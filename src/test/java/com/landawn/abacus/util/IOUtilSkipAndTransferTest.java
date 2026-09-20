@@ -612,7 +612,7 @@ public class IOUtilSkipAndTransferTest extends TestBase {
         // Laziness: taking 2 elements must not require materializing the whole tree.
         assertEquals(2, IOUtil.walk(root, true, false).limit(2).toList().size());
 
-        assertEquals(0, IOUtil.walk(null).count());
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.walk(null));
         assertEquals(0, IOUtil.walk(new File(tempDir, "does-not-exist"), true, true).count());
 
         final File file = write("walk-not-a-dir.txt", "x");

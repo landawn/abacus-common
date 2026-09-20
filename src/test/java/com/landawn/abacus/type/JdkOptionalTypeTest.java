@@ -284,7 +284,8 @@ public class JdkOptionalTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -307,7 +308,8 @@ public class JdkOptionalTypeTest extends TestBase {
         assertEquals("false", reviewFixes20260906_ser(Type.of("JdkOptional<Boolean>"), Optional.empty(), falseCfg));
         assertEquals("\"\"", reviewFixes20260906_ser(optionalStringType, Optional.empty(), emptyStr));
         assertEquals("null", reviewFixes20260906_ser(optionalStringType, Optional.empty(), zero));
-        assertEquals("\"0\"", reviewFixes20260906_ser(Type.of("JdkOptional<Long>"), Optional.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true)));
+        assertEquals("\"0\"", reviewFixes20260906_ser(Type.of("JdkOptional<Long>"), Optional.empty(),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true)));
         assertEquals("null", reviewFixes20260906_ser(optionalIntegerType, Optional.empty(), com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("null", reviewFixes20260906_ser(optionalIntegerType, Optional.empty(), null));
         assertEquals("null", reviewFixes20260906_ser(optionalIntegerType, null, null));

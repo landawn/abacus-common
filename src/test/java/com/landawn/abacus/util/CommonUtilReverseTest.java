@@ -544,6 +544,7 @@ public class CommonUtilReverseTest extends CommonUtilTestSupport {
         assertEquals("cat", list.get(1));
         assertEquals("a", list.get(2));
     }
+
     private static final class CountingLinkedList extends LinkedList<Object> {
         private static final long serialVersionUID = 1L;
 

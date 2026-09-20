@@ -544,13 +544,14 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of an instant does not always identify one: parsing rejects a local date a daylight-saving gap
      * removes or an overlap repeats, and {@code format} can produce exactly such text: it writes
      * {@code "2018-11-04"} for an instant on that day in {@code America/Sao_Paulo}, where midnight does
-     * not exist, and {@code parseTo*} then refuses that text. A fall-back overlap that repeats midnight
+     * not exist, and instant-producing {@code parseTo*} methods then refuse that text. A fall-back overlap that repeats midnight
      * (00:00&ndash;01:00 in {@code America/Havana}, and 1950-04-16 in {@code America/Cuiaba}) is refused
      * for the same reason: the text names two instants and this pattern cannot say which, so it is
      * rejected rather than resolved to one of them &mdash; unlike
      * {@link #truncate(java.util.Date, int)}, which has an input instant to pick the side from. Use
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} or {@link #ISO_OFFSET_TIMESTAMP_FORMAT} when a rendering
-     * must round-trip in every zone.</p>
+     * must identify its UTC offset in a zone with whole-minute offsets; use
+     * {@link #ISO_ZONED_DATE_TIME_FORMAT} when offset seconds must also be retained.</p>
      *
      * <p>Years are limited to an unsigned four-digit Common Era year ({@code 0001} through {@code 9999})
      * on both parsing and formatting.</p>
@@ -615,9 +616,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of an instant does not always identify one: parsing rejects a local date-time a daylight-saving
      * gap removes or an overlap repeats, and {@code format} can produce exactly such text: it writes
      * {@code "2025-11-02 01:30:00"} for the first pass of the autumn overlap in {@code America/New_York},
-     * and {@code parseTo*} then refuses that text as ambiguous. Use
+     * and instant-producing {@code parseTo*} methods then refuse that text as ambiguous. Use
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} or {@link #ISO_OFFSET_TIMESTAMP_FORMAT} when a rendering
-     * must round-trip in every zone.</p>
+     * must identify its UTC offset in a zone with whole-minute offsets; use
+     * {@link #ISO_ZONED_DATE_TIME_FORMAT} when offset seconds must also be retained.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -658,9 +660,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of an instant does not always identify one: parsing rejects a local date-time a daylight-saving
      * gap removes or an overlap repeats, and {@code format} can produce exactly such text: it writes
      * {@code "2025-11-02 01:30:00.000"} for the first pass of the autumn overlap in {@code America/New_York},
-     * and {@code parseTo*} then refuses that text as ambiguous. Use
+     * and instant-producing {@code parseTo*} methods then refuse that text as ambiguous. Use
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} or {@link #ISO_OFFSET_TIMESTAMP_FORMAT} when a rendering
-     * must round-trip in every zone.</p>
+     * must identify its UTC offset in a zone with whole-minute offsets; use
+     * {@link #ISO_ZONED_DATE_TIME_FORMAT} when offset seconds must also be retained.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -699,9 +702,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of an instant does not always identify one: parsing rejects a local date-time a daylight-saving
      * gap removes or an overlap repeats, and {@code format} can produce exactly such text: it writes
      * {@code "2025-11-02T01:30:00"} for the first pass of the autumn overlap in {@code America/New_York},
-     * and {@code parseTo*} then refuses that text as ambiguous. Use
+     * and instant-producing {@code parseTo*} methods then refuse that text as ambiguous. Use
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} or {@link #ISO_OFFSET_TIMESTAMP_FORMAT} when a rendering
-     * must round-trip in every zone.</p>
+     * must identify its UTC offset in a zone with whole-minute offsets; use
+     * {@link #ISO_ZONED_DATE_TIME_FORMAT} when offset seconds must also be retained.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -743,9 +747,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * of an instant does not always identify one: parsing rejects a local date-time a daylight-saving
      * gap removes or an overlap repeats, and {@code format} can produce exactly such text: it writes
      * {@code "2025-11-02T01:30:00.000"} for the first pass of the autumn overlap in {@code America/New_York},
-     * and {@code parseTo*} then refuses that text as ambiguous. Use
+     * and instant-producing {@code parseTo*} methods then refuse that text as ambiguous. Use
      * {@link #ISO_OFFSET_DATE_TIME_FORMAT} or {@link #ISO_OFFSET_TIMESTAMP_FORMAT} when a rendering
-     * must round-trip in every zone.</p>
+     * must identify its UTC offset in a zone with whole-minute offsets; use
+     * {@link #ISO_ZONED_DATE_TIME_FORMAT} when offset seconds must also be retained.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -871,7 +876,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * for UTC representation. Widely used in APIs, logs, and communication protocols.</p>
      *
      * <p>Parsing requires this exact shape: every field must be written at its full width
-     * ({@code "2025-01-15T14:30:45Z"}); use a variable-width pattern such as {@code "yyyy-M-d'T'H:m:s'Z'"} to accept shorter fields.</p>
+     * ({@code "2025-01-15T14:30:45Z"}); use a variable-width pattern such as {@code "yyyy-M-d'T'H:m:sXXX"} to accept shorter fields.</p>
      *
      * <p>Years are limited to an unsigned four-digit Common Era year ({@code 0001} through {@code 9999})
      * on both parsing and formatting.</p>
@@ -904,7 +909,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p>Parsing requires this exact shape: every field up to the seconds must be written at its full
      * width ({@code "2025-01-15T10:30:45.123Z"}); use a variable-width pattern such as
-     * {@code "yyyy-M-d'T'H:m:s.SSS'Z'"} to accept shorter fields.</p>
+     * {@code "yyyy-M-d'T'H:m:s.SSSXXX"} to accept shorter fields.</p>
      *
      * <p>Years are limited to an unsigned four-digit Common Era year ({@code 0001} through {@code 9999})
      * on both parsing and formatting.</p>
@@ -1085,8 +1090,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Returns an independent clone with the same runtime type. Custom calendar implementations are
      * supported by this class, so a broken/hostile {@code clone()} must be rejected before the clone is
      * mutated or exposed to a registered creator.
+     *
+     * @throws IllegalStateException if {@code source.clone()} does not return a distinct Calendar of the same runtime class
      */
-    private static Calendar cloneCalendar(final Calendar source) {
+    private static Calendar cloneCalendar(final Calendar source) throws IllegalStateException {
         final Object cloned = source.clone();
 
         if (!(cloned instanceof Calendar) || cloned == source || cloned.getClass() != source.getClass()) {
@@ -1385,9 +1392,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Calendar cal = Dates.currentCalendar();
-     * int year = cal.get(Calendar.YEAR);   // year is the current year
+     * int year = cal.get(Calendar.YEAR);   // year in the calendar's chronology
      * assert cal != null;                  // returns true (never null)
-     * assert year >= 1970;                 // returns true (current year is after the epoch)
+     * assert cal.getTimeInMillis() > 0;     // returns true (current instant is after the epoch)
      * }</pre>
      *
      * @return a new {@code Calendar} instance representing the current date and time.
@@ -1402,9 +1409,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * GregorianCalendar cal = Dates.currentGregorianCalendar();
-     * int year = cal.get(Calendar.YEAR);   // year is the current year
+     * int year = cal.get(Calendar.YEAR);   // year in the calendar's chronology
      * assert cal != null;                  // returns true (never null)
-     * assert year >= 1970;                 // returns true (current year is after the epoch)
+     * assert cal.getTimeInMillis() > 0;     // returns true (current instant is after the epoch)
      * }</pre>
      *
      * @return a new {@code GregorianCalendar} instance representing the current date and time.
@@ -1695,7 +1702,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the calendar providing the time value, not {@code null}.
      * @return a new {@code java.util.Date} instance representing the same point in time.
-     * @throws IllegalArgumentException if calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @see #createJUDate(java.util.Date)
      * @see #createJUDate(long)
      */
@@ -1720,7 +1727,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date providing the time value, not {@code null}.
      * @return a new {@code java.util.Date} instance representing the same point in time.
-     * @throws IllegalArgumentException if date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @see #createJUDate(Calendar)
      * @see #createJUDate(long)
      */
@@ -1770,7 +1777,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the calendar providing the time value, not {@code null}.
      * @return a new {@code java.sql.Date} instance representing the same point in time.
-     * @throws IllegalArgumentException if calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @see #createDate(java.util.Date)
      * @see #createDate(long)
      * @see #createJUDate(Calendar)
@@ -1795,7 +1802,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date providing the time value, not {@code null}.
      * @return a new {@code java.sql.Date} instance representing the same point in time.
-     * @throws IllegalArgumentException if date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @see #createDate(Calendar)
      * @see #createDate(long)
      * @see #createJUDate(java.util.Date)
@@ -1853,7 +1860,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the calendar providing the time value, not {@code null}.
      * @return a new {@code java.sql.Time} instance representing the same point in time.
-     * @throws IllegalArgumentException if calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @see #createTime(java.util.Date)
      * @see #createTime(long)
      * @see #createDate(Calendar)
@@ -1878,7 +1885,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date providing the time value, not {@code null}.
      * @return a new {@code java.sql.Time} instance representing the same point in time.
-     * @throws IllegalArgumentException if date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @see #createTime(Calendar)
      * @see #createTime(long)
      * @see #createDate(java.util.Date)
@@ -1935,7 +1942,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the calendar providing the time value, not {@code null}.
      * @return a new {@code java.sql.Timestamp} instance representing the same point in time.
-     * @throws IllegalArgumentException if calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @see #createTimestamp(java.util.Date)
      * @see #createTimestamp(long)
      * @see #createTime(Calendar)
@@ -1963,7 +1970,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date providing the time value, not {@code null}.
      * @return a new {@code java.sql.Timestamp} instance representing the same point in time, including
      *         any sub-millisecond fraction carried by a {@code Timestamp} input.
-     * @throws IllegalArgumentException if date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @see #createTimestamp(Calendar)
      * @see #createTimestamp(long)
      * @see #createTime(java.util.Date)
@@ -2015,7 +2022,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the calendar providing the time value, not {@code null}.
      * @return a new {@code java.util.Calendar} instance representing the same point in time in the same time zone.
-     * @throws IllegalArgumentException if calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @see #createCalendar(java.util.Date)
      * @see #createCalendar(long)
      * @see #createCalendar(long, TimeZone)
@@ -2042,7 +2049,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date providing the time value, not {@code null}.
      * @return a new {@code java.util.Calendar} instance representing the same point in time.
-     * @throws IllegalArgumentException if date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @see #createCalendar(Calendar)
      * @see #createCalendar(long)
      * @see #createCalendar(long, TimeZone)
@@ -2091,7 +2098,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * TimeZone utc = TimeZone.getTimeZone("UTC");
      * Calendar cal = Dates.createCalendar(0L, utc);    // cal is at epoch millis in UTC
      * assert cal.getTimeInMillis() == 0L;              // returns true
-     * assert cal.get(Calendar.YEAR) == 1970;           // returns true (1970-01-01 in UTC)
+     * assert cal.toInstant().atZone(ZoneOffset.UTC).getYear() == 1970; // ISO year, independent of calendar chronology
      * assert cal.get(Calendar.HOUR_OF_DAY) == 0;       // returns true
      *
      * Calendar def = Dates.createCalendar(0L, null);   // uses the default time zone
@@ -2134,7 +2141,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the calendar providing the time value, not {@code null}.
      * @return a new {@code java.util.GregorianCalendar} instance representing the same point in time in the same time zone.
-     * @throws IllegalArgumentException if calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @see #createGregorianCalendar(java.util.Date)
      * @see #createGregorianCalendar(long)
      * @see #createGregorianCalendar(long, TimeZone)
@@ -2160,7 +2167,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date providing the time value, not {@code null}.
      * @return a new {@code java.util.GregorianCalendar} instance representing the same point in time.
-     * @throws IllegalArgumentException if date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @see #createGregorianCalendar(Calendar)
      * @see #createGregorianCalendar(long)
      * @see #createGregorianCalendar(long, TimeZone)
@@ -2251,7 +2258,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the calendar providing the time value, not {@code null}.
      * @return a new {@code XMLGregorianCalendar} instance representing the same point in time in the source calendar's time zone.
-     * @throws IllegalArgumentException if calendar is {@code null}, or if the calendar's zone offset at
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}, or if the calendar's zone offset at
      *         that instant is not a whole number of minutes in the range -14:00 through +14:00, which
      *         XML Schema cannot represent.
      * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
@@ -2280,7 +2287,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date providing the time value, not {@code null}.
      * @return a new {@code XMLGregorianCalendar} instance representing the same point in time.
-     * @throws IllegalArgumentException if date is {@code null}, or if the default zone's offset at that
+     * @throws IllegalArgumentException if {@code date} is {@code null}, or if the default zone's offset at that
      *         instant is not a whole number of minutes in the range -14:00 through +14:00, which XML
      *         Schema cannot represent.
      * @throws UnsupportedOperationException if the {@code DatatypeFactory} is not available.
@@ -2756,7 +2763,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *                                                                     // returns "14:30:45.123" (the fraction is retained)
      *
      * Dates.parseToTime("14:30:45.123", "HH:mm:ss.SSS").toString();       // returns "14:30:45" (Time.toString() never shows millis)
-     * assert Dates.parseToTime("14:30:45.123", "HH:mm:ss.SSS").getTime() % 1000 == 123;
+     * assert Math.floorMod(Dates.parseToTime("14:30:45.123", "HH:mm:ss.SSS").getTime(), 1000) == 123;
      *                                                                     // returns true (the fraction is still in the epoch value)
      * Dates.parseToTime((String) null, "HH:mm:ss");                       // returns null
      * Dates.parseToTime("bad", "HH:mm:ss");                               // throws IllegalArgumentException
@@ -2979,7 +2986,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * Parses date/time text into a {@code Timestamp} with an explicit locale for locale-sensitive pattern
      * fields, exactly as {@link #parseToTimestamp(String, String, TimeZone)} does with {@code Locale.US}; the
-     * locale matters only for a custom pattern with month, weekday or am/pm names.
+     * locale affects a custom pattern's textual fields and numeric digit shapes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3055,8 +3062,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Parses a JDBC timestamp escape string ({@code yyyy-mm-dd hh:mm:ss[.fffffffff]}) in an explicit
      * zone, preserving the nanosecond fraction. Invalid fields, nonexistent local times, and ambiguous
      * local times are rejected.
+     *
+     * @throws DateTimeException if {@code str} contains an invalid date/time field, a year before 0001, or a local time that cannot be resolved uniquely
+     *         in {@code timeZone}
+     * @throws IllegalArgumentException if the custom time-zone calendar cannot resolve the local timestamp or the resulting instant cannot be represented
+     *         as a Timestamp
      */
-    private static Timestamp parseJdbcTimestamp(final String str, final TimeZone timeZone) {
+    private static Timestamp parseJdbcTimestamp(final String str, final TimeZone timeZone) throws DateTimeException, IllegalArgumentException {
         final int year = parseInt(str, 0, 4);
         final int month = parseInt(str, 5, 7);
         final int day = parseInt(str, 8, 10);
@@ -3258,8 +3270,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Resolves a local date-time without the adjustment performed by {@link LocalDateTime#atZone(ZoneId)}.
      * A gap has no valid offset and an overlap has two; both are rejected unless the input supplied a
      * valid preferred offset that disambiguates the overlap.
+     *
+     * @throws DateTimeException if {@code localDateTime} falls in a gap, is ambiguous without a preferred offset, or {@code preferredOffset} is invalid
+     *         in {@code zone}
      */
-    private static ZonedDateTime resolveLocalDateTimeStrict(final LocalDateTime localDateTime, final ZoneId zone, final ZoneOffset preferredOffset) {
+    private static ZonedDateTime resolveLocalDateTimeStrict(final LocalDateTime localDateTime, final ZoneId zone, final ZoneOffset preferredOffset)
+            throws DateTimeException {
         final List<ZoneOffset> validOffsets = zone.getRules().getValidOffsets(localDateTime);
 
         if (preferredOffset != null) {
@@ -3287,7 +3303,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Converts a legacy {@link TimeZone} only when its actual rules can be represented faithfully by
      * {@link ZoneId}. The ID is never trusted by itself: a custom zone may reuse a registered ID while
      * carrying completely different rules.
-     * @throws IllegalArgumentException if {@code timeZone} is {@code null}, its rules cannot be represented by a {@code ZoneId}, or its fixed offset is sub-second or outside the supported range.
+     *
+     * @throws IllegalArgumentException if {@code timeZone} is {@code null}, its rules cannot be represented by a {@code ZoneId}, or its fixed offset is
+     *         sub-second or outside the supported range.
      */
     private static ZoneId toZoneId(final TimeZone timeZone) throws IllegalArgumentException {
         N.checkArgNotNull(timeZone, cs.timeZone);
@@ -3554,6 +3572,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param amount the amount to add, may be negative
      * @param unit one of the fields {@link #isCivilAddField(CalendarField)} accepts
      * @return the resulting epoch milliseconds
+     *
      * @throws ArithmeticException if the result leaves the signed-long epoch-millisecond range
      */
     private static long addCivilFieldMillis(final long sourceMillis, final TimeZone timeZone, final int amount, final CalendarField unit)
@@ -5079,6 +5098,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * Parses {@code str} with {@code sdf} and requires the entire input to match the pattern, so
      * trailing whitespace or garbage is not silently truncated into a plausible date.
+     *
      * @throws ParseException if the text cannot be parsed completely, including any trailing characters.
      */
     private static java.util.Date parseFully(final DateFormat sdf, final String str) throws ParseException {
@@ -5166,7 +5186,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Converts an instant to the civil date in the specified zone. This is the explicit, zoned
-     * epoch-to-civil conversion; the reverse of {@code LocalDate.atStartOfDay(zone)}.
+     * epoch-to-civil conversion; the time of day is discarded.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5228,8 +5248,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * Converts an instant to the civil date and time in the specified zone. This is the combined form of
-     * {@link #dateAt(Instant, ZoneId)} and {@link #timeAt(Instant, ZoneId)}, and the reverse of
-     * {@code localDateTime.atZone(zone).toInstant()}.
+     * {@link #dateAt(Instant, ZoneId)} and {@link #timeAt(Instant, ZoneId)}. The result carries no
+     * offset, so converting it back during a daylight-saving overlap requires choosing an offset.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5312,7 +5332,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
     /**
      * @param appliedOffset receives the offset {@code SimpleDateFormat} applied when the text went through it;
      *        {@code null} when the caller does not need it
-     * @throws IllegalArgumentException if {@code locale} is {@code null}, or the text, format, or time-zone combination cannot be resolved as a valid unambiguous instant.
+     *
+     * @throws IllegalArgumentException if {@code locale} is {@code null}, or the text, format, or time-zone combination cannot be resolved as a valid
+     *         unambiguous instant.
      */
     private static long parse(final String dateTime, final String format, final TimeZone timezone, final Locale locale, final boolean zoneIsDefaultSnapshot,
             final AppliedZoneOffset appliedOffset) throws IllegalArgumentException {
@@ -5452,8 +5474,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * opts out entirely for text that cannot put the fraction at index 19. The rejection message therefore
      * names that whole shape: reporting only the fraction width told a caller whose text carried exactly
      * three fraction digits that it had the wrong number of them.</p>
+     *
+     * @throws IllegalArgumentException if {@code dateTime} does not have the exact field widths, three fractional digits, or required UTC designator of
+     *         {@code formatToUse}
      */
-    private static void checkNamedTimestampFraction(final String dateTime, final String formatToUse) {
+    private static void checkNamedTimestampFraction(final String dateTime, final String formatToUse) throws IllegalArgumentException {
         final boolean zulu = ISO_8601_TIMESTAMP_FORMAT.equals(formatToUse);
         final boolean local = LOCAL_TIMESTAMP_FORMAT.equals(formatToUse) || ISO_LOCAL_TIMESTAMP_FORMAT.equals(formatToUse);
 
@@ -5484,8 +5509,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * in an overlap; this check also rejects that ambiguity, including historical overlaps in zones that
      * no longer observe daylight saving. Custom patterns remain non-lenient but do not receive the
      * explicit overlap check, as do zones whose rules cannot be represented faithfully as a {@link ZoneId}.
+     *
+     * @throws IllegalArgumentException if the local date/time in {@code dateTime} falls in a daylight-saving gap or overlap in the resolved time zone
      */
-    private static void checkGapAndOverlap(final String dateTime, final String formatToUse, final TimeZone timeZone) {
+    private static void checkGapAndOverlap(final String dateTime, final String formatToUse, final TimeZone timeZone) throws IllegalArgumentException {
         final boolean dateOnly = LOCAL_DATE_FORMAT.equals(formatToUse);
 
         // ISO_LOCAL_TIMESTAMP_FORMAT belongs here with its space-separated twin LOCAL_TIMESTAMP_FORMAT.
@@ -5585,8 +5612,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * ({@code 'uuuu-MM-dd'}) that the caller never wrote and cannot find anywhere in this class. Only
      * a genuine parse failure is restated - it is the one that carries the underlying
      * {@code DateTimeException}, whose message and error index are preserved as the cause.</p>
+     *
+     * @throws IllegalArgumentException if {@code parser} rejects the text or its time zone; date/time parse failures are restated using the
+     *         caller-supplied format
      */
-    private static <R> R parseReportingCallerFormat(final String text, final String format, final Supplier<R> parser) {
+    private static <R> R parseReportingCallerFormat(final String text, final String format, final Supplier<R> parser) throws IllegalArgumentException {
         try {
             return parser.get();
         } catch (final IllegalArgumentException e) {
@@ -5613,8 +5643,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * {@link #checkCompleteInstantFormat} on the instant-bearing side. Only the predefined constants
      * are checked; the fields of a custom pattern are the caller's own business and the formatter
      * reports what it could not obtain.
+     *
+     * @throws IllegalArgumentException if {@code format} lacks the complete date or time fields required by {@code requiresDate} or {@code requiresTime}
      */
-    private static void checkCompleteCivilFormat(final String format, final String text, final boolean requiresDate, final boolean requiresTime) {
+    private static void checkCompleteCivilFormat(final String format, final String text, final boolean requiresDate, final boolean requiresTime)
+            throws IllegalArgumentException {
         final boolean partialDate = LOCAL_YEAR_FORMAT.equals(format) || LOCAL_MONTH_DAY_FORMAT.equals(format);
 
         if (requiresDate && (partialDate || LOCAL_TIME_FORMAT.equals(format))) {
@@ -6165,9 +6198,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the XMLGregorianCalendar instance to be formatted; may be {@code null}.
      * @param format the date format pattern; if {@code null} or empty, the default format is used.
-     * @param timeZone the output-zone override; if {@code null} and {@code format} is null or empty, the XML
-     *        calendar's own timezone is retained, for a custom pattern as well as for the lexical default
-     *        (the live default time zone when the XML timezone field is undefined);
+     * @param timeZone the output-zone override; if {@code null}, a custom pattern uses the XML calendar's
+     *        timezone (the live default time zone when that field is undefined), while the lexical default
+     *        retains the timezone field exactly, including an undefined value;
      *        must be {@code null} or UTC-equivalent when the format is fixed to UTC/GMT
      *        ({@link #ISO_8601_DATE_TIME_FORMAT}, {@link #ISO_8601_TIMESTAMP_FORMAT}, or {@link #HTTP_DATE_FORMAT}).
      * @return a string representation of the XMLGregorianCalendar instance, or {@code null} if the calendar is {@code null}.
@@ -6395,12 +6428,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @throws IllegalArgumentException if {@code locale} or {@code appendable} is {@code null}, the
      *         pattern is invalid, a fixed-zone format conflicts with {@code timeZone}, or a predefined
      *         format cannot represent the value's year or effective UTC offset
-     * @throws UncheckedIOException if appending fails
+     * @throws UncheckedIOException if writing the formatted date/time text or null marker to {@code appendable} fails
      */
     public static void formatTo(final java.util.Date date, final String format, final TimeZone timeZone, final Locale locale, final Appendable appendable)
             throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(appendable, cs.appendable);
         N.checkArgNotNull(locale, cs.locale);
+        N.checkArgNotNull(appendable, cs.appendable);
 
         if (date == null) {
             formatToForNull(appendable);
@@ -6550,12 +6583,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *         format cannot represent the value's year or effective UTC offset, or the effective zone carries rules no
      *         {@link ZoneId} can express and the format is the ISO zoned default or
      *         {@link #ISO_ZONED_DATE_TIME_FORMAT}
-     * @throws UncheckedIOException if appending fails
+     * @throws UncheckedIOException if writing the formatted date/time text or null marker to {@code appendable} fails
      */
     public static void formatTo(final Calendar calendar, final String format, final TimeZone timeZone, final Locale locale, final Appendable appendable)
             throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(appendable, cs.appendable);
         N.checkArgNotNull(locale, cs.locale);
+        N.checkArgNotNull(appendable, cs.appendable);
 
         if (calendar == null) {
             formatToForNull(appendable);
@@ -6670,9 +6703,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param calendar the XMLGregorianCalendar instance to be formatted; may be {@code null}.
      * @param format the date format pattern; if {@code null} or empty, the default format is used.
-     * @param timeZone the output-zone override; if {@code null} and {@code format} is null or empty, the XML
-     *        calendar's own timezone is retained, for a custom pattern as well as for the lexical default
-     *        (the live default time zone when the XML timezone field is undefined);
+     * @param timeZone the output-zone override; if {@code null}, a custom pattern uses the XML calendar's
+     *        timezone (the live default time zone when that field is undefined), while the lexical default
+     *        retains the timezone field exactly, including an undefined value;
      *        must be {@code null} or UTC-equivalent when the format is fixed to UTC/GMT
      *        ({@link #ISO_8601_DATE_TIME_FORMAT}, {@link #ISO_8601_TIMESTAMP_FORMAT}, or {@link #HTTP_DATE_FORMAT}).
      * @param appendable the Appendable to which the formatted date string is to be appended; must not be {@code null}.
@@ -6719,12 +6752,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *         conversion cannot represent its effective XML timezone, a leap second, or a fraction
      *         finer than nanoseconds exactly
      * @throws IllegalStateException if XML lexical formatting is selected and the fields do not form a valid XML Schema built-in date/time type
-     * @throws UncheckedIOException if appending fails
+     * @throws UncheckedIOException if writing the formatted date/time text or null marker to {@code appendable} fails
      */
     public static void formatTo(final XMLGregorianCalendar calendar, final String format, final TimeZone timeZone, final Locale locale,
             final Appendable appendable) throws IllegalArgumentException, IllegalStateException, UncheckedIOException {
-        N.checkArgNotNull(appendable, cs.appendable);
         N.checkArgNotNull(locale, cs.locale);
+        N.checkArgNotNull(appendable, cs.appendable);
 
         if (calendar == null) {
             formatToForNull(appendable);
@@ -6794,7 +6827,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * @throws UncheckedIOException if appending the formatted text fails.
+     * @throws UncheckedIOException if writing the formatted date/time text to {@code appendable} fails.
      */
     private static void appendFormattedText(final Appendable appendable, final String str) throws UncheckedIOException {
         try {
@@ -6806,7 +6839,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
     /**
      * @throws IllegalArgumentException if {@code locale} is {@code null}, or a non-null date cannot be represented by the requested format and time zone.
-     * @throws UncheckedIOException if writing the formatted result to {@code appendable} fails.
+     * @throws UncheckedIOException if writing the formatted date/time text or null marker to {@code appendable} fails.
      */
     private static String formatDate(final Appendable appendable, final java.util.Date date, String format, TimeZone timeZone, final Locale locale)
             throws IllegalArgumentException, UncheckedIOException {
@@ -6908,7 +6941,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
-    private static void fastDateFormat(final StringBuilder sb, final Appendable appendable, final long timeInMillis, final boolean includeMillis) {
+    /**
+     * @throws IllegalArgumentException if {@code timeInMillis} is outside Common Era years 0001 through 9999
+     * @throws UncheckedIOException if writing the formatted timestamp to {@code appendable} fails
+     */
+    private static void fastDateFormat(final StringBuilder sb, final Appendable appendable, final long timeInMillis, final boolean includeMillis)
+            throws IllegalArgumentException, UncheckedIOException {
         // The civil fields come from java.time rather than from a GregorianCalendar built per call: this is
         // the default rendering of every Date, and constructing and completing a calendar cost several
         // times what the rest of the method does. Both views are proleptic ISO in UTC, so the fields are
@@ -6995,8 +7033,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
-    /** Writes a non-negative integer as exactly {@code width} ASCII digits. */
-    private static void writePaddedInt(final char[] buffer, final int offset, int value, final int width) {
+    /**
+     * Writes a non-negative integer as exactly {@code width} ASCII digits.
+     *
+     * @throws IllegalArgumentException if {@code value} is negative or cannot fit in {@code width} decimal digits
+     */
+    private static void writePaddedInt(final char[] buffer, final int offset, int value, final int width) throws IllegalArgumentException {
         if (value < 0) {
             throw new IllegalArgumentException("Value must be non-negative: " + value);
         }
@@ -7022,8 +7064,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * lexical default never calls this method and can therefore retain finer fractions and leap
      * seconds unchanged; conversion for a zone override rejects values that cannot be represented
      * exactly instead of silently truncating them.
+     *
+     * @throws IllegalArgumentException if {@code calendar} contains a leap second or fractional seconds that cannot be represented exactly in nanoseconds
      */
-    private static Instant exactInstant(final XMLGregorianCalendar calendar) {
+    private static Instant exactInstant(final XMLGregorianCalendar calendar) throws IllegalArgumentException {
         if (calendar.getSecond() == 60) {
             throw new IllegalArgumentException("A leap-second XMLGregorianCalendar cannot be converted exactly to an Instant for zone conversion");
         }
@@ -7044,8 +7088,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
-    /** Ensures an instant's effective zone offset fits XML Schema's whole-minute, +/-14:00 field. */
-    private static void checkXMLTimeZoneRepresentable(final TimeZone timeZone, final long epochMillis) {
+    /**
+     * Ensures an instant's effective zone offset fits XML Schema's whole-minute, +/-14:00 field.
+     *
+     * @throws IllegalArgumentException if the offset of {@code timeZone} at {@code epochMillis} is not a whole number of minutes or is outside -14:00
+     *         through +14:00
+     */
+    private static void checkXMLTimeZoneRepresentable(final TimeZone timeZone, final long epochMillis) throws IllegalArgumentException {
         final int offsetMillis = timeZone.getOffset(epochMillis);
         final int maxOffsetMillis = 14 * 60 * 60 * 1000;
 
@@ -7115,9 +7164,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is {@code null}, if {@code amount} is out of range
-     *         for the field, or if the requested value names a wall clock the evaluating time zone does
-     *         not have on that date (a daylight-saving gap).
+     * @throws IllegalArgumentException if {@code date} is {@code null}, if {@code amount} is out of range
+     *         for the field, or if zone resolution cannot preserve the requested field (and, for year/month
+     *         changes, the carried day of month).
      *         A day-of-month the resulting month does not have is clamped, not rejected.
      * @see Calendar#YEAR
      * @see Calendar#set(int, int)
@@ -7174,9 +7223,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is {@code null}, if {@code amount} is out of range
-     *         for the field, or if the requested value names a wall clock the evaluating time zone does
-     *         not have on that date (a daylight-saving gap).
+     * @throws IllegalArgumentException if {@code date} is {@code null}, if {@code amount} is out of range
+     *         for the field, or if zone resolution cannot preserve the requested field (and, for year/month
+     *         changes, the carried day of month).
      *         A day-of-month the resulting month does not have is clamped, not rejected.
      * @see Calendar#MONTH
      * @see Calendar#set(int, int)
@@ -7227,9 +7276,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is {@code null}, if {@code amount} is out of range
-     *         for the field, or if the requested value names a wall clock the evaluating time zone does
-     *         not have on that date (a daylight-saving gap).
+     * @throws IllegalArgumentException if {@code date} is {@code null}, if {@code amount} is out of range
+     *         for the field, or if zone resolution cannot preserve the requested field (and, for year/month
+     *         changes, the carried day of month).
      *         Unlike {@link #setYears(java.util.Date, int)} and {@link #setMonths(java.util.Date, int)},
      *         which clamp, an explicit day-of-month the month does not have is rejected.
      * @see Calendar#DAY_OF_MONTH
@@ -7278,9 +7327,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is {@code null}, if {@code amount} is out of range
-     *         for the field, or if the requested value names a wall clock the evaluating time zone does
-     *         not have on that date (a daylight-saving gap).
+     * @throws IllegalArgumentException if {@code date} is {@code null}, if {@code amount} is out of range
+     *         for the field, or if zone resolution cannot preserve the requested field (and, for year/month
+     *         changes, the carried day of month).
      * @see Calendar#HOUR_OF_DAY
      * @see Calendar#set(int, int)
      */
@@ -7326,9 +7375,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is {@code null}, if {@code amount} is out of range
-     *         for the field, or if the requested value names a wall clock the evaluating time zone does
-     *         not have on that date (a daylight-saving gap).
+     * @throws IllegalArgumentException if {@code date} is {@code null}, if {@code amount} is out of range
+     *         for the field, or if zone resolution cannot preserve the requested field (and, for year/month
+     *         changes, the carried day of month).
      * @see Calendar#MINUTE
      * @see Calendar#set(int, int)
      */
@@ -7374,9 +7423,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is {@code null}, if {@code amount} is out of range
-     *         for the field, or if the requested value names a wall clock the evaluating time zone does
-     *         not have on that date (a daylight-saving gap).
+     * @throws IllegalArgumentException if {@code date} is {@code null}, if {@code amount} is out of range
+     *         for the field, or if zone resolution cannot preserve the requested field (and, for year/month
+     *         changes, the carried day of month).
      * @see Calendar#SECOND
      * @see Calendar#set(int, int)
      */
@@ -7422,9 +7471,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date, not {@code null}.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is {@code null}, if {@code amount} is out of range
-     *         for the field, or if the requested value names a wall clock the evaluating time zone does
-     *         not have on that date (a daylight-saving gap).
+     * @throws IllegalArgumentException if {@code date} is {@code null}, if {@code amount} is out of range
+     *         for the field, or if zone resolution cannot preserve the requested field (and, for year/month
+     *         changes, the carried day of month).
      * @see Calendar#MILLISECOND
      * @see Calendar#set(int, int)
      */
@@ -7455,7 +7504,8 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendarField the {@code Calendar} field to set the amount to.
      * @param amount the amount to set.
      * @return a new {@code Date} set with the specified value.
-     * @throws IllegalArgumentException if the date is {@code null}, if the field value is out of range
+     *
+     * @throws IllegalArgumentException if {@code date} is {@code null}, if the field value is out of range
      *         for the field, or if it is an in-range day-of-month the current month does not have.
      * @see Calendar#set(int, int)
      */
@@ -7505,9 +7555,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * operation: {@code Calendar} reports an out-of-range value as just {@code "MONTH"} or
      * {@code "DAY_OF_MONTH: 31 -> 2"}, which tells a caller of the public {@code set*} methods neither
      * which call failed nor what it passed.</p>
+     *
+     * @throws IllegalArgumentException if setting {@code calendarField} to {@code amount} produces an invalid date/time, an unresolved local time, or
+     *         changes a field that must be preserved
      */
     private static long setFieldMillis(final Calendar c, final int calendarField, final int amount, final java.util.Date source, final TimeZone zone,
-            final TimeZone renderingZone, final boolean pinned) {
+            final TimeZone renderingZone, final boolean pinned) throws IllegalArgumentException {
         try {
             int writtenDayOfMonth = -1;
 
@@ -7564,9 +7617,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * which is fine unless it moved the field the caller wrote (or the day of month {@code setYears}/{@code setMonths}
      * clamped to, which keeps a skipped calendar day - Apia 2011-12-30 - rejected). The message has the shape
      * {@code Calendar}'s non-lenient check used to produce, which {@link #setFieldMillis} wraps.
+     *
+     * @throws IllegalArgumentException if resolving {@code resolvedMillis} in {@code rulesZone} changed the requested field value or the day of month
+     *         that must be preserved
      */
     private static void requireWrittenFieldsIntact(final long resolvedMillis, final int calendarField, final int amount, final int writtenDayOfMonth,
-            final TimeZone rulesZone) {
+            final TimeZone rulesZone) throws IllegalArgumentException {
         final Instant instant = Instant.ofEpochMilli(resolvedMillis);
         final LocalDateTime got = LocalDateTime.ofInstant(instant, toZoneId(rulesZone).getRules().getOffset(instant));
         final int have;
@@ -7617,8 +7673,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * {@code setYears(date, 2000)} produced 2000 BCE, no BCE value could be moved into the Common Era at
      * all, and year 0 was unreachable. Setting {@code ERA} alongside {@code YEAR} makes the argument mean
      * the same thing on both sides of 1 CE, and matches {@link LocalDate#withYear(int)}.</p>
+     *
+     * @throws IllegalArgumentException if {@code year} is outside the supported proleptic year range
      */
-    private static void setProlepticYear(final Calendar c, final int year) {
+    private static void setProlepticYear(final Calendar c, final int year) throws IllegalArgumentException {
         final long yearOfEra = year >= 1 ? year : 1L - year;
 
         if (yearOfEra > Integer.MAX_VALUE) {
@@ -7866,7 +7924,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
     // sub-day fields are reachable: the caller routes DAY_OF_MONTH/WEEK_OF_YEAR/MONTH/YEAR through
     // addCivilFieldMillis (a field walk resolved through the zone's rules), so those branches would be
     // dead code here. The amount is taken as long so the multiplication cannot overflow int before widening.
-    private static long toMillis(final long amount, final CalendarField field) {
+    /**
+     * @throws IllegalArgumentException if {@code field} has no supported fixed millisecond conversion
+     */
+    private static long toMillis(final long amount, final CalendarField field) throws IllegalArgumentException {
         switch (field) {
             case MILLISECOND:
                 return amount;
@@ -7970,8 +8031,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * are bounded by the same conservative chunk size. Equal instants are allowed rather than treated as
      * a wrap: the work calendar is pinned to a fixed offset, so no non-zero chunk yields one, and the
      * check stays a pure direction test.
+     *
+     * @throws ArithmeticException if adding {@code amount} in {@code unit} overflows the supported epoch-millisecond range
      */
-    private static void addCalendarFieldExact(final Calendar calendar, final int amount, final CalendarField unit) {
+    private static void addCalendarFieldExact(final Calendar calendar, final int amount, final CalendarField unit) throws ArithmeticException {
         // Month chunks span complete 400-year Gregorian cycles so intermediate additions cannot
         // clamp the day (including February 29) before the final target month is reached. The
         // slightly smaller bound retains the direction-based overflow check below.
@@ -8027,7 +8090,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add years to, not {@code null}.
      * @param amount the amount of years to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of years added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends java.util.Date> T addYears(final T date, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8063,7 +8126,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add months to, not {@code null}.
      * @param amount the amount of months to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of months added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends java.util.Date> T addMonths(final T date, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8099,7 +8162,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add weeks to, not {@code null}.
      * @param amount the amount of weeks to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of weeks added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends java.util.Date> T addWeeks(final T date, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8140,7 +8203,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add days to, not {@code null}.
      * @param amount the amount of days to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of days added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends java.util.Date> T addDays(final T date, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8175,7 +8238,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add hours to, not {@code null}.
      * @param amount the amount of hours to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of hours added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addHours(final T date, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8203,7 +8266,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add minutes to, not {@code null}.
      * @param amount the amount of minutes to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of minutes added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addMinutes(final T date, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8231,7 +8294,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add seconds to, not {@code null}.
      * @param amount the amount of seconds to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of seconds added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addSeconds(final T date, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8258,7 +8321,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add milliseconds to, not {@code null}.
      * @param amount the amount of milliseconds to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of milliseconds added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addMilliseconds(final T date, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8291,7 +8354,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add hours to, not {@code null}.
      * @param amount the amount of hours to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of hours added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if conversion to milliseconds or the resulting epoch-millisecond value overflows a {@code long}.
      * @see #addHours(java.util.Date, int)
      */
@@ -8324,7 +8387,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add minutes to, not {@code null}.
      * @param amount the amount of minutes to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of minutes added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if conversion to milliseconds or the resulting epoch-millisecond value overflows a {@code long}.
      * @see #addMinutes(java.util.Date, int)
      */
@@ -8357,7 +8420,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add seconds to, not {@code null}.
      * @param amount the amount of seconds to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of seconds added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if conversion to milliseconds or the resulting epoch-millisecond value overflows a {@code long}.
      * @see #addSeconds(java.util.Date, int)
      */
@@ -8390,7 +8453,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to add milliseconds to, not {@code null}.
      * @param amount the amount of milliseconds to add, may be negative to subtract.
      * @return a new {@code Date} instance with the specified number of milliseconds added.
-     * @throws IllegalArgumentException if the date is {@code null}.
+     * @throws IllegalArgumentException if {@code date} is {@code null}.
      * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends java.util.Date> T addMilliseconds(final T date, final long amount) throws IllegalArgumentException, ArithmeticException {
@@ -8427,7 +8490,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add years to, not {@code null}.
      * @param amount the amount of years to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of years added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends Calendar> T addYears(final T calendar, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8466,7 +8529,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add months to, not {@code null}.
      * @param amount the amount of months to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of months added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends Calendar> T addMonths(final T calendar, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8505,7 +8568,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add weeks to, not {@code null}.
      * @param amount the amount of weeks to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of weeks added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends Calendar> T addWeeks(final T calendar, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8550,7 +8613,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add days to, not {@code null}.
      * @param amount the amount of days to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of days added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends Calendar> T addDays(final T calendar, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8582,7 +8645,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add hours to, not {@code null}.
      * @param amount the amount of hours to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of hours added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends Calendar> T addHours(final T calendar, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8613,7 +8676,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add minutes to, not {@code null}.
      * @param amount the amount of minutes to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of minutes added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends Calendar> T addMinutes(final T calendar, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8644,7 +8707,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add seconds to, not {@code null}.
      * @param amount the amount of seconds to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of seconds added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends Calendar> T addSeconds(final T calendar, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8673,7 +8736,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add milliseconds to, not {@code null}.
      * @param amount the amount of milliseconds to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of milliseconds added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting instant is outside the signed-long epoch-millisecond range.
      */
     public static <T extends Calendar> T addMilliseconds(final T calendar, final int amount) throws IllegalArgumentException, ArithmeticException {
@@ -8704,7 +8767,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add hours to, not {@code null}.
      * @param amount the amount of hours to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of hours added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if conversion to milliseconds or the resulting epoch-millisecond value overflows a {@code long}.
      * @see #addHours(Calendar, int)
      */
@@ -8735,7 +8798,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add minutes to, not {@code null}.
      * @param amount the amount of minutes to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of minutes added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if conversion to milliseconds or the resulting epoch-millisecond value overflows a {@code long}.
      * @see #addMinutes(Calendar, int)
      */
@@ -8766,7 +8829,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add seconds to, not {@code null}.
      * @param amount the amount of seconds to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of seconds added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if conversion to milliseconds or the resulting epoch-millisecond value overflows a {@code long}.
      * @see #addSeconds(Calendar, int)
      */
@@ -8797,7 +8860,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to add milliseconds to, not {@code null}.
      * @param amount the amount of milliseconds to add, may be negative to subtract.
      * @return a new {@code Calendar} instance with the specified number of milliseconds added.
-     * @throws IllegalArgumentException if the calendar is {@code null}.
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}.
      * @throws ArithmeticException if the resulting epoch-millisecond value overflows a {@code long}.
      */
     public static <T extends Calendar> T addMilliseconds(final T calendar, final long amount) throws IllegalArgumentException, ArithmeticException {
@@ -8844,7 +8907,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -8883,7 +8946,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        {@code IllegalArgumentException}.
      * @return a new date object of type T, rounded to the nearest whole unit as specified by the field;
      *         an exact tie rounds up to the later boundary (see <i>Rounding semantics</i> above).
-     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
+     * @throws IllegalArgumentException if {@code date} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
      *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
      *         seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million or the rounded
@@ -8954,7 +9017,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -8978,7 +9041,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the CalendarField to which the date is to be rounded.
      * @return a new date object of type T, rounded to the nearest whole unit as specified by the field;
      *         an exact tie rounds up to the later boundary (see {@link #round(java.util.Date, int)}).
-     * @throws IllegalArgumentException if the date or field is {@code null}, or if the field is not supported, or the evaluating time zone carries
+     * @throws IllegalArgumentException if {@code date} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone carries
      *         custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million or the rounded
      *         epoch-millisecond value overflows.
@@ -9037,7 +9100,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9065,7 +9128,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        {@code IllegalArgumentException}.
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the
      *         field; an exact tie rounds up to the later boundary (see {@link #round(java.util.Date, int)}).
-     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
      *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
      *         seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
@@ -9125,7 +9188,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9149,7 +9212,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the CalendarField to which the calendar is to be rounded.
      * @return a new calendar object of type T, rounded to the nearest whole unit as specified by the
      *         field; an exact tie rounds up to the later boundary (see {@link #round(java.util.Date, int)}).
-     * @throws IllegalArgumentException if the calendar or field is {@code null}, or if the field is not supported, or the evaluating time zone
+     * @throws IllegalArgumentException if {@code calendar} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone
      *         carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
@@ -9201,7 +9264,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9228,7 +9291,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        and {@link #SEMI_MONTH}; any other field (including {@code ERA}) throws
      *        {@code IllegalArgumentException}.
      * @return a new date object of type T, truncated to the specified field.
-     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
+     * @throws IllegalArgumentException if {@code date} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
      *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
      *         seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
@@ -9252,7 +9315,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Truncates the given date, leaving the field specified as the most significant field
+     * Truncates the given date, leaving the field specified as the least significant retained field
      * (see <i>Daylight saving</i> below).
      * The original date object is unchanged. This overload evaluates in the JVM default time zone;
      * use the {@code Calendar} overloads to control the zone.
@@ -9279,7 +9342,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9302,7 +9365,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to be truncated.
      * @param field the CalendarField to which the date is to be truncated.
      * @return a new date object of type T, truncated to the specified field.
-     * @throws IllegalArgumentException if the date or field is {@code null}, or if the field is not supported, or the evaluating time zone carries
+     * @throws IllegalArgumentException if {@code date} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone carries
      *         custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
@@ -9350,7 +9413,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9377,7 +9440,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        and {@link #SEMI_MONTH}; any other field (including {@code ERA}) throws
      *        {@code IllegalArgumentException}.
      * @return a new calendar object of type T, truncated to the specified field.
-     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
      *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
      *         seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
@@ -9398,7 +9461,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Truncates the given calendar, leaving the field specified as the most significant field
+     * Truncates the given calendar, leaving the field specified as the least significant retained field
      * (see <i>Daylight saving</i> below).
      * The original calendar object is unchanged.
      *
@@ -9425,7 +9488,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9448,7 +9511,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to be truncated.
      * @param field the CalendarField to which the calendar is to be truncated.
      * @return a new calendar object of type T, truncated to the specified field.
-     * @throws IllegalArgumentException if the calendar or field is {@code null}, or if the field is not supported, or the evaluating time zone
+     * @throws IllegalArgumentException if {@code calendar} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone
      *         carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
@@ -9500,7 +9563,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9527,7 +9590,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        and {@link #SEMI_MONTH}; any other field (including {@code ERA}) throws
      *        {@code IllegalArgumentException}.
      * @return a new date object of type T, adjusted to the ceiling of the specified field.
-     * @throws IllegalArgumentException if the date is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
+     * @throws IllegalArgumentException if {@code date} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
      *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
      *         seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million or the ceiling
@@ -9580,7 +9643,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9603,7 +9666,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to be adjusted.
      * @param field the CalendarField to which the date is to be adjusted.
      * @return a new date object of type T, adjusted to the nearest future unit as specified by the field.
-     * @throws IllegalArgumentException if the date or field is {@code null}, or if the field is not supported, or the evaluating time zone carries
+     * @throws IllegalArgumentException if {@code date} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone carries
      *         custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million or the ceiling
      *         epoch-millisecond value overflows.
@@ -9652,7 +9715,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9679,7 +9742,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        and {@link #SEMI_MONTH}; any other field (including {@code ERA}) throws
      *        {@code IllegalArgumentException}.
      * @return a new calendar object of type T, adjusted to the ceiling of the specified field.
-     * @throws IllegalArgumentException if the calendar is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
+     * @throws IllegalArgumentException if {@code calendar} is {@code null}, or if {@code field} is not a supported Calendar field, or the evaluating time
      *         zone carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of
      *         seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
@@ -9723,7 +9786,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * <p>Boundaries are computed on the proleptic ISO calendar (a customized
      * {@link GregorianCalendar#setGregorianChange(java.util.Date) Julian/Gregorian cutover} is not
      * applied) and are resolved in the evaluating time zone, which must be one {@link ZoneId} can
-     * express &mdash; the same requirement {@code parse}, {@code format} and {@code isSameDay} impose.</p>
+     * express.</p>
      *
      * <p><b>Daylight saving.</b> A boundary is a <i>resolved civil</i> boundary, not merely a local time
      * whose finer fields read zero. When an overlap repeats a nominal boundary, both occurrences are
@@ -9746,7 +9809,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the original calendar object to be adjusted.
      * @param field the field to be used for the ceiling operation, as a CalendarField.
      * @return a new calendar object representing the adjusted time.
-     * @throws IllegalArgumentException if the calendar or field is {@code null}, or if the field is not supported, or the evaluating time zone
+     * @throws IllegalArgumentException if {@code calendar} or {@code field} is {@code null}, or if the field is not supported, or the evaluating time zone
      *         carries custom daylight-saving rules that no {@link ZoneId} can represent, or a fixed offset that is not a whole number of seconds.
      * @throws ArithmeticException if the year magnitude exceeds 280 million in either direction (the
      *         guard tests the absolute proleptic year, so the most negative epoch values are rejected
@@ -9803,6 +9866,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param field the calendar field to modify
      * @param timeZone the zone the boundaries belong to; not {@code null}
      * @param modType type to truncate, round or ceiling
+     *
      * @throws IllegalArgumentException if {@code field} is unsupported, or {@code timeZone} carries rules
      *         no {@link ZoneId} can express
      * @throws ArithmeticException if the year magnitude exceeds 280 million
@@ -10116,7 +10180,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Determines if two calendars are equal up to no more than the specified most significant field.
+     * Determines whether the instants produced by truncating both calendars to the specified field are equal.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10148,7 +10212,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param cal1 the first calendar, not {@code null}.
      * @param cal2 the second calendar, not {@code null}.
-     * @param field the field from {@code CalendarField} to be the most significant field for comparison.
+     * @param field the finest retained field when truncating the values for comparison.
      * @return {@code true} if cal1 and cal2 are equal up to the specified field; {@code false} otherwise.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
      *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
@@ -10166,7 +10230,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
      *
-     * Determines if two calendars are equal up to no more than the specified most significant field.
+     * Determines whether the instants produced by truncating both calendars to the specified field are equal.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10212,7 +10276,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Determines if two dates are equal up to no more than the specified most significant field.
+     * Determines whether the instants produced by truncating both dates to the specified field are equal.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10244,7 +10308,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date1 the first date, not {@code null}.
      * @param date2 the second date, not {@code null}.
-     * @param field the field from {@code CalendarField} to be the most significant field for comparison.
+     * @param field the finest retained field when truncating the values for comparison.
      * @return {@code true} if date1 and date2 are equal up to the specified field; {@code false} otherwise.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
      *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
@@ -10262,8 +10326,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
      *
-     * Determines if two dates are equal up to no more than the specified
-     * most significant field.
+     * Determines whether the instants produced by truncating both dates to the specified field are equal.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10310,9 +10373,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Compares two Calendar instances up to the specified field.
-     * The comparison is based on the most significant field, meaning that it compares
-     * the Calendar instances year by year, month by month, day by day, etc., depending on the specified field.
+     * Compares the instants produced by truncating both Calendar instances to the specified field.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10344,7 +10405,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param cal1 the first Calendar instance to be compared, not {@code null}.
      * @param cal2 the second Calendar instance to be compared, not {@code null}.
-     * @param field the field from {@code CalendarField} to be the most significant field for comparison.
+     * @param field the finest retained field when truncating the values for comparison.
      * @return a negative integer, zero, or a positive integer as the first Calendar is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
      *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
@@ -10355,6 +10416,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     public static int truncatedCompareTo(final Calendar cal1, final Calendar cal2, final CalendarField field)
             throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(cal1, cs.calendar1);
+        N.checkArgNotNull(cal2, cs.calendar2);
+
         return truncatedCompareTo(cal1, cal2, N.checkArgNotNull(field, cs.field).value());
     }
 
@@ -10362,7 +10426,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
      *
-     * Determines how two calendars compare up to no more than the specified most significant field.
+     * Compares the instants produced by truncating both calendars to the specified field.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10412,9 +10476,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Compares two Date instances up to the specified field.
-     * The comparison is based on the most significant field, meaning that it compares
-     * the Date instances year by year, month by month, day by day, etc., depending on the specified field.
+     * Compares the instants produced by truncating both Date instances to the specified field.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10446,7 +10508,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date1 the first Date instance to be compared, not {@code null}.
      * @param date2 the second Date instance to be compared, not {@code null}.
-     * @param field the field from {@code CalendarField} to be the most significant field for comparison.
+     * @param field the finest retained field when truncating the values for comparison.
      * @return a negative integer, zero, or a positive integer as the first Date is less than, equal to, or greater than the second.
      * @throws IllegalArgumentException if any argument is {@code null}, if {@code field} is not a
      *         supported field, or if the evaluating time zone carries custom daylight-saving rules that
@@ -10457,6 +10519,9 @@ public abstract sealed class Dates permits Dates.DateUtil {
      */
     public static int truncatedCompareTo(final java.util.Date date1, final java.util.Date date2, final CalendarField field)
             throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(date1, cs.date1);
+        N.checkArgNotNull(date2, cs.date2);
+
         return truncatedCompareTo(date1, date2, N.checkArgNotNull(field, cs.field).value());
     }
 
@@ -10464,8 +10529,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Copied from Apache Commons Lang under Apache License v2.
      * <br />
      *
-     * Determines how two dates compare up to no more than the specified
-     * most significant field.
+     * Compares the instants produced by truncating both dates to the specified field.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10564,9 +10628,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
      * @return the number of milliseconds within the fragment of {@code date}.
-     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code date} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInMilliseconds(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(date, cs.date);
         return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.MILLISECONDS);
     }
 
@@ -10618,9 +10683,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
      * @return the number of seconds within the fragment of {@code date}.
-     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code date} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInSeconds(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(date, cs.date);
         return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.SECONDS);
     }
 
@@ -10672,9 +10738,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
      * @return the number of minutes within the fragment of {@code date}.
-     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code date} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInMinutes(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(date, cs.date);
         return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.MINUTES);
     }
 
@@ -10726,9 +10793,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
      * @return the number of hours within the fragment of {@code date}.
-     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code date} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInHours(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(date, cs.date);
         return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.HOURS);
     }
 
@@ -10778,9 +10846,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param date the date to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code date} to calculate.
      * @return the number of days within the fragment of {@code date}.
-     * @throws IllegalArgumentException if {@code date} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code date} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInDays(final java.util.Date date, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(date, cs.date);
         return getFragment(date, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.DAYS);
     }
 
@@ -10795,6 +10864,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param fragment the {@code Calendar} field part of {@code date} to calculate.
      * @param unit the time unit.
      * @return the number of units within the fragment of {@code date}.
+     *
      * @throws IllegalArgumentException if {@code date} is {@code null} or the specified fragment is not supported.
      */
     private static long getFragment(final java.util.Date date, final int fragment, final TimeUnit unit) throws IllegalArgumentException {
@@ -10872,9 +10942,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
      * @return the number of milliseconds within the fragment of {@code calendar}.
-     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code calendar} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInMilliseconds(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(calendar, cs.calendar);
         return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.MILLISECONDS);
     }
 
@@ -10937,9 +11008,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
      * @return the number of seconds within the fragment of {@code calendar}.
-     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code calendar} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInSeconds(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(calendar, cs.calendar);
         return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.SECONDS);
     }
 
@@ -11002,9 +11074,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
      * @return the number of minutes within the fragment of {@code calendar}.
-     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code calendar} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInMinutes(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(calendar, cs.calendar);
         return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.MINUTES);
     }
 
@@ -11067,9 +11140,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
      * @return the number of hours within the fragment of {@code calendar}.
-     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code calendar} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInHours(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(calendar, cs.calendar);
         return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.HOURS);
     }
 
@@ -11132,9 +11206,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param calendar the calendar to work with, not {@code null}.
      * @param fragment the {@code CalendarField} fragment of {@code calendar} to calculate.
      * @return the number of days within the fragment of {@code calendar}.
-     * @throws IllegalArgumentException if {@code calendar} is {@code null} or the fragment is not supported.
+     * @throws IllegalArgumentException if {@code calendar} or {@code fragment} is {@code null}, or {@code fragment} is not supported.
      */
     public static long getFragmentInDays(final Calendar calendar, final CalendarField fragment) throws IllegalArgumentException {
+        N.checkArgNotNull(calendar, cs.calendar);
         return getFragment(calendar, N.checkArgNotNull(fragment, cs.fragment).value(), TimeUnit.DAYS);
     }
 
@@ -11148,6 +11223,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * @param fragment the {@code Calendar} field part of {@code calendar} to calculate.
      * @param unit the time unit.
      * @return the number of units within the fragment of {@code calendar}.
+     *
      * @throws IllegalArgumentException if {@code calendar} is {@code null} or the specified fragment is not
      *         supported.
      */
@@ -11798,8 +11874,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * {@code java.time} does not know (a hand-built {@link SimpleTimeZone}, say). Every other zone
      * rejection in this class is an {@code IllegalArgumentException}, and these methods document that,
      * so translate rather than leak a second exception type out of one class.</p>
+     *
+     * @throws IllegalArgumentException if the default time-zone ID is not recognized by java.time
      */
-    private static ZoneId defaultZoneId() {
+    private static ZoneId defaultZoneId() throws IllegalArgumentException {
         // One read of the default: ZoneId.systemDefault() is TimeZone.getDefault().toZoneId(), so reading
         // it again for the message could name a zone other than the one that failed.
         final TimeZone defaultTimeZone = TimeZone.getDefault();
@@ -11821,7 +11899,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return left.getYear() == right.getYear() && left.getMonth() == right.getMonth();
     }
 
-    private static void requireCompatibleTimeZones(final Calendar cal1, final Calendar cal2) {
+    /**
+     * @throws IllegalArgumentException if {@code cal1} and {@code cal2} do not have equivalent time-zone rules
+     */
+    private static void requireCompatibleTimeZones(final Calendar cal1, final Calendar cal2) throws IllegalArgumentException {
         final TimeZone tz1 = zoneOf(cal1);
         final TimeZone tz2 = zoneOf(cal2);
 
@@ -11955,7 +12036,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * }</pre>
      *
      * <p>The civil fields are read on a proleptic Gregorian calendar, so they are the ones
-     * {@link #format(java.util.Date)} prints: neither the default locale's calendar system nor the legacy
+     * {@link #format(java.util.Date, String)} prints with {@link #LOCAL_TIMESTAMP_FORMAT}: neither the default locale's calendar system nor the legacy
      * 1582 Julian/Gregorian cutover can change the answer. Both values are read on the same calendar, so
      * the same-runtime-class requirement of {@link #isSameLocalTime(Calendar, Calendar)} is always met
      * here.</p>
@@ -12207,8 +12288,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * {@code format} wins; otherwise the pattern is auto-detected from the text. Bare numeric text is
      * rejected as ambiguous (epoch milliseconds vs. a numeric date) and undetectable text fails with a
      * clear message.
+     *
+     * @throws IllegalArgumentException if {@code text} is ambiguous numeric date/time text or no supported format can be detected
      */
-    private static String requireDetectedFormat(final String text, final String format) {
+    private static String requireDetectedFormat(final String text, final String format) throws IllegalArgumentException {
         String detected = checkDateFormat(text, format);
 
         if (Strings.isEmpty(detected)) {
@@ -12318,15 +12401,23 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return text == null || (text.length() == 4 && "null".equalsIgnoreCase(text.toString()));
     }
 
-    /** Rejects empty text; {@code null} references and the {@code "null"} marker are handled by the caller. */
-    private static void rejectEmptyDateTime(final CharSequence text) {
+    /**
+     * Rejects empty text; {@code null} references and the {@code "null"} marker are handled by the caller.
+     *
+     * @throws IllegalArgumentException if {@code text} is empty
+     */
+    private static void rejectEmptyDateTime(final CharSequence text) throws IllegalArgumentException {
         if (Strings.isEmpty(text)) {
             throw new IllegalArgumentException("Cannot parse empty date/time text: \"" + text + "\"");
         }
     }
 
-    /** Rejects predefined partial formats for instant-producing parsing; an instant needs a complete local date. */
-    private static void checkCompleteInstantFormat(final String format, final String text) {
+    /**
+     * Rejects predefined partial formats for instant-producing parsing; an instant needs a complete local date.
+     *
+     * @throws IllegalArgumentException if {@code format} lacks a complete date needed to resolve an instant from {@code text}
+     */
+    private static void checkCompleteInstantFormat(final String format, final String text) throws IllegalArgumentException {
         if (LOCAL_YEAR_FORMAT.equals(format) || LOCAL_MONTH_DAY_FORMAT.equals(format) || LOCAL_TIME_FORMAT.equals(format)) {
             throw new IllegalArgumentException("Format '" + format + "' does not contain a complete local date, so no instant can be resolved from: \"" + text
                     + "\"; use a parseToLocal* method and convert explicitly");
@@ -12337,8 +12428,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Rejects legacy patterns that would synthesize a date from SimpleDateFormat's 1970-01-01 base.
      * Instant-bearing targets accept a complete date with an optional time, but not year-only,
      * month-day, or time-only input.
+     *
+     * @throws IllegalArgumentException if the effective format lacks the complete date required by {@code targetMethod}
      */
-    private static void checkCompleteLegacyDateFormat(final String text, final String format, final String targetMethod) {
+    private static void checkCompleteLegacyDateFormat(final String text, final String format, final String targetMethod) throws IllegalArgumentException {
         final String effectiveFormat = checkDateFormat(text, format);
 
         // An undetected auto shape is delegated to the ISO parser, whose supported forms all carry a
@@ -12356,8 +12449,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * anchored to 1970-01-01. A pattern containing only part of a date, or lacking enough time fields
      * to identify a clock hour, is rejected rather than allowing SimpleDateFormat to synthesize its
      * missing fields from the epoch base.
+     *
+     * @throws IllegalArgumentException if the effective format provides neither a complete date nor a resolvable time for {@code targetMethod}
      */
-    private static void checkCompleteOrTimeOnlyLegacyDateFormat(final String text, final String format, final String targetMethod) {
+    private static void checkCompleteOrTimeOnlyLegacyDateFormat(final String text, final String format, final String targetMethod)
+            throws IllegalArgumentException {
         final String effectiveFormat = checkDateFormat(text, format);
 
         // An undetected auto shape is left to the authoritative parser. Otherwise accept a complete
@@ -12582,7 +12678,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return format;
     }
 
-    private static TimeZone checkTimeZone(final String dateTime, final String format, final TimeZone timeZone) {
+    /**
+     * @throws IllegalArgumentException if an explicitly supplied time zone conflicts with the fixed GMT or UTC semantics of {@code format}
+     */
+    private static TimeZone checkTimeZone(final String dateTime, final String format, final TimeZone timeZone) throws IllegalArgumentException {
         return checkTimeZone(dateTime, format, timeZone, false, false);
     }
 
@@ -12598,9 +12697,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *        supplied. A designator the <i>text</i> carries ({@code Z}, {@code GMT}) is data, not a caller
      *        choice, so it wins over the fallback zone exactly as a numeric offset or a bracketed region
      *        does; only an explicitly named fixed-zone constant makes a different zone a conflict.
+     *
+     * @throws IllegalArgumentException if an explicitly supplied time zone conflicts with the fixed GMT or UTC semantics of {@code format}
      */
     private static TimeZone checkTimeZone(final String dateTime, final String format, final TimeZone timeZone, final boolean zoneIsDefaultSnapshot,
-            final boolean formatAutoDetected) {
+            final boolean formatAutoDetected) throws IllegalArgumentException {
         // Snapshot a caller-owned mutable zone before inspecting it, so validation and use observe one
         // coherent rule set even if another thread mutates the original concurrently.
         final TimeZone suppliedTimeZone = timeZone == null ? null : (TimeZone) timeZone.clone();
@@ -12680,8 +12781,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return timeZone.getID() + " (raw offset " + offset + ")";
     }
 
-    /** Ensures that an instant can be represented by HTTP's unsigned four-digit year field. */
-    private static void checkHttpDateYear(final Instant instant) {
+    /**
+     * Ensures that an instant can be represented by HTTP's unsigned four-digit year field.
+     *
+     * @throws IllegalArgumentException if {@code instant} falls outside Common Era years 0001 through 9999 in UTC
+     */
+    private static void checkHttpDateYear(final Instant instant) throws IllegalArgumentException {
         final int year = instant.atZone(GMT_ZONE_ID).getYear();
 
         if (year < 1 || year > 9999) {
@@ -12713,8 +12818,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return Strings.isEmpty(format) && isZoneFixedFormat(effectiveFormat) ? null : timeZone;
     }
 
-    /** Rejects non-canonical text before SimpleDateFormat can consume more than four year digits. */
-    private static void checkFixedFourDigitYearText(final String dateTime, final String format) {
+    /**
+     * Rejects non-canonical text before SimpleDateFormat can consume more than four year digits.
+     *
+     * @throws IllegalArgumentException if a format requiring a four-digit Common Era year receives {@code dateTime} without a year from 0001 through 9999
+     */
+    private static void checkFixedFourDigitYearText(final String dateTime, final String format) throws IllegalArgumentException {
         if (!hasFixedFourDigitLeadingYear(format)) {
             return;
         }
@@ -12747,8 +12856,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * <p>Variable-width input is still parseable: supply the variable-width pattern named in the
      * rejection message, which carries no such promise.</p>
+     *
+     * @throws IllegalArgumentException if {@code dateTime} does not match the canonical field widths and separators required by {@code format}
      */
-    private static void checkFixedWidthLegacyText(final String dateTime, final String format) {
+    private static void checkFixedWidthLegacyText(final String dateTime, final String format) throws IllegalArgumentException {
         final int expectedLength; // -1: only the fixed 19-character head is checked here
         final char dateTimeSeparator; // 0 when the pattern has no time part after the date
 
@@ -12842,8 +12953,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return "yyyy-M-d";
     }
 
-    /** Ensures that a value fits the unsigned four-digit year promised by a predefined pattern. */
-    private static void checkFixedFourDigitYear(final java.util.Date date, final TimeZone timeZone, final String format) {
+    /**
+     * Ensures that a value fits the unsigned four-digit year promised by a predefined pattern.
+     *
+     * @throws IllegalArgumentException if {@code format} requires a four-digit Common Era year and {@code date} falls outside years 0001 through 9999 in
+     *         {@code timeZone}
+     */
+    private static void checkFixedFourDigitYear(final java.util.Date date, final TimeZone timeZone, final String format) throws IllegalArgumentException {
         // Read the year through java.time: that is what renders ISO_ZONED_DATE_TIME_FORMAT and the
         // Calendar default, and what the legacy formatter agrees with once legacyRenderingZone has
         // aligned it. Reading it from a legacy Calendar let Africa/Monrovia's -00:43:08 local mean time
@@ -12872,8 +12988,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
         }
     }
 
-    /** Enforces the exact offset grammar promised by the predefined legacy ISO offset pattern. */
-    private static void checkIsoOffsetText(final String dateTime, final String format) {
+    /**
+     * Enforces the exact offset grammar promised by the predefined legacy ISO offset pattern.
+     *
+     * @throws IllegalArgumentException if {@code dateTime} does not match the required ISO offset timestamp shape or its offset is outside -18:00 through
+     *         +18:00
+     */
+    private static void checkIsoOffsetText(final String dateTime, final String format) throws IllegalArgumentException {
         final int offsetStart = isoOffsetStart(format);
 
         if (offsetStart < 0) {
@@ -12916,8 +13037,13 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return ISO_OFFSET_TIMESTAMP_FORMAT.equals(format) ? 23 : -1;
     }
 
-    /** Ensures that the predefined legacy ISO offset formatter can emit its effective offset exactly. */
-    private static void checkIsoOffsetAtInstant(final java.util.Date date, final TimeZone timeZone) {
+    /**
+     * Ensures that the predefined legacy ISO offset formatter can emit its effective offset exactly.
+     *
+     * @throws IllegalArgumentException if the offset of {@code timeZone} at {@code date} is not a whole number of minutes or is outside -18:00 through
+     *         +18:00
+     */
+    private static void checkIsoOffsetAtInstant(final java.util.Date date, final TimeZone timeZone) throws IllegalArgumentException {
         final int offsetMillis = timeZone.getOffset(date.getTime());
 
         if (offsetMillis % 60_000 != 0) {
@@ -12933,7 +13059,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
     }
 
     /**
-     * Resolves the five fixed-shape zone-less predefined patterns without {@link SimpleDateFormat}:
+     * Resolves the six fixed-shape zone-less predefined patterns without {@link SimpleDateFormat}:
      * {@link #LOCAL_DATE_FORMAT}, {@link #LOCAL_TIME_FORMAT}, {@link #LOCAL_DATE_TIME_FORMAT},
      * {@link #ISO_LOCAL_DATE_TIME_FORMAT} and the two {@code .SSS} local timestamp constants. The
      * shape has already been pinned by {@link #checkFixedWidthLegacyText},
@@ -13033,8 +13159,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Re-applies the sub-millisecond nanoseconds of {@code source} to {@code result} when both are
      * {@link Timestamp}s. Arithmetic in this class round-trips through whole milliseconds, which
      * would otherwise silently zero the sub-millisecond part of a Timestamp's nanos.
+     *
+     * @throws IllegalStateException if restoring the Timestamp fraction changes the expected epoch-millisecond value of {@code result}
      */
-    private static <T extends java.util.Date> T preserveSubMillis(final T result, final java.util.Date source) {
+    private static <T extends java.util.Date> T preserveSubMillis(final T result, final java.util.Date source) throws IllegalStateException {
         if (result instanceof Timestamp && source instanceof Timestamp) {
             final int subMillis = ((Timestamp) source).getNanos() % 1_000_000;
             final long expectedMillis = result.getTime();
@@ -13050,8 +13178,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return result;
     }
 
-    /** Removes any sub-millisecond fraction injected by a custom Timestamp creator. */
-    private static <T extends java.util.Date> T clearSubMillis(final T result, final long expectedMillis) {
+    /**
+     * Removes any sub-millisecond fraction injected by a custom Timestamp creator.
+     *
+     * @throws IllegalStateException if clearing the Timestamp fraction changes the expected epoch-millisecond value of {@code result}
+     */
+    private static <T extends java.util.Date> T clearSubMillis(final T result, final long expectedMillis) throws IllegalStateException {
         if (result instanceof Timestamp) {
             final Timestamp ts = (Timestamp) result;
             ts.setNanos((int) Math.floorMod(expectedMillis, 1000L) * 1_000_000);
@@ -13065,7 +13197,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return result;
     }
 
-    private static <T extends java.util.Date> T createDate(final long millis, final T source) {
+    /**
+     * @throws IllegalStateException if the creator, constructor, or clone returns null, the source itself, a different runtime class, or a date at an
+     *         incorrect epoch millisecond
+     */
+    private static <T extends java.util.Date> T createDate(final long millis, final T source) throws IllegalStateException {
         final Class<? extends java.util.Date> cls = source.getClass();
         final LongFunction<? extends java.util.Date> creator = dateCreatorPool.get(cls);
         final java.util.Date result;
@@ -13122,8 +13258,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Returns an independent clone with the same runtime type. Custom date implementations are supported
      * by this class, so a broken or hostile {@code clone()} must be rejected before the clone is mutated
      * or returned to the caller.
+     *
+     * @throws IllegalStateException if {@code source.clone()} does not return a distinct Date of the same runtime class
      */
-    private static java.util.Date cloneDate(final java.util.Date source) {
+    private static java.util.Date cloneDate(final java.util.Date source) throws IllegalStateException {
         final Object cloned = source.clone();
 
         if (!(cloned instanceof java.util.Date) || cloned == source || cloned.getClass() != source.getClass()) {
@@ -13133,7 +13271,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
         return (java.util.Date) cloned;
     }
 
-    private static <T extends Calendar> T createCalendar(final T source, final long millis) {
+    /**
+     * @throws IllegalStateException if cloning or creating the calendar returns null, the source itself, a different runtime class, or a calendar at an
+     *         incorrect epoch millisecond
+     */
+    private static <T extends Calendar> T createCalendar(final T source, final long millis) throws IllegalStateException {
         final Class<T> cls = (Class<T>) source.getClass();
         final LongObjFunction<? super Calendar, ? extends java.util.Calendar> creator = calendarCreatorPool.get(cls);
 
@@ -13251,7 +13393,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date to check.
      * @return {@code true} if the provided date is the last date of its month.
-     * @throws IllegalArgumentException if the date is {@code null}, or if the ID of the live default
+     * @throws IllegalArgumentException if {@code date} is {@code null}, or if the ID of the live default
      *         time zone is not one {@link ZoneId} recognizes. A default zone that merely customizes the
      *         rules of a known ID is accepted, and the known ID's rules are used.
      */
@@ -13283,7 +13425,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date to check.
      * @return {@code true} if the provided date is the last date of its year.
-     * @throws IllegalArgumentException if the date is {@code null}, or if the ID of the live default
+     * @throws IllegalArgumentException if {@code date} is {@code null}, or if the ID of the live default
      *         time zone is not one {@link ZoneId} recognizes. A default zone that merely customizes the
      *         rules of a known ID is accepted, and the known ID's rules are used.
      */
@@ -13310,7 +13452,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date to be evaluated.
      * @return the number of days in the month of the given date.
-     * @throws IllegalArgumentException if the date is {@code null}, or if the ID of the live default
+     * @throws IllegalArgumentException if {@code date} is {@code null}, or if the ID of the live default
      *         time zone is not one {@link ZoneId} recognizes. A default zone that merely customizes the
      *         rules of a known ID is accepted, and the known ID's rules are used.
      */
@@ -13336,7 +13478,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      *
      * @param date the date to be evaluated.
      * @return the number of days in the year of the given date.
-     * @throws IllegalArgumentException if the date is {@code null}, or if the ID of the live default
+     * @throws IllegalArgumentException if {@code date} is {@code null}, or if the ID of the live default
      *         time zone is not one {@link ZoneId} recognizes. A default zone that merely customizes the
      *         rules of a known ID is accepted, and the known ID's rules are used.
      */
@@ -13552,7 +13694,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Appends the literal string {@code "null"} to {@code appendable} — the {@code formatTo} counterpart
      * of {@code format(null)} returning {@code null}, since an Appendable cannot "return null".
      * @throws IllegalArgumentException if {@code appendable} is {@code null}.
-     * @throws UncheckedIOException if appending the text fails.
+     * @throws UncheckedIOException if writing the {@code "null"} marker to {@code appendable} fails.
      */
     static void formatToForNull(final Appendable appendable) throws IllegalArgumentException, UncheckedIOException {
         N.checkArgNotNull(appendable, cs.appendable);
@@ -14161,8 +14303,11 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * date is required (time-only input is rejected); a missing time defaults to midnight.
          * Nonexistent local times in a DST gap and ambiguous local times in an
          * overlap are rejected unless an offset in the text disambiguates the overlap.
+         *
+         * @throws IllegalArgumentException if the supplied zone conflicts with the fixed UTC or GMT semantics of this formatter
+         * @throws DateTimeException if the parsed fields lack a complete date or cannot be resolved to a valid zoned date/time
          */
-        private ZonedDateTime parseZoned(final CharSequence text, final TimeZone fallbackZone) {
+        private ZonedDateTime parseZoned(final CharSequence text, final TimeZone fallbackZone) throws IllegalArgumentException, DateTimeException {
             return parseZoned(text, fallbackZone, parseRaw(text));
         }
 
@@ -14176,8 +14321,12 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * text the most expensive step of a short parse for a zone it never used. The fixed-zone conflict
          * check still reads it eagerly: that check exists to catch a caller mistake, whatever the text
          * says.</p>
+         *
+         * @throws IllegalArgumentException if the supplied zone conflicts with the fixed UTC or GMT semantics of this formatter
+         * @throws DateTimeException if the parsed fields lack a complete date or cannot be resolved to a valid zoned date/time
          */
-        private ZonedDateTime parseZoned(final CharSequence text, final TimeZone fallbackZone, final TemporalAccessor parsed) {
+        private ZonedDateTime parseZoned(final CharSequence text, final TimeZone fallbackZone, final TemporalAccessor parsed)
+                throws IllegalArgumentException, DateTimeException {
             if ((utcZFormat || httpDateFormat) && fallbackZone != null) {
                 final ZoneId zone;
 
@@ -14385,7 +14534,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param locale the locale for textual fields such as {@code MMM}, {@code EEE}, and {@code a};
          *        must not be {@code null}.
          * @return a locale-aware formatter.
-         * @throws IllegalArgumentException if {@code pattern} is null/empty, {@code locale} is null, or
+         * @throws IllegalArgumentException if {@code pattern} is {@code null} or empty, {@code locale} is {@code null}, or
          *         the pattern is invalid.
          * @see #of(String)
          * @see DateTimeFormatter#ofPattern(String, Locale)
@@ -14399,7 +14548,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
 
         /**
          * @throws IllegalArgumentException if {@code appendable} is {@code null}.
-         * @throws UncheckedIOException if appending the text fails.
+         * @throws UncheckedIOException if writing the formatted date/time text to {@code appendable} fails.
          */
         private static void appendFormatted(final Appendable appendable, final String str) throws IllegalArgumentException, UncheckedIOException {
             N.checkArgNotNull(appendable, cs.appendable);
@@ -14552,8 +14701,10 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * Fixed UTC/GMT formatters append a literal zone claim. Formatting a zone-less temporal (e.g.
          * {@link LocalDateTime}) would mislabel local wall-clock fields as an absolute instant, so the
          * caller must convert explicitly (e.g. {@code atZone(...)}).
+         *
+         * @throws IllegalArgumentException if this formatter has fixed UTC or GMT semantics and {@code temporal} does not represent an instant
          */
-        private void checkInstantBearingForFixedZoneFormat(final TemporalAccessor temporal) {
+        private void checkInstantBearingForFixedZoneFormat(final TemporalAccessor temporal) throws IllegalArgumentException {
             if ((utcZFormat || httpDateFormat) && !temporal.isSupported(ChronoField.INSTANT_SECONDS)) {
                 throw new IllegalArgumentException("Pattern '" + displayName + "' has fixed " + (httpDateFormat ? "GMT" : "UTC")
                         + " semantics and can only format instant-bearing temporals"
@@ -14613,7 +14764,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param calendar the {@code java.util.Calendar} instance to format; if {@code null}, the string {@code "null"} is appended.
          * @param appendable the Appendable to which the formatted string will be appended; must not be {@code null}.
-         * @throws IllegalArgumentException if {@code appendable} is null, {@code calendar} is non-lenient and contains invalid fields,
+         * @throws IllegalArgumentException if {@code appendable} is {@code null}, {@code calendar} is non-lenient and contains invalid fields,
          *         or this is {@link #HTTP_DATE} and the instant's GMT year is outside
          *         Common Era 0001 through 9999, or if the zone the value is rendered in cannot be expressed as a {@link ZoneId} (custom
          *         daylight-saving rules, or a fixed offset that is sub-second or beyond +/-18:00).
@@ -14654,7 +14805,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *         has fixed UTC/GMT semantics and {@code temporal} is not instant-bearing, or when this is
          *         {@link #HTTP_DATE} and the instant's GMT year is outside Common Era 0001 through 9999.
          * @throws DateTimeException if the formatter requires an unavailable temporal field or cannot represent its value
-         * @throws UncheckedIOException if the appendable throws an {@code IOException}.
+         * @throws UncheckedIOException if writing the formatted date/time text or null marker to {@code appendable} fails
          * @see DateTimeFormatter#formatTo(TemporalAccessor, Appendable)
          */
         public void formatTo(final TemporalAccessor temporal, final Appendable appendable)
@@ -14689,7 +14840,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null}.
          * @return a LocalDate instance representing the parsed date, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern (including a purely numeric value, which is <i>not</i> treated as
          *         epoch milliseconds &mdash; use {@link Dates#parseEpochMillis(String)} for epoch-millisecond text).
          * @see LocalDate#from(TemporalAccessor)
@@ -14725,7 +14876,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null}.
          * @return a LocalTime instance representing the parsed time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern (including a purely numeric value, which is <i>not</i> treated as
          *         epoch milliseconds &mdash; use {@link Dates#parseEpochMillis(String)} for epoch-millisecond text).
          * @see LocalTime#from(TemporalAccessor)
@@ -14762,7 +14913,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null}.
          * @return a LocalDateTime instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern (including a purely numeric value, which is <i>not</i> treated as
          *         epoch milliseconds &mdash; use {@link Dates#parseEpochMillis(String)} for epoch-millisecond text).
          * @see LocalDateTime#from(TemporalAccessor)
@@ -14799,7 +14950,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null}.
          * @return an OffsetDateTime instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern (including a purely numeric value, which is <i>not</i> treated as
          *         epoch milliseconds &mdash; use {@link Dates#parseEpochMillis(String)} for epoch-millisecond text).
          * @see OffsetDateTime#from(TemporalAccessor)
@@ -14835,7 +14986,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null}.
          * @return a ZonedDateTime instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern (including a purely numeric value, which is <i>not</i> treated as
          *         epoch milliseconds &mdash; use {@link Dates#parseEpochMillis(String)} for epoch-millisecond text).
          * @see ZonedDateTime#from(TemporalAccessor)
@@ -14869,7 +15020,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null}.
          * @return an Instant instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern (including a purely numeric value, which is <i>not</i> treated as
          *         epoch milliseconds &mdash; use {@link Dates#parseEpochMillis(String)} for epoch-millisecond text).
          * @see Instant#from(TemporalAccessor)
@@ -14961,7 +15112,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null}.
          * @return a {@code java.util.Date} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern.
          * @see #parseToJUDate(CharSequence, TimeZone)
          */
@@ -14995,7 +15146,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param text the CharSequence to parse; may be {@code null}.
          * @param tz the time zone to interpret zone-less text in; if {@code null}, the default time zone is used.
          * @return a {@code java.util.Date} instance representing the parsed date and time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern, or if a fixed UTC/GMT formatter is combined with a non-UTC-equivalent zone.
          * @see #parseToJUDate(CharSequence)
          */
@@ -15196,7 +15347,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param text the CharSequence to parse; may be {@code null}.
          * @return a {@code java.sql.Timestamp} instance representing the parsed date and time
          *         (sub-millisecond nanoseconds preserved), or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern.
          * @see #parseToTimestamp(CharSequence, TimeZone)
          */
@@ -15231,7 +15382,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param tz the time zone to interpret zone-less text in; if {@code null}, the default time zone is used.
          * @return a {@code java.sql.Timestamp} instance representing the parsed date and time
          *         (sub-millisecond nanoseconds preserved), or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern, or if a fixed UTC/GMT formatter is combined with a non-UTC-equivalent zone.
          * @see #parseToTimestamp(CharSequence)
          */
@@ -15260,7 +15411,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          *
          * @param text the CharSequence to parse; may be {@code null}.
          * @return a proleptic {@code GregorianCalendar} representing the parsed date and time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern.
          * @see #parseToCalendar(CharSequence, TimeZone)
          */
@@ -15291,7 +15442,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
          * @param text the CharSequence to parse; may be {@code null}.
          * @param tz the fallback zone for zone-less text; if {@code null}, the live default zone is used.
          * @return a proleptic {@code GregorianCalendar} representing the parsed date and time, or {@code null} if {@code text} is {@code null} or the case-insensitive marker {@code "null"}.
-         * @throws IllegalArgumentException if the text is non-empty and cannot be parsed with this
+         * @throws IllegalArgumentException if the text is empty or cannot be parsed with this
          *         formatter's pattern, or if a fixed UTC/GMT formatter is combined with a non-UTC-equivalent zone.
          * @see #parseToCalendar(CharSequence)
          */
@@ -15448,6 +15599,7 @@ public abstract sealed class Dates permits Dates.DateUtil {
      * Converts {@code duration} in {@code unit} to milliseconds. Unlike {@link TimeUnit#toMillis(long)},
      * which saturates on overflow, this throws {@link ArithmeticException}; sub-millisecond units are
      * truncated toward zero (inherently lossy — "exact" refers to the overflow behavior).
+     *
      * @throws IllegalArgumentException if {@code unit} is {@code null}.
      * @throws ArithmeticException if conversion to milliseconds overflows.
      */

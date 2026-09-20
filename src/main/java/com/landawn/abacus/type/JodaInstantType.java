@@ -80,8 +80,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * <p>Unlike the {@code java.util.Date}/{@code Calendar} handlers, no year-range check is applied here: an instant
      * outside Common Era years 0001 through 9999 is printed as is, for example {@code "10000-01-01T00:00:00.000Z"} or
      * {@code "-0001-01-01T00:00:00.000Z"}. Text whose year has more than four digits or a leading {@code '-'} is
-     * rejected by the inverse parser ({@link #valueOf(String)}) and by every other date handler of this type system,
-     * so it does not round-trip. Year {@code 0000} is the one out-of-range value that does:
+     * rejected by this handler's inverse parser ({@link #valueOf(String)}), so it does not round-trip through this handler. Year {@code 0000} is the one out-of-range value that does:
      * {@code "0000-12-31T23:59:59.999Z"} is read back at the same instant here (Joda accepts year zero), although the
      * {@code Date}/{@code Calendar} handlers reject it.</p>
      *
@@ -100,8 +99,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns {@link Instant#now()}</li>
-     *   <li>Numeric strings (an optional sign followed by decimal digits only, as accepted by
-     *       {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix): parsed as milliseconds since the
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only;
+     *       no {@code 0x} hex, no {@code L} suffix): parsed as milliseconds since the
      *       epoch</li>
      *   <li>20-character strings ending in {@code 'Z'}/{@code 'z'}: parsed as ISO-8601 date-time
      *       ({@code "yyyy-MM-dd'T'HH:mm:ss'Z'"})</li>
@@ -164,8 +163,8 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
 
     /**
      * Converts a region of a character array to a Joda {@link Instant} instance.
-     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp: digits ending in a
-     * digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted), it is parsed as such; otherwise
+     * If the character sequence has more than four characters and consists of an optional sign followed only by
+     * ASCII decimal digits, it is parsed as epoch milliseconds (no hexadecimal prefix or type suffix); otherwise
      * the characters are converted to a {@link String} and delegated to {@link #valueOf(String)}, so both overloads
      * give the same answer for the same text.
      *
@@ -173,20 +172,20 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param offset the index of the first character to use
      * @param len    the number of characters to use
      * @return the parsed Joda instant, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see
      *         {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public Instant valueOf(final char[] cbuf, final int offset, final int len) throws IllegalArgumentException {
+    public Instant valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // IllegalArgumentException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
@@ -278,6 +277,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the Joda {@link Instant} to append; may be {@code null}
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the formatted date/time text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -290,7 +290,7 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Instant x) throws IOException {
+    public void appendTo(final Appendable appendable, final Instant x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -322,11 +322,12 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the Joda {@link Instant} to write; may be {@code null}
      * @param config the serialization configuration; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the selected date/time representation, quotation marks or null literal to {@code writer} fails
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final Instant x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Instant x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

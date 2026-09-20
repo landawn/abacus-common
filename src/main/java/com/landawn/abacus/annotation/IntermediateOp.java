@@ -35,9 +35,11 @@ import java.lang.annotation.Target;
  *
  * <p><b>Characteristics of intermediate operations:</b></p>
  * <ul>
- *   <li><b>Lazy evaluation:</b> Operations are not executed until a terminal operation is invoked.</li>
+ *   <li><b>Lazy evaluation:</b> Processing is typically deferred until traversal; methods also
+ *       marked {@link TerminalOpTriggered} may materialize their source during the call.</li>
  *   <li><b>Stateless or stateful:</b> May maintain state between elements (e.g., {@code distinct}, {@code sorted}).</li>
- *   <li><b>Non-consuming:</b> Do not process the stream source directly.</li>
+ *   <li><b>Source consumption:</b> Usually deferred; consult the method's contract for operations
+ *       that buffer or otherwise consume the upstream source before returning.</li>
  *   <li><b>Pipeline formation:</b> Enable fluent API design through method chaining.</li>
  * </ul>
  *

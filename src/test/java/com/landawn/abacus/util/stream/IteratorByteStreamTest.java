@@ -26,13 +26,11 @@ public class IteratorByteStreamTest extends TestBase {
             for (final boolean empty : new boolean[] { true, false }) {
                 final byte[] values = empty ? new byte[0] : new byte[] { (byte) 1 };
                 final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
-                try (final ByteStream stream = arrayBacked ? ByteStream.of(values)
-                        : ByteStream.of(com.landawn.abacus.util.ByteIterator.of(values))) {
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                            () -> stream.groupTo(value -> value, null, () -> {
-                                factoryCalls.incrementAndGet();
-                                return new java.util.HashMap<>();
-                            }));
+                try (final ByteStream stream = arrayBacked ? ByteStream.of(values) : ByteStream.of(com.landawn.abacus.util.ByteIterator.of(values))) {
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> stream.groupTo(value -> value, null, () -> {
+                        factoryCalls.incrementAndGet();
+                        return new java.util.HashMap<>();
+                    }));
                     org.junit.jupiter.api.Assertions.assertEquals(0, factoryCalls.get());
                 }
             }
@@ -153,7 +151,6 @@ public class IteratorByteStreamTest extends TestBase {
             assertEquals(2, attempts.get());
         }
     }
-
 
     // Creates an iterator-backed ByteStream (IteratorByteStream) rather than array-backed
     private ByteStream iter(byte... values) {

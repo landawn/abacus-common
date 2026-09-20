@@ -51,9 +51,9 @@ import com.landawn.abacus.util.ImmutableList;
 /**
  * A comprehensive file manipulation utility class that provides unified file operations by wrapping and extending
  * Google Guava's file utilities. This class serves as a facade combining functionality from both
- * {@code com.google.common.io.Files} and {@code com.google.common.io.MoreFiles}, offering a consistent and
- * enhanced API for file manipulation, I/O operations, and path management with improved {@code null} safety and
- * performance optimizations.
+ * {@code com.google.common.io.Files} and {@code com.google.common.io.MoreFiles}, offering a consistent
+ * API for file manipulation, I/O operations, and path management. Argument validation and file-system
+ * behavior come from the delegated Guava or JDK method.
  *
  * <p>Note: This class delegates to Google Guava (Apache License 2.0); every method is a thin wrapper over
  * {@code com.google.common.io.Files} / {@code MoreFiles} or {@code java.nio.file.Files}, so the behaviour
@@ -180,7 +180,8 @@ import com.landawn.abacus.util.ImmutableList;
  * <ul>
  *   <li><b>Stateless Design:</b> All utility methods are stateless and thread-safe</li>
  *   <li><b>Concurrent Access:</b> Safe for concurrent access from multiple threads</li>
- *   <li><b>File System Operations:</b> Thread-safe at the file system level</li>
+ *   <li><b>File System Operations:</b> Concurrent operations on the same paths still require caller
+ *       coordination; copying, moving, and multi-step directory operations are not generally atomic</li>
  *   <li><b>Object Creation:</b> Factory methods create new instances without shared state</li>
  * </ul>
  *
@@ -204,7 +205,8 @@ import com.landawn.abacus.util.ImmutableList;
  *
  * <p><b>Platform Compatibility:</b>
  * <ul>
- *   <li><b>Cross-Platform Paths:</b> Handles platform-specific path separators and conventions</li>
+ *   <li><b>Paths:</b> File and Path operations use the platform's path rules; {@code simplifyPath}
+ *       specifically uses Unix-style forward slashes</li>
  *   <li><b>File System Features:</b> Adapts to different file system capabilities; on file systems without
  *       {@link SecureDirectoryStream} (Windows) the recursive-delete methods require
  *       {@link RecursiveDeleteOption#ALLOW_INSECURE}</li>
@@ -227,7 +229,8 @@ import com.landawn.abacus.util.ImmutableList;
  *   <li><b>Extension Extraction:</b> Reliable file extension parsing with edge case handling</li>
  *   <li><b>Name Without Extension:</b> Clean filename extraction without extension</li>
  *   <li><b>Path Simplification:</b> Resolves relative path components (./ and ../)</li>
- *   <li><b>Cross-Platform Paths:</b> Consistent path handling across operating systems</li>
+ *   <li><b>Path Syntax:</b> Filename extraction follows the File or Path API used by the overload;
+ *       lexical simplification uses Unix-style path syntax</li>
  * </ul>
  *
  * <p><b>Best Practices:</b>
@@ -245,7 +248,7 @@ import com.landawn.abacus.util.ImmutableList;
  *   <li>Reading entire large files into memory when streaming would suffice</li>
  *   <li>Not closing resources properly (use try-with-resources)</li>
  *   <li>Using platform-default charset without explicit specification</li>
- *   <li>Performing file operations without checking existence or permissions</li>
+ *   <li>Assuming an earlier existence or permission check guarantees that a later operation succeeds</li>
  *   <li>Ignoring IOException in file operations</li>
  * </ul>
  *
@@ -265,7 +268,7 @@ import com.landawn.abacus.util.ImmutableList;
  *   <li><b>Import-Clash Workaround:</b> Its primary purpose is to sidestep the very common import clash on the simple
  *       name {@code Files} (shared by {@link java.nio.file.Files}, {@link com.google.common.io.Files} and this facade);
  *       when another {@code Files} already occupies the simple name, callers can reach this facade through the
- *       conflict-free name {@code Files.MoreFiles}. See {@link Files.MoreFiles} for details.</li>
+ *       conflict-free name {@code MoreFiles} by importing the nested class. See {@link Files.MoreFiles} for details.</li>
  *   <li><b>Naming Convenience:</b> Provided so callers familiar with Guava's {@code MoreFiles} can use a similarly named type</li>
  * </ul>
  *
@@ -354,7 +357,8 @@ public abstract class Files { //NOSONAR
      * @param charset the charset used to decode the input stream (see {@link StandardCharsets} for helpful predefined constants).
      * @return a BufferedReader instance for reading from the file.
      * @throws NullPointerException if a reference argument is {@code null}.
-     * @throws FileNotFoundException if the file does not exist, is a directory rather than a regular file,     or for some other reason cannot be opened for reading.
+     * @throws FileNotFoundException if the file does not exist, is a directory rather than a regular file, or for some other reason cannot be opened for
+     *         reading.
      */
     public static BufferedReader newReader(final File file, final Charset charset) throws NullPointerException, FileNotFoundException {
         return com.google.common.io.Files.newReader(file, charset);
@@ -384,7 +388,8 @@ public abstract class Files { //NOSONAR
      * @param charset the charset used to encode the output stream (see {@link StandardCharsets} for helpful predefined constants)
      * @return a BufferedWriter instance for writing to the file
      * @throws NullPointerException if a reference argument is {@code null}.
-     * @throws FileNotFoundException if the file exists but is a directory rather than a regular file,     does not exist but cannot be created, or cannot be opened for any other reason
+     * @throws FileNotFoundException if the file exists but is a directory rather than a regular file, does not exist but cannot be created, or cannot be
+     *         opened for any other reason
      */
     public static BufferedWriter newWriter(final File file, final Charset charset) throws NullPointerException, FileNotFoundException {
         return com.google.common.io.Files.newWriter(file, charset);
@@ -1048,7 +1053,8 @@ public abstract class Files { //NOSONAR
      * @param mode the mode to use when mapping {@code file} (READ_ONLY, READ_WRITE, or PRIVATE).
      * @return a buffer reflecting {@code file}.
      * @throws NullPointerException if {@code file} or {@code mode} is {@code null}.
-     * @throws FileNotFoundException if the {@code file} does not exist and {@code mode} is     {@link MapMode#READ_ONLY}; in {@code READ_WRITE} or {@code PRIVATE} mode a missing file is     created empty and a zero-capacity buffer is returned instead.
+     * @throws FileNotFoundException if the {@code file} does not exist and {@code mode} is {@link MapMode#READ_ONLY}; in {@code READ_WRITE} or
+     *         {@code PRIVATE} mode a missing file is created empty and a zero-capacity buffer is returned instead.
      * @throws IOException if opening, sizing, mapping, or closing the file fails.
      * @see FileChannel#map(MapMode, long, long)
      */
@@ -1070,7 +1076,8 @@ public abstract class Files { //NOSONAR
      * exist, it will be created with the requested {@code size}. Thus, this method is useful for
      * creating memory mapped files which do not yet exist.
      *
-     * <p>This only works for files ≤ {@link Integer#MAX_VALUE} bytes.
+     * <p>The requested mapping size must not exceed {@link Integer#MAX_VALUE} bytes;
+     * the file itself may be larger.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1084,7 +1091,7 @@ public abstract class Files { //NOSONAR
      * @return a buffer reflecting {@code file}.
      * @throws IllegalArgumentException if {@code size} is negative or exceeds {@link Integer#MAX_VALUE}.
      * @throws NullPointerException if {@code file} or {@code mode} is {@code null}.
-     * @throws FileNotFoundException if the {@code file} does not exist and {@code mode} is     {@link MapMode#READ_ONLY}.
+     * @throws FileNotFoundException if the {@code file} does not exist and {@code mode} is {@link MapMode#READ_ONLY}.
      * @throws IOException if opening or mapping the file fails, including a requested size beyond the file length in {@link
      *         MapMode#READ_ONLY} mode
      * @see FileChannel#map(MapMode, long, long)
@@ -1118,7 +1125,7 @@ public abstract class Files { //NOSONAR
      * // Returns: "/foo/baz"
      * }</pre>
      *
-     * @param pathname the path to simplify.
+     * @param pathname the Unix-style path to simplify; backslashes are ordinary filename characters.
      * @return the simplified path.
      * @throws NullPointerException if a reference argument is {@code null}.
      */
@@ -1339,7 +1346,7 @@ public abstract class Files { //NOSONAR
      * @return an immutable list of paths to the entries (files and immediate subdirectories) in the directory
      * @throws NullPointerException if a reference argument is {@code null}.
      * @throws NoSuchFileException if the file does not exist <i>(optional specific exception)</i>
-     * @throws NotDirectoryException if the file could not be opened because it is not a directory     <i>(optional specific exception)</i>
+     * @throws NotDirectoryException if the file could not be opened because it is not a directory <i>(optional specific exception)</i>
      * @throws IOException if opening, reading, or closing the directory stream fails.
      * @see IOUtil#listFiles(File)
      */
@@ -1549,14 +1556,15 @@ public abstract class Files { //NOSONAR
      * <p>Unlike the Guava-backed {@code asCharSource(file, charset).read()} (and
      * {@link IOUtil#readAllToString(File)}), which replace malformed input with U+FFFD, this
      * JDK-backed method rejects undecodable bytes with a {@link java.nio.charset.MalformedInputException}
-     * (an {@code IOException}) - e.g. any Latin-1 text file containing a non-ASCII byte.
+     * (an {@code IOException}) - for example, a Latin-1 file containing a lone {@code 0xE9} byte.
      *
      * @param file the file to read from.
      * @return a string containing the content read from the file.
      * @throws NullPointerException if {@code file} is {@code null}.
      * @throws MalformedInputException if the file's bytes are not decodable as UTF-8.
      * @throws IOException if opening the file, reading its bytes or closing the input channel fails
-     * @throws SecurityException in the case of the default provider, and a security manager is         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
+     * @throws SecurityException in the case of the default provider, and a security manager is installed, the
+     *         {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @throws OutOfMemoryError if the file is extremely large, for example larger than {@code 2GB}.
      * @see #readString(File, Charset)
      * @see java.nio.file.Files#readString(Path)
@@ -1594,7 +1602,8 @@ public abstract class Files { //NOSONAR
      * @throws NullPointerException if {@code file} or {@code charset} is {@code null}.
      * @throws MalformedInputException if the file's bytes are not decodable in {@code charset}.
      * @throws IOException if opening the file, reading its bytes or closing the input channel fails
-     * @throws SecurityException in the case of the default provider, and a security manager is         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
+     * @throws SecurityException in the case of the default provider, and a security manager is installed, the
+     *         {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @throws OutOfMemoryError if the file is extremely large, for example, larger than {@code 2GB}.
      * @see java.nio.file.Files#readString(Path, Charset)
      * @see IOUtil#readAllToString(File, Charset)
@@ -1608,8 +1617,8 @@ public abstract class Files { //NOSONAR
      * Writes the given character sequence to a file using UTF-8 charset, overwriting any existing content.
      *
      * <p>This is a convenience method equivalent to {@code asCharSink(file, StandardCharsets.UTF_8).write(from)}
-     * and is the writing counterpart of {@link #readString(File)}. Every {@code char} is encodable in UTF-8,
-     * so no data is lost here; unpaired surrogates, however, are written as the replacement byte {@code '?'}
+     * and is the writing counterpart of {@link #readString(File)}. Well-formed Unicode text is
+     * preserved; unpaired surrogates are written as the replacement byte {@code '?'}
      * (see {@link #writeString(File, CharSequence, Charset)}).
      *
      * <p><b>Usage Examples:</b></p>
@@ -1679,8 +1688,8 @@ public abstract class Files { //NOSONAR
      * <p><b>Note:</b> this method is backed by {@code java.nio.file.Files}. Unlike the Guava-backed
      * {@link #readLines(File, Charset)} (and {@link IOUtil#readAllLines(File)}), which replace malformed
      * input with U+FFFD, this JDK-backed method rejects undecodable bytes with a
-     * {@link java.nio.charset.MalformedInputException} (an {@code IOException}) - e.g. any Latin-1 text
-     * file containing a non-ASCII byte. Both return a mutable {@link List} of lines with terminators
+     * {@link java.nio.charset.MalformedInputException} (an {@code IOException}) - for example, a Latin-1
+     * file containing a lone {@code 0xE9} byte. Both return a mutable {@link List} of lines with terminators
      * stripped; a UTF-8 byte-order mark is kept as U+FEFF at the start of the first line by both.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1696,7 +1705,8 @@ public abstract class Files { //NOSONAR
      * @throws NullPointerException if {@code file} is {@code null}.
      * @throws MalformedInputException if the file's bytes are not decodable as UTF-8.
      * @throws IOException if opening or reading the file fails.
-     * @throws SecurityException in the case of the default provider, and a security manager is         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked.
+     * @throws SecurityException in the case of the default provider, and a security manager is installed, the
+     *         {@link SecurityManager#checkRead(String) checkRead} method is invoked.
      * @see #readAllLines(File, Charset)
      * @see #readLines(File, Charset)
      * @see java.nio.file.Files#readAllLines(Path, Charset)
@@ -1740,7 +1750,8 @@ public abstract class Files { //NOSONAR
      * @throws NullPointerException if {@code file} or {@code charset} is {@code null}.
      * @throws MalformedInputException if the file's bytes are not decodable in {@code charset}.
      * @throws IOException if opening the file, reading its lines or closing its reader fails
-     * @throws SecurityException in the case of the default provider, and a security manager is         installed, the {@link SecurityManager#checkRead(String) checkRead} method is invoked         to check read access to the file.
+     * @throws SecurityException in the case of the default provider, and a security manager is installed, the
+     *         {@link SecurityManager#checkRead(String) checkRead} method is invoked to check read access to the file.
      * @see #readLines(File, Charset)
      * @see java.nio.file.Files#readAllLines(Path, Charset)
      * @see IOUtil#readAllLines(File, Charset)
@@ -1759,8 +1770,8 @@ public abstract class Files { //NOSONAR
      * ({@link com.landawn.abacus.guava.Files}). A single source file can only import one of them by
      * its simple name; the others must be referenced by their fully qualified names. When another
      * {@code Files} is already imported, this nested class lets you reach every method of this facade
-     * through the distinct, conflict-free name {@code Files.MoreFiles} (or simply {@code MoreFiles}
-     * once {@code Files.MoreFiles} is statically imported).</p>
+     * through {@code MoreFiles} after importing {@code com.landawn.abacus.guava.Files.MoreFiles},
+     * as shown below, or through its fully qualified name.</p>
      *
      * <p>The name mirrors Guava's own {@code com.google.common.io.MoreFiles}, so callers already
      * familiar with that type have a similarly named entry point here.</p>

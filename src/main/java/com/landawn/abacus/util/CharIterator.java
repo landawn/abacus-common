@@ -219,7 +219,14 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * }
      * }</pre>
      *
-     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     * <p>The returned iterator initializes its source on its first traversal operation. Its access methods
+     * throw {@link IllegalStateException} if the supplier returns {@code null} or recursively accesses this
+     * iterator during initialization. The supplier is invoked at most once. Initialization exceptions and
+     * errors are cached and rethrown on later access, even if the supplier catches a recursive-access failure.</p>
+     *
+     * <p>The supplier must return a valid source distinct from this deferred iterator and must not create
+     * a cycle through other delegating iterators. Returning this iterator directly throws a cached
+     * {@link IllegalStateException}; indirect delegation cycles are not detected.</p>
      *
      * @param iteratorSupplier a Supplier that provides the CharIterator when needed
      * @return a {@code CharIterator} that is initialized on first use
@@ -231,6 +238,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
         return new CharIterator() {
             private CharIterator iter = null;
             private volatile boolean isInitialized = false;
+            private boolean isInitializing = false;
             private Throwable initializationFailure = null;
 
             @Override
@@ -248,21 +256,38 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
             }
 
             /**
-             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null} or recursively accesses this iterator
              */
             private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
+                            if (isInitializing) {
+                                if (initializationFailure == null) {
+                                    initializationFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                                }
+
+                                throw (IllegalStateException) initializationFailure;
+                            }
+
+                            isInitializing = true;
+
                             try {
                                 iter = iteratorSupplier.get();
+
+                                if (iter == this) {
+                                    throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
+                                }
 
                                 if (iter == null) {
                                     throw new IllegalStateException("Iterator supplier returned null");
                                 }
                             } catch (RuntimeException | Error e) {
-                                initializationFailure = e;
+                                if (initializationFailure == null) {
+                                    initializationFailure = e;
+                                }
                             } finally {
+                                isInitializing = false;
                                 isInitialized = true;
                             }
                         }

@@ -1176,7 +1176,6 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         assertEquals(Arrays.asList(2, 4), grouped.get(true));
     }
 
-
     @Test
     public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
         final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();

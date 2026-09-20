@@ -57,8 +57,9 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      * Constructs an {@code AbstractJodaDateTimeType} with the specified type name.
      *
      * @param typeName the name of the Joda DateTime type (e.g., "DateTime", "Instant")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractJodaDateTimeType(final String typeName) {
+    protected AbstractJodaDateTimeType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -110,8 +111,8 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      * <p>Unlike the {@code java.util.Date}/{@code Calendar} handlers, no year-range check is applied here: an instant
      * outside Common Era years 0001 through 9999 is printed as is, for example {@code "10000-01-01T00:00:00.000Z"},
      * {@code "292278994-08-17T07:12:55.807Z"} or {@code "-0001-01-01T00:00:00.000Z"}. Text whose year has more than
-     * four digits or a leading {@code '-'} is rejected by the inverse parser ({@link #valueOf(String)}) and by every
-     * other date handler of this type system, so it does not round-trip. Year {@code 0000} is the one out-of-range
+     * four digits or a leading {@code '-'} is rejected by this handler's inverse parser ({@link #valueOf(String)}),
+     * so it does not round-trip through this handler. Year {@code 0000} is the one out-of-range
      * value that does: {@code "0000-12-31T23:59:59.999Z"} is read back at the same instant here (Joda accepts year
      * zero), although the {@code Date}/{@code Calendar} handlers reject it.</p>
      *
@@ -138,6 +139,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the Joda {@code DateTime} instant value to append
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the value to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -150,7 +152,7 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final T x) throws IOException {
+    public void appendTo(final Appendable appendable, final T x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -185,11 +187,12 @@ public abstract class AbstractJodaDateTimeType<T extends AbstractInstant> extend
      * @param writer the {@code CharacterWriter} to write to
      * @param x the Joda {@code DateTime} instant value to write
      * @param config the serialization configuration, may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the serialized value to {@code writer} fails
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

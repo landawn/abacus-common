@@ -27,13 +27,11 @@ public class IteratorLongStreamTest extends TestBase {
             for (final boolean empty : new boolean[] { true, false }) {
                 final long[] values = empty ? new long[0] : new long[] { (long) 1 };
                 final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
-                try (final LongStream stream = arrayBacked ? LongStream.of(values)
-                        : LongStream.of(com.landawn.abacus.util.LongIterator.of(values))) {
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                            () -> stream.groupTo(value -> value, null, () -> {
-                                factoryCalls.incrementAndGet();
-                                return new java.util.HashMap<>();
-                            }));
+                try (final LongStream stream = arrayBacked ? LongStream.of(values) : LongStream.of(com.landawn.abacus.util.LongIterator.of(values))) {
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> stream.groupTo(value -> value, null, () -> {
+                        factoryCalls.incrementAndGet();
+                        return new java.util.HashMap<>();
+                    }));
                     org.junit.jupiter.api.Assertions.assertEquals(0, factoryCalls.get());
                 }
             }
@@ -137,7 +135,6 @@ public class IteratorLongStreamTest extends TestBase {
         }
     }
 
-
     @Test
     public void testLimitPreservesQuotaWhenSupplierFailsBeforeProducingValue() {
         final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
@@ -157,7 +154,6 @@ public class IteratorLongStreamTest extends TestBase {
             assertEquals(2, attempts.get());
         }
     }
-
 
     // Creates an iterator-backed LongStream (IteratorLongStream) rather than array-backed
     private LongStream iter(long... values) {

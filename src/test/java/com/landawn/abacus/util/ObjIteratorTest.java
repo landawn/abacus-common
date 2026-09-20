@@ -27,6 +27,25 @@ import com.landawn.abacus.TestBase;
 public class ObjIteratorTest extends TestBase {
 
     @Test
+    public void testDeferRejectsReturningItself() {
+        for (int mode = 0; mode < 2; mode++) {
+            final int[] supplierCalls = { 0 };
+            final java.util.concurrent.atomic.AtomicReference<ObjIterator<String>> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final ObjIterator<String> iterator = ObjIterator.defer(() -> {
+                supplierCalls[0]++;
+                return reference.get();
+            });
+            reference.set(iterator);
+
+            final IllegalStateException failure = mode == 0 ? assertThrows(IllegalStateException.class, iterator::hasNext)
+                    : assertThrows(IllegalStateException.class, iterator::next);
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::next));
+            assertEquals(1, supplierCalls[0]);
+        }
+    }
+
+    @Test
     public void testEmpty() {
         ObjIterator<String> iter = ObjIterator.empty();
         assertFalse(iter.hasNext());
@@ -470,15 +489,13 @@ public class ObjIteratorTest extends TestBase {
     @Test
     public void testToArrayRejectsNullArrayWithNamedMessage() {
         assertEquals("'a' cannot be null",
-                assertThrows(NullPointerException.class, () -> ObjIterator.of(new String[] { "a", "b" }, 0, 2).toArray((String[]) null))
-                        .getMessage());
+                assertThrows(NullPointerException.class, () -> ObjIterator.of(new String[] { "a", "b" }, 0, 2).toArray((String[]) null)).getMessage());
         assertEquals("'a' cannot be null",
                 assertThrows(NullPointerException.class, () -> ObjIterator.of(new String[] { "a", "b" }).toArray((String[]) null)).getMessage());
         // the iterator-backed base path, which already had the guard
         assertEquals("'a' cannot be null",
                 assertThrows(NullPointerException.class, () -> ObjIterator.of(Arrays.asList("a", "b")).toArray((String[]) null)).getMessage());
-        assertEquals("'a' cannot be null",
-                assertThrows(NullPointerException.class, () -> ObjIterator.<String> empty().toArray((String[]) null)).getMessage());
+        assertEquals("'a' cannot be null", assertThrows(NullPointerException.class, () -> ObjIterator.<String> empty().toArray((String[]) null)).getMessage());
 
         // "rejected before consuming any elements"
         final ObjIterator<String> iter = ObjIterator.of(new String[] { "a", "b" }, 0, 2);

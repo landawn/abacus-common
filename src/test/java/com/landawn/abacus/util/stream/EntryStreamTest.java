@@ -475,20 +475,17 @@ public class EntryStreamTest extends TestBase {
         final List<String> expectedKeys = Arrays.asList("c", "d", "e");
         final List<String> droppedKeys = new ArrayList<>();
 
-        assertEquals(expectedKeys, EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2)
-                .parallel(3)
-                .dropWhile(e -> e.getValue() < 3, e -> droppedKeys.add(e.getKey()))
-                .keys().sorted().toList());
+        assertEquals(expectedKeys,
+                EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2)
+                        .parallel(3)
+                        .dropWhile(e -> e.getValue() < 3, e -> droppedKeys.add(e.getKey()))
+                        .keys()
+                        .sorted()
+                        .toList());
         assertEquals(Arrays.asList("a", "b"), droppedKeys);
 
-        assertEquals(expectedKeys, EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2)
-                .parallel(3)
-                .dropWhile((k, v) -> v < 3)
-                .keys().sorted().toList());
-        assertEquals(expectedKeys, EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2)
-                .parallel(3)
-                .skipUntil((k, v) -> v >= 3)
-                .keys().sorted().toList());
+        assertEquals(expectedKeys, EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2).parallel(3).dropWhile((k, v) -> v < 3).keys().sorted().toList());
+        assertEquals(expectedKeys, EntryStream.of("a", 1, "b", 2, "c", 3, "d", 1, "e", 2).parallel(3).skipUntil((k, v) -> v >= 3).keys().sorted().toList());
     }
 
     @Test
@@ -5917,8 +5914,7 @@ public class EntryStreamTest extends TestBase {
      */
     @Test
     public void testCollect_nullCollectorThrowsIae() {
-        assertThrows(IllegalArgumentException.class,
-                () -> EntryStream.of(N.asMap("a", 1)).collect((Collector<Map.Entry<String, Integer>, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> EntryStream.of(N.asMap("a", 1)).collect((Collector<Map.Entry<String, Integer>, ?, ?>) null));
     }
 
     // ------------------------------------------------------------------------------------------------------
@@ -5935,13 +5931,11 @@ public class EntryStreamTest extends TestBase {
     public void testSelectByKeyValue_nullClassIsRejectedAndTheStreamIsClosed() {
         final MutableBoolean closed = MutableBoolean.of(false);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> EntryStream.of("a", 1).onClose(closed::setTrue).selectByKey(null));
+        assertThrows(IllegalArgumentException.class, () -> EntryStream.of("a", 1).onClose(closed::setTrue).selectByKey(null));
         assertTrue(closed.isTrue(), "selectByKey(null) must close the stream before throwing");
 
         closed.setFalse();
-        assertThrows(IllegalArgumentException.class,
-                () -> EntryStream.of("a", 1).onClose(closed::setTrue).selectByValue(null));
+        assertThrows(IllegalArgumentException.class, () -> EntryStream.of("a", 1).onClose(closed::setTrue).selectByValue(null));
         assertTrue(closed.isTrue(), "selectByValue(null) must close the stream before throwing");
 
         // the ordinary paths are unaffected

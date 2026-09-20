@@ -18,7 +18,7 @@
  * <p>{@link JsonHttpMessageConverter} extends Spring's {@code AbstractJsonHttpMessageConverter}
  * and delegates JSON read/write to Abacus {@link com.landawn.abacus.util.N} and
  * {@link com.landawn.abacus.type.TypeFactory}. Register it in Spring MVC or on a
- * {@code RestTemplate} / {@code WebClient} message-converter list to use Abacus JSON for
+ * {@code RestTemplate} message-converter list to use Abacus JSON for
  * {@code application/json}.</p>
  *
  * <p>Root JDK and Abacus {@code Optional} values, Abacus {@code Nullable}, and {@code Holder} use

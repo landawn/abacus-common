@@ -86,10 +86,13 @@ public class FnnCoverageTest extends TestBase {
         final Throwables.Function<String, Integer, Exception> f = String::length;
         assertSame(f, Fnn.f(f));
         assertEquals("x1", Fnn.f("x", (Throwables.BiFunction<String, Integer, String, Exception>) (pref, i) -> pref + i).apply(1));
-        assertEquals("a-1-true", Fnn.f("a", 1, (Throwables.TriFunction<String, Integer, Boolean, String, Exception>) (x, y, z) -> x + "-" + y + "-" + z).apply(true));
+        assertEquals("a-1-true",
+                Fnn.f("a", 1, (Throwables.TriFunction<String, Integer, Boolean, String, Exception>) (x, y, z) -> x + "-" + y + "-" + z).apply(true));
         assertEquals("ab2", Fnn.f((Throwables.BiFunction<String, Integer, String, Exception>) (s, i) -> s + i).apply("ab", 2));
-        assertEquals("p-2-z", Fnn.f("p", (Throwables.TriFunction<String, Integer, String, String, Exception>) (a, n, s) -> a + "-" + n + "-" + s).apply(2, "z"));
-        assertEquals("a1t", Fnn.f((Throwables.TriFunction<String, Integer, Boolean, String, Exception>) (s, i, b) -> s + i + (b ? "t" : "f")).apply("a", 1, true));
+        assertEquals("p-2-z",
+                Fnn.f("p", (Throwables.TriFunction<String, Integer, String, String, Exception>) (a, n, s) -> a + "-" + n + "-" + s).apply(2, "z"));
+        assertEquals("a1t",
+                Fnn.f((Throwables.TriFunction<String, Integer, Boolean, String, Exception>) (s, i, b) -> s + i + (b ? "t" : "f")).apply("a", 1, true));
 
         final List<String> seen = new ArrayList<>();
         final Throwables.Consumer<String, Exception> c = seen::add;

@@ -3,6 +3,10 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +19,58 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 
 public class AndroidUtilTest extends TestBase {
+
+    @Test
+    public void fallbackExecutorsCanBeInitializedDuringJvmShutdown() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeFalse(IOUtil.IS_PLATFORM_ANDROID);
+
+        final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+        final Path outputFile = Files.createTempFile("android-executor-shutdown-", ".log");
+        Process process = null;
+
+        try {
+            process = new ProcessBuilder(javaBin, "-cp", System.getProperty("java.class.path"), FallbackShutdownProbe.class.getName()).redirectErrorStream(true)
+                    .redirectOutput(outputFile.toFile())
+                    .start();
+
+            try {
+                Assertions.assertTrue(process.waitFor(30, TimeUnit.SECONDS), "shutdown probe did not exit");
+                final String output = Files.readString(outputFile, StandardCharsets.UTF_8);
+                Assertions.assertEquals(0, process.exitValue(), output);
+                Assertions.assertTrue(output.contains("PROBE serial=true pool=true"), output);
+            } finally {
+                process.destroyForcibly();
+                process.waitFor(5, TimeUnit.SECONDS);
+            }
+        } finally {
+            if (process == null || !process.isAlive()) {
+                Files.deleteIfExists(outputFile);
+            } else {
+                outputFile.toFile().deleteOnExit();
+            }
+        }
+    }
+
+    public static final class FallbackShutdownProbe {
+        public static void main(final String[] args) {
+            // Initialize platform detection before shutdown to isolate AndroidUtil's first use.
+            if (IOUtil.IS_PLATFORM_ANDROID) {
+                throw new IllegalStateException("This probe requires the fallback executors");
+            }
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                try {
+                    final boolean serial = CompletableFuture.supplyAsync(() -> Thread.currentThread().isDaemon(), AndroidUtil.getSerialExecutor())
+                            .get(5, TimeUnit.SECONDS);
+                    final boolean pool = CompletableFuture.supplyAsync(() -> Thread.currentThread().isDaemon(), AndroidUtil.getThreadPoolExecutor())
+                            .get(5, TimeUnit.SECONDS);
+                    System.out.println("PROBE serial=" + serial + " pool=" + pool);
+                } catch (final Throwable failure) {
+                    failure.printStackTrace();
+                }
+            }));
+        }
+    }
 
     @Test
     public void testGetSerialExecutor() {

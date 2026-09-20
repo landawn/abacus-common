@@ -255,7 +255,8 @@ public class OptionalLongTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -273,23 +274,29 @@ public class OptionalLongTypeTest extends TestBase {
 
         assertEquals("0", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), zero));
         assertEquals("0", reviewFixes20260906_ser(optionalLongType, null, zero));
-        assertEquals("0", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
+        assertEquals("0", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(),
+                com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
         assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("null", reviewFixes20260906_ser(optionalLongType, null, com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), null));
         assertEquals("null", reviewFixes20260906_ser(optionalLongType, null, null));
-        assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
+        assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
         assertEquals("7", reviewFixes20260906_ser(optionalLongType, OptionalLong.of(7L), zero));
         assertEquals("7", reviewFixes20260906_ser(optionalLongType, OptionalLong.of(7L), null));
 
         // the substituted zero is quoted under writeLongAsString exactly as MutableLongType/LongType do
-        final com.landawn.abacus.parser.JsonSerConfig zeroLas = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true);
+        final com.landawn.abacus.parser.JsonSerConfig zeroLas = com.landawn.abacus.parser.JsonSerConfig.create()
+                .setWriteNullNumberAsZero(true)
+                .setWriteLongAsString(true);
         assertEquals("\"0\"", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), zeroLas));
         assertEquals("\"0\"", reviewFixes20260906_ser(optionalLongType, null, zeroLas));
         assertEquals("\"7\"", reviewFixes20260906_ser(optionalLongType, OptionalLong.of(7L), zeroLas));
         // XML config has quotation 0, so the zero stays bare
-        assertEquals("0", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true)));
-        assertEquals("null", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true)));
+        assertEquals("0", reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(),
+                com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true)));
+        assertEquals("null",
+                reviewFixes20260906_ser(optionalLongType, OptionalLong.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true)));
     }
 
     // T5-06 (2026-09-06, code change REJECTED - pinned): an empty-string column value is coerced by Numbers.toXxx(Object)

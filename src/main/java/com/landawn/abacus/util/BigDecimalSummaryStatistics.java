@@ -176,11 +176,13 @@ public class BigDecimalSummaryStatistics implements Consumer<BigDecimal> {
      * }</pre>
      *
      * @param other another {@code BigDecimalSummaryStatistics} to be combined with this one; must not be {@code null}
-     * @throws NullPointerException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      * @throws ArithmeticException if the combined count would overflow or the sum cannot be represented
      *         by {@code BigDecimal}; this instance is unchanged
      */
-    public void combine(final BigDecimalSummaryStatistics other) throws NullPointerException, ArithmeticException {
+    public void combine(final BigDecimalSummaryStatistics other) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(other, cs.other);
+
         // Read both source totals before assignment so self-combination is also safe.
         final long newCount = Math.addExact(count, other.count);
         final BigDecimal newSum = sum.add(other.sum);

@@ -238,6 +238,10 @@ public final class BufferedJsonWriter extends CharacterWriter {
      * <code>&#92;uXXXX</code> escape: a lone surrogate has no UTF-8 encoding, so the {@code OutputStream}-backed
      * writer would otherwise substitute {@code ?} while the String/Writer-backed writers passed it through raw.
      * RFC 8259 permits the escaped form and it decodes back to the same {@code char}.</p>
+     *
+     * @param ch the character to write
+     * @throws IOException if this writer is closed, or writing the escaped character to the underlying
+     *         output stream or writer fails
      */
     @Override
     public void writeCharacter(final char ch) throws IOException {
@@ -253,9 +257,16 @@ public final class BufferedJsonWriter extends CharacterWriter {
      *
      * <p>Unpaired surrogates are escaped as <code>&#92;uXXXX</code>; well-formed surrogate pairs are copied through
      * unchanged (see {@link #writeCharacter(char)}).</p>
+     *
+     * @param cbuf the character array to write; must not be {@code null}
+     * @throws IOException if this writer is closed, or writing the escaped characters to the underlying
+     *         output stream or writer fails
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      */
     @Override
-    public void writeCharacter(final char[] cbuf) throws IOException {
+    public void writeCharacter(final char[] cbuf) throws IOException, NullPointerException {
+        ensureOpen();
+
         writeCharacter(cbuf, 0, cbuf.length);
     }
 
@@ -264,10 +275,21 @@ public final class BufferedJsonWriter extends CharacterWriter {
      *
      * <p>Unpaired surrogates are escaped as <code>&#92;uXXXX</code>; well-formed surrogate pairs are copied through
      * unchanged (see {@link #writeCharacter(char)}).</p>
+     *
+     * @param cbuf the character array containing the data to write; must not be {@code null}
+     * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
+     * @param len the number of characters to write; must be non-negative and {@code off + len} must not
+     *        exceed {@code cbuf.length}
+     * @throws IOException if this writer is closed, or writing the escaped characters to the underlying
+     *         output stream or writer fails
+     * @throws NullPointerException if {@code cbuf} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
+     *         exceeds {@code cbuf.length}
      */
     @Override
-    public void writeCharacter(final char[] cbuf, final int off, final int len) throws IOException {
+    public void writeCharacter(final char[] cbuf, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
+        N.requireNonNull(cbuf, cs.cbuf);
 
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
@@ -315,6 +337,10 @@ public final class BufferedJsonWriter extends CharacterWriter {
      *
      * <p>Unpaired surrogates are escaped as <code>&#92;uXXXX</code>; well-formed surrogate pairs are copied through
      * unchanged (see {@link #writeCharacter(char)}).</p>
+     *
+     * @param str the string to write; if {@code null}, the literal text {@code "null"} is written
+     * @throws IOException if this writer is closed, or writing the escaped characters to the underlying
+     *         output stream or writer fails
      */
     @Override
     public void writeCharacter(final String str) throws IOException {
@@ -331,9 +357,20 @@ public final class BufferedJsonWriter extends CharacterWriter {
      * <p>Unpaired surrogates are escaped as <code>&#92;uXXXX</code>; well-formed surrogate pairs are copied through
      * unchanged (see {@link #writeCharacter(char)}). A pair split by the requested range boundary counts as
      * unpaired.</p>
+     *
+     * @param str the string containing the data to write; if {@code null}, the literal text {@code "null"}
+     *        is used as the source
+     * @param off the start offset in the string (or in {@code "null"} when {@code str} is {@code null});
+     *        must be non-negative and not greater than the effective length
+     * @param len the number of characters to write; must be non-negative and {@code off + len} must not
+     *        exceed the effective length
+     * @throws IOException if this writer is closed, or writing the escaped characters to the underlying
+     *         output stream or writer fails
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
+     *         exceeds the effective length
      */
     @Override
-    public void writeCharacter(final String str, final int off, final int len) throws IOException {
+    public void writeCharacter(final String str, final int off, final int len) throws IOException, IndexOutOfBoundsException {
         if (str == null) {
             write(Strings.NULL_CHAR_ARRAY, off, len);
 

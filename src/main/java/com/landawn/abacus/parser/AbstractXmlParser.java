@@ -19,8 +19,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLStreamConstants;
@@ -32,15 +41,28 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 
+import com.landawn.abacus.annotation.JsonXmlConfig;
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil.PropInfo;
+import com.landawn.abacus.parser.ParserUtil.XmlEmbeddedJsonConfig;
+import com.landawn.abacus.type.ObjectType;
+import com.landawn.abacus.type.StringBufferType;
+import com.landawn.abacus.type.StringBuilderType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.Beans;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.BufferedXmlWriter;
+import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.Holder;
+import com.landawn.abacus.util.IOUtil;
 import com.landawn.abacus.util.Indexed;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.NamingPolicy;
+import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Strings;
 import com.landawn.abacus.util.Timed;
@@ -48,6 +70,7 @@ import com.landawn.abacus.util.Triple;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.TypeAttrParser;
 import com.landawn.abacus.util.XmlUtil;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u;
 
 /**
@@ -82,48 +105,88 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     private static final Logger logger = LoggerFactory.getLogger(AbstractXmlParser.class);
 
     /**
-     * Legacy compatibility switch for XML documents whose {@code type} attributes name arbitrary
-     * application classes. Enabling it is unsafe for untrusted XML because resolving such a name can
-     * initialize and later instantiate the named class.
+     * Former process-wide switch, retained as an internal name for compatibility tests. It no longer
+     * grants type permissions; unknown classes cannot be loaded just because XML names them.
      */
     static final String XML_TYPE_CLASS_FOR_NAME_PROPERTY = "abacus.xml.allowTypeAttrClassForName";
 
     /**
-     * Exact built-in type names and framework-emitted aliases that may be resolved from untrusted XML without arbitrary name-driven class loading.
-     * A generic expression is accepted only when its raw type and every nested type argument are either safe
-     * built-ins or a name an already-registered type answers to as its own and the class itself supplies (its
-     * canonical class name, or its simple name when that is the type's {@link Type#name()} - the name the writers
-     * emit). Registration is checked without performing a creating lookup; names of unregistered classes and custom
-     * registration aliases are deliberately excluded.
+     * Exact built-in scalar/container names, including runtime classes emitted by JDK collection factories.
+     * Explicit application type permissions are held by each parser, independently of global registration.
      */
-    private static final Set<String> SAFE_XML_TYPE_ATTRIBUTE_NAMES = Set.of("boolean", "byte", "char", "short", "int", "long", "float", "double", "Boolean",
-            "Byte", "Character", "Short", "Integer", "Long", "Float", "Double", "java.lang.Boolean", "java.lang.Byte", "java.lang.Character", "java.lang.Short",
-            "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", "String", "StringBuilder", "StringBuffer", "CharSequence", "Object",
-            "Number", "java.lang.String", "java.lang.StringBuilder", "java.lang.StringBuffer", "java.lang.CharSequence", "java.lang.Object", "java.lang.Number",
-            "BigInteger", "BigDecimal", "java.math.BigInteger", "java.math.BigDecimal", "Date", "Time", "Timestamp", "JUDate", "java.sql.Date", "java.sql.Time",
-            "java.sql.Timestamp", "java.util.Date", "Calendar", "GregorianCalendar", "java.util.Calendar", "java.util.GregorianCalendar", "Duration", "Instant",
-            "LocalDate", "LocalDateTime", "LocalTime", "MonthDay", "OffsetDateTime", "OffsetTime", "Period", "Year", "YearMonth", "ZonedDateTime", "ZoneId",
-            "ZoneOffset", "java.time.Duration", "java.time.Instant", "java.time.LocalDate", "java.time.LocalDateTime", "java.time.LocalTime",
-            "java.time.MonthDay", "java.time.OffsetDateTime", "java.time.OffsetTime", "java.time.Period", "java.time.Year", "java.time.YearMonth",
-            "java.time.ZonedDateTime", "java.time.ZoneId", "java.time.ZoneOffset", "UUID", "URI", "URL", "File", "Locale", "Currency", "java.util.UUID",
-            "java.net.URI", "java.net.URL", "java.io.File", "java.util.Locale", "java.util.Currency", "Optional", "OptionalInt", "OptionalLong",
-            "OptionalDouble", "java.util.Optional", "java.util.OptionalInt", "java.util.OptionalLong", "java.util.OptionalDouble", "AtomicBoolean",
-            "AtomicInteger", "AtomicLong", "AtomicReference", "java.util.concurrent.atomic.AtomicBoolean", "java.util.concurrent.atomic.AtomicInteger",
-            "java.util.concurrent.atomic.AtomicLong", "java.util.concurrent.atomic.AtomicReference", "Collection", "List", "ArrayList", "LinkedList", "Vector",
-            "Stack", "Set", "HashSet", "LinkedHashSet", "SortedSet", "NavigableSet", "TreeSet", "Queue", "Deque", "ArrayDeque", "PriorityQueue",
-            "java.util.Collection", "java.util.List", "java.util.ArrayList", "java.util.LinkedList", "java.util.Vector", "java.util.Stack", "java.util.Set",
-            "java.util.HashSet", "java.util.LinkedHashSet", "java.util.SortedSet", "java.util.NavigableSet", "java.util.TreeSet", "java.util.Queue",
-            "java.util.Deque", "java.util.ArrayDeque", "java.util.PriorityQueue", "CopyOnWriteArrayList", "CopyOnWriteArraySet", "ConcurrentLinkedQueue",
-            "ConcurrentLinkedDeque", "LinkedBlockingQueue", "LinkedBlockingDeque", "PriorityBlockingQueue", "ConcurrentSkipListSet",
-            "java.util.concurrent.CopyOnWriteArrayList", "java.util.concurrent.CopyOnWriteArraySet", "java.util.concurrent.ConcurrentLinkedQueue",
-            "java.util.concurrent.ConcurrentLinkedDeque", "java.util.concurrent.LinkedBlockingQueue", "java.util.concurrent.LinkedBlockingDeque",
-            "java.util.concurrent.PriorityBlockingQueue", "java.util.concurrent.ConcurrentSkipListSet", "Map", "HashMap", "LinkedHashMap", "SortedMap",
-            "NavigableMap", "TreeMap", "Hashtable", "IdentityHashMap", "WeakHashMap", "Properties", "java.util.Map", "java.util.HashMap",
-            "java.util.LinkedHashMap", "java.util.SortedMap", "java.util.NavigableMap", "java.util.TreeMap", "java.util.Hashtable", "java.util.IdentityHashMap",
-            "java.util.WeakHashMap", "java.util.Properties", "ConcurrentMap", "ConcurrentHashMap", "ConcurrentNavigableMap", "ConcurrentSkipListMap",
-            "java.util.concurrent.ConcurrentMap", "java.util.concurrent.ConcurrentHashMap", "java.util.concurrent.ConcurrentNavigableMap",
-            "java.util.concurrent.ConcurrentSkipListMap", "ImmutableList", "ImmutableSet", "ImmutableMap", "com.landawn.abacus.util.ImmutableList",
-            "com.landawn.abacus.util.ImmutableSet", "com.landawn.abacus.util.ImmutableMap");
+    private static final Set<String> SAFE_XML_TYPE_ATTRIBUTE_NAMES = builtInXmlTypeNames(Set.of("boolean", "byte", "char", "short", "int", "long", "float",
+            "double", "Boolean", "Byte", "Character", "Short", "Integer", "Long", "Float", "Double", "java.lang.Boolean", "java.lang.Byte",
+            "java.lang.Character", "java.lang.Short", "java.lang.Integer", "java.lang.Long", "java.lang.Float", "java.lang.Double", "String", "StringBuilder",
+            "StringBuffer", "CharSequence", "Object", "Number", "java.lang.String", "java.lang.StringBuilder", "java.lang.StringBuffer",
+            "java.lang.CharSequence", "java.lang.Object", "java.lang.Number", "BigInteger", "BigDecimal", "java.math.BigInteger", "java.math.BigDecimal",
+            "Date", "Time", "Timestamp", "JUDate", "java.sql.Date", "java.sql.Time", "java.sql.Timestamp", "java.util.Date", "Calendar", "GregorianCalendar",
+            "java.util.Calendar", "java.util.GregorianCalendar", "Duration", "Instant", "LocalDate", "LocalDateTime", "LocalTime", "MonthDay", "OffsetDateTime",
+            "OffsetTime", "Period", "Year", "YearMonth", "ZonedDateTime", "ZoneId", "ZoneOffset", "java.time.Duration", "java.time.Instant",
+            "java.time.LocalDate", "java.time.LocalDateTime", "java.time.LocalTime", "java.time.MonthDay", "java.time.OffsetDateTime", "java.time.OffsetTime",
+            "java.time.Period", "java.time.Year", "java.time.YearMonth", "java.time.ZonedDateTime", "java.time.ZoneId", "java.time.ZoneOffset", "UUID", "URI",
+            "URL", "File", "Locale", "Currency", "java.util.UUID", "java.net.URI", "java.net.URL", "java.io.File", "java.util.Locale", "java.util.Currency",
+            "Optional", "OptionalInt", "OptionalLong", "OptionalDouble", "java.util.Optional", "java.util.OptionalInt", "java.util.OptionalLong",
+            "java.util.OptionalDouble", "AtomicBoolean", "AtomicInteger", "AtomicLong", "AtomicReference", "java.util.concurrent.atomic.AtomicBoolean",
+            "java.util.concurrent.atomic.AtomicInteger", "java.util.concurrent.atomic.AtomicLong", "java.util.concurrent.atomic.AtomicReference", "Collection",
+            "List", "ArrayList", "LinkedList", "Vector", "Stack", "Set", "HashSet", "LinkedHashSet", "SortedSet", "NavigableSet", "TreeSet", "Queue", "Deque",
+            "ArrayDeque", "PriorityQueue", "java.util.Collection", "java.util.List", "java.util.ArrayList", "java.util.LinkedList", "java.util.Vector",
+            "java.util.Stack", "java.util.Set", "java.util.HashSet", "java.util.LinkedHashSet", "java.util.SortedSet", "java.util.NavigableSet",
+            "java.util.TreeSet", "java.util.Queue", "java.util.Deque", "java.util.ArrayDeque", "java.util.PriorityQueue", "CopyOnWriteArrayList",
+            "CopyOnWriteArraySet", "ConcurrentLinkedQueue", "ConcurrentLinkedDeque", "LinkedBlockingQueue", "LinkedBlockingDeque", "PriorityBlockingQueue",
+            "ConcurrentSkipListSet", "java.util.concurrent.CopyOnWriteArrayList", "java.util.concurrent.CopyOnWriteArraySet",
+            "java.util.concurrent.ConcurrentLinkedQueue", "java.util.concurrent.ConcurrentLinkedDeque", "java.util.concurrent.LinkedBlockingQueue",
+            "java.util.concurrent.LinkedBlockingDeque", "java.util.concurrent.PriorityBlockingQueue", "java.util.concurrent.ConcurrentSkipListSet", "Map",
+            "HashMap", "LinkedHashMap", "SortedMap", "NavigableMap", "TreeMap", "Hashtable", "IdentityHashMap", "WeakHashMap", "Properties", "java.util.Map",
+            "java.util.HashMap", "java.util.LinkedHashMap", "java.util.SortedMap", "java.util.NavigableMap", "java.util.TreeMap", "java.util.Hashtable",
+            "java.util.IdentityHashMap", "java.util.WeakHashMap", "java.util.Properties", "ConcurrentMap", "ConcurrentHashMap", "ConcurrentNavigableMap",
+            "ConcurrentSkipListMap", "java.util.concurrent.ConcurrentMap", "java.util.concurrent.ConcurrentHashMap",
+            "java.util.concurrent.ConcurrentNavigableMap", "java.util.concurrent.ConcurrentSkipListMap", "ImmutableList", "ImmutableSet", "ImmutableMap",
+            "com.landawn.abacus.util.ImmutableList", "com.landawn.abacus.util.ImmutableSet", "com.landawn.abacus.util.ImmutableMap", "MapEntity",
+            "com.landawn.abacus.util.MapEntity", "Dataset", "com.landawn.abacus.util.Dataset", "RowDataset", "com.landawn.abacus.util.RowDataset",
+            // These simple aliases resolve to Abacus types, not to the similarly named JDK types.
+            "com.landawn.abacus.util.Duration", "com.landawn.abacus.util.u$Optional", "com.landawn.abacus.util.u.Optional",
+            "com.landawn.abacus.util.u$OptionalInt", "com.landawn.abacus.util.u.OptionalInt", "com.landawn.abacus.util.u$OptionalLong",
+            "com.landawn.abacus.util.u.OptionalLong", "com.landawn.abacus.util.u$OptionalDouble", "com.landawn.abacus.util.u.OptionalDouble"));
+
+    private static Set<String> builtInXmlTypeNames(final Set<String> names) {
+        final Set<String> result = new HashSet<>(names);
+        // These library values have intrinsic short names in the XML writer. Both spellings also remain
+        // available to explicitly restricted parsers, independently of application type registrations.
+        for (final String name : List.of("BooleanList", "CharList", "ByteList", "ShortList", "IntList", "LongList", "FloatList", "DoubleList", "MutableBoolean",
+                "MutableChar", "MutableByte", "MutableShort", "MutableInt", "MutableLong", "MutableFloat", "MutableDouble")) {
+            result.add(name);
+            result.add("com.landawn.abacus.util." + name);
+        }
+
+        // Collection writers preserve runtime type names. Discover the exact JDK classes from trusted
+        // factories rather than allowing a package prefix or loading a class named by the document.
+        // Uninstantiable wrappers still use the reader's existing fallback to the declared container type.
+        for (final Object container : new Object[] { List.of(), List.of(0), List.of(0, 1, 2), Set.of(), Set.of(0), Set.of(0, 1, 2), Map.of(), Map.of(0, 0),
+                Map.of(0, 0, 1, 1), Arrays.asList(0), Collections.nCopies(1, 0), Collections.emptyList(), Collections.emptySet(), Collections.emptyMap(),
+                Collections.emptySortedSet(), Collections.emptyNavigableSet(), Collections.emptySortedMap(), Collections.emptyNavigableMap(),
+                Collections.singletonList(0), Collections.singleton(0), Collections.singletonMap(0, 0), Collections.unmodifiableCollection(new ArrayList<>()),
+                Collections.unmodifiableList(new ArrayList<>()), Collections.unmodifiableList(new LinkedList<>()), Collections.unmodifiableSet(new HashSet<>()),
+                Collections.unmodifiableSortedSet(new TreeSet<>()), Collections.unmodifiableNavigableSet(new TreeSet<>()),
+                Collections.unmodifiableMap(new HashMap<>()), Collections.unmodifiableSortedMap(new TreeMap<>()),
+                Collections.unmodifiableNavigableMap(new TreeMap<>()), Collections.synchronizedCollection(new ArrayList<>()),
+                Collections.synchronizedList(new ArrayList<>()), Collections.synchronizedList(new LinkedList<>()), Collections.synchronizedSet(new HashSet<>()),
+                Collections.synchronizedSortedSet(new TreeSet<>()), Collections.synchronizedNavigableSet(new TreeSet<>()),
+                Collections.synchronizedMap(new HashMap<>()), Collections.synchronizedSortedMap(new TreeMap<>()),
+                Collections.synchronizedNavigableMap(new TreeMap<>()), Collections.checkedCollection(new ArrayList<>(), Object.class),
+                Collections.checkedList(new ArrayList<>(), Object.class), Collections.checkedList(new LinkedList<>(), Object.class),
+                Collections.checkedSet(new HashSet<>(), Object.class), Collections.checkedSortedSet(new TreeSet<>(), Object.class),
+                Collections.checkedNavigableSet(new TreeSet<>(), Object.class), Collections.checkedMap(new HashMap<>(), Object.class, Object.class),
+                Collections.checkedSortedMap(new TreeMap<>(), Object.class, Object.class),
+                Collections.checkedNavigableMap(new TreeMap<>(), Object.class, Object.class) }) {
+            result.add(container.getClass().getName());
+            final String canonicalName = container.getClass().getCanonicalName();
+            // Factory implementations may be local or anonymous classes, which have no canonical name.
+            if (canonicalName != null) {
+                result.add(canonicalName);
+            }
+        }
+        return Set.copyOf(result);
+    }
 
     // protected static final int TEXT_SIZE_TO_READ_MORE = 256;
 
@@ -135,17 +198,16 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * values stay quoted so array/collection delimiters are unambiguous. Selected by {@link #getJSC(XmlSerConfig)} when neither
      * circular references nor empty beans need to be tolerated.
      */
-    protected static final JsonSerConfig jsc = JsonSerConfig.create();
+    protected static final JsonSerConfig jsc = new XmlEmbeddedJsonConfig();
 
     /** Variant of {@link #jsc} that also tolerates beans with no serializable property. */
-    protected static final JsonSerConfig jscWithEmptyBeanSupported = JsonSerConfig.create().setFailOnEmptyBean(false);
+    protected static final JsonSerConfig jscWithEmptyBeanSupported = new XmlEmbeddedJsonConfig().setFailOnEmptyBean(false);
 
     /** Variant of {@link #jsc} that also tolerates circular references. */
-    protected static final JsonSerConfig jscWithCircularRefSupported = JsonSerConfig.create().setCircularReferenceSupported(true);
+    protected static final JsonSerConfig jscWithCircularRefSupported = new XmlEmbeddedJsonConfig().setCircularReferenceSupported(true);
 
     /** Variant of {@link #jsc} that tolerates both circular references and empty beans. */
-    protected static final JsonSerConfig jscWithCircularRefAndEmptyBeanSupported = JsonSerConfig.create()
-            .setFailOnEmptyBean(false)
+    protected static final JsonSerConfig jscWithCircularRefAndEmptyBeanSupported = new XmlEmbeddedJsonConfig().setFailOnEmptyBean(false)
             .setCircularReferenceSupported(true);
 
     /** Key type assumed for map entries when the configuration specifies none ({@code Object}). */
@@ -159,6 +221,10 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
 
     /** The fallback deserialization configuration used when a per-call {@code config} argument is {@code null}. */
     protected final XmlDeserConfig defaultXmlDeserConfig;
+
+    private final Map<String, Type<?>> approvedXmlTypes;
+    private final Set<Class<?>> approvedXmlClasses;
+    private final boolean acceptRegisteredTypes;
 
     /**
      * Constructs an {@code AbstractXmlParser} with default serialization and deserialization configurations.
@@ -175,6 +241,55 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param xdc the XML deserialization configuration, or {@code null} to use a new default configuration
      */
     protected AbstractXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) {
+        this(xsc, xdc, Set.of(), true);
+    }
+
+    /**
+     * Constructs a parser with the supplied configurations and explicitly approved XML types.
+     *
+     * @param xsc the serialization configuration, or {@code null} to use a new default configuration
+     * @param xdc the deserialization configuration, or {@code null} to use a new default configuration
+     * @param allowedTypeClasses the approved classes; may be empty but must not be {@code null} or contain {@code null}
+     * @throws IllegalArgumentException if {@code allowedTypeClasses} is {@code null} or an approved type name is ambiguous
+     * @throws NullPointerException if {@code allowedTypeClasses} contains a {@code null} element
+     */
+    protected AbstractXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc, final Set<Class<?>> allowedTypeClasses)
+            throws IllegalArgumentException, NullPointerException {
+        this(xsc, xdc, allowedTypeClasses, false);
+    }
+
+    /**
+     * Initializes the configuration defaults and a snapshot of the explicitly approved XML types.
+     *
+     * @param xsc the serialization configuration, or {@code null} to use a new default configuration
+     * @param xdc the deserialization configuration, or {@code null} to use a new default configuration
+     * @param allowedTypeClasses the approved classes; may be empty but must not be {@code null} or contain {@code null}
+     * @param acceptRegisteredTypes whether registered types may also be resolved
+     * @throws IllegalArgumentException if {@code allowedTypeClasses} is {@code null} or an approved type name is ambiguous
+     * @throws NullPointerException if {@code allowedTypeClasses} contains a {@code null} element
+     */
+    private AbstractXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc, final Set<Class<?>> allowedTypeClasses, final boolean acceptRegisteredTypes)
+            throws IllegalArgumentException, NullPointerException {
+        N.checkArgNotNull(allowedTypeClasses, cs.allowedTypeClasses);
+        this.acceptRegisteredTypes = acceptRegisteredTypes;
+        final Map<String, Type<?>> approved = new HashMap<>();
+        final Set<Class<?>> resolvedClasses = new HashSet<>();
+        for (final Class<?> cls : Set.copyOf(allowedTypeClasses)) {
+            final Type<?> type = Type.of(cls);
+            // An enum constant's class resolves to its declaring enum. Approve that resolved class,
+            // while retaining only the supplied class's names as permitted document spellings below.
+            resolvedClasses.add(type.javaType());
+            approved.put(cls.getName(), type);
+            if (cls.getCanonicalName() != null) {
+                approved.put(cls.getCanonicalName(), type);
+            }
+            if (cls.getSimpleName().equals(type.name())) {
+                final Type<?> previous = approved.putIfAbsent(type.name(), type);
+                N.checkArgument(previous == null || previous.javaType() == cls, "Ambiguous approved XML type name: " + type.name());
+            }
+        }
+        approvedXmlTypes = Map.copyOf(approved);
+        approvedXmlClasses = Set.copyOf(resolvedClasses);
         defaultXmlSerConfig = xsc != null ? xsc : new XmlSerConfig();
         defaultXmlDeserConfig = xdc != null ? xdc : new XmlDeserConfig();
     }
@@ -194,9 +309,11 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param source the XML DOM node to deserialize
      * @param targetType the type of the target object to deserialize into
      * @return an instance of the target type populated with data from the XML node
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws ParsingException if the XML structure does not match the target type
      */
     @Override
-    public <T> T deserialize(final Node source, final Type<? extends T> targetType) {
+    public <T> T deserialize(final Node source, final Type<? extends T> targetType) throws IllegalArgumentException, ParsingException {
         return deserialize(source, null, targetType);
     }
 
@@ -215,9 +332,11 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param source the XML DOM node to deserialize
      * @param targetType the class of the target object to deserialize into
      * @return an instance of the target class populated with data from the XML node
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws ParsingException if the XML structure does not match the target type
      */
     @Override
-    public <T> T deserialize(final Node source, final Class<? extends T> targetType) {
+    public <T> T deserialize(final Node source, final Class<? extends T> targetType) throws IllegalArgumentException, ParsingException {
         return deserialize(source, null, targetType);
     }
 
@@ -232,7 +351,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param source the file containing XML content to deserialize
      * @param config the XML deserialization configuration; may be {@code null} for default settings
      * @param nodeTypes a map of XML element names to their corresponding {@link Type} descriptors,
-     *        used to resolve the concrete type for each element encountered during parsing
+     *        used to resolve the concrete type of the root element
      * @return an instance of the resolved target type populated with data from the XML content
      * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
@@ -252,7 +371,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param source the input stream containing XML content to deserialize
      * @param config the XML deserialization configuration; may be {@code null} for default settings
      * @param nodeTypes a map of XML element names to their corresponding {@link Type} descriptors,
-     *        used to resolve the concrete type for each element encountered during parsing
+     *        used to resolve the concrete type of the root element
      * @return an instance of the resolved target type populated with data from the XML content
      * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
@@ -272,7 +391,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param source the reader containing XML content to deserialize
      * @param config the XML deserialization configuration; may be {@code null} for default settings
      * @param nodeTypes a map of XML element names to their corresponding {@link Type} descriptors,
-     *        used to resolve the concrete type for each element encountered during parsing
+     *        used to resolve the concrete type of the root element
      * @return an instance of the resolved target type populated with data from the XML content
      * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
@@ -292,7 +411,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param source the XML DOM node to deserialize
      * @param config the XML deserialization configuration; may be {@code null} for default settings
      * @param nodeTypes a map of XML element names to their corresponding {@link Type} descriptors,
-     *        used to resolve the concrete type for each element encountered during parsing
+     *        used to resolve the concrete type of the root element
      * @return an instance of the resolved target type populated with data from the XML node
      * @throws UnsupportedOperationException always thrown by this base-class implementation
      */
@@ -429,6 +548,10 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @throws ParsingException if {@code text} contains a code unit that cannot be represented in XML 1.0
      */
     protected static void checkXmlText(final CharSequence text, final String what) throws ParsingException {
+        checkXmlText(text, what, null);
+    }
+
+    private static void checkXmlText(final CharSequence text, final String what, final String propName) throws ParsingException {
         if (text == null) {
             return;
         }
@@ -446,7 +569,8 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
             }
 
             if (!isXmlCharacter(ch)) {
-                throw new ParsingException(what + " contains U+" + String.format("%04X", (int) ch) + ", which cannot be represented in XML 1.0");
+                throw new ParsingException((propName == null ? what : "Property '" + propName + "'") + " contains U+" + String.format("%04X", (int) ch)
+                        + ", which cannot be represented in XML 1.0");
             }
         }
     }
@@ -609,11 +733,39 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     }
 
     /**
+     * Writes a property-less object as an empty bean element when requested. This applies only to the
+     * generic object handler: unsupported structured types such as Dataset must still fail, not lose data.
+     * This serialization option does not provide a deserialization codec for the otherwise unsupported class.
+     */
+    protected static boolean writeEmptyObject(final Type<?> type, final XmlSerConfig config, final String indentation, final BufferedXmlWriter writer)
+            throws IOException {
+        if (config.isFailOnEmptyBean() || !(type instanceof ObjectType) || !type.isObject()) {
+            return false;
+        }
+        final JsonXmlConfig annotation = type.javaType().getAnnotation(JsonXmlConfig.class);
+        final NamingPolicy policy = config.getPropNamingPolicy() != null ? config.getPropNamingPolicy()
+                : annotation == null ? NamingPolicy.CAMEL_CASE : annotation.namingPolicy();
+        final String name = Beans.normalizePropName(ClassUtil.getSimpleClassName(type.javaType()));
+        final ParserUtil.XmlNameTag tag = ParserUtil.getXmlNameTags(name, type.name(), true)[policy.ordinal()];
+        if (config.isPrettyFormat() && indentation != null) {
+            writer.write(IOUtil.LINE_SEPARATOR_UNIX);
+            writer.write(indentation);
+        }
+        if (config.isTagByPropertyName()) {
+            checkXmlElementName(tag.name, "Class name");
+            writer.write(config.isWriteTypeInfo() ? tag.namedStartWithType : tag.namedStart);
+            writer.write(tag.namedEnd);
+        } else {
+            writer.write(config.isWriteTypeInfo() ? tag.epStartWithType : tag.epStart);
+            writer.write(tag.epEnd);
+        }
+        return true;
+    }
+
+    /**
      * Writes a directly serializable scalar as element text, guarding the values XML 1.0 cannot carry.
-     * A {@code char}/{@code Character} value of {@code '\0'} is written as an empty element (nothing is
-     * written), which {@code Type.of(char.class).valueOf("")} reads back as {@code '\0'} while
-     * {@code Type.of(Character.class).valueOf("")} reads back as {@code null}. Any other String,
-     * {@code CharSequence} or {@code char} value is checked with {@link #checkXmlText(CharSequence, String)}
+     * String, {@code CharSequence} and {@code char} values, including NUL, are checked with
+     * {@link #checkXmlText(CharSequence, String)}
      * first; every other type is written unchanged.
      *
      * @param bw the writer to write to
@@ -624,22 +776,48 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @throws ParsingException if the value contains a code unit that cannot be represented in XML 1.0
      * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
-    @SuppressWarnings("unchecked")
     protected static void writeXmlScalar(final BufferedXmlWriter bw, final Type<?> type, final Object value, final XmlSerConfig config, final String what)
             throws ParsingException, IOException {
-        if (type.isCharacter() && value instanceof Character) {
-            final char ch = (Character) value;
+        writeXmlScalar(bw, type, value, config, what, null);
+    }
 
-            if (ch == 0) {
-                // NUL has no XML representation at all; the empty element is the one lossless spelling for a char.
-                return;
+    /** The property name is formatted only if validation fails, avoiding a diagnostic String on each successful write. */
+    @SuppressWarnings("unchecked")
+    static void writeXmlScalar(final BufferedXmlWriter bw, final Type<?> type, final Object value, final XmlSerConfig config, final String what,
+            final String propName) throws ParsingException, IOException {
+        if (value instanceof StringBuilder && type.getClass() == StringBuilderType.class
+                || value instanceof StringBuffer && type.getClass() == StringBufferType.class) {
+            // The built-in handlers write this same snapshot as text. Share it with validation;
+            // custom handlers must still receive the original value through serializeTo below.
+            final String text = value.toString();
+            checkXmlText(text, what, propName);
+            final char quotation = config == null ? 0 : config.getStringQuotation();
+            if (quotation != 0) {
+                bw.write(quotation);
             }
-
-            checkXmlText(String.valueOf(ch), what);
-        } else if (value instanceof CharSequence) {
-            checkXmlText((CharSequence) value, what);
+            bw.writeCharacter(text);
+            if (quotation != 0) {
+                bw.write(quotation);
+            }
+            return;
         }
 
+        Object scalar = value;
+        while (scalar != null) {
+            final Object unwrapped = unwrapOptional(scalar);
+            if (unwrapped == scalar) {
+                break;
+            }
+            scalar = unwrapped;
+        }
+        if (scalar instanceof CharSequence) {
+            checkXmlText(scalar.toString(), what, propName);
+        } else if (scalar instanceof Character) {
+            final char ch = (Character) scalar;
+            if (!isXmlCharacter(ch)) {
+                checkXmlText(scalar.toString(), what, propName);
+            }
+        }
         ((Type<Object>) type).serializeTo(bw, value, config);
     }
 
@@ -689,14 +867,19 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * wrappers, {@code u.Nullable}, {@code java.util.Optional}, {@code java.util.OptionalInt/Long/Double}).
      *
      * @param value the wrapper instance, or any other object
-     * @return the wrapped element when present; {@code null} for an empty wrapper and for
-     *         {@code Nullable.of(null)}; {@code value} itself when it is not a wrapper
+     * @return the wrapped element when present; {@code null} for an empty wrapper;
+     *         {@code value} itself when it is not a wrapper
+     * @throws ParsingException if a present-null Nullable cannot be represented without losing its presence state
      */
     protected static Object unwrapOptional(final Object value) {
         if (value instanceof u.Optional) {
             return ((u.Optional<?>) value).orElseNull();
         } else if (value instanceof u.Nullable) {
-            return ((u.Nullable<?>) value).orElseNull();
+            final u.Nullable<?> nullable = (u.Nullable<?>) value;
+            if (nullable.isPresent() && nullable.get() == null) {
+                throw new ParsingException("XML cannot represent Nullable.of(null) distinctly from Nullable.empty()");
+            }
+            return nullable.orElseNull();
         } else if (value instanceof java.util.Optional) {
             return ((java.util.Optional<?>) value).orElse(null);
         } else if (value instanceof u.OptionalInt) {
@@ -730,7 +913,8 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Returns whether {@code type} is a tuple-like handler ({@code Tuple1..9}, {@code Pair}, {@code Triple},
      * {@code Indexed}, {@code Timed}) whose {@code serializeTo} writes its String slots unquoted under an
      * XML configuration (string quotation {@code 0}), so that a comma inside a slot corrupts the text.
-     * Such values must be written as their {@code stringOf} (JSON) form instead.
+     * Such values must use JSON quoting while retaining XML's embedded-value policy; calling
+     * {@code stringOf} directly would bypass rejection of nested present-null Nullable values.
      *
      * @param type the type handler to inspect
      * @return {@code true} for the tuple-like handlers
@@ -770,8 +954,9 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
                 writeUnwrappedValue(bw, type.elementType(), nested, config, what);
             }
         } else if (isTupleLike(type)) {
-            // stringOf is the JSON form the tuple's valueOf parses; serializeTo would write String slots unquoted.
-            strType.serializeTo(bw, escapeEmbeddedJson(((Type<Object>) type).stringOf(value)), config);
+            // Preserve declared slot types and JSON quoting while propagating XML's policy into nested values.
+            // stringOf uses the ordinary JSON defaults and would silently collapse present-null Nullable slots.
+            strType.serializeTo(bw, serializeEmbeddedJson(type, value, config), config);
         } else if (type.isSerializable() && !type.isObjectArray() && !type.isCollection()) {
             writeXmlScalar(bw, type, value, config, what);
         } else {
@@ -795,9 +980,12 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param propNode the XML node containing the property value
      * @return the converted property value, or {@code null} if the node indicates a {@code null} value
      *         ({@code isNull="true"}, whatever text the node contains)
-     * @throws ParsingException if {@code propType} is {@code null} (and the node does not indicate a {@code null} value)
+     * @throws ParsingException if a nonblank type attribute is not approved, or {@code propType} is {@code null}
+     *         and the node does not indicate a {@code null} value
      */
     protected Object getPropValue(final String propName, final Type<?> propType, final PropInfo propInfo, final Node propNode) throws ParsingException {
+        // Declared/configured scalar types and null markers do not waive type-attribute approval.
+        resolvePresentTypeAttribute(XmlUtil.getAttribute(propNode, XmlConstants.TYPE));
         // The null marker wins over any text, as it does in the SAX and StAX readers.
         final NamedNodeMap attributes = propNode.getAttributes();
 
@@ -856,7 +1044,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @throws ParsingException if a nonblank type attribute is not allowed or no usable property class is available
      */
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(final Class<?> propClass, final Node node) throws ParsingException {
+    protected <T> T newPropInstance(final Class<?> propClass, final Node node) throws ParsingException {
         if ((propClass != null) && !Modifier.isAbstract(propClass.getModifiers())) {
             try {
                 return (T) N.newInstance(propClass);
@@ -889,7 +1077,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @throws ParsingException if a nonblank type attribute is not allowed or no usable property class is available
      */
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(final Class<?> propClass, final Attributes attrs) throws ParsingException {
+    protected <T> T newPropInstance(final Class<?> propClass, final Attributes attrs) throws ParsingException {
         if ((propClass != null) && !Modifier.isAbstract(propClass.getModifiers())) {
             try {
                 return (T) N.newInstance(propClass);
@@ -912,6 +1100,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
+     * advanceToDocumentElement(reader);
      * String typeValue = getAttribute(reader, "type");
      * }</pre>
      *
@@ -956,7 +1145,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return the class corresponding to an allowed type attribute, or {@code null} if the attribute is absent or blank
      * @throws ParsingException if a nonblank type attribute is not allowed
      */
-    protected static Class<?> getAttributeTypeClass(final Node node) throws ParsingException {
+    protected Class<?> getAttributeTypeClass(final Node node) throws ParsingException {
         final String typeAttr = XmlUtil.getAttribute(node, XmlConstants.TYPE);
         final Type<?> type = resolvePresentTypeAttribute(typeAttr);
 
@@ -977,7 +1166,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return the class corresponding to an allowed type attribute, or {@code null} if the attribute is absent or blank
      * @throws ParsingException if a nonblank type attribute is not allowed
      */
-    protected static Class<?> getAttributeTypeClass(final Attributes attrs) throws ParsingException {
+    protected Class<?> getAttributeTypeClass(final Attributes attrs) throws ParsingException {
         if (attrs == null) {
             return null;
         }
@@ -995,6 +1184,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
+     * advanceToDocumentElement(reader);
      * Class<?> typeClass = getAttributeTypeClass(reader);
      * }</pre>
      *
@@ -1002,7 +1192,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return the class corresponding to an allowed type attribute, or {@code null} if the attribute is absent or blank
      * @throws ParsingException if a nonblank type attribute is not allowed
      */
-    protected static Class<?> getAttributeTypeClass(final XMLStreamReader xmlReader) throws ParsingException {
+    protected Class<?> getAttributeTypeClass(final XMLStreamReader xmlReader) throws ParsingException {
         if (xmlReader.getAttributeCount() == 0) {
             return null;
         }
@@ -1014,20 +1204,16 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
     }
 
     /**
-     * Resolves an XML {@code type} attribute without permitting arbitrary class loading by default.
-     * Exact names in the built-in scalar/container allowlist, explicitly approved framework aliases, and the names an
-     * already-registered type answers to as its own and the class itself supplies - its canonical class name, or its
-     * simple name when that is the type's {@link Type#name()}, the name the writers emit - are accepted. The name of an
-     * unregistered class or a custom registration alias is not sufficient.
-     * Arrays and generic expressions are accepted only when every component satisfies the same rule. This preserves deterministic
-     * round-trips for application beans without loading a class because its name appeared in XML. Applications that deserialize
-     * trusted legacy XML may restore unrestricted name-driven lookup by setting
-     * {@value #XML_TYPE_CLASS_FOR_NAME_PROPERTY} to {@code true}.
+     * Resolves an XML type attribute using built-ins and the application classes explicitly approved
+     * for this parser. Ordinary factories also accept intrinsic names of already-registered classes,
+     * preserving target-class and serializer round-trips without loading classes named only by XML.
+     * Every array/generic component must qualify. Explicit approval sets exclude global registrations;
+     * registration aliases and the former system-property switch never grant permission.
      *
      * @param typeAttr the decoded attribute value, or {@code null}
      * @return the resolved type, or {@code null} when the value is empty or not allowed
      */
-    protected static Type<?> resolveTypeAttribute(final String typeAttr) {
+    protected Type<?> resolveTypeAttribute(final String typeAttr) {
         if (Strings.isEmpty(typeAttr)) {
             return null;
         }
@@ -1038,8 +1224,10 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
             return null;
         }
 
-        if (Boolean.getBoolean(XML_TYPE_CLASS_FOR_NAME_PROPERTY) || isAllowedXmlTypeAttributeName(typeName)) {
-            return Type.of(typeName);
+        if (isAllowedXmlTypeAttributeName(typeName)) {
+            final Type<?> approved = approvedXmlTypes.get(typeName);
+            final Type<?> resolved = approved != null ? approved : Type.of(typeName);
+            return isApprovedResolvedType(resolved) ? resolved : null;
         }
 
         return null;
@@ -1053,7 +1241,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return the resolved type, or {@code null} when the attribute is absent or blank
      * @throws ParsingException if a nonblank attribute is not allowed
      */
-    private static Type<?> resolvePresentTypeAttribute(final String typeAttr) throws ParsingException {
+    protected final Type<?> resolvePresentTypeAttribute(final String typeAttr) throws ParsingException {
         final Type<?> type = resolveTypeAttribute(typeAttr);
 
         if (type == null && Strings.isNotBlank(typeAttr)) {
@@ -1063,7 +1251,27 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         return type;
     }
 
-    private static boolean isAllowedXmlTypeAttributeName(String typeName) {
+    // A global alias must not turn an allowed built-in name into permission for an application class.
+    private boolean isApprovedResolvedType(final Type<?> type) {
+        Class<?> cls = type.javaType();
+        while (cls.isArray()) {
+            cls = cls.getComponentType();
+        }
+        // Check class membership once rather than scanning each approved class's binary/canonical aliases.
+        final boolean allowed = approvedXmlClasses.contains(cls) || SAFE_XML_TYPE_ATTRIBUTE_NAMES.contains(cls.getName())
+                || acceptRegisteredTypes && isRegisteredXmlTypeName(cls.getCanonicalName());
+        if (!allowed) {
+            return false;
+        }
+        for (final Type<?> parameter : type.parameterTypes()) {
+            if (!isApprovedResolvedType(parameter)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isAllowedXmlTypeAttributeName(String typeName) {
         while (typeName.endsWith("[]")) {
             typeName = typeName.substring(0, typeName.length() - 2);
         }
@@ -1073,7 +1281,16 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
 
             final String className = typeAttr.getClassName();
 
-            if (!SAFE_XML_TYPE_ATTRIBUTE_NAMES.contains(className) && !isRegisteredXmlTypeName(className)) {
+            if (acceptRegisteredTypes && SAFE_XML_TYPE_ATTRIBUTE_NAMES.contains(className)) {
+                // Compatibility with registered classes must not let an application alias hijack a built-in name.
+                final Type<?> registered = TypeFactory.getTypeIfPresent(className);
+                if (registered != null && !SAFE_XML_TYPE_ATTRIBUTE_NAMES.contains(registered.javaType().getName())) {
+                    return false;
+                }
+            }
+
+            if (!SAFE_XML_TYPE_ATTRIBUTE_NAMES.contains(className) && !approvedXmlTypes.containsKey(className)
+                    && !(acceptRegisteredTypes && isRegisteredXmlTypeName(className))) {
                 return false;
             }
 
@@ -1089,29 +1306,18 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         }
     }
 
-    /**
-     * Returns whether {@code typeName} is a name an already-registered type answers to <i>as its own</i>, and that the
-     * named class itself supplies: its canonical class name, or its simple name when that is also the type's intrinsic
-     * {@link Type#name()}. The simple-name form matters because it is what the writers emit - {@link Type#xmlName()}
-     * is {@code name()} with the angle brackets escaped - and many built-ins register under the simple name of their
-     * class ({@code MapEntity}, {@code MutableInt}, {@code Dataset}), so accepting only canonical names rejected this
-     * library's own output.
-     *
-     * <p>The registry lookup is non-creating, so no name in a document can trigger class loading. Requiring the name to
-     * be one the class itself supplies is what keeps an application-defined registration <i>alias</i> rejected:
-     * {@code TypeFactory.registerType("my.app.Alias", Foo.class, ..)} pools a handler whose own {@code name()} is the
-     * alias, so the {@code name()} test alone would readmit it.</p>
-     */
-    private static boolean isRegisteredXmlTypeName(final String typeName) {
-        final Type<?> registeredType = TypeFactory.getTypeIfPresent(typeName);
-
-        if (registeredType == null || registeredType.javaType() == null) {
+    private static boolean isRegisteredXmlTypeName(final String name) {
+        if (name == null) {
             return false;
         }
-
-        final Class<?> javaType = registeredType.javaType();
-
-        return typeName.equals(javaType.getCanonicalName()) || typeName.equals(javaType.getSimpleName()) && typeName.equals(registeredType.name());
+        // Non-creating lookup: a document cannot load a new class. A custom registration alias is not
+        // an intrinsic name, even when its handler reports that alias as Type.name().
+        final Type<?> registered = TypeFactory.getTypeIfPresent(name);
+        if (registered == null) {
+            return false;
+        }
+        final Class<?> cls = registered.javaType();
+        return name.equals(cls.getCanonicalName()) || name.equals(cls.getName()) || name.equals(cls.getSimpleName()) && name.equals(registered.name());
     }
 
     /**
@@ -1129,7 +1335,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return the concrete class to instantiate, either from the type attribute or the target class
      * @throws ParsingException if a nonblank type attribute is not allowed
      */
-    protected static Class<?> getConcreteClass(final Node node, final Class<?> targetType) throws ParsingException {
+    protected Class<?> getConcreteClass(final Node node, final Class<?> targetType) throws ParsingException {
         if (node == null) {
             return targetType;
         }
@@ -1154,7 +1360,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return the concrete class to instantiate, either from the type attribute or the target class
      * @throws ParsingException if a nonblank type attribute is not allowed
      */
-    protected static Class<?> getConcreteClass(final Attributes attrs, final Class<?> targetType) throws ParsingException {
+    protected Class<?> getConcreteClass(final Attributes attrs, final Class<?> targetType) throws ParsingException {
         if (attrs == null) {
             return targetType;
         }
@@ -1171,6 +1377,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
+     * advanceToDocumentElement(reader);
      * Class<?> concreteClass = getConcreteClass(reader, Map.class);
      * }</pre>
      *
@@ -1179,7 +1386,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return the concrete class to instantiate, either from the type attribute or the target class
      * @throws ParsingException if a nonblank type attribute is not allowed
      */
-    protected static Class<?> getConcreteClass(final XMLStreamReader xmlReader, final Class<?> targetType) throws ParsingException {
+    protected Class<?> getConcreteClass(final XMLStreamReader xmlReader, final Class<?> targetType) throws ParsingException {
         if (xmlReader.getAttributeCount() == 0) {
             return targetType;
         }
@@ -1191,7 +1398,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
 
     /**
      * Validates and extracts a single child element node from an XML element.
-     * This method ensures that an element contains exactly one child element, ignoring text,
+     * This method ensures that an element contains at most one child element, ignoring text,
      * comments, processing instructions, and other non-element DOM nodes.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1245,7 +1452,30 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return the JSON text with XML-forbidden code units escaped, or null if the type returns null text
      */
     protected String serializeEmbeddedJson(final Object value, final XmlSerConfig config) {
+        if (value != null) {
+            final Type<?> type = Type.of(value.getClass());
+            if (type.isOptionalOrNullable() || isTupleLike(type) || value instanceof Holder) {
+                try {
+                    return serializeEmbeddedJson(type, value, config);
+                } catch (final IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }
+        }
         return escapeEmbeddedJson(jsonParser.serialize(value, getJSC(config)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private String serializeEmbeddedJson(final Type<?> type, final Object value, final XmlSerConfig config) throws IOException {
+        // The JSON String overload uses stringOf for scalar roots. Use the value writer so wrappers/raw-JSON
+        // properties retain the XML policy, including declared tuple slot types and properly quoted String slots.
+        final BufferedJsonWriter jsonWriter = Objectory.createBufferedJsonWriter();
+        try {
+            ((Type<Object>) type).serializeTo(jsonWriter, value, getJSC(config));
+            return escapeEmbeddedJson(jsonWriter.toString());
+        } finally {
+            Objectory.recycle(jsonWriter);
+        }
     }
 
     /**
@@ -1312,6 +1542,18 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
             baseConfig = jscWithEmptyBeanSupported;
         } else {
             baseConfig = jsc;
+        }
+
+        // The common XML settings already match the shared embedding configuration. Avoid
+        // cloning it for every scalar collection/property; neither writer mutates it.
+        if (config.getIgnoredPropNames() == null && config.getExclusion() == baseConfig.getExclusion()
+                && config.isSkipTransientField() == baseConfig.isSkipTransientField() && config.getDateTimeFormat() == baseConfig.getDateTimeFormat()
+                && config.getPropNamingPolicy() == baseConfig.getPropNamingPolicy() && config.isWriteLongAsString() == baseConfig.isWriteLongAsString()
+                && config.isWriteNullStringAsEmpty() == baseConfig.isWriteNullStringAsEmpty()
+                && config.isWriteNullNumberAsZero() == baseConfig.isWriteNullNumberAsZero()
+                && config.isWriteNullBooleanAsFalse() == baseConfig.isWriteNullBooleanAsFalse()
+                && config.isWriteBigDecimalAsPlain() == baseConfig.isWriteBigDecimalAsPlain()) {
+            return baseConfig;
         }
 
         // XML uses the JSON serializer for raw-JSON properties and for compact scalar

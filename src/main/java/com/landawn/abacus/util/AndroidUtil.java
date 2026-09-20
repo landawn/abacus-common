@@ -35,7 +35,10 @@ import com.landawn.abacus.annotation.Internal;
  * otherwise-finished JVM alive.</p>
  *
  * <p>On non-Android platforms a JVM shutdown hook is registered to gracefully
- * terminate the created executors on JVM exit.</p>
+ * terminate the created executors on JVM exit. If this class is first initialized during
+ * JVM shutdown, registration is no longer possible and the daemon executors remain usable
+ * without a hook. A shutdown hook submitting work must await it before returning, since
+ * daemon workers do not delay JVM exit.</p>
  *
  * <p>This class is marked {@link Internal} and is intended for framework use only.
  * It cannot be instantiated.</p>
@@ -81,8 +84,7 @@ public final class AndroidUtil {
             SERIAL_EXECUTOR = serialExecutor;
             TP_EXECUTOR = tpExecutor;
 
-            // Register shutdown hook to properly cleanup executors
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            final Thread shutdownHook = new Thread(() -> {
                 if (serialExecutor != null) {
                     serialExecutor.shutdown();
                     try {
@@ -106,7 +108,14 @@ public final class AndroidUtil {
                         tpExecutor.shutdownNow();
                     }
                 }
-            }));
+            });
+
+            try {
+                Runtime.getRuntime().addShutdownHook(shutdownHook);
+            } catch (final IllegalStateException ignored) {
+                // First use may occur from another shutdown hook. The fallback workers are daemon
+                // threads, so a missing cleanup hook must not make this class fail initialization.
+            }
         }
     }
 

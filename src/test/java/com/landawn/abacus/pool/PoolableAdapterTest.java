@@ -9,11 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
@@ -521,69 +519,13 @@ public class PoolableAdapterTest extends TestBase {
         return baos.toByteArray();
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
-            return (T) ois.readObject();
-        }
-    }
-
     @Test
-    public void testIsSerializable() {
-        // Pool extends Serializable and serializes its elements; the package's recommended value
-        // wrapper must therefore be Serializable itself.
-        assertTrue(PoolableAdapter.of("test") instanceof Serializable);
-    }
-
-    @Test
-    public void testSerializationRoundTripPreservesValueAndActivityPrint() throws Exception {
-        final PoolableAdapter<String> adapter = PoolableAdapter.of("hello", 600_000, 60_000);
-        adapter.activityPrint().updateAccessCount();
-        adapter.activityPrint().updateAccessCount();
-        adapter.activityPrint().updateLastAccessTime();
-        final ActivityPrint before = adapter.activityPrint();
-
-        final PoolableAdapter<String> copy = deserialize(serialize(adapter));
-
-        assertNotNull(copy);
-        assertEquals("hello", copy.value());
-        assertEquals(adapter, copy);
-        assertNotNull(copy.activityPrint());
-        assertEquals(before.getCreatedTime(), copy.activityPrint().getCreatedTime());
-        assertEquals(before.getMaxLiveTime(), copy.activityPrint().getMaxLiveTime());
-        assertEquals(before.getMaxIdleTime(), copy.activityPrint().getMaxIdleTime());
-        assertEquals(before.getLastAccessTime(), copy.activityPrint().getLastAccessTime());
-        assertEquals(2, copy.activityPrint().getAccessCount());
-        assertFalse(copy.activityPrint().isExpired());
-    }
-
-    @Test
-    public void testSerializationRoundTripOfNullValue() throws Exception {
-        final PoolableAdapter<Object> adapter = PoolableAdapter.of(null);
-
-        final PoolableAdapter<Object> copy = deserialize(serialize(adapter));
-
-        assertNotNull(copy);
-        assertNull(copy.value());
-        assertEquals(Long.MAX_VALUE, copy.activityPrint().getMaxLiveTime());
-        assertEquals(Long.MAX_VALUE, copy.activityPrint().getMaxIdleTime());
-    }
-
-    @Test
-    public void testSerializationRoundTripOfUnicodeValue() throws Exception {
-        final String unicode = "中文 café 😀";
-
-        final PoolableAdapter<String> copy = deserialize(serialize(PoolableAdapter.of(unicode)));
-
-        assertEquals(unicode, copy.value());
-    }
-
-    @Test
-    public void testSerializationOfNonSerializableValueFails() {
-        // Documented: the adapter serializes iff its value does.
-        final PoolableAdapter<Object> adapter = PoolableAdapter.of(new Object());
-
-        assertThrows(NotSerializableException.class, () -> serialize(adapter));
+    public void testIsNotSerializable() {
+        // PoolableAdapter is final and does not implement Serializable.
+        assertFalse(Serializable.class.isInstance(PoolableAdapter.of("test")));
+        assertThrows(NotSerializableException.class, () -> serialize(PoolableAdapter.of("test")));
+        assertThrows(NotSerializableException.class, () -> serialize(PoolableAdapter.of(null)));
+        assertThrows(NotSerializableException.class, () -> serialize(PoolableAdapter.of(new Object())));
     }
 
 }

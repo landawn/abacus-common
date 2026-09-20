@@ -7,8 +7,10 @@ import java.util.LinkedHashMap;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class WrapperSelfRenderingTest {
+public class WrapperSelfRenderingTest extends TestBase {
     @Test
     void collectionWrappersRecognizeTheirOwnIdentityIncludingReverseViews() {
         final var backing = new ArrayList<>();

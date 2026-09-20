@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * <p>Within abacus this is applied across {@code com.landawn.abacus.util.Seq} and the
  * {@code *Stream} families on operations such as {@code sorted}, {@code reversed},
  * {@code shuffled}, {@code groupBy}, and similar &mdash; places where the entire upstream must be
- * materialized before any downstream stage can be wired up.</p>
+ * materialized before this stage can emit elements downstream.</p>
  *
  * <p>In normal pipeline processing, intermediate operations are lazy and do not consume the
  * source until a terminal operation is invoked. Methods marked with {@code @TerminalOpTriggered}

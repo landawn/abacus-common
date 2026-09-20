@@ -906,8 +906,8 @@ public final class Clazz {
      * The queue can be created with or without a capacity constraint. If no capacity is specified,
      * it defaults to {@code Integer.MAX_VALUE}.</p>
      *
-     * <p><b>Thread Safety:</b> This queue is fully thread-safe. All queue operations are atomic and
-     * blocking methods like {@code put()} and {@code take()} will wait until space is available or
+     * <p><b>Thread Safety:</b> This queue is thread-safe. Individual insertion and removal operations are atomic;
+     * bulk operations and sequences of calls need not be atomic. Blocking methods like {@code put()} and {@code take()} wait until space is available or
      * an element becomes available, respectively.</p>
      *
      * <p><b>Use Cases:</b> Ideal for producer-consumer scenarios where you need to coordinate work
@@ -1378,7 +1378,7 @@ public final class Clazz {
      * provides an {@code inverse()} view that treats values as keys and keys as values, enabling
      * efficient bidirectional lookups.</p>
      *
-     * <p><b>Uniqueness Constraint:</b> If you attempt to insert a value that already exists,
+     * <p><b>Uniqueness Constraint:</b> If you attempt to associate a value with a different key when that value already exists,
      * BiMap will throw an {@code IllegalArgumentException}. Use {@code forcePut()} to replace
      * both the existing key-value and value-key mappings.</p>
      *

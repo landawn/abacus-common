@@ -16,11 +16,15 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.TimeZone;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -28,12 +32,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
 
+@Isolated("Pins the JVM default timezone when checking zone-undefined JDBC values")
 public class XMLGregorianCalendarTypeTest extends TestBase {
 
     private XMLGregorianCalendarType xmlCalendarType;
@@ -225,6 +231,94 @@ public class XMLGregorianCalendarTypeTest extends TestBase {
         xmlCalendarType.set(stmt, "date_param", null);
 
         verify(stmt).setTimestamp("date_param", null);
+    }
+
+    @Test
+    public void testGetByIndexPreservesTimestampNanoseconds() throws Exception {
+        verifyTimestampReadPrecision(true);
+    }
+
+    @Test
+    public void testGetByLabelPreservesTimestampNanoseconds() throws Exception {
+        verifyTimestampReadPrecision(false);
+    }
+
+    private void verifyTimestampReadPrecision(final boolean byIndex) throws Exception {
+        for (final String text : new String[] { "2025-01-15T05:00:45.123456789Z", "1969-12-31T23:59:59.999999999Z", "1970-01-01T00:00:00.000000001Z",
+                "2025-01-15T05:00:45.123Z", "2025-01-15T05:00:45Z" }) {
+            final Timestamp source = Timestamp.from(Instant.parse(text));
+            final ResultSet rs = mock(ResultSet.class);
+            when(rs.getTimestamp(1)).thenReturn(source);
+            when(rs.getTimestamp("date_column")).thenReturn(source);
+
+            final XMLGregorianCalendar actual = byIndex ? xmlCalendarType.get(rs, 1) : xmlCalendarType.get(rs, "date_column");
+
+            assertEquals(source.getTime(), actual.toGregorianCalendar().getTimeInMillis(), text);
+            assertEquals(0, BigDecimal.valueOf(source.getNanos(), 9).compareTo(actual.getFractionalSecond()), text);
+            assertEquals(Instant.parse(text), source.toInstant(), "The JDBC value must remain unchanged");
+            if (source.getNanos() % 1_000_000 == 0) {
+                assertEquals(3, actual.getFractionalSecond().scale(), "Existing millisecond lexical precision must remain unchanged");
+            }
+        }
+    }
+
+    @Test
+    public void testSetByIndexPreservesXmlNanoseconds() throws Exception {
+        verifyTimestampWritePrecision(true);
+    }
+
+    @Test
+    public void testSetByNamePreservesXmlNanoseconds() throws Exception {
+        verifyTimestampWritePrecision(false);
+    }
+
+    @Test
+    public void testSetWithUndefinedTimezoneUsesCurrentDefaultAndPreservesNanoseconds() throws Exception {
+        final TimeZone originalZone = TimeZone.getDefault();
+        final String text = "2025-01-15T10:30:45.123456789";
+        final XMLGregorianCalendar source = DatatypeFactory.newInstance().newXMLGregorianCalendar(text);
+
+        try {
+            for (final String[] sample : new String[][] { { "GMT+05:30", "2025-01-15T05:00:45.123456789Z" },
+                    { "GMT-04:00", "2025-01-15T14:30:45.123456789Z" } }) {
+                TimeZone.setDefault(TimeZone.getTimeZone(sample[0]));
+                final Timestamp expected = Timestamp.from(Instant.parse(sample[1]));
+                final PreparedStatement prepared = mock(PreparedStatement.class);
+                final CallableStatement callable = mock(CallableStatement.class);
+
+                xmlCalendarType.set(prepared, 1, source);
+                xmlCalendarType.set(callable, "date_param", source);
+
+                verify(prepared).setTimestamp(1, expected);
+                verify(callable).setTimestamp("date_param", expected);
+                assertEquals(DatatypeConstants.FIELD_UNDEFINED, source.getTimezone());
+                assertEquals(text, source.toXMLFormat(), "JDBC conversion must not resolve the source's timezone in place");
+            }
+        } finally {
+            TimeZone.setDefault(originalZone);
+        }
+    }
+
+    private void verifyTimestampWritePrecision(final boolean byIndex) throws Exception {
+        for (final String[] sample : new String[][] { { "2025-01-15T10:30:45.123456789+05:30", "2025-01-15T05:00:45.123456789Z" },
+                { "1969-12-31T23:59:59.999999999Z", "1969-12-31T23:59:59.999999999Z" }, { "1970-01-01T00:00:00.000000001Z", "1970-01-01T00:00:00.000000001Z" },
+                { "2025-01-15T10:30:45.123+05:30", "2025-01-15T05:00:45.123Z" }, { "2025-01-15T10:30:45+05:30", "2025-01-15T05:00:45Z" },
+                { "2025-01-15T10:30:45.123456789987+05:30", "2025-01-15T05:00:45.123456789Z" } }) {
+            final XMLGregorianCalendar source = DatatypeFactory.newInstance().newXMLGregorianCalendar(sample[0]);
+            final Timestamp expected = Timestamp.from(OffsetDateTime.parse(sample[1]).toInstant());
+
+            if (byIndex) {
+                final PreparedStatement stmt = mock(PreparedStatement.class);
+                xmlCalendarType.set(stmt, 1, source);
+                verify(stmt).setTimestamp(1, expected);
+            } else {
+                final CallableStatement stmt = mock(CallableStatement.class);
+                xmlCalendarType.set(stmt, "date_param", source);
+                verify(stmt).setTimestamp("date_param", expected);
+            }
+
+            assertEquals(sample[0], source.toXMLFormat(), "The XML value must remain unchanged");
+        }
     }
 
     @Test

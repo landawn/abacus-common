@@ -69,8 +69,8 @@ public enum Exclusion {
     DEFAULT,
 
     /**
-     * No bean properties are excluded during serialization.
-     * All properties will be included in the serialized output regardless of their values.
+     * No bean properties are excluded because of their values, including {@code null} and primitive defaults.
+     * Other rules, such as ignored property names and transient-field handling, still apply.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

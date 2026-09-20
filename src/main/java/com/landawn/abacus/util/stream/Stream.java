@@ -248,13 +248,13 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *   <li>Sequential processing is often more efficient for small datasets; the crossover point depends on
  *       the source, per-element work, executor, and hardware</li>
  *   <li>Parallel processing benefits CPU-intensive operations on large datasets</li>
- *   <li>Lazy evaluation means intermediate operations are not executed until a terminal operation</li>
+ *   <li>Most intermediate operations defer work until traversal; consult each operation for eager evaluation or buffering</li>
  *   <li>Primitive specialized streams (IntStream, LongStream, DoubleStream) avoid boxing overhead</li>
  * </ul>
  *
  * <p><b>abacus {@code Stream} vs. {@link java.util.stream.Stream JDK Stream} &mdash; how they differ:</b>
- * This {@code Stream} is a superset of the JDK's {@link java.util.stream.Stream}: it has the same lazy,
- * single-use pipeline model and the same core operations (filter / map / flatMap / reduce / collect / ...),
+ * This {@code Stream} has a generally lazy,
+ * single-use pipeline model and core operations comparable to the JDK's {@link java.util.stream.Stream} (filter / map / flatMap / reduce / collect / ...),
  * but adds a much larger API and a few behavioral differences:
  *
  * <table border="1">
@@ -274,8 +274,8 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *     <td>Resource lifecycle</td>
  *     <td>Closed automatically when a terminal operation completes (and still {@link AutoCloseable} for
  *         try-with-resources over I/O sources).</td>
- *     <td>{@link AutoCloseable}, but only I/O-backed streams (e.g. {@code Files.lines}) need closing;
- *         a terminal operation does not close the stream.</td>
+ *     <td>{@link AutoCloseable}; resource-backed streams (e.g. {@code Files.lines}) and streams with
+ *         required close handlers need explicit closing. A terminal operation does not close the stream.</td>
  *   </tr>
  *   <tr>
  *     <td>Primitive streams</td>
@@ -287,7 +287,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *     <td>Parallelism</td>
  *     <td>{@code parallel()} plus overloads taking an explicit thread count and a
  *         {@link java.util.concurrent.Executor} for fine-grained control.</td>
- *     <td>{@code parallel()} runs on the shared common ForkJoinPool.</td>
+ *     <td>{@code parallel()} normally uses the common ForkJoinPool and has no executor parameter.</td>
  *   </tr>
  *   <tr>
  *     <td>Checked exceptions</td>
@@ -326,7 +326,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *       <td><b><i>abacus</i></b>: returns its own {@code u.Optional<T>} &middot; &#9888;&#65039; <b><i>JDK</i></b>: returns {@code java.util.Optional<T>}</td>
  *     </tr>
  *     <tr>
- *       <td><b>null arguments</b> to any operation</td>
+ *       <td><b>null function arguments</b> to stream operations</td>
  *       <td><b><i>abacus</i></b>: throws {@link IllegalArgumentException} (via {@code checkArgNotNull}),
  *           and the stream is <b>closed</b> before the exception propagates &middot; &#9888;&#65039;
  *           <b><i>JDK</i></b>: throws {@link NullPointerException} and leaves the stream open.
@@ -351,7 +351,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *     </tr>
  *     <tr>
  *       <td>{@code peek}/{@code onEach}</td>
- *       <td><b><i>abacus</i></b>: always invokes the action for every element pulled &middot; &#9888;&#65039; <b><i>JDK</i></b>: the action "may not be invoked" for elements it optimizes away (e.g. under a short-circuiting {@code count()})</td>
+ *       <td><b><i>abacus</i></b>: always invokes the action for every element pulled &middot; &#9888;&#65039; <b><i>JDK</i></b>: the action "may not be invoked" for elements it optimizes away (e.g. when {@code count()} is optimized without traversal)</td>
  *     </tr>
  *     <tr>
  *       <td>{@code iterator()}</td>
@@ -499,7 +499,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *   </tr>
  *   <tr>
  *     <td>{@link #findFirst() findFirst()} / {@link #findAny() findAny()} (no-arg)</td>
- *     <td>JDK-aligned aliases of {@code first()} (deterministic encounter order on this API).</td>
+ *     <td>JDK-aligned aliases of {@code first()} in the current pipeline's order; prior parallel stages may reorder the source.</td>
  *   </tr>
  *   <tr>
  *     <td>{@link #findFirst(Throwables.Predicate) findFirst(predicate)}</td>
@@ -512,7 +512,7 @@ import com.landawn.abacus.util.stream.ObjIteratorEx.BufferedIterator;
  *   </tr>
  *   <tr>
  *     <td>{@link #findLast(Throwables.Predicate) findLast(predicate)}</td>
- *     <td>Last matching element (must scan all remaining elements).</td>
+ *     <td>Last matching element in the current pipeline's order; array-backed streams may search backward.</td>
  *   </tr>
  *   <tr>
  *     <td>{@link BaseStream#onlyOne() onlyOne()}</td>
@@ -1017,7 +1017,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public abstract <R> Stream<R> slidingMap(BiFunction<? super T, ? super T, ? extends R> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Returns a stream consisting of the results of applying the given function to each pair of elements separated by the specified increment in this stream.
+     * Returns a stream consisting of the results of applying the given function to adjacent pairs whose starting positions are separated by the specified increment in this stream.
      * Unpaired element will be applied with {@code null} as its pair.
      *
      * <p>For example, if this stream contains elements [a, b, c, d] and increment=2, pairs are taken every 2 elements: [f(a,b), f(c,d)].
@@ -1048,7 +1048,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each pair of elements
      * @return a new stream consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null} or {@code increment} is not positive.
+     * @throws IllegalArgumentException if {@code increment} is not positive or {@code mapper} is {@code null}.
      * @see #slidingMap(BiFunction)
      * @see #slidingMap(int, boolean, BiFunction)
      */
@@ -1058,7 +1058,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Returns a stream consisting of the results of applying the given function to each pair of elements separated by the specified increment in this stream.
+     * Returns a stream consisting of the results of applying the given function to adjacent pairs whose starting positions are separated by the specified increment in this stream.
      *
      * <p>For example, if this stream contains elements [a, b, c, d, e] and increment=2, ignoreNotPaired=false,
      * the resulting stream will contain [f(a,b), f(c,d), f(e,null)].
@@ -1111,7 +1111,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each pair of elements
      * @return a new stream consisting of the results of applying the mapper function to each pair of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null} or {@code increment} is not positive.
+     * @throws IllegalArgumentException if {@code increment} is not positive or {@code mapper} is {@code null}.
      * @see #slidingMap(int, BiFunction)
      * @see #sliding(int, int)
      */
@@ -1158,7 +1158,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Returns a stream consisting of the results of applying the given function to each triple of elements separated by the specified increment in this stream.
+     * Returns a stream consisting of the results of applying the given function to adjacent triples whose starting positions are separated by the specified increment in this stream.
      * Unpaired elements will be applied with {@code null} as their pair.
      *
      * <p>For example, if this stream contains elements [a, b, c, d, e, f] and increment=3, the resulting stream will contain [f(a,b,c), f(d,e,f)].
@@ -1184,7 +1184,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each triple of elements
      * @return a new stream consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null} or {@code increment} is not positive.
+     * @throws IllegalArgumentException if {@code increment} is not positive or {@code mapper} is {@code null}.
      * @see #slidingMap(TriFunction)
      * @see #slidingMap(int, boolean, TriFunction)
      */
@@ -1194,7 +1194,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Returns a stream consisting of the results of applying the given function to each triple of elements separated by the specified increment in this stream.
+     * Returns a stream consisting of the results of applying the given function to adjacent triples whose starting positions are separated by the specified increment in this stream.
      *
      * <p>For example, if this stream contains elements [a, b, c, d, e, f, g] and increment=3, ignoreNotPaired=false,
      * the resulting stream will contain [f(a,b,c), f(d,e,f), f(g,null,null)].
@@ -1251,7 +1251,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper a non-interfering, stateless function that transforms each triple of elements
      * @return a new stream consisting of the results of applying the mapper function to each triple of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null} or {@code increment} is not positive.
+     * @throws IllegalArgumentException if {@code increment} is not positive or {@code mapper} is {@code null}.
      * @see #slidingMap(int, TriFunction)
      * @see #sliding(int, int)
      */
@@ -1343,6 +1343,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * It applies different transformation functions to the first element and all subsequent elements.
+     * With an iterator-backed parallel stream, this method may obtain the first source element
+     * before returning; the mapping functions are still invoked when the returned stream is consumed.
      *
      * <p>For example, if this stream contains elements [a, b, c, d], the resulting stream will contain [f(a), g(b), g(c), g(d)],
      * where f is the mapperForFirst function and g is the mapperForElse function.
@@ -1362,7 +1364,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toList();   // returns [10, 4, 6, 8]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation with lazy mapping and possible eager retrieval of the first source element;
+     * {@link ParallelSupported parallel-supported}; parallel processing may buffer elements.
      *
      * @param <R> the type of the result elements
      * @param mapperForFirst a non-interfering, stateless function to apply to the first element of this stream.
@@ -1937,6 +1940,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a CharStream of elements.
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed while consuming it. A null mapped stream is treated as empty.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -1967,6 +1972,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a Collection of Character elements.
+     * A null mapped collection is treated as empty, and null elements are converted to the primitive zero value.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2028,6 +2034,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a ByteStream of elements.
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed while consuming it. A null mapped stream is treated as empty.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2058,6 +2066,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a Collection of Byte elements.
+     * A null mapped collection is treated as empty, and null elements are converted to the primitive zero value.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2118,6 +2127,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a ShortStream of elements.
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed while consuming it. A null mapped stream is treated as empty.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2148,6 +2159,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a Collection of Short elements.
+     * A null mapped collection is treated as empty, and null elements are converted to the primitive zero value.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2208,6 +2220,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return an IntStream of elements.
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed while consuming it. A null mapped stream is treated as empty.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2238,6 +2252,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a Collection of Integer elements.
+     * A null mapped collection is treated as empty, and null elements are converted to the primitive zero value.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2298,6 +2313,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a LongStream of elements.
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed while consuming it. A null mapped stream is treated as empty.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2328,6 +2345,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a Collection of Long elements.
+     * A null mapped collection is treated as empty, and null elements are converted to the primitive zero value.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2388,6 +2406,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a FloatStream of elements.
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed while consuming it. A null mapped stream is treated as empty.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2417,6 +2437,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a Collection of Float elements.
+     * A null mapped collection is treated as empty, and null elements are converted to the primitive zero value.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2477,6 +2498,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a DoubleStream of elements.
+     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * stream is closed while consuming it. A null mapped stream is treated as empty.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2507,6 +2530,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Transforms the elements in the stream by applying a function to each element.
      * The function should return a Collection of Double elements.
+     * A null mapped collection is treated as empty, and null elements are converted to the primitive zero value.
      * This is an intermediate operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -2783,7 +2807,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toList();   // returns ["HELLO", "hello", 5, "WORLD", "world", 5]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all values emitted for one input element before exposing them downstream.
      *
      * @param <R> the type of the output stream
      * @param mapper a BiConsumer that takes an input element and a Consumer for output elements, and produces multiple output elements for each input element.
@@ -2821,7 +2845,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toArray();   // returns [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all values emitted for one input element before exposing them downstream.
      *
      * @param mapper a BiConsumer that takes an input element and an IntConsumer for output integers, and produces multiple output integers for each input element.
      * @return a new IntStream consisting of all output integers produced by the BiConsumer for each input element.
@@ -2860,7 +2884,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toArray();   // returns [1, 2, 3, 5, 6, 7]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all values emitted for one input element before exposing them downstream.
      *
      * @param mapper a BiConsumer that takes an input element and a LongConsumer for output longs, and produces multiple output longs for each input element.
      * @return a new LongStream consisting of all output longs produced by the BiConsumer for each input element.
@@ -2896,7 +2920,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toArray();   // returns [1.5, 2.5, 3.5, 4.5]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all values emitted for one input element before exposing them downstream.
      *
      * @param mapper a BiConsumer that takes an input element and a DoubleConsumer for output doubles, and produces multiple output doubles for each input element.
      * @return a new DoubleStream consisting of all output doubles produced by the BiConsumer for each input element.
@@ -3238,10 +3262,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * Stream.of("apple", "apricot", "banana", "blueberry", "cherry")
      *       .groupBy(s -> s.charAt(0))
-     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=[apple, apricot], b=[banana, blueberry], c=[cherry]
+     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints these entries (key order unspecified): a=[apple, apricot], b=[banana, blueberry], c=[cherry]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and lists of grouped values.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
@@ -3281,7 +3305,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=[apple, apricot], b=[banana, blueberry], c=[cherry] (in insertion order)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and lists of grouped values.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
@@ -3311,10 +3335,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * Stream.of("apple", "apricot", "banana", "blueberry")
      *       .groupBy(s -> s.charAt(0), String::length)
-     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=[5, 7], b=[6, 9]
+     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints these entries (key order unspecified): a=[5, 7], b=[6, 9]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and lists of grouped values.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param <V> The type of the value in the resulting Map.Entry.
@@ -3350,7 +3374,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=[5, 7], b=[6, 9] (in sorted order)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and lists of grouped values.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param <V> The type of the value in the resulting Map.Entry.
@@ -3380,10 +3404,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * Stream.of("apple", "apricot", "banana", "blueberry")
      *       .groupBy(s -> s.charAt(0), Collectors.counting())
-     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=2, b=2
+     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints these entries (key order unspecified): a=2, b=2
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; maintains the group map and downstream accumulation state; memory use depends on the keys and collector.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param <D> The result type of the Collector.
@@ -3391,7 +3415,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to be applied to the elements of each group.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of applying the Collector to the elements of the group.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
      * @see #groupBy(Function, Collector, Supplier)
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -3417,7 +3441,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=2, b=2 (in insertion order)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; maintains the group map and downstream accumulation state; memory use depends on the keys and collector.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param <D> The result type of the Collector.
@@ -3426,7 +3450,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of applying the Collector to the elements of the group.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream}, {@code mapFactory} is {@code null}
      * @see #groupBy(Function, Collector)
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -3448,10 +3472,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * Stream.of("apple", "apricot", "banana", "blueberry")
      *       .groupBy(s -> s.charAt(0), String::length, Collectors.summingInt(Integer::intValue))
-     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=12, b=15
+     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints these entries (key order unspecified): a=12, b=15
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; maintains the group map and downstream accumulation state; memory use depends on the keys and collector.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param <V> The type of the value to be collected in the resulting Map.Entry.
@@ -3461,7 +3485,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to be applied to the values of each group.
      * @return a new Stream consisting of Map.Entry instances where the key is the group identifier and the value is the result of applying the Collector to the values of the group.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code downstream} is {@code null}
      * @see #groupBy(Function, Function, Collector, Supplier)
      * @see Collectors#groupingBy(Function, Collector)
      */
@@ -3489,7 +3513,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=12, b=15 (in sorted order)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; maintains the group map and downstream accumulation state; memory use depends on the keys and collector.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param <V> The type of the value to be collected in the resulting Map.Entry.
@@ -3522,10 +3546,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * Stream.of("apple", "apricot", "banana", "blueberry")
      *       .groupBy(s -> s.charAt(0), String::length, Integer::sum)
-     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints: a=12, b=15
+     *       .forEach(e -> System.out.println(e.getKey() + "=" + e.getValue()));   // prints these entries (key order unspecified): a=12, b=15
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and one accumulated value per key.
      *
      * @param <K> The type of the key in the resulting Map.Entry.
      * @param <V> The type of the value in the resulting Map.Entry.
@@ -3563,7 +3587,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints entries like: a=12, b=6, c=6
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and one accumulated value per key.
      *
      * @param <K> The type of the key in the resulting Map.Entry
      * @param <V> The type of the value in the resulting Map.Entry
@@ -3599,10 +3623,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of("apple", "apricot", "banana", "cherry")
      *       .groupByToEntry(s -> s.charAt(0))
      *       .forEach(System.out::println);
-     * // Prints: a=[apple, apricot], b=[banana], c=[cherry]
+     * // Prints these entries (key order unspecified): a=[apple, apricot], b=[banana], c=[cherry]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and lists of grouped values.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
@@ -3640,7 +3664,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints entries in sorted order: a=[apple, apricot], b=[banana], c=[cherry]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and lists of grouped values.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to.
@@ -3671,10 +3695,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of("apple", "apricot", "banana", "cherry")
      *       .groupByToEntry(s -> s.charAt(0), String::toUpperCase)
      *       .forEach(System.out::println);
-     * // Prints: a=[APPLE, APRICOT], b=[BANANA], c=[CHERRY]
+     * // Prints these entries (key order unspecified): a=[APPLE, APRICOT], b=[BANANA], c=[CHERRY]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and lists of grouped values.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param <V> The type of the value in the resulting EntryStream
@@ -3716,7 +3740,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints in insertion order: a=[5, 7], b=[6], c=[6]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and lists of grouped values.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param <V> The type of the value in the resulting EntryStream
@@ -3749,10 +3773,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of("apple", "apricot", "banana", "cherry")
      *       .groupByToEntry(s -> s.charAt(0), Collectors.counting())
      *       .forEach(System.out::println);
-     * // Prints: a=2, b=1, c=1
+     * // Prints these entries (key order unspecified): a=2, b=1, c=1
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; maintains the group map and downstream accumulation state; memory use depends on the keys and collector.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param <D> The type of the value in the resulting EntryStream. The type is determined by the result type of the Collector.
@@ -3760,7 +3784,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to be applied to the elements of each group.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the Collector to the elements of the group
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
      * @see #groupByToEntry(Function, Collector, Supplier)
      * @see #groupTo(Throwables.Function, Collector)
      */
@@ -3789,7 +3813,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints in sorted order: a=apple, apricot, b=banana, blueberry, c=cherry
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; maintains the group map and downstream accumulation state; memory use depends on the keys and collector.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param <D> The type of the value in the resulting EntryStream. The type is determined by the result type of the Collector.
@@ -3798,7 +3822,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the Collector to the elements of the group
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream}, {@code mapFactory} is {@code null}
      * @see #groupByToEntry(Function, Collector)
      * @see #groupTo(Throwables.Function, Collector, Supplier)
      */
@@ -3824,10 +3848,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                       String::length,
      *                       Collectors.summingInt(Integer::intValue))
      *       .forEach(System.out::println);
-     * // Prints: a=12, b=6, c=6
+     * // Prints these entries (key order unspecified): a=12, b=6, c=6
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; maintains the group map and downstream accumulation state; memory use depends on the keys and collector.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param <V> The type of the intermediate values used in the Collector
@@ -3837,7 +3861,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream the Collector to be applied to the values of each group.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the Collector to the values of the group
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code downstream} is {@code null}
      * @see #groupByToEntry(Function, Function, Collector, Supplier)
      * @see #groupTo(Throwables.Function, Throwables.Function, Collector)
      */
@@ -3861,13 +3885,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of("apple", "apricot", "banana", "cherry")
      *       .groupByToEntry(s -> s.charAt(0),
      *                       String::toUpperCase,
-     *                       Collectors.toSet(),
+     *                       Collectors.toCollection(LinkedHashSet::new),
      *                       Suppliers.ofLinkedHashMap())
      *       .forEach(System.out::println);
      * // Prints in insertion order: a=[APPLE, APRICOT], b=[BANANA], c=[CHERRY]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; maintains the group map and downstream accumulation state; memory use depends on the keys and collector.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param <V> The type of the intermediate values used in the Collector
@@ -3878,7 +3902,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted.
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of applying the Collector to the values of the group
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code downstream}, {@code mapFactory} is {@code null}
      * @see #groupByToEntry(Function, Function, Collector)
      * @see #groupTo(Throwables.Function, Throwables.Function, Collector, Supplier)
      */
@@ -3904,10 +3928,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                       String::length,
      *                       Integer::sum)
      *       .forEach(System.out::println);
-     * // Prints: a=12, b=6, c=6
+     * // Prints these entries (key order unspecified): a=12, b=6, c=6
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and one accumulated value per key.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param <V> The type of the value in the resulting EntryStream
@@ -3945,7 +3969,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints in sorted order: a=2, b=3
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the group map and one accumulated value per key.
      *
      * @param <K> The type of the key in the resulting EntryStream
      * @param <V> The type of the value in the resulting EntryStream
@@ -4122,10 +4146,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of("apple", "banana", "apricot", "cherry", "avocado")
      *       .countBy(s -> s.charAt(0))
      *       .forEach(System.out::println);
-     * // Prints: a=3, b=1, c=1
+     * // Prints these entries (key order unspecified): a=3, b=1, c=1
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains one key and count per distinct group.
      *
      * @param <K> The type of the key in the resulting Stream. The type is determined by the result type of the Function.
      * @param keyMapper the Function to be used for mapping stream elements to keys.
@@ -4162,7 +4186,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints in sorted order: a=3, b=1, c=1
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains one key and count per distinct group.
      *
      * @param <K> The type of the key in the resulting Stream. The type is determined by the result type of the Function.
      * @param keyMapper the Function to be used for mapping stream elements to keys.
@@ -4201,10 +4225,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of("one", "two", "three", "four", "five")
      *       .countByToEntry(String::length)
      *       .forEach(System.out::println);
-     * // Prints: 3=2, 4=2, 5=1
+     * // Prints these entries (key order unspecified): 3=2, 4=2, 5=1
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains one key and count per distinct group.
      *
      * @param <K> The type of the key in the resulting EntryStream. The type is determined by the result type of the Function.
      * @param keyMapper the Function to be used for mapping stream elements to keys.
@@ -4241,7 +4265,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints in insertion order: 3=2, 5=1, 4=2
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains one key and count per distinct group.
      *
      * @param <K> The type of the key in the resulting EntryStream. The type is determined by the result type of the Function.
      * @param keyMapper the Function to be used for mapping stream elements to keys.
@@ -4385,7 +4409,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is an intermediate operation.
      *
      * <p>This operation will be processed sequentially, even in a parallel stream.
-     * Each collapsed group starts with the provided initial value.
+     * Each collapsed group starts with the same supplied initial value; it is not copied. Use an
+     * immutable initial value or a collector that creates a fresh container for each group.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4397,7 +4422,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints: "12", "567", "10"
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; retains the current accumulated result; its size depends on the merge function.
      *
      * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
      * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
@@ -4459,7 +4484,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Collapses consecutive elements in the stream into groups based on a three-element predicate.
-     * Elements for which the predicate returns {@code true} when applied with the first and last elements of the group are grouped together into lists.
+     * Elements for which the predicate returns {@code true} when applied to the first and last elements of the group and the next element are grouped together into lists.
      * The collapsible predicate takes three elements: the first and last elements of the group, and the next element in the stream.
      * This is an intermediate operation.
      *
@@ -4496,7 +4521,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Collapses consecutive elements in the stream into custom collections based on a three-element predicate.
-     * Elements for which the predicate returns {@code true} when applied with the first and last elements of the group
+     * Elements for which the predicate returns {@code true} when applied to the first and last elements of the group and the next element
      * are grouped together into collections created by the supplied collection factory.
      * The collapsible predicate takes three elements: the first and last elements of the group, and the next element in the stream.
      * This is an intermediate operation.
@@ -4537,7 +4562,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements satisfy a three-element predicate.
-     * Elements for which the predicate returns {@code true} when applied with the first and last elements of the group are combined using the provided merge function.
+     * Elements for which the predicate returns {@code true} when applied to the first and last elements of the group and the next element are combined using the provided merge function.
      * The collapsible predicate takes three elements: the first and last elements of the group, and the next element in the stream.
      * This is an intermediate operation.
      *
@@ -4576,12 +4601,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Collapses consecutive elements in the stream into an accumulator of type U based on a three-element predicate.
-     * Elements for which the predicate returns {@code true} when applied with the first and last elements of the group are combined using the provided merge function.
+     * Elements for which the predicate returns {@code true} when applied to the first and last elements of the group and the next element are combined using the provided merge function.
      * The collapsible predicate takes three elements: the first and last elements of the group, and the next element in the stream.
      * This is an intermediate operation.
      *
      * <p>This operation will be processed sequentially, even in a parallel stream.
-     * Each collapsed group starts with the provided initial value.
+     * Each collapsed group starts with the same supplied initial value; it is not copied. Use an
+     * immutable initial value or a collector that creates a fresh container for each group.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4593,7 +4619,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Prints: "136", "10", "1516"
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; retains the current accumulated result; its size depends on the merge function.
      *
      * <p>During manual iteration, lookahead is cached only after a successful source read. A failed later read does not
      * replay elements already incorporated into the unfinished group; a successfully read candidate remains cached if
@@ -4618,7 +4644,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Collapses consecutive elements in the stream using a collector when elements satisfy a three-element predicate.
-     * Elements for which the predicate returns {@code true} when applied with the first and last elements of the group are collected using the provided collector.
+     * Elements for which the predicate returns {@code true} when applied to the first and last elements of the group and the next element are collected using the provided collector.
      * The collapsible predicate takes three elements: the first and last elements of the group, and the next element in the stream.
      * This is an intermediate operation.
      *
@@ -4798,7 +4824,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is an intermediate operation that groups consecutive elements into fixed-size chunks using the specified collection type.
      *
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
-     * Each chunk preserves the order of elements from the original stream.
+     * Elements are added to each chunk in the current pipeline's order; the supplied collection controls iteration order and duplicate retention.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4814,7 +4840,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collectionSupplier a function that provides a new collection of type C for each chunk
      * @return a Stream of Collections, each containing a chunk of elements from the original stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if chunkSize is not positive.
+     * @throws IllegalArgumentException if {@code chunkSize} is not positive or {@code collectionSupplier} is {@code null}.
      * @see #split(int)
      * @see #split(int, Collector)
      */
@@ -4932,7 +4958,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to be used for collecting elements of each chunk
      * @return a new Stream consisting of elements from the original Stream collected by the provided collector
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if collector is null.
+     * @throws IllegalArgumentException if {@code predicate} or {@code collector} is {@code null}.
      * @see #split(Predicate)
      * @see #split(Predicate, Supplier)
      */
@@ -5166,6 +5192,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * If increment equals windowSize, windows don't overlap. If increment is less than windowSize, windows overlap.
      * If increment is greater than windowSize, some elements may be skipped.
      *
+     * <p>The last window may contain fewer than {@code windowSize} elements. Iteration stops after
+     * the first window that reaches the end of the source; overlapping tail elements alone do not
+     * produce additional windows. For example, {@code Stream.of(1, 2, 3).sliding(3, 1)} produces
+     * only {@code [1, 2, 3]}. When {@code increment > windowSize}, a new window also requires an
+     * element after the skipped gap; exhausting the source in that gap produces no additional window.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream.of(1, 2, 3, 4, 5)
@@ -5195,6 +5227,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The window moves over the elements of the Stream according to the specified window size and increment.
      * The type of collection for each window is determined by the provided supplier.
      * This is an intermediate operation that produces potentially overlapping or non-overlapping collections.
+     *
+     * <p>The last window may be shorter than {@code windowSize}. As with {@link #sliding(int, int)},
+     * no further windows are emitted after a window reaches the end of the source.
      *
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
      * If increment equals windowSize, windows don't overlap. If increment is less than windowSize, windows overlap.
@@ -5232,6 +5267,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The window moves over the elements of the Stream according to the specified window size and increment.
      * The elements in each window are then collected into a result container using the provided Collector.
      * This is an intermediate operation that produces collected results from potentially overlapping windows.
+     *
+     * <p>The last window may be shorter than {@code windowSize}. As with {@link #sliding(int, int)},
+     * no further windows are emitted after a window reaches the end of the source.
      *
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
      * The collector is applied independently to each window.
@@ -5292,6 +5330,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Returns a stream consisting of the distinct elements of this stream,
      * where duplicates are merged using the provided merge function.
+     * Equality follows the grouping map's ordinary key equality, so array keys use identity equality.
      * This is an intermediate operation that removes duplicates by merging them.
      *
      * <p>This operation may need to process the entire input before producing a result.
@@ -5305,7 +5344,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toList();   // returns ["aa", "bb", "c"]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains one key and accumulated merge result per distinct group.
      *
      * @param mergeFunction a binary operator used to merge duplicate elements.
      * @return a new Stream consisting of the distinct elements of this stream with duplicates merged
@@ -5348,7 +5387,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation streams elements through lazily, retaining only the seen keys.
      * It can be parallelized if the stream supports parallel processing.
-     * For elements with the same key, the first encountered element is retained.
+     * Sequentially, the first element for each key is retained. In parallel, any occurrence may win.
+     * Array keys are compared by deep contents; other keys use ordinary equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5374,6 +5414,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a stream consisting of the distinct elements of this stream,
      * where the distinctness is determined by the value mapped from the given key mapper function.
      * Duplicates are merged using the provided merge function.
+     * Equality follows the grouping map's ordinary key equality, so array keys use identity equality.
      * This is an intermediate operation that removes elements with duplicate keys by merging them.
      *
      * <p>This operation may need to process the entire input before producing a result.
@@ -5387,7 +5428,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toList();   // returns ["a1+a2", "b1+b2"]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains one key and accumulated merge result per distinct group.
      *
      * @param keyMapper a function to extract the key for comparison.
      * @param mergeFunction a binary operator used to merge duplicate elements.
@@ -5432,7 +5473,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation will load all elements into memory for sorting.
      * It can be parallelized if the stream supports parallel processing.
-     * The comparator should be consistent with equals for correct behavior.
+     * The comparator must obey the Comparator contract, including transitivity; consistency with equals is not required for sorting.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5493,7 +5534,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation will load all elements into memory for sorting.
      * It can be parallelized if the stream supports parallel processing.
-     * This method is more efficient than sortedBy for primitive int keys.
+     * This method compares primitive int keys without boxing them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5524,7 +5565,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation will load all elements into memory for sorting.
      * It can be parallelized if the stream supports parallel processing.
-     * This method is more efficient than sortedBy for primitive long keys.
+     * This method compares primitive long keys without boxing them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5555,7 +5596,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation will load all elements into memory for sorting.
      * It can be parallelized if the stream supports parallel processing.
-     * This method is more efficient than sortedBy for primitive double keys.
+     * This method compares primitive double keys without boxing them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5585,7 +5626,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation will load all elements into memory for sorting.
      * It can be parallelized if the stream supports parallel processing.
-     * The comparator should be consistent with equals for correct behavior.
+     * The comparator must obey the Comparator contract, including transitivity; consistency with equals is not required for sorting.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5615,7 +5656,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation will load all elements into memory for sorting.
      * It can be parallelized if the stream supports parallel processing.
-     * This method is more efficient than reverseSortedBy for primitive int keys.
+     * This method compares primitive int keys without boxing them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5645,7 +5686,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation will load all elements into memory for sorting.
      * It can be parallelized if the stream supports parallel processing.
-     * This method is more efficient than reverseSortedBy for primitive long keys.
+     * This method compares primitive long keys without boxing them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5675,7 +5716,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation will load all elements into memory for sorting.
      * It can be parallelized if the stream supports parallel processing.
-     * This method is more efficient than reverseSortedBy for primitive double keys.
+     * This method compares primitive double keys without boxing them.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5786,7 +5827,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return a new Stream consisting of the top n elements of this stream compared by the provided Comparator.
      *              There is no guarantee on the order of the returned elements.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if n is less than zero.
+     * @throws IllegalArgumentException if {@code n} is negative or {@code comparator} is {@code null}.
      * @see #top(int)
      * @see #kthLargest(int, Comparator)
      */
@@ -5851,10 +5892,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Returns a Stream consisting of the elements of this stream, excluding the last n elements.
-     * This is an intermediate operation that requires buffering n elements.
+     * Iterator-backed streams may buffer up to {@code n} elements.
      *
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
-     * A queue with size up to n will be maintained to filter out the last n elements.
+     * Iterator-backed streams maintain a queue of up to {@code n} elements; array-backed streams may access the prefix directly.
      * It may cause OutOfMemoryError if n is too large.
      * If source traversal fails while the queue is being filled during manual iteration,
      * successfully buffered elements are retained and filling resumes on the next access.
@@ -5881,13 +5922,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Returns a Stream consisting of the last n elements of this stream.
-     * This is an intermediate operation that requires buffering n elements.
+     * Iterator-backed streams may buffer up to {@code n} elements.
      *
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
-     * A queue with size up to n will be maintained to retain the last n elements.
-     * It may cause OutOfMemoryError if n is too large.
-     * All elements are traversed, but at most {@code n} elements are retained. The stream is closed after
-     * a terminal operation completes.
+     * For positive {@code n}, an iterator-backed stream traverses the source while retaining at most
+     * {@code n} elements; array-backed streams may access the suffix directly. A zero limit does not
+     * traverse the source. The stream is closed after a terminal operation completes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5917,13 +5957,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Returns a Stream consisting of the last n elements of this stream.
-     * This is an intermediate operation that requires buffering n elements.
+     * Iterator-backed streams may buffer up to {@code n} elements.
      *
      * <p>This operation is sequential only and cannot be parallelized, even in parallel streams.
-     * A queue with size up to n will be maintained to retain the last n elements.
-     * It may cause OutOfMemoryError if n is too large.
-     * All elements are traversed, but at most {@code n} elements are retained. The stream is closed after
-     * a terminal operation completes.
+     * For positive {@code n}, an iterator-backed stream traverses the source while retaining at most
+     * {@code n} elements; array-backed streams may access the suffix directly. A zero limit does not
+     * traverse the source. The stream is closed after a terminal operation completes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5947,7 +5986,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public abstract Stream<T> takeLast(int n) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Performs the given action on the elements pulled by downstream/terminal operation.
+     * Performs the given action as elements are pulled during traversal, including manual iteration.
      * This is an intermediate operation.
      *
      * <p>The action should be non-interfering and stateless for correct behavior in parallel streams.
@@ -5962,7 +6001,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @param action the action to be performed on the elements pulled by downstream/terminal operation.
+     * @param action the action to perform as elements are pulled during traversal, including manual iteration.
      * @return a new Stream consisting of the elements of this stream with the provided action applied to each element.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code action} is {@code null}
@@ -6033,7 +6072,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public abstract Stream<T> onLast(Consumer<? super T> action) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Performs the given action on the elements pulled by downstream/terminal operation.
+     * Performs the given action as elements are pulled during traversal, including manual iteration.
      * This is an intermediate operation.
      *
      * <p>This method is equivalent to {@code onEach} and provides the same functionality.
@@ -6052,7 +6091,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @param action the action to be performed on the elements pulled by downstream/terminal operation.
+     * @param action the action to perform as elements are pulled during traversal, including manual iteration.
      * @return a new Stream consisting of the elements of this stream with the provided action applied to each element.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code action} is {@code null}.
@@ -6299,10 +6338,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs the provided action for each element of the Stream.
      * After all elements have been processed by the Consumer, the provided Runnable is executed.
-     * This is a terminal operation that ensures a completion callback.
+     * The completion callback runs only after successful traversal; it is not invoked if traversal or the action fails.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * The onComplete callback is executed after all parallel tasks complete.
+     * The onComplete callback is executed after all parallel tasks complete successfully.
      *
      * <p>The behavior of this operation is explicitly nondeterministic for parallel streams.
      * For parallel stream pipelines, this operation does not guarantee to respect the encounter
@@ -6323,7 +6362,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that the action may throw
      * @param <E2> the type of exception that the onComplete may throw
      * @param action the action to be performed for each element
-     * @param onComplete the Runnable to be executed after all elements have been processed
+     * @param onComplete the Runnable to execute after all elements have been processed successfully
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code action}, {@code onComplete} is {@code null}
      * @throws E Exception thrown by the Consumer
@@ -6423,7 +6462,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>&#9888;&#65039; On a parallel stream the index is an invocation counter, not the
      * element's position.</b> Workers share one counter and increment it as they are called, so an
      * element is paired with the order in which it happened to be processed — not with where it sat
-     * in the source. Only a sequential stream pairs each element with its true index. Use
+     * in the source. A sequential stream pairs each element with its index in the current pipeline order. Use
      * {@code indexed()} (which forces sequential execution) when the position itself matters.
      * The index is also an {@code int} and wraps silently past {@code Integer.MAX_VALUE}.
      *
@@ -6461,11 +6500,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Iteration on this stream will also be stopped when this flag is set to {@code true}.
      * This is a terminal operation that may not consume all elements.
      *
-     * <p>On a <b>sequential</b> stream this consumes exactly the elements it delivers: nothing is read past
-     * the point where the flag is observed to be {@code true}. A <b>parallel</b> stream cannot offer that -
-     * its workers buffer ahead of consumption, so the source is typically read hundreds of elements beyond
-     * the last one delivered. That read-ahead is inherent to any parallel short-circuit here, not specific
-     * to this method: a plain {@code parallel(8).limit(3)} reads a comparable distance ahead.
+     * <p>On a <b>sequential</b> stream, the terminal loop stops requesting elements once it observes
+     * the flag as {@code true}. Upstream operations and buffered sources may already have read ahead.
+     * In parallel, other workers may have elements in flight and may continue briefly after the flag is set.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      * In parallel execution, other threads may continue processing briefly after the flag is set.
@@ -6504,14 +6541,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * If the flagToBreak is set to {@code true} at the beginning, no elements will be iterated from the stream before it is stopped and closed.
      * This is a terminal operation that may not consume all elements.
      *
-     * <p>On a <b>sequential</b> stream this consumes exactly the elements it delivers: nothing is read past
-     * the point where the flag is observed to be {@code true}. A <b>parallel</b> stream cannot offer that -
-     * its workers buffer ahead of consumption, so the source is typically read hundreds of elements beyond
-     * the last one delivered. That read-ahead is inherent to any parallel short-circuit here, not specific
-     * to this method: a plain {@code parallel(8).limit(3)} reads a comparable distance ahead.
+     * <p>On a <b>sequential</b> stream, the terminal loop stops requesting elements once it observes
+     * the flag as {@code true}. Upstream operations and buffered sources may already have read ahead.
+     * In parallel, other workers may have elements in flight and may continue briefly after the flag is set.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * The flag should be thread-safe if used in parallel streams.
+     * MutableBoolean provides visibility of flag changes between threads; stopping parallel workers is not instantaneous.
      *
      * <p>The behavior of this operation is explicitly nondeterministic for parallel streams.
      * For parallel stream pipelines, this operation does not guarantee to respect the encounter
@@ -6549,7 +6584,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a terminal operation that processes consecutive element pairs.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * In parallel execution, pairs are formed from elements within each partition.
+     * In parallel execution, a shared cursor coordinates pairs in the current pipeline order; actions may run in any order.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6597,7 +6632,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param increment the distance between the first elements of each pair. Must be positive.
      * @param action a non-interfering action to perform on each pair of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null} or {@code increment} is not positive.
+     * @throws IllegalArgumentException if {@code increment} is not positive or {@code action} is {@code null}.
      * @throws E if the action throws an exception
      * @see #forEachPair(Throwables.BiConsumer)
      */
@@ -6612,7 +6647,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a terminal operation that processes consecutive element triples.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * In parallel execution, triples are formed from elements within each partition.
+     * In parallel execution, a shared cursor coordinates triples in the current pipeline order; actions may run in any order.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6660,7 +6695,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param increment the distance between the first elements of each triple. Must be positive.
      * @param action a non-interfering action to perform on each triple of elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code action} is {@code null} or {@code increment} is not positive.
+     * @throws IllegalArgumentException if {@code increment} is not positive or {@code action} is {@code null}.
      * @throws E if the action throws an exception
      * @see #forEachTriple(Throwables.TriConsumer)
      */
@@ -6675,7 +6710,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a terminal operation that short-circuits on the first match.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * It returns as soon as any element matches, without processing remaining elements.
+     * It can stop when a match is found; parallel workers may already be processing other elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6704,7 +6739,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a terminal operation that short-circuits on the first non-match.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * It returns {@code false} as soon as any element doesn't match, without processing remaining elements.
+     * It can return {@code false} when a non-match is found; parallel workers may already be processing other elements.
      * Returns {@code true} if the stream is empty.
      *
      * <p><b>Usage Examples:</b></p>
@@ -6734,7 +6769,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a terminal operation that short-circuits on the first match.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * It returns {@code false} as soon as any element matches, without processing remaining elements.
+     * It can return {@code false} when a match is found; parallel workers may already be processing other elements.
      * Returns {@code true} if the stream is empty.
      *
      * <p><b>Usage Examples:</b></p>
@@ -6765,7 +6800,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a terminal operation that may short-circuit.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * It's equivalent to: {@code atLeast <= stream.filter(predicate).limit(atMost + 1).count() <= atMost}
+     * The result tests whether the match count is between the inclusive bounds. It can stop after
+     * observing more than {@code atMost} matches.
      *
      * <p>Name is shared with {@link com.landawn.abacus.util.Seq Seq} / {@link com.landawn.abacus.util.N N}
      * (not {@code isMatchCountBetween}); see the class-level
@@ -6786,7 +6822,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @return {@code true} if the number of elements matching the predicate is within the range [atLeast, atMost], {@code false} otherwise
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code atLeast} or {@code atMost} is negative, or if {@code atLeast} is
-     *         greater than {@code atMost}.
+     *         greater than {@code atMost}, or if {@code predicate} is {@code null}.
      * @throws E Exception thrown by the predicate
      * @see #anyMatch(Throwables.Predicate)
      * @see #allMatch(Throwables.Predicate)
@@ -6804,16 +6840,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This method is an alias of {@link #first()} even in parallel: it does not race workers at the
      * terminal. Sequential streams return the encounter-order first element. Parallel streams return
-     * the first element of the current pipeline iterator (array index {@code 0}, or the iterator's next
-     * element after any upstream parallel reordering). Use {@link #findAny(Throwables.Predicate)} for
+     * the first remaining element of the current pipeline iterator after any upstream parallel reordering. Use {@link #findAny(Throwables.Predicate)} for
      * unordered parallel search. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.Stream#findFirst()} API.</p>
      *
-     * <p><b>Null elements:</b> the returned {@code Optional} is created with
-     * {@code Optional.ofNullable}, so a {@code null} first element yields an <i>empty</i>
-     * {@code Optional} rather than throwing. Note that this makes "the first element was
-     * {@code null}" indistinguishable from "the stream was empty"; call {@link #skipNulls()}
-     * beforehand if you need to tell those two cases apart.</p>
+     * <p><b>Null elements:</b> a selected {@code null} element causes a {@link NullPointerException}.
+     * Use {@link #skipNulls()} to search only non-null elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6824,6 +6856,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the first element of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findAny()
@@ -6852,11 +6885,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Use {@link #findAny(Throwables.Predicate)} for unordered parallel search. The {@code findAny} name
      * is kept to align with the standard Stream API naming conventions.</p>
      *
-     * <p><b>Null elements:</b> the returned {@code Optional} is created with
-     * {@code Optional.ofNullable}, so a {@code null} first element yields an <i>empty</i>
-     * {@code Optional} rather than throwing. Note that this makes "the first element was
-     * {@code null}" indistinguishable from "the stream was empty"; call {@link #skipNulls()}
-     * beforehand if you need to tell those two cases apart.</p>
+     * <p><b>Null elements:</b> a selected {@code null} element causes a {@link NullPointerException}.
+     * Use {@link #skipNulls()} to search only non-null elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6867,6 +6897,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the first element of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findFirst()
@@ -6889,15 +6920,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * {@code Optional}, or an empty {@code Optional} if no element matches. This is a
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
-     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * <p>When several elements match, the one at the smallest index in the current pipeline order wins.
+     * Upstream parallel operations may have reordered that pipeline. If that ordering guarantee is not needed,
      * {@link #findAny(Throwables.Predicate)} may find a match faster in parallel.</p>
      *
-     * <p><b>Null elements:</b> the predicate is applied to {@code null} elements as well. The returned
-     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null}
-     * element yields an <i>empty</i> {@code Optional} rather than throwing — which makes
-     * "matched a {@code null}" indistinguishable from "no match". Filter nulls out beforehand if
-     * you need to tell those apart.</p>
+     * <p><b>Null elements:</b> a selected {@code null} element causes a {@link NullPointerException}.
+     * Use {@link #skipNulls()} to search only non-null elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6911,6 +6939,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code Optional} containing the first element that matches the predicate, or an empty
      *         {@code Optional} if no element matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
@@ -6934,11 +6963,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * {@link #findFirst(Throwables.Predicate)} in parallel. The no-argument {@link #findAny()}
      * is an alias of {@link #first()} and also has no parallel encounter-order guarantee.</p>
      *
-     * <p><b>Null elements:</b> the predicate is applied to {@code null} elements as well. The returned
-     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null}
-     * element yields an <i>empty</i> {@code Optional} rather than throwing — which makes
-     * "matched a {@code null}" indistinguishable from "no match". Filter nulls out beforehand if
-     * you need to tell those apart.</p>
+     * <p><b>Null elements:</b> a selected {@code null} element causes a {@link NullPointerException}.
+     * Use {@link #skipNulls()} to search only non-null elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6952,6 +6978,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code Optional} containing a matching element, or an empty {@code Optional} if no element matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
@@ -6974,11 +7001,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * relative to the current pipeline encounter order: when several elements match, the one at the largest
      * index wins. Upstream parallel operations may reorder the original source.</p>
      *
-     * <p><b>Null elements:</b> the predicate is applied to {@code null} elements as well. The returned
-     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null}
-     * element yields an <i>empty</i> {@code Optional} rather than throwing — which makes
-     * "matched a {@code null}" indistinguishable from "no match". Filter nulls out beforehand if
-     * you need to tell those apart.</p>
+     * <p><b>Null elements:</b> a selected {@code null} element causes a {@link NullPointerException}.
+     * Use {@link #skipNulls()} to search only non-null elements.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6992,6 +7016,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate a non-interfering, stateless predicate to test each element of the stream
      * @return an {@code Optional} containing the last element that matches the predicate, or an empty
      *         {@code Optional} if no element matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @throws E if the predicate throws an exception
@@ -7007,9 +7032,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Checks if the stream contains all the specified elements.
-     * This is a terminal operation that may short-circuit if a missing element is found.
+     * This is a terminal operation that can short-circuit when every requested element has been found.
      *
-     * <p>This operation is sequential only and cannot be parallelized.
+     * <p>Requests reduced to a single value may use parallel search; requests for multiple distinct values are checked sequentially.
      * Elements are compared using {@link Object#equals(Object) Object.equals(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -7018,7 +7043,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                        .containsAll(2, 4);   // returns true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}, though a request for more than one distinct value is matched sequentially; may build a lookup set from the requested elements; does not retain traversed source elements.
      *
      * @param a the elements to check for presence in the stream
      * @return {@code true} if the stream contains all the specified elements or the specified array is {@code null} or empty, {@code false} otherwise
@@ -7027,15 +7052,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #containsNone(Object[])
      */
     @SuppressWarnings("unchecked")
-    @SequentialOnly
+    @ParallelSupported
     @TerminalOp
     public abstract boolean containsAll(T... a) throws IllegalStateException;
 
     /**
      * Checks if the stream contains all the specified elements.
-     * This is a terminal operation that may short-circuit if a missing element is found.
+     * This is a terminal operation that can short-circuit when every requested element has been found.
      *
-     * <p>This operation is sequential only and cannot be parallelized.
+     * <p>Multiple requested elements are checked sequentially; a single requested element may use parallel search.
      * Elements are compared using {@link Object#equals(Object) Object.equals(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -7044,7 +7069,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                        .containsAll(Arrays.asList(2, 4));   // returns true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}, though a request for more than one distinct value is matched sequentially; may build a lookup set from the requested elements; does not retain traversed source elements.
      *
      * @param c the elements to check for presence in the stream
      * @return {@code true} if the stream contains all the specified elements or the specified collection is {@code null} or empty, {@code false} otherwise
@@ -7052,7 +7077,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #containsAny(Collection)
      * @see #containsNone(Collection)
      */
-    @SequentialOnly
+    @ParallelSupported
     @TerminalOp
     public abstract boolean containsAll(Collection<? extends T> c) throws IllegalStateException;
 
@@ -7060,7 +7085,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Checks if the stream contains any of the specified elements.
      * This is a terminal operation that short-circuits on the first match.
      *
-     * <p>This operation is sequential only and cannot be parallelized.
+     * <p>This operation can use parallel search on a parallel stream.
      * Elements are compared using {@link Object#equals(Object) Object.equals(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -7069,7 +7094,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                        .containsAny(7, 3, 9);   // returns true (contains 3)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; may build a lookup set from the requested elements; does not retain traversed source elements.
      *
      * @param a the elements to check for presence in the stream
      * @return {@code true} if the stream contains any of the specified elements, {@code false} if it does not, or if the array is {@code null} or empty
@@ -7078,7 +7103,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #containsAll(Object[])
      */
     @SuppressWarnings("unchecked")
-    @SequentialOnly
+    @ParallelSupported
     @TerminalOp
     public abstract boolean containsAny(T... a) throws IllegalStateException;
 
@@ -7086,7 +7111,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Checks if the stream contains any of the specified elements.
      * This is a terminal operation that short-circuits on the first match.
      *
-     * <p>This operation is sequential only and cannot be parallelized.
+     * <p>This operation can use parallel search on a parallel stream.
      * Elements are compared using {@link Object#equals(Object) Object.equals(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -7095,7 +7120,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                        .containsAny(Arrays.asList("x", "b", "z"));   // returns true (contains "b")
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; may build a lookup set from the requested elements; does not retain traversed source elements.
      *
      * @param c the elements to check for presence in the stream
      * @return {@code true} if the stream contains any of the specified elements, {@code false} if it does not, or if the collection is {@code null} or empty
@@ -7103,7 +7128,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #containsNone(Collection)
      * @see #containsAll(Collection)
      */
-    @SequentialOnly
+    @ParallelSupported
     @TerminalOp
     public abstract boolean containsAny(Collection<? extends T> c) throws IllegalStateException;
 
@@ -7111,7 +7136,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Checks if the stream doesn't contain any of the specified elements.
      * This is a terminal operation that short-circuits if any specified element is found.
      *
-     * <p>This operation is sequential only and cannot be parallelized.
+     * <p>This operation can use parallel search on a parallel stream.
      * Elements are compared using {@link Object#equals(Object) Object.equals(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -7120,7 +7145,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                         .containsNone(7, 8, 9);   // returns true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; may build a lookup set from the requested elements; does not retain traversed source elements.
      *
      * @param a the elements to check for presence in the stream
      * @return {@code true} if the stream doesn't contain any of the specified elements, or if this stream is empty, or if the array is {@code null} or empty, {@code false} otherwise
@@ -7129,7 +7154,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #containsAll(Object[])
      */
     @SuppressWarnings("unchecked")
-    @SequentialOnly
+    @ParallelSupported
     @TerminalOp
     public abstract boolean containsNone(T... a) throws IllegalStateException;
 
@@ -7137,7 +7162,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Checks if the stream doesn't contain any of the specified elements.
      * This is a terminal operation that short-circuits if any specified element is found.
      *
-     * <p>This operation is sequential only and cannot be parallelized.
+     * <p>This operation can use parallel search on a parallel stream.
      * Elements are compared using {@link Object#equals(Object) Object.equals(Object)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -7146,7 +7171,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                         .containsNone(Arrays.asList("x", "y", "z"));   // returns true
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; may build a lookup set from the requested elements; does not retain traversed source elements.
      *
      * @param c the elements to check for presence in the stream
      * @return {@code true} if the stream doesn't contain any of the specified elements, or if this stream is empty, or if the collection is {@code null} or empty, {@code false} otherwise
@@ -7154,7 +7179,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #containsAny(Collection)
      * @see #containsAll(Collection)
      */
-    @SequentialOnly
+    @ParallelSupported
     @TerminalOp
     public abstract boolean containsNone(Collection<? extends T> c) throws IllegalStateException;
 
@@ -7201,7 +7226,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns ImmutableMap{"apple"=5, "banana"=6, "cherry"=6}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the mapped keys and accumulated values, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -7253,7 +7278,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns ImmutableMap{'a'="apple,apricot", 'b'="banana"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the mapped keys and accumulated values, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -7304,7 +7329,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns {"apple"=5, "banana"=6, "cherry"=6}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the mapped keys and accumulated values, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -7347,7 +7372,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns {1="a", 2="bb,dd", 3="ccc"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the mapped keys and accumulated values, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -7393,7 +7418,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns TreeMap{"apple"=5, "banana"=6, "cherry"=6}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the mapped keys and accumulated values, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -7441,7 +7466,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns LinkedHashMap{1="a", 2="bb,dd", 3="ccc"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the mapped keys and accumulated values, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -7485,7 +7510,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns {1=["a"], 2=["bb", "dd"], 3=["ccc"]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains all grouped values in the result lists, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <E> the type of exception that the keyMapper function may throw
@@ -7525,7 +7550,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns TreeMap{1=["a"], 2=["bb", "dd"], 3=["ccc"]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains all grouped values in the result lists, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <M> the type of the resulting map
@@ -7565,7 +7590,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns {'a'=["APPLE", "APRICOT"], 'b'=["BANANA"]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains all grouped values in the result lists, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -7609,7 +7634,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns LinkedHashMap{'a'=[5, 7], 'b'=[6]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains all grouped values in the result lists, including partial maps in parallel.
      *
      * @param <K> the type of keys in the resulting map
      * @param <V> the type of values in the resulting map
@@ -7635,8 +7660,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Groups the elements of this stream by a key produced by the provided keyMapper function.
-     * The resulting map will contain keys produced by the keyMapper function and values as collections
-     * of elements that map to the same key, reduced using the provided downstream collector.
+     * The resulting map associates each extracted key with the downstream collector
+     * result for elements that map to that key.
      * This is a terminal operation that creates a map of grouped and collected elements.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -7673,8 +7698,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Groups the elements of this stream by a key produced by the provided keyMapper function.
-     * The resulting map will contain keys produced by the keyMapper function and values as collections
-     * of elements that map to the same key, reduced using the provided downstream collector.
+     * The resulting map associates each extracted key with the downstream collector
+     * result for elements that map to that key.
      * The provided mapFactory is used to create the resulting map.
      * This is a terminal operation.
      *
@@ -7711,9 +7736,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Groups the elements of this stream by a key produced by the provided keyMapper function.
-     * The resulting map will contain keys produced by the keyMapper function and values as collections
-     * of elements that map to the same key, with values transformed by valueMapper and then
-     * reduced using the provided downstream collector.
+     * The resulting map associates each extracted key with the downstream collector
+     * result for values produced by valueMapper for that key.
      * This is a terminal operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
@@ -7754,9 +7778,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Groups the elements of this stream by a key produced by the provided keyMapper function.
-     * The resulting map will contain keys produced by the keyMapper function and values as collections
-     * of elements that map to the same key, with values transformed by valueMapper and then
-     * reduced using the provided downstream collector.
+     * The resulting map associates each extracted key with the downstream collector
+     * result for values produced by valueMapper for that key.
      * The provided mapFactory is used to create the resulting map.
      * This is a terminal operation.
      *
@@ -7820,11 +7843,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * //          7=[apricot]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains one grouped value per extracted-key occurrence in result lists, including partial maps in parallel.
      *
      * @param <K> The type of the keys in the resulting Map
      * @param <E> The type of the exception that can be thrown by the key mapping function
-     * @param flatKeyExtractor a function that maps an input element to a collection of keys.
+     * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
      * @return a Map where each key is associated with a List of elements that were mapped to it
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code flatKeyExtractor} is {@code null}
@@ -7854,12 +7877,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * //                  a=[apple, apricot], b=[banana]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains one grouped value per extracted-key occurrence in result lists, including partial maps in parallel.
      *
      * @param <K> The type of the keys in the resulting Map
      * @param <M> The type of the resulting Map
      * @param <E> The type of the exception that can be thrown by the key mapping function
-     * @param flatKeyExtractor a function that maps an input element to a collection of keys.
+     * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
      * @param mapFactory a supplier to create the resulting map.
      * @return a Map where each key is associated with a List of elements that were mapped to it
      * @throws IllegalStateException if the stream is already closed
@@ -7894,13 +7917,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * //          7=[APRICOT]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains one grouped value per extracted-key occurrence in result lists, including partial maps in parallel.
      *
      * @param <K> The type of the keys in the resulting Map
      * @param <V> The type of the values in the resulting Map
      * @param <E> The type of the exception that can be thrown by the key mapping function
      * @param <E2> The type of the exception that can be thrown by the value mapping function
-     * @param flatKeyExtractor a function that maps an input element to a collection of keys.
+     * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
      * @param valueMapper a function that maps an input element and its corresponding key to a value.
      * @return a Map where each key is associated with a List of values that were mapped to it
      * @throws IllegalStateException if the stream is already closed
@@ -7938,14 +7961,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * //                                                 6=[banana-6]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains one grouped value per extracted-key occurrence in result lists, including partial maps in parallel.
      *
      * @param <K> The type of the keys in the resulting Map
      * @param <V> The type of the values in the resulting Map
      * @param <M> The type of the resulting Map
      * @param <E> The type of the exception that can be thrown by the key mapping function
      * @param <E2> The type of the exception that can be thrown by the value mapping function
-     * @param flatKeyExtractor a function that maps an input element to a collection of keys.
+     * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
      * @param valueMapper a function that maps an input element and its corresponding key to a value.
      * @param mapFactory a supplier to create the resulting map.
      * @return a Map where each key is associated with a List of values that were mapped to it
@@ -7985,7 +8008,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <K> The type of the keys in the resulting Map
      * @param <D> The type of the values in the resulting Map
      * @param <E> The type of the exception that can be thrown by the key mapping function
-     * @param flatKeyExtractor a function that maps an input element to a collection of keys.
+     * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
      * @param downstream a Collector that accumulates input elements into a mutable result container.
      * @return a Map where each key is associated with the result of the downstream collector
      * @throws IllegalStateException if the stream is already closed
@@ -8025,7 +8048,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <D> The type of the values in the resulting Map
      * @param <M> The type of the resulting Map
      * @param <E> The type of the exception that can be thrown by the key mapping function
-     * @param flatKeyExtractor a function that maps an input element to a collection of keys.
+     * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
      * @param downstream a Collector that accumulates input elements into a mutable result container.
      * @param mapFactory a function that creates a new Map.
      * @return a Map where each key is associated with the result of the downstream collector
@@ -8055,7 +8078,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of("apple", "apricot", "banana")
      *       .flatGroupTo(s -> Arrays.asList(s.charAt(0), s.length()),
      *                    (key, str) -> str + "-" + key,
-     *                    Collectors.toSet());
+     *                    Collectors.toCollection(LinkedHashSet::new));
      * // Returns {a=[apple-a, apricot-a],
      * //          b=[banana-b],
      * //          5=[apple-5],
@@ -8070,7 +8093,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <D> The type of the values in the resulting Map
      * @param <E> The type of the exception that can be thrown by the key mapping function
      * @param <E2> The type of the exception that can be thrown by the value mapping function
-     * @param flatKeyExtractor a function that maps an input element to a collection of keys.
+     * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
      * @param valueMapper a function that maps an input element and a key to an intermediate value.
      * @param downstream a Collector that accumulates intermediate values into a final result.
      * @return a Map where each key is associated with the result of applying the downstream collector to the values mapped to it
@@ -8116,7 +8139,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <M> The type of the resulting Map
      * @param <E> The type of the exception that can be thrown by the key mapping function
      * @param <E2> The type of the exception that can be thrown by the value mapping function
-     * @param flatKeyExtractor a function that maps an input element to a collection of keys.
+     * @param flatKeyExtractor a function that maps an input element to a collection of keys; null or empty collections add no values, and repeated keys add repeated values.
      * @param valueMapper a function that maps an input element and a key to an intermediate value.
      * @param downstream a Collector that accumulates intermediate values into a final result.
      * @param mapFactory a Supplier that generates the resulting Map.
@@ -8183,7 +8206,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns {false=3, true=2}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; maintains collector state for both partitions; memory usage depends on the downstream collector.
      *
      * @param <D> The result type of the downstream collector
      * @param <E> The type of the exception that can be thrown by the predicate
@@ -8191,7 +8214,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream a Collector that accumulates elements into a final result.
      * @return a Map where the Boolean key is associated with a value that is the result of applying a downstream collector to the elements that satisfy or do not satisfy the predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code predicate} or {@code downstream} is {@code null}
      * @throws E Exception thrown by the predicate
      * @see #groupTo(Throwables.Function, Collector)
      * @see Collectors#partitioningBy(Predicate, Collector)
@@ -8215,7 +8238,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns ListMultimap {a=[apple, apricot, avocado], b=[banana]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains grouped values according to the result multimap's collection semantics.
      *
      * @param <K> the type of keys in the resulting multimap
      * @param <E> the type of exception that may be thrown by the key extractor function
@@ -8243,10 +8266,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * Stream.of("apple", "apricot", "banana", "avocado")
      *       .toMultimap(s -> s.charAt(0), Suppliers.ofSetMultimap());
-     * // Returns SetMultimap {a=[apple, apricot, avocado], b=[banana]}
+     * // Contains these SetMultimap entries (key and set order unspecified): {a=[apple, apricot, avocado], b=[banana]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains grouped values according to the result multimap's collection semantics.
      *
      * @param <K> the type of keys in the resulting multimap
      * @param <V> the type of collection in the resulting multimap
@@ -8281,7 +8304,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Returns ListMultimap {a=[5, 7], b=[6]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains grouped values according to the result multimap's collection semantics.
      *
      * @param <K> the type of keys in the resulting ListMultimap
      * @param <V> the type of values in the resulting ListMultimap
@@ -8316,10 +8339,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toMultimap(s -> s.charAt(0),
      *                   String::toUpperCase,
      *                   Suppliers.ofSetMultimap());
-     * // Returns SetMultimap {a=[APPLE, APRICOT], b=[BANANA]}
+     * // Contains these SetMultimap entries (key and set order unspecified): {a=[APPLE, APRICOT], b=[BANANA]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains grouped values according to the result multimap's collection semantics.
      *
      * @param <K> the type of keys in the resulting Multimap
      * @param <V> the type of values in the resulting Multimap
@@ -8354,7 +8377,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Stream.of(Map.of("name", "John", "age", 30),
      *           Map.of("name", "Jane", "age", 25))
      *       .toDataset();
-     * // Returns Dataset with columns [name, age]
+     * // Returns Dataset with name and age columns (map key order is unspecified)
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
@@ -8402,7 +8425,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Performs a reduction on the elements of this stream, using the provided BinaryOperator, and returns an Optional.
-     * The BinaryOperator should be an associative accumulation function, and it is applied from left to right to the elements in this stream.
+     * The BinaryOperator is applied from left to right; associativity is not required for this sequential fold.
      * This is a terminal operation and will always run sequentially, even in parallel stream.
      *
      * <p><b>Usage Examples:</b></p>
@@ -8415,10 +8438,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .foldLeft((a, b) -> a + b);   // returns Optional.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; retains the accumulated result; memory usage depends on that result.
      *
      * @param accumulator the function for combining two values.
      * @return an Optional describing the result of the fold, or an empty Optional if the stream is empty
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see #reduce(BinaryOperator)
@@ -8439,7 +8463,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .foldLeft("", (acc, s) -> acc + s);   // returns "abc"
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; retains the accumulated result; memory usage depends on that result.
      *
      * @param <U> the type of the initial value and the return value
      * @param identity the initial value.
@@ -8455,7 +8479,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Performs a reduction on the elements of this stream, using the provided BinaryOperator, and returns an Optional.
-     * The BinaryOperator should be an associative accumulation function, and it is applied from right to left to the elements in this stream.
+     * The BinaryOperator is applied from right to left, with the accumulated value first; associativity is not required.
      * This is a terminal operation and will always run sequentially, even in parallel stream.
      *
      * <p><b>Usage Examples:</b></p>
@@ -8472,6 +8496,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param accumulator the function for combining two values.
      * @return an Optional describing the result of the fold, or an empty Optional if the stream is empty
+     * @throws NullPointerException if the final reduction result is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      * @see #reduce(BinaryOperator)
@@ -8526,10 +8551,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .reduce((a, b) -> a + b);   // returns Optional.empty()
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains partial accumulated results; memory usage depends on those results.
      *
      * @param accumulator the function for combining the current reduced value and the current stream element. Must be associative.
      * @return an Optional describing the result of the reduction. If the stream is empty, an empty {@code Optional} is returned.
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}
      */
@@ -8558,7 +8584,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .reduce(0, (a, b) -> a + b);   // returns 10
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains partial accumulated results; memory usage depends on those results.
      *
      * @param identity the identity value for the accumulating function, i.e. {@code accumulator.apply(identity, t) == t}.
      * @param accumulator the function for combining the current reduced value and the current stream element. Must be associative.
@@ -8581,7 +8607,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a terminal operation.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
-     * The accumulator and combiner should be associative for correct behavior in parallel streams.
+     * The combiner must be associative and compatible with the accumulator: combining a partial result
+     * with the result of accumulating one element from the identity must equal accumulating that element
+     * directly into the partial result.
      *
      * <p><b>{@code identity} must be a true identity for {@code combiner}</b>, i.e.
      * {@code combiner.apply(identity, u)} must equal {@code u} for every {@code u}. On a parallel
@@ -8603,7 +8631,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .toString();   // returns "abc"
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains partial accumulated results; memory usage depends on those results.
      *
      * @param <U> the type of the initial value and the return value of the reduction operation
      * @param identity the initial value of the reduction operation.
@@ -8645,7 +8673,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
      * @param accumulator an associative, non-interfering, stateless function for incorporating an additional element into a result.
      * @param combiner an associative, non-interfering, stateless function for combining two values, which must be compatible with the accumulator function.
-     *                It is unnecessary to specify {@code combiner} if {@code R} is a {@code Map/Collection/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
+     *                For supported container types, use the two-argument {@link #collect(Supplier, BiConsumer)} overload to supply a default combiner.
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
@@ -8970,6 +8998,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator the comparator to compare elements of this stream.
      * @return an <i>Optional</i> describing the minimum element of this stream, or an empty <i>Optional</i> if the stream is empty.
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -8991,10 +9020,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .get();   // returns "apple"
      * }</pre>
      *
+     * <p>{@code keyMapper} is applied to <i>every</i> element, {@code null} ones included, so it must
+     * tolerate {@code null} whenever the stream may contain one. {@code minBy(Person::getAge)} over a
+     * stream holding a {@code null} element throws a {@link NullPointerException} from the extractor
+     * itself, even when that {@code null} element is not the minimum.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param keyMapper a function to apply to each element to determine its key for comparison.
      * @return an <i>Optional</i> describing the minimum element of this stream, or an empty <i>Optional</i> if the stream is empty.
+     * @throws NullPointerException if the selected element is {@code null}, or if {@code keyMapper} rejects a {@code null} element
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      */
@@ -9055,6 +9090,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param comparator the comparator to compare elements of this stream.
      * @return an <i>Optional</i> describing the maximum element of this stream, or an empty <i>Optional</i> if the stream is empty.
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -9076,10 +9112,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .get();   // returns "banana" or "cherry"
      * }</pre>
      *
+     * <p>{@code keyMapper} is applied to <i>every</i> element, {@code null} ones included, so it must
+     * tolerate {@code null} whenever the stream may contain one. {@code maxBy(Person::getAge)} over a
+     * stream holding a {@code null} element throws a {@link NullPointerException} from the extractor
+     * itself, even when that {@code null} element is not the maximum.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param keyMapper a function to apply to each element to determine its key for comparison.
      * @return an <i>Optional</i> describing the maximum element of this stream, or an empty <i>Optional</i> if the stream is empty.
+     * @throws NullPointerException if the selected element is {@code null}, or if {@code keyMapper} rejects a {@code null} element
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      */
@@ -9126,8 +9168,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      *
-     * <p><b>Note:</b> the result is returned as a {@code long}, so it does not overflow at any practically attainable
-     * element count. The array/collection form {@link N#sumInt(Iterable, ToIntFunction)} instead returns an
+     * <p><b>Note:</b> the result is accumulated and returned as a {@code long}. Sums outside the {@code long} range
+     * overflow with ordinary Java arithmetic. The array/collection form {@link N#sumInt(Iterable, ToIntFunction)} instead returns an
      * {@code int} and throws {@link ArithmeticException} if the total does not fit &mdash; the same method name has
      * different overflow behavior in the two APIs.</p>
      *
@@ -9155,7 +9197,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Sums the long values extracted from the elements in this stream using the provided function.
-     * This is a terminal operation.
+     * This is a terminal operation. Sums outside the {@code long} range overflow with ordinary Java arithmetic.
      *
      * <p>This operation can be parallelized if the stream supports parallel processing.
      *
@@ -9306,6 +9348,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param k the rank of the element to find. k=1 would mean the largest element, k=2 the second largest, and so on. Must be positive.
      * @param comparator a comparator to determine the order of the elements.
      * @return an {@code Optional} containing the <i>k-th</i> largest element if it exists, otherwise an empty {@code Optional}.
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code k} is not positive, or if {@code comparator} is {@code null}.
      */
@@ -9353,7 +9396,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .containsDuplicates();   // returns false
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; retains keys seen so far and stops when a duplicate is found.
      *
      * @return <i>true</i> if the stream contains duplicate elements, otherwise <i>false</i>.
      * @throws IllegalStateException if the stream is already closed
@@ -9365,7 +9408,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Generates all possible combinations of the elements in this stream.
      * This is an intermediate operation and can only be processed sequentially.
-     * The operation is stateful and may need to process the entire input before producing a result.
+     * The operation is stateful. Without repetition, iterator-backed input is materialized and closed
+     * during this call; array-backed input may be accessed directly. With repetition, input is materialized
+     * on first traversal. Results are generated from the retained input.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9381,7 +9426,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // [1, 2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; input materialization may occur during this call; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a new stream where each element is a list representing a combination of elements from the original stream.
      * @throws IllegalStateException if the stream is already closed
@@ -9395,7 +9440,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Generates all possible combinations of the elements in this stream of the specified length.
      * This is an intermediate operation and can only be processed sequentially.
-     * The operation is stateful and may need to process the entire input before producing a result.
+     * The operation is stateful. Without repetition, iterator-backed input is materialized and closed
+     * during this call; array-backed input may be accessed directly. With repetition, input is materialized
+     * on first traversal. Results are generated from the retained input.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9406,7 +9453,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // [2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; input materialization may occur during this call; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param len the length of each combination. Must be non-negative and not bigger than the number of elements in this stream.
      * @return a new stream where each element is a list representing a combination of elements from the original stream.
@@ -9420,9 +9467,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public abstract Stream<List<T>> combinations(int len) throws IllegalStateException, IndexOutOfBoundsException;
 
     /**
-     * Generates all possible combinations of the elements in this stream of the specified length, with or without repetition.
+     * Generates combinations without repetition, or the ordered Cartesian power when repetition is enabled.
+     * With repetition, different orders such as {@code [1, 2]} and {@code [2, 1]} are both included.
      * This is an intermediate operation and can only be processed sequentially.
-     * The operation is stateful and may need to process the entire input before producing a result.
+     * The operation is stateful. Without repetition, iterator-backed input is materialized and closed
+     * during this call; array-backed input may be accessed directly. With repetition, input is materialized
+     * on first traversal. Results are generated from the retained input.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9445,14 +9495,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // [3, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; input materialization may occur during this call; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param len the length of each combination. Must be non-negative, and must not be bigger than the number of elements in this stream if {@code repeat} is {@code false}.
      * @param repeat if {@code true}, elements can be repeated in the combinations; otherwise, elements are not repeated.
      * @return a new stream where each element is a list representing a combination of elements from the original stream.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code repeat} is {@code true} and {@code len} is negative.
-     * @throws IndexOutOfBoundsException if {@code repeat} is {@code false} and {@code len} is negative or greater than the number of stream elements
+     * @throws IllegalArgumentException if {@code len} is negative, or if repetition produces more than {@code Integer.MAX_VALUE} results.
+     * @throws IndexOutOfBoundsException if {@code repeat} is {@code false} and {@code len} exceeds the number of stream elements
      */
     @SequentialOnly
     @IntermediateOp
@@ -9460,8 +9510,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Generates all permutations of the elements in the stream.
-     * This operation is only applicable to sequential streams. The operation is stateful and may need to process the entire input
-     * before producing a result. For example, one cannot permute elements until one has seen all of them.
+     * This operation runs sequentially and materializes and closes this stream during the call.
+     * The returned stream generates permutations from that retained input.
      * As a result, for infinite input streams, this operation may never complete.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9476,7 +9526,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // [2, 1, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; input is materialized during this call; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a new Stream consisting of all the permutations of the elements in the original Stream.
      * @throws IllegalStateException if the stream is already closed
@@ -9489,8 +9539,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Generates all ordered permutations of the elements in the stream.
      *
-     * This operation is only applicable to sequential streams. The operation is stateful and may need to process the entire input
-     * before producing a result. For example, one cannot permute elements until one has seen all of them.
+     * This operation runs sequentially and materializes and closes this stream during the call.
+     * The returned stream generates permutations from that retained input.
      * As a result, for infinite input streams, this operation may never complete.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9505,7 +9555,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // [3, 2, 1]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; input is materialized during this call; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @return a new Stream consisting of all the ordered permutations of the elements in the original Stream.
      * @throws IllegalStateException if the stream is already closed
@@ -9518,8 +9568,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Generates all ordered permutations of the elements in the stream, according to the specified comparator.
      *
-     * This operation is only applicable to sequential streams. The operation is stateful and may need to process the entire input
-     * before producing a result. For example, one cannot permute elements until one has seen all of them.
+     * This operation runs sequentially and materializes and closes this stream during the call.
+     * The returned stream generates permutations from that retained input.
      * As a result, for infinite input streams, this operation may never complete.
      *
      * <p>The order of the permutations is determined by the provided comparator. If the comparator views two elements as equal,
@@ -9537,7 +9587,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // [1, 2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; input is materialized during this call; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param comparator the comparator that should be used to determine the order of the elements in the permutations.
      * @return a new Stream consisting of all the ordered permutations of the elements in the original Stream.
@@ -9554,8 +9604,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The Cartesian product is a mathematical operation that returns a set from multiple sets.
      * Each member of the Cartesian product is an ordered tuple consisting of one member from each of the given sets.
      *
-     * This operation is only applicable to sequential streams. The operation is stateful and may need to process the entire input
-     * before producing a result. For example, one cannot generate a Cartesian product until one has seen all elements from all sets.
+     * This operation runs sequentially and materializes and closes this stream during the call.
+     * The supplied collections are copied when the returned stream is first traversed; tuples are generated on demand.
      * As a result, for infinite input streams, this operation may never complete.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9576,11 +9626,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // [3, 5, 7]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; this stream is materialized during the call; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param cs the collections to generate the Cartesian product from.
      * @return a new Stream consisting of all the ordered tuples in the Cartesian product of the elements in this stream and the specified collections.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if the Cartesian product exceeds {@code Integer.MAX_VALUE} tuples
      * @see #cartesianProduct(Collection)
      * @see Iterables#cartesianProduct(Collection...)
      */
@@ -9598,8 +9649,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The Cartesian product is a mathematical operation that returns a set from multiple sets.
      * Each member of the Cartesian product is an ordered tuple consisting of one member from each of the given sets.
      *
-     * This operation is only applicable to sequential streams. The operation is stateful and may need to process the entire input
-     * before producing a result. For example, one cannot generate a Cartesian product until one has seen all elements from all sets.
+     * This operation runs sequentially and materializes and closes this stream during the call.
+     * The supplied collections are copied when the returned stream is first traversed; tuples are generated on demand.
      * As a result, for infinite input streams, this operation may never complete.
      *
      * <p><b>Usage Examples:</b></p>
@@ -9620,12 +9671,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // [3, 5, 7]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; this stream is materialized during the call; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
      * @param cs the collections to generate the Cartesian product from.
      * @return a new Stream consisting of all the ordered tuples in the Cartesian product of the elements in this stream and the specified collections.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code cs} is {@code null}; the stream is closed without consuming its elements
+     * @throws IllegalArgumentException if the Cartesian product exceeds {@code Integer.MAX_VALUE} tuples
      * @see Iterables#cartesianProduct(Collection)
      */
     @SequentialOnly
@@ -9668,7 +9720,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * number of occurrences present in both sources (after mapping).
      * This is an intermediate operation.
      *
-     * <p>This operation can be parallelized if the stream supports parallel processing.
+     * <p>This operation can be parallelized if the stream supports parallel processing. When several
+     * elements have the same key, parallel workers may select different occurrences between runs.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9680,10 +9733,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // (two "apple"s because 5 appears twice in the collection, and "banana" because its length 6 is in the collection)
      * }</pre>
      *
-     * <p>This operation is lazy per element: it does not buffer this stream, so it also works on
-     * infinite streams as long as the collection {@code c} is finite.
+     * <p>This operation is lazy per element: it does not buffer this stream, it can process
+     * infinite input incrementally. A downstream operation must still be able to terminate; exhausting
+     * the requested keys does not itself stop traversal of an infinite source.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; retains a count for each distinct key in the supplied collection; does not retain traversed source elements.
      *
      * @param <U> the type of elements in the collection and the type of mapped stream elements
      * @param mapper a function that transforms stream elements into a form that can be compared with collection elements.
@@ -9705,7 +9759,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * after applying the provided mapping function. This operation considers the number of occurrences.
      * This is an intermediate operation.
      *
-     * <p>This operation can be parallelized if the stream supports parallel processing.
+     * <p>This operation can be parallelized if the stream supports parallel processing. When several
+     * elements have the same key, parallel workers may select different occurrences between runs.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9720,7 +9775,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // - "cherry" (length 6): 1 in stream, 0 of length-6 remaining in collection, 1-0=1 "cherry" remains
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; retains a count for each distinct key in the supplied collection; does not retain traversed source elements.
      *
      * @param <U> the type of the values being compared
      * @param mapper a function that transforms stream elements into values for comparison.
@@ -10335,12 +10390,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The stream is written progressively as elements are consumed, with periodic flushing for large streams.
      *
      * <p><b>Intermediate vs terminal:</b> {@code onEachSave} is an {@link IntermediateOp intermediate}
-     * side-effect (like {@link #onEach(Consumer)}): it does <b>not</b> flush/close by itself and writes
-     * only when a later terminal operation pulls elements. Prefer {@link #persist(File)} when the stream
+     * side-effect (like {@link #onEach(Consumer)}): it does <b>not</b> consume the stream by itself and writes
+     * as elements are pulled during traversal, including manual iteration. Prefer {@link #persist(File)} when the stream
      * should be fully consumed and closed as the write sink.</p>
      *
      * <p>This is an intermediate operation and will not close the stream. The actual writing
-     * occurs when a terminal operation is invoked on the returned stream.</p>
+     * occurs as elements are pulled during traversal, including manual iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10374,7 +10429,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The stream is written progressively as elements are consumed, with periodic flushing for large streams.
      *
      * <p>This is an intermediate operation and will not close the stream. The actual writing
-     * occurs when a terminal operation is invoked on the returned stream.</p>
+     * occurs as elements are pulled during traversal, including manual iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10409,7 +10464,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The stream is written progressively as elements are consumed, with periodic flushing for large streams.
      *
      * <p>This is an intermediate operation and will not close the stream. The actual writing
-     * occurs when a terminal operation is invoked on the returned stream.</p>
+     * occurs as elements are pulled during traversal, including manual iteration.</p>
      *
      * <p>Note: The output stream is not closed by this operation.</p>
      *
@@ -10446,7 +10501,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The stream is written progressively as elements are consumed, with periodic flushing for large streams.
      *
      * <p>This is an intermediate operation and will not close the stream. The actual writing
-     * occurs when a terminal operation is invoked on the returned stream.</p>
+     * occurs as elements are pulled during traversal, including manual iteration.</p>
      *
      * <p>Note: The writer is not closed by this operation.</p>
      *
@@ -10483,7 +10538,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The stream is written progressively as elements are consumed, with periodic flushing for large streams.
      *
      * <p>This is an intermediate operation and will not close the stream. The actual writing
-     * occurs when a terminal operation is invoked on the returned stream.</p>
+     * occurs as elements are pulled during traversal, including manual iteration.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10519,7 +10574,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The stream is written progressively as elements are consumed, with periodic flushing for large streams.
      *
      * <p>This is an intermediate operation and will not close the stream. The actual writing
-     * occurs when a terminal operation is invoked on the returned stream.</p>
+     * occurs as elements are pulled during traversal, including manual iteration.</p>
      *
      * <p>Note: The writer is not closed by this operation.</p>
      *
@@ -10589,7 +10644,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Saves each element of this stream to the database using the provided prepared statement and statement setter with batch processing.
      * This is an intermediate operation that performs a side effect while passing elements through unchanged.
      *
-     * <p>Elements are batched according to the specified batch size and interval for efficient database operations.
+     * <p>Elements are executed in batches of the specified size, with a pause after each full batch.
+     * The interval is a delay, not a timer that flushes a partially filled batch.
      * The stream continues to flow after this operation, allowing further processing.
      * Note: The prepared statement is not closed by this operation.
      *
@@ -10604,13 +10660,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .count();   // inserts 3 records in batches of 2, returns 3
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; the JDBC driver may retain parameters for the current batch.
      *
      * <p>Consuming or closing the returned stream can throw {@link UncheckedSQLException} if setting statement parameters or executing an individual statement or batch fails.</p>
      *
      * @param stmt the prepared statement used to save each element.
      * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used.
-     * @param batchIntervalInMillis the interval in milliseconds between each batch
+     * @param batchIntervalInMillis the delay in milliseconds after each full batch; does not schedule partial-batch flushes
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
@@ -10632,7 +10688,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The stream continues to flow after this operation, allowing further processing.
      * Note: the {@code Connection} is <b>not</b> closed by this operation — the caller owns it.
      * The {@code PreparedStatement} created from {@code insertSQL} <b>is</b> closed when the
-     * operation finishes, normally or exceptionally.
+     * returned stream is closed, including after a terminal operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10669,7 +10725,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * The stream continues to flow after this operation, allowing further processing.
      * Note: the {@code Connection} is <b>not</b> closed by this operation — the caller owns it.
      * The {@code PreparedStatement} created from {@code insertSQL} <b>is</b> closed when the
-     * operation finishes, normally or exceptionally.
+     * returned stream is closed, including after a terminal operation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10684,14 +10740,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .count();   // inserts 2 records with batching, returns 2
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; the JDBC driver may retain parameters for the current batch.
      *
      * <p>Consuming or closing the returned stream can throw {@link UncheckedSQLException} if preparing a statement, setting its parameters, or executing an individual statement or batch fails.</p>
      *
      * @param conn the connection used to save each element.
      * @param insertSQL the SQL insert script used to prepare the statement.
      * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used.
-     * @param batchIntervalInMillis the interval in milliseconds between each batch
+     * @param batchIntervalInMillis the delay in milliseconds after each full batch; does not schedule partial-batch flushes
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
@@ -10760,14 +10816,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .count();   // inserts 1000 tokens in batches of 50, returns 1000
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; the JDBC driver may retain parameters for the current batch.
      *
      * <p>Consuming or closing the returned stream can throw {@link UncheckedSQLException} if obtaining a connection, preparing a statement, setting its parameters, or executing an individual statement or batch fails.</p>
      *
      * @param ds the data source used to save each element.
      * @param insertSQL the SQL insert script used to prepare the statement.
      * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used.
-     * @param batchIntervalInMillis the interval in milliseconds between each batch
+     * @param batchIntervalInMillis the delay in milliseconds after each full batch; does not schedule partial-batch flushes
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return a new stream with the same elements as this stream; writing occurs as a side effect when elements are pulled
      * @throws IllegalStateException if the stream is already closed
@@ -10938,7 +10994,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the output stream to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code toLine} is {@code null}
+     * @throws IllegalArgumentException if {@code toLine} or {@code output} is {@code null}
      * @throws IOException if writing elements or flushing the output fails
      * @see N#stringOf(Object)
      */
@@ -10973,7 +11029,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the output stream to persist the stream to.
      * @return the number of elements persisted (excluding header and tail)
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code toLine} is {@code null}
+     * @throws IllegalArgumentException if {@code toLine} or {@code output} is {@code null}
      * @throws IOException if writing elements, the header, or the tail or flushing the output fails
      * @see N#stringOf(Object)
      */
@@ -10995,7 +11051,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <pre>{@code
      * try (StringWriter sw = new StringWriter()) {
      *     long count = Stream.of(1.5, 2.5, 3.5)
-     *                        .persist(d -> String.format("%.2f", d), sw);
+     *                        .persist(d -> String.format(Locale.ROOT, "%.2f", d), sw);
      *     // Writer contains "1.50\n2.50\n3.50\n", count = 3
      * }
      * }</pre>
@@ -11006,7 +11062,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the writer to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code toLine} is {@code null}
+     * @throws IllegalArgumentException if {@code toLine} or {@code output} is {@code null}
      * @throws IOException if writing elements or flushing the output fails
      * @see N#stringOf(Object)
      */
@@ -11040,7 +11096,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the writer to persist the stream to.
      * @return the number of elements persisted (excluding header and tail)
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code toLine} is {@code null}
+     * @throws IllegalArgumentException if {@code toLine} or {@code output} is {@code null}
      * @throws IOException if writing elements, the header, or the tail or flushing the output fails
      * @see N#stringOf(Object)
      */
@@ -11136,7 +11192,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the writer to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code write} is {@code null}
+     * @throws IllegalArgumentException if {@code write} or {@code output} is {@code null}
      * @throws IOException if writing elements (including the supplied write callback) or flushing the output fails
      */
     @SequentialOnly
@@ -11171,7 +11227,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the writer to persist the stream to.
      * @return the number of elements persisted (excluding header and tail)
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code write} is {@code null}
+     * @throws IllegalArgumentException if {@code write} or {@code output} is {@code null}
      * @throws IOException if writing elements, the header, or the tail (including the supplied write callback) or flushing the output fails
      */
     @SequentialOnly
@@ -11183,7 +11239,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Persists the stream to the database using the provided prepared statement and statement setter with batch processing.
      * This is a terminal operation that consumes all elements and saves them to the database.
      *
-     * <p>Elements are batched according to the specified batch size and interval for efficient database operations.
+     * <p>Elements are executed in batches of the specified size, with a pause after each full batch.
+     * The interval is a delay, not a timer that flushes a partially filled batch.
      * The prepared statement should be ready for execution. Batch updates are used if batchSize &gt;= 2.
      * Note: The prepared statement is not closed by this operation.
      *
@@ -11198,11 +11255,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Inserts 2 orders with batching, count = 2
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; the JDBC driver may retain parameters for the current batch.
      *
      * @param stmt the prepared statement used to persist the stream.
      * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used.
-     * @param batchIntervalInMillis the interval in milliseconds between each batch
+     * @param batchIntervalInMillis the delay in milliseconds after each full batch; does not schedule partial-batch flushes
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
@@ -11233,12 +11290,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Inserts 3 status records with batching, count = 3
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; the JDBC driver may retain parameters for the current batch.
      *
      * @param conn the connection used to persist the stream.
      * @param insertSQL the SQL insert script used to prepare the statement.
      * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used.
-     * @param batchIntervalInMillis the interval in milliseconds between each batch
+     * @param batchIntervalInMillis the delay in milliseconds after each full batch; does not schedule partial-batch flushes
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
@@ -11274,12 +11331,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Inserts 1000 log entries in batches of 100, count = 1000
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; the JDBC driver may retain parameters for the current batch.
      *
      * @param ds the data source used to persist the stream.
      * @param insertSQL the SQL insert script used to prepare the statement.
      * @param batchSize the number of elements to include in each batch. If less than 2, batch update won't be used.
-     * @param batchIntervalInMillis the interval in milliseconds between each batch
+     * @param batchIntervalInMillis the delay in milliseconds after each full batch; does not schedule partial-batch flushes
      * @param stmtSetter the function to set each element to the prepared statement.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
@@ -11313,7 +11370,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the file to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code output} is {@code null} or a directory
+     * @throws IllegalArgumentException if {@code output} is {@code null} or a directory, or the first row is
+     *         {@code null} or is neither a bean nor a map
      * @throws UncheckedIOException if the output file or a required parent directory cannot be created, the file cannot be opened for writing,
      *         or closing the owned file writer fails
      * @throws IOException if writing CSV records or headers or flushing the output fails
@@ -11349,7 +11407,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the file to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code output} is {@code null} or a directory
+     * @throws IllegalArgumentException if {@code csvHeaders} is {@code null} or empty, {@code output} is
+     *         {@code null} or a directory, a requested bean property does not exist, or the first row is
+     *         {@code null} or is neither a bean, map, collection, nor object array
      * @throws UncheckedIOException if the output file or a required parent directory cannot be created, the file cannot be opened for writing,
      *         or closing the owned file writer fails
      * @throws IOException if writing CSV records or headers or flushing the output fails
@@ -11388,7 +11448,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the output stream to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the first row is {@code null} or is neither a bean nor a map
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or the first row is {@code null}
+     *         or is neither a bean nor a map
      * @throws IOException if writing CSV records or headers or flushing the output fails
      * @see CsvUtil#setHeaderParser(Function)
      * @see CsvUtil#setLineParser(BiConsumer)
@@ -11425,7 +11486,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the output stream to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code csvHeaders} is {@code null} or empty, a requested bean property does not exist,
+     * @throws IllegalArgumentException if {@code csvHeaders} is {@code null} or empty, {@code output} is {@code null}, a requested bean property does not exist,
      *         or the first row is {@code null} or is neither a bean, map, collection, nor object array
      * @throws IOException if writing CSV records or headers or flushing the output fails
      * @see CsvUtil#setHeaderParser(Function)
@@ -11461,7 +11522,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the writer to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the first row is {@code null} or is neither a bean nor a map
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or the first row is {@code null}
+     *         or is neither a bean nor a map
      * @throws IOException if writing CSV records or headers or flushing the output fails
      * @see CsvUtil#setHeaderParser(Function)
      * @see CsvUtil#setLineParser(BiConsumer)
@@ -11505,7 +11567,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the writer to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code csvHeaders} is {@code null} or empty, a requested bean property does not exist,
+     * @throws IllegalArgumentException if {@code csvHeaders} is {@code null} or empty, {@code output} is {@code null}, a requested bean property does not exist,
      *         or the first row is {@code null} or is neither a bean, map, collection, nor object array
      * @throws IOException if writing CSV records or headers or flushing the output fails
      * @see CsvUtil#setHeaderParser(Function)
@@ -11571,11 +11633,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the output stream to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if writing the JSON array or flushing the output fails
      */
     @SequentialOnly
     @TerminalOp
-    public abstract long persistToJson(OutputStream output) throws IllegalStateException, IOException;
+    public abstract long persistToJson(OutputStream output) throws IllegalStateException, IllegalArgumentException, IOException;
 
     /**
      * Persists the stream with JSON format to the specified writer.
@@ -11600,11 +11663,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param output the writer to persist the stream to.
      * @return the number of elements persisted
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if writing the JSON array or flushing the output fails
      */
     @SequentialOnly
     @TerminalOp
-    public abstract long persistToJson(Writer output) throws IllegalStateException, IOException;
+    public abstract long persistToJson(Writer output) throws IllegalStateException, IllegalArgumentException, IOException;
 
     /**
      * Converts this Stream to a JDK Stream.
@@ -11612,7 +11676,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation is useful when you need to integrate with APIs that expect JDK streams
      * or when you want to use JDK stream operations not available in this Stream implementation.
-     * The returned stream is parallel if this stream is parallel; encounter order is preserved.
+     * The returned stream is parallel if this stream is parallel; it preserves the current pipeline
+     * iterator order, which upstream parallel operations may already have changed. JDK terminal
+     * operations do not close the JDK stream; close it explicitly to run required close handlers.
      * If this stream has close handlers, closing the returned JDK stream closes this stream and
      * invokes those handlers exactly once, even if this stream is subsequently closed again.
      *
@@ -11624,14 +11690,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * jdkStream.forEach(System.out::println);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return a java.util.stream.Stream containing the elements of this Stream
      * @throws IllegalStateException if the stream is already closed
      * @see #transformViaJdkStream(Function)
      * @see #transformViaJdkStream(Function, boolean)
      */
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public abstract java.util.stream.Stream<T> toJdkStream() throws IllegalStateException;
 
@@ -11642,7 +11708,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation allows you to leverage JDK stream operations while maintaining
      * the current Stream API. The transformation is not deferred by default.
-     * The function receives a sequential JDK stream. The returned stream adopts the parallel
+     * The function receives a JDK stream with this stream's current execution mode. The returned stream adopts the parallel
      * or sequential mode of the JDK stream returned by the function.
      *
      * <p><b>Usage Examples:</b></p>
@@ -11665,7 +11731,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @see #toJdkStream()
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public <U> Stream<U> transformViaJdkStream(final Function<? super java.util.stream.Stream<T>, ? extends java.util.stream.Stream<? extends U>> transfer)
             throws IllegalStateException, IllegalArgumentException {
@@ -11680,11 +11746,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Transforms the current Stream into another Stream by applying the provided function.
      * The function takes a JDK Stream as input and returns a new JDK Stream.
      * The returned JDK Stream is then wrapped back into a Stream of this class.
-     * The transformation can be deferred, which means it will be performed when the stream is consumed.
+     * The transformation can be deferred until traversal or closure initializes the wrapped stream.
      *
-     * <p>When deferred is {@code true}, the transformation is invoked when traversal begins.
-     * When {@code false}, the transformation is applied immediately. The function receives a
-     * sequential JDK stream and may return a sequential or parallel JDK pipeline. Without deferral,
+     * <p>When deferred is {@code true}, the transformation is invoked when traversal or closure initializes the wrapped stream.
+     * When {@code false}, the transformation is applied immediately. The function receives a JDK stream with this stream's
+     * current execution mode and may return a sequential or parallel JDK pipeline. Without deferral,
      * the returned stream adopts that pipeline's mode; with deferral, the outer stream starts sequential.
      *
      * <p><b>Usage Examples:</b></p>
@@ -11703,14 +11769,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <U> The type of elements in the returned stream
      * @param transfer the function to be applied on the current stream to produce a new stream.
-     * @param deferred if {@code true}, the transformation is deferred until the stream is consumed
+     * @param deferred if {@code true}, the transformation is deferred until traversal or closure initializes the wrapped stream
      * @return a new Stream transformed by the provided function
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      * @see #toJdkStream()
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public <U> Stream<U> transformViaJdkStream(final Function<? super java.util.stream.Stream<T>, ? extends java.util.stream.Stream<? extends U>> transfer,
             final boolean deferred) throws IllegalStateException, IllegalArgumentException {
@@ -11785,7 +11851,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(op::apply).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -11840,7 +11906,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel().filter(predicate).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -11880,7 +11946,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel().map(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -11921,7 +11987,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel().flatMap(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -11962,7 +12028,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel().flatmap(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12004,7 +12070,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel(maxThreadNum).filter(predicate).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12012,11 +12078,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; may buffer chunks while parallel tasks are in flight.
      *
-     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
+     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be non-negative; zero selects the default parallelism.
      * @param predicate the predicate to apply to each element to determine if it should be included.
      * @return a new Stream with the specified filter applied in parallel
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code predicate} is {@code null}
      * @see #sps(int, Function)
      */
     @Beta
@@ -12024,6 +12090,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public Stream<T> spsFilter(final int maxThreadNum, final Predicate<? super T> predicate) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(predicate, cs.predicate);
 
         return sps(maxThreadNum, s -> s.filter(predicate));
@@ -12045,7 +12112,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel(maxThreadNum).map(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12054,11 +12121,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; may buffer chunks while parallel tasks are in flight.
      *
      * @param <R> The type of the elements in the returned stream
-     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
+     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be non-negative; zero selects the default parallelism.
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code mapper} is {@code null}
      * @see #sps(int, Function)
      */
     @Beta
@@ -12066,6 +12133,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public <R> Stream<R> spsMap(final int maxThreadNum, final Function<? super T, ? extends R> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, s -> s.map(mapper));
@@ -12087,7 +12155,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel(maxThreadNum).flatMap(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12096,11 +12164,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; may buffer chunks while parallel tasks are in flight.
      *
      * @param <R> The type of the elements in the returned stream
-     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
+     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be non-negative; zero selects the default parallelism.
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code mapper} is {@code null}
      * @see #sps(int, Function)
      */
     @Beta
@@ -12109,6 +12177,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, s -> s.flatMap(mapper));
@@ -12130,7 +12199,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code parallel(maxThreadNum).flatmap(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12139,11 +12208,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; may buffer chunks while parallel tasks are in flight.
      *
      * @param <R> The type of the elements in the returned stream
-     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
+     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be non-negative; zero selects the default parallelism.
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code mapper} is {@code null}
      * @see #sps(int, Function)
      */
     @Beta
@@ -12152,6 +12221,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, s -> s.flatmap(mapper));
@@ -12173,7 +12243,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> it's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).filter(predicate)).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12186,7 +12256,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive, {@code chunkSize} is not positive, or {@code predicate} is {@code null}
      * @see #sps(int, int, Function)
      */
     @Beta
@@ -12195,6 +12265,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(maxThreadNum, cs.maxThreadNum);
+        checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(predicate, cs.predicate);
 
         return sps(maxThreadNum, chunkSize, s -> Stream.of(s).filter(predicate));
@@ -12217,7 +12289,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).map(mapper)).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12231,7 +12303,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been mapped in parallel using the provided mapper function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive, {@code chunkSize} is not positive, or {@code mapper} is {@code null}
      * @see #sps(int, int, Function)
      */
     @Beta
@@ -12240,6 +12312,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(maxThreadNum, cs.maxThreadNum);
+        checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, chunkSize, s -> Stream.of(s).map(mapper));
@@ -12262,7 +12336,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).flatMap(mapper)).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12276,7 +12350,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been flat-mapped in parallel using the provided mapper function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive, {@code chunkSize} is not positive, or {@code mapper} is {@code null}
      * @see #sps(int, int, Function)
      */
     @Beta
@@ -12285,6 +12359,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(maxThreadNum, cs.maxThreadNum);
+        checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, chunkSize, s -> Stream.of(s).flatMap(mapper));
@@ -12307,7 +12383,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code split(chunkSize).parallel(maxThreadNum).flatMap(s -> Stream.of(s).flatmap(mapper)).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12321,7 +12397,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mapper the function to be applied to each element of the stream.
      * @return a new Stream that has been flat-mapped in parallel using the provided mapper function
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is not positive, {@code chunkSize} is not positive, or {@code mapper} is {@code null}
      * @see #sps(int, int, Function)
      */
     @Beta
@@ -12330,6 +12406,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(maxThreadNum, cs.maxThreadNum);
+        checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, chunkSize, s -> Stream.of(s).flatmap(mapper));
@@ -12353,7 +12431,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel().filterE(predicate).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12395,7 +12473,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel().mapE(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12439,7 +12517,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel().flatMapE(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12483,7 +12561,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel().flatmapE(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12527,7 +12605,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel(maxThreadNum).filterE(predicate).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12535,11 +12613,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; may buffer chunks while parallel tasks are in flight.
      *
-     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
+     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be non-negative; zero selects the default parallelism.
      * @param predicate the predicate to be used for the filter operation on the stream.
      * @return a new Stream that has been filtered in parallel using the provided predicate
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code predicate} is {@code null}
      * @see #sps(int, Function)
      */
     @Beta
@@ -12548,6 +12626,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(predicate, cs.predicate);
 
         return sps(maxThreadNum, s -> s.filterE(predicate));
@@ -12571,7 +12650,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel(maxThreadNum).mapE(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12580,11 +12659,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; may buffer chunks while parallel tasks are in flight.
      *
      * @param <R> The type of the elements in the returned stream
-     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
+     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be non-negative; zero selects the default parallelism.
      * @param mapper the mapping function to apply to each element.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code mapper} is {@code null}
      * @see #sps(int, Function)
      */
     @Beta
@@ -12593,6 +12672,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, s -> s.mapE(mapper));
@@ -12616,7 +12696,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel(maxThreadNum).flatMapE(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12625,11 +12705,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; may buffer chunks while parallel tasks are in flight.
      *
      * @param <R> The type of the elements in the returned stream
-     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
+     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be non-negative; zero selects the default parallelism.
      * @param mapper the mapping function to apply to each element, which produces a stream of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code mapper} is {@code null}
      * @see #sps(int, Function)
      */
     @Beta
@@ -12638,6 +12718,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, s -> s.flatMapE(mapper));
@@ -12661,7 +12742,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Implementation Note:</b> It's equivalent to: {@code parallel(maxThreadNum).flatmapE(mapper).sequential()}
      *
-     * <p><b>&#9888;&#65039; Output order is not the source order.</b> Because the work is done on a
+     * <p><b>&#9888;&#65039; Output order is not guaranteed to be the source order.</b> Because the work is done on a
      * parallel stream, results are emitted in completion order; the trailing {@code sequential()}
      * only affects later stages and does not restore it. Verified: {@code Stream.of(1, 2, 3, 4)
      * .spsMap(x -> x * 2)} can return {@code [4, 2, 6, 8]}. Sort the result, or keep the pipeline
@@ -12670,11 +12751,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; may buffer chunks while parallel tasks are in flight.
      *
      * @param <R> The type of the elements in the returned stream
-     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be positive.
+     * @param maxThreadNum the maximum number of threads to be used for parallel execution. Must be non-negative; zero selects the default parallelism.
      * @param mapper the mapping function to apply to each element, which produces a collection of new values.
      * @return a new Stream consisting of the results of applying the given function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxThreadNum} is negative or {@code mapper} is {@code null}
      * @see #sps(int, Function)
      */
     @Beta
@@ -12684,6 +12765,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNegative(maxThreadNum, cs.maxThreadNum);
         checkArgNotNull(mapper, cs.mapper);
 
         return sps(maxThreadNum, s -> s.flatmapE(mapper));
@@ -12714,16 +12796,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * {@code jdkStream.iterator()} &mdash; and a JDK stream consumed through its iterator evaluates
      * stateless stages such as {@code map}/{@code filter} on the <i>calling</i> thread. Only terminals
      * that short-circuit to a real JDK terminal (for example {@code count()} and {@code toArray()})
-     * dispatch {@code op} to the common ForkJoinPool. Measured on a 500-element source: the same
+     * may execute the JDK pipeline in parallel. A JDK count optimization may also avoid evaluating mapped elements. Measured on a 500-element source: the same
      * {@code sjps(js -> js.map(...))} pipeline ran the mapper on 1 thread when finished with
      * {@code toList()} and on 9 threads when finished with {@code count()}. Do not rely on this method
      * for parallelism; use {@link #parallel()} or {@link #sps(Function)} instead.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; the function is invoked immediately, and buffering depends on the returned JDK pipeline.
      *
      * @param <R> The type of the elements in the resulting stream
      * @param op the function to be applied to the JDK parallel stream.
-     * @return a new Stream with the specified operation applied in parallel
+     * @return a new Stream wrapping the transformed JDK pipeline; actual parallel execution depends on how it is consumed
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code op} is {@code null}.
      */
@@ -12993,7 +13075,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><strong>Important:</strong> The provided stream will be fully loaded into memory to perform the cross join.
      * If the second stream is too large to fit in memory, consider reversing the operation using
-     * {@code b.crossJoin(this.toList(), func)} if this stream is smaller, or use a collection-based approach
+     * {@code b.crossJoin(this.toList(), (right, left) -> func.apply(left, right))} if this stream is smaller, or use a collection-based approach
      * with appropriate batching. The second stream will be automatically closed along with this stream.
      *
      * <p><b>Usage Examples:</b></p>
@@ -13036,11 +13118,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs an inner join between this stream and the specified collection based on matching keys.
      * This operation efficiently combines elements from both sources where the extracted keys are equal,
      * similar to SQL's INNER JOIN operation. Only elements with matching keys in both sources are included
-     * in the result. Uses hash-based lookup for {@code O(n + m)} time complexity.
+     * in the result. Uses hash-based lookup for {@code O(n + m + r)} time complexity.
      *
      * <p>The operation builds a hash map from the collection for efficient lookups, making it much faster
-     * than nested loop joins for large datasets. The operation is stateless and can be parallelized if
+     * than nested loop joins for large datasets. The operation retains join state and can be parallelized if
      * the stream supports parallel processing, making it suitable for large-scale data processing.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13068,7 +13155,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection
      * @return a new Stream of Pair objects containing matched elements from both sources
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
      * @see #innerJoin(Collection, Function, Function, BiFunction)
      * @see #leftJoin(Collection, Function, Function)
      * @see #fullJoin(Collection, Function, Function)
@@ -13082,11 +13169,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs an inner join between this stream and the specified collection with result transformation.
      * This operation combines elements from both sources where keys match and immediately applies a
-     * transformation function to produce custom result objects. Uses hash-based lookup for {@code O(n + m)} performance.
+     * transformation function to produce custom result objects. Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>This variant is preferred when you need to transform matched pairs directly into result objects,
      * avoiding intermediate Pair objects for better performance and cleaner code. The function receives
      * both matched elements and can produce any desired output type.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13131,11 +13223,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs an inner join between this stream and a collection of the same type using a common key extractor.
      * This simplified method is useful when joining homogeneous collections where both sources contain
-     * the same type of elements and use the same key extraction logic. Uses hash-based lookup for {@code O(n + m)} performance.
+     * the same type of elements and use the same key extraction logic. Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>This method is particularly useful for self-joins, finding intersections based on a property,
      * or matching elements from two sources of the same type. The single key mapper is applied to
      * elements from both sources.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13161,7 +13258,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements; applied to both sources
      * @return a new Stream of Pair objects containing matched elements from both sources
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper} is {@code null}
      * @see #innerJoin(Collection, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -13173,10 +13270,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs an inner join between this stream and a collection of the same type with result transformation.
      * This method combines the convenience of a single key mapper for homogeneous types with the ability
-     * to transform matched pairs into custom results. Uses hash-based lookup for {@code O(n + m)} performance.
+     * to transform matched pairs into custom results. Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>This variant is ideal for self-joins where you need to produce a specific output from matched
      * elements, such as comparison results, merged objects, or computed values based on both elements.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13205,7 +13307,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param func the function to apply to matched pairs to produce result elements
      * @return a new Stream consisting of the results of applying the function to matched pairs
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code func} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper}, {@code func} is {@code null}
      * @see #innerJoin(Collection, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -13217,12 +13319,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs an inner join between this stream and another stream with result transformation.
      * This operation combines elements from both streams where keys match and applies a transformation function.
-     * The second stream is loaded into memory for efficient hash-based lookup, providing {@code O(n + m)} performance.
+     * The second stream is loaded into memory for efficient hash-based lookup, providing {@code O(n + m + r)} performance.
      *
      * <p><strong>Important:</strong> The second stream will be fully loaded into memory to build the hash map
      * for efficient joining. If the second stream is too large to fit in memory, consider reversing the join
      * operation using {@code b.innerJoin(this.toList(), ...)} if this stream is smaller. The second stream
      * will be automatically closed along with this stream to prevent resource leaks.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13273,7 +13380,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><strong>Performance Warning:</strong> This method has quadratic time complexity as it tests every
      * element from this stream against every element from the collection. For large datasets, consider using
-     * the key-based join methods {@link #innerJoin(Collection, Function, Function)} which offer O(n + m)
+     * the key-based join methods {@link #innerJoin(Collection, Function, Function)} which offer O(n + m + r)
      * performance through hash-based lookup.
      *
      * <p>Use this method only when:
@@ -13282,6 +13389,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <li>You need range-based joins or inequality conditions</li>
      * <li>The datasets are small enough that O(n * m) performance is acceptable</li>
      * </ul>
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13307,7 +13417,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test pairs of elements
      * @return a new Stream of Pair objects containing matched elements from both sources
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code predicate} is {@code null}
      * @deprecated The time complexity is O(n * m). You should try {@code innerJoin(Collection, Function, Function)} first
      *             for better performance with key-based joins
      * @see #innerJoin(Collection, Function, Function)
@@ -13326,7 +13436,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><strong>Performance Warning:</strong> This method has quadratic time complexity. For large datasets
      * with simple equality conditions, use {@link #innerJoin(Collection, Function, Function, BiFunction)}
-     * for {@code O(n + m)} performance through hash-based lookup.
+     * for {@code O(n + m + r)} performance through hash-based lookup.
      *
      * <p>This method is appropriate for:
      * <ul>
@@ -13334,6 +13444,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <li>Range-based or inequality joins that cannot use hash lookup</li>
      * <li>Small datasets where O(n * m) performance is acceptable</li>
      * </ul>
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13380,12 +13493,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs a full outer join between this stream and the specified collection based on matching keys.
      * This operation includes all elements from both sources, pairing elements where keys match and including
-     * unmatched elements with {@code null} for the missing side. Uses hash-based lookup for {@code O(n + m)} performance.
+     * unmatched elements with {@code null} for the missing side. Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>A full outer join ensures no data is lost from either source. Elements from this stream without
      * matches in the collection will be paired with {@code null} for the right side, and elements from the collection
      * without matches in this stream will be paired with {@code null} for the left side. This is equivalent to
      * SQL's FULL OUTER JOIN operation.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13417,7 +13535,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection
      * @return a new Stream of Pair objects containing all elements from both sources, with {@code null} for unmatched elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
      * @see #fullJoin(Collection, Function, Function, BiFunction)
      * @see #innerJoin(Collection, Function, Function)
      * @see #leftJoin(Collection, Function, Function)
@@ -13432,14 +13550,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a full outer join with result transformation.
      * This operation includes all elements from both sources and applies a transformation function to produce
      * custom results. The function must handle {@code null} values for unmatched elements. Uses hash-based lookup
-     * for {@code O(n + m)} performance.
+     * for {@code O(n + m + r)} performance.
      *
      * <p>The transformation function receives {@code null} for unmatched elements:
      * <ul>
      * <li>When a left element has no matching right element, the function receives (leftElement, null)</li>
      * <li>When a right element has no matching left element, the function receives (null, rightElement)</li>
-     * <li>When elements match, the function receives both {@code non-null} elements</li>
+     * <li>When elements match, the function receives both source elements, which may themselves be {@code null}</li>
      * </ul>
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13488,11 +13611,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs a full outer join between this stream and a collection of the same type using a common key extractor.
      * This operation includes all elements from both sources, pairing elements where keys match and including
-     * unmatched elements with {@code null} for the missing side. Uses hash-based lookup for {@code O(n + m)} performance.
+     * unmatched elements with {@code null} for the missing side. Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>This simplified method is useful for comparing or reconciling two collections of the same type,
      * such as finding differences between datasets, synchronizing records, or identifying missing elements
      * in either collection.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13522,7 +13650,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements; applied to both sources
      * @return a new Stream of Pair objects containing all elements from both sources, with {@code null} for unmatched elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper} is {@code null}
      * @see #fullJoin(Collection, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -13534,11 +13662,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs a full outer join between this stream and a collection of the same type with result transformation.
      * This operation includes all elements from both sources and applies a transformation function that must
-     * handle {@code null} values for unmatched elements. Uses hash-based lookup for {@code O(n + m)} performance.
+     * handle {@code null} values for unmatched elements. Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>This method is ideal for generating comparison reports, synchronization summaries, or change logs
      * between two datasets of the same type. The transformation function can produce different outputs
      * based on whether elements are matched, only in the left source, or only in the right source.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13573,7 +13706,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param func the function to apply to pairs; must handle {@code null} values
      * @return a new Stream consisting of the results of applying the function to all pairs
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code func} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper}, {@code func} is {@code null}
      * @see #fullJoin(Collection, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -13585,12 +13718,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs a full outer join between this stream and another stream with result transformation.
      * This operation includes all elements from both streams and applies a transformation function.
-     * The second stream is loaded into memory for efficient hash-based lookup, providing {@code O(n + m)} performance.
+     * The second stream is loaded into memory for efficient hash-based lookup, providing {@code O(n + m + r)} performance.
      *
      * <p><strong>Important:</strong> The second stream will be fully loaded into memory. If it's too large,
      * consider using {@code b.fullJoin(this.toList(), ...)} if this stream is smaller. The second stream
      * will be automatically closed along with this stream. The transformation function must handle {@code null} values
      * for unmatched elements from either stream.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13640,7 +13778,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * unmatched elements with {@code null}. Time complexity is O(n * m), making it less efficient than key-based joins.
      *
      * <p><strong>Performance Warning:</strong> This method has quadratic time complexity. For large datasets,
-     * use {@link #fullJoin(Collection, Function, Function)} for {@code O(n + m)} performance with key-based joining.
+     * use {@link #fullJoin(Collection, Function, Function)} for {@code O(n + m + r)} performance with key-based joining.
      * The predicate is only invoked with pairs of actual elements; unmatched elements are paired with {@code null}
      * in the result.
      *
@@ -13650,6 +13788,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <li>You need complex matching logic that requires examining multiple fields</li>
      * <li>The datasets are small enough that O(n * m) performance is acceptable</li>
      * </ul>
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13675,7 +13816,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test pairs of elements from this stream and the collection
      * @return a new Stream of Pair objects containing all elements from both sources, with {@code null} for unmatched elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code predicate} is {@code null}
      * @deprecated The time complexity is O(n * m). You should try {@code fullJoin(Collection, Function, Function)}
      *             first for better performance with key-based joins
      * @see #fullJoin(Collection, Function, Function)
@@ -13694,8 +13835,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><strong>Performance Warning:</strong> This method has quadratic time complexity. For large datasets
      * with simple equality conditions, use {@link #fullJoin(Collection, Function, Function, BiFunction)}
-     * for {@code O(n + m)} performance. The predicate is only invoked with pairs of actual elements; the
+     * for {@code O(n + m + r)} performance. The predicate is only invoked with pairs of actual elements; the
      * transformation function must handle {@code null} values for unmatched elements.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13747,12 +13891,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a left outer join between this stream and the specified collection based on matching keys.
      * This operation includes all elements from this stream, pairing them with matching elements from the
      * collection where keys are equal. Elements from this stream without matches are paired with {@code null}.
-     * Uses hash-based lookup for {@code O(n + m)} performance.
+     * Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>A left join preserves all data from the left side (this stream) while optionally enriching it
      * with data from the right side (the collection). This is equivalent to SQL's LEFT OUTER JOIN operation
      * and is useful for optional data enrichment, maintaining all primary records while adding supplementary
      * information where available.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13783,7 +13932,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection
      * @return a new Stream of Pair objects containing all elements from this stream, with {@code null} for unmatched right elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
      * @see #leftJoin(Collection, Function, Function, BiFunction)
      * @see #innerJoin(Collection, Function, Function)
      * @see #fullJoin(Collection, Function, Function)
@@ -13798,11 +13947,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a left outer join with result transformation.
      * This operation includes all elements from this stream and applies a transformation function to produce
      * custom results. The function receives {@code null} for the right parameter when no match is found in the collection.
-     * Uses hash-based lookup for {@code O(n + m)} performance.
+     * Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>This method is ideal for enriching or annotating all elements from the primary stream with optional
      * data from a secondary source. The transformation function must handle {@code null} values for the right parameter
      * to process unmatched elements appropriately.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13852,11 +14006,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a left outer join between this stream and a collection of the same type using a common key extractor.
      * This operation includes all elements from this stream, pairing them with matching elements from the
      * collection where keys are equal. Elements without matches are paired with {@code null}.
-     * Uses hash-based lookup for {@code O(n + m)} performance.
+     * Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>This simplified method is useful for enriching a primary dataset with optional information from
      * a secondary dataset of the same type, such as adding manager information to employees or finding
      * corresponding records in a reference collection.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13886,7 +14045,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements; applied to both sources
      * @return a new Stream of Pair objects containing all elements from this stream, with {@code null} for unmatched right elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper} is {@code null}
      * @see #leftJoin(Collection, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -13898,10 +14057,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs a left outer join between this stream and a collection of the same type with result transformation.
      * This operation includes all elements from this stream and applies a transformation function that must
-     * handle {@code null} values for unmatched right elements. Uses hash-based lookup for {@code O(n + m)} performance.
+     * handle {@code null} values for unmatched right elements. Uses hash-based lookup for {@code O(n + m + r)} performance.
      *
      * <p>This method is ideal for creating reports or transformations where all primary records must be
      * preserved while optionally enriching them with data from a secondary source of the same type.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -13934,7 +14098,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param func the function to apply to pairs; must handle {@code null} right values
      * @return a new Stream consisting of the results of applying the function to all left elements with their matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code func} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper}, {@code func} is {@code null}
      * @see #leftJoin(Collection, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -13946,12 +14110,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Performs a left outer join between this stream and another stream with result transformation.
      * This operation includes all elements from this stream and applies a transformation function.
-     * The second stream is loaded into memory for efficient hash-based lookup, providing {@code O(n + m)} performance.
+     * The second stream is loaded into memory for efficient hash-based lookup, providing {@code O(n + m + r)} performance.
      *
      * <p><strong>Important:</strong> The second stream will be fully loaded into memory. If it's too large,
      * consider using {@code b.rightJoin(this.toList(), ...)} for the equivalent operation with reversed
      * memory usage. The second stream will be automatically closed along with this stream. The transformation
      * function must handle {@code null} values for unmatched right elements.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14004,7 +14173,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation has time complexity O(n * m), where {@code n} is the size of this stream and {@code m} is the size
      * of the specified collection. For better performance, consider using the key-based join methods instead.
      * Elements from this stream without matches will be paired with {@code null}.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14023,7 +14192,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test pairs of elements from this stream and the collection.
      * @return a new Stream of Pair objects containing all elements from this stream, with {@code null} for unmatched right elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code predicate} is {@code null}
      * @deprecated The time complexity is O(n * m). You should try {@code leftJoin(Collection, Function, Function)} first.
      * @see #leftJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -14041,7 +14210,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation has time complexity O(n * m), where {@code n} is the size of this stream and {@code m} is the size
      * of the specified collection. For better performance, consider using the key-based join methods instead.
      * The mapping function will receive {@code null} for the right parameter when no match is found.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14080,10 +14249,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a right outer join between this stream and the specified collection based on matching keys.
      * This is an intermediate operation that includes all elements from the collection, matching with elements from this stream where keys are equal.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m + r),
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * Elements from the collection without matches will be paired with {@code null} for the left element.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14105,7 +14279,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @return a new Stream of Pair objects containing all elements from the collection, with {@code null} for unmatched left elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
      * @see #rightJoin(Collection, Function, Function, BiFunction)
      * @see #leftJoin(Collection, Function, Function)
      * @see #fullJoin(Collection, Function, Function)
@@ -14120,10 +14294,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a right outer join between this stream and the specified collection, applying a mapping function.
      * This is an intermediate operation that includes all elements from the collection and transforms the result.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m + r),
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * The mapping function will receive {@code null} for the left parameter when no match is found.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14163,10 +14342,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a right outer join between this stream and the specified collection of the same type based on a common key.
      * This is an intermediate operation that includes all elements from the collection, matching with elements from this stream where keys are equal.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m + r),
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * Elements from the collection without matches will be paired with {@code null} for the left element.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14186,7 +14370,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param keyMapper function to extract keys from elements.
      * @return a new Stream of Pair objects containing all elements from the collection, with {@code null} for unmatched left elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper} is {@code null}
      * @see #rightJoin(Collection, Function, BiFunction)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -14199,10 +14383,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a right outer join between this stream and the specified collection of the same type, applying a mapping function.
      * This is an intermediate operation that includes all elements from the collection and transforms the result.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m + r),
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * The mapping function will receive {@code null} for the left parameter when no match is found.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14225,7 +14414,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param func the function to apply to pairs to produce result elements. Must handle {@code null} left values.
      * @return a new Stream consisting of the results of applying the function to all right elements with their matches
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code func} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper}, {@code func} is {@code null}
      * @see #rightJoin(Collection, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
      */
@@ -14238,11 +14427,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a right outer join between this stream and another stream, applying a mapping function.
      * This is an intermediate operation that includes all elements from the second stream and transforms the result.
      *
-     * <p>This operation loads the second stream into memory for efficient hash-based lookup with time complexity O(n + m),
+     * <p>This operation loads the second stream into memory for efficient hash-based lookup with time complexity O(n + m + r),
      * where {@code n} is the size of this stream and {@code m} is the size of the second stream. If the second stream is too large
      * to fit in memory, consider using {@code b.leftJoin(this.toList(), ...)} instead to load this stream into memory.
      * The second stream will be closed along with this stream.
      * The mapping function will receive {@code null} for the left parameter when no match is found.
+     *
+     * <p>Hash-based complexity is expected, with {@code r} the number of output pairs; duplicate keys
+     * can produce up to {@code n * m} pairs. Callback costs are additional.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14283,7 +14477,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation has time complexity O(n * m), where {@code n} is the size of this stream and {@code m} is the size
      * of the specified collection. For better performance, consider using the key-based join methods instead.
      * Elements from the collection without matches will be paired with {@code null} for the left element.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14302,7 +14496,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param predicate the condition to test pairs of elements from this stream and the collection.
      * @return a new Stream of Pair objects containing all elements from the collection, with {@code null} for unmatched left elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code predicate} is {@code null}
      * @deprecated The time complexity is O(n * m). You should try {@code rightJoin(Collection, Function, Function)} first.
      * @see #rightJoin(Collection, Function, Function)
      * @see <a href="https://stackoverflow.com/questions/38549">What is the difference between "INNER JOIN" and "OUTER JOIN"</a>
@@ -14320,7 +14514,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This operation has time complexity O(n * m), where {@code n} is the size of this stream and {@code m} is the size
      * of the specified collection. For better performance, consider using the key-based join methods instead.
      * The mapping function will receive {@code null} for the left parameter when no match is found.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14359,10 +14553,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection based on matching keys.
      * This is an intermediate operation that groups elements from the collection by matching keys with elements from this stream.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * Each element from this stream is paired with a list of all matching elements from the collection.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14378,6 +14577,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
      *
+     * <p>An unmatched left element receives an empty list.
+     *
      * @param <U> the type of elements in the collection to join with
      * @param <K> the type of the key used for joining
      * @param b the collection to join with.
@@ -14385,7 +14586,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param rightKeyExtractor function to extract keys from elements of the collection.
      * @return a new Stream of Pair objects containing elements from this stream paired with lists of matching elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
      * @see #groupJoin(Collection, Function, Function, BiFunction)
      */
     @ParallelSupported
@@ -14397,10 +14598,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection, applying a mapping function to grouped results.
      * This is an intermediate operation that groups elements from the collection by matching keys and transforms the result.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * The mapping function receives each element from this stream with a list of all matching elements from the collection.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14416,6 +14622,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
+     *
+     * <p>An unmatched left element receives an empty list.
      *
      * @param <U> the type of elements in the collection to join with
      * @param <K> the type of the key used for joining
@@ -14439,10 +14647,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection of the same type based on a common key.
      * This is an intermediate operation that groups elements from the collection by matching keys with elements from this stream.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * Each element from this stream is paired with a list of all matching elements from the collection.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14460,12 +14673,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
      *
+     * <p>An unmatched left element receives an empty list.
+     *
      * @param <K> the type of the key used for joining
      * @param b the collection to join with.
      * @param keyMapper function to extract keys from elements.
      * @return a new Stream of Pair objects containing elements from this stream paired with lists of matching elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper} is {@code null}
      * @see #groupJoin(Collection, Function, BiFunction)
      */
     @ParallelSupported
@@ -14477,10 +14692,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection of the same type, applying a mapping function.
      * This is an intermediate operation that groups elements from the collection by matching keys and transforms the result.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * The mapping function receives each element from this stream with a list of all matching elements from the collection.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14492,11 +14712,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .groupJoin(employees, Person::getId,
      *                  (mgr, empList) -> mgr.getName() + " manages: " +
      *                                    empList.stream().map(Person::getName)
-     *                                           .collect(Collectors.joining(", ")))
+     *                                           .collect(java.util.stream.Collectors.joining(", ")))
      *       .forEach(System.out::println);
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
+     *
+     * <p>An unmatched left element receives an empty list.
      *
      * @param <K> the type of the key used for joining
      * @param <R> the type of the result elements
@@ -14505,7 +14727,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param func the function to apply to element-list pairs to produce result elements.
      * @return a new Stream consisting of the results of applying the function to grouped pairs
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code func} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper}, {@code func} is {@code null}
      * @see #groupJoin(Collection, Function)
      */
     @ParallelSupported
@@ -14517,10 +14739,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and another stream, applying a mapping function to grouped results.
      * This is an intermediate operation that groups elements from the second stream by matching keys and transforms the result.
      *
-     * <p>This operation loads the second stream into memory for efficient hash-based lookup with time complexity O(n + m),
-     * where {@code n} is the size of this stream and {@code m} is the size of the second stream. If the second stream is too large
-     * to fit in memory, consider using {@code b.groupJoin(this, ...)} instead.
+     * <p>This operation loads the second stream into memory for efficient hash-based lookup with expected lookup and indexing cost O(n + m), excluding callback costs,
+     * where {@code n} is the size of this stream and {@code m} is the size of the second stream. Reversing the inputs changes which elements receive groups and is not an equivalent replacement.
      * The second stream will be closed along with this stream.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14533,6 +14759,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
+     *
+     * <p>An unmatched left element receives an empty list.
      *
      * @param <U> the type of elements in the stream to join with
      * @param <K> the type of the key used for joining
@@ -14556,10 +14784,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection, merging grouped elements with a binary operator.
      * This is an intermediate operation that groups elements from the collection by matching keys and reduces each group to a single value.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * Multiple matching elements from the collection are reduced to a single value using the merge function.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14585,7 +14818,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param mergeFunction binary operator to merge multiple matching elements into one.
      * @return a new Stream of Pair objects containing elements paired with merged matching elements, with {@code null} for unmatched elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code leftKeyExtractor}, {@code rightKeyExtractor}, {@code mergeFunction} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code leftKeyExtractor}, {@code rightKeyExtractor}, {@code mergeFunction} is {@code null}
      * @see #groupJoin(Collection, Function, Function, BinaryOperator, BiFunction)
      */
     @ParallelSupported
@@ -14597,10 +14830,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection, merging grouped elements and applying a mapping function.
      * This is an intermediate operation that groups elements, reduces each group, and transforms the result.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * Multiple matching elements are first reduced using the merge function, then the result is transformed.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14640,10 +14878,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and another stream, merging grouped elements and applying a mapping function.
      * This is an intermediate operation that groups elements, reduces each group, and transforms the result.
      *
-     * <p>This operation loads the second stream into memory for efficient hash-based lookup with time complexity O(n + m),
-     * where {@code n} is the size of this stream and {@code m} is the size of the second stream. If the second stream is too large
-     * to fit in memory, consider using {@code b.groupJoin(this, ...)} instead.
+     * <p>This operation loads the second stream into memory for efficient hash-based lookup with expected lookup and indexing cost O(n + m), excluding callback costs,
+     * where {@code n} is the size of this stream and {@code m} is the size of the second stream. Reversing the inputs changes which elements receive groups and is not an equivalent replacement.
      * The second stream will be closed along with this stream.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14681,10 +14923,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection using a collector to aggregate grouped elements.
      * This is an intermediate operation that groups elements from the collection by matching keys and collects each group.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * The collector is used to aggregate all matching elements from the collection for each element in this stream.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14700,6 +14947,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
      *
+     * <p>An unmatched left element receives a fresh reduction of empty input using the collector.
+     *
      * @param <U> the type of elements in the collection to join with
      * @param <K> the type of the key used for joining
      * @param <D> the result type of the downstream collector
@@ -14709,7 +14958,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream collector to aggregate matching elements.
      * @return a new Stream of Pair objects containing elements paired with collected results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code leftKeyExtractor}, {@code rightKeyExtractor} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code leftKeyExtractor}, {@code rightKeyExtractor}, {@code downstream} is {@code null}
      * @see #groupJoin(Collection, Function, Function, Collector, BiFunction)
      */
     @ParallelSupported
@@ -14721,10 +14970,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection using a collector and applying a mapping function.
      * This is an intermediate operation that groups elements, collects each group, and transforms the result.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * The collector aggregates matching elements, then the mapping function transforms the paired result.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14740,6 +14994,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
+     *
+     * <p>An unmatched left element receives a fresh reduction of empty input using the collector.
      *
      * @param <U> the type of elements in the collection to join with
      * @param <K> the type of the key used for joining
@@ -14765,10 +15021,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection of the same type using a collector.
      * This is an intermediate operation that groups elements from the collection by matching keys and collects each group.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * The collector is used to aggregate all matching elements from the collection for each element in this stream.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14786,6 +15047,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
      *
+     * <p>An unmatched left element receives a fresh reduction of empty input using the collector.
+     *
      * @param <K> the type of the key used for joining
      * @param <D> the result type of the downstream collector
      * @param b the collection to join with.
@@ -14793,7 +15056,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param downstream collector to aggregate matching elements.
      * @return a new Stream of Pair objects containing elements paired with collected results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper}, {@code downstream} is {@code null}
      * @see #groupJoin(Collection, Function, Collector, BiFunction)
      */
     @ParallelSupported
@@ -14805,10 +15068,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and the specified collection of the same type using a collector and mapping function.
      * This is an intermediate operation that groups elements, collects each group, and transforms the result.
      *
-     * <p>This operation uses hash-based lookup for efficient joining with time complexity O(n + m),
+     * <p>This operation uses hash-based lookup for efficient joining with expected lookup and indexing cost O(n + m), excluding callback costs,
      * where {@code n} is the size of this stream and {@code m} is the size of the specified collection.
      * The collector aggregates matching elements, then the mapping function transforms the paired result.
-     * The operation is stateless and can be parallelized if the stream supports parallel processing.
+     * The operation retains join state and can be parallelized if the stream supports parallel processing.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14826,6 +15094,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
      *
+     * <p>An unmatched left element receives a fresh reduction of empty input using the collector.
+     *
      * @param <K> the type of the key used for joining
      * @param <D> the result type of the downstream collector
      * @param <R> the type of the result elements
@@ -14835,7 +15105,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param func the function to apply to paired results to produce final elements.
      * @return a new Stream consisting of the results of applying the function to collected pairs
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code func} is {@code null}
+     * @throws IllegalArgumentException if any of {@code b}, {@code keyMapper}, {@code downstream}, {@code func} is {@code null}
      * @see #groupJoin(Collection, Function, Collector)
      */
     @ParallelSupported
@@ -14847,10 +15117,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Performs a group join between this stream and another stream using a collector and applying a mapping function.
      * This is an intermediate operation that groups elements, collects each group, and transforms the result.
      *
-     * <p>This operation loads the second stream into memory for efficient hash-based lookup with time complexity O(n + m),
-     * where {@code n} is the size of this stream and {@code m} is the size of the second stream. If the second stream is too large
-     * to fit in memory, consider using {@code b.groupJoin(this, ...)} instead.
+     * <p>This operation loads the second stream into memory for efficient hash-based lookup with expected lookup and indexing cost O(n + m), excluding callback costs,
+     * where {@code n} is the size of this stream and {@code m} is the size of the second stream. Reversing the inputs changes which elements receive groups and is not an equivalent replacement.
      * The second stream will be closed along with this stream.
+     *
+     * <p>Keys use ordinary map equality: null keys match each other, and array keys use identity equality.
+     *
+     * <p>Matching lists or aggregate results are cached per right key and shared by left elements
+     * with that key. Treat these values as read-only while traversing, especially in parallel.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14864,6 +15138,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; may materialize or index the right input in memory.
+     *
+     * <p>An unmatched left element receives a fresh reduction of empty input using the collector.
      *
      * @param <U> the type of elements in the stream to join with
      * @param <K> the type of the key used for joining
@@ -14891,12 +15167,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This operation is designed for joining with ordered data where elements can be matched based on ranges
      * rather than exact key matches.
-     * <b>{@code b} must already be ordered consistently with {@code predicate}.</b> This is a
-     * correctness precondition, not a performance hint: the join advances a single forward cursor over
-     * {@code b}, so an element that arrives out of order is silently skipped and never appears in any
-     * result. Sort {@code b} first if you are not certain of its order.
+     * The join uses a single forward cursor over {@code b}. For each left element it consumes
+     * only the consecutive matching prefix at that cursor. The first nonmatching right element stays
+     * pending for the next left element; it is not skipped. Each right element is consumed at most once.
+     * Arrange both inputs so desired matches form successive prefixes. Sorting alone is insufficient
+     * if an unmatched right element blocks later matches; overlapping ranges do not reuse consumed elements.
      * Elements from the iterator that match the predicate are collected into lists for each stream element.
-     * This operation must be used in sequential mode only.
+     * Matching is serialized even for a parallel source; subsequent stages may retain parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14913,8 +15190,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; may buffer elements from the right input while matching ranges.
      *
      * @param <U> the type of elements in the iterator
-     * @param b the iterator to join with; it must already be ordered consistently with
-     *        {@code predicate}, or elements are silently dropped
+     * @param b the iterator to join with; desired matches must form successive prefixes for the left elements
      * @param predicate the condition to test if elements can be joined.
      * @return a new Stream of Pair objects containing stream elements paired with lists of matching iterator elements
      * @throws IllegalStateException if the stream is already closed
@@ -14932,12 +15208,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a sequential operation that collects matching elements from the iterator for each stream element.
      *
      * <p>This operation is designed for joining with ordered data where elements can be matched based on ranges.
-     * <b>{@code b} must already be ordered consistently with {@code predicate}.</b> This is a
-     * correctness precondition, not a performance hint: the join advances a single forward cursor over
-     * {@code b}, so an element that arrives out of order is silently skipped and never appears in any
-     * result. Sort {@code b} first if you are not certain of its order.
+     * The join uses a single forward cursor over {@code b}. For each left element it consumes
+     * only the consecutive matching prefix at that cursor. The first nonmatching right element stays
+     * pending for the next left element; it is not skipped. Each right element is consumed at most once.
+     * Arrange both inputs so desired matches form successive prefixes. Sorting alone is insufficient
+     * if an unmatched right element blocks later matches; overlapping ranges do not reuse consumed elements.
      * Elements from the iterator that match the predicate are collected using the specified collector.
-     * This operation must be used in sequential mode only.
+     * Matching is serialized even for a parallel source; subsequent stages may retain parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -14956,13 +15233,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <U> the type of elements in the iterator
      * @param <R> the result type of the collector
-     * @param b the iterator to join with; it must already be ordered consistently with
-     *        {@code predicate}, or elements are silently dropped
+     * @param b the iterator to join with; desired matches must form successive prefixes for the left elements
      * @param predicate the condition to test if elements can be joined.
      * @param collector the collector to aggregate matching elements.
      * @return a new Stream of Pair objects containing stream elements paired with collected results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code b}, {@code predicate}, or {@code collector} is {@code null}
      * @see #joinByRange(Iterator, BiPredicate)
      */
     @Beta
@@ -14976,12 +15252,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a sequential operation that collects matching elements and applies a mapping function.
      *
      * <p>This operation is designed for joining with ordered data where elements can be matched based on ranges.
-     * <b>{@code b} must already be ordered consistently with {@code predicate}.</b> This is a
-     * correctness precondition, not a performance hint: the join advances a single forward cursor over
-     * {@code b}, so an element that arrives out of order is silently skipped and never appears in any
-     * result. Sort {@code b} first if you are not certain of its order.
+     * The join uses a single forward cursor over {@code b}. For each left element it consumes
+     * only the consecutive matching prefix at that cursor. The first nonmatching right element stays
+     * pending for the next left element; it is not skipped. Each right element is consumed at most once.
+     * Arrange both inputs so desired matches form successive prefixes. Sorting alone is insufficient
+     * if an unmatched right element blocks later matches; overlapping ranges do not reuse consumed elements.
      * Elements are collected using the specified collector, then transformed by the mapping function.
-     * This operation must be used in sequential mode only.
+     * Matching is serialized even for a parallel source; subsequent stages may retain parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15002,8 +15279,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> the type of elements in the iterator
      * @param <D> the result type of the collector
      * @param <R> the type of the result elements
-     * @param b the iterator to join with; it must already be ordered consistently with
-     *        {@code predicate}, or elements are silently dropped
+     * @param b the iterator to join with; desired matches must form successive prefixes for the left elements
      * @param predicate the condition to test if elements can be joined.
      * @param collector the collector to aggregate matching elements.
      * @param func the function to apply to paired results to produce final elements.
@@ -15024,13 +15300,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a sequential operation that also processes remaining elements after the join.
      *
      * <p>This operation is designed for joining with ordered data where elements can be matched based on ranges.
-     * <b>{@code b} must already be ordered consistently with {@code predicate}.</b> This is a
-     * correctness precondition, not a performance hint: the join advances a single forward cursor over
-     * {@code b}, so an element that arrives out of order is silently skipped and never appears in any
-     * result. Sort {@code b} first if you are not certain of its order.
+     * The join uses a single forward cursor over {@code b}. For each left element it consumes
+     * only the consecutive matching prefix at that cursor. The first nonmatching right element stays
+     * pending for the next left element; it is not skipped. Each right element is consumed at most once.
+     * Arrange both inputs so desired matches form successive prefixes. Sorting alone is insufficient
+     * if an unmatched right element blocks later matches; overlapping ranges do not reuse consumed elements.
      * After processing all stream elements, any remaining elements in the iterator are processed by the mapper function
-     * and appended to the result stream. This ensures no data is lost from the iterator.
-     * This operation must be used in sequential mode only.
+     * and appended to the result stream. The mapper controls how much of that remainder is consumed and retained.
+     * Matching is serialized even for a parallel source; subsequent stages may retain parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15053,8 +15330,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param <U> the type of elements in the iterator
      * @param <D> the result type of the collector
      * @param <R> the type of the result elements
-     * @param b the iterator to join with; it must already be ordered consistently with
-     *        {@code predicate}, or elements are silently dropped
+     * @param b the iterator to join with; desired matches must form successive prefixes for the left elements
      * @param predicate the condition to test if elements can be joined.
      * @param collector the collector to aggregate matching elements.
      * @param func the function to apply to paired results to produce final elements.
@@ -15076,13 +15352,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a sequential operation that matches elements from the second stream that satisfy the predicate.
      *
      * <p>This operation is designed for joining with ordered data where elements can be matched based on ranges.
-     * <b>{@code b} must already be ordered consistently with {@code predicate}.</b> This is a
-     * correctness precondition, not a performance hint: the join advances a single forward cursor over
-     * {@code b}, so an element that arrives out of order is silently skipped and never appears in any
-     * result. Sort {@code b} first if you are not certain of its order.
+     * The join uses a single forward cursor over {@code b}. For each left element it consumes
+     * only the consecutive matching prefix at that cursor. The first nonmatching right element stays
+     * pending for the next left element; it is not skipped. Each right element is consumed at most once.
+     * Arrange both inputs so desired matches form successive prefixes. Sorting alone is insufficient
+     * if an unmatched right element blocks later matches; overlapping ranges do not reuse consumed elements.
      * Elements from the second stream that match the predicate are collected into lists for each element of this stream.
      * The second stream will be closed along with this stream.
-     * This operation must be used in sequential mode only.
+     * Matching is serialized even for a parallel source; subsequent stages may retain parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15121,13 +15398,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a sequential operation that collects matching elements from the second stream.
      *
      * <p>This operation is designed for joining with ordered data where elements can be matched based on ranges.
-     * <b>{@code b} must already be ordered consistently with {@code predicate}.</b> This is a
-     * correctness precondition, not a performance hint: the join advances a single forward cursor over
-     * {@code b}, so an element that arrives out of order is silently skipped and never appears in any
-     * result. Sort {@code b} first if you are not certain of its order.
+     * The join uses a single forward cursor over {@code b}. For each left element it consumes
+     * only the consecutive matching prefix at that cursor. The first nonmatching right element stays
+     * pending for the next left element; it is not skipped. Each right element is consumed at most once.
+     * Arrange both inputs so desired matches form successive prefixes. Sorting alone is insufficient
+     * if an unmatched right element blocks later matches; overlapping ranges do not reuse consumed elements.
      * Elements from the second stream that match the predicate are collected using the specified collector.
      * The second stream will be closed along with this stream.
-     * This operation must be used in sequential mode only.
+     * Matching is serialized even for a parallel source; subsequent stages may retain parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15151,7 +15429,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to aggregate matching elements.
      * @return a new Stream of Pair objects containing stream elements paired with collected results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}
+     * @throws IllegalArgumentException if {@code b}, {@code predicate}, or {@code collector} is {@code null}
      * @see #joinByRange(Stream, BiPredicate)
      */
     @Beta
@@ -15165,13 +15443,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a sequential operation that collects matching elements and applies a mapping function.
      *
      * <p>This operation is designed for joining with ordered data where elements can be matched based on ranges.
-     * <b>{@code b} must already be ordered consistently with {@code predicate}.</b> This is a
-     * correctness precondition, not a performance hint: the join advances a single forward cursor over
-     * {@code b}, so an element that arrives out of order is silently skipped and never appears in any
-     * result. Sort {@code b} first if you are not certain of its order.
+     * The join uses a single forward cursor over {@code b}. For each left element it consumes
+     * only the consecutive matching prefix at that cursor. The first nonmatching right element stays
+     * pending for the next left element; it is not skipped. Each right element is consumed at most once.
+     * Arrange both inputs so desired matches form successive prefixes. Sorting alone is insufficient
+     * if an unmatched right element blocks later matches; overlapping ranges do not reuse consumed elements.
      * Elements are collected using the specified collector, then transformed by the mapping function.
      * The second stream will be closed along with this stream.
-     * This operation must be used in sequential mode only.
+     * Matching is serialized even for a parallel source; subsequent stages may retain parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15214,14 +15493,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a sequential operation that also processes remaining elements after the join.
      *
      * <p>This operation is designed for joining with ordered data where elements can be matched based on ranges.
-     * <b>{@code b} must already be ordered consistently with {@code predicate}.</b> This is a
-     * correctness precondition, not a performance hint: the join advances a single forward cursor over
-     * {@code b}, so an element that arrives out of order is silently skipped and never appears in any
-     * result. Sort {@code b} first if you are not certain of its order.
+     * The join uses a single forward cursor over {@code b}. For each left element it consumes
+     * only the consecutive matching prefix at that cursor. The first nonmatching right element stays
+     * pending for the next left element; it is not skipped. Each right element is consumed at most once.
+     * Arrange both inputs so desired matches form successive prefixes. Sorting alone is insufficient
+     * if an unmatched right element blocks later matches; overlapping ranges do not reuse consumed elements.
      * After processing all elements from this stream, any remaining elements in the second stream are processed
-     * by the mapper function and appended to the result stream. This ensures no data is lost from the second stream.
+     * by the mapper function and appended to the result stream. The mapper controls how much of that remainder is consumed and retained.
      * The second stream will be closed along with this stream.
-     * This operation must be used in sequential mode only.
+     * Matching is serialized even for a parallel source; subsequent stages may retain parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15264,18 +15544,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     // #######################################9X9#######################################
 
     /**
-     * Returns at least one element in every specified interval, or the default value if no element occurs during that interval.
-     * This is a sequential-only intermediate operation useful for handling sparse streams where you need regular output
-     * even when the source stream has periods of inactivity. It's particularly valuable for time-series data with gaps,
-     * ensuring downstream operations receive regular input for processing or visualization.
-     *
-     * <p>When no element arrives within the specified duration, the default value is emitted to maintain a consistent
-     * flow of data. This prevents timeout issues in downstream operations and helps maintain responsive UIs when
-     * displaying real-time data streams.
+     * Waits up to the specified duration for the next buffered element on each downstream request,
+     * returning a default value if the wait expires while the source is still active.
+     * This sequential-only intermediate operation supplies defaults during source inactivity.
+     * It does not schedule downstream processing at fixed intervals: downstream work, callback execution,
+     * and thread scheduling can delay output. It terminates when the source is exhausted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Ensure at least one value every 5 seconds, use 0 as default for missing data
+     * // Wait up to 5 seconds per request, using 0 while the source is inactive
      * Stream<Integer> sparseData = getSensorReadings();
      * sparseData.maxWait(Duration.ofSeconds(5), 0)
      *           .forEach(value -> updateChart(value));
@@ -15288,12 +15565,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in a queue of the default capacity (64).
      *
-     * @param duration the maximum duration to wait for an element before emitting the default value; must be positive
+     * @param duration the maximum duration to wait for an element before emitting the default value; must be at least one millisecond
      * @param defaultValue the value to emit if no element occurs within the specified duration; can be null
      * @return a new Stream that emits elements from the original stream or the default value if no element
      *         occurs within the duration
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration is {@code null} or non-positive.
+     * @throws IllegalArgumentException if duration is {@code null} or converts to fewer than one millisecond.
      * @see #maxWait(Duration, Supplier)
      * @see #window(Duration)
      */
@@ -15355,7 +15633,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     }
 
                     @Override
-                    public T next() {
+                    public T next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -15371,14 +15649,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     }
 
     /**
-     * Returns at least one element in every specified interval, or a value from the supplier if no element occurs during that interval.
+     * Waits up to the specified duration for the next buffered element on each downstream request,
+     * returning a default value if the wait expires while the source is still active.
      * This is a sequential-only intermediate operation useful for handling sparse streams with dynamic default values.
      * The supplier is called only when needed, allowing for expensive computations to be deferred or context-aware
      * default values to be generated based on the current system state.
      *
      * <p>This method is particularly useful when default values need to be computed dynamically, such as timestamps,
      * random values, or values that depend on external state. The supplier is invoked each time a timeout occurs,
-     * ensuring fresh values are generated.
+     * producing a fresh default for that request. Downstream work and thread scheduling can delay output;
+     * this method does not establish a fixed output frequency and stops when the source is exhausted.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15397,13 +15677,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in a queue of the default capacity (64).
      *
      * @param duration the maximum duration to wait for an element before emitting a value from the supplier;
-     *                 must be positive
+     *                 must be at least one millisecond
      * @param supplierForDefaultValue the supplier to provide a value if no element occurs within the specified
      *                                duration; may return {@code null} values
      * @return a new Stream that emits elements from the original stream or values from the supplier if no element
      *         occurs within the duration
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration is {@code null} or non-positive, or if
+     * @throws IllegalArgumentException if duration is {@code null} or converts to fewer than one millisecond, or if
      *         {@code supplierForDefaultValue} is {@code null}.
      * @see #maxWait(Duration, Object)
      * @see #window(Duration)
@@ -15416,9 +15697,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         assertNotClosed();
 
         checkArgNotNull(duration, cs.duration);
-        checkArgNotNull(supplierForDefaultValue, cs.supplierForDefaultValue);
-
         checkArgPositive(duration.toMillis(), "duration.toMillis()");
+        checkArgNotNull(supplierForDefaultValue, cs.supplierForDefaultValue);
 
         final ArrayBlockingQueue<T> queueToBuffer = new ArrayBlockingQueue<>(DEFAULT_BUFFERED_SIZE_PER_ITERATOR);
         final MutableBoolean hasMore = MutableBoolean.of(true);
@@ -15469,7 +15749,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     }
 
                     @Override
-                    public T next() {
+                    public T next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -15499,6 +15779,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * skipped — every emitted list contains at least one element. To get output for every interval,
      * combine with {@link #maxWait(Duration, Object)}.
      *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Process events in 5-second windows
@@ -15514,16 +15798,17 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *           .forEach(avg -> saveToDatabase(avg));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
-     * @param duration the duration for each window; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
      * @return a new Stream where each element is a List&lt;T&gt; representing a window of elements from the original Stream
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration is {@code null} or non-positive.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond
      * @see #window(Duration, Supplier)
      * @see #window(Duration, Collector)
      * @see #window(Duration, Duration)
@@ -15535,6 +15820,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     public Stream<List<T>> window(final Duration duration) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
 
         return window(duration, Collectors.toList());
     }
@@ -15548,6 +15836,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The collection supplier is called once per window to create a fresh collection instance.
      * Windows with no elements are skipped; each returned collection contains at least one element.
      *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Use LinkedHashSet to maintain order and remove duplicates within each window
@@ -15560,19 +15852,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *           .forEach(min -> recordMinimum(min));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <C> the type of the Collection used for each window
-     * @param duration the duration for each window; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
      * @param collectionSupplier a Supplier that provides a new Collection instance for each window
      * @return a new Stream where each element is a Collection&lt;T&gt; representing a window of elements
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration is {@code null} or non-positive, or if {@code collectionSupplier}
-     *         is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, or {@code collectionSupplier} is {@code null}
      * @see #window(Duration)
      * @see #window(Duration, Collector)
      * @see #maxWait(Duration, Object)
@@ -15584,6 +15876,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
         return window(duration, LongSuppliers.ofCurrentTimeMillis(), collectionSupplier);
@@ -15598,6 +15892,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * for aligning windows to specific time boundaries (e.g., minute boundaries, hour boundaries)
      * or synchronizing windows across multiple streams.
      *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Align windows to minute boundaries
@@ -15606,25 +15904,26 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .forEach(window -> processAlignedWindow(window));
      *
      * // Start windowing at a specific timestamp
-     * long startTime = parseToTimestamp("2024-01-01T00:00:00Z");
-     * historicalData.window(Duration.ofHours(1), () -> startTime, LinkedList::new)
+     * long startTime = System.currentTimeMillis();
+     * liveData.window(Duration.ofHours(1), () -> startTime, LinkedList::new)
      *               .forEach(hourlyData -> analyzeHour(hourlyData));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <C> the type of the Collection used for each window
-     * @param duration the duration for each window; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
      * @param startTimeSupplier a supplier that provides the start time for the first window in milliseconds since epoch
      * @param collectionSupplier a Supplier that provides a new Collection instance for each window
      * @return a new Stream where each element is a Collection&lt;T&gt; representing a window of elements
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration is {@code null} or non-positive, or if {@code startTimeSupplier}
-     *         or {@code collectionSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond,
+     *         {@code startTimeSupplier} is {@code null}, or {@code collectionSupplier} is {@code null}
      * @see #window(Duration, Supplier)
      * @see #maxWait(Duration, Object)
      */
@@ -15635,6 +15934,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             final Supplier<? extends C> collectionSupplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
@@ -15648,6 +15949,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The collector is applied to each window independently, producing one result per window.
      * Windows with no elements are skipped, so the collector is only applied to windows containing at least one element.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15665,18 +15970,19 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *             });
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <R> the result type of the Collector
-     * @param duration the duration for each window; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
      * @param collector a Collector to aggregate the elements in each window; must not be null
      * @return a new Stream where each element is the result of applying the Collector to a window
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration is {@code null} or non-positive, or if collector is null.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, or {@code collector} is {@code null}
      * @see #window(Duration)
      * @see #window(Duration, Duration, Collector)
      * @see #maxWait(Duration, Object)
@@ -15686,6 +15992,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     public <R> Stream<R> window(final Duration duration, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
 
         return window(duration, LongSuppliers.ofCurrentTimeMillis(), collector);
     }
@@ -15698,6 +16007,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The start time supplier determines when the first window begins, and the collector
      * processes each window's elements to produce an aggregated result. This is particularly
      * useful for generating time-aligned reports or statistics.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15713,20 +16026,21 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *         .forEach(concatenated -> logBatch(concatenated));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <R> the result type of the Collector
-     * @param duration the duration for each window; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
      * @param startTimeSupplier the supplier function to provide the start time for the first window in milliseconds
      * @param collector a Collector to aggregate the elements in each window
      * @return a new Stream where each element is the result of applying the Collector to a window
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration or collector is {@code null}, or if duration is non-positive, or
-     *         if {@code startTimeSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond,
+     *         {@code startTimeSupplier} is {@code null}, or {@code collector} is {@code null}
      * @see #window(Duration, Collector)
      * @see #maxWait(Duration, Object)
      */
@@ -15737,6 +16051,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
 
         return window(duration, duration, startTimeSupplier, collector);
@@ -15753,6 +16069,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * When increment equals duration, windows are adjacent (tumbling windows). When increment
      * exceeds duration, there are gaps between windows.
      *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create 10-second windows that slide every 5 seconds (50% overlap)
@@ -15765,17 +16085,18 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *             .forEach(rollingAvg -> updateDisplay(rollingAvg));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
-     * @param duration the duration for each window; must be positive
-     * @param increment the increment duration for the start of each window; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
+     * @param increment the increment duration for the start of each window; must be at least one millisecond
      * @return a new Stream where each element is a list of elements from the overlapping windows
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration or increment is {@code null} or non-positive.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, {@code increment} is {@code null} or converts to fewer than one millisecond
      * @see #window(Duration)
      * @see #window(Duration, Duration, Collector)
      * @see #sliding(int, int, Collector)
@@ -15785,6 +16106,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     public Stream<List<T>> window(final Duration duration, final Duration increment) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
+        checkArgNotNull(increment, cs.increment);
+        checkArgPositive(increment.toMillis(), "increment.toMillis()");
 
         return window(duration, increment, Collectors.toList());
     }
@@ -15797,6 +16123,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The collection supplier is called for each window to create a fresh instance. Elements
      * are added to the collection as they fall within the window's time boundaries. Overlapping
      * windows will contain some of the same elements when increment is less than duration.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15811,20 +16141,20 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .forEach(max -> recordMaximum(max));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <C> the type of the collection
-     * @param duration the duration for each window; must be positive
-     * @param increment the increment duration for window starts; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
+     * @param increment the increment duration for window starts; must be at least one millisecond
      * @param collectionSupplier the supplier function to provide a new collection for each window
      * @return a new Stream where each element is a collection from a sliding window
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration or increment is {@code null} or non-positive, or if
-     *         {@code collectionSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, {@code increment} is {@code null} or converts to fewer than one millisecond, or {@code collectionSupplier} is {@code null}
      * @see #window(Duration, Duration)
      * @see #window(Duration, Supplier)
      */
@@ -15835,6 +16165,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
+        checkArgNotNull(increment, cs.increment);
+        checkArgPositive(increment.toMillis(), "increment.toMillis()");
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
         return window(duration, increment, LongSuppliers.ofCurrentTimeMillis(), collectionSupplier);
@@ -15848,6 +16182,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The start time supplier determines when the first window begins. Subsequent windows
      * start at intervals determined by the increment parameter. This enables synchronization
      * across multiple streams or alignment to specific time boundaries.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15865,21 +16203,22 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *               () -> syncTime, LinkedList::new);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <C> the type of the collection
-     * @param duration the duration for each window; must be positive
-     * @param increment the increment duration for window starts; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
+     * @param increment the increment duration for window starts; must be at least one millisecond
      * @param startTimeSupplier the supplier for the first window's start time in milliseconds
      * @param collectionSupplier the supplier for new collection instances
      * @return a new Stream where each element is a collection from a sliding window
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration or increment is {@code null}, or if duration or increment is
-     *         non-positive, or if {@code startTimeSupplier} or {@code collectionSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, {@code increment} is {@code null} or converts to fewer than one millisecond,
+     *         {@code startTimeSupplier} is {@code null}, or {@code collectionSupplier} is {@code null}
      * @see #window(Duration, Duration, Supplier)
      */
     @Beta
@@ -15889,6 +16228,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             final Supplier<? extends C> collectionSupplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
+        checkArgNotNull(increment, cs.increment);
+        checkArgPositive(increment.toMillis(), "increment.toMillis()");
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
@@ -15898,29 +16241,29 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Creates sliding windows with custom start time, collection type, and async processing option.
      * This internal method provides additional control over element buffering behavior for
-     * advanced streaming scenarios. When async is {@code true}, elements are pulled asynchronously
-     * by another thread, improving performance for streams with blocking I/O operations.
+     * advanced streaming scenarios. When async is {@code true}, non-array sources are pulled asynchronously
+     * by another thread, which can improve performance for streams with blocking I/O operations.
      *
-     * <p>Asynchronous processing is beneficial when the stream source involves network I/O,
+     * <p>Asynchronous processing can help when the stream source involves network I/O,
      * file I/O, or other blocking operations. It allows the windowing operation to continue
      * processing buffered elements while waiting for new data to arrive.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <C> the type of the collection
-     * @param duration the duration for each window; must be positive
-     * @param increment the increment duration for window starts; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
+     * @param increment the increment duration for window starts; must be at least one millisecond
      * @param startTimeSupplier the supplier for the first window's start time
      * @param collectionSupplier the supplier for new collection instances
      * @param async {@code true} to enable asynchronous element pulling, {@code false} for synchronous
      * @return a new Stream where each element is a collection from a sliding window
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration or increment is {@code null}, or if duration or increment is
-     *         non-positive.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, {@code increment} is {@code null} or converts to fewer than one millisecond, or {@code collectionSupplier} is {@code null}
      */
     @Beta
     @SequentialOnly
@@ -15928,6 +16271,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     <C extends Collection<T>> Stream<C> window(final Duration duration, final Duration increment, final LongSupplier startTimeSupplier,
             final Supplier<? extends C> collectionSupplier, final boolean async) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
+        checkArgNotNull(increment, cs.increment);
+        checkArgPositive(increment.toMillis(), "increment.toMillis()");
 
         return window(duration, increment, startTimeSupplier, null, Collectors.toCollection(collectionSupplier), async);
     }
@@ -15940,6 +16288,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>Each window is processed independently by the collector, producing one result per window.
      * When windows overlap (increment &lt; duration), elements contribute to multiple aggregations,
      * providing smooth transitions in the results.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -15955,20 +16307,20 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *           .forEach(freqMap -> analyzeWordTrends(freqMap));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <R> the type of the result
-     * @param duration the duration for each window; must be positive
-     * @param increment the increment duration for window starts; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
+     * @param increment the increment duration for window starts; must be at least one millisecond
      * @param collector a Collector to aggregate elements in each window
      * @return a new Stream where each element is an aggregation result from a sliding window
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration, increment or collector is {@code null}, or if durations are
-     *         non-positive.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, {@code increment} is {@code null} or converts to fewer than one millisecond, or {@code collector} is {@code null}
      * @see #window(Duration, Duration)
      * @see #window(Duration, Collector)
      */
@@ -15978,6 +16330,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public <R> Stream<R> window(final Duration duration, final Duration increment, final Collector<? super T, ?, R> collector)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
+        checkArgNotNull(increment, cs.increment);
+        checkArgPositive(increment.toMillis(), "increment.toMillis()");
 
         return window(duration, increment, LongSuppliers.ofCurrentTimeMillis(), collector);
     }
@@ -15990,6 +16347,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The start time supplier ensures windows begin at a specific time, enabling
      * coordination between different streams or alignment to clock boundaries for
      * consistent reporting intervals.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16007,21 +16368,22 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .forEach(joined -> processJoinedWindow(joined));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <R> the type of the result
-     * @param duration the duration for each window; must be positive
-     * @param increment the increment duration for window starts; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
+     * @param increment the increment duration for window starts; must be at least one millisecond
      * @param startTimeSupplier the supplier for the first window's start time in milliseconds
      * @param collector a Collector to aggregate elements in each window
      * @return a new Stream where each element is an aggregation result from a sliding window
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration, increment or collector is {@code null}, or if the durations are
-     *         non-positive, or if {@code startTimeSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, {@code increment} is {@code null} or converts to fewer than one millisecond,
+     *         {@code startTimeSupplier} is {@code null}, or {@code collector} is {@code null}
      * @see #window(Duration, Duration, Collector)
      */
     @Beta
@@ -16031,6 +16393,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
+        checkArgNotNull(increment, cs.increment);
+        checkArgPositive(increment.toMillis(), "increment.toMillis()");
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
 
         return window(duration, increment, startTimeSupplier, null, collector);
@@ -16038,7 +16404,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Creates sliding windows with custom window handler and collector.
-     * This advanced method supports complex windowing scenarios including watermarking,
+     * This advanced method supports complex windowing scenarios including event-time extraction,
      * late data handling, and custom event-time processing. The window handler provides
      * hooks for managing out-of-order events and implementing sophisticated stream processing patterns.
      *
@@ -16046,7 +16412,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <ul>
      * <li>Event time extraction from elements</li>
      * <li>Late data detection and handling</li>
-     * <li>Watermark processing for out-of-order streams</li>
+     * <li>Delayed processing of window results</li>
      * <li>Result caching for late data updates</li>
      * </ul>
      *
@@ -16066,15 +16432,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *            .forEach(summary -> processSummary(summary));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <R> the type of the result
-     * @param duration the duration for each window; must be positive
-     * @param increment the increment duration for window starts; must be positive
+     * @param duration the duration for each window; must be at least one millisecond
+     * @param increment the increment duration for window starts; must be at least one millisecond
      * @param startTimeSupplier the supplier for the first window's start time
      * @param windowHandler handler for late data and custom window operations; may be null. When it supplies a
      *                      {@link WindowHandler#timeExtractor() timeExtractor}, elements are assigned to windows by
@@ -16082,9 +16448,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                      historical data can be replayed
      * @param collector a Collector to aggregate elements in each window
      * @return a new Stream with aggregated sliding window results
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration, increment or collector is {@code null}, or if duration or
-     *         increment is non-positive, or if {@code startTimeSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, {@code increment} is {@code null} or converts to fewer than one millisecond,
+     *         {@code startTimeSupplier} is {@code null},
+     *         a non-null {@code windowHandler} reports a non-positive cache size for late data, or {@code collector} is {@code null}
      * @see WindowHandler
      * @see WindowHandler#timeExtractor()
      * @see #window(Duration, Duration, LongSupplier, Collector)
@@ -16096,6 +16464,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             final WindowHandler<T, R> windowHandler, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(duration, cs.duration);
+        checkArgPositive(duration.toMillis(), "duration.toMillis()");
+        checkArgNotNull(increment, cs.increment);
+        checkArgPositive(increment.toMillis(), "increment.toMillis()");
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
 
         return window(duration, increment, startTimeSupplier, windowHandler, collector, true); // It should be true by default. Otherwise, window size/duration will depend on iterator.next().
@@ -16107,11 +16479,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * timing, aggregation, late data handling, and asynchronous element processing.
      * It forms the foundation for all sliding window operations.
      *
-     * <p>Asynchronous processing improves performance for streams with blocking operations
-     * by buffering elements in a separate thread while windows are being processed.
+     * <p>For non-array sources, asynchronous processing can reduce blocking during window processing
+     * by buffering elements in a separate thread. Array sources are read directly.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
@@ -16124,9 +16496,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to aggregate window elements
      * @param async {@code true} for asynchronous element pulling
      * @return a new Stream with aggregated sliding window results
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if duration, increment or collector is {@code null}, or if duration or
-     *         increment is non-positive.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or converts to fewer than one millisecond, {@code increment} is {@code null} or converts to fewer than one millisecond,
+     *         a non-null {@code windowHandler} reports a non-positive cache size for late data, or {@code collector} is {@code null}
      */
     @Beta
     @SequentialOnly
@@ -16138,11 +16511,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         checkArgPositive(duration.toMillis(), "duration.toMillis()");
         checkArgNotNull(increment, cs.increment);
         checkArgPositive(increment.toMillis(), "increment.toMillis()");
-        checkArgNotNull(collector, cs.collector);
 
         if (windowHandler != null) {
             checkArgPositive(windowHandler.cacheSizeForLateData(), "windowHandler.cacheSizeForLateData()");
         }
+
+        checkArgNotNull(collector, cs.collector);
 
         final boolean isActionOnLateDataNotNull = windowHandler != null && windowHandler.onLateDataAction() != null;
         final boolean isEventTimeExtractorNull = windowHandler == null || windowHandler.timeExtractor() == null;
@@ -16253,7 +16627,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -16463,6 +16837,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * time-based windows might accumulate too many elements during traffic spikes, or
      * pure count-based windows might wait too long during quiet periods.
      *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Windows of at most 100 elements or 5 seconds duration
@@ -16478,18 +16856,18 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *             .forEach(stats -> saveStats(stats));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
-     * @param maxDuration the maximum duration for each window; must be positive
+     * @param maxDuration the maximum duration for each window; must be at least one millisecond
      * @param maxWindowSize the maximum number of elements for each window; must be positive
      * @return a new Stream where each element is a list of bounded window elements
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxDuration is {@code null} or non-positive, or maxWindowSize is
-     *         non-positive.
+     * @throws IllegalArgumentException if {@code maxDuration} is {@code null} or converts to fewer than one millisecond, {@code maxWindowSize} is non-positive
      * @see #window(Duration)
      * @see #window(Duration, int, Collector)
      * @see #sliding(int, int)
@@ -16499,6 +16877,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     @IntermediateOp
     public Stream<List<T>> window(final Duration maxDuration, final int maxWindowSize) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(maxDuration, cs.maxDuration);
+        checkArgPositive(maxDuration.toMillis(), "maxDuration.toMillis()");
+        checkArgPositive(maxWindowSize, cs.maxWindowSize);
 
         return window(maxDuration, maxWindowSize, Collectors.toList());
     }
@@ -16511,7 +16893,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The collection supplier creates a new instance for each window. Windows
      * close and emit their contents when either limit is reached, ensuring
-     * predictable memory usage and latency bounds.
+     * a bound on the number of elements accumulated per window. Actual memory depends on
+     * element sizes and the collection, and callbacks or scheduling can delay output.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16527,20 +16914,20 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *       .forEach(topEvents -> displayTopEvents(topEvents));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
      *
      * @param <C> the type of the collection
-     * @param maxDuration the maximum duration for each window; must be positive
+     * @param maxDuration the maximum duration for each window; must be at least one millisecond
      * @param maxWindowSize the maximum number of elements; must be positive
      * @param collectionSupplier the supplier for new collection instances
      * @return a new Stream where each element is a bounded collection
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxDuration is {@code null} or non-positive, or maxWindowSize is
-     *         non-positive, or if {@code collectionSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxDuration} is {@code null} or converts to fewer than one millisecond, {@code maxWindowSize} is non-positive, or {@code collectionSupplier} is {@code null}
      * @see #window(Duration, int)
      * @see #window(Duration, Supplier)
      */
@@ -16551,6 +16938,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(maxDuration, cs.maxDuration);
+        checkArgPositive(maxDuration.toMillis(), "maxDuration.toMillis()");
+        checkArgPositive(maxWindowSize, cs.maxWindowSize);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
         return window(maxDuration, maxWindowSize, LongSuppliers.ofCurrentTimeMillis(), collectionSupplier);
@@ -16564,6 +16954,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The start time supplier determines when windowing begins, enabling
      * synchronization across streams or alignment to time boundaries while
      * maintaining size limits for predictable resource usage.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16579,8 +16973,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * stream2.window(Duration.ofSeconds(30), 500, () -> syncTime, LinkedList::new);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
@@ -16591,9 +16985,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param startTimeSupplier the supplier for start time in milliseconds
      * @param collectionSupplier the supplier for collection instances
      * @return a new Stream where each element is a bounded collection
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxDuration is {@code null} or non-positive, or maxWindowSize is
-     *         non-positive, or if {@code startTimeSupplier} or {@code collectionSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxDuration} is {@code null} or converts to fewer than one millisecond, {@code maxWindowSize} is non-positive,
+     *         {@code startTimeSupplier} is {@code null}, or {@code collectionSupplier} is {@code null}
      * @see #window(Duration, int, Supplier)
      */
     @Beta
@@ -16603,6 +16998,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             final Supplier<? extends C> collectionSupplier) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(maxDuration, cs.maxDuration);
+        checkArgPositive(maxDuration.toMillis(), "maxDuration.toMillis()");
+        checkArgPositive(maxWindowSize, cs.maxWindowSize);
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
@@ -16612,14 +17010,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Creates bounded windows with custom start time, collection type, and async option.
      * This internal method adds asynchronous processing control to bounded windows,
-     * improving performance for streams with blocking I/O operations.
+     * which can improve performance for streams with blocking I/O operations.
      *
-     * <p>When async is {@code true}, elements are buffered in a separate thread while
-     * windows are being processed, preventing blocking delays from affecting
-     * window timing.
+     * <p>When async is {@code true}, non-array sources are buffered in a separate thread while
+     * windows are being processed; array sources are read directly. Callbacks and scheduling
+     * can still delay window output.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
@@ -16631,9 +17029,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collectionSupplier the supplier for collections
      * @param async {@code true} for asynchronous element pulling
      * @return a new Stream where each element is a bounded collection
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxDuration is {@code null} or non-positive, or maxWindowSize is
-     *         non-positive.
+     * @throws IllegalArgumentException if {@code maxDuration} is {@code null} or converts to fewer than one millisecond, {@code maxWindowSize} is non-positive, or {@code collectionSupplier} is {@code null}
      */
     @Beta
     @SequentialOnly
@@ -16641,6 +17039,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     <C extends Collection<T>> Stream<C> window(final Duration maxDuration, final int maxWindowSize, final LongSupplier startTimeSupplier,
             final Supplier<? extends C> collectionSupplier, final boolean async) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(maxDuration, cs.maxDuration);
+        checkArgPositive(maxDuration.toMillis(), "maxDuration.toMillis()");
+        checkArgPositive(maxWindowSize, cs.maxWindowSize);
 
         return window(maxDuration, maxWindowSize, startTimeSupplier, null, Collectors.toCollection(collectionSupplier), async);
     }
@@ -16654,6 +17056,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>The collector processes each window independently when either limit
      * is reached. This is ideal for computing statistics or transformations
      * over bounded batches of time-series data.
+     *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -16671,8 +17077,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *         .forEach(batch -> sendBatchMessage(batch));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
@@ -16682,9 +17088,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxWindowSize the maximum number of elements
      * @param collector a Collector to aggregate window elements
      * @return a new Stream where each element is an aggregation result
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxDuration is {@code null} or non-positive, maxWindowSize is non-positive,
-     *         or collector is {@code null}.
+     * @throws IllegalArgumentException if {@code maxDuration} is {@code null} or converts to fewer than one millisecond, {@code maxWindowSize} is non-positive, or {@code collector} is {@code null}
      * @see #window(Duration, int)
      * @see #window(Duration, Collector)
      */
@@ -16694,6 +17100,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public <R> Stream<R> window(final Duration maxDuration, final int maxWindowSize, final Collector<? super T, ?, R> collector)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
+
+        checkArgNotNull(maxDuration, cs.maxDuration);
+        checkArgPositive(maxDuration.toMillis(), "maxDuration.toMillis()");
+        checkArgPositive(maxWindowSize, cs.maxWindowSize);
 
         return window(maxDuration, maxWindowSize, LongSuppliers.ofCurrentTimeMillis(), collector);
     }
@@ -16707,6 +17117,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * or size limit is reached. The collector then processes the window contents
      * to produce an aggregated result.
      *
+     * <p>Elements are timestamped when the window iterator processes them using the system clock.
+     * To assign windows from timestamps carried by the elements, use an overload with
+     * {@link WindowHandler#timeExtractor() WindowHandler.timeExtractor}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Aligned statistics for bounded windows
@@ -16718,8 +17132,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *             .forEach(typeCount -> saveHourlyStats(typeCount));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
@@ -16730,9 +17144,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param startTimeSupplier the supplier for start time in milliseconds
      * @param collector a Collector to aggregate window elements
      * @return a new Stream where each element is an aggregation result
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxDuration is {@code null} or non-positive, maxWindowSize is non-positive,
-     *         or collector is {@code null}, or if {@code startTimeSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxDuration} is {@code null} or converts to fewer than one millisecond, {@code maxWindowSize} is non-positive,
+     *         {@code startTimeSupplier} is {@code null}, or {@code collector} is {@code null}
      * @see #window(Duration, int, Collector)
      */
     @Beta
@@ -16742,6 +17157,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(maxDuration, cs.maxDuration);
+        checkArgPositive(maxDuration.toMillis(), "maxDuration.toMillis()");
+        checkArgPositive(maxWindowSize, cs.maxWindowSize);
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
 
         return window(maxDuration, maxWindowSize, startTimeSupplier, null, collector);
@@ -16750,7 +17168,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     /**
      * Creates bounded windows with window handler and collector.
      * This advanced method supports bounded windows with custom event-time
-     * processing, late data handling, and watermarking. Windows close when
+     * processing, late data handling, and delayed result processing. Windows close when
      * either limit is reached, with sophisticated stream processing capabilities.
      *
      * <p>The WindowHandler enables complex scenarios like:
@@ -16776,8 +17194,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *            .forEach(summary -> processBoundedSummary(summary));
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
@@ -16792,9 +17210,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *                      by reaching {@code maxWindowSize}), so historical data can be replayed
      * @param collector a Collector to aggregate window elements
      * @return a new Stream where each element is an aggregation result
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxDuration or collector is {@code null}, or maxDuration or maxWindowSize
-     *         is non-positive, or if {@code startTimeSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code maxDuration} is {@code null} or converts to fewer than one millisecond, {@code maxWindowSize} is non-positive,
+     *         {@code startTimeSupplier} is {@code null},
+     *         a non-null {@code windowHandler} reports a non-positive cache size for late data, or {@code collector} is {@code null}
      * @see WindowHandler
      * @see WindowHandler#timeExtractor()
      * @see #window(Duration, int, LongSupplier, Collector)
@@ -16806,6 +17226,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             final WindowHandler<T, R> windowHandler, final Collector<? super T, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgNotNull(maxDuration, cs.maxDuration);
+        checkArgPositive(maxDuration.toMillis(), "maxDuration.toMillis()");
+        checkArgPositive(maxWindowSize, cs.maxWindowSize);
         checkArgNotNull(startTimeSupplier, cs.startTimeSupplier);
 
         return window(maxDuration, maxWindowSize, startTimeSupplier, windowHandler, collector, true); // It should be true by default. Otherwise, window size/duration will depend on iterator.next();
@@ -16817,8 +17240,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * all customization options including timing, size limits, late data handling,
      * and asynchronous processing.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
-     *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; maintains current or active window state and may buffer input asynchronously; collectors determine
+     * how much accumulated state each window retains.
      *
      * <p>Traversing the returned stream throws {@link ArithmeticException} if a window boundary exceeds
      * the range of a {@code long} timestamp.</p>
@@ -16831,9 +17254,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param collector the collector to aggregate elements
      * @param async {@code true} for asynchronous element pulling
      * @return a new Stream where each element is an aggregation result
+     * @throws ArithmeticException if a duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxDuration or collector is {@code null}, or maxDuration or maxWindowSize
-     *         is non-positive.
+     * @throws IllegalArgumentException if {@code maxDuration} is {@code null} or converts to fewer than one millisecond, {@code maxWindowSize} is non-positive,
+     *         a non-null {@code windowHandler} reports a non-positive cache size for late data, or {@code collector} is {@code null}
      */
     @Beta
     @SequentialOnly
@@ -16844,11 +17268,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         checkArgNotNull(maxDuration, cs.maxDuration);
         checkArgPositive(maxDuration.toMillis(), "maxDuration.toMillis()");
         checkArgPositive(maxWindowSize, cs.maxWindowSize);
-        checkArgNotNull(collector, cs.collector);
 
         if (windowHandler != null) {
             checkArgPositive(windowHandler.cacheSizeForLateData(), "windowHandler.cacheSizeForLateData()");
         }
+
+        checkArgNotNull(collector, cs.collector);
 
         final boolean isActionOnLateDataNotNull = windowHandler != null && windowHandler.onLateDataAction() != null;
         final boolean isEventTimeExtractorNull = windowHandler == null || windowHandler.timeExtractor() == null;
@@ -16942,7 +17367,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -17404,7 +17829,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -17491,7 +17916,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers elements in the current window or active windows.
      *
      * @param maxWaitForNextInMillis function to calculate timeout in milliseconds
-     * @param windowSplitter predicate to determine window boundaries
+     * @param windowSplitter predicate returning {@code true} to keep the next element in the current window,
+     *                       or {@code false} to start a new window with that element
      * @return a new Stream where each element is a list from a timeout window
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code maxWaitForNextInMillis} or {@code windowSplitter} is {@code null}.
@@ -17576,7 +18002,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * long syncTime = getGlobalSyncTime();
      * stream.window(
      *     (first, current, count) -> calculateAdaptiveTimeout(first, current),
-     *     (first, current, next, count) -> shouldSplitWindow(current, next),
+     *     (first, current, next, count) -> !shouldSplitWindow(current, next),
      *     () -> syncTime, ArrayList::new)
      *     .forEach(window -> processAdaptiveWindow(window));
      * }</pre>
@@ -17668,7 +18094,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <ul>
      * <li>Dynamic timeout based on window state</li>
      * <li>Content-based window boundaries</li>
-     * <li>Custom timestamp generation</li>
+     * <li>A custom initial window start time</li>
      * <li>Flexible result aggregation</li>
      * </ul>
      *
@@ -17677,7 +18103,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * // Complex adaptive windowing with all parameters
      * stream.window(
      *     (first, current, count) -> calculateDynamicTimeout(first, current, count),
-     *     (first, current, next, count) -> detectBoundary(first, current, next, count),
+     *     (first, current, next, count) -> !detectBoundary(first, current, next, count),
      *     () -> getCustomTimestamp(),
      *     Collectors.groupingBy(Event::getType,
      *                          Collectors.summarizingInt(Event::getValue)))
@@ -17688,7 +18114,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param <R> the type of the result
      * @param maxWaitForNextInMillis function to calculate timeout in milliseconds
-     * @param windowSplitter predicate to determine window boundaries
+     * @param windowSplitter predicate returning {@code true} to keep the next element in the current window,
+     *                       or {@code false} to start a new window with that element
      * @param startTimeSupplier supplier for the start time in milliseconds; elements pulled before that instant are discarded without notice
      * @param collector collector to aggregate window elements
      * @return a new Stream where each element is an aggregation result
@@ -17770,7 +18197,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -17924,15 +18351,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Attaches a new stream with its own terminal operation to consume elements from the upstream.
-     * This allows multiple downstream streams to process the same upstream elements independently, without restarting the upstream stream.
+     * This allows multiple downstream streams to process elements from the same upstream pipeline, without restarting the upstream stream.
      *
-     * <p>The intermediate and terminal operations in the attached stream will be executed in a new thread.
-     * The new thread is started when the main stream receives the first element or is closed if there are no elements.
+     * <p>The intermediate and terminal operations in the attached stream will be executed in a separate asynchronous task.
+     * The task starts when an element is first sent to the subscriber, or when the main stream closes.
      * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
      *
      * <p>After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
-     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements
-     * or final result in another stream. However, when the main stream is closed, it will wait for the attached stream
+     * The pipelines share the upstream source and element objects. Mutations and shared callback state
+     * can affect both pipelines, and queue backpressure or failures can affect their progress.
+     * When the main stream is closed, it will wait for the attached stream
      * to close before calling close actions, and any failure raised while waiting is propagated to the caller.
      * If interruption prevents delivery to the subscriber queue, the caller retains its interrupt status.
      *
@@ -17974,15 +18402,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Attaches a new stream with its own terminal operation to consume elements from the upstream.
-     * This allows multiple downstream streams to process the same upstream elements independently, without restarting the upstream stream.
+     * This allows multiple downstream streams to process elements from the same upstream pipeline, without restarting the upstream stream.
      *
-     * <p>The intermediate and terminal operations in the attached stream will be executed in a new thread.
-     * The new thread is started when the main stream receives the first element or is closed if there are no elements.
+     * <p>The intermediate and terminal operations in the attached stream will be executed in a separate asynchronous task.
+     * The task starts when an element is first sent to the subscriber, or when the main stream closes.
      * Elements from upstream pulled by the main stream will be put in a queue for the attached stream to consume.
      *
      * <p>After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
-     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements
-     * or final result in another stream. However, when the main stream is closed, it will wait for the attached stream
+     * The pipelines share the upstream source and element objects. Mutations and shared callback state
+     * can affect both pipelines, and queue backpressure or failures can affect their progress.
+     * When the main stream is closed, it will wait for the attached stream
      * to close before calling close actions, and any failure raised while waiting is propagated to the caller.
      * If interruption prevents delivery to the subscriber queue, the caller retains its interrupt status.
      *
@@ -18004,11 +18433,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxWaitForAddingElementToQueue max wait time to add the next element to queue for subscriber stream to consume.
      *                                       Default value is 30000 (unit is milliseconds). Must be positive.
      *                                       If the next element can't be added to queue after waiting for the period, an exception will be thrown in the subscriber stream.
-     * @param executor the executor to run the attached stream.
+     * @param executor the executor to run the attached stream; it must run the task asynchronously
+     *                 with capacity to make progress while the main stream is consuming or closing
      * @return the main stream with the attached subscriber
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any parameter is invalid, or if
-     *         {@code consumerForNewStreamWithTerminalAction} or {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code consumerForNewStreamWithTerminalAction} is {@code null},
+     *         {@code queueSize} or {@code maxWaitForAddingElementToQueue} is not positive, or {@code executor} is {@code null}.
      */
     @Beta
     @SequentialOnly
@@ -18060,7 +18490,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -18105,7 +18535,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 nextCallCount.increment();
 
                 try {
@@ -18264,8 +18694,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param executor the executor to run the attached stream.
      * @return the main stream with the attached subscriber
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any parameter is invalid, or if any of {@code predicate},
-     *         {@code consumerForNewStreamWithTerminalAction}, or {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code predicate} or {@code consumerForNewStreamWithTerminalAction} is {@code null},
+     *         {@code queueSize} or {@code maxWaitForAddingElementToQueue} is not positive, or {@code executor} is {@code null}.
      * @see #addSubscriber(Throwables.Consumer, int, long, Executor)
      * @see #filter(Predicate, Consumer)
      */
@@ -18335,7 +18765,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -18407,7 +18837,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -18454,15 +18884,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Attaches a new stream with its own terminal operation to consume elements not taken by the specified predicate.
-     * This allows multiple downstream streams to process the same upstream elements independently, without restarting the upstream stream.
+     * This allows multiple downstream streams to process elements from the same upstream pipeline, without restarting the upstream stream.
      *
-     * <p>The intermediate and terminal operations in the attached stream will be executed in a new thread.
+     * <p>The intermediate and terminal operations in the attached stream will be executed in a separate asynchronous task.
      * Once the predicate returns {@code false} for an element, that element and all subsequent elements will be sent to the subscriber stream.
      * The subscriber starts when the predicate first returns false, or when the main stream closes if it has not started yet.
      *
      * <p>After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
-     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements
-     * or final result in another stream. However, when the main stream is closed, it will wait for the attached stream
+     * The pipelines share the upstream source and element objects. Mutations and shared callback state
+     * can affect both pipelines, and queue backpressure or failures can affect their progress.
+     * When the main stream is closed, it will wait for the attached stream
      * to close before calling close actions, and any failure raised while waiting is propagated to the caller.
      * If interruption prevents delivery to the subscriber queue, the caller retains its interrupt status.
      *
@@ -18503,15 +18934,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Attaches a new stream with its own terminal operation to consume elements not taken by the specified predicate.
-     * This allows multiple downstream streams to process the same upstream elements independently, without restarting the upstream stream.
+     * This allows multiple downstream streams to process elements from the same upstream pipeline, without restarting the upstream stream.
      *
-     * <p>The intermediate and terminal operations in the attached stream will be executed in a new thread.
+     * <p>The intermediate and terminal operations in the attached stream will be executed in a separate asynchronous task.
      * Once the predicate returns {@code false} for an element, that element and all subsequent elements will be sent to the subscriber stream.
      * The subscriber starts when the predicate first returns false, or when the main stream closes if it has not started yet.
      *
      * <p>After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
-     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements
-     * or final result in another stream. However, when the main stream is closed, it will wait for the attached stream
+     * The pipelines share the upstream source and element objects. Mutations and shared callback state
+     * can affect both pipelines, and queue backpressure or failures can affect their progress.
+     * When the main stream is closed, it will wait for the attached stream
      * to close before calling close actions, and any failure raised while waiting is propagated to the caller.
      * If interruption prevents delivery to the subscriber queue, the caller retains its interrupt status.
      *
@@ -18528,7 +18960,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * @param predicate the predicate to test elements.
      * @param consumerForNewStreamWithTerminalAction the consumer for the new stream with terminal action.
-     * @param executor the executor to run the attached stream.
+     * @param executor the executor to run the attached stream; it must run the task asynchronously
+     *                 with capacity to make progress while the main stream is consuming or closing
      * @return the main stream with the attached subscriber
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code predicate}, {@code consumerForNewStreamWithTerminalAction},
@@ -18607,7 +19040,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -18683,7 +19116,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -18730,15 +19163,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Attaches a new stream with its own terminal operation to consume elements dropped by the specified predicate.
-     * This allows multiple downstream streams to process the same upstream elements independently, without restarting the upstream stream.
+     * This allows multiple downstream streams to process elements from the same upstream pipeline, without restarting the upstream stream.
      *
-     * <p>The intermediate and terminal operations in the attached stream will be executed in a new thread.
+     * <p>The intermediate and terminal operations in the attached stream will be executed in a separate asynchronous task.
      * Elements that match the predicate will be sent to the subscriber stream until the predicate returns {@code false}.
-     * The new thread is started when the main stream receives the first element or is closed if there are no elements.
+     * The task starts when an element is first sent to the subscriber, or when the main stream closes.
      *
-     * <p>After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
-     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements
-     * or final result in another stream. However, when the main stream is closed, it will wait for the attached stream
+     * <p>After the main stream is finished, the attached stream can finish pulling the dropped prefix, stopping at the first nonmatching element.
+     * The pipelines share the upstream source and element objects. Mutations and shared callback state
+     * can affect both pipelines, and queue backpressure or failures can affect their progress.
+     * When the main stream is closed, it will wait for the attached stream
      * to close before calling close actions, and any failure raised while waiting is propagated to the caller.
      * If interruption prevents delivery to the subscriber queue, the caller retains its interrupt status.
      *
@@ -18781,15 +19215,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Attaches a new stream with its own terminal operation to consume elements dropped by the specified predicate.
-     * This allows multiple downstream streams to process the same upstream elements independently, without restarting the upstream stream.
+     * This allows multiple downstream streams to process elements from the same upstream pipeline, without restarting the upstream stream.
      *
-     * <p>The intermediate and terminal operations in the attached stream will be executed in a new thread.
+     * <p>The intermediate and terminal operations in the attached stream will be executed in a separate asynchronous task.
      * Elements that match the predicate will be sent to the subscriber stream until the predicate returns {@code false}.
-     * The new thread is started when the main stream receives the first element or is closed if there are no elements.
+     * The task starts when an element is first sent to the subscriber, or when the main stream closes.
      *
-     * <p>After the main stream is finished, the attached stream will continue to pull remaining elements from upstream if needed.
-     * The main stream and the attached stream run independently. Operations in one stream won't impact the elements
-     * or final result in another stream. However, when the main stream is closed, it will wait for the attached stream
+     * <p>After the main stream is finished, the attached stream can finish pulling the dropped prefix, stopping at the first nonmatching element.
+     * The pipelines share the upstream source and element objects. Mutations and shared callback state
+     * can affect both pipelines, and queue backpressure or failures can affect their progress.
+     * When the main stream is closed, it will wait for the attached stream
      * to close before calling close actions, and any failure raised while waiting is propagated to the caller.
      * If interruption prevents delivery to the subscriber queue, the caller retains its interrupt status.
      *
@@ -18810,11 +19245,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param maxWaitForAddingElementToQueue max wait time to add the next element to queue for subscriber stream to consume.
      *                                       Default value is 30000 (unit is milliseconds). Must be positive.
      *                                       If the next element can't be added to queue after waiting for the period, an exception will be thrown in the subscriber stream.
-     * @param executor the executor to run the attached stream.
+     * @param executor the executor to run the attached stream; it must run the task asynchronously
+     *                 with capacity to make progress while the main stream is consuming or closing
      * @return the main stream with the attached subscriber
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any parameter is invalid, or if any of {@code predicate},
-     *         {@code consumerForNewStreamWithTerminalAction}, or {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code predicate} or {@code consumerForNewStreamWithTerminalAction} is {@code null},
+     *         {@code queueSize} or {@code maxWaitForAddingElementToQueue} is not positive, or {@code executor} is {@code null}.
      * @see #addSubscriber(Throwables.Consumer, int, long, Executor)
      * @see #dropWhile(Predicate, Consumer)
      */
@@ -18885,7 +19321,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -18966,7 +19402,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -19011,8 +19447,12 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         return newStream(iter, isSorted(), comparator(), mergeCloseHandlers(iter::closeResource, closeHandlers(), true));
     }
 
+    /**
+     * @throws IllegalStateException if more than one main-stream pull is outstanding, or the main stream
+     *         has completed while a pull remains outstanding
+     */
     private static void checkNextCallCountInMainStream(final MutableInt nextCallCount, final MutableBoolean isMainStreamCompleted,
-            final MutableBoolean isExceptionThrown) {
+            final MutableBoolean isExceptionThrown) throws IllegalStateException {
         if (nextCallCount.value() > 1 || (isMainStreamCompleted.isTrue() && nextCallCount.value() > 0)) {
             isExceptionThrown.setTrue();
 
@@ -19020,8 +19460,13 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         }
     }
 
+    /**
+     * @throws IllegalStateException if no failure has yet been reported and an element could not be queued
+     *         for the subscriber, more than one main-stream pull is outstanding, or the main stream has completed
+     *         while a pull remains outstanding
+     */
     private static void checkExceptionsForSubscriber(final MutableBoolean isFailedToOfferToQueue, final MutableInt nextCallCount,
-            final MutableBoolean isMainStreamCompleted, final int queueSize, final MutableBoolean isExceptionThrown) {
+            final MutableBoolean isMainStreamCompleted, final int queueSize, final MutableBoolean isExceptionThrown) throws IllegalStateException {
         if (isExceptionThrown.isFalse()) {
             if (isFailedToOfferToQueue.isTrue()) {
                 isExceptionThrown.setTrue();
@@ -19082,7 +19527,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Executes the provided terminal operation asynchronously on this Stream using the specified Executor.
-     * This is a terminal operation that consumes the stream and returns immediately with a ContinuableFuture.
+     * This terminal operation submits the action to the executor and returns its ContinuableFuture.
+     * Whether submission returns before the action finishes depends on the executor; a direct executor runs it inline.
      *
      * <p>The terminal operation is a function that consumes this Stream and may throw an exception.
      * The result of the operation is wrapped in a ContinuableFuture which allows for further chaining of operations.
@@ -19175,7 +19621,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Executes the provided terminal operation asynchronously on this Stream using the specified Executor and returns its result.
-     * This is a terminal operation that consumes the stream and returns immediately with a ContinuableFuture.
+     * This terminal operation submits the action to the executor and returns its ContinuableFuture.
+     * Whether submission returns before the action finishes depends on the executor; a direct executor runs it inline.
      *
      * <p>The terminal operation is a function that consumes this Stream, produces a result, and may throw an exception.
      * The result of the operation is wrapped in a ContinuableFuture which allows for further chaining of operations.
@@ -19332,7 +19779,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (exhausted) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -19464,6 +19911,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * <p>This method provides a convenient way to create a stream from individual elements without
      * first creating a collection or array.
      *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream<Integer> numbers = Stream.of(1, 2, 3, 4, 5);
@@ -19486,6 +19936,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * This method is useful when you need to process only a portion of an array.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19510,10 +19963,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a stream containing elements from the given collection.
      * This is a static factory method that creates a stream from a collection.
      *
-     * <p>The stream reads the collection through its {@code iterator()} when the terminal operation runs, so the
-     * collection is not copied. Structurally modifying the collection between creating the stream and running the
-     * terminal operation is undefined in the same way it is for the iterator of that collection: for the JDK
-     * collections it fails fast with a {@link java.util.ConcurrentModificationException}.
+     * <p>A null or initially empty collection produces an empty stream. Otherwise, the collection is not copied;
+     * its iterator is obtained when this stream is created.
+     * Structural modifications thereafter follow that iterator's contract. Many JDK collection
+     * iterators detect such changes during traversal and throw {@link java.util.ConcurrentModificationException},
+     * while concurrent and snapshot iterators have different behavior.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19639,8 +20093,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a stream containing the elements of the specified iterator.
      * This is a static factory method that creates a stream from an iterator.
      *
-     * <p>The iterator will be consumed as the stream is traversed. Once the stream is consumed,
-     * the iterator will be exhausted and cannot be reused.
+     * <p>The iterator will be consumed as the stream is traversed. A short-circuiting operation may leave
+     * unread elements; full traversal exhausts the input. Do not traverse the same input concurrently.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19691,8 +20145,8 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a stream containing the elements of the specified enumeration.
      * This is a static factory method that creates a stream from an Enumeration.
      *
-     * <p>The enumeration will be consumed as the stream is traversed. Once the stream is consumed,
-     * the enumeration will be exhausted and cannot be reused.
+     * <p>The enumeration will be consumed as the stream is traversed. A short-circuiting operation may leave
+     * unread elements; full traversal exhausts the input. Do not traverse the same input concurrently.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19717,7 +20171,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() { // NOSONAR
+            public T next() throws NoSuchElementException { // NOSONAR
                 return enumeration.nextElement();
             }
         });
@@ -19728,6 +20182,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * This is a static factory method that creates a stream of Boolean objects from a primitive boolean array.
      *
      * <p>Each boolean value in the array is boxed into a Boolean object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19753,6 +20210,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * Each boolean value is boxed into a Boolean object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19784,7 +20244,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public Boolean next() {
+            public Boolean next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -19832,6 +20292,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>Each char value in the array is boxed into a Character object.
      *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] charArray = {'a', 'b', 'c'};
@@ -19856,6 +20319,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * Each char value is boxed into a Character object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19887,7 +20353,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public Character next() {
+            public Character next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -19936,6 +20402,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>Each byte value in the array is boxed into a Byte object.
      *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] byteArray = {1, 2, 3};
@@ -19960,6 +20429,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * Each byte value is boxed into a Byte object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19991,7 +20463,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public Byte next() {
+            public Byte next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -20040,6 +20512,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>Each short value in the array is boxed into a Short object.
      *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] shortArray = {1, 2, 3};
@@ -20064,6 +20539,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * Each short value is boxed into a Short object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20095,7 +20573,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public Short next() {
+            public Short next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -20144,6 +20622,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>Each int value in the array is boxed into an Integer object.
      *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] intArray = {1, 2, 3};
@@ -20168,6 +20649,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * Each int value is boxed into an Integer object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20199,7 +20683,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public Integer next() {
+            public Integer next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -20248,6 +20732,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>Each long value in the array is boxed into a Long object.
      *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] longArray = {1L, 2L, 3L};
@@ -20272,6 +20759,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * Each long value is boxed into a Long object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20303,7 +20793,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public Long next() {
+            public Long next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -20352,6 +20842,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>Each float value in the array is boxed into a Float object.
      *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] floatArray = {1.0f, 2.0f, 3.0f};
@@ -20376,6 +20869,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * Each float value is boxed into a Float object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20407,7 +20903,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public Float next() {
+            public Float next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -20456,6 +20952,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>Each double value in the array is boxed into a Double object.
      *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] doubleArray = {1.0, 2.0, 3.0};
@@ -20480,6 +20979,9 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will contain elements from the fromIndex (inclusive) to the toIndex (exclusive).
      * Each double value is boxed into a Double object.
+     *
+     * <p>The backing array is not copied. Changes to its elements before they are read can be observed
+     * by the stream. A {@code null} array is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20511,7 +21013,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public Double next() {
+            public Double next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -20640,7 +21142,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * map.put("b", 2);
      * map.put("c", 3);
      * Stream<String> keyStream = Stream.ofKeys(map, v -> v > 1);
-     * keyStream.forEach(System.out::println);   // prints: b, c (keys with values > 1)
+     * keyStream.forEach(System.out::println);   // prints: b and c, in unspecified order (keys with values > 1)
      * }</pre>
      *
      * @param <K> the type of the keys in the map
@@ -20770,7 +21272,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * map.put("b", 2);
      * map.put("c", 3);
      * Stream<Integer> valueStream = Stream.ofValues(map, (k, v) -> k.length() == 1 && v > 1);
-     * valueStream.forEach(System.out::println);   // prints: 2, 3
+     * valueStream.forEach(System.out::println);   // prints: 2 and 3, in unspecified order
      * }</pre>
      *
      * @param <K> the type of the keys in the map
@@ -21177,8 +21679,6 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      */
     public static <T> Stream<T> splitByChunkCount(final int totalSize, final int maxChunkCount, final IntBiFunction<? extends T> mapper)
             throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, cs.mapper);
-
         return splitByChunkCount(totalSize, maxChunkCount, false, mapper);
     }
 
@@ -21235,7 +21735,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (cursor >= totalSize) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -21278,7 +21778,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (cursor >= totalSize) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -21417,7 +21917,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cnt++ >= count) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -21500,7 +22000,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -21531,7 +22031,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -21581,7 +22081,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Creates a stream that repeats the given element a specified number of times.
      * This is a static factory method that creates a stream with repeated elements.
      *
-     * <p>The returned stream will contain exactly n copies of the specified element.
+     * <p>The returned stream will contain exactly n occurrences of the specified element reference; the element is not cloned.
      * If n is 0, an empty stream is returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -21613,7 +22113,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -21713,7 +22213,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -21728,7 +22228,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Returns a Stream produced by iterative application of a function to an initial element.
      * This is a static factory method that creates a stream through iterative function application.
      *
-     * <p>The first element (position 0) in the Stream will be the provided init value.
+     * <p>If {@code hasNext} initially returns {@code true}, the first element (position 0) is {@code init}.
      * For n &gt; 0, the element at position n will be the result of applying the function f to the
      * element at position n - 1. The stream continues as long as hasNext returns {@code true}.
      * After the {@code hasNext} supplier first returns {@code false}, the stream remains exhausted
@@ -21741,7 +22241,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * }</pre>
      *
      * @param <T> the type of elements in the stream
-     * @param init the initial element; may be {@code null}, in which case {@code null} is the first element and is
+     * @param init the initial element; may be {@code null}, in which case {@code null} is the first candidate element and is
      *             passed to {@code f} (as in {@link java.util.stream.Stream#iterate(Object, UnaryOperator)})
      * @param hasNext a supplier that returns {@code true} if the iteration should continue
      * @param f a function to apply to the previous element to generate the next element
@@ -21771,7 +22271,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -21846,7 +22346,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -22128,7 +22628,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                         }
 
                         @Override
-                        public String next() {
+                        public String next() throws NoSuchElementException {
                             return lineIterator.next();
                         }
 
@@ -22231,7 +22731,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public File next() {
+            public File next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -22287,42 +22787,48 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     }
 
     /**
-     * Creates a stream that generates elements at fixed intervals.
+     * Creates a stream that generates elements on demand according to a fixed time schedule.
      * This is a static factory method that creates a stream with timed element generation.
      *
      * <p>Elements are generated by the supplier at the specified interval in milliseconds.
      * This creates an infinite stream that should be used with limiting operations or closed when done.
      *
+     * <p>Callbacks run only when the stream is traversed. The schedule begins when this factory
+     * is called; overdue elements may be produced in a burst. Downstream processing, callback work
+     * and scheduling can delay actual emission beyond the scheduled time.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Stream<String> timestamps = Stream.interval(1000, () -> new Date().toString());
-     * timestamps.limit(5).forEach(System.out::println);   // prints timestamp every second, 5 times
+     * timestamps.limit(5).forEach(System.out::println);   // prints 5 timestamps, scheduled one second apart
      * }</pre>
      *
      * @param <T> the type of elements generated by the stream
      * @param intervalInMillis the interval in milliseconds between each element generation
      * @param s the supplier that generates the elements
      * @return a stream that generates elements at the specified interval
-     * @throws IllegalArgumentException if {@code s} is {@code null}.
+     * @throws IllegalArgumentException if {@code intervalInMillis} is not positive or {@code s} is {@code null}
      */
     public static <T> Stream<T> interval(final long intervalInMillis, final Supplier<T> s) throws IllegalArgumentException {
-        N.checkArgNotNull(s, cs.s);
-
         return interval(0, intervalInMillis, s);
     }
 
     /**
-     * Creates a stream that generates elements at fixed intervals after an initial delay.
+     * Creates a stream that generates elements on demand according to a fixed time schedule after an initial delay.
      * This is a static factory method that creates a stream with delayed and timed element generation.
      *
      * <p>After the initial delay, elements are generated by the supplier at the specified interval.
      * This creates an infinite stream that should be used with limiting operations or closed when done.
      *
+     * <p>Callbacks run only when the stream is traversed. The schedule begins when this factory
+     * is called; overdue elements may be produced in a burst. Downstream processing, callback work
+     * and scheduling can delay actual emission beyond the scheduled time.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] count = {0};
      * Stream<Integer> counter = Stream.interval(2000, 500, () -> count[0]++);
-     * counter.limit(5).forEach(System.out::println);   // waits 2 seconds, then prints every 500ms
+     * counter.limit(5).forEach(System.out::println);   // first scheduled time is 2 seconds from construction, then every 500ms
      * }</pre>
      *
      * @param <T> the type of elements generated by the stream
@@ -22330,20 +22836,22 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param intervalInMillis the interval in milliseconds between each element generation
      * @param s the supplier that generates the elements
      * @return a stream that generates elements at the specified interval after the initial delay
-     * @throws IllegalArgumentException if {@code s} is {@code null}.
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative, {@code intervalInMillis} is not positive, or {@code s} is {@code null}
      */
     public static <T> Stream<T> interval(final long delayInMillis, final long intervalInMillis, final Supplier<T> s) throws IllegalArgumentException {
-        N.checkArgNotNull(s, cs.s);
-
         return interval(delayInMillis, intervalInMillis, TimeUnit.MILLISECONDS, s);
     }
 
     /**
-     * Creates a stream that generates elements at fixed intervals after an initial delay.
+     * Creates a stream that generates elements on demand according to a fixed time schedule after an initial delay.
      * This is a static factory method that creates a stream with delayed and timed element generation with custom time units.
      *
      * <p>After the initial delay, elements are generated by the supplier at the specified interval.
      * This creates an infinite stream that should be used with limiting operations or closed when done.
+     *
+     * <p>Callbacks run only when the stream is traversed. The schedule begins when this factory
+     * is called; overdue elements may be produced in a burst. Downstream processing, callback work
+     * and scheduling can delay actual emission beyond the scheduled time.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22358,10 +22866,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param unit the time unit of the delay and interval
      * @param s the supplier that generates the elements
      * @return a stream that generates elements at the specified interval after the initial delay
-     * @throws IllegalArgumentException if {@code s} is {@code null}.
+     * @throws IllegalArgumentException if {@code delay} is negative, {@code interval} is not positive, {@code unit} is {@code null},
+     *         {@code interval} converts to zero milliseconds, or {@code s} is {@code null}
      * @see LongStream#interval(long, long, TimeUnit)
      */
     public static <T> Stream<T> interval(final long delay, final long interval, final TimeUnit unit, final Supplier<T> s) throws IllegalArgumentException {
+        N.checkArgNotNegative(delay, cs.delay);
+        N.checkArgPositive(interval, cs.interval);
+        N.checkArgNotNull(unit, cs.unit);
+        N.checkArgPositive(unit.toMillis(interval), "interval in milliseconds");
         N.checkArgNotNull(s, cs.s);
 
         //noinspection resource
@@ -22369,7 +22882,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     }
 
     /**
-     * Creates a stream that generates elements at fixed intervals.
+     * Creates a stream that generates elements on demand according to a fixed time schedule.
      * This is a static factory method that creates a stream with timed element generation using timestamps.
      *
      * <p>Elements are generated by the function, which receives the <i>scheduled</i> emission
@@ -22378,6 +22891,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * delay between building the stream and consuming it produces an immediate burst of already-due
      * elements carrying their original timestamps.
      * This creates an infinite stream that should be used with limiting operations or closed when done.
+     *
+     * <p>Callbacks run only when the stream is traversed. The schedule begins when this factory
+     * is called; overdue elements may be produced in a burst. Downstream processing, callback work
+     * and scheduling can delay actual emission beyond the scheduled time.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22391,16 +22908,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param s the function that generates the elements; it receives the scheduled emission timestamp
      *        in milliseconds
      * @return a stream that generates elements at the specified interval
-     * @throws IllegalArgumentException if {@code s} is {@code null}.
+     * @throws IllegalArgumentException if {@code intervalInMillis} is not positive or {@code s} is {@code null}
      */
     public static <T> Stream<T> interval(final long intervalInMillis, final LongFunction<? extends T> s) throws IllegalArgumentException {
-        N.checkArgNotNull(s, cs.s);
-
         return interval(0, intervalInMillis, s);
     }
 
     /**
-     * Creates a stream that generates elements at fixed intervals after an initial delay.
+     * Creates a stream that generates elements on demand according to a fixed time schedule after an initial delay.
      * This is a static factory method that creates a stream with delayed and timed element generation using timestamps.
      *
      * <p>After the initial delay, elements are generated by the function, which receives the
@@ -22408,6 +22923,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * at the moment of the call. The schedule is anchored when this factory method is invoked, not on
      * first consumption.
      * This creates an infinite stream that should be used with limiting operations or closed when done.
+     *
+     * <p>Callbacks run only when the stream is traversed. The schedule begins when this factory
+     * is called; overdue elements may be produced in a burst. Downstream processing, callback work
+     * and scheduling can delay actual emission beyond the scheduled time.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22422,17 +22941,15 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param s the function that generates the elements; it receives the scheduled emission timestamp
      *        in milliseconds
      * @return a stream that generates elements at the specified interval after the initial delay
-     * @throws IllegalArgumentException if {@code s} is {@code null}.
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative, {@code intervalInMillis} is not positive, or {@code s} is {@code null}
      */
     public static <T> Stream<T> interval(final long delayInMillis, final long intervalInMillis, final LongFunction<? extends T> s)
             throws IllegalArgumentException {
-        N.checkArgNotNull(s, cs.s);
-
         return interval(delayInMillis, intervalInMillis, TimeUnit.MILLISECONDS, s);
     }
 
     /**
-     * Creates a stream that generates elements at fixed intervals after an initial delay.
+     * Creates a stream that generates elements on demand according to a fixed time schedule after an initial delay.
      * This is a static factory method that creates a stream with delayed and timed element generation using timestamps and custom time units.
      *
      * <p>After the initial delay, elements are generated by the function, which receives the
@@ -22441,6 +22958,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * the delay and interval parameters). The schedule is anchored when this factory method is invoked,
      * not on first consumption.
      * This creates an infinite stream that should be used with limiting operations or closed when done.
+     *
+     * <p>Callbacks run only when the stream is traversed. The schedule begins when this factory
+     * is called; overdue elements may be produced in a burst. Downstream processing, callback work
+     * and scheduling can delay actual emission beyond the scheduled time.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22456,11 +22977,16 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param s the function that generates the elements; it receives the scheduled emission timestamp
      *        in milliseconds
      * @return a stream that generates elements at the specified interval after the initial delay
-     * @throws IllegalArgumentException if {@code s} is {@code null}.
+     * @throws IllegalArgumentException if {@code delay} is negative, {@code interval} is not positive, {@code unit} is {@code null},
+     *         {@code interval} converts to zero milliseconds, or {@code s} is {@code null}
      * @see LongStream#interval(long, long, TimeUnit)
      */
     public static <T> Stream<T> interval(final long delay, final long interval, final TimeUnit unit, final LongFunction<? extends T> s)
             throws IllegalArgumentException {
+        N.checkArgNotNegative(delay, cs.delay);
+        N.checkArgPositive(interval, cs.interval);
+        N.checkArgNotNull(unit, cs.unit);
+        N.checkArgPositive(unit.toMillis(interval), "interval in milliseconds");
         N.checkArgNotNull(s, cs.s);
 
         //noinspection resource
@@ -22473,6 +22999,10 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>The stream will poll elements from the queue until the duration expires. Elements are retrieved
      * as they become available. This is useful for processing elements from concurrent producers.
+     *
+     * <p>The observation deadline is calculated when this factory is called, not on first traversal.
+     * A duration that converts to negative milliseconds yields no elements; zero milliseconds allows only an immediate poll if traversal
+     * still occurs at the deadline. Downstream work does not extend the deadline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22492,6 +23022,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param queue the blocking queue to observe
      * @param duration the total time to observe the queue
      * @return a stream that polls elements from the queue until the duration expires
+     * @throws ArithmeticException if the duration cannot be represented as a {@code long} number of milliseconds
      * @throws IllegalArgumentException if the queue or duration is null.
      */
     @Beta
@@ -22523,7 +23054,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -22538,7 +23069,11 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     }
 
     /**
-     * Observes a blocking queue and creates a stream that polls elements from the queue at fixed intervals.
+     * Observes a blocking queue and creates a stream that waits for queued elements using a maximum poll wait.
+     *
+     * <p>Each poll returns as soon as an element is available. Empty polls are retried while
+     * {@code hasMore} is true, and queued elements are drained after it becomes false. The wait
+     * parameter controls how often an empty queue is checked for completion, not the output frequency.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -22556,7 +23091,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * @param queue the blocking queue to observe
      * @param hasMore a supplier that returns {@code true} if the upstream may still put more elements into the queue, or {@code false} if the upstream is completed.
      * @param maxWaitIntervalInMillis the maximum wait interval in milliseconds between polling the queue
-     * @return a stream that polls elements from the queue at the specified interval
+     * @return a stream that polls queued elements, waiting up to the specified interval per poll
      * @throws IllegalArgumentException if the queue is {@code null}, or if maxWaitIntervalInMillis is not positive
      *         (zero or negative), or if {@code hasMore} is {@code null}.
      */
@@ -22586,7 +23121,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -22783,7 +23318,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -22840,7 +23375,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -22896,7 +23431,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -23203,7 +23738,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (next == null && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -23536,7 +24071,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (next == null && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -23684,7 +24219,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextChar(), iterB.nextChar());
             }
         });
@@ -23735,7 +24270,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextChar(), iterB.nextChar(), iterC.nextChar());
             }
         });
@@ -23839,12 +24374,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final List<CharStream> sources = new ArrayList<>(c);
         final int len = sources.size();
-        final CharIterator[] iters = new CharIterator[len];
-        int i = 0;
-
-        for (final CharStream s : sources) {
-            iters[i++] = iterate(s);
-        }
+        final CharIterator[] iters = iterateAll(sources, new CharIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -23859,7 +24389,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final char[] args = new char[len];
 
                 for (int i = 0; i < len; i++) {
@@ -23976,7 +24506,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextChar(), iterB.hasNext() ? iterB.nextChar() : valueForNoneB);
                 } else {
@@ -24029,7 +24559,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextChar(), iterB.hasNext() ? iterB.nextChar() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextChar() : valueForNoneC);
@@ -24157,11 +24687,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final int len = sources.size();
 
         final CharStream[] ss = sources.toArray(new CharStream[len]);
-        final CharIterator[] iters = new CharIterator[len];
-
-        for (int i = 0; i < len; i++) {
-            iters[i] = iterate(ss[i]);
-        }
+        final CharIterator[] iters = iterateAll(sources, new CharIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -24183,7 +24709,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final char[] args = new char[len];
                 boolean hasNext = false;
 
@@ -24307,7 +24833,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextByte(), iterB.nextByte());
             }
         });
@@ -24357,7 +24883,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextByte(), iterB.nextByte(), iterC.nextByte());
             }
         });
@@ -24457,12 +24983,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final List<ByteStream> sources = new ArrayList<>(c);
         final int len = sources.size();
-        final ByteIterator[] iters = new ByteIterator[len];
-        int i = 0;
-
-        for (final ByteStream s : sources) {
-            iters[i++] = iterate(s);
-        }
+        final ByteIterator[] iters = iterateAll(sources, new ByteIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -24477,7 +24998,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final byte[] args = new byte[len];
 
                 for (int i = 0; i < len; i++) {
@@ -24593,7 +25114,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextByte(), iterB.hasNext() ? iterB.nextByte() : valueForNoneB);
                 } else {
@@ -24646,7 +25167,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextByte(), iterB.hasNext() ? iterB.nextByte() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextByte() : valueForNoneC);
@@ -24774,11 +25295,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final int len = sources.size();
 
         final ByteStream[] ss = sources.toArray(new ByteStream[len]);
-        final ByteIterator[] iters = new ByteIterator[len];
-
-        for (int i = 0; i < len; i++) {
-            iters[i] = iterate(ss[i]);
-        }
+        final ByteIterator[] iters = iterateAll(sources, new ByteIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -24800,7 +25317,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final byte[] args = new byte[len];
                 boolean hasNext = false;
 
@@ -24925,7 +25442,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextShort(), iterB.nextShort());
             }
         });
@@ -24975,7 +25492,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextShort(), iterB.nextShort(), iterC.nextShort());
             }
         });
@@ -25075,12 +25592,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final List<ShortStream> sources = new ArrayList<>(c);
         final int len = sources.size();
-        final ShortIterator[] iters = new ShortIterator[len];
-        int i = 0;
-
-        for (final ShortStream s : sources) {
-            iters[i++] = iterate(s);
-        }
+        final ShortIterator[] iters = iterateAll(sources, new ShortIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -25095,7 +25607,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final short[] args = new short[len];
 
                 for (int i = 0; i < len; i++) {
@@ -25212,7 +25724,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextShort(), iterB.hasNext() ? iterB.nextShort() : valueForNoneB);
                 } else {
@@ -25266,7 +25778,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextShort(), iterB.hasNext() ? iterB.nextShort() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextShort() : valueForNoneC);
@@ -25398,11 +25910,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final int len = sources.size();
 
         final ShortStream[] ss = sources.toArray(new ShortStream[len]);
-        final ShortIterator[] iters = new ShortIterator[len];
-
-        for (int i = 0; i < len; i++) {
-            iters[i] = iterate(ss[i]);
-        }
+        final ShortIterator[] iters = iterateAll(sources, new ShortIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -25424,7 +25932,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final short[] args = new short[len];
                 boolean hasNext = false;
 
@@ -25551,7 +26059,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextInt(), iterB.nextInt());
             }
         });
@@ -25603,7 +26111,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextInt(), iterB.nextInt(), iterC.nextInt());
             }
         });
@@ -25710,12 +26218,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final List<IntStream> sources = new ArrayList<>(c);
         final int len = sources.size();
-        final IntIterator[] iters = new IntIterator[len];
-        int i = 0;
-
-        for (final IntStream s : sources) {
-            iters[i++] = iterate(s);
-        }
+        final IntIterator[] iters = iterateAll(sources, new IntIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -25730,7 +26233,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final int[] args = new int[len];
 
                 for (int i = 0; i < len; i++) {
@@ -25849,7 +26352,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextInt(), iterB.hasNext() ? iterB.nextInt() : valueForNoneB);
                 } else {
@@ -25903,7 +26406,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextInt(), iterB.hasNext() ? iterB.nextInt() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextInt() : valueForNoneC);
@@ -26034,11 +26537,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final int len = sources.size();
 
         final IntStream[] ss = sources.toArray(new IntStream[len]);
-        final IntIterator[] iters = new IntIterator[len];
-
-        for (int i = 0; i < len; i++) {
-            iters[i] = iterate(ss[i]);
-        }
+        final IntIterator[] iters = iterateAll(sources, new IntIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -26060,7 +26559,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final int[] args = new int[len];
                 boolean hasNext = false;
 
@@ -26180,7 +26679,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextLong(), iterB.nextLong());
             }
         });
@@ -26227,7 +26726,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextLong(), iterB.nextLong(), iterC.nextLong());
             }
         });
@@ -26334,12 +26833,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final List<LongStream> sources = new ArrayList<>(c);
         final int len = sources.size();
-        final LongIterator[] iters = new LongIterator[len];
-        int i = 0;
-
-        for (final LongStream s : sources) {
-            iters[i++] = iterate(s);
-        }
+        final LongIterator[] iters = iterateAll(sources, new LongIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -26354,7 +26848,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final long[] args = new long[len];
 
                 for (int i = 0; i < len; i++) {
@@ -26472,7 +26966,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextLong(), iterB.hasNext() ? iterB.nextLong() : valueForNoneB);
                 } else {
@@ -26525,7 +27019,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextLong(), iterB.hasNext() ? iterB.nextLong() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextLong() : valueForNoneC);
@@ -26654,11 +27148,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final int len = sources.size();
 
         final LongStream[] ss = sources.toArray(new LongStream[len]);
-        final LongIterator[] iters = new LongIterator[len];
-
-        for (int i = 0; i < len; i++) {
-            iters[i] = iterate(ss[i]);
-        }
+        final LongIterator[] iters = iterateAll(sources, new LongIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -26680,7 +27170,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final long[] args = new long[len];
                 boolean hasNext = false;
 
@@ -26794,7 +27284,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextFloat(), iterB.nextFloat());
             }
         });
@@ -26838,7 +27328,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextFloat(), iterB.nextFloat(), iterC.nextFloat());
             }
         });
@@ -26938,12 +27428,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final List<FloatStream> sources = new ArrayList<>(c);
         final int len = sources.size();
-        final FloatIterator[] iters = new FloatIterator[len];
-        int i = 0;
-
-        for (final FloatStream s : sources) {
-            iters[i++] = iterate(s);
-        }
+        final FloatIterator[] iters = iterateAll(sources, new FloatIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -26958,7 +27443,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final float[] args = new float[len];
 
                 for (int i = 0; i < len; i++) {
@@ -27076,7 +27561,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextFloat(), iterB.hasNext() ? iterB.nextFloat() : valueForNoneB);
                 } else {
@@ -27129,7 +27614,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextFloat(), iterB.hasNext() ? iterB.nextFloat() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextFloat() : valueForNoneC);
@@ -27258,11 +27743,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final int len = sources.size();
 
         final FloatStream[] ss = sources.toArray(new FloatStream[len]);
-        final FloatIterator[] iters = new FloatIterator[len];
-
-        for (int i = 0; i < len; i++) {
-            iters[i] = iterate(ss[i]);
-        }
+        final FloatIterator[] iters = iterateAll(sources, new FloatIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -27284,7 +27765,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final float[] args = new float[len];
                 boolean hasNext = false;
 
@@ -27398,7 +27879,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextDouble(), iterB.nextDouble());
             }
         });
@@ -27442,7 +27923,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.nextDouble(), iterB.nextDouble(), iterC.nextDouble());
             }
         });
@@ -27544,12 +28025,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
         final List<DoubleStream> sources = new ArrayList<>(c);
         final int len = sources.size();
-        final DoubleIterator[] iters = new DoubleIterator[len];
-        int i = 0;
-
-        for (final DoubleStream s : sources) {
-            iters[i++] = iterate(s);
-        }
+        final DoubleIterator[] iters = iterateAll(sources, new DoubleIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -27564,7 +28040,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final double[] args = new double[len];
 
                 for (int i = 0; i < len; i++) {
@@ -27688,7 +28164,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextDouble(), iterB.hasNext() ? iterB.nextDouble() : valueForNoneB);
                 } else {
@@ -27744,7 +28220,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.nextDouble(), iterB.hasNext() ? iterB.nextDouble() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextDouble() : valueForNoneC);
@@ -27882,11 +28358,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
         final int len = sources.size();
 
         final DoubleStream[] ss = sources.toArray(new DoubleStream[len]);
-        final DoubleIterator[] iters = new DoubleIterator[len];
-
-        for (int i = 0; i < len; i++) {
-            iters[i] = iterate(ss[i]);
-        }
+        final DoubleIterator[] iters = iterateAll(sources, new DoubleIterator[len], source -> iterate(source));
 
         return new IteratorStream<>(new ObjIteratorEx<R>() {
             @Override
@@ -27908,7 +28380,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final double[] args = new double[len];
                 boolean hasNext = false;
 
@@ -28128,7 +28600,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.next(), iterB.next());
             }
         });
@@ -28182,7 +28654,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return zipFunction.apply(iterA.next(), iterB.next(), iterC.next());
             }
         });
@@ -28403,7 +28875,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final Object[] args = new Object[len];
 
                 for (int i = 0; i < len; i++) {
@@ -28620,7 +29092,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB);
                 } else {
@@ -28680,7 +29152,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.apply(iterA.next(), iterB.hasNext() ? iterB.next() : valueForNoneB, iterC.hasNext() ? iterC.next() : valueForNoneC);
                 } else if (iterB.hasNext()) {
@@ -28921,7 +29393,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final Object[] args = new Object[len];
                 boolean hasNext = false;
 
@@ -28950,7 +29422,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      *
      * <p><b>Usage Examples:</b></p>
@@ -28986,7 +29458,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * If maxThreadNumForZipFunction is 1, this method behaves the same as the sequential zip operation.
      * When either iterator is exhausted, the other iterator is not advanced for an incomplete pair.
@@ -29060,7 +29532,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -29087,7 +29559,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * For better performance with large streams, consider using buffered() on the input streams.
      * The returned stream will automatically close all input streams when it is closed.
@@ -29133,7 +29605,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      *
      * <p><b>Usage Examples:</b></p>
@@ -29172,7 +29644,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * If maxThreadNumForZipFunction is 1, this method behaves the same as the sequential zip operation.
      * When any iterator is exhausted, the other iterators are not advanced for an incomplete triplet.
@@ -29252,7 +29724,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -29279,7 +29751,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * For better performance with large streams, consider using buffered() on the input streams.
      * The returned stream will automatically close all input streams when it is closed.
@@ -29330,7 +29802,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * The resulting stream will have a length equal to the longer of the two input iterables.
      *
@@ -29369,7 +29841,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * The resulting stream will have a length equal to the longer of the two input iterators.
      * If maxThreadNumForZipFunction is 1, this method behaves the same as the sequential zip operation.
@@ -29451,7 +29923,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -29478,7 +29950,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * The resulting stream will have a length equal to the longer of the two input streams.
      * For better performance with large streams, consider using buffered() on the input streams.
@@ -29529,7 +30001,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * The resulting stream will have a length equal to the longest of the three input iterables.
      *
@@ -29574,7 +30046,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * The resulting stream will have a length equal to the longest of the three input iterators.
      * If maxThreadNumForZipFunction is 1, this method behaves the same as the sequential zip operation.
@@ -29671,7 +30143,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -29698,7 +30170,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * The resulting stream will have a length equal to the longest of the three input streams.
      * For better performance with large streams, consider using buffered() on the input streams.
@@ -29755,7 +30227,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * For better performance with large streams, consider using buffered() on the input streams.
      * The returned stream will automatically close all input streams when it is closed.
@@ -29786,6 +30258,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public static <T, R> Stream<R> parallelZip(final Collection<? extends Stream<? extends T>> streams,
             final Function<? super List<T>, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
+        N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
         final List<? extends Stream<? extends T>> sources = N.isEmpty(streams) ? new ArrayList<>(0) : new ArrayList<>(streams);
 
@@ -29800,7 +30273,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * The resulting stream will have a length equal to the longest of the input streams.
      * The size of valuesForNone must match the size of the streams collection.
@@ -29836,6 +30309,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
     public static <T, R> Stream<R> parallelZip(final Collection<? extends Stream<? extends T>> streams, final List<? extends T> valuesForNone,
             final Function<? super List<T>, ? extends R> zipFunction, final int maxThreadNumForZipFunction) throws IllegalArgumentException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
+        N.checkArgPositive(maxThreadNumForZipFunction, cs.maxThreadNumForZipFunction);
 
         final List<? extends Stream<? extends T>> sources = N.isEmpty(streams) ? new ArrayList<>(0) : new ArrayList<>(streams);
 
@@ -29855,7 +30329,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      *
      * <p><b>Usage Examples:</b></p>
@@ -29893,7 +30367,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      *
      * <p>This is a parallel operation where the zipFunction is executed concurrently by multiple threads.
      * The order of elements in the resulting stream is NOT guaranteed to match the input order: with more than one thread,
-     * results are emitted in the order their {@code zipFunction} computations complete. Pass {@code maxThreadNumForZipFunction == 1}
+     * results are emitted as workers enqueue completed {@code zipFunction} results. Pass {@code maxThreadNumForZipFunction == 1}
      * (or use the sequential {@code zip(...)}) if the original positional order must be preserved.
      * The resulting stream will have a length equal to the longest of the input iterables.
      * The size of valuesForNone must match the size of the iterables collection.
@@ -29934,7 +30408,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Each list of values is combined into a single value by the provided {@code zipFunction},
      * which will be executed by multiple threads for improved performance.
      *
-     * <p>This operation processes elements from all iterators in parallel, taking one element
+     * <p>This operation reads each positional tuple under a shared lock, taking one element
      * from each iterator and combining them using the zip function. The stream terminates when
      * any iterator is exhausted. No iterator is advanced for a tuple unless every iterator has
      * another element.
@@ -30018,7 +30492,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -30043,7 +30517,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
      * Each list of values is combined into a single value by the provided {@code zipFunction},
      * which will be executed by multiple threads for improved performance.
      *
-     * <p>This operation processes elements from all iterators in parallel. When an iterator
+     * <p>This operation reads positional tuples under a shared lock and computes their results in parallel. When an iterator
      * is exhausted, its corresponding value from {@code valuesForNone} is used. The stream
      * continues until all iterators are exhausted.
      *
@@ -30129,7 +30603,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -30195,7 +30669,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cursorA < lenA) {
                     if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                         return a[cursorA++];
@@ -30348,7 +30822,7 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 // Peek both heads before calling the selector so a throwing selector retries the same values.
                 if (!hasNextA && iterA.hasNext()) {
                     nextA = iterA.next();
@@ -30605,13 +31079,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Merges a collection of streams into a single stream in parallel using the default maximum thread number.
-     * All elements from each input stream will be merged into intermediate queues by multiple threads first,
-     * then these queues will be merged into one stream.
+     * For more than three sources and more than one worker, traversal first materializes
+     * intermediate pairwise merges in arrays, until only two or three sources remain to merge lazily.
+     * A single worker uses the sequential merge; smaller source collections do not need those arrays.
      *
-     * <p>This method provides better performance than sequential merge for large collections of streams,
+     * <p>This method may improve performance over sequential merge for large collections of streams,
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
-     * elements merged into the intermediate queues. Consider using {@link #merge(Collection, BiFunction)}
-     * for totally lazy evaluation.
+     * elements materialized in intermediate arrays. Consider using {@link #merge(Collection, BiFunction)}
+     * for incremental element consumption.
      * The returned stream will automatically close all input streams when it is closed.
      * The collection's membership and encounter order are snapshotted when this method is called.
      *
@@ -30644,13 +31119,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Merges a collection of streams into a single stream in parallel with the specified maximum thread number.
-     * All elements from each input stream will be merged into intermediate queues by multiple threads first,
-     * then these queues will be merged into one stream.
+     * For more than three sources and more than one worker, traversal first materializes
+     * intermediate pairwise merges in arrays, until only two or three sources remain to merge lazily.
+     * A single worker uses the sequential merge; smaller source collections do not need those arrays.
      *
-     * <p>This method provides better performance than sequential merge for large collections of streams,
+     * <p>This method may improve performance over sequential merge for large collections of streams,
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
-     * elements merged into the intermediate queues. Consider using {@link #merge(Collection, BiFunction)}
-     * for totally lazy evaluation.
+     * elements materialized in intermediate arrays. Consider using {@link #merge(Collection, BiFunction)}
+     * for incremental element consumption.
      * The returned stream will automatically close all input streams when it is closed.
      * The collection's membership and encounter order are snapshotted when this method is called.
      *
@@ -30768,13 +31244,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Merges a collection of iterables into a single stream in parallel using the default maximum thread number.
-     * All elements from each input iterable will be merged into intermediate queues by multiple threads first,
-     * then these queues will be merged into one stream.
+     * For more than three sources and more than one worker, traversal first materializes
+     * intermediate pairwise merges in arrays, until only two or three sources remain to merge lazily.
+     * A single worker uses the sequential merge; smaller source collections do not need those arrays.
      *
-     * <p>This method provides better performance than sequential merge for large collections of iterables,
+     * <p>This method may improve performance over sequential merge for large collections of iterables,
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
-     * elements merged into the intermediate queues. Consider using {@link #mergeIterables(Collection, BiFunction)}
-     * for totally lazy evaluation.
+     * elements materialized in intermediate arrays. Consider using {@link #mergeIterables(Collection, BiFunction)}
+     * for incremental element consumption.
      * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
@@ -30805,13 +31282,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Merges a collection of iterables into a single stream in parallel with the specified maximum thread number.
-     * All elements from each input iterable will be merged into intermediate queues by multiple threads first,
-     * then these queues will be merged into one stream.
+     * For more than three sources and more than one worker, traversal first materializes
+     * intermediate pairwise merges in arrays, until only two or three sources remain to merge lazily.
+     * A single worker uses the sequential merge; smaller source collections do not need those arrays.
      *
-     * <p>This method provides better performance than sequential merge for large collections of iterables,
+     * <p>This method may improve performance over sequential merge for large collections of iterables,
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
-     * elements merged into the intermediate queues. Consider using {@link #mergeIterables(Collection, BiFunction)}
-     * for totally lazy evaluation.
+     * elements materialized in intermediate arrays. Consider using {@link #mergeIterables(Collection, BiFunction)}
+     * for incremental element consumption.
      * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
@@ -30845,13 +31323,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Merges a collection of iterators into a single stream in parallel using the default maximum thread number.
-     * All elements from each input iterator will be merged into intermediate queues by multiple threads first,
-     * then these queues will be merged into one stream.
+     * For more than three sources and more than one worker, traversal first materializes
+     * intermediate pairwise merges in arrays, until only two or three sources remain to merge lazily.
+     * A single worker uses the sequential merge; smaller source collections do not need those arrays.
      *
-     * <p>This method provides better performance than sequential merge for large collections of iterators,
+     * <p>This method may improve performance over sequential merge for large collections of iterators,
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
-     * elements merged into the intermediate queues. Consider using {@link #mergeIterators(Collection, BiFunction)}
-     * for totally lazy evaluation.
+     * elements materialized in intermediate arrays. Consider using {@link #mergeIterators(Collection, BiFunction)}
+     * for incremental element consumption.
      * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>
@@ -30882,13 +31361,14 @@ public abstract class Stream<T> extends StreamBase<T, Object[], Predicate<? supe
 
     /**
      * Merges a collection of iterators into a single stream in parallel with the specified maximum thread number.
-     * All elements from each input iterator will be merged into intermediate queues by multiple threads first,
-     * then these queues will be merged into one stream.
+     * For more than three sources and more than one worker, traversal first materializes
+     * intermediate pairwise merges in arrays, until only two or three sources remain to merge lazily.
+     * A single worker uses the sequential merge; smaller source collections do not need those arrays.
      *
-     * <p>This method provides better performance than sequential merge for large collections of iterators,
+     * <p>This method may improve performance over sequential merge for large collections of iterators,
      * but is not totally lazy evaluation and may cause {@code OutOfMemoryError} if there are too many
-     * elements merged into the intermediate queues. Consider using {@link #mergeIterators(Collection, BiFunction)}
-     * for totally lazy evaluation.
+     * elements materialized in intermediate arrays. Consider using {@link #mergeIterators(Collection, BiFunction)}
+     * for incremental element consumption.
      * The collection's membership and encounter order are snapshotted when this method is called.
      *
      * <p><b>Usage Examples:</b></p>

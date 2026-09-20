@@ -293,7 +293,7 @@ public final class ConcurrentCacheMap<K, V> extends AbstractMap<K, V> implements
     /**
      * Atomically computes and inserts a value for {@code key} if no mapping is currently present.
      * Delegates to {@link ConcurrentHashMap#computeIfAbsent(Object, Function)} and retains its
-     * atomicity, so the mapping function is applied at most once per absent key.
+     * atomicity, so the mapping function is applied at most once in this invocation when the key is absent.
      *
      * <p>If the mapping function returns {@code null}, no mapping is recorded and {@code null} is
      * returned. Unlike the null-tolerant query operations of this class, this method throws

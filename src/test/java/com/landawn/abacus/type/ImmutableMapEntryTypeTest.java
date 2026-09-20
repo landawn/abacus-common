@@ -164,8 +164,7 @@ public class ImmutableMapEntryTypeTest extends TestBase {
 
     // --- review fixes 2026-09-06 (T10-06 pin, T10-08) ---
 
-    private static String serialize(final ImmutableMapEntryType<String, Object> type, final Object value, final JsonSerConfig config)
-            throws IOException {
+    private static String serialize(final ImmutableMapEntryType<String, Object> type, final Object value, final JsonSerConfig config) throws IOException {
         final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
 
         try {
@@ -234,7 +233,8 @@ public class ImmutableMapEntryTypeTest extends TestBase {
         // The javadoc promises serializeTo agrees with stringOf and with a Map<K, V> holding the same value. That was
         // true only for an Object slot: a DECLARED container value type is not serializable, so its handler quoted its
         // whole JSON rendering as one string ({"k":"{\"x\": 1}"}), unlike Pair/Triple/Tuple/Optional after T6-01.
-        final ImmutableMapEntryType<String, Map<String, Integer>> type = (ImmutableMapEntryType<String, Map<String, Integer>>) createType("Map.ImmutableEntry<String, Map<String, Integer>>");
+        final ImmutableMapEntryType<String, Map<String, Integer>> type = (ImmutableMapEntryType<String, Map<String, Integer>>) createType(
+                "Map.ImmutableEntry<String, Map<String, Integer>>");
         final Map<String, Integer> inner = new LinkedHashMap<>();
         inner.put("x", 1);
         final AbstractMap.SimpleImmutableEntry<String, Map<String, Integer>> entry = new AbstractMap.SimpleImmutableEntry<>("k", inner);
@@ -277,6 +277,7 @@ public class ImmutableMapEntryTypeTest extends TestBase {
         final ImmutableMapEntryType<String, Map<String, Integer>> t2 = type;
         assertEquals("{\"é\": {\"é中\": 2}}", t2.stringOf(new AbstractMap.SimpleImmutableEntry<>("é", uni)));
     }
+
     // R05-2 sibling (2026-09-08): serializeTo writes the value through AbstractTupleType.serializeSlot, which
     // dispatches on the runtime class for a declared Object slot; appendTo went straight to the declared handler,
     // so an immutable map entry holding a map appended ObjectType's JSON stringOf form ({"k": 1}) where the

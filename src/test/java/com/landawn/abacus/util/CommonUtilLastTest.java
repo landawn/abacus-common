@@ -454,6 +454,7 @@ public class CommonUtilLastTest extends CommonUtilTestSupport {
 
         assertEquals(distinct.subList(1000, 3000), CommonUtil.lastElements(new LinkedHashSet<>(distinct), 2000));
     }
+
     @Test
     public void testLastIndexOf_toleranceStartIndexFromBackClamping() {
         final float[] floats = { 1.0f, 2.0f, 1.0f };

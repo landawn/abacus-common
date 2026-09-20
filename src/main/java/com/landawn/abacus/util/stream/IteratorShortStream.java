@@ -160,7 +160,7 @@ class IteratorShortStream extends AbstractShortStream {
                 }
 
                 @Override
-                public short nextShort() {
+                public short nextShort() throws NoSuchElementException {
                     return values.nextShort();
                 }
             };
@@ -196,7 +196,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -235,7 +235,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -282,7 +282,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -308,7 +308,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 return mapper.applyAsShort(elements.nextShort());
             }
 
@@ -328,7 +328,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return mapper.applyAsInt(elements.nextShort());
             }
 
@@ -348,7 +348,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return mapper.apply(elements.nextShort());
             }
 
@@ -388,7 +388,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -435,7 +435,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -478,7 +478,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -521,7 +521,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -580,7 +580,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -627,7 +627,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -669,7 +669,7 @@ class IteratorShortStream extends AbstractShortStream {
                 }
 
                 @Override
-                public short nextShort() {
+                public short nextShort() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -702,7 +702,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cnt >= maxSize) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -773,7 +773,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 skipElements();
 
                 return elements.nextShort();
@@ -812,7 +812,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public ShortStream top(final int n) throws IllegalStateException {
+    public ShortStream top(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         return top(n, SHORT_COMPARATOR);
@@ -847,7 +847,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -963,7 +963,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 final short next = elements.nextShort();
 
                 action.accept(next);
@@ -1313,7 +1313,7 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public int sum() throws IllegalStateException {
+    public int sum() throws IllegalStateException, ArithmeticException {
         assertNotClosed();
 
         try {
@@ -1501,7 +1501,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return elements.nextShort();
             }
 
@@ -1553,7 +1553,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }
@@ -1594,13 +1594,7 @@ class IteratorShortStream extends AbstractShortStream {
                             iter = s == null ? ShortIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -1628,7 +1622,7 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }

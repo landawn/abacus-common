@@ -365,7 +365,7 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * MutableFloat balance = MutableFloat.of(1000.0f);
      * balance.subtract(250.0f);   // balance is now 750.0f
      *
-     * // Be aware of underflow
+     * // Be aware of overflow to negative infinity
      * MutableFloat small = MutableFloat.of(-Float.MAX_VALUE);
      * small.subtract(Float.MAX_VALUE);   // Results in NEGATIVE_INFINITY
      * }</pre>

@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class DurationPartDocsTest {
+public class DurationPartDocsTest extends TestBase {
     @Test
     void negativeSubsecondBoundariesFollowTruncationRatherThanJdkNormalization() {
         assertEquals(0, Duration.ofMillis(-59999).toMinutesPart());

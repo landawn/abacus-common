@@ -87,8 +87,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Memoized supplier with expiration for expensive operations
- * Throwables.Supplier<DatabaseConnection, SQLException> dbSupplier =
- *     Fnn.memoizeWithExpiration(() -> createConnection(), 5, TimeUnit.MINUTES);
+ * Throwables.Supplier<Config, IOException> configSupplier =
+ *     Fnn.memoizeWithExpiration(() -> loadConfig(), 5, TimeUnit.MINUTES);
  *
  * // Synchronized function for thread-safe operations
  * Object mutex = new Object();
@@ -102,7 +102,7 @@ import com.landawn.abacus.util.stream.Stream;
  * // Exception-safe predicates for filtering
  * Seq<String, Exception> validData = dataSeq
  *     .filter(Fnn.notNull())
- *     .filter(Fnn.pp(data -> validateData(data)));
+ *     .filter(Fnn.p(data -> validateData(data)));
  *
  * // Rate-limited operations
  * Throwables.Consumer<ApiRequest, IOException> rateLimitedApi =
@@ -223,7 +223,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Integration with Standard APIs:</b>
  * <ul>
- *   <li><b>Stream API:</b> Throwables functional interfaces work seamlessly with stream operations</li>
+ *   <li><b>Seq API:</b> Throwables functional interfaces work directly with {@link Seq}; JDK streams require adaptation</li>
  *   <li><b>Collections:</b> Safe operations on collections with exception-throwing predicates</li>
  *   <li><b>Standard Functions:</b> Adapters convert between JDK and throwable functional interfaces</li>
  * </ul>
@@ -255,7 +255,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Functional Interface Conversions:</b>
  * The class provides comprehensive conversion utilities:
  * <ul>
- *   <li><b>Consumer ↔ Function:</b> Convert consumers to functions returning void or specific values</li>
+ *   <li><b>Consumer ↔ Function:</b> Convert consumers to functions returning {@code null} or specific values</li>
  *   <li><b>Runnable ↔ Callable:</b> Convert between runnable and callable interfaces</li>
  *   <li><b>Standard ↔ Throwables:</b> Adapt between standard Java and throwable interfaces</li>
  *   <li><b>Arity Conversion:</b> Convert between different parameter counts (unary, binary, ternary)</li>
@@ -365,9 +365,8 @@ public final class Fnn {
     }
 
     /**
-     * Returns a memoized Supplier that caches the result of the first invocation and returns the cached value
-     * on subsequent calls. The supplier creates a single instance lazily on the first call to {@code get()},
-     * and all subsequent calls return the same cached instance without re-executing the underlying supplier logic.
+     * Returns a memoized Supplier that caches the first successful result, including {@code null},
+     * and returns that result on subsequent calls without re-executing the underlying supplier logic.
      * This is particularly useful for expensive initialization operations that should only execute once.
      *
      * <p>The returned supplier is <b>thread-safe</b> and guarantees that the underlying supplier is called
@@ -389,7 +388,7 @@ public final class Fnn {
      * @param <T> the type of results supplied by this supplier
      * @param <E> the type of exception that may be thrown by the supplier
      * @param supplier the supplier whose result should be memoized
-     * @return a memoized version of the supplier that caches the result after the first call
+     * @return a memoized version of the supplier that caches the result after the first successful call
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
      * @see Throwables.LazyInitializer#of(Throwables.Supplier)
@@ -402,7 +401,7 @@ public final class Fnn {
 
     /**
      * Returns a memoized Supplier with time-based expiration that caches the supplied value for a specified duration.
-     * The returned supplier caches the result from the first invocation and returns the cached value on subsequent
+     * The returned supplier caches the result from the first successful invocation and returns the cached value on subsequent
      * calls until the specified time has elapsed. After expiration, the next call triggers a fresh computation,
      * which is then cached for another duration period. This is ideal for expensive operations where stale data
      * is acceptable for a limited time window.
@@ -410,8 +409,8 @@ public final class Fnn {
      * <p><b>Thread Safety:</b> The returned supplier is <b>thread-safe</b> and uses double-checked locking with
      * volatile variables to ensure correct behavior under concurrent access. Multiple threads may safely call
      * {@code get()} simultaneously. Refreshes are serialized on a private monitor, not on the returned supplier
-     * itself, so caller code that synchronizes on the returned object can neither block nor interleave with a
-     * refresh.</p>
+     * itself. Locking the returned supplier does not acquire the refresh monitor or coordinate with
+     * refreshes.</p>
      *
      * <p><b>Exception Handling:</b> If the underlying supplier throws an exception, the value is not cached and
      * subsequent calls will retry the computation. The memoization only occurs upon successful completion,
@@ -450,14 +449,14 @@ public final class Fnn {
     public static <T, E extends Throwable> Throwables.Supplier<T, E> memoizeWithExpiration(final Throwables.Supplier<T, E> supplier, final long duration,
             final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgPositive(duration, cs.duration);
         N.checkArgNotNull(unit, cs.unit);
-        N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
 
         return new Throwables.Supplier<>() {
             private final Throwables.Supplier<T, E> delegate = supplier;
             private final long durationNanos = unit.toNanos(duration);
             // A private monitor rather than `this`: the returned supplier is handed to the caller, and a caller
-            // doing `synchronized (memoizedSupplier) { ... }` must not be able to block or interleave with a
+            // doing `synchronized (memoizedSupplier) { ... }` does not acquire the monitor used for a
             // refresh. Same reason memoize(Function) uses its own resultMapLock.
             private final Object lock = new Object();
             private volatile T value;
@@ -556,7 +555,7 @@ public final class Fnn {
     /**
      * Returns a memoized version of the input Function that caches results for each distinct input value.
      * The returned function maintains an internal cache mapping input values to their computed results,
-     * ensuring that the underlying function is called at most once per unique input. Subsequent calls
+     * caching the first successful result for each unique input, including {@code null}. Subsequent calls
      * with the same input return the cached result immediately without re-executing the function logic.
      * This is particularly valuable for expensive computations or I/O operations with deterministic results.
      *
@@ -663,7 +662,11 @@ public final class Fnn {
                 return result == none ? null : result;
             }
 
-            private R compute(final T key) throws E {
+            /**
+             * @throws IllegalStateException if computing {@code key} recursively requests the same memoized value
+             * @throws E if the memoized function throws while computing {@code key}
+             */
+            private R compute(final T key) throws IllegalStateException, E {
                 Set<T> keys = keysInProgress.get();
 
                 if (keys == null) {
@@ -704,7 +707,10 @@ public final class Fnn {
                 }
             }
 
-            private void failIfRecursive(final T key) {
+            /**
+             * @throws IllegalStateException if {@code key} is already being computed by this thread
+             */
+            private void failIfRecursive(final T key) throws IllegalStateException {
                 final Set<T> keys = keysInProgress.get();
 
                 if (keys != null && keys.contains(key)) {
@@ -1226,7 +1232,7 @@ public final class Fnn {
 
     /**
      * Returns a {@code Throwables.Consumer} that throws the exception provided by the given supplier.
-     * The consumer ignores its input and, on each invocation, obtains a fresh exception instance from
+     * The consumer ignores its input and, on each invocation, obtains an exception instance from
      * the supplier and throws it. This is useful as a terminal handler in functional pipelines where
      * a custom exception type or message should be raised.
      *
@@ -1284,6 +1290,7 @@ public final class Fnn {
      * Returns a {@code Throwables.Consumer} that sleeps uninterruptibly for the specified number of milliseconds.
      * The consumer ignores its input and calls {@link N#sleepUninterruptibly(long)}.
      * Unlike {@link #sleep(long)}, interruptions are suppressed and the sleep continues for the full duration.
+     * The interrupt flag is restored before returning if an interruption occurred.
      * A zero or negative {@code millis} results in no sleep.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1722,7 +1729,7 @@ public final class Fnn {
 
     /**
      * Returns a BinaryOperator that throws an {@link IllegalStateException} when invoked, indicating
-     * that duplicate keys are not allowed. This merger is typically used in {@code Collectors.toMap()}
+     * that duplicate keys are not allowed. This merger can be used in {@code Seq.toMap(keyMapper, valueMapper, mergeFunction)}
      * when duplicate keys should cause an immediate failure rather than silent merging.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1736,7 +1743,7 @@ public final class Fnn {
      * @return a BinaryOperator that always throws {@code IllegalStateException} with a message describing the duplicate values
      * @see #ignoringMerger()
      * @see #replacingMerger()
-     * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
+     * @see Seq#toMap(Throwables.Function, Throwables.Function, Throwables.BinaryOperator)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> throwingMerger() {
         return BinaryOperators.THROWING_MERGER;
@@ -1744,7 +1751,7 @@ public final class Fnn {
 
     /**
      * Returns a BinaryOperator that ignores the second value and returns the first value.
-     * This merger is typically used in {@code Collectors.toMap()} when keeping the first occurrence
+     * This merger can be used in {@code Seq.toMap(keyMapper, valueMapper, mergeFunction)} when keeping the first occurrence
      * of duplicate keys is the desired behavior.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1759,7 +1766,7 @@ public final class Fnn {
      * @return a BinaryOperator that always returns the first operand, discarding the second
      * @see #throwingMerger()
      * @see #replacingMerger()
-     * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
+     * @see Seq#toMap(Throwables.Function, Throwables.Function, Throwables.BinaryOperator)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> ignoringMerger() {
         return BinaryOperators.IGNORING_MERGER;
@@ -1767,7 +1774,7 @@ public final class Fnn {
 
     /**
      * Returns a BinaryOperator that replaces the first value with the second value.
-     * This merger is typically used in {@code Collectors.toMap()} when keeping the last occurrence
+     * This merger can be used in {@code Seq.toMap(keyMapper, valueMapper, mergeFunction)} when keeping the last occurrence
      * of duplicate keys is the desired behavior.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1782,7 +1789,7 @@ public final class Fnn {
      * @return a BinaryOperator that always returns the second operand, discarding the first
      * @see #throwingMerger()
      * @see #ignoringMerger()
-     * @see java.util.stream.Collectors#toMap(java.util.function.Function, java.util.function.Function, java.util.function.BinaryOperator, Supplier)
+     * @see Seq#toMap(Throwables.Function, Throwables.Function, Throwables.BinaryOperator)
      */
     public static <T, E extends Exception> Throwables.BinaryOperator<T, E> replacingMerger() {
         return BinaryOperators.REPLACING_MERGER;
@@ -2083,7 +2090,7 @@ public final class Fnn {
      * <pre>{@code
      * // Find the entry with the smallest key in a map
      * Seq<Map.Entry<String, Integer>, Exception> entrySeq = Seq.of(N.asMap("b", 2, "a", 1));
-     * Optional<Map.Entry<String, Integer>> minEntry = entrySeq.reduce(Fnn.minByKey());   // Optional of a=1
+     * Nullable<Map.Entry<String, Integer>> minEntry = entrySeq.reduce(Fnn.minByKey());   // Nullable of a=1
      * }</pre>
      *
      * @param <K> the type of the Comparable key
@@ -2114,7 +2121,7 @@ public final class Fnn {
      * <pre>{@code
      * // Find the entry with the smallest value in a map
      * Seq<Map.Entry<String, Integer>, Exception> entrySeq = Seq.of(N.asMap("a", 2, "b", 1));
-     * Optional<Map.Entry<String, Integer>> minEntry = entrySeq.reduce(Fnn.minByValue());   // Optional of b=1
+     * Nullable<Map.Entry<String, Integer>> minEntry = entrySeq.reduce(Fnn.minByValue());   // Nullable of b=1
      * }</pre>
      *
      * @param <K> the type of the key
@@ -4584,7 +4591,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Runnable<IOException> throwableRunnable = () -> writeToFile();
-     * Runnable javaRunnable = Fnn.r2jr(throwableRunnable);
+     * java.lang.Runnable javaRunnable = Fnn.r2jr(throwableRunnable);
      * executor.execute(javaRunnable);
      * }</pre>
      *
@@ -4649,7 +4656,7 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Callable<String, IOException> throwableCallable = () -> readFromFile();
-     * Callable<String> javaCallable = Fnn.c2jc(throwableCallable);
+     * java.util.concurrent.Callable<String> javaCallable = Fnn.c2jc(throwableCallable);
      * executor.submit(javaCallable);
      * }</pre>
      *

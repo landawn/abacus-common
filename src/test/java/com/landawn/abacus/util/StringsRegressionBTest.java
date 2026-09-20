@@ -486,7 +486,7 @@ public class StringsRegressionBTest extends TestBase {
                 assertDelimiterRejected(() -> Strings.split(str, delimiter, true));
                 assertDelimiterRejected(() -> Strings.splitPreserveAllTokens(str, delimiter));
                 assertDelimiterRejected(() -> Strings.splitPreserveAllTokens(str, delimiter, true));
-                // For the max-taking String-delimiter overloads the max is checked first, then the delimiter.
+                // String-delimiter overloads validate the delimiter before max, in signature order.
                 assertDelimiterRejected(() -> Strings.split(str, delimiter, 3));
                 assertDelimiterRejected(() -> Strings.split(str, delimiter, 3, true));
                 assertDelimiterRejected(() -> Strings.splitPreserveAllTokens(str, delimiter, 3));
@@ -500,14 +500,24 @@ public class StringsRegressionBTest extends TestBase {
         assertEquals("'delimiter' cannot be null or empty", e.getMessage());
     }
 
-    /** The documented order for the two-collaborator overloads is max first, then delimiter. */
+    /** Validate the delimiter before max, including when the source would otherwise return early. */
     @Test
-    public void testMaxIsValidatedBeforeDelimiter() {
-        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Strings.split(null, (String) null, 0));
-        assertEquals("'max' cannot be zero or negative: 0", e.getMessage());
-
-        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () -> Strings.splitPreserveAllTokens(null, (String) null, 0, true));
-        assertEquals("'max' cannot be zero or negative: 0", e2.getMessage());
+    public void testDelimiterIsValidatedBeforeMax() {
+        for (final String str : new String[] { null, "", "a,b" }) {
+            for (final int max : new int[] { 0, -1 }) {
+                for (final String delimiter : new String[] { null, "" }) {
+                    assertDelimiterRejected(() -> Strings.split(str, delimiter, max));
+                    assertDelimiterRejected(() -> Strings.split(str, delimiter, max, true));
+                    assertDelimiterRejected(() -> Strings.splitPreserveAllTokens(str, delimiter, max));
+                    assertDelimiterRejected(() -> Strings.splitPreserveAllTokens(str, delimiter, max, true));
+                }
+                // With a valid delimiter, max is still validated before an empty-source return.
+                assertMaxRejected(() -> Strings.split(str, ",", max), max);
+                assertMaxRejected(() -> Strings.split(str, ",", max, true), max);
+                assertMaxRejected(() -> Strings.splitPreserveAllTokens(str, ",", max), max);
+                assertMaxRejected(() -> Strings.splitPreserveAllTokens(str, ",", max, true), max);
+            }
+        }
     }
 
     /** A valid max still short-circuits on a null/empty input exactly as documented. */

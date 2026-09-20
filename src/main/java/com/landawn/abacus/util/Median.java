@@ -32,7 +32,7 @@ import com.landawn.abacus.util.u.OptionalShort;
 /**
  * Finds the median element (or the two middle elements) of an array, a collection, or a range of either, without
  * modifying the input. Ranges of four or more elements are copied and the copy is sorted, costing O(n log n) time
- * and O(n) auxiliary space; shorter ranges are resolved directly (see <b>Algorithm</b> below). The caller's data is
+ * and O(n) auxiliary space; shorter ranges use specialized selection paths (see <b>Algorithm</b> below). The caller's data is
  * never touched either way.
  *
  * <p><b>What is returned.</b> A {@link Pair}. For an odd number of elements, {@code left} is the single median and
@@ -51,8 +51,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *
  * <p><b>Empty and null inputs are rejected</b> with {@link IllegalArgumentException}; a range outside the input raises
  * {@link IndexOutOfBoundsException}, which is checked before the emptiness check. A {@code null} comparator is always
- * rejected - ahead of every other check except in {@link #of(Object[], Comparator)}, which validates the array first
- * and so reports the empty-input failure for a {@code null} or empty array. How {@code null} <i>elements</i> are
+ * rejected after the input and any requested range have been validated. How {@code null} <i>elements</i> are
  * ordered is entirely the comparator's business - the natural-order overloads use a null-first comparator, so a
  * {@code null} element sorts below every other value.
  *
@@ -62,11 +61,12 @@ import com.landawn.abacus.util.u.OptionalShort;
  * is lost.
  *
  * <p><b>Algorithm.</b> Ranges of four or more elements are copied and sorted, then read at the middle position(s).
- * Shorter ranges are resolved without sorting: the primitive overloads compare directly and allocate nothing, while
+ * Shorter ranges have specialized paths: primitive overloads select directly without a working array, while
  * the object overloads delegate their three-element case to {@link N#lowerMedian}, which selects through a small
  * bounded heap (falling back to copy-and-sort when the range contains {@code null}) and so does allocate. Collection
  * overloads always copy first, so the result never depends on a {@code size()} the iterator disagrees with. The
- * selected range or collection is read exactly once.
+ * collection copy is then used for selection; array overloads may read an element more than once.
+ * Result pairs and present optional components still require objects.
  *
  * <p><b>Tie handling.</b> When several elements compare equal at a median position, <i>which</i> of those equal
  * elements is returned is unspecified. Ranges of one, two, and four-or-more elements all return the element a stable
@@ -128,8 +128,8 @@ public final class Median {
      * Finds the median value(s) from an array of characters using natural ordering.
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
-     * The input array does not need to be pre-sorted. This method copies the array and sorts the
-     * copy, running in O(n log n) time without modifying the input.</p>
+     * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
+     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -164,7 +164,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex); the range is copied and the copy is sorted, leaving the input unmodified.</p>
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * shorter ranges are selected directly. The input is not modified.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -227,8 +228,8 @@ public final class Median {
      * Finds the median value(s) from an array of bytes using natural ordering.
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
-     * The input array does not need to be pre-sorted. This method copies the array and sorts the
-     * copy, running in O(n log n) time without modifying the input.</p>
+     * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
+     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -263,7 +264,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex); the range is copied and the copy is sorted, leaving the input unmodified.</p>
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * shorter ranges are selected directly. The input is not modified.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -326,8 +328,8 @@ public final class Median {
      * Finds the median value(s) from an array of short integers using natural ordering.
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
-     * The input array does not need to be pre-sorted. This method copies the array and sorts the
-     * copy, running in O(n log n) time without modifying the input.</p>
+     * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
+     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -362,7 +364,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex); the range is copied and the copy is sorted, leaving the input unmodified.</p>
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * shorter ranges are selected directly. The input is not modified.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -425,8 +428,8 @@ public final class Median {
      * Finds the median value(s) from an array of integers using natural ordering.
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
-     * The input array does not need to be pre-sorted. This method copies the array and sorts the
-     * copy, running in O(n log n) time without modifying the input.</p>
+     * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
+     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -462,7 +465,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex); the range is copied and the copy is sorted, leaving the input unmodified.</p>
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * shorter ranges are selected directly. The input is not modified.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -525,8 +529,8 @@ public final class Median {
      * Finds the median value(s) from an array of long integers using natural ordering.
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
-     * The input array does not need to be pre-sorted. This method copies the array and sorts the
-     * copy, running in O(n log n) time without modifying the input.</p>
+     * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
+     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -562,7 +566,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex); the range is copied and the copy is sorted, leaving the input unmodified.</p>
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * shorter ranges are selected directly. The input is not modified.</p>
      *
      * <p>For subarrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -625,8 +630,8 @@ public final class Median {
      * Finds the median value(s) from an array of float values using natural ordering.
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
-     * The input array does not need to be pre-sorted. This method copies the array and sorts the
-     * copy, running in O(n log n) time without modifying the input.
+     * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
+     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.
      * Elements are compared using {@link Float#compare(float, float)}, which imposes a total ordering in which
      * {@code NaN} is considered greater than all other values and {@code 0.0f} is considered greater than {@code -0.0f}.</p>
      *
@@ -663,7 +668,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex); the range is copied and the copy is sorted, leaving the input unmodified.
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * shorter ranges are selected directly. The input is not modified.
      * Elements are compared using {@link Float#compare(float, float)}, which imposes a total ordering in which
      * {@code NaN} is considered greater than all other values and {@code 0.0f} is considered greater than {@code -0.0f}.</p>
      *
@@ -728,8 +734,8 @@ public final class Median {
      * Finds the median value(s) from an array of double values using natural ordering.
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order.
-     * The input array does not need to be pre-sorted. This method copies the array and sorts the
-     * copy, running in O(n log n) time without modifying the input.
+     * The input array does not need to be pre-sorted. Arrays of four or more elements are copied and the
+     * copy is sorted in O(n log n) time; shorter arrays are selected directly. The input is not modified.
      * Elements are compared using {@link Double#compare(double, double)}, which imposes a total ordering in which
      * {@code NaN} is considered greater than all other values (including positive infinity) and {@code 0.0d} is
      * considered greater than {@code -0.0d}.</p>
@@ -768,7 +774,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order.
      * The input array does not need to be pre-sorted. This method operates on a contiguous subarray defined
-     * by the range [fromIndex, toIndex); the range is copied and the copy is sorted, leaving the input unmodified.
+     * by the range [fromIndex, toIndex). Ranges of four or more elements are copied and the copy is sorted;
+     * shorter ranges are selected directly. The input is not modified.
      * Elements are compared using {@link Double#compare(double, double)}, which imposes a total ordering in which
      * {@code NaN} is considered greater than all other values (including positive infinity) and {@code 0.0d} is
      * considered greater than {@code -0.0d}.</p>
@@ -835,7 +842,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order
      * according to their natural comparison method (compareTo). The input array does not need to be pre-sorted.
-     * The selected range is copied and the copy is sorted, so the input array is not modified.</p>
+     * Arrays of four or more elements are copied and the copy is sorted; shorter inputs use the selection
+     * paths described in the class documentation. The input array is not modified.</p>
      *
      * <p>For arrays with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -918,8 +926,9 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the array elements are arranged in sorted order
      * according to the provided comparator. The input array does not need to be pre-sorted. This method
-     * copies the array and sorts the copy with the supplied comparator, allowing median calculation on objects
-     * that may not implement Comparable or when a different ordering than natural order is desired.</p>
+     * uses the supplied comparator, allowing median calculation on objects that may not implement Comparable
+     * or when a different ordering is desired. Arrays of four or more elements are copied and sorted;
+     * shorter inputs use the selection paths described in the class documentation.</p>
      *
      * <p><strong>Note:</strong> {@code cmp} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
@@ -947,11 +956,13 @@ public final class Median {
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if {@code cmp} is
      *         {@code null}.
      * @throws ClassCastException if the selected elements cannot be compared with each other by the chosen ordering
+     * @throws NullPointerException if the comparator is invoked for a selected null element and does not accept nulls
      * @see #of(Object[], int, int, Comparator)
      * @see #of(Comparable[])
      * @see N#lowerMedian(Object[], Comparator)
      */
-    public static <T> Pair<T, Nullable<T>> of(final T[] source, final Comparator<? super T> cmp) throws IllegalArgumentException, ClassCastException {
+    public static <T> Pair<T, Nullable<T>> of(final T[] source, final Comparator<? super T> cmp)
+            throws IllegalArgumentException, ClassCastException, NullPointerException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
         N.checkArgNotNull(cmp, cs.cmp);
 
@@ -963,10 +974,9 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the subarray elements are arranged in sorted order
      * according to the provided comparator. The input array does not need to be pre-sorted. This method
-     * operates on a contiguous subarray defined by the range [fromIndex, toIndex); the range is copied and the
-     * copy is sorted, leaving the input array unmodified.</p>
-     *
-     * <p>The selected range is copied and the copy is sorted; the input array is not modified.</p>
+     * operates on the contiguous range [fromIndex, toIndex), leaving the input array unmodified. Ranges of
+     * one or two elements are compared directly; three-element ranges delegate to {@link N#lowerMedian}.
+     * Larger ranges are copied and the copy is sorted.</p>
      *
      * <p><strong>Note:</strong> {@code cmp} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
@@ -995,26 +1005,27 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty, if the (in-range)
-     *         {@code toIndex - fromIndex} is less than 1, or if {@code cmp} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than the
      *                                   length of the array, or {@code fromIndex > toIndex}. The range is
      *                                   validated before the emptiness check, so an out-of-range index raises
-     *                                   this rather than the empty-input {@code IllegalArgumentException}; a
-     *                                   {@code null} {@code cmp} is still rejected first.
+     *                                   this rather than the empty-input {@code IllegalArgumentException}.
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, if the (in-range)
+     *         {@code toIndex - fromIndex} is less than 1, or if {@code cmp} is {@code null}.
      * @throws ClassCastException if the selected elements cannot be compared with each other by the chosen ordering
+     * @throws NullPointerException if the comparator is invoked for a selected null element and does not accept nulls
      * @see #of(Object[], Comparator)
      * @see #of(Comparable[], int, int)
      * @see N#lowerMedian(Object[], int, int, Comparator)
      */
     public static <T> Pair<T, Nullable<T>> of(final T[] source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
-            throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
-        N.checkArgNotNull(cmp, cs.cmp);
+            throws IndexOutOfBoundsException, IllegalArgumentException, ClassCastException, NullPointerException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(source));
 
         if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
+
+        N.checkArgNotNull(cmp, cs.cmp);
 
         final int len = toIndex - fromIndex;
 
@@ -1027,10 +1038,8 @@ public final class Median {
         } else if (len == 3) {
             return Pair.of(N.lowerMedian(source, fromIndex, toIndex, cmp), Nullable.empty());
         } else {
-            // One copy-and-sort for every range. The previous bounded min-heap could not hold null, so it had
-            // to pre-scan for nulls, reading the range twice and then tie-breaking differently from its own
-            // sort fallback. Sorting always is a single pass, is stable, and lets a null-tolerant comparator
-            // order nulls like any other value.
+            // Sort a copy to preserve the source and allow null-tolerant comparators. The stable sort
+            // also preserves encounter order among values that the comparator considers equal.
             final T[] copy = N.copyOfRange(source, fromIndex, toIndex);
             N.sort(copy, cmp);
 
@@ -1043,7 +1052,8 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the collection elements are arranged in sorted order
      * according to their natural comparison method (compareTo). The input collection does not need to be sorted.
-     * The collection is traversed once into a copy, which is then sorted; the input collection is not modified.</p>
+     * The collection is copied before selection. Copies of four or more elements are sorted; shorter copies
+     * use the selection paths described in the class documentation. The input collection is not modified.</p>
      *
      * <p>For collections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -1080,11 +1090,11 @@ public final class Median {
      *
      * <p>The median represents the middle value(s) when the collection elements are arranged in sorted order
      * according to the provided comparator. The input collection does not need to be sorted. This method
-     * copies the collection and sorts the copy with the supplied comparator, providing flexibility for objects
+     * copies the collection and uses the supplied comparator for selection, providing flexibility for objects
      * that may not implement Comparable or when a different ordering than natural order is desired.</p>
      *
-     * <p>The collection is traversed exactly once into a copy, which is then sorted; the input collection
-     * is not modified.</p>
+     * <p>Copies of four or more elements are sorted; shorter copies use the selection paths described
+     * in the class documentation. The input collection is not modified.</p>
      *
      * <p><strong>Note:</strong> {@code cmp} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
@@ -1112,18 +1122,19 @@ public final class Median {
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if {@code cmp} is
      *         {@code null}.
      * @throws ClassCastException if the selected elements cannot be compared with each other by the chosen ordering
+     * @throws NullPointerException if the comparator is invoked for a selected null element and does not accept nulls
      * @see #of(Collection)
      * @see #of(Collection, int, int, Comparator)
      * @see N#lowerMedian(Collection, Comparator)
      * @see Iterables#lowerMedian(Collection, Comparator)
      */
     public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> source, final Comparator<? super T> cmp)
-            throws IllegalArgumentException, ClassCastException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
+            throws IllegalArgumentException, ClassCastException, NullPointerException {
         if (N.isEmpty(source)) {
             throw new IllegalArgumentException("Source collection is null or empty");
         }
+
+        N.checkArgNotNull(cmp, cs.cmp);
 
         final List<T> copy = new ArrayList<>(source);
         final int len = copy.size();
@@ -1156,7 +1167,8 @@ public final class Median {
      * to the comparator-based version using the natural order comparator.</p>
      *
      * <p>The method efficiently handles the range extraction by using a slice operation that creates a view
-     * of the specified portion of the collection without copying all elements unnecessarily.</p>
+     * of the specified portion of the collection. The selected values are then copied for median selection,
+     * so no elements outside the range need to be stored.</p>
      *
      * <p>For subcollections with an odd number of elements, returns the single median value in the {@code left}
      * component of the pair, with the {@code right} component empty.</p>
@@ -1205,8 +1217,8 @@ public final class Median {
      * median-finding algorithm to the resulting subcollection.</p>
      *
      * <p>The method first validates the input parameters and range bounds, then creates a slice view of the
-     * collection using the specified indices. This approach is memory-efficient as it avoids copying
-     * elements that are not part of the target range.</p>
+     * collection using the specified indices. The selected values are then copied for median selection;
+     * elements outside the target range are not stored.</p>
      *
      * <p><strong>Note:</strong> {@code cmp} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
@@ -1235,26 +1247,27 @@ public final class Median {
      * @return a {@code Pair} containing the median value(s). For odd-size subcollections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, if the (in-range)
-     *         {@code toIndex - fromIndex} is less than 1, or if {@code cmp} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than the
      *                                   size of the collection, or {@code fromIndex > toIndex}. The range is
      *                                   validated before the emptiness check, so an out-of-range index raises
-     *                                   this rather than the empty-input {@code IllegalArgumentException}; a
-     *                                   {@code null} {@code cmp} is still rejected first.
+     *                                   this rather than the empty-input {@code IllegalArgumentException}.
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, if the (in-range)
+     *         {@code toIndex - fromIndex} is less than 1, or if {@code cmp} is {@code null}.
      * @throws ClassCastException if the selected elements cannot be compared with each other by the chosen ordering
+     * @throws NullPointerException if the comparator is invoked for a selected null element and does not accept nulls
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
      * @see N#lowerMedian(Collection, int, int, Comparator)
      */
     public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
-            throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
-        N.checkArgNotNull(cmp, cs.cmp);
+            throws IndexOutOfBoundsException, IllegalArgumentException, ClassCastException, NullPointerException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(source));
 
         if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source collection is null/empty, or the range is empty: toIndex - fromIndex must be >= 1"); //NOSONAR
         }
+
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return of(N.slice(source, fromIndex, toIndex), cmp);
     }

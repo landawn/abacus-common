@@ -217,8 +217,7 @@ public class NamingPolicyTest extends AbstractParserTest {
         assertEquals("a9aBb", NamingPolicy.CAMEL_CASE.convert("a9ABb"));
 
         final String[] samples = { "a__b", "a9_ABb", "_first__name_", "userName", "XMLParser", "-a-", " -hello- ", "" };
-        final NamingPolicy[] idempotent = { NamingPolicy.SNAKE_CASE, NamingPolicy.SCREAMING_SNAKE_CASE, NamingPolicy.KEBAB_CASE,
-                NamingPolicy.NO_CHANGE };
+        final NamingPolicy[] idempotent = { NamingPolicy.SNAKE_CASE, NamingPolicy.SCREAMING_SNAKE_CASE, NamingPolicy.KEBAB_CASE, NamingPolicy.NO_CHANGE };
 
         for (final String s : samples) {
             for (final NamingPolicy p : idempotent) {

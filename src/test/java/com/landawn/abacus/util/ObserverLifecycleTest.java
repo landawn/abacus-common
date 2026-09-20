@@ -510,8 +510,7 @@ public class ObserverLifecycleTest extends TestBase {
                 .info()
                 .command()
                 .orElse(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java");
-        final ProcessBuilder builder = new ProcessBuilder(javaCommand, "-Xmx256m", "-cp", System.getProperty("java.class.path"),
-                JvmExitProbe.class.getName());
+        final ProcessBuilder builder = new ProcessBuilder(javaCommand, "-Xmx256m", "-cp", System.getProperty("java.class.path"), JvmExitProbe.class.getName());
         builder.redirectErrorStream(true);
 
         final StringBuilder out = new StringBuilder();

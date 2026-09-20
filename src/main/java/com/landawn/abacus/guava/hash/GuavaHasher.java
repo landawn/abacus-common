@@ -55,7 +55,7 @@ final class GuavaHasher implements Hasher {
      * @throws NullPointerException if {@code gHasher} is {@code null}
      */
     GuavaHasher(final com.google.common.hash.Hasher gHasher) throws NullPointerException {
-        N.requireNonNull(gHasher, "gHasher");
+        N.requireNonNull(gHasher, cs.gHasher);
         this.gHasher = gHasher;
     }
 

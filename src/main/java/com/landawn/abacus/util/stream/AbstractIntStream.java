@@ -203,7 +203,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -335,7 +335,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextInt();
                 right = left;
 
@@ -379,7 +379,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextInt();
                 right = left;
 
@@ -421,7 +421,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public IntList next() {
+            public IntList next() throws NoSuchElementException {
                 final IntList result = new IntList(9);
                 result.add(hasNext ? next : (next = iter.nextInt()));
 
@@ -465,7 +465,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 int res = hasNext ? next : (next = iter.nextInt());
 
                 hasNext = false;
@@ -508,7 +508,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 final int first = hasNext ? next : (next = iter.nextInt());
                 int res = first;
 
@@ -616,7 +616,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 final int next = iter.nextInt();
                 iter.advance(skip);
                 return next;
@@ -644,7 +644,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (isFirst) {
                     res = iter.nextInt();
                     isFirst = false;
@@ -673,7 +673,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return (res = accumulator.applyAsInt(res, iter.nextInt()));
             }
         }, false);
@@ -702,7 +702,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (isFirst) {
                     isFirst = false;
                     return init;
@@ -779,7 +779,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -873,7 +873,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -998,7 +998,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1119,7 +1119,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1199,7 +1199,7 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1413,6 +1413,7 @@ abstract class AbstractIntStream extends IntStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
@@ -1548,7 +1549,8 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         try (final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer()) {
@@ -1585,7 +1587,8 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjIntConsumer<? super R> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public <R> R collect(final Supplier<R> supplier, final ObjIntConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

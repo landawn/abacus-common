@@ -217,10 +217,11 @@ public final class FilenameUtil {
 
     /**
      * Normalizes a path, removing double and single dot path steps,
-     * and removing any final directory separator.
+     * and removing a final directory separator unless it is part of the prefix.
      *
      * <p>This method is similar to {@link #normalize(String)} but removes
-     * the trailing slash if present.</p>
+     * the trailing slash if present beyond the prefix. Root and home-directory prefixes retain
+     * their separator; for example, {@code "/"}, {@code "C:/"}, and {@code "~/"} remain prefixes.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

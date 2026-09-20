@@ -511,12 +511,14 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         final Dataset ds = twoColumnDataset();
         final Dataset.Row row = ds.row(0);
 
-        // row(int) is an indexed view, so it follows the position through a reorder.
+        // Structural changes invalidate a row accessor; reacquire the row at its new position.
         ds.sortBy("id", Comparator.reverseOrder());
-        assertEquals(Integer.valueOf(3), row.get("id"));
+        assertThrows(ConcurrentModificationException.class, () -> row.get("id"));
+        final Dataset.Row current = ds.row(0);
+        assertEquals(Integer.valueOf(3), current.get("id"));
 
         ds.freeze();
-        assertThrows(IllegalStateException.class, () -> row.set("id", 9));
+        assertThrows(IllegalStateException.class, () -> current.set("id", 9));
     }
 
     @Test
@@ -882,16 +884,17 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         // C-025 - the one filter overload whose javadoc had not said so
         assertThrows(IllegalArgumentException.class, () -> ds.filter(0, 1, CommonUtil.asList("id"), null, 1));
 
-        // C-026 - the row index is re-checked on every access, so a Row outlives its row silently no more
+        // C-026 - a structural change invalidates every accessor, even when an index remains in range.
         final Dataset shrinking = Dataset.rows(CommonUtil.asList("id", "name"), new Object[][] { { 1, "a" }, { 2, "b" } });
         final Dataset.Row stale = shrinking.row(1);
         assertEquals(Integer.valueOf(2), stale.<Integer> get(0)); // fine while the row exists
         shrinking.removeRow(1);
-        assertThrows(IndexOutOfBoundsException.class, () -> stale.get(0));
-        assertThrows(IndexOutOfBoundsException.class, () -> stale.get("id"));
-        assertThrows(IndexOutOfBoundsException.class, () -> stale.set(0, 9));
-        assertThrows(IndexOutOfBoundsException.class, () -> stale.set("id", 9));
-        assertThrows(IndexOutOfBoundsException.class, stale::toArray);
+        assertThrows(ConcurrentModificationException.class, () -> stale.get(0));
+        assertThrows(ConcurrentModificationException.class, () -> stale.get("id"));
+        assertThrows(ConcurrentModificationException.class, () -> stale.set(0, 9));
+        assertThrows(ConcurrentModificationException.class, () -> stale.set("id", 9));
+        assertThrows(ConcurrentModificationException.class, stale::toArray);
+        assertEquals("Row[1]=<invalidated>", stale.toString());
 
         // C-029 - the array factory rejects a null row; the Collection factory turns one into an all-null row
         assertThrows(IllegalArgumentException.class, () -> Dataset.rows(CommonUtil.asList("id"), new Object[][] { { 1 }, null }));
@@ -955,8 +958,7 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         // right-dataset order and fullJoin must agree. The key 1 below straddles the key 2, which is what the
         // distinct-key regression above cannot detect.
         final Dataset left = Dataset.rows(CommonUtil.asList("id", "lv"), new Object[][] { { 9, "L9" } });
-        final Dataset right = Dataset.rows(CommonUtil.asList("rid", "rv"),
-                new Object[][] { { 1, "R1" }, { 2, "R2" }, { 1, "R1b" }, { 3, "R3" } });
+        final Dataset right = Dataset.rows(CommonUtil.asList("rid", "rv"), new Object[][] { { 1, "R1" }, { 2, "R2" }, { 1, "R1b" }, { 3, "R3" } });
         final List<String> expected = Arrays.asList(null, "R1", "R2", "R1b", "R3");
 
         assertEquals(expected, left.fullJoin(right, CommonUtil.asMap("id", "rid")).getColumn("rv"));

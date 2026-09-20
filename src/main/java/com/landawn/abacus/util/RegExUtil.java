@@ -1080,7 +1080,7 @@ public final class RegExUtil {
     public static final Pattern WHITESPACE_FINDER = Pattern.compile("\\s+");
 
     /**
-     * Pattern that matches an entire string if it is a valid Java identifier.
+     * Pattern that matches an entire string with Java identifier syntax; keywords are not excluded.
      * This is the anchored version of {@link #JAVA_IDENTIFIER_FINDER} that requires the entire string to match.
      *
      * @see #JAVA_IDENTIFIER_FINDER
@@ -1201,7 +1201,8 @@ public final class RegExUtil {
     public static final Pattern BANK_CARD_NUMBER_MATCHER = matchEntire(BANK_CARD_NUMBER_FINDER);
 
     /**
-     * Pattern that matches an entire string if it is a valid email address according to RFC 5322.
+     * Pattern that matches an entire string against the RFC 5322-inspired subset described by
+     * {@link #EMAIL_ADDRESS_RFC_5322_FINDER}; it is not a complete email-address validator.
      * This is the anchored version of {@link #EMAIL_ADDRESS_RFC_5322_FINDER} that requires the entire string to match.
      *
      * @see #EMAIL_ADDRESS_RFC_5322_FINDER
@@ -1532,7 +1533,7 @@ public final class RegExUtil {
      * // Returns: "123"
      *
      * String email = RegExUtil.findFirst("Contact: john@example.com or jane@test.org",
-     *                                   "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     *                                   "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
      * // Returns: "john@example.com"
      *
      * String noResult = RegExUtil.findFirst("abc", "\\d+");
@@ -1583,7 +1584,7 @@ public final class RegExUtil {
      * String result = RegExUtil.findFirst("abc123xyz456", digitPattern);
      * // Returns: "123"
      *
-     * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
      * String email = RegExUtil.findFirst("Contact: john@example.com or jane@test.org", emailPattern);
      * // Returns: "john@example.com"
      *
@@ -1641,7 +1642,7 @@ public final class RegExUtil {
      * // Returns: "java"
      *
      * String email = RegExUtil.findLast("Contact: john@example.com or jane@test.org",
-     *                                  "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     *                                  "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
      * // Returns: "jane@test.org"
      *
      * String noResult = RegExUtil.findLast("abc", "\\d+");
@@ -1697,7 +1698,7 @@ public final class RegExUtil {
      * String word = RegExUtil.findLast("hello world java", wordPattern);
      * // Returns: "java"
      *
-     * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b");
+     * Pattern emailPattern = Pattern.compile("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b");
      * String email = RegExUtil.findLast("Contact: john@example.com or jane@test.org", emailPattern);
      * // Returns: "jane@test.org"
      *

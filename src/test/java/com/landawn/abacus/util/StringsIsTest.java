@@ -481,7 +481,26 @@ public class StringsIsTest extends StringsTestSupport {
         assertFalse(Strings.isAllLowerCase("ABC"));
         assertFalse(Strings.isAllLowerCase("abc123"));
         assertFalse(Strings.isAllLowerCase(null));
-        assertFalse(Strings.isAllLowerCase(""));
+    }
+
+    @Test
+    public void testIsAllLowerCase_empty_isVacuouslyTrue() {
+        // An empty CharSequence has no code point that is not lowercase, so the universal
+        // quantifier is vacuously satisfied. null is a missing input, not an empty one.
+        assertTrue(Strings.isAllLowerCase(""));
+        assertTrue(Strings.isAllLowerCase(new StringBuilder()));
+        assertTrue(Strings.isAllLowerCase(new StringBuilder("ab").subSequence(1, 1)));
+        assertFalse(Strings.isAllLowerCase(null));
+
+        // ... and it is simultaneously vacuously all-uppercase, which is only consistent for empty input.
+        assertTrue(Strings.isAllUpperCase(""));
+        assertFalse(Strings.isMixedCase(""));
+
+        // The sibling character-class predicates deliberately keep returning false for empty input.
+        assertFalse(Strings.isAlpha(""));
+        assertFalse(Strings.isNumeric(""));
+        assertFalse(Strings.isAsciiPrintable(""));
+        assertFalse(Strings.isWhitespace(""));
     }
 
     @Test
@@ -492,7 +511,14 @@ public class StringsIsTest extends StringsTestSupport {
         assertFalse(Strings.isAllUpperCase("abc"));
         assertFalse(Strings.isAllUpperCase("ABC123"));
         assertFalse(Strings.isAllUpperCase(null));
-        assertFalse(Strings.isAllUpperCase(""));
+    }
+
+    @Test
+    public void testIsAllUpperCase_empty_isVacuouslyTrue() {
+        assertTrue(Strings.isAllUpperCase(""));
+        assertTrue(Strings.isAllUpperCase(new StringBuilder()));
+        assertTrue(Strings.isAllUpperCase(new StringBuilder("AB").subSequence(2, 2)));
+        assertFalse(Strings.isAllUpperCase(null));
     }
 
     @Test
@@ -869,6 +895,7 @@ public class StringsIsTest extends StringsTestSupport {
         assertFalse(Strings.isBase64Mime("SGV!sbG8=".getBytes(StandardCharsets.US_ASCII)));
         assertFalse(Strings.isBase64Mime((byte[]) null));
     }
+
     /**
      * Contract pin for the Commons Lang comparison note on {@code isAsciiPrintable(CharSequence)}: only the EMPTY
      * result diverges - both libraries return {@code false} for {@code null}.

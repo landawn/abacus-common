@@ -203,7 +203,7 @@ import com.landawn.abacus.parser.ParserUtil.PropInfo;
  * <ul>
  *   <li><b>UncheckedIOException:</b> Wraps IOException from Appendable operations</li>
  *   <li><b>IllegalArgumentException:</b> Thrown for invalid argument shapes or unsupported target types</li>
- *   <li><b>NullPointerException:</b> Appropriate {@code null} checks with descriptive messages</li>
+ *   <li><b>NullPointerException:</b> A destination map rejects a decoded {@code null} value</li>
  *   <li><b>Charset Fallback:</b> A {@code null} charset is handled gracefully with a fallback to UTF-8</li>
  * </ul>
  *
@@ -777,7 +777,7 @@ public final class URLEncodedUtil {
     /**
      * Encodes the provided parameters into a URL-encoded query string and appends the result to an {@code Appendable} using UTF-8.
      * <p>
-     * This method is useful for streaming or building query strings without creating intermediate String objects.
+     * This method appends the query directly without first materializing the complete encoded query as a String.
      * The parameters are encoded according to application/x-www-form-urlencoded rules and directly appended
      * to the provided output.
      * </p>
@@ -815,7 +815,7 @@ public final class URLEncodedUtil {
     /**
      * Encodes the provided parameters into a URL-encoded query string and appends the result to an {@code Appendable} using the specified charset.
      * <p>
-     * This method is useful for streaming or building query strings without creating intermediate String objects.
+     * This method appends the query directly without first materializing the complete encoded query as a String.
      * The parameters are encoded using the specified charset according to application/x-www-form-urlencoded rules
      * and directly appended to the provided output.
      * </p>
@@ -858,7 +858,7 @@ public final class URLEncodedUtil {
      * Encodes the provided parameters into a URL-encoded query string and appends the result to an {@code Appendable}
      * using the specified charset and naming policy.
      * <p>
-     * This method is useful for streaming or building query strings without creating intermediate String objects.
+     * This method appends the query directly without first materializing the complete encoded query as a String.
      * Property/key names are transformed according to the naming policy before being percent-encoded using the
      * specified charset according to application/x-www-form-urlencoded rules.
      * </p>
@@ -1033,7 +1033,13 @@ public final class URLEncodedUtil {
         return sb == null ? bounded : sb.toString();
     }
 
-    private static String requireParameterName(final Object name) {
+    /**
+     * Requires a non-null string parameter name.
+     *
+     * @throws IllegalArgumentException if {@code name} is {@code null}
+     * @throws ClassCastException if {@code name} is not a {@link String}
+     */
+    private static String requireParameterName(final Object name) throws IllegalArgumentException, ClassCastException {
         if (name == null) {
             throw new IllegalArgumentException("Parameter name must not be null");
         }
@@ -1173,7 +1179,7 @@ public final class URLEncodedUtil {
      * plus {@code / ; : @ & = + $ ,}). Spaces are percent-encoded rather than converted to
      * {@code '+'}, preserving valid path separator and parameter syntax.
      *
-     * <p>Used internally to encode individual path segments of a URI.</p>
+     * <p>Used internally to encode a URI path while preserving path separators.</p>
      *
      * @param content the string to encode; {@code null} is written as the literal text {@code "null"}.
      * @param charset the charset used to convert characters to bytes before percent-encoding;

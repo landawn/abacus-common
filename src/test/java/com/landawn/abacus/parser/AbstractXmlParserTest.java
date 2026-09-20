@@ -35,6 +35,8 @@ import com.landawn.abacus.util.XmlUtil;
 import testfixtures.types.UntrustedXmlType;
 
 public abstract class AbstractXmlParserTest extends AbstractParserTest {
+    // Explicit policy remains independent of global registrations; ordinary factories retain round-trip compatibility.
+    private final AbstractXmlParser resolver = new XmlParserImpl(XmlParserType.StAX, null, null, java.util.Set.of());
     private static final String UNTRUSTED_INITIALIZED_PROPERTY = "com.landawn.abacus.test.untrustedXmlTypeInitialized";
 
     // TODO: AbstractXmlParser's Node deserialize delegate methods are exercised by concrete XmlParser tests; isolated coverage would require
@@ -56,7 +58,7 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
     }
 
     @Test
-    public void testTypeAttributesUseExactSafeNamesByDefault() throws Exception {
+    public void testExplicitTypePolicyUsesExactSafeNames() throws Exception {
         final String property = AbstractXmlParser.XML_TYPE_CLASS_FOR_NAME_PROPERTY;
         final String previousValue = System.getProperty(property);
         final String previousInitializedValue = System.getProperty(UNTRUSTED_INITIALIZED_PROPERTY);
@@ -67,38 +69,38 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
 
             final DocumentBuilder parser = XmlUtil.createDOMParser(false, false);
             final Node safeNode = parser.parse(new InputSource(new StringReader("<value type=\"ArrayList\"/>"))).getDocumentElement();
-            assertSame(ArrayList.class, AbstractXmlParser.getAttributeTypeClass(safeNode));
-            assertSame(HashSet.class, AbstractXmlParser.resolveTypeAttribute("HashSet<Object>").javaType());
+            assertSame(ArrayList.class, resolver.getAttributeTypeClass(safeNode));
+            assertSame(HashSet.class, resolver.resolveTypeAttribute("HashSet<Object>").javaType());
 
             Type.of(PersonType.class);
-            assertNull(AbstractXmlParser.resolveTypeAttribute(PersonType.class.getSimpleName()));
-            assertNull(AbstractXmlParser.resolveTypeAttribute("List<" + PersonType.class.getSimpleName() + ">"));
-            assertSame(PersonType.class, AbstractXmlParser.resolveTypeAttribute(PersonType.class.getCanonicalName()).javaType());
-            assertSame(List.class, AbstractXmlParser.resolveTypeAttribute("List<" + PersonType.class.getCanonicalName() + ">").javaType());
-            assertSame(ImmutableMap.class, AbstractXmlParser.resolveTypeAttribute("ImmutableMap<Object, Object>").javaType());
-            assertNull(AbstractXmlParser.resolveTypeAttribute(" \t "));
+            assertNull(resolver.resolveTypeAttribute(PersonType.class.getSimpleName()));
+            assertNull(resolver.resolveTypeAttribute("List<" + PersonType.class.getSimpleName() + ">"));
+            assertNull(resolver.resolveTypeAttribute(PersonType.class.getCanonicalName()));
+            assertNull(resolver.resolveTypeAttribute("List<" + PersonType.class.getCanonicalName() + ">"));
+            assertSame(ImmutableMap.class, resolver.resolveTypeAttribute("ImmutableMap<Object, Object>").javaType());
+            assertNull(resolver.resolveTypeAttribute(" \t "));
 
             final Node blankNode = parser.parse(new InputSource(new StringReader("<value type=\"   \"/>"))).getDocumentElement();
-            assertNull(AbstractXmlParser.getAttributeTypeClass(blankNode));
+            assertNull(resolver.getAttributeTypeClass(blankNode));
 
             final String untrustedName = "untrusted.abacus.UntrustedXmlType";
             final Node untrustedNode = parser.parse(new InputSource(new StringReader("<value type=\"" + untrustedName + "\"/>"))).getDocumentElement();
-            assertThrows(ParsingException.class, () -> AbstractXmlParser.getAttributeTypeClass(untrustedNode));
+            assertThrows(ParsingException.class, () -> resolver.getAttributeTypeClass(untrustedNode));
 
             final AttributesImpl attrs = new AttributesImpl();
             attrs.addAttribute("", "type", "type", "CDATA", untrustedName);
-            assertThrows(ParsingException.class, () -> AbstractXmlParser.getAttributeTypeClass(attrs));
+            assertThrows(ParsingException.class, () -> resolver.getAttributeTypeClass(attrs));
 
             final XMLStreamReader xmlReader = XMLInputFactory.newFactory().createXMLStreamReader(new StringReader("<value type=\"" + untrustedName + "\"/>"));
             xmlReader.nextTag();
-            assertThrows(ParsingException.class, () -> AbstractXmlParser.getAttributeTypeClass(xmlReader));
+            assertThrows(ParsingException.class, () -> resolver.getAttributeTypeClass(xmlReader));
             xmlReader.close();
 
-            assertNull(AbstractXmlParser.resolveTypeAttribute("List<" + untrustedName + ">"));
+            assertNull(resolver.resolveTypeAttribute("List<" + untrustedName + ">"));
             assertNull(System.getProperty(UNTRUSTED_INITIALIZED_PROPERTY), "A rejected type attribute must not initialize its class");
 
             final String unregisteredAlias = "untrusted.abacus.UnregisteredXmlTypeAliasForTest";
-            assertNull(AbstractXmlParser.resolveTypeAttribute(unregisteredAlias));
+            assertNull(resolver.resolveTypeAttribute(unregisteredAlias));
 
             final String registeredAlias = "untrusted.abacus.RegisteredXmlTypeAliasForTest";
 
@@ -106,8 +108,8 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
                 TypeFactory.registerType(registeredAlias, UntrustedXmlType.class, value -> value.toString(), value -> null);
             }
 
-            assertNull(AbstractXmlParser.resolveTypeAttribute(registeredAlias));
-            assertNull(AbstractXmlParser.resolveTypeAttribute("List<" + registeredAlias + ">"));
+            assertNull(resolver.resolveTypeAttribute(registeredAlias));
+            assertNull(resolver.resolveTypeAttribute("List<" + registeredAlias + ">"));
             assertNull(System.getProperty(UNTRUSTED_INITIALIZED_PROPERTY), "Rejecting a registered alias must not initialize its class");
         } finally {
             if (previousValue == null) {
@@ -125,7 +127,7 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
     }
 
     @Test
-    public void testLegacyTypeAttributeClassForNameCanBeEnabled() throws Exception {
+    public void testLegacySystemPropertyCannotGrantTypePermission() throws Exception {
         final String property = AbstractXmlParser.XML_TYPE_CLASS_FOR_NAME_PROPERTY;
         final String previousValue = System.getProperty(property);
 
@@ -135,15 +137,15 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
             final String legacyTypeName = "testfixtures.types.LegacyXmlType";
             final DocumentBuilder parser = XmlUtil.createDOMParser(false, false);
             final Node legacyNode = parser.parse(new InputSource(new StringReader("<value type=\"" + legacyTypeName + "\"/>"))).getDocumentElement();
-            assertEquals(legacyTypeName, AbstractXmlParser.getAttributeTypeClass(legacyNode).getName());
+            assertThrows(ParsingException.class, () -> resolver.getAttributeTypeClass(legacyNode));
 
             final AttributesImpl attrs = new AttributesImpl();
             attrs.addAttribute("", "type", "type", "CDATA", legacyTypeName);
-            assertEquals(legacyTypeName, AbstractXmlParser.getAttributeTypeClass(attrs).getName());
+            assertThrows(ParsingException.class, () -> resolver.getAttributeTypeClass(attrs));
 
             final XMLStreamReader xmlReader = XMLInputFactory.newFactory().createXMLStreamReader(new StringReader("<value type=\"" + legacyTypeName + "\"/>"));
             xmlReader.nextTag();
-            assertEquals(legacyTypeName, AbstractXmlParser.getAttributeTypeClass(xmlReader).getName());
+            assertThrows(ParsingException.class, () -> resolver.getAttributeTypeClass(xmlReader));
             xmlReader.close();
         } finally {
             if (previousValue == null) {
@@ -169,15 +171,16 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
             System.clearProperty(property);
 
             assertEquals("MapEntity", Type.of(MapEntity.class).xmlName());
-            assertSame(MapEntity.class, AbstractXmlParser.resolveTypeAttribute(Type.of(MapEntity.class).xmlName()).javaType());
-            assertSame(MapEntity.class, AbstractXmlParser.resolveTypeAttribute(MapEntity.class.getCanonicalName()).javaType());
-            assertSame(MutableInt.class, AbstractXmlParser.resolveTypeAttribute(Type.of(MutableInt.class).xmlName()).javaType());
-            assertSame(Dataset.class, AbstractXmlParser.resolveTypeAttribute("Dataset").javaType());
-            assertSame(List.class, AbstractXmlParser.resolveTypeAttribute("List<MutableInt>").javaType());
+            assertSame(MapEntity.class, resolver.resolveTypeAttribute(Type.of(MapEntity.class).xmlName()).javaType());
+            assertSame(MapEntity.class, resolver.resolveTypeAttribute(MapEntity.class.getCanonicalName()).javaType());
+            assertSame(MutableInt.class, resolver.resolveTypeAttribute(Type.of(MutableInt.class).xmlName()).javaType());
+            assertSame(Dataset.class, resolver.resolveTypeAttribute("Dataset").javaType());
+            assertSame(List.class, resolver.resolveTypeAttribute("List<MutableInt>").javaType());
 
-            final Node mapEntityNode = XmlUtil.createDOMParser(false, false).parse(new InputSource(new StringReader("<value type=\"MapEntity\"/>")))
+            final Node mapEntityNode = XmlUtil.createDOMParser(false, false)
+                    .parse(new InputSource(new StringReader("<value type=\"MapEntity\"/>")))
                     .getDocumentElement();
-            assertSame(MapEntity.class, AbstractXmlParser.getAttributeTypeClass(mapEntityNode));
+            assertSame(MapEntity.class, resolver.getAttributeTypeClass(mapEntityNode));
 
             // A registration alias is its OWN Type.name(), so the name() test alone would have readmitted it. Only a
             // name the class itself supplies - its canonical or simple name - is accepted.
@@ -188,8 +191,8 @@ public abstract class AbstractXmlParserTest extends AbstractParserTest {
             }
 
             assertEquals(alias, TypeFactory.getTypeIfPresent(alias).name());
-            assertNull(AbstractXmlParser.resolveTypeAttribute(alias));
-            assertNull(AbstractXmlParser.resolveTypeAttribute("List<" + alias + ">"));
+            assertNull(resolver.resolveTypeAttribute(alias));
+            assertNull(resolver.resolveTypeAttribute("List<" + alias + ">"));
         } catch (final Exception e) {
             throw new RuntimeException(e);
         } finally {

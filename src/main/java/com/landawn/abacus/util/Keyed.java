@@ -202,7 +202,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * }</pre>
      *
      * @param obj the reference object with which to compare.
-     * @return {@code true} if this object has the same key as the obj argument;
+     * @return {@code true} if the argument has the exact same runtime class and an equal key;
      *         {@code false} otherwise.
      */
     @Override

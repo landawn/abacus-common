@@ -19,8 +19,8 @@ import static java.lang.Character.MIN_SURROGATE;
 
 /**
  * Low-level, high-performance utility methods for working with UTF-8 character encoding.
- * This class provides optimized implementations for UTF-8 validation and length calculation
- * that are more efficient than using {@code String.getBytes(UTF_8)}.
+ * This class provides UTF-8 validation and length calculation without allocating an encoded
+ * byte array.
  *
  * <p>The implementation follows the restricted definition of UTF-8 introduced in Unicode 3.1,
  * which means it rejects "non-shortest form" byte sequences. In contrast, convenience
@@ -32,13 +32,13 @@ import static java.lang.Character.MIN_SURROGATE;
  *   <li>Highly optimized for performance with special handling for ASCII characters</li>
  *   <li>Validates proper UTF-8 encoding including surrogate pair validation</li>
  *   <li>Rejects overlong encodings and invalid byte sequences</li>
- *   <li>More efficient than standard Java UTF-8 operations for validation and length calculation</li>
+ *   <li>Validation and length calculation without creating an intermediate encoded byte array</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * String text = "Hello 世界";
- * int utf8Length = Utf8.encodedLength(text);   // more efficient than text.getBytes("UTF-8").length
+ * int utf8Length = Utf8.encodedLength(text);   // does not allocate an encoded byte array
  *
  * byte[] bytes = getDataFromNetwork();
  * if (Utf8.isWellFormed(bytes)) {
@@ -55,8 +55,9 @@ public final class Utf8 {
 
     /**
      * Returns the number of bytes in the UTF-8-encoded form of the given character sequence.
-     * This method is equivalent to {@code string.getBytes(UTF_8).length}, but is more efficient
-     * in both time and space.
+     * For well-formed UTF-16 whose encoded length fits in an {@code int}, this returns the same
+     * length as UTF-8 encoding without allocating the encoded byte array. Unlike
+     * {@code String.getBytes(UTF_8)}, it rejects unpaired surrogates instead of replacing them.
      *
      * <p>The implementation is optimized with fast paths for:</p>
      * <ul>
@@ -119,9 +120,9 @@ public final class Utf8 {
 
     /**
      * Computes the additional UTF-8 encoded bytes required for the portion of {@code sequence}
-     * starting at {@code start}, for characters that need more than one byte in UTF-8 (i.e.,
-     * characters at code-point {@code >= 0x800}, including surrogate pairs). Pure-ASCII and
-     * two-byte characters have already been counted by the caller.
+     * starting at {@code start}, beyond the one byte per UTF-16 code unit counted by the caller.
+     * The caller has already accounted for all extra bytes before {@code start}; this method
+     * handles all remaining characters, including two-byte characters and surrogate pairs.
      *
      * @param sequence the character sequence being measured
      * @param start the index in {@code sequence} from which to begin counting
@@ -166,7 +167,7 @@ public final class Utf8 {
      *
      * <p>This method returns {@code true} if and only if
      * {@code Arrays.equals(bytes, new String(bytes, UTF_8).getBytes(UTF_8))} would return {@code true},
-     * but is more efficient in both time and space.</p>
+     * without allocating the intermediate decoded string and re-encoded byte array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -200,7 +201,7 @@ public final class Utf8 {
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);
-     * if (Utf8.isWellFormed(buffer, 0, bytesRead)) {
+     * if (bytesRead >= 0 && Utf8.isWellFormed(buffer, 0, bytesRead)) {
      *     String text = new String(buffer, 0, bytesRead, StandardCharsets.UTF_8);
      * }
      * }</pre>

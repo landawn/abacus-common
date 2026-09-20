@@ -116,8 +116,9 @@ class ArrayFloatStream extends AbstractFloatStream {
      * }</pre>
      *
      * @param values the float array to stream over
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayFloatStream(final float[] values) {
+    ArrayFloatStream(final float[] values) throws NullPointerException {
         this(values, 0, values.length);
     }
 
@@ -136,8 +137,9 @@ class ArrayFloatStream extends AbstractFloatStream {
      *
      * @param values the float array to stream over
      * @param closeHandlers handlers to execute when the stream is closed, can be null
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayFloatStream(final float[] values, final Collection<LocalRunnable> closeHandlers) {
+    ArrayFloatStream(final float[] values, final Collection<LocalRunnable> closeHandlers) throws NullPointerException {
         this(values, 0, values.length, closeHandlers);
     }
 
@@ -156,8 +158,9 @@ class ArrayFloatStream extends AbstractFloatStream {
      * @param values the float array to stream over
      * @param sorted whether the array elements are in sorted order
      * @param closeHandlers handlers to execute when the stream is closed, can be null
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayFloatStream(final float[] values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
+    ArrayFloatStream(final float[] values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) throws NullPointerException {
         this(values, 0, values.length, sorted, closeHandlers);
     }
 
@@ -276,7 +279,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -323,7 +326,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -375,7 +378,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -419,7 +422,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -485,7 +488,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -530,7 +533,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -575,7 +578,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -620,7 +623,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -666,7 +669,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -735,7 +738,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -792,7 +795,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -845,7 +848,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -898,7 +901,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -967,7 +970,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1036,7 +1039,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1106,7 +1109,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1164,7 +1167,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1204,7 +1207,7 @@ class ArrayFloatStream extends AbstractFloatStream {
                 }
 
                 @Override
-                public float nextFloat() {
+                public float nextFloat() throws NoSuchElementException {
                     if (!hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1312,7 +1315,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1400,7 +1403,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2146,7 +2149,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2216,7 +2219,7 @@ class ArrayFloatStream extends AbstractFloatStream {
                 }
 
                 @Override
-                public float nextFloat() {
+                public float nextFloat() throws NoSuchElementException {
                     if (iter == null) {
                         init();
                     }
@@ -2254,13 +2257,7 @@ class ArrayFloatStream extends AbstractFloatStream {
                             iter = s == null ? FloatIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -2292,7 +2289,7 @@ class ArrayFloatStream extends AbstractFloatStream {
                 }
 
                 @Override
-                public float nextFloat() {
+                public float nextFloat() throws NoSuchElementException {
                     if (!executed) {
                         executed = true;
                         action.run();
@@ -2347,7 +2344,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (fromIndex >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2382,7 +2379,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }

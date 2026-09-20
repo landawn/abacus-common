@@ -176,12 +176,11 @@ public class JsonMappersTest extends TestBase {
         // These three were the only TypeReference overloads left without an explicit guard. Jackson already threw
         // an IllegalArgumentException of its own here, so the exception type proves nothing - the message is what
         // pins them to the same guard the other 20 use (Jackson's own reads: argument "typeRef" is null).
-        Assertions.assertEquals("'targetType' cannot be null", Assertions
-                .assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(dataInput(bytes), (TypeReference<?>) null))
-                .getMessage());
-        Assertions.assertEquals("'targetType' cannot be null", Assertions
-                .assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(dataInput(bytes), (TypeReference<?>) null, config))
-                .getMessage());
+        Assertions.assertEquals("'targetType' cannot be null",
+                Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(dataInput(bytes), (TypeReference<?>) null)).getMessage());
+        Assertions.assertEquals("'targetType' cannot be null",
+                Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(dataInput(bytes), (TypeReference<?>) null, config))
+                        .getMessage());
         Assertions.assertEquals("'targetType' cannot be null",
                 Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(dataInput(bytes), (TypeReference<?>) null)).getMessage());
     }
@@ -498,8 +497,7 @@ public class JsonMappersTest extends TestBase {
 
         // a null targetType is an argument error on every TypeReference overload, with the same message on all of
         // them - not a raw NullPointerException out of Jackson, and not Jackson's own 'argument "typeRef" is null'
-        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> JsonMappers.fromJson(json, (TypeReference<?>) null));
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(json, (TypeReference<?>) null));
         Assertions.assertEquals("'targetType' cannot be null", e.getMessage());
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(bytes, (TypeReference<?>) null));
@@ -510,8 +508,7 @@ public class JsonMappersTest extends TestBase {
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(json, (TypeReference<?>) null, config));
         Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(file, (TypeReference<?>) null, config));
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> JsonMappers.fromJson(new ByteArrayInputStream(bytes), (TypeReference<?>) null, config));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(new ByteArrayInputStream(bytes), (TypeReference<?>) null, config));
         Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(new StringReader(json), (TypeReference<?>) null, config));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> wrapper.fromJson(json, (TypeReference<?>) null));

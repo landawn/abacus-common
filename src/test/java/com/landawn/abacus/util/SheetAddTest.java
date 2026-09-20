@@ -340,19 +340,22 @@ public class SheetAddTest extends SheetTestSupport {
 
     @Test
     public void testDuplicateKeyMessageRendersArrayKeys() {
-        // Array keys are a documented first-class key type, but the duplicate diagnostics concatenated the key
-        // with '+' and printed "[I@c65a5ef" - the sibling renameRow/renameColumn messages already used N.toString.
+        // Duplicate diagnostics show which array object is already present, along with its contents.
         final Sheet<int[], String, Integer> rowKeyed = Sheet.rows(Arrays.asList(new int[] { 1, 2 }), Arrays.asList("c1"), new Integer[][] { { 1 } });
-        assertEquals("Row '[1, 2]' already exists",
-                assertThrows(IllegalArgumentException.class, () -> rowKeyed.addRow(new int[] { 1, 2 }, null)).getMessage());
-        assertEquals("Row '[1, 2]' already exists",
-                assertThrows(IllegalArgumentException.class, () -> rowKeyed.addRow(0, new int[] { 1, 2 }, null)).getMessage());
+        final int[] rowKey = rowKeyed.rowKeySet().iterator().next();
+        final String rowDescription = "[1, 2]@" + Integer.toHexString(System.identityHashCode(rowKey));
+        // Pin the canonical duplicate-key form once; the remaining overloads verify its diagnostic content.
+        assertEquals("Row '" + rowDescription + " (array keys match by identity)' already exists",
+                assertThrows(IllegalArgumentException.class, () -> rowKeyed.addRow(rowKeyed.rowKeySet().iterator().next(), null)).getMessage());
+        assertArrayKeyDiagnostic(assertThrows(IllegalArgumentException.class, () -> rowKeyed.addRow(0, rowKey, null)).getMessage(), "row", rowDescription);
 
         final Sheet<String, int[], Integer> columnKeyed = Sheet.rows(Arrays.asList("r1"), Arrays.asList(new int[] { 7, 8 }), new Integer[][] { { 1 } });
-        assertEquals("Column '[7, 8]' already exists",
-                assertThrows(IllegalArgumentException.class, () -> columnKeyed.addColumn(new int[] { 7, 8 }, null)).getMessage());
-        assertEquals("Column '[7, 8]' already exists",
-                assertThrows(IllegalArgumentException.class, () -> columnKeyed.addColumn(0, new int[] { 7, 8 }, null)).getMessage());
+        final int[] columnKey = columnKeyed.columnKeySet().iterator().next();
+        final String columnDescription = "[7, 8]@" + Integer.toHexString(System.identityHashCode(columnKey));
+        assertArrayKeyDiagnostic(assertThrows(IllegalArgumentException.class, () -> columnKeyed.addColumn(columnKey, null)).getMessage(), "column",
+                columnDescription);
+        assertArrayKeyDiagnostic(assertThrows(IllegalArgumentException.class, () -> columnKeyed.addColumn(0, columnKey, null)).getMessage(), "column",
+                columnDescription);
 
         // A plain key still renders exactly as it did.
         assertEquals("Row 'row1' already exists",
@@ -363,24 +366,28 @@ public class SheetAddTest extends SheetTestSupport {
 
     @Test
     public void testPutAllForeignKeyMessageRendersArrayKeys() {
-        // Companion to testDuplicateKeyMessageRendersArrayKeys: putAll names whole key *sets* in its message and
-        // concatenated them straight in, so an array key came out as "[[I@67389cb8]".
+        // Whole-set diagnostics preserve the same content and identity information as single-key failures.
         final int[] rowKey = { 1, 2 };
         final int[] columnKey = { 7, 8 };
         final int[] absent = { 9, 9 };
+        final String rowDescription = "[1, 2]@" + Integer.toHexString(System.identityHashCode(rowKey));
+        final String columnDescription = "[7, 8]@" + Integer.toHexString(System.identityHashCode(columnKey));
+        final String absentDescription = "[9, 9]@" + Integer.toHexString(System.identityHashCode(absent));
+        final String identityNote = " (array keys match by identity)";
         final Sheet<int[], int[], Integer> target = Sheet.rows(Arrays.asList(rowKey), Arrays.asList(columnKey), new Integer[][] { { 1 } });
 
         final Sheet<int[], int[], Integer> foreignRow = Sheet.rows(Arrays.asList(absent), Arrays.asList(columnKey), new Integer[][] { { 2 } });
-        assertEquals("[[9, 9]] are not all included in this sheet with row key set: [[1, 2]]",
+        // Keep one exact putAll message while allowing surrounding wording to evolve in its other paths.
+        assertEquals("[" + absentDescription + "] are not all included in this sheet with row key set: [" + rowDescription + "]" + identityNote,
                 assertThrows(IllegalArgumentException.class, () -> target.putAll(foreignRow)).getMessage());
-        assertEquals("[[9, 9]] are not all included in this sheet with row key set: [[1, 2]]",
-                assertThrows(IllegalArgumentException.class, () -> target.putAll(foreignRow, (a, b) -> a)).getMessage());
+        assertArrayKeyDiagnostic(assertThrows(IllegalArgumentException.class, () -> target.putAll(foreignRow, (a, b) -> a)).getMessage(), "row",
+                absentDescription, rowDescription);
 
         final Sheet<int[], int[], Integer> foreignColumn = Sheet.rows(Arrays.asList(rowKey), Arrays.asList(absent), new Integer[][] { { 2 } });
-        assertEquals("[[9, 9]] are not all included in this sheet with column key set: [[7, 8]]",
-                assertThrows(IllegalArgumentException.class, () -> target.putAll(foreignColumn)).getMessage());
-        assertEquals("[[9, 9]] are not all included in this sheet with column key set: [[7, 8]]",
-                assertThrows(IllegalArgumentException.class, () -> target.putAll(foreignColumn, (a, b) -> a)).getMessage());
+        assertArrayKeyDiagnostic(assertThrows(IllegalArgumentException.class, () -> target.putAll(foreignColumn)).getMessage(), "column", absentDescription,
+                columnDescription);
+        assertArrayKeyDiagnostic(assertThrows(IllegalArgumentException.class, () -> target.putAll(foreignColumn, (a, b) -> a)).getMessage(), "column",
+                absentDescription, columnDescription);
 
         // A plain key set still renders exactly as it did.
         final Sheet<String, String, Integer> foreignPlain = Sheet.rows(Arrays.asList("nope"), columnKeys, new Integer[][] { { 1, 2, 3 } });

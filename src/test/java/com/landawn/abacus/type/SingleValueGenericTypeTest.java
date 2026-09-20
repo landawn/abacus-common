@@ -9,7 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -163,6 +165,124 @@ public class SingleValueGenericTypeTest extends TestBase {
         for (String argument : new String[] { "?", "? extends List<?>", "? extends List<BigDecimal>" }) {
             Type<NestedBoundBox<?>> valid = TypeFactory.getType(NestedBoundBox.class.getName() + "<" + argument + ">");
             assertEquals(List.of(new BigDecimal("1.2300")), valid.valueOf("[1.2300]").value);
+        }
+    }
+
+    @Test
+    public void creatorSupertypesRetainTheirGenericArguments() {
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(WrongCollectionBox.class));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(WrongInheritedCollectionBox.class));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(WrongNestedCollectionBox.class));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(WrongInheritedArrayCollectionBox.class));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(WrongInheritedWildcardCollectionBox.class));
+
+        final Type<CollectionBox> collectionType = TypeFactory.getType(CollectionBox.class);
+        final CollectionBox value = CollectionBox.of(DECIMALS);
+        assertEquals(DECIMALS, collectionType.valueOf(collectionType.stringOf(value)).value);
+
+        final Type<GenericCollectionBox<BigDecimal>> genericType = TypeFactory.getType(GenericCollectionBox.class.getName() + "<BigDecimal>");
+        assertEquals(DECIMALS, genericType.valueOf(genericType.stringOf(GenericCollectionBox.of(DECIMALS))).value);
+    }
+
+    public static class WrongCollectionBox {
+        @JsonXmlValue
+        public final List<BigDecimal> value = List.of();
+
+        @JsonXmlCreator
+        public static WrongCollectionBox of(Collection<String> value) {
+            throw new AssertionError("Must reject before invocation");
+        }
+    }
+
+    public static class GenericList<T> extends ArrayList<T> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class DecimalList extends GenericList<BigDecimal> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class GenericArrayList<T> extends ArrayList<T[]> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class DecimalArrayList extends GenericArrayList<BigDecimal> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class WrongInheritedArrayCollectionBox {
+        @JsonXmlValue
+        public final DecimalArrayList value = new DecimalArrayList();
+
+        @JsonXmlCreator
+        public static WrongInheritedArrayCollectionBox of(Collection<String[]> value) {
+            throw new AssertionError("Must reject before invocation");
+        }
+    }
+
+    public static class GenericWildcardList<T> extends ArrayList<List<? extends T>> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class DecimalWildcardList extends GenericWildcardList<BigDecimal> {
+        private static final long serialVersionUID = 1L;
+    }
+
+    public static class WrongInheritedWildcardCollectionBox {
+        @JsonXmlValue
+        public final DecimalWildcardList value = new DecimalWildcardList();
+
+        @JsonXmlCreator
+        public static WrongInheritedWildcardCollectionBox of(Collection<List<? extends String>> value) {
+            throw new AssertionError("Must reject before invocation");
+        }
+    }
+
+    public static class WrongInheritedCollectionBox {
+        @JsonXmlValue
+        public final DecimalList value = new DecimalList();
+
+        @JsonXmlCreator
+        public static WrongInheritedCollectionBox of(Collection<String> value) {
+            throw new AssertionError("Must reject before invocation");
+        }
+    }
+
+    public static class WrongNestedCollectionBox {
+        @JsonXmlValue
+        public final List<List<BigDecimal>> value = List.of();
+
+        @JsonXmlCreator
+        public static WrongNestedCollectionBox of(Collection<List<String>> value) {
+            throw new AssertionError("Must reject before invocation");
+        }
+    }
+
+    public static class CollectionBox {
+        @JsonXmlValue
+        public final List<BigDecimal> value;
+
+        private CollectionBox(Collection<? extends BigDecimal> value) {
+            this.value = new ArrayList<>(value);
+        }
+
+        @JsonXmlCreator
+        public static CollectionBox of(Collection<? extends BigDecimal> value) {
+            return new CollectionBox(value);
+        }
+    }
+
+    public static class GenericCollectionBox<T extends BigDecimal> {
+        @JsonXmlValue
+        public final List<T> value;
+
+        private GenericCollectionBox(Collection<T> value) {
+            this.value = new ArrayList<>(value);
+        }
+
+        @JsonXmlCreator
+        public static <U extends BigDecimal> GenericCollectionBox<U> of(Collection<U> value) {
+            return new GenericCollectionBox<>(value);
         }
     }
 

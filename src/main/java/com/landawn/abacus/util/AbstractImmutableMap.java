@@ -401,10 +401,13 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      *
      * @param value the value whose presence in this map is to be tested.
      * @return {@code true} if this map maps one or more keys to the specified value.
+     * @throws NullPointerException if {@code value} is {@code null} and the backing map does not permit
+     *         {@code null} values (optional)
+     * @throws ClassCastException if {@code value} has a type that the backing map cannot compare (optional)
      * @see java.util.Map#containsValue(Object)
      */
     @Override
-    public boolean containsValue(final Object value) {
+    public boolean containsValue(final Object value) throws NullPointerException, ClassCastException {
         return map.containsValue(value);
     }
 

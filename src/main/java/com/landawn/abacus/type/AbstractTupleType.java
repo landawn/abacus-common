@@ -23,6 +23,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserUtil.XmlEmbeddedJsonConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.IOUtil;
@@ -45,6 +47,8 @@ import com.landawn.abacus.util.Tuple;
  */
 @SuppressWarnings("java:S2160")
 abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
+
+    private static final JsonSerConfig XML_SLOT_JSON_CONFIG = new XmlEmbeddedJsonConfig();
 
     private final String declaringName;
 
@@ -148,9 +152,11 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
      * @param str the JSON array string to deserialize, may be {@code null} or empty
      * @return a new tuple instance, or {@code null} if {@code str} is {@code null} or empty (a blank, non-empty
      *         string is not treated as empty and is rejected)
-     * @throws IllegalArgumentException if the parsed value is not an array whose length exactly matches the tuple         arity (this includes a blank string, unbalanced brackets and trailing text)
+     * @throws IllegalArgumentException if the parsed value is not an array whose length exactly matches the tuple
+     *         arity (this includes a blank string, unbalanced brackets and trailing text)
      * @throws ParsingException if an element token is not valid JSON for its declared element type
-     * @throws NumberFormatException if a numeric element token cannot be converted to its declared element type         (for example {@code 1.0} into an {@code Integer} slot)
+     * @throws NumberFormatException if a numeric element token cannot be converted to its declared element type
+     *         (for example the quoted text {@code "1.0"} into an {@code Integer} slot)
      * @throws ArithmeticException if a numeric element is outside the range accepted by its declared type.
      * @see #valueOf(Object)
      * @see #stringOf(Tuple)
@@ -305,7 +311,8 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
      * {@code "{\"k\": 1}"}) when {@code config} is a {@link JsonSerConfig}; under any other config its
      * {@code stringOf} text is written with the writer's character escaping. A {@code null} element is written by
      * its declared handler, so that handler's null-substitution flags ({@code writeNullNumberAsZero} and friends)
-     * apply. The result matches {@link #stringOf(Tuple)} for every element shape.
+     * apply. The structure matches {@link #stringOf(Tuple)}; configuration may change individual
+     * representations, such as date formats and null substitutions.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML
@@ -351,12 +358,14 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
      *   <li>a serializable handler (scalars, tuples, optionals, registered single-value types, {@code List<Integer>} ...)
      *       writes the value itself;</li>
      *   <li>a structured handler that is not serializable (bean, map, {@code List<Object>}, {@code Object[]}) would
-     *       otherwise emit a quoted JSON <i>string</i>, so the value is written as embedded JSON when {@code config} is a
-     *       {@link JsonSerConfig}, and as escaped {@code stringOf} text under any other config. The embedded JSON is
-     *       written straight to the writer only when that writer is a JSON writer; on an XML or CSV writer - which a
-     *       {@code JsonSerConfig} can still reach, {@code Type.serializeTo} being public API - the same text goes
-     *       through {@code writeCharacter} so it is escaped for the target format instead of landing there as raw
-     *       JSON. The embedded JSON is always written compactly: {@code prettyFormat} is deliberately not propagated
+     *       otherwise emit a quoted JSON <i>string</i>, so a {@link JsonSerConfig} writes the value as embedded JSON
+     *       using that configuration. A {@link XmlSerConfig} instead uses {@link #XML_SLOT_JSON_CONFIG}, which retains
+     *       the JSON defaults but rejects present-null {@code Nullable} values, including those nested inside the
+     *       structured slot. Other configurations, including {@code null}, use escaped {@code stringOf} text.
+     *       Embedded JSON is written straight to the writer only with a {@code JsonSerConfig} and a JSON writer;
+     *       otherwise it goes through {@code writeCharacter} so it is escaped for the target format. This also
+     *       handles a {@code JsonSerConfig} reaching an XML or CSV writer through the public {@code Type.serializeTo}
+     *       API. The embedded JSON is always written compactly: {@code prettyFormat} is deliberately not propagated
      *       to it, because this helper is not told the caller's current indentation and a pretty embedded structure
      *       would restart at the left margin. An unregistered plain object (serialization type {@code UNKNOWN}) keeps
      *       the handler's own quoted {@code toString()} form.</li>
@@ -400,7 +409,9 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
                 writer.writeCharacter(Utils.jsonParser.serialize(value, embeddedConfig));
             }
         } else {
-            writer.writeCharacter(type.stringOf(value));
+            // XML wrapper/tuple roots also embed structured slots as JSON. Keep that fallback's usual
+            // JSON defaults, but carry the presence check into nested values instead of using stringOf.
+            writer.writeCharacter(config instanceof XmlSerConfig ? Utils.jsonParser.serialize(value, XML_SLOT_JSON_CONFIG) : type.stringOf(value));
         }
     }
 }

@@ -18,8 +18,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class FactoryCacheLifetimeTest {
+public class FactoryCacheLifetimeTest extends TestBase {
     @TempDir
     Path directory;
 

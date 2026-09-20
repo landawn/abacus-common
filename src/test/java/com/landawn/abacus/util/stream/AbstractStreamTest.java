@@ -86,11 +86,10 @@ public class AbstractStreamTest extends TestBase {
         for (final boolean empty : new boolean[] { true, false }) {
             final AtomicInteger factoryCalls = new AtomicInteger();
             try (final Stream<Integer> stream = empty ? Stream.empty() : Stream.of(1)) {
-                assertThrows(IllegalArgumentException.class, () -> stream.flatGroupTo(value -> List.of(value),
-                        (key, value) -> value, null, () -> {
-                            factoryCalls.incrementAndGet();
-                            return new HashMap<>();
-                        }));
+                assertThrows(IllegalArgumentException.class, () -> stream.flatGroupTo(value -> List.of(value), (key, value) -> value, null, () -> {
+                    factoryCalls.incrementAndGet();
+                    return new HashMap<>();
+                }));
                 assertEquals(0, factoryCalls.get());
             }
         }
@@ -202,8 +201,7 @@ public class AbstractStreamTest extends TestBase {
         }
     }
 
-    private static Iterator<Integer> sourceFailingOnceAt(final int failureIndex, final boolean failInHasNext,
-            final IllegalStateException failure) {
+    private static Iterator<Integer> sourceFailingOnceAt(final int failureIndex, final boolean failInHasNext, final IllegalStateException failure) {
         return new Iterator<>() {
             private final Iterator<Integer> values = Arrays.asList(0, 1, 2, 3, 4, 5).iterator();
             private int index;
@@ -241,7 +239,8 @@ public class AbstractStreamTest extends TestBase {
             when(ds.getConnection()).thenReturn(connection);
             when(connection.prepareStatement(anyString())).thenThrow(failure);
             final AtomicInteger closeCount = new AtomicInteger();
-            final Stream<Integer> saved = Stream.of(1).onClose(closeCount::incrementAndGet)
+            final Stream<Integer> saved = Stream.of(1)
+                    .onClose(closeCount::incrementAndGet)
                     .onEachSave(ds, "INSERT INTO test VALUES (?)", (value, statement) -> statement.setInt(1, value));
 
             final RuntimeException thrown = terminal ? assertThrows(RuntimeException.class, saved::count)
@@ -263,8 +262,8 @@ public class AbstractStreamTest extends TestBase {
         identity.add(new String("a"));
 
         for (final boolean parallel : new boolean[] { false, true }) {
-            final java.util.function.Function<List<String>, Stream<String>> source = values -> parallel
-                    ? Stream.of(values.iterator()).parallel(2) : Stream.of(values.iterator());
+            final java.util.function.Function<List<String>, Stream<String>> source = values -> parallel ? Stream.of(values.iterator()).parallel(2)
+                    : Stream.of(values.iterator());
             assertFalse(source.apply(Arrays.asList("A", "B")).containsAll(sorted));
             assertFalse(source.apply(Arrays.asList("A", "B")).containsAny(sorted));
             assertTrue(source.apply(Arrays.asList("A", "B")).containsNone(sorted));
@@ -1330,7 +1329,8 @@ public class AbstractStreamTest extends TestBase {
         for (final boolean advanceFirst : new boolean[] { false, true }) {
             try (Stream<Stream<Integer>> parts = splitter.apply(Stream.of(Arrays.asList(1, 2, 3, 4).iterator()))) {
                 final ObjIteratorEx<Stream<Integer>> iterator = parts.iteratorEx();
-                try (Stream<Integer> first = iterator.next(); Stream<Integer> second = iterator.next()) {
+                try (Stream<Integer> first = iterator.next();
+                     Stream<Integer> second = iterator.next()) {
                     assertFalse(iterator.hasNext());
                     if (advanceFirst) {
                         iterator.advance(1);
@@ -5177,11 +5177,9 @@ public class AbstractStreamTest extends TestBase {
     @Test
     public void testCollect_nullCollectorThrowsIaeAndClosesTheStream() {
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).collect((Collector<Integer, ?, ?>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).collect((Collector<Integer, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).collect((Collector<Integer, ?, ?>) null));
         assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).parallel(2).collect((Collector<Integer, ?, ?>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).parallel(2).collect((Collector<Integer, ?, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).parallel(2).collect((Collector<Integer, ?, ?>) null));
 
         final Stream<Integer> stream = Stream.of(1, 2, 3);
         assertThrows(IllegalArgumentException.class, () -> stream.collect((Collector<Integer, ?, ?>) null));
@@ -5202,7 +5200,6 @@ public class AbstractStreamTest extends TestBase {
         // the ordinary path is unaffected
         assertEquals(2, Stream.of(1, 2).crossJoin(Arrays.asList("a")).count());
     }
-
 
     // ------------------------------------------------------------------------------------------------------
     // Stream review 2026-09-09 (pass B) - rollup / forEachUntil / splitAt

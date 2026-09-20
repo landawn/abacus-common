@@ -37,8 +37,8 @@ public class ISO8601UtilTest extends TestBase {
 
     @Test
     public void format_rejectsUnrepresentableValuesAndNulls() {
-        assertThrows(NullPointerException.class, () -> ISO8601Util.format(null));
-        assertThrows(NullPointerException.class, () -> ISO8601Util.format(Instant.EPOCH, null));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(null));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(Instant.EPOCH, null));
         assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(Instant.EPOCH, ZoneOffset.ofTotalSeconds(30)));
         assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(Instant.MIN));
         assertThrows(IllegalArgumentException.class, () -> ISO8601Util.format(Instant.MAX));
@@ -165,9 +165,12 @@ public class ISO8601UtilTest extends TestBase {
 
     @Test
     public void parse_rejectsNullWithConsistentArgumentExceptions() {
-        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstant(null));
-        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstant("2023-12-25", (ZoneId) null));
-        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstant("2023-12-25", (ParsePosition) null));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parseInstant(null));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parseInstant("2023-12-25", (ZoneId) null));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parseInstant("2023-12-25", (ParsePosition) null));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parseInstant((String) null, new ParsePosition(0)));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parseInstantWithDefaultZone(null, () -> ZoneOffset.UTC));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parseInstantWithDefaultZone("2023-12-25", null));
     }
 
     @Test
@@ -283,7 +286,7 @@ public class ISO8601UtilTest extends TestBase {
         assertEquals(Instant.parse("2023-12-25T08:30:45Z"), ISO8601Util.parseInstant("2023-12-25T10:30:45+02:00", offsetPosition, ZoneId.of("Asia/Kolkata")));
         assertEquals(25, offsetPosition.getIndex());
 
-        assertThrows(NullPointerException.class, () -> ISO8601Util.parseInstant("2023-12-25", new ParsePosition(0), (ZoneId) null));
+        assertThrows(IllegalArgumentException.class, () -> ISO8601Util.parseInstant("2023-12-25", new ParsePosition(0), (ZoneId) null));
     }
 
     @Test

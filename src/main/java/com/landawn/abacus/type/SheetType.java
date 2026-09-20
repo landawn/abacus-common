@@ -198,6 +198,10 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * type-specific (often yielding the type's default) and is not always identity-preserving for {@code null}. This
      * is the key distinction from {@link Object#toString()}, whose result is not guaranteed to be convertible back
      * into the original value.</p>
+     * <p>Parsing does not preserve raw array key identity under {@link Sheet}'s key contract. Obtain keys from
+     * the parsed Sheet's key views for lookup; equal array contents alone do not make it equal to the source.
+     * Equal-content array column keys produce repeated JSON column names, whose occurrence order must be
+     * preserved when parsing; see {@link #valueOf(String)}.</p>
      *
      * @param x the Sheet to convert to string
      * @return the JSON string representation of the sheet, or {@code null} if the input is null
@@ -228,6 +232,11 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
+     * <p>Raw array keys use identity equality, and parsing does not preserve their original identity. Use the
+     * returned Sheet's key views for lookup instead of relying on array keys from the original Sheet.
+     * Array column names are processed in document order, each matching the next unused content-equal entry
+     * in {@code columnKeySet}. Reordering repeated equal-content column names therefore changes which key
+     * receives each column's values; the JSON representation cannot distinguish those keys by identity.</p>
      *
      * @param str the JSON string to parse
      * @return the parsed Sheet object with its declared row, column, and element types preserved,
@@ -253,11 +262,10 @@ public class SheetType<R, C, E> extends AbstractType<Sheet<R, C, E>> {
      * @param elementTypeName the type name for values/elements
      * @param isDeclaringName whether to use declaring names (true) or full names (false)
      * @return the formatted type name string
-     * @throws NullPointerException if {@code typeClass} is {@code null}.
-     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final Class<?> typeClass, final String rowKeyTypeName, final String columnKeyTypeName, final String elementTypeName,
-            final boolean isDeclaringName) throws NullPointerException, IllegalArgumentException {
+            final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(rowKeyTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(columnKeyTypeName).declaringName() + SK.COMMA_SPACE + TypeFactory.getType(elementTypeName).declaringName()

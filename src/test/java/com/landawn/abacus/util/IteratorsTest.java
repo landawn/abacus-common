@@ -56,8 +56,8 @@ public class IteratorsTest extends IteratorsTestSupport {
                 }
             };
 
-            Iterators.forEach(source, Iterators.IterateOptions.builder().processThreads(processThreads).build(),
-                    value -> processed.incrementAndGet(), () -> completionThread.set(Thread.currentThread()));
+            Iterators.forEach(source, Iterators.IterateOptions.builder().processThreads(processThreads).build(), value -> processed.incrementAndGet(),
+                    () -> completionThread.set(Thread.currentThread()));
 
             assertEquals(4, processed.get());
             assertFalse(readers.isEmpty());
@@ -2425,8 +2425,7 @@ public class IteratorsTest extends IteratorsTestSupport {
         assertFalse(Iterators.unzip3((Iterator<String>) null, unzip3).hasNext());
         assertFalse(Iterators.unzip3((Iterable<String>) null, unzip3).hasNext());
 
-        assertThrows(IllegalArgumentException.class,
-                () -> Iterators.unzip((Iterator<String>) null, (BiConsumer<String, Pair<String, Integer>>) null));
+        assertThrows(IllegalArgumentException.class, () -> Iterators.unzip((Iterator<String>) null, (BiConsumer<String, Pair<String, Integer>>) null));
         assertFalse(Iterators.cycle((Iterable<String>) null).hasNext());
     }
 }

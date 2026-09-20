@@ -148,6 +148,7 @@ public class NullsTest extends AbstractTest {
         assertNull(Nulls.lastElement(Collections.<String> emptyIterator()));
         assertNull(Nulls.lastElement((Iterator<String>) null));
     }
+
     @Test
     public void testLastElementIterableUsesDescendingIterator() {
         assertEquals("c", Nulls.lastElement(new LinkedList<>(Arrays.asList("a", "b", "c"))));

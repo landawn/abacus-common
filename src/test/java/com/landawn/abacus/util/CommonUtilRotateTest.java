@@ -449,6 +449,7 @@ public class CommonUtilRotateTest extends CommonUtilTestSupport {
         CommonUtil.rotate(b, 1, 1, 1);
         Assertions.assertArrayEquals(original, b);
     }
+
     @Test
     public void testRotate_effectiveDistanceZeroIsANoOpForNonListCollections() {
         final Collection<String> unmodifiable = Collections.unmodifiableCollection(new LinkedHashSet<>(Arrays.asList("a", "b", "c")));

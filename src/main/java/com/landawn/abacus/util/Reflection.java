@@ -331,9 +331,10 @@ public final class Reflection<T> {
      * A field declared in a subclass takes precedence over a field with the same name in a superclass.
      * Primitive fields support the unboxing and widening conversions allowed by {@link Field#set(Object, Object)}.
      *
-     * <p>A {@code final} <i>instance</i> field is written: ReflectASM cannot assign one, so the fast path
-     * falls back to standard reflection, which can. A {@code static final} field is writable by neither and
-     * is reported through the {@code RuntimeException} below. This differs from
+     * <p>For a {@code final} <i>instance</i> field, the fast path falls back to standard reflection.
+     * The write succeeds only when the JVM's access and field-modification rules permit it.
+     * A {@code static final} field is writable by neither path and is reported through the
+     * {@code RuntimeException} below. This differs from
      * {@code ReflectASM.set(String, Object)}, which rejects every {@code final} field.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -406,13 +407,13 @@ public final class Reflection<T> {
     /**
      * Invokes the specified method on the target instance with the given arguments and returns the result.
      * The method is selected based on its name and the types of the provided arguments.
-     * If ReflectASM is available, it will be used for better performance; in that case the method is
-     * selected by name and argument count, and methods ReflectASM does not expose at all (private methods,
-     * methods declared by {@code Object}, interface default methods) automatically fall back to
-     * standard reflection, which also searches superclasses.
+     * If ReflectASM is available, it is used when its name-and-argument-count lookup selects a unique
+     * method compatible with the supplied arguments. Other lookups, including methods ReflectASM does
+     * not expose (private methods, methods declared by {@code Object}, and interface default methods),
+     * fall back to standard reflection, which also searches superclasses.
      *
-     * <p>That fallback is driven by ReflectASM's own method table, so it does <i>not</i> cover a method the
-     * table lists but whose generated accessor is then refused access to it: such a call propagates an
+     * <p>After a method qualifies for the ReflectASM path, the fallback does <i>not</i> cover a generated
+     * accessor that is then refused access to that method: such a call propagates an
      * {@link IllegalAccessError}. The accessor is normally defined by a separate class loader, and so in a
      * different runtime package than the target, which makes this reachable for a non-public method or a
      * method of a non-public class; whether the accessor can instead be defined in the target's own loader

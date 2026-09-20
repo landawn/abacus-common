@@ -243,7 +243,7 @@ public final class EscapeUtil {
      * to their escaped representations (e.g., newline to {@code \n}, tab to {@code \t}).
      *
      * <p>This method properly handles quotes and control characters including tab, backslash, carriage return,
-     * form feed, and others. Characters outside the printable ASCII range (32-127) are converted to
+     * form feed, and others. Characters outside the ASCII range U+0020 through U+007F are converted to
      * Unicode escape sequences ({@code \\uXXXX}).</p>
      *
      * <p>The resulting string can be safely embedded in Java source code as a string literal.</p>
@@ -274,7 +274,8 @@ public final class EscapeUtil {
      * The key difference is that EcmaScript also escapes single quotes ({@code '}) and
      * forward slashes ({@code /}).</p>
      *
-     * <p>The resulting string can be safely embedded in JavaScript or ActionScript code.</p>
+     * <p>The result is the content of a single-quoted or double-quoted JavaScript or ActionScript string
+     * literal; surrounding quotes are not added. It is not an encoder for template literals.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -610,8 +611,9 @@ public final class EscapeUtil {
      * Unescapes a string containing XML entity escapes, converting them back to their
      * corresponding Unicode characters.
      *
-     * <p>This method reverses the escaping performed by {@link #escapeXml10(String)} and
-     * {@link #escapeXml11(String)}. It supports the five basic XML entities ({@code &lt;},
+     * <p>This method decodes the escapes produced by {@link #escapeXml10(String)} and
+     * {@link #escapeXml11(String)}; characters those methods remove cannot be recovered.
+     * It supports the five basic XML entities ({@code &lt;},
      * {@code &gt;}, {@code &quot;}, {@code &amp;}, {@code &apos;}) and numeric character
      * references (decimal {@code &#65;} or hexadecimal {@code &#x41;}).</p>
      *
@@ -751,7 +753,7 @@ public final class EscapeUtil {
          * }</pre>
          *
          * @param input CharSequence that is being translated
-         * @param index int representing the current point of translation
+         * @param index the UTF-16 character index at which translation starts
          * @param out Writer to translate the text to
          * @return int count of codepoints consumed
          * @throws IOException if and only if the Writer produces an IOException
@@ -1210,7 +1212,8 @@ public final class EscapeUtil {
                     i++;
                 }
 
-                if (index + i + 4 <= input.length()) {
+                // Compare the remaining length to avoid overflowing a valid offset near Integer.MAX_VALUE.
+                if (input.length() - index - i >= 4) {
                     // Get 4 hex digits
                     final CharSequence unicode = input.subSequence(index + i, index + i + 4);
 
@@ -1658,7 +1661,7 @@ public final class EscapeUtil {
          * @param input the character sequence to translate
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
-         * @return the number of consumed characters for the matched lookup key, or {@code 0} if no key matches
+         * @return the number of consumed Unicode code points for the matched lookup key, or {@code 0} if no key matches
          * @throws NullPointerException if {@code input} is null, or {@code out} is null when this translator writes output
          * @throws IndexOutOfBoundsException if {@code index} is outside the input character range
          * @throws IOException if writing translated output fails
@@ -1667,10 +1670,7 @@ public final class EscapeUtil {
         public int translate(final CharSequence input, final int index, final Writer out) throws NullPointerException, IndexOutOfBoundsException, IOException {
             // check if translation exists for the input at position index
             if (prefixSet.contains(input.charAt(index))) {
-                int max = longest;
-                if (index + longest > input.length()) {
-                    max = input.length() - index;
-                }
+                final int max = Math.min(longest, input.length() - index);
                 // implement greedy algorithm by trying maximum match first
                 for (int i = max; i >= shortest; i--) {
                     final CharSequence subSeq = input.subSequence(index, index + i);
@@ -1762,7 +1762,7 @@ public final class EscapeUtil {
          * @param input the CharSequence being translated
          * @param index the index of the current character in the sequence; must be {@code 0}
          * @param out the Writer to write the escaped output to
-         * @return the number of codepoints consumed (always the full length of {@code input})
+         * @return the number of Unicode code points in the complete {@code input}, which may be less than its UTF-16 length
          * @throws IllegalStateException if {@code index} is not {@code 0}
          * @throws NullPointerException if {@code input} or {@code out} is null and {@code index} is zero
          * @throws IOException if writing escaped characters to the supplied output fails
@@ -1809,7 +1809,7 @@ public final class EscapeUtil {
          * @param input the CharSequence being translated
          * @param index the index of the current character in the sequence; must be {@code 0}
          * @param out the Writer to write the unescaped output to
-         * @return the number of codepoints consumed (always the full length of {@code input})
+         * @return the number of Unicode code points in the complete {@code input}, which may be less than its UTF-16 length
          * @throws IllegalStateException if {@code index} is not {@code 0}
          * @throws NullPointerException if {@code input} or {@code out} is null and {@code index} is zero
          * @throws IOException if writing escaped characters to the supplied output fails

@@ -114,11 +114,13 @@ public class SeqAppendTest extends SeqTestSupport {
     @Test
     public void testAppendPrepend_Seq_successPathStillTakesOwnershipOfTheArgument() throws Exception {
         final AtomicInteger appendArgClosed = new AtomicInteger();
-        assertEquals(Arrays.asList(1, 9), Seq.<Integer, Exception> of(1).append(Seq.<Integer, Exception> of(9).onClose(appendArgClosed::incrementAndGet)).toList());
+        assertEquals(Arrays.asList(1, 9),
+                Seq.<Integer, Exception> of(1).append(Seq.<Integer, Exception> of(9).onClose(appendArgClosed::incrementAndGet)).toList());
         assertEquals(1, appendArgClosed.get());
 
         final AtomicInteger prependArgClosed = new AtomicInteger();
-        assertEquals(Arrays.asList(9, 1), Seq.<Integer, Exception> of(1).prepend(Seq.<Integer, Exception> of(9).onClose(prependArgClosed::incrementAndGet)).toList());
+        assertEquals(Arrays.asList(9, 1),
+                Seq.<Integer, Exception> of(1).prepend(Seq.<Integer, Exception> of(9).onClose(prependArgClosed::incrementAndGet)).toList());
         assertEquals(1, prependArgClosed.get());
     }
 

@@ -55,6 +55,12 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * {@link Future} objects in concurrent programming scenarios. This class offers sophisticated functionality
  * for coordinating already-started asynchronous operations, including result aggregation and
  * completion-order processing. Iterators returned by this class are intended for a single consumer.
+ * Iteration follows the order in which completion observers publish results, not necessarily the
+ * original completion times: inputs already complete when registered and relay scheduling can
+ * affect that order.
+ * If an {@code iterate} factory fails during registration, already-submitted blocking relay tasks
+ * are cancelled without cancelling the caller's input futures. Already-attached CompletableFuture callbacks
+ * may remain registered until their inputs complete, but release the abandoned result queue and stop publishing.
  *
  * <p>The {@code Futures} utility addresses common challenges in concurrent programming by providing intuitive
  * methods for handling multiple asynchronous operations simultaneously. It bridges the gap between individual
@@ -67,7 +73,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *   <li><b>Tuple Integration:</b> Seamless conversion of multiple futures into strongly-typed Tuple objects</li>
  *   <li><b>Result Coordination:</b> {@code allOf()} methods for collecting results in input order</li>
  *   <li><b>Successful Races:</b> {@code anyOf()} methods for processing the first successfully completed future</li>
- *   <li><b>Completion Iteration:</b> Iterator-based access to futures as they complete (first-finished, first-out)</li>
+ *   <li><b>Completion Iteration:</b> Iterator-based access to futures as they complete (in completion-observation order)</li>
  *   <li><b>Timeout Management:</b> Built-in timeout support for preventing indefinite blocking operations</li>
  *   <li><b>Error Handling:</b> Exception propagation, with failure aggregation for {@code anyOf()}</li>
  *   <li><b>Type Safety:</b> Strong generic typing maintained throughout all composition operations</li>
@@ -210,10 +216,10 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  *
  * <p><b>Completion Iteration Features:</b>
  * <ul>
- *   <li><b>First-Finished Processing:</b> Handle results as soon as individual futures complete</li>
+ *   <li><b>Completion-Observation Processing:</b> Handle results as soon as individual futures complete</li>
  *   <li><b>Timeout Support:</b> Prevent indefinite blocking with configurable timeout values</li>
  *   <li><b>Exception Isolation:</b> Continue processing remaining futures even if some fail</li>
- *   <li><b>Memory Efficiency:</b> Stream-like processing without storing all results in memory</li>
+ *   <li><b>Memory Efficiency:</b> Incremental consumption; the queue can retain all completed results until they are consumed</li>
  *   <li><b>Custom Transformation:</b> Apply functions to results during iteration</li>
  * </ul>
  *
@@ -230,17 +236,17 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * <ul>
  *   <li><b>Combination Construction:</b> O(1) for fixed-arity tuple combinations, O(n) for collection-based operations</li>
  *   <li><b>Memory Usage:</b> O(n) for captured input lists and completion-relay structures</li>
- *   <li><b>Thread Safety:</b> Static factory calls share no mutable state; input futures retain their own concurrency contracts</li>
+ *   <li><b>Thread Safety:</b> Aggregate state is isolated per call; completion observers may use shared thread-safe relay executors</li>
  *   <li><b>Completion Detection:</b> Optimized algorithms for detecting future completion states</li>
  *   <li><b>Iterator Behavior:</b> Results are consumed lazily, while all input futures are registered when the iterator is created</li>
  * </ul>
  *
  * <p><b>Thread Safety and Concurrency:</b>
  * <ul>
- *   <li><b>Static Methods:</b> Factory calls do not mutate shared class state</li>
+ *   <li><b>Static Methods:</b> Factory calls may submit observation tasks to shared thread-safe relay executors</li>
  *   <li><b>Input Contracts:</b> Operations delegate to input futures, whose own thread-safety guarantees still apply</li>
  *   <li><b>Iterators:</b> Returned iterators have mutable cursor state and should be consumed by one thread</li>
- *   <li><b>No Shared State:</b> No mutable static variables that could cause race conditions</li>
+ *   <li><b>Aggregate State:</b> Each aggregate and iterator maintains its own completion state</li>
  *   <li><b>Executor Independence:</b> Works with any Executor implementation for flexible threading</li>
  * </ul>
  *
@@ -256,7 +262,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * <p><b>Best Practices and Recommendations:</b>
  * <ul>
  *   <li>Use {@code allOf()} when you need all results before proceeding with computation</li>
- *   <li>Use {@code anyOf()} for race conditions where first completion is sufficient</li>
+ *   <li>Use {@code anyOf()} when the first observed successful completion is sufficient</li>
  *   <li>Use {@code iterate()} for processing results as they become available (stream-like processing)</li>
  *   <li>Prefer Tuple combinations for small, fixed numbers of futures (2-7 futures)</li>
  *   <li>Use collection-based methods for dynamic numbers of futures</li>
@@ -355,7 +361,7 @@ import com.landawn.abacus.util.Tuple.Tuple7;
  * <p><b>Comparison with Alternative Approaches:</b>
  * <ul>
  *   <li><b>vs. CompletableFuture.allOf():</b> typed {@code List<T>} results vs. {@code CompletableFuture<Void>} requiring separate per-future result retrieval</li>
- *   <li><b>vs. Manual Future.get() calls:</b> Parallel execution vs. sequential blocking</li>
+ *   <li><b>vs. Manual Future.get() calls:</b> A single aggregate handle for already-started computations</li>
  *   <li><b>vs. ExecutorCompletionService:</b> Simplified API vs. lower-level completion service management</li>
  *   <li><b>vs. Custom Thread Management:</b> Built-in error handling vs. manual exception aggregation</li>
  * </ul>
@@ -495,6 +501,11 @@ public final class Futures {
      *     });
      * }</pre>
      *
+     * <p>Each call to a get method runs the corresponding zip function on the calling thread;
+     * its result is not cached. Timeout enforcement is the zip function's responsibility.
+     * An overload accepting only one zip function also uses that function for timed get calls,
+     * without passing it the requested timeout.</p>
+     *
      * <p>The returned future's get methods propagate InterruptedException, ExecutionException and
      * CancellationException directly. Other exceptions from the zip function are wrapped in
      * ExecutionException. The timed get method also propagates TimeoutException directly.</p>
@@ -544,7 +555,7 @@ public final class Futures {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Basic timeout handling with fallback
-     * Future<String> slowFuture = CompletableFuture.supplyAsync(() -> {
+     * Future<String> slowFuture = ContinuableFuture.callAsync(() -> {
      *     Thread.sleep(5000);
      *     return "Slow Result";
      * });
@@ -601,6 +612,11 @@ public final class Futures {
      *         return processData(tuple._2.get(tuple._3 / 2, tuple._4));
      *     });
      * }</pre>
+     *
+     * <p>Each call to a get method runs the corresponding zip function on the calling thread;
+     * its result is not cached. Timeout enforcement is the zip function's responsibility.
+     * An overload accepting only one zip function also uses that function for timed get calls,
+     * without passing it the requested timeout.</p>
      *
      * <p>The returned future's get methods propagate InterruptedException, ExecutionException and
      * CancellationException directly. Other exceptions from the zip function are wrapped in
@@ -661,7 +677,7 @@ public final class Futures {
      * Future<String> cityFuture = CompletableFuture.completedFuture("New York");
      *
      * ContinuableFuture<String> profile = Futures.compose(nameFuture, ageFuture, cityFuture,
-     *     (f1, f2, f3) -> String.format("%s, %d years old, from %s",
+     *     (f1, f2, f3) -> String.format(java.util.Locale.ROOT, "%s, %d years old, from %s",
      *         f1.get(), f2.get(), f3.get()));
      *
      * System.out.println(profile.get());   // prints "John, 30 years old, from New York"
@@ -695,6 +711,11 @@ public final class Futures {
      *         }
      *     });
      * }</pre>
+     *
+     * <p>Each call to a get method runs the corresponding zip function on the calling thread;
+     * its result is not cached. Timeout enforcement is the zip function's responsibility.
+     * An overload accepting only one zip function also uses that function for timed get calls,
+     * without passing it the requested timeout.</p>
      *
      * <p>The returned future's get methods propagate InterruptedException, ExecutionException and
      * CancellationException directly. Other exceptions from the zip function are wrapped in
@@ -772,7 +793,7 @@ public final class Futures {
      *     (c, i, o) -> new AggregatedData(c.get(), i.get(), o.get()),
      *     // Priority-based retrieval under timeout
      *     tuple -> {
-     *         long timePerFuture = tuple._4 / 3;
+     *         long timePerFuture = tuple._4 / 5;
      *         TimeUnit unit = tuple._5;
      *
      *         try {
@@ -782,7 +803,7 @@ public final class Futures {
      *             // Important data second (40% of time)
      *             ImportantData i = tuple._2.get(timePerFuture * 2, unit);
      *
-     *             // Optional data last (20% of time)
+     *             // Use optional data only if it is already complete
      *             OptionalData o = tuple._3.isDone() ?
      *                 tuple._3.get() : OptionalData.EMPTY;
      *
@@ -813,6 +834,11 @@ public final class Futures {
      *         }
      *     });
      * }</pre>
+     *
+     * <p>Each call to a get method runs the corresponding zip function on the calling thread;
+     * its result is not cached. Timeout enforcement is the zip function's responsibility.
+     * An overload accepting only one zip function also uses that function for timed get calls,
+     * without passing it the requested timeout.</p>
      *
      * <p>The returned future's get methods propagate InterruptedException, ExecutionException and
      * CancellationException directly. Other exceptions from the zip function are wrapped in
@@ -940,6 +966,11 @@ public final class Futures {
      *         return new Statistics(avg, max, min, values.size());
      *     });
      * }</pre>
+     *
+     * <p>Each call to a get method runs the corresponding zip function on the calling thread;
+     * its result is not cached. Timeout enforcement is the zip function's responsibility.
+     * An overload accepting only one zip function also uses that function for timed get calls,
+     * without passing it the requested timeout.</p>
      *
      * <p>The returned future's get methods propagate InterruptedException, ExecutionException and
      * CancellationException directly. Other exceptions from the zip function are wrapped in
@@ -1084,6 +1115,11 @@ public final class Futures {
      *         return CacheEntry.MISS;
      *     });
      * }</pre>
+     *
+     * <p>Each call to a get method runs the corresponding zip function on the calling thread;
+     * its result is not cached. Timeout enforcement is the zip function's responsibility.
+     * An overload accepting only one zip function also uses that function for timed get calls,
+     * without passing it the requested timeout.</p>
      *
      * <p>The returned future's get methods propagate InterruptedException, ExecutionException and
      * CancellationException directly. Other exceptions from the zip function are wrapped in
@@ -1631,8 +1667,8 @@ public final class Futures {
      * @param action the function to apply to the list of results, in iteration order of
      *               {@code cfs}.
      * @return a {@code ContinuableFuture} whose result is the value produced by {@code action}
-     *         applied to the list of all completed results. Calling {@code get()} on it waits
-     *         for all input futures and may throw {@link InterruptedException} or
+     *         applied to the list of all completed results. A successful {@code get()} waits
+     *         for all input futures; a failed input may be reported earlier. It may throw {@link InterruptedException} or
      *         {@link ExecutionException}; if {@code action} throws, that same {@link ExecutionException} carries
      *         it as the cause - checked or unchecked alike - per the {@link Future} contract.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, or if {@code action} is {@code null}.
@@ -2242,7 +2278,7 @@ public final class Futures {
             @Override
             public T get(final long timeout, final TimeUnit unit)
                     throws NullPointerException, CancellationException, RejectedExecutionException, InterruptedException, TimeoutException, ExecutionException {
-                N.requireNonNull(unit, "unit");
+                N.requireNonNull(unit, cs.unit);
                 if (terminal.isDone()) {
                     return terminalValue();
                 }
@@ -2299,7 +2335,7 @@ public final class Futures {
     }
 
     /**
-     * Creates an iterator that yields results from futures as they complete (first-finished, first-out).
+     * Creates an iterator that yields results from futures as they complete (in completion-observation order).
      * This method allows processing results as soon as they become available, without waiting
      * for all futures to complete. Failed futures will throw their exceptions when their result
      * is requested via next().
@@ -2326,13 +2362,12 @@ public final class Futures {
      *
      * @param <T> the result type of the futures.
      * @param cfs the array of futures to iterate over, must not be {@code null} or empty.
-     * @return an {@code ObjIterator} that yields results in completion order (first-finished,
-     *         first-out). Calling {@code next()} on a failed future rethrows a {@link RuntimeException}
+     * @return an {@code ObjIterator} that yields results in completion-observation order. Calling {@code next()} on a failed future rethrows a {@link RuntimeException}
      *         directly, or wraps another exception in a runtime exception.
      *         If the consumer is interrupted while waiting, its interrupt flag is restored, pending relays
      *         are released without cancelling inputs, and {@code next()} throws one final runtime exception
      *         wrapping an {@link InterruptedException} before iteration ends.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      */
@@ -2347,7 +2382,8 @@ public final class Futures {
     /**
      * Creates an iterator that yields results from futures in the collection as they complete.
      * Similar to the array version but accepts any Collection. Results are returned in the
-     * order of completion, not the order in the collection.
+     * order in which completion observers publish them, not necessarily the input collection
+     * order or the historical order in which the futures completed.
      *
      * <p>This is useful for processing results incrementally, implementing progress updates,
      * or handling results with different processing times.
@@ -2371,14 +2407,13 @@ public final class Futures {
      *
      * @param <T> the result type of the futures.
      * @param cfs the collection of futures to iterate over, must not be {@code null} or empty.
-     * @return an {@code ObjIterator} that yields results in completion order (first-finished,
-     *         first-out). Calling {@code next()} on a failed future rethrows a {@link RuntimeException}
+     * @return an {@code ObjIterator} that yields results in completion-observation order. Calling {@code next()} on a failed future rethrows a {@link RuntimeException}
      *         directly, or wraps another exception in a runtime exception.
      *         If the consumer is interrupted while waiting, its interrupt flag is restored, pending relays
      *         are released without cancelling inputs, and {@code next()} throws one final runtime exception
      *         wrapping an {@link InterruptedException} before iteration ends.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      * @see #iterate(Collection, long, TimeUnit)
      * @see #iterate(Collection, Function)
@@ -2426,8 +2461,8 @@ public final class Futures {
      *        when this method is called, not at the first {@code hasNext()}, so an iterator that is built and
      *        then held before being consumed has already spent part of its budget.
      * @param unit the time unit of {@code totalTimeoutForAll}, must not be {@code null}.
-     * @return an {@code ObjIterator} that yields results in completion order (first-finished,
-     *         first-out) with timeout enforcement. Calling {@code next()} on a failed future
+     * @return an {@code ObjIterator} that yields results in completion-observation order
+     *         with timeout enforcement. Calling {@code next()} on a failed future
      *         rethrows a {@link RuntimeException} directly, or wraps another exception in a runtime
      *         exception. After draining results observed in time, an expired deadline with unobserved
      *         inputs produces one final runtime exception wrapping a {@link TimeoutException}.
@@ -2435,7 +2470,7 @@ public final class Futures {
      *         are released without cancelling inputs, and {@code next()} throws one final runtime exception
      *         wrapping an {@link InterruptedException} before iteration ends.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not positive, or {@code unit} is {@code null}.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      * @see #iterate(Collection)
      * @see #iterate(Collection, long, TimeUnit, Function)
@@ -2447,7 +2482,7 @@ public final class Futures {
 
     /**
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      */
     private static <T> ObjIterator<T> iterate02(final Collection<? extends Future<? extends T>> cfs)
@@ -2457,7 +2492,7 @@ public final class Futures {
 
     /**
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not positive, or {@code unit} is {@code null}.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      */
     private static <T> ObjIterator<T> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit)
@@ -2508,7 +2543,7 @@ public final class Futures {
      * ObjIterator<String> results = Futures.iterate(calculations,
      *     result -> {
      *         if (result.isSuccess()) {
-     *             return "Success: " + result.orElseThrow();
+     *             return "Success: " + result.orElseIfFailure(null);
      *         } else {
      *             return "Failed: " + result.getException().getMessage();
      *         }
@@ -2525,13 +2560,12 @@ public final class Futures {
      * @param resultHandler the function to transform each {@code Result} (success value or
      *                      failure exception) into the desired output type. Must not be
      *                      {@code null}.
-     * @return an {@code ObjIterator} that yields transformed results in completion order
-     *         (first-finished, first-out).
+     * @return an {@code ObjIterator} that yields transformed results in completion-observation order.
      *         If the consumer is interrupted while waiting, its interrupt flag is restored, pending relays
      *         are released without cancelling inputs, and one final {@code Result} carrying an
      *         {@link InterruptedException} is passed to {@code resultHandler} before iteration ends.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, or {@code resultHandler} is {@code null}.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      * @see #iterate(Collection)
      * @see #iterate(Collection, long, TimeUnit, Function)
@@ -2562,7 +2596,7 @@ public final class Futures {
      *     10, TimeUnit.SECONDS,
      *     result -> {
      *         if (result.isSuccess()) {
-     *             return processDataPoint(result.orElseThrow());
+     *             return processDataPoint(result.orElseIfFailure(null));
      *         } else if (result.getException() instanceof TimeoutException) {
      *             return ProcessedData.timeout();
      *         } else {
@@ -2587,8 +2621,8 @@ public final class Futures {
      * @param unit the time unit of {@code totalTimeoutForAll}, must not be {@code null}.
      * @param resultHandler the function to transform each {@code Result}, including
      *                      timeout-failure handling.
-     * @return an {@code ObjIterator} that yields transformed results in completion order
-     *         (first-finished, first-out) with timeout enforcement. Results observed within the budget
+     * @return an {@code ObjIterator} that yields transformed results in completion-observation order
+     *         with timeout enforcement. Results observed within the budget
      *         remain available after the deadline; later results are excluded. After draining those
      *         results, an expired deadline with unobserved inputs passes one final {@code Result}
      *         carrying a {@link TimeoutException} to {@code resultHandler}.
@@ -2596,7 +2630,7 @@ public final class Futures {
      *         are released without cancelling inputs, and one final {@code Result} carrying an
      *         {@link InterruptedException} is passed to {@code resultHandler} before iteration ends.
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not positive, or {@code unit} is {@code null}, or {@code resultHandler} is {@code null}.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      * @see #iterate(Collection, Function)
      * @see #iterate(Collection, long, TimeUnit)
@@ -2611,7 +2645,7 @@ public final class Futures {
 
     /**
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      */
     private static <T, R> ObjIterator<R> iterate02(final Collection<? extends Future<? extends T>> cfs,
@@ -2622,7 +2656,7 @@ public final class Futures {
 
     /**
      * @throws IllegalArgumentException if {@code cfs} is {@code null} or empty, {@code totalTimeoutForAll} is not positive, or {@code unit} is {@code null}.
-     * @throws NullPointerException if the input contains a {@code null} future.
+     * @throws NullPointerException if the input contains a {@code null} future; checked before any completion observer is registered.
      * @throws RejectedExecutionException if the relay executor rejects a task submitted to observe an unfinished future.
      */
     private static <T, R> ObjIterator<R> iterate02(final Collection<? extends Future<? extends T>> cfs, final long totalTimeoutForAll, final TimeUnit unit,
@@ -2638,13 +2672,15 @@ public final class Futures {
         // Count and register the same snapshot, even if the source collection changes during construction.
         final List<Future<? extends T>> futureList = new ArrayList<>(cfs);
         N.checkArgument(N.notEmpty(futureList), "The specified collection cannot be null or empty");
+
+        // Validate the complete snapshot before attaching callbacks or starting blocking relay tasks.
+        // Otherwise a later null input leaves observers running without an iterator to release them.
+        for (final Future<? extends T> future : futureList) {
+            N.requireNonNull(future, cs.future);
+        }
+
         final int futureCount = futureList.size();
-        final Consumer<Result<T, Exception>> complete = outcome -> {
-            // Retain unconsumed results that arrived in budget, but exclude all late outcomes.
-            if (totalTimeoutForAllInNanos == Long.MAX_VALUE || System.nanoTime() - startTimeInNanos <= totalTimeoutForAllInNanos) {
-                completedResults.offer(outcome);
-            }
-        };
+        final IterationCompletion<T> complete = new IterationCompletion<>(completedResults, startTimeInNanos, totalTimeoutForAllInNanos);
 
         // Track every submitted wrapper task so we can cancel still-running ones when
         // the global timeout fires or the consumer is interrupted. Without this, blocked
@@ -2659,30 +2695,42 @@ public final class Futures {
         // starting the relays for its siblings.
         List<Future<? extends T>> alreadyDone = null;
 
-        for (final Future<? extends T> future : futureList) {
-            if (future instanceof CompletableFuture<? extends T> completableFuture) {
-                completableFuture.whenComplete((value, error) -> {
-                    complete.accept(error == null ? Result.of(value, null) : Result.of(null, convertException(error)));
-                });
-            } else if (future.isDone()) {
-                // No relay thread needed: the outcome is available now and get() will not block.
-                if (alreadyDone == null) {
-                    alreadyDone = new ArrayList<>(futureCount);
-                }
-
-                alreadyDone.add(future);
-            } else {
-                final FutureTask<Void> submittedTask = new FutureTask<>(() -> {
-                    try {
-                        complete.accept(Result.of(future.get(), null));
-                    } catch (final Exception | Error e) { // A broken/custom Future may throw an Error directly; never leave the consumer waiting forever.
-                        complete.accept(Result.of(null, convertException(e)));
+        try {
+            for (final Future<? extends T> future : futureList) {
+                if (future instanceof CompletableFuture<? extends T> completableFuture) {
+                    completableFuture.whenComplete((value, error) -> {
+                        complete.accept(error == null ? Result.of(value, null) : Result.of(null, convertException(error)));
+                    });
+                } else if (future.isDone()) {
+                    // No relay thread needed: the outcome is available now and get() will not block.
+                    if (alreadyDone == null) {
+                        alreadyDone = new ArrayList<>(futureCount);
                     }
-                }, null);
 
-                submitted.add(submittedTask);
-                RELAY_EXECUTOR.execute(submittedTask);
+                    alreadyDone.add(future);
+                } else {
+                    final FutureTask<Void> submittedTask = new FutureTask<>(() -> {
+                        try {
+                            complete.accept(Result.of(future.get(), null));
+                        } catch (final Exception | Error e) { // A broken/custom Future may throw an Error directly; never leave the consumer waiting forever.
+                            complete.accept(Result.of(null, convertException(e)));
+                        }
+                    }, null);
+
+                    submitted.add(submittedTask);
+                    RELAY_EXECUTOR.execute(submittedTask);
+                }
             }
+        } catch (final RuntimeException | Error failure) {
+            // Detach callback state before interrupting relays, which can themselves publish failures.
+            // No iterator is returned to consume queued results or release the owned wrapper tasks.
+            complete.abandon();
+            // Cancel only our relay tasks; the caller still owns the input futures.
+            for (final Future<?> task : submitted) {
+                task.cancel(true);
+            }
+
+            throw failure;
         }
 
         if (alreadyDone != null) {
@@ -2715,12 +2763,9 @@ public final class Futures {
                 }
 
                 if (remainingCount <= 0) {
-                    // Deliberately no cancelPending() here. Every relay has already offered its result
-                    // (that is what drove remainingCount to 0), so this could only catch one in the window
-                    // between offer(..) and the FutureTask going done -- and cancel(true) would then
-                    // interrupt a RELAY_EXECUTOR worker that is about to be reused, leaking the interrupt
-                    // into the next task. The interrupt/timeout paths below cancel because they really do
-                    // abandon in-flight relays.
+                    // Every input has published its result, so no blocking relay remains to release.
+                    // A relay may still be finishing its FutureTask bookkeeping; let it finish normally.
+                    // Interruption and timeout cancel relays because those paths abandon pending results.
                     noMore = true;
                     return false;
                 }
@@ -2785,6 +2830,40 @@ public final class Futures {
                 }
             }
         };
+    }
+
+    /**
+     * Publishes in-budget results while allowing failed registration to release its abandoned queue.
+     * Pending callbacks retain this small holder, whose queue reference is detached on abandonment.
+     * Publication and detachment share a monitor so no callback can enqueue after the queue is cleared.
+     *
+     * @param <T> the result type of the input futures
+     */
+    private static final class IterationCompletion<T> implements Consumer<Result<T, Exception>> {
+        private BlockingQueue<Result<T, Exception>> results;
+        private final long startTimeInNanos;
+        private final long timeoutInNanos;
+
+        private IterationCompletion(final BlockingQueue<Result<T, Exception>> results, final long startTimeInNanos, final long timeoutInNanos) {
+            this.results = results;
+            this.startTimeInNanos = startTimeInNanos;
+            this.timeoutInNanos = timeoutInNanos;
+        }
+
+        @Override
+        public synchronized void accept(final Result<T, Exception> outcome) {
+            // Keep results observed in budget available even when the iterator is consumed after its deadline.
+            if (results != null && (timeoutInNanos == Long.MAX_VALUE || System.nanoTime() - startTimeInNanos <= timeoutInNanos)) {
+                results.offer(outcome);
+            }
+        }
+
+        private synchronized void abandon() {
+            if (results != null) {
+                results.clear();
+                results = null;
+            }
+        }
     }
 
     /**

@@ -116,10 +116,11 @@ public class CollectorsTest extends TestBase {
         final BiConsumer<StringBuilder, String> accumulator = StringBuilder::append;
         final BinaryOperator<StringBuilder> combiner = StringBuilder::append;
 
-        assertTrue(assertThrows(IllegalArgumentException.class,
-                () -> Collectors.create(supplier, accumulator, combiner, (Characteristics[]) null)).getMessage().contains("characteristics"));
-        assertTrue(assertThrows(IllegalArgumentException.class,
-                () -> Collectors.create(supplier, accumulator, combiner, Characteristics.UNORDERED, null)).getMessage().contains("characteristics[1]"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Collectors.create(supplier, accumulator, combiner, (Characteristics[]) null)).getMessage()
+                .contains("characteristics"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Collectors.create(supplier, accumulator, combiner, Characteristics.UNORDERED, null))
+                .getMessage()
+                .contains("characteristics[1]"));
         assertTrue(assertThrows(IllegalArgumentException.class,
                 () -> Collectors.create(supplier, accumulator, combiner, StringBuilder::toString, (Characteristics[]) null)).getMessage()
                         .contains("characteristics"));
@@ -134,16 +135,18 @@ public class CollectorsTest extends TestBase {
         final BiConsumer<StringBuilder, String> accumulator = StringBuilder::append;
         final BinaryOperator<StringBuilder> combiner = StringBuilder::append;
 
-        assertEquals("ab", java.util.stream.Stream.of("a", "b")
-                .collect(Collectors.create(supplier, accumulator, combiner, (Collection<Characteristics>) null)).toString());
+        assertEquals("ab",
+                java.util.stream.Stream.of("a", "b")
+                        .collect(Collectors.create(supplier, accumulator, combiner, (Collection<Characteristics>) null))
+                        .toString());
         assertEquals("ab", java.util.stream.Stream.of("a", "b")
                 .collect(Collectors.create(supplier, accumulator, combiner, StringBuilder::toString, (Collection<Characteristics>) null)));
         assertTrue(assertThrows(IllegalArgumentException.class,
                 () -> Collectors.create(supplier, accumulator, combiner, Arrays.asList(Characteristics.UNORDERED, null))).getMessage()
                         .contains("characteristics[1]"));
         assertTrue(assertThrows(IllegalArgumentException.class,
-                () -> Collectors.create(supplier, accumulator, combiner, StringBuilder::toString, Arrays.asList(Characteristics.UNORDERED, null)))
-                        .getMessage().contains("characteristics[1]"));
+                () -> Collectors.create(supplier, accumulator, combiner, StringBuilder::toString, Arrays.asList(Characteristics.UNORDERED, null))).getMessage()
+                        .contains("characteristics[1]"));
     }
 
     @Data
@@ -959,24 +962,13 @@ public class CollectorsTest extends TestBase {
         // Both null also counts as duplicate.
         assertThrows(TooManyElementsException.class, () -> Stream.of((Integer) null, (Integer) null).collect(Collectors.onlyOne()));
 
-        // A single null element returns empty Optional (matches first()/last() semantics).
-        Optional<Integer> singleNull = Stream.<Integer> of((Integer) null).collect(Collectors.onlyOne());
-        assertFalse(singleNull.isPresent());
+        assertThrows(NullPointerException.class, () -> Stream.<Integer> of((Integer) null).collect(Collectors.onlyOne()));
     }
 
-    /**
-     * Bug fix regression: {@code first()} and {@code last()} previously used Optional.of(value)
-     * in the finisher, which throws NPE if the captured first/last element happened to be null.
-     */
     @Test
-    public void testFirstLast_NullElement_NoNPE() {
-        // first() over a stream whose first element is null must not NPE.
-        Optional<Integer> first = Stream.of((Integer) null, 1, 2).collect(Collectors.first());
-        assertFalse(first.isPresent());
-
-        // last() over a stream whose last element is null must not NPE.
-        Optional<Integer> last = Stream.of(1, 2, (Integer) null).collect(Collectors.last());
-        assertFalse(last.isPresent());
+    public void testFirstLast_NullElement_ThrowsNPE() {
+        assertThrows(NullPointerException.class, () -> Stream.of((Integer) null, 1, 2).collect(Collectors.first()));
+        assertThrows(NullPointerException.class, () -> Stream.of(1, 2, (Integer) null).collect(Collectors.last()));
     }
 
     @Test
@@ -1244,11 +1236,9 @@ public class CollectorsTest extends TestBase {
     }
 
     @Test
-    public void testCollectingOrEmptyNullDownstreamResultReturnsEmpty() {
-        final Optional<List<String>> result = Stream.of("a")
-                .collect(Collectors.collectingOrEmpty(Collectors.collectingAndThen(Collectors.<String> toList(), list -> (List<String>) null)));
-
-        assertFalse(result.isPresent());
+    public void testCollectingOrEmptyNullDownstreamResultThrowsNPE() {
+        assertThrows(NullPointerException.class, () -> Stream.of("a")
+                .collect(Collectors.collectingOrEmpty(Collectors.collectingAndThen(Collectors.<String> toList(), list -> (List<String>) null))));
     }
 
     @Test
@@ -4447,11 +4437,9 @@ public class CollectorsTest extends TestBase {
     }
 
     @Test
-    public void testMinMaxWithNullWinnerReturnsEmptyOptional() {
-        // regression: the reducing finisher used Optional.of, throwing NPE when the reduction
-        // winner was null (e.g. min() over all-null elements with its null-ordering comparator)
-        assertFalse(Stream.of((String) null).collect(Collectors.min()).isPresent());
-        assertFalse(Stream.of((String) null).collect(Collectors.max()).isPresent());
+    public void testMinMaxWithNullWinnerThrowsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> Stream.of((String) null).collect(Collectors.min()));
+        assertThrows(NullPointerException.class, () -> Stream.of((String) null).collect(Collectors.max()));
 
         // unchanged for normal values
         assertEquals(Optional.of(1), Stream.of(3, 1, 2).collect(Collectors.min()));
@@ -4653,7 +4641,8 @@ public class CollectorsTest extends TestBase {
         assertEquals(10, Stream.of(1, 5, 5).collect(Collectors.maxAll(Comparator.<Integer> naturalOrder(), downstream)));
         assertEquals(2, Stream.of(5, 1, 1).collect(Collectors.minAll(Comparator.<Integer> naturalOrder(), downstream)));
 
-        final Optional<Pair<Integer, Integer>> withRepresentative = Stream.of(1, 5, 5).collect(Collectors.maxAllWith(Comparators.<Integer> naturalOrder(), downstream));
+        final Optional<Pair<Integer, Integer>> withRepresentative = Stream.of(1, 5, 5)
+                .collect(Collectors.maxAllWith(Comparators.<Integer> naturalOrder(), downstream));
         assertTrue(withRepresentative.isPresent());
         assertEquals(Integer.valueOf(5), withRepresentative.get().left());
         assertEquals(Integer.valueOf(10), withRepresentative.get().right());
@@ -4878,7 +4867,8 @@ public class CollectorsTest extends TestBase {
             for (final boolean parallel : new boolean[] { false, true }) {
                 final Stream<Integer> objectSource = iteratorSource ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3);
                 final Stream<Integer> objects = parallel ? objectSource.parallel(2) : objectSource;
-                assertEquals(N.asMap(0, 1L, 1, 2L), objects.groupTo(value -> value % 2, Collectors.counting(), java.util.concurrent.ConcurrentSkipListMap::new));
+                assertEquals(N.asMap(0, 1L, 1, 2L),
+                        objects.groupTo(value -> value % 2, Collectors.counting(), java.util.concurrent.ConcurrentSkipListMap::new));
 
                 final IntStream intSource = iteratorSource ? IntStream.of(com.landawn.abacus.util.IntIterator.of(1, 2, 3)) : IntStream.of(1, 2, 3);
                 final IntStream ints = parallel ? intSource.parallel(2) : intSource;

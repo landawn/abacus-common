@@ -65,14 +65,17 @@ import com.google.common.hash.HashCode;
  * <p><b>Hashing complex objects with Funnel:</b></p>
  * <pre>{@code
  * class Person {
- *     String firstName;
- *     String lastName;
- *     int age;
+ *     String firstName = "Alice";
+ *     String lastName = "Smith";
+ *     int age = 30;
  * }
  *
  * // Funnel receives Guava PrimitiveSink (putString/putInt), not abacus Hasher
  * Funnel<Person> personFunnel = (person, into) -> {
- *     into.putString(person.firstName, StandardCharsets.UTF_8)
+ *     // Prefix variable-length fields so adjacent names cannot merge ambiguously.
+ *     into.putInt(person.firstName.length())
+ *         .putString(person.firstName, StandardCharsets.UTF_8)
+ *         .putInt(person.lastName.length())
  *         .putString(person.lastName, StandardCharsets.UTF_8)
  *         .putInt(person.age);
  * };
@@ -207,7 +210,7 @@ public interface HashFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] buffer = new byte[1024];
-     * int bytesRead = inputStream.read(buffer);
+     * int bytesRead = inputStream.readNBytes(buffer, 0, buffer.length); // zero at end of input
      * HashCode hash = Hashing.md5().hash(buffer, 0, bytesRead);
      * }</pre>
      *

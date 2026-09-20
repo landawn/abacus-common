@@ -39,13 +39,11 @@ public class IteratorCharStreamTest extends TestBase {
             for (final boolean empty : new boolean[] { true, false }) {
                 final char[] values = empty ? new char[0] : new char[] { (char) 1 };
                 final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
-                try (final CharStream stream = arrayBacked ? CharStream.of(values)
-                        : CharStream.of(com.landawn.abacus.util.CharIterator.of(values))) {
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                            () -> stream.groupTo(value -> value, null, () -> {
-                                factoryCalls.incrementAndGet();
-                                return new java.util.HashMap<>();
-                            }));
+                try (final CharStream stream = arrayBacked ? CharStream.of(values) : CharStream.of(com.landawn.abacus.util.CharIterator.of(values))) {
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> stream.groupTo(value -> value, null, () -> {
+                        factoryCalls.incrementAndGet();
+                        return new java.util.HashMap<>();
+                    }));
                     org.junit.jupiter.api.Assertions.assertEquals(0, factoryCalls.get());
                 }
             }
@@ -166,7 +164,6 @@ public class IteratorCharStreamTest extends TestBase {
             assertEquals(2, attempts.get());
         }
     }
-
 
     private static final char[] TEST_ARRAY = new char[] { 'a', 'b', 'c', 'd', 'e' };
     private CharStream stream;

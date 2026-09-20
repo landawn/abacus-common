@@ -24,13 +24,12 @@ import com.landawn.abacus.util.function.ShortSupplier;
 import com.landawn.abacus.util.stream.ShortStream;
 
 /**
- * A specialized iterator for primitive {@code short} values that does not support element removal
- * ({@link #remove()} always throws {@link UnsupportedOperationException}).
+ * A specialized iterator for primitive {@code short} values. Factory-created iterators do not support element removal
+ * ({@link #remove()} throws {@link UnsupportedOperationException}); subclasses may override that method.
  * This class provides various factory methods and operations for creating and manipulating
  * iterators over {@code short} values without the overhead of boxing/unboxing.
  *
- * <p>The iterator is unmodifiable, meaning elements cannot be removed through it; like every iterator,
- * its traversal position is mutable and instances are generally neither reusable nor thread-safe.
+ * <p>The traversal position is mutable and instances are generally neither reusable nor thread-safe.
  * It provides specialized methods like {@code nextShort()} to avoid boxing overhead,
  * and lazy operations such as {@code skip()}, {@code limit()}, and {@code filter()}. These operations
  * share and consume the original iterator rather than copying its remaining values.</p>
@@ -74,8 +73,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public short nextShort() {
+        public short nextShort() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -160,8 +163,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -187,7 +194,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
 
     /**
      * Creates a ShortIterator that is initialized lazily using the provided Supplier.
-     * The actual iterator is not created until the first method call on the returned iterator.
+     * The actual iterator is not created until the first traversal operation of the returned iterator.
      * This is useful for deferring expensive iterator creation until it is actually needed.
      *
      * <p><b>Usage Examples:</b></p>
@@ -196,7 +203,14 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * // The expensive computation is not performed until iter.hasNext() or iter.nextShort() is called
      * }</pre>
      *
-     * <p>Initialization happens on the returned iterator. Its access methods throw {@link IllegalStateException} if the supplier returns {@code null}; supplier runtime exceptions and errors are cached and rethrown on later access.</p>
+     * <p>The returned iterator initializes its source on its first traversal operation. Its access methods
+     * throw {@link IllegalStateException} if the supplier returns {@code null} or recursively accesses this
+     * iterator during initialization. The supplier is invoked at most once. Initialization exceptions and
+     * errors are cached and rethrown on later access, even if the supplier catches a recursive-access failure.</p>
+     *
+     * <p>The supplier must return a valid source distinct from this deferred iterator and must not create
+     * a cycle through other delegating iterators. Returning this iterator directly throws a cached
+     * {@link IllegalStateException}; indirect delegation cycles are not detected.</p>
      *
      * @param iteratorSupplier a {@link Supplier} that provides the {@code ShortIterator} when needed
      * @return a lazily initialized {@code ShortIterator}
@@ -208,6 +222,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
         return new ShortIterator() {
             private ShortIterator iter = null;
             private volatile boolean isInitialized = false;
+            private boolean isInitializing = false;
             private Throwable initializationFailure = null;
 
             @Override
@@ -224,19 +239,39 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return iter.nextShort();
             }
 
-            private void init() {
+            /**
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null} or recursively accesses this iterator
+             */
+            private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
+                            if (isInitializing) {
+                                if (initializationFailure == null) {
+                                    initializationFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                                }
+
+                                throw (IllegalStateException) initializationFailure;
+                            }
+
+                            isInitializing = true;
+
                             try {
                                 iter = iteratorSupplier.get();
+
+                                if (iter == this) {
+                                    throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
+                                }
 
                                 if (iter == null) {
                                     throw new IllegalStateException("Iterator supplier returned null");
                                 }
                             } catch (RuntimeException | Error e) {
-                                initializationFailure = e;
+                                if (initializationFailure == null) {
+                                    initializationFailure = e;
+                                }
                             } finally {
+                                isInitializing = false;
                                 isInitialized = true;
                             }
                         }
@@ -326,8 +361,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -345,7 +384,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of((short)1, (short)2);
-     * Short boxed = iter.next();            // returns Short.valueOf(1) — avoid this
+     * Short boxed = iter.next();            // returns Short.valueOf((short)1) — avoid this
      * short primitive = iter.nextShort();   // returns 2 — prefer this
      * }</pre>
      *
@@ -412,8 +451,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -466,8 +509,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -518,8 +565,12 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return hasNext;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -658,8 +709,13 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             * @throws ArithmeticException if an element remains after the index has reached {@link Long#MAX_VALUE}
+             */
             @Override
-            public IndexedShort next() {
+            public IndexedShort next() throws NoSuchElementException, ArithmeticException {
                 if (indexOverflow) {
                     if (!iter.hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);

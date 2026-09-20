@@ -81,112 +81,112 @@ public class FloatStreamTest extends TestBase {
 
     @Nested
     @DisplayName("Factory Methods - Static")
-    public class FactoryMethods {
+    public class FactoryMethods extends TestBase {
     }
 
     @Nested
     @DisplayName("Zip Operations")
-    public class ZipOperations {
+    public class ZipOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Merge Operations")
-    public class MergeOperations {
+    public class MergeOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Intermediate Operations - Filtering")
-    public class FilteringOperations {
+    public class FilteringOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Intermediate Operations - Transformation")
-    public class TransformationOperations {
+    public class TransformationOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Intermediate Operations - Advanced")
-    public class AdvancedOperations {
+    public class AdvancedOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Intermediate Operations - Sorting")
-    public class SortingOperations {
+    public class SortingOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Intermediate Operations - Set Operations")
-    public class SetOperations {
+    public class SetOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Intermediate Operations - Instance Zip and Merge")
-    public class InstanceZipMerge {
+    public class InstanceZipMerge extends TestBase {
     }
 
     @Nested
     @DisplayName("Intermediate Operations - Side Effects")
-    public class SideEffects {
+    public class SideEffects extends TestBase {
     }
 
     @Nested
     @DisplayName("Intermediate Operations - Conditional")
-    public class ConditionalOperations {
+    public class ConditionalOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Terminal Operations - Aggregation")
-    public class AggregationOperations {
+    public class AggregationOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Terminal Operations - Reduction")
-    public class ReductionOperations {
+    public class ReductionOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Terminal Operations - Search")
-    public class SearchOperations {
+    public class SearchOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Terminal Operations - Matching")
-    public class MatchingOperations {
+    public class MatchingOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Terminal Operations - Collection")
-    public class CollectionOperations {
+    public class CollectionOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Terminal Operations - ForEach")
-    public class ForEachOperations {
+    public class ForEachOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Terminal Operations - Joining")
-    public class JoiningOperations {
+    public class JoiningOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("BaseStream - Parallelism")
-    public class ParallelismOperations {
+    public class ParallelismOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("BaseStream - Lifecycle")
-    public class LifecycleOperations {
+    public class LifecycleOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("BaseStream - Iterator")
-    public class IteratorOperations {
+    public class IteratorOperations extends TestBase {
     }
 
     @Nested
     @DisplayName("Edge Cases")
-    public class EdgeCases {
+    public class EdgeCases extends TestBase {
     }
 
     @Test

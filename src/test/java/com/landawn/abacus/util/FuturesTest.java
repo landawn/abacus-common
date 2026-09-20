@@ -12,7 +12,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -21,6 +24,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -41,11 +46,219 @@ import com.landawn.abacus.util.Tuple.Tuple7;
 public class FuturesTest extends TestBase {
 
     @Test
+    public void testIterateDetachesPendingCallbacksWhenRegistrationFails() throws Exception {
+        for (final Throwable failure : List.of(new IllegalStateException("registration failed"), new AssertionError("registration failed"))) {
+            final AtomicReference<BiConsumer<? super String, ? super Throwable>> callback = new AtomicReference<>();
+            final CompletableFuture<String> pending = new CompletableFuture<>() {
+                @Override
+                public CompletableFuture<String> whenComplete(final BiConsumer<? super String, ? super Throwable> action) {
+                    callback.set(action);
+                    return super.whenComplete(action);
+                }
+            };
+            final AtomicReference<BlockingQueue<?>> abandonedQueue = new AtomicReference<>();
+            final FutureTask<String> broken = new FutureTask<>(() -> "unused") {
+                @Override
+                public boolean isDone() {
+                    abandonedQueue.set(Assertions.assertDoesNotThrow(() -> retainedIterationQueue(callback.get())));
+                    Assertions.assertNotNull(abandonedQueue.get());
+                    assertEquals(1, abandonedQueue.get().size(), "An earlier completion must already be queued");
+                    if (failure instanceof RuntimeException exception) {
+                        throw exception;
+                    }
+                    throw (Error) failure;
+                }
+            };
+
+            Assertions.assertSame(failure,
+                    assertThrows(failure.getClass(), () -> Futures.iterate(Arrays.asList(pending, CompletableFuture.completedFuture("queued"), broken))));
+            assertFalse(pending.isDone(), "The pending input still belongs to the caller");
+            assertTrue(abandonedQueue.get().isEmpty(), "Failed registration must discard queued payloads");
+            Assertions.assertNull(retainedIterationQueue(callback.get()), "The input callback must release the abandoned queue");
+
+            assertTrue(pending.complete("late"));
+            assertEquals("late", pending.join());
+            assertTrue(abandonedQueue.get().isEmpty(), "A late callback must not repopulate the abandoned queue");
+        }
+    }
+
+    @Test
+    public void testIterateAbandonsAnInFlightCallbackWhenRegistrationFails() throws Exception {
+        final AtomicReference<BiConsumer<? super String, ? super Throwable>> callback = new AtomicReference<>();
+        final CompletableFuture<String> pending = new CompletableFuture<>() {
+            @Override
+            public CompletableFuture<String> whenComplete(final BiConsumer<? super String, ? super Throwable> action) {
+                callback.set(action);
+                return super.whenComplete(action);
+            }
+        };
+        final CountDownLatch conversionEntered = new CountDownLatch(1);
+        final CountDownLatch finishConversion = new CountDownLatch(1);
+        final IllegalStateException inputFailure = new IllegalStateException("input failed");
+        final CompletionException completionFailure = new CompletionException(inputFailure) {
+            @Override
+            public synchronized Throwable getCause() {
+                conversionEntered.countDown();
+                try {
+                    assertTrue(finishConversion.await(5, TimeUnit.SECONDS), "The test must release callback conversion");
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError(e);
+                }
+                return inputFailure;
+            }
+        };
+        final Thread completing = new Thread(() -> pending.completeExceptionally(completionFailure));
+        final AtomicReference<BlockingQueue<?>> abandonedQueue = new AtomicReference<>();
+        final IllegalStateException registrationFailure = new IllegalStateException("registration failed");
+        final FutureTask<String> broken = new FutureTask<>(() -> "unused") {
+            @Override
+            public boolean isDone() {
+                abandonedQueue.set(Assertions.assertDoesNotThrow(() -> retainedIterationQueue(callback.get())));
+                Assertions.assertNotNull(abandonedQueue.get());
+                completing.start();
+                try {
+                    assertTrue(conversionEntered.await(5, TimeUnit.SECONDS), "The callback must be in flight before registration fails");
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError(e);
+                }
+                throw registrationFailure;
+            }
+        };
+
+        try {
+            Assertions.assertSame(registrationFailure, assertThrows(IllegalStateException.class,
+                    () -> Futures.iterate(Arrays.asList(pending, CompletableFuture.completedFuture("queued"), broken))));
+            assertTrue(abandonedQueue.get().isEmpty());
+            Assertions.assertNull(retainedIterationQueue(callback.get()));
+        } finally {
+            finishConversion.countDown();
+            completing.join(5000);
+        }
+
+        assertFalse(completing.isAlive());
+        assertTrue(abandonedQueue.get().isEmpty(), "A callback already in progress must not publish after abandonment");
+        assertFalse(pending.isCancelled());
+    }
+
+    // Inspect only this library's captured callback state, without depending on field names or GC timing.
+    // A retained queue represents retained result payloads even when the caller has no returned iterator.
+    private static BlockingQueue<?> retainedIterationQueue(final Object callback) throws IllegalAccessException {
+        final java.util.Set<Object> visited = Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        final java.util.ArrayDeque<Object> remaining = new java.util.ArrayDeque<>();
+        remaining.add(callback);
+        while (!remaining.isEmpty()) {
+            final Object state = remaining.remove();
+            if (state instanceof BlockingQueue<?> queue) {
+                return queue;
+            }
+            if (!visited.add(state) || !state.getClass().getName().startsWith(Futures.class.getName() + "$")) {
+                continue;
+            }
+            for (final java.lang.reflect.Field field : state.getClass().getDeclaredFields()) {
+                if (!java.lang.reflect.Modifier.isStatic(field.getModifiers()) && !field.getType().isPrimitive()) {
+                    field.setAccessible(true);
+                    final Object captured = field.get(state);
+                    if (captured != null) {
+                        remaining.add(captured);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Test
+    public void testIterateReleasesRelaysWhenRegistrationFails() throws Exception {
+        for (final Throwable failure : List.of(new IllegalStateException("registration failed"), new AssertionError("registration failed"))) {
+            for (int mode = 0; mode < 2; mode++) {
+                final CompletableFuture<String> pending = new CompletableFuture<>();
+                final java.util.concurrent.CountDownLatch relayEntered = new java.util.concurrent.CountDownLatch(1);
+                final java.util.concurrent.CountDownLatch relayInterrupted = new java.util.concurrent.CountDownLatch(1);
+                final FutureTask<String> unfinished = new FutureTask<>(() -> "unused") {
+                    @Override
+                    public String get() throws InterruptedException, ExecutionException {
+                        relayEntered.countDown();
+                        try {
+                            return super.get();
+                        } catch (final InterruptedException e) {
+                            relayInterrupted.countDown();
+                            throw e;
+                        }
+                    }
+                };
+                final Runnable failRegistration = () -> {
+                    try {
+                        assertTrue(relayEntered.await(5, TimeUnit.SECONDS), "The preceding relay must have started");
+                    } catch (final InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new AssertionError(e);
+                    }
+
+                    if (failure instanceof RuntimeException exception) {
+                        throw exception;
+                    }
+                    throw (Error) failure;
+                };
+                final Future<String> broken = mode == 0 ? new FutureTask<>(() -> "unused") {
+                    @Override
+                    public boolean isDone() {
+                        failRegistration.run();
+                        return false;
+                    }
+                } : new CompletableFuture<>() {
+                    @Override
+                    public CompletableFuture<String> whenComplete(final java.util.function.BiConsumer<? super String, ? super Throwable> action) {
+                        failRegistration.run();
+                        return this;
+                    }
+                };
+
+                try {
+                    Assertions.assertSame(failure, assertThrows(failure.getClass(), () -> Futures.iterate(Arrays.asList(pending, unfinished, broken))));
+                    assertTrue(relayInterrupted.await(5, TimeUnit.SECONDS), "Failed construction must release its relay");
+                    assertFalse(unfinished.isCancelled(), "The input future belongs to the caller");
+                    assertFalse(unfinished.isDone());
+                    assertFalse(pending.isDone(), "Registration cleanup must preserve pending CompletableFuture inputs");
+                    assertTrue(pending.complete("still owned by caller"));
+                } finally {
+                    unfinished.cancel(true);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testIterateRejectsNullBeforeRegisteringObservers() {
+        for (int mode = 0; mode < 5; mode++) {
+            final CompletableFuture<String> unfinished = new CompletableFuture<>();
+            final List<Future<String>> inputs = Arrays.asList(unfinished, null);
+            final int overload = mode;
+
+            assertThrows(NullPointerException.class, () -> {
+                switch (overload) {
+                    case 0 -> Futures.iterate(unfinished, null);
+                    case 1 -> Futures.iterate(inputs);
+                    case 2 -> Futures.iterate(inputs, 1, TimeUnit.SECONDS);
+                    case 3 -> Futures.iterate(inputs, Function.identity());
+                    default -> Futures.iterate(inputs, 1, TimeUnit.SECONDS, Function.identity());
+                }
+            });
+
+            assertEquals(0, unfinished.getNumberOfDependents(), "Invalid input must not retain a completion observer");
+            assertFalse(unfinished.isDone());
+        }
+    }
+
+    @Test
     public void testAnyOfCancellationExceptionFromComputationIsFailure() {
         for (int mode = 0; mode < 3; mode++) {
             final int getMode = mode;
             final CancellationException cause = new CancellationException("computation failed");
-            final FutureTask<String> failed = new FutureTask<>(() -> { throw cause; });
+            final FutureTask<String> failed = new FutureTask<>(() -> {
+                throw cause;
+            });
             failed.run();
             final ContinuableFuture<String> aggregate = Futures.anyOf(failed);
             final ExecutionException first = assertThrows(ExecutionException.class, () -> {
@@ -2297,8 +2510,8 @@ public class FuturesTest extends TestBase {
         final AssertionError first = new AssertionError("first");
         final LinkageError second = new LinkageError("second");
         final IllegalStateException third = new IllegalStateException("third");
-        final List<Future<? extends String>> failures = Arrays.asList(CompletableFuture.failedFuture(first),
-                CompletableFuture.failedFuture(second), CompletableFuture.failedFuture(third), CompletableFuture.failedFuture(first));
+        final List<Future<? extends String>> failures = Arrays.asList(CompletableFuture.failedFuture(first), CompletableFuture.failedFuture(second),
+                CompletableFuture.failedFuture(third), CompletableFuture.failedFuture(first));
 
         for (int mode = 0; mode < 3; mode++) {
             final int getMode = mode;
@@ -2350,8 +2563,8 @@ public class FuturesTest extends TestBase {
     public void testTimedIterateDrainsInBudgetFailureThenReportsTimeoutForLateSuccess() throws Exception {
         final IllegalArgumentException failure = new IllegalArgumentException("early");
         final CompletableFuture<String> late = new CompletableFuture<>();
-        final ObjIterator<Result<String, Exception>> iter = Futures.iterate(
-                Arrays.asList(CompletableFuture.<String> failedFuture(failure), late), 100, TimeUnit.MILLISECONDS, Function.identity());
+        final ObjIterator<Result<String, Exception>> iter = Futures.iterate(Arrays.asList(CompletableFuture.<String> failedFuture(failure), late), 100,
+                TimeUnit.MILLISECONDS, Function.identity());
 
         Thread.sleep(200);
         late.complete("late");
@@ -2463,11 +2676,10 @@ public class FuturesTest extends TestBase {
                 throw second;
             }
         };
-        final List<ContinuableFuture<?>> composites = Arrays.asList(
-                Futures.compose(firstInput, secondInput, (a, b) -> "unused"),
+        final List<ContinuableFuture<?>> composites = Arrays.asList(Futures.compose(firstInput, secondInput, (a, b) -> "unused"),
                 Futures.compose(firstInput, secondInput, secondInput, (a, b, c) -> "unused"),
-                Futures.compose(List.of(firstInput, secondInput, secondInput), inputs -> "unused"),
-                Futures.allOf(firstInput, secondInput), Futures.anyOf(firstInput, secondInput), Futures.combine(firstInput, secondInput));
+                Futures.compose(List.of(firstInput, secondInput, secondInput), inputs -> "unused"), Futures.allOf(firstInput, secondInput),
+                Futures.anyOf(firstInput, secondInput), Futures.combine(firstInput, secondInput));
 
         for (final ContinuableFuture<?> composite : composites) {
             calls.set(0);

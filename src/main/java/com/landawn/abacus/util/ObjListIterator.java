@@ -89,8 +89,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public Object next() {
+        public Object next() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
@@ -99,8 +103,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if there is no element before the current cursor
+         */
         @Override
-        public Object previous() {
+        public Object previous() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
@@ -417,8 +425,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -435,8 +447,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
                 return iter.hasPrevious();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if there is no element before the current cursor
+             */
             @Override
-            public T previous() {
+            public T previous() throws NoSuchElementException {
                 if (!hasPrevious()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -544,8 +560,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
                 return position < count && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -560,8 +580,12 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
                 return iter.hasPrevious();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if there is no element before the current cursor
+             */
             @Override
-            public T previous() {
+            public T previous() throws NoSuchElementException {
                 if (!hasPrevious()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -685,7 +709,7 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * @throws ArrayStoreException if a remaining element is not assignable to the runtime component type of {@code a}
      */
     public <A> A[] toArray(final A[] a) throws NullPointerException, ArrayStoreException {
-        N.requireNonNull(a, "a");
+        N.requireNonNull(a, cs.a);
         return toList().toArray(a);
     }
 

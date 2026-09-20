@@ -93,11 +93,11 @@ import com.landawn.abacus.util.function.IntFunction;
  *
  * // Create a function for HashSet with initial capacity
  * IntFunction<Set<Integer>> setCreator = IntFunctions.ofSet();
- * Set<Integer> set = setCreator.apply(50);   // returns HashSet with capacity 50
+ * Set<Integer> set = setCreator.apply(50);   // returns HashSet sized for 50 elements
  *
  * // Create a function for HashMap with initial capacity
  * IntFunction<Map<String, Object>> mapCreator = IntFunctions.ofMap();
- * Map<String, Object> map = mapCreator.apply(200);   // returns HashMap with capacity 200
+ * Map<String, Object> map = mapCreator.apply(200);   // returns HashMap sized for 200 entries
  *
  * // Create a function for primitive arrays
  * IntFunction<int[]> arrayCreator = IntFunctions.ofIntArray();
@@ -193,11 +193,11 @@ public final class IntFunctions {
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super LinkedList> LINKED_LIST_FACTORY = len -> new LinkedList<>();
 
-    /** Shared factory function that creates a new {@link java.util.HashSet} with the given initial capacity. */
+    /** Shared factory function that creates a new {@link java.util.HashSet} sized for the given expected element count. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Set> SET_FACTORY = N::newHashSet;
 
-    /** Shared factory function that creates a new {@link LinkedHashSet} with the given initial capacity. */
+    /** Shared factory function that creates a new {@link LinkedHashSet} sized for the given expected element count. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Set> LINKED_HASH_SET_FACTORY = N::newLinkedHashSet;
 
@@ -237,11 +237,11 @@ public final class IntFunctions {
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super PriorityQueue> PRIORITY_QUEUE_FACTORY = PriorityQueue::new;
 
-    /** Shared factory function that creates a new {@link java.util.HashMap} with the given initial capacity. */
+    /** Shared factory function that creates a new {@link java.util.HashMap} sized for the given expected element count. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Map> MAP_FACTORY = N::newHashMap;
 
-    /** Shared factory function that creates a new {@link java.util.LinkedHashMap} with the given initial capacity. */
+    /** Shared factory function that creates a new {@link java.util.LinkedHashMap} sized for the given expected element count. */
     @SuppressWarnings("rawtypes")
     private static final IntFunction<? super Map> LINKED_HASH_MAP_FACTORY = N::newLinkedHashMap;
 
@@ -1017,7 +1017,7 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Map<String, Integer>> mapCreator = IntFunctions.ofMap();
-     * Map<String, Integer> map = mapCreator.apply(100);   // returns HashMap with capacity 100
+     * Map<String, Integer> map = mapCreator.apply(100);   // returns HashMap sized for 100 entries
      * Map<String, Integer> empty = mapCreator.apply(0);   // returns HashMap with capacity 0
      * }</pre>
      *
@@ -1041,7 +1041,7 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Map<String, Integer>> mapCreator = IntFunctions.ofLinkedHashMap();
-     * Map<String, Integer> map = mapCreator.apply(100);   // returns LinkedHashMap with capacity 100
+     * Map<String, Integer> map = mapCreator.apply(100);   // returns LinkedHashMap sized for 100 entries
      * Map<String, Integer> empty = mapCreator.apply(0);   // returns LinkedHashMap with capacity 0
      * }</pre>
      *
@@ -1291,8 +1291,9 @@ public final class IntFunctions {
      * Returns a new stateful {@code IntFunction} that always returns the same {@link DisposableObjArray} instance.
      *
      * <p>The {@code DisposableObjArray} is created lazily on the first {@code apply} call and reused
-     * for all subsequent calls. Because the same array instance is reused, the returned function
-     * must not be saved, cached, or used in parallel streams.</p>
+     * for all subsequent calls. Use the function sequentially for one computation. Consume each
+     * returned array before the next call and do not retain it as an independent result or use
+     * the function in parallel streams.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1335,8 +1336,9 @@ public final class IntFunctions {
      * of the specified component type.
      *
      * <p>The {@code DisposableArray} is created lazily on the first {@code apply} call and reused
-     * for all subsequent calls. Because the same array instance is reused, the returned function
-     * must not be saved, cached, or used in parallel streams.</p>
+     * for all subsequent calls. Use the function sequentially for one computation. Consume each
+     * returned array before the next call and do not retain it as an independent result or use
+     * the function in parallel streams.</p>
      *
      * <p>The component type is validated when this factory is called. Primitive component types
      * are not supported by {@link DisposableArray}; use the corresponding primitive disposable
@@ -1424,7 +1426,7 @@ public final class IntFunctions {
      *   <li>{@code ImmutableSortedSet}, {@code ImmutableNavigableSet} (and subtypes) - a {@code TreeSet} creator, so the ordering they guarantee is not dropped</li>
      *   <li>{@code ImmutableSet} (and other subtypes) - a {@code HashSet} creator</li>
      * </ul>
-     * <p>The creator is therefore not always an instance of {@code targetType}: an {@code AbstractQueue} target
+     * <p>The created collection is therefore not always an instance of {@code targetType}: an {@code AbstractQueue} target
      * yields a {@code LinkedList}, which does not extend {@code AbstractQueue}, and each {@code Immutable*}
      * target listed above yields a plain mutable JDK collection, meant to be populated and then wrapped -
      * casting such a result to the requested {@code Immutable*} type throws a {@link ClassCastException}.
@@ -1462,12 +1464,12 @@ public final class IntFunctions {
     @SuppressWarnings("rawtypes")
     public static <T> IntFunction<? extends Collection<T>> ofCollection(final Class<? extends Collection> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
+        N.checkArgument(Collection.class.isAssignableFrom(targetType), "'targetType': {} is not a Collection class", targetType);
 
         final java.util.concurrent.atomic.AtomicReference<IntFunction> slot = collectionCreatorPool.get(targetType);
         IntFunction ret = slot.get();
 
         if (ret == null) {
-            N.checkArgument(Collection.class.isAssignableFrom(targetType), "'targetType': {} is not a Collection class", targetType);
 
             if (Collection.class.equals(targetType) || AbstractCollection.class.equals(targetType) || List.class.equals(targetType)
                     || AbstractList.class.equals(targetType) || ArrayList.class.equals(targetType)) {
@@ -1592,7 +1594,7 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<? extends Map<String, Integer>> func = IntFunctions.ofMap(HashMap.class);
-     * Map<String, Integer> map = func.apply(100);           // returns HashMap with capacity 100
+     * Map<String, Integer> map = func.apply(100);           // returns HashMap sized for 100 entries
      *
      * IntFunction<? extends Map<String, Integer>> treeFunc = IntFunctions.ofMap(TreeMap.class);
      * Map<String, Integer> tree = treeFunc.apply(50);   // returns TreeMap (capacity ignored)
@@ -1618,12 +1620,12 @@ public final class IntFunctions {
     @SuppressWarnings("rawtypes")
     public static <K, V> IntFunction<? extends Map<K, V>> ofMap(final Class<? extends Map> targetType) throws IllegalArgumentException {
         N.checkArgNotNull(targetType, cs.targetType);
+        N.checkArgument(Map.class.isAssignableFrom(targetType), "'targetType': {} is not a Map class", targetType);
 
         final java.util.concurrent.atomic.AtomicReference<IntFunction> slot = mapCreatorPool.get(targetType);
         IntFunction ret = slot.get();
 
         if (ret == null) {
-            N.checkArgument(Map.class.isAssignableFrom(targetType), "'targetType': {} is not a Map class", targetType);
 
             if (Map.class.equals(targetType) || AbstractMap.class.equals(targetType) || HashMap.class.equals(targetType) || EnumMap.class.equals(targetType)) {
                 ret = ofMap();
@@ -1738,8 +1740,8 @@ public final class IntFunctions {
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
-        N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
         N.checkArgNotNull(creator, cs.creator);
+        N.checkArgument(Collection.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Collection class", targetClass);
 
         if (N.isBuiltinClass(targetClass)) {
             throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));
@@ -1780,8 +1782,8 @@ public final class IntFunctions {
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
             throws IllegalArgumentException {
         N.checkArgNotNull(targetClass, cs.targetClass);
-        N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
         N.checkArgNotNull(creator, cs.creator);
+        N.checkArgument(Map.class.isAssignableFrom(targetClass), "'targetClass': {} is not a Map class", targetClass);
 
         if (N.isBuiltinClass(targetClass)) {
             throw new IllegalArgumentException("Can't register IntFunction with built-in class: " + ClassUtil.getCanonicalClassName(targetClass));

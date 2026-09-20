@@ -839,21 +839,17 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         throw new UnsupportedOperationException();
     }
 
+    // Overrides List.removeFirst(), whose default checks isEmpty() BEFORE delegating to remove(0) and so
+    // raises NoSuchElementException on an empty list instead of reporting that the list is read-only.
+    // java.util.List.of() blocks it unconditionally for the same reason; this matches that.
     /**
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException,
      * including on an empty list.
      *
      * @return never returns normally.
-     * @throws UnsupportedOperationException always.
+     * @throws UnsupportedOperationException always, because this list does not support mutation.
      * @deprecated ImmutableList does not support modification operations.
-     */
-    // Overrides List.removeFirst(), whose default checks isEmpty() BEFORE delegating to remove(0) and so
-    // raises NoSuchElementException on an empty list instead of reporting that the list is read-only.
-    // java.util.List.of() blocks it unconditionally for the same reason; this matches that.
-    /**
-     * {@inheritDoc}
-     * @throws UnsupportedOperationException always, because this object does not support this mutation
      */
     @Deprecated
     @Override
@@ -861,19 +857,15 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         throw new UnsupportedOperationException();
     }
 
+    // See removeFirst(): the inherited List default raises NoSuchElementException on an empty list.
     /**
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException,
      * including on an empty list.
      *
      * @return never returns normally.
-     * @throws UnsupportedOperationException always.
+     * @throws UnsupportedOperationException always, because this list does not support mutation.
      * @deprecated ImmutableList does not support modification operations.
-     */
-    // See removeFirst(): the inherited List default raises NoSuchElementException on an empty list.
-    /**
-     * {@inheritDoc}
-     * @throws UnsupportedOperationException always, because this object does not support this mutation
      */
     @Deprecated
     @Override
@@ -881,19 +873,15 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         throw new UnsupportedOperationException();
     }
 
+    // Overridden only so that a call is flagged at compile time like every other mutator on this class; the
+    // inherited List.addFirst(E) default already fails at run time by delegating to add(0, e).
     /**
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
      * @param e ignored; this list cannot be modified.
-     * @throws UnsupportedOperationException always.
+     * @throws UnsupportedOperationException always, because this list does not support mutation.
      * @deprecated ImmutableList does not support modification operations.
-     */
-    // Overridden only so that a call is flagged at compile time like every other mutator on this class; the
-    // inherited List.addFirst(E) default already fails at run time by delegating to add(0, e).
-    /**
-     * {@inheritDoc}
-     * @throws UnsupportedOperationException always, because this object does not support this mutation
      */
     @Deprecated
     @Override
@@ -901,19 +889,15 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
         throw new UnsupportedOperationException();
     }
 
+    // See addFirst(E): the inherited List.addLast(E) default delegates to add(e) and so is already blocked
+    // at run time; this override adds the missing compile-time deprecation warning.
     /**
      * This operation is not supported by ImmutableList.
      * Attempting to call this method will always throw an UnsupportedOperationException.
      *
      * @param e ignored; this list cannot be modified.
-     * @throws UnsupportedOperationException always.
+     * @throws UnsupportedOperationException always, because this list does not support mutation.
      * @deprecated ImmutableList does not support modification operations.
-     */
-    // See addFirst(E): the inherited List.addLast(E) default delegates to add(e) and so is already blocked
-    // at run time; this override adds the missing compile-time deprecation warning.
-    /**
-     * {@inheritDoc}
-     * @throws UnsupportedOperationException always, because this object does not support this mutation
      */
     @Deprecated
     @Override

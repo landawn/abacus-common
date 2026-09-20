@@ -194,11 +194,13 @@ public abstract class RateLimiter {
      *     before reaching its stable (maximum) rate, must be non-negative
      * @param unit the time unit of the warmupPeriod argument, must not be null
      * @return a newly created {@code RateLimiter} with the specified rate and warmup period
-     * @throws IllegalArgumentException if {@code unit} is {@code null}, {@code permitsPerSecond} is negative,
-     *         zero, or NaN, or {@code warmupPeriod} is negative.
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN, if
+     *         {@code warmupPeriod} is negative, or if {@code unit} is {@code null}.
      */
     public static RateLimiter create(final double permitsPerSecond, final long warmupPeriod, final TimeUnit unit) throws IllegalArgumentException {
+        N.checkArgument(permitsPerSecond > 0.0, "rate must be positive: %s", permitsPerSecond);
         N.checkArgument(warmupPeriod >= 0, "warmupPeriod must not be negative: %s", warmupPeriod);
+        N.checkArgNotNull(unit, cs.unit);
         return create(permitsPerSecond, warmupPeriod, unit, 3.0, SleepingStopwatch.createFromSystemTimer());
     }
 
@@ -257,7 +259,7 @@ public abstract class RateLimiter {
      * @throws IllegalArgumentException if {@code stopwatch} is {@code null}
      */
     RateLimiter(final SleepingStopwatch stopwatch) throws IllegalArgumentException {
-        this.stopwatch = N.checkArgNotNull(stopwatch);
+        this.stopwatch = N.checkArgNotNull(stopwatch, cs.stopwatch);
     }
 
     /**
@@ -387,8 +389,8 @@ public abstract class RateLimiter {
 
     /**
      * Acquires a single permit from this {@code RateLimiter}, blocking until the request can be
-     * granted. This method blocks indefinitely until a permit is available and returns the amount
-     * of time spent waiting.
+     * granted. Waiting is uninterruptible. The returned duration is the requested sleep time,
+     * which can differ from actual elapsed time because of scheduling and timer overhead.
      *
      * <p>This method is equivalent to {@code acquire(1)}.
      *
@@ -405,7 +407,7 @@ public abstract class RateLimiter {
      * fastLimiter.acquire();                           // returns 0.0 (no wait needed at high rate)
      * }</pre>
      *
-     * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
+     * @return the requested sleep duration to enforce the rate, in seconds; 0.0 if no sleep was requested
      * @see #acquire(int)
      * @see #tryAcquire()
      * @see #tryAcquire(int)
@@ -418,8 +420,8 @@ public abstract class RateLimiter {
 
     /**
      * Acquires the given number of permits from this {@code RateLimiter}, blocking until the request
-     * can be granted. This method blocks indefinitely until the requested permits are available and
-     * returns the amount of time spent waiting.
+     * can be granted. Waiting is uninterruptible. The returned duration is the requested sleep time,
+     * which can differ from actual elapsed time because of scheduling and timer overhead.
      *
      * <p>Note that the number of permits requested affects the throttling of the <i>next</i> request,
      * not the current one. If this method is called on an idle rate limiter, it will return immediately
@@ -437,7 +439,7 @@ public abstract class RateLimiter {
      * }</pre>
      *
      * @param permits the number of permits to acquire, must be positive
-     * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
+     * @return the requested sleep duration to enforce the rate, in seconds; 0.0 if no sleep was requested
      * @throws IllegalArgumentException if the requested number of permits is negative or zero.
      * @see #acquire()
      * @see #tryAcquire()
@@ -467,9 +469,10 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Acquires a permit from this {@code RateLimiter} if it can be obtained without exceeding the
-     * specified {@code timeout}, or returns {@code false} immediately (without waiting) if the permit
-     * had not been granted before the timeout expired.
+     * Acquires a permit from this {@code RateLimiter} if its required reservation delay is within
+     * the specified {@code timeout}, or returns {@code false} immediately (without waiting) if the
+     * delay exceeds the timeout. Actual elapsed time may exceed the timeout because of scheduling
+     * and timer overhead.
      *
      * <p>This method is equivalent to {@code tryAcquire(1, timeout, unit)}.
      *
@@ -477,9 +480,9 @@ public abstract class RateLimiter {
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(2.0);
      * if (limiter.tryAcquire(100, TimeUnit.MILLISECONDS)) {
-     *     // Permit acquired within 100ms
+     *     // Permit acquired after a requested wait of at most 100ms
      * } else {
-     *     // Timeout expired
+     *     // Required delay exceeds the timeout; no waiting occurred
      * }
      * limiter.tryAcquire(0, TimeUnit.MILLISECONDS);    // returns immediately (no wait)
      *
@@ -487,9 +490,9 @@ public abstract class RateLimiter {
      * limiter.tryAcquire(-1, TimeUnit.MILLISECONDS);    // returns immediately
      * }</pre>
      *
-     * @param timeout the maximum time to wait for the permit. Negative values are treated as zero.
+     * @param timeout the maximum reservation delay to accept for the permit. Negative values are treated as zero.
      * @param unit the time unit of the timeout argument, must not be null
-     * @return {@code true} if the permit was acquired within the timeout, {@code false} otherwise
+     * @return {@code true} if the permit was acquired, {@code false} if its reservation delay exceeded the timeout
      * @throws IllegalArgumentException if {@code unit} is {@code null}
      * @see #tryAcquire()
      * @see #tryAcquire(int)
@@ -571,22 +574,23 @@ public abstract class RateLimiter {
     }
 
     /**
-     * Acquires the given number of permits from this {@code RateLimiter} if they can be obtained
-     * without exceeding the specified {@code timeout}, or returns {@code false} immediately (without
-     * waiting) if the permits had not been granted before the timeout expired.
+     * Acquires the given number of permits from this {@code RateLimiter} if their required reservation
+     * delay is within the specified {@code timeout}, or returns {@code false} immediately (without
+     * waiting) if that delay exceeds the timeout.
      *
-     * <p>This method will block for up to the specified timeout duration waiting for permits to become
-     * available. If permits are available within the timeout, they are acquired and the method returns
-     * {@code true}. Otherwise, it returns {@code false} without acquiring any permits.
+     * <p>If the calculated delay fits within the timeout, the permits are reserved and the method
+     * sleeps uninterruptibly before returning {@code true}. Scheduling and timer overhead can make
+     * actual elapsed time exceed the timeout. Otherwise it returns {@code false} without sleeping
+     * or acquiring any permits.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * RateLimiter limiter = RateLimiter.create(2.0);
      * if (limiter.tryAcquire(5, 2, TimeUnit.SECONDS)) {
-     *     // Successfully acquired 5 permits within 2 seconds
+     *     // Acquired 5 permits after a requested wait of at most 2 seconds
      *     processBatch();
      * } else {
-     *     // Could not acquire permits within timeout
+     *     // Required reservation delay exceeds the timeout; no waiting occurred
      *     handleTimeout();
      * }
      * limiter.tryAcquire(1, 0, TimeUnit.MILLISECONDS);      // Try immediately (no wait)
@@ -596,7 +600,7 @@ public abstract class RateLimiter {
      * }</pre>
      *
      * @param permits the number of permits to acquire, must be positive
-     * @param timeout the maximum time to wait for the permits. Negative values are treated as zero.
+     * @param timeout the maximum reservation delay to accept for the permits. Negative values are treated as zero.
      * @param unit the time unit of the timeout argument, must not be null
      * @return {@code true} if the permits were acquired, {@code false} otherwise
      * @throws IllegalArgumentException if {@code unit} is {@code null}, or if {@code permits} is zero or negative
@@ -684,8 +688,9 @@ public abstract class RateLimiter {
      * <li>The returned timestamp represents when these permits can actually be used. For an idle
      *     rate limiter, this is typically {@code nowMicros} or earlier, meaning the permits can
      *     be used immediately.</li>
-     * <li>For a saturated rate limiter, this returns a future timestamp. The current request does
-     *     not wait; instead, <i>future</i> requests will be delayed to account for these permits.</li>
+     * <li>For a saturated rate limiter, this returns a future timestamp without sleeping. The caller
+     *     must wait until that timestamp to repay earlier reservations; the cost of the permits
+     *     reserved here delays subsequent requests.</li>
      * <li>Implementations must update state such that subsequent calls to {@link #queryEarliestAvailable(long)}
      *     and {@link #reserveEarliestAvailable(int, long)} reflect the consumption of these permits.</li>
      * <li>The number of permits requested affects throttling of <i>subsequent</i> requests, not the

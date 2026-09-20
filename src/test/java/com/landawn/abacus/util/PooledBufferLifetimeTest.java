@@ -13,8 +13,10 @@ import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class PooledBufferLifetimeTest {
+public class PooledBufferLifetimeTest extends TestBase {
     private static Object field(final Class<?> owner, final String name, final Object object) throws Exception {
         final Field field = owner.getDeclaredField(name);
         field.setAccessible(true);

@@ -24,7 +24,7 @@ package com.landawn.abacus.util;
  *
  * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
  *
- * <p>ASCII utilities also exist in other classes of this package:</p>
+ * <p>Related ASCII utilities:</p>
  * <ul>
  * <li>{@link Charsets#US_ASCII} specifies the {@code Charset} of ASCII characters.</li>
  * <li>Google Guava's {@code CharMatcher.ascii()} matches ASCII characters and provides text

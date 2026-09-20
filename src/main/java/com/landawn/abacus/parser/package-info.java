@@ -25,8 +25,8 @@
  * <h2>Contracts</h2>
  * <ul>
  *   <li>{@link Parser} &mdash; thread-safe serialize / deserialize to String, File, stream, and reader/writer.
- *       Implementations honor {@link com.landawn.abacus.annotation.JsonXmlField} and
- *       {@link com.landawn.abacus.annotation.JsonXmlConfig}.</li>
+ *       JSON and the standard/Abacus XML implementations honor {@link com.landawn.abacus.annotation.JsonXmlField} and
+ *       {@link com.landawn.abacus.annotation.JsonXmlConfig}; other formats use their own mapping rules.</li>
  *   <li>{@link JsonParser} &mdash; JSON with {@code parse} (String convenience, including unbracketed
  *       array-like input), {@code deserialize} (String/File/stream/reader), {@code stream} for large
  *       arrays, and {@code parseInto} overloads that populate a caller-supplied array, collection, or map.</li>

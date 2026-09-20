@@ -403,8 +403,8 @@ public class IntegerTypeTest extends TestBase {
     // T4-01 / T4-02 end to end: JSON hands quoted scalars to valueOf(char[]), XML to valueOf(String)
     @Test
     public void reviewFixes20260906_jsonAndXmlAgree() {
-        IntegralBean fromJson = ParserFactory.createJsonParser().deserialize("{\"i\": \"0x1F\", \"l\": \"0x7FFFFFFFFFFFFFFF\", \"by\": \"#7F\", \"sh\": \"-0x8000\"}",
-                IntegralBean.class);
+        IntegralBean fromJson = ParserFactory.createJsonParser()
+                .deserialize("{\"i\": \"0x1F\", \"l\": \"0x7FFFFFFFFFFFFFFF\", \"by\": \"#7F\", \"sh\": \"-0x8000\"}", IntegralBean.class);
         IntegralBean fromXml = ParserFactory.createXmlParser()
                 .deserialize("<integralBean><i>0x1F</i><l>0x7FFFFFFFFFFFFFFF</l><by>#7F</by><sh>-0x8000</sh></integralBean>", IntegralBean.class);
 
@@ -418,7 +418,8 @@ public class IntegerTypeTest extends TestBase {
         assertEquals(Short.MIN_VALUE, fromXml.getSh());
 
         assertThrows(ArithmeticException.class, () -> ParserFactory.createJsonParser().deserialize("{\"by\": \"128\"}", IntegralBean.class));
-        assertThrows(ArithmeticException.class, () -> ParserFactory.createXmlParser().deserialize("<integralBean><by>128</by></integralBean>", IntegralBean.class));
+        assertThrows(ArithmeticException.class,
+                () -> ParserFactory.createXmlParser().deserialize("<integralBean><by>128</by></integralBean>", IntegralBean.class));
         assertThrows(ArithmeticException.class, () -> ParserFactory.createJsonParser().deserialize("{\"sh\": \"40000\"}", IntegralBean.class));
         assertThrows(NumberFormatException.class, () -> ParserFactory.createJsonParser().deserialize("{\"i\": \"0x1G\"}", IntegralBean.class));
     }

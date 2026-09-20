@@ -695,8 +695,8 @@ public class DatesZoneDatabaseTest extends TestBase {
 
         assertEquals(daylightPass + shift, Dates.parseToJUDate(text, custom, timeZone).getTime());
         assertEquals(text, Dates.format(new java.util.Date(daylightPass + shift), custom, timeZone));
-        assertEquals(daylightPass + shift, Dates.parseToJUDate(Dates.format(new java.util.Date(daylightPass + shift), custom, timeZone), custom, timeZone)
-                .getTime());
+        assertEquals(daylightPass + shift,
+                Dates.parseToJUDate(Dates.format(new java.util.Date(daylightPass + shift), custom, timeZone), custom, timeZone).getTime());
 
         final String predefined = Dates.format(new java.util.Date(daylightPass), Dates.LOCAL_TIMESTAMP_FORMAT, timeZone);
 

@@ -17,36 +17,49 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.eventbus.EventBus;
 import com.landawn.abacus.eventbus.Subscribe;
 
 @Tag("unit")
-public class OpenUtilContractsTest {
+public class OpenUtilContractsTest extends TestBase {
     @Test
     void fnnAdaptersPreserveFailuresAndMutableGroupingContracts() throws Exception {
         final IllegalStateException conversion = new IllegalStateException("conversion");
-        final Object input = new Object() { @Override public String toString() { throw conversion; } };
+        final Object input = new Object() {
+            @Override
+            public String toString() {
+                throw conversion;
+            }
+        };
         assertSame(conversion, assertThrows(IllegalStateException.class, () -> Fnn.toStr().apply(input)));
         assertEquals("null", Fnn.toStr().apply(null));
-        final var closer = Fnn.<AutoCloseable, Exception>closeQuietly();
+        final var closer = Fnn.<AutoCloseable, Exception> closeQuietly();
         closer.accept(null);
-        closer.accept(() -> { throw new IOException("suppressed"); });
+        closer.accept(() -> {
+            throw new IOException("suppressed");
+        });
         final AssertionError error = new AssertionError("close");
-        assertSame(error, assertThrows(AssertionError.class, () -> closer.accept(() -> { throw error; })));
+        assertSame(error, assertThrows(AssertionError.class, () -> closer.accept(() -> {
+            throw error;
+        })));
         final boolean interrupted = Thread.interrupted();
         try {
-            closer.accept(() -> { throw new InterruptedException("restore"); });
+            closer.accept(() -> {
+                throw new InterruptedException("restore");
+            });
             assertTrue(Thread.currentThread().isInterrupted());
         } finally {
             Thread.interrupted();
-            if (interrupted) Thread.currentThread().interrupt();
+            if (interrupted)
+                Thread.currentThread().interrupt();
         }
-        final Pair<String, String> pair = Fnn.<String, String, Exception>pair().apply(null, "");
+        final Pair<String, String> pair = Fnn.<String, String, Exception> pair().apply(null, "");
         pair.setLeft("甲🙂");
         pair.setRight(null);
         assertEquals("甲🙂", pair.getLeft());
         assertNull(pair.getRight());
-        final Triple<String, String, String> triple = Fnn.<String, String, String, Exception>triple().apply(null, "", "甲🙂");
+        final Triple<String, String, String> triple = Fnn.<String, String, String, Exception> triple().apply(null, "", "甲🙂");
         triple.setLeft("");
         triple.setMiddle("乙🙂");
         triple.setRight(null);
@@ -58,8 +71,12 @@ public class OpenUtilContractsTest {
     public static class Listener {
         Thread thread;
         String value;
+
         @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
-        public void receive(String event) { thread = Thread.currentThread(); value = event; }
+        public void receive(String event) {
+            thread = Thread.currentThread();
+            value = event;
+        }
     }
 
     @Test
@@ -86,8 +103,13 @@ public class OpenUtilContractsTest {
             final CountDownLatch finished = new CountDownLatch(1);
             wrapper.getExecutor().execute(() -> {
                 started.countDown();
-                try { release.await(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-                finally { finished.countDown(); }
+                try {
+                    release.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    finished.countDown();
+                }
             });
             try {
                 assertTrue(started.await(5, TimeUnit.SECONDS));
@@ -108,20 +130,34 @@ public class OpenUtilContractsTest {
     void allComposeOverloadsExposeZipFailuresThroughExecutionException() throws Exception {
         final Future<Integer> input = CompletableFuture.completedFuture(1);
         for (final Exception cause : List.of(new IOException("读取"), new IllegalStateException("计算"))) {
-            final List<Future<?>> composed = List.of(
-                    Futures.compose(input, input, (a, b) -> { throw cause; }),
-                    Futures.compose(input, input, (a, b) -> { throw cause; }, tuple -> { throw cause; }),
-                    Futures.compose(input, input, input, (a, b, c) -> { throw cause; }),
-                    Futures.compose(input, input, input, (a, b, c) -> { throw cause; }, tuple -> { throw cause; }),
-                    Futures.compose(List.of(input), values -> { throw cause; }),
-                    Futures.compose(List.of(input), values -> { throw cause; }, tuple -> { throw cause; }));
+            final List<Future<?>> composed = List.of(Futures.compose(input, input, (a, b) -> {
+                throw cause;
+            }), Futures.compose(input, input, (a, b) -> {
+                throw cause;
+            }, tuple -> {
+                throw cause;
+            }), Futures.compose(input, input, input, (a, b, c) -> {
+                throw cause;
+            }), Futures.compose(input, input, input, (a, b, c) -> {
+                throw cause;
+            }, tuple -> {
+                throw cause;
+            }), Futures.compose(List.of(input), values -> {
+                throw cause;
+            }), Futures.compose(List.of(input), values -> {
+                throw cause;
+            }, tuple -> {
+                throw cause;
+            }));
             for (final Future<?> future : composed) {
                 assertSame(cause, assertThrows(ExecutionException.class, future::get).getCause());
                 assertSame(cause, assertThrows(ExecutionException.class, () -> future.get(1, TimeUnit.SECONDS)).getCause());
             }
         }
         final java.util.concurrent.CancellationException cancellation = new java.util.concurrent.CancellationException("cancelled");
-        final Future<?> cancelled = Futures.compose(input, input, (a, b) -> { throw cancellation; });
+        final Future<?> cancelled = Futures.compose(input, input, (a, b) -> {
+            throw cancellation;
+        });
         assertSame(cancellation, assertThrows(java.util.concurrent.CancellationException.class, cancelled::get));
     }
 
@@ -134,17 +170,22 @@ public class OpenUtilContractsTest {
                 System.setProperty("java.specification.version", value);
                 final String name = JavaVersion.class.getName();
                 final ClassLoader loader = new ClassLoader(JavaVersion.class.getClassLoader()) {
-                    @Override protected Class<?> loadClass(String requested, boolean resolve) throws ClassNotFoundException {
-                        if (!requested.equals(name)) return super.loadClass(requested, resolve);
+                    @Override
+                    protected Class<?> loadClass(String requested, boolean resolve) throws ClassNotFoundException {
+                        if (!requested.equals(name))
+                            return super.loadClass(requested, resolve);
                         synchronized (getClassLoadingLock(requested)) {
                             Class<?> result = findLoadedClass(requested);
                             if (result == null) {
                                 try (var input = getParent().getResourceAsStream(requested.replace('.', '/') + ".class")) {
                                     final byte[] bytes = input.readAllBytes();
                                     result = defineClass(requested, bytes, 0, bytes.length);
-                                } catch (IOException e) { throw new ClassNotFoundException(requested, e); }
+                                } catch (IOException e) {
+                                    throw new ClassNotFoundException(requested, e);
+                                }
                             }
-                            if (resolve) resolveClass(result);
+                            if (resolve)
+                                resolveClass(result);
                             return result;
                         }
                     }
@@ -156,8 +197,10 @@ public class OpenUtilContractsTest {
                 assertEquals(value.equals("25") ? 25f : 99f, max.invoke(null));
             }
         } finally {
-            if (previous == null) System.clearProperty("java.specification.version");
-            else System.setProperty("java.specification.version", previous);
+            if (previous == null)
+                System.clearProperty("java.specification.version");
+            else
+                System.setProperty("java.specification.version", previous);
         }
     }
 }

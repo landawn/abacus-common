@@ -195,7 +195,7 @@ interface JsonReader {
 
     /**
      * Gets the text content from the last read token.
-     * This method should only be called when {@link #hasText()} returns {@code true}.
+     * An empty quoted string has empty text even though {@link #hasText()} returns {@code false}.
      * The returned text represents the value of the last parsed token, such as
      * a string value, number, boolean, or {@code null}.
      *
@@ -222,8 +222,8 @@ interface JsonReader {
      * Type<Integer> intType = Type.of(Integer.class);
      * Integer value = reader.readValue(intType);
      *
-     * Type<Person> personType = Type.of(Person.class);
-     * Person person = reader.readValue(personType);
+     * // Reading the same scalar token as text preserves its spelling.
+     * String text = reader.readValue(Type.of(String.class));
      * }</pre>
      *
      * @param <T> the target type

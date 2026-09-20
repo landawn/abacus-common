@@ -509,7 +509,8 @@ public class ObjectArrayTypeTest extends TestBase {
         // serializable element types keep the element-by-element path
         assertEquals("[\"a\", null]", serializeToJsonWriter(stringArrayType, new String[] { "a", null }, jsc));
         assertEquals("[1, null]", serializeToJsonWriter(intArrayType, new Integer[] { 1, null }, jsc));
-        assertEquals("[\"a\", \"\"]", serializeToJsonWriter(stringArrayType, new String[] { "a", null }, JsonSerConfig.create().setWriteNullStringAsEmpty(true)));
+        assertEquals("[\"a\", \"\"]",
+                serializeToJsonWriter(stringArrayType, new String[] { "a", null }, JsonSerConfig.create().setWriteNullStringAsEmpty(true)));
     }
 
     @Test
@@ -549,8 +550,8 @@ public class ObjectArrayTypeTest extends TestBase {
 
         final String hetJson = "[1, \"a\", null, 2.5, true, {\"name\": \"z\", \"age\": 3}]";
         final String json = jp.serialize(h);
-        assertEquals("{\"optObj\": " + hetJson + ", \"optBean\": [{\"name\": \"q\", \"age\": 1}, null], \"tup\": [" + hetJson + ", \"x\"], \"pair\": [" + hetJson
-                + ", \"x\"], \"plain\": " + hetJson + "}", json);
+        assertEquals("{\"optObj\": " + hetJson + ", \"optBean\": [{\"name\": \"q\", \"age\": 1}, null], \"tup\": [" + hetJson + ", \"x\"], \"pair\": ["
+                + hetJson + ", \"x\"], \"plain\": " + hetJson + "}", json);
 
         final ReviewHolder back = jp.deserialize(json, ReviewHolder.class);
         assertHeterogeneousElements(back.getOptObj().get(), "optObj");
@@ -587,7 +588,9 @@ public class ObjectArrayTypeTest extends TestBase {
 
         final String xml = xp.serialize(h);
         // escaped JSON text (a string element is quoted, so ", < & and , survive the round trip); the bean-array text is unchanged
-        assertTrue(xml.contains("<optObj>[1, &quot;a\\&quot;b&quot;, null, 2.5, true, &quot;x&lt;y&amp;z&quot;, &quot;p,q&quot;, {&quot;name&quot;: &quot;z&quot;, &quot;age&quot;: 3}]</optObj>"), xml);
+        assertTrue(xml.contains(
+                "<optObj>[1, &quot;a\\&quot;b&quot;, null, 2.5, true, &quot;x&lt;y&amp;z&quot;, &quot;p,q&quot;, {&quot;name&quot;: &quot;z&quot;, &quot;age&quot;: 3}]</optObj>"),
+                xml);
         assertTrue(xml.contains("<optBean>[{&quot;name&quot;: &quot;q&quot;, &quot;age&quot;: 1}, null]</optBean>"), xml);
 
         final ReviewHolder back = xp.deserialize(xml, ReviewHolder.class);
@@ -612,8 +615,8 @@ public class ObjectArrayTypeTest extends TestBase {
         // Before the fixes an ArrayList[] / HashMap[] came back (ClassCastException at the caller) or ArrayStoreException.
         // The JSON reader now hands a scalar slot the raw text of a nested value, so the result is a real String[]
         // holding that text (the parser-side collectionToArray guard is pinned by the XML test below).
-        final String[][] cases = { { "[[1]]", "[1]" }, { "[{}]", "{}" }, { "[{\"a\": 1}]", "{\"a\": 1}" }, { "[a, [1]]", "a", "[1]" }, { "[[1], a]", "[1]", "a" },
-                { "[null, [1]]", null, "[1]" }, { "[[]]", "[]" } };
+        final String[][] cases = { { "[[1]]", "[1]" }, { "[{}]", "{}" }, { "[{\"a\": 1}]", "{\"a\": 1}" }, { "[a, [1]]", "a", "[1]" },
+                { "[[1], a]", "[1]", "a" }, { "[null, [1]]", null, "[1]" }, { "[[]]", "[]" } };
 
         for (final String[] c : cases) {
             final String[] expected = Arrays.copyOfRange(c, 1, c.length);
@@ -702,7 +705,6 @@ public class ObjectArrayTypeTest extends TestBase {
         assertTrue(pretty.isPrettyFormat());
 
         final Type<ReviewBean[]> beanArrayType = TypeFactory.getType(ReviewBean[].class);
-        assertEquals("[{\"name\": \"q\", \"age\": 1}, null]",
-                serializeToJsonWriter(beanArrayType, new ReviewBean[] { new ReviewBean("q", 1), null }, pretty));
+        assertEquals("[{\"name\": \"q\", \"age\": 1}, null]", serializeToJsonWriter(beanArrayType, new ReviewBean[] { new ReviewBean("q", 1), null }, pretty));
     }
 }

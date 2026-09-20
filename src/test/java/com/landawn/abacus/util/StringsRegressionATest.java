@@ -239,6 +239,7 @@ public class StringsRegressionATest extends TestBase {
         assertEquals(grin, Strings.toCamelCase(grin));
         assertEquals(grin, Strings.toUpperCamelCase(grin));
     }
+
     /**
      * The class-level whitespace-predicate index lists {@code containsWhitespace} in the code-unit half and the
      * case-conversion family, {@code capitalizeWords}/{@code capitalizeWordsFully} and {@code mapWords} in the

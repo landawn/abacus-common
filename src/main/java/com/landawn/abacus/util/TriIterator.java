@@ -101,14 +101,18 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public Object next() {
+        public Object next() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
         /**
          * @throws IllegalArgumentException if {@code action} is {@code null}.
-         * @throws NoSuchElementException if {@code action} is non-null; this iterator is empty
+         * @throws NoSuchElementException if {@code action} is non-null, because this iterator is empty
          */
         @Override
         protected void next(final Throwables.TriConsumer action) throws IllegalArgumentException, NoSuchElementException {
@@ -275,8 +279,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 return hasNextFlag;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public Triple<A, B, C> next() {
+            public Triple<A, B, C> next() throws NoSuchElementException {
                 if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -327,6 +335,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             /**
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming a triple
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -363,8 +372,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                         return hasNextFlag;
                     }
 
+                    /**
+                     * {@inheritDoc}
+                     * @throws NoSuchElementException if this iterator has no remaining element
+                     */
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!(hasNextFlag || hasNext())) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -437,8 +450,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public Triple<A, B, C> next() {
+            public Triple<A, B, C> next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -493,6 +510,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             /**
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming a triple
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -521,8 +539,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                         return cursor < toIndex;
                     }
 
+                    /**
+                     * {@inheritDoc}
+                     * @throws NoSuchElementException if this iterator has no remaining element
+                     */
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -562,7 +584,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param a the first array, may be {@code null}
      * @param b the second array, may be {@code null}
      * @param c the third array, may be {@code null}
-     * @return a TriIterator that iterates over the elements of the three arrays in parallel
+     * @return a TriIterator that combines elements at corresponding positions of the three arrays
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final A[] a, final B[] b, final C[] c) {
         return zip(Array.asList(a), Array.asList(b), Array.asList(c));
@@ -600,7 +622,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param valueForNoneA the default value for missing elements in the first array
      * @param valueForNoneB the default value for missing elements in the second array
      * @param valueForNoneC the default value for missing elements in the third array
-     * @return a TriIterator that iterates over the elements of the three arrays in parallel, using default values for missing elements
+     * @return a TriIterator that combines elements at corresponding positions of the three arrays, using default values for missing elements
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final A[] a, final B[] b, final C[] c, final A valueForNoneA, final B valueForNoneB,
             final C valueForNoneC) {
@@ -632,7 +654,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param a the first iterable, may be {@code null}
      * @param b the second iterable, may be {@code null}
      * @param c the third iterable, may be {@code null}
-     * @return a TriIterator that iterates over the elements of the three iterables in parallel
+     * @return a TriIterator that combines elements at corresponding positions of the three iterables
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c) {
         return zip(a == null ? null : a.iterator(), b == null ? null : b.iterator(), c == null ? null : c.iterator());
@@ -669,7 +691,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param valueForNoneA the default value for missing elements in the first iterable
      * @param valueForNoneB the default value for missing elements in the second iterable
      * @param valueForNoneC the default value for missing elements in the third iterable
-     * @return a TriIterator that iterates over the elements of the three iterables in parallel, using default values for missing elements
+     * @return a TriIterator that combines elements at corresponding positions of the three iterables, using default values for missing elements
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterable<A> a, final Iterable<B> b, final Iterable<C> c, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC) {
@@ -704,7 +726,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param iterA the first iterator, may be {@code null}
      * @param iterB the second iterator, may be {@code null}
      * @param iterC the third iterator, may be {@code null}
-     * @return a TriIterator that iterates over the elements of the three iterators in parallel
+     * @return a TriIterator that combines elements at corresponding positions of the three iterators
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterator<A> iterA, final Iterator<B> iterB, final Iterator<C> iterC) {
         if (iterA == null || iterB == null || iterC == null) {
@@ -728,8 +750,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 return hasNextFlag;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public Triple<A, B, C> next() {
+            public Triple<A, B, C> next() throws NoSuchElementException {
                 if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -774,6 +800,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             /**
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming a triple
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -808,8 +835,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                         return hasNextFlag;
                     }
 
+                    /**
+                     * {@inheritDoc}
+                     * @throws NoSuchElementException if this iterator has no remaining element
+                     */
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!(hasNextFlag || hasNext())) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -859,7 +890,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param valueForNoneA the default value for missing elements in the first iterator
      * @param valueForNoneB the default value for missing elements in the second iterator
      * @param valueForNoneC the default value for missing elements in the third iterator
-     * @return a TriIterator that iterates over the elements of the three iterators in parallel, using default values for missing elements
+     * @return a TriIterator that combines elements at corresponding positions of the three iterators, using default values for missing elements
      */
     public static <A, B, C> TriIterator<A, B, C> zip(final Iterator<A> iterA, final Iterator<B> iterB, final Iterator<C> iterC, final A valueForNoneA,
             final B valueForNoneB, final C valueForNoneC) {
@@ -884,8 +915,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 return hasNextFlag;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public Triple<A, B, C> next() {
+            public Triple<A, B, C> next() throws NoSuchElementException {
                 if (!(hasNextFlag || hasNext())) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -933,6 +968,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             /**
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming a triple
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -968,8 +1004,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                         return hasNextFlag;
                     }
 
+                    /**
+                     * {@inheritDoc}
+                     * @throws NoSuchElementException if this iterator has no remaining element
+                     */
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (!(hasNextFlag || hasNext())) {
                             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1306,8 +1346,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public Triple<A, B, C> next() {
+            public Triple<A, B, C> next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1348,6 +1392,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             /**
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming a triple
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -1424,8 +1469,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public Triple<A, B, C> next() {
+            public Triple<A, B, C> next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1474,6 +1523,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             /**
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming a triple
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -1549,8 +1599,12 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
                 return hasNextFlag;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public Triple<A, B, C> next() {
+            public Triple<A, B, C> next() throws NoSuchElementException {
                 if (!hasNextFlag && !hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1595,6 +1649,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
 
             /**
              * @throws IllegalArgumentException if {@code action} is {@code null}.
+             * @throws E if {@code action} throws while consuming a triple
              */
             @Override
             public <E extends Exception> void foreachRemaining(final Throwables.TriConsumer<? super A, ? super B, ? super C, E> action)
@@ -1764,7 +1819,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param supplier a supplier invoked three times to create the left, middle, and right lists; each call must return a {@code non-null} {@code List}
      * @return a {@code Triple} whose left, middle, and right lists contain all first, second, and third components, respectively
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call to it returns {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, if any of the three calls to it returns
+     *         {@code null}, or if any two of the three returned lists are the same instance.
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1812,8 +1868,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param middleSupplier a supplier that provides the collection for second components; must return a {@code non-null} collection
      * @param rightSupplier a supplier that provides the collection for third components; must return a {@code non-null} collection
      * @return a {@code Triple} whose left, middle, and right collections contain all first, second, and third components, respectively
-     * @throws IllegalArgumentException if any supplier returns {@code null}, or if any of {@code leftSupplier},
-     *         {@code middleSupplier}, {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code leftSupplier}, {@code middleSupplier}, {@code rightSupplier} is
+     *         {@code null}, if any of them returns {@code null}, or if any two of the three returned collections are the
+     *         same instance.
      * @see #unzipToLists(Supplier)
      * @see #unzipToSets(Supplier)
      */
@@ -1871,7 +1928,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param supplier a supplier invoked three times to create the left, middle, and right sets; each call must return a {@code non-null} {@code Set}
      * @return a {@code Triple} whose left, middle, and right sets contain the distinct first, second, and third components, respectively
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or any call to it returns {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, if any of the three calls to it returns
+     *         {@code null}, or if any two of the three returned sets are the same instance.
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -1938,7 +1996,7 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      */
     @Deprecated
     public <T> T[] toArray(final T[] a) throws NullPointerException, ArrayStoreException {
-        N.requireNonNull(a, "a");
+        N.requireNonNull(a, cs.a);
         return toList().toArray(a);
     }
 

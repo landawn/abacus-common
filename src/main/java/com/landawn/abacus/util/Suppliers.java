@@ -307,8 +307,9 @@ public final class Suppliers {
      *
      * @param targetType the class to test, must not be {@code null}
      * @return {@code true} if {@code targetType} has a usable no-argument construction path, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      */
-    static boolean canInstantiateWithoutProbe(final Class<?> targetType) {
+    static boolean canInstantiateWithoutProbe(final Class<?> targetType) throws IllegalArgumentException {
         return ClassUtil.getDeclaredConstructor(targetType) != null
                 || (!Modifier.isStatic(targetType.getModifiers()) && ClassUtil.isAnonymousOrMemberClass(targetType));
     }

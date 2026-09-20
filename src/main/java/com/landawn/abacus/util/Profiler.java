@@ -148,7 +148,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <ul>
  *   <li>Use multiple rounds (3-5) to account for JVM warmup and obtain stable measurements</li>
  *   <li>Implement internal loops for high-iteration testing to minimize memory overhead</li>
- *   <li>Discard a first, unmeasured {@code run(..)} - or rely on multi-round mode, whose earlier rounds are
+ *   <li>Discard the results of an initial {@code run(..)} - or use multi-round mode, whose earlier rounds are
  *       only printed and whose last, warmest round is the one returned - to reduce JIT effects</li>
  *   <li>Use appropriate thread counts based on system capabilities and test objectives</li>
  *   <li>Monitor memory usage during profiling to prevent OutOfMemoryError</li>
@@ -237,8 +237,8 @@ public final class Profiler {
      * </ol>
      *
      * <p>This method is ideal for quick performance benchmarks where you need to assess how code
-     * performs under concurrent load. The multi-round approach helps eliminate JVM warmup effects
-     * and provides more stable, statistically significant results. Intermediate rounds' results
+     * performs under concurrent load. Multiple rounds can reduce JVM warmup effects, but do not
+     * guarantee stable or statistically significant results. Intermediate rounds' results
      * are printed automatically to the console; the final round's statistics are returned for
      * further analysis (and are NOT auto-printed — call {@code printResult()} on the returned
      * object if needed).
@@ -290,11 +290,12 @@ public final class Profiler {
      *                Each execution is timed individually for statistical analysis.
      *                Recommended range: 100-10,000 for balanced memory usage and statistical significance
      * @param roundNum the number of times to repeat the entire test (all threads and loops).
-     *                 Multiple rounds help eliminate JVM warmup effects and provide stable measurements.
+     *                 Multiple rounds can reduce JVM warmup effects but do not guarantee stable measurements.
      *                 A value of 0 or less is treated as 1. Recommended: 3-5 rounds for most tests, 1 for quick checks
      * @param command the code to be profiled and executed in each loop iteration.
      *                This should be a Runnable that can throw checked exceptions.
-     *                The command is executed (threadNum * loopNum * roundNum) times in total
+     *                Unless profiling is suspended, the command is executed
+     *                {@code threadNum * loopNum * Math.max(1, roundNum)} times in total
      * @return a {@link MultiLoopsStatistics} object containing comprehensive performance metrics including
      *         minimum, maximum, average, and percentile execution times for all test executions.
      *         The returned statistics represent the final round of testing
@@ -465,8 +466,9 @@ public final class Profiler {
      * @param threadNum the number of concurrent threads to execute the test, must be greater than 0.
      *                  Each thread runs independently and executes the full loop sequence
      * @param threadDelay the delay in milliseconds to wait before starting each subsequent thread, must be &gt;= 0.
-     *                    A value of 0 starts all threads simultaneously. Higher values create gradual ramp-up.
-     *                    Example: With 10 threads and 100ms delay, the 10th thread starts 900ms after the first
+     *                    A value of 0 adds no deliberate delay between worker submissions. Higher values create gradual ramp-up.
+     *                    With 10 threads and 100ms delay, nine delays occur before the 10th submission;
+     *                    actual worker start times also depend on scheduling and submission overhead
      * @param loopNum the number of times each thread executes the command, must be greater than 0.
      *                Each execution is measured and contributes to the statistical analysis
      * @param loopDelay the delay in milliseconds to wait between each loop iteration within a thread, must be &gt;= 0.
@@ -888,8 +890,8 @@ public final class Profiler {
      * @param methodName the name of the method being profiled
      * @param invocation the invocation, already bound to this thread's argument so that no dispatch
      *        bookkeeping lands inside the measured window (see the comment at the timing call below)
-     * @param setUpForMethod the setup method to be executed before the profiled method, may be {@code null}
      * @param reflective whether invocation uses Method.invoke and adds its own exception wrapper
+     * @param setUpForMethod the setup method to be executed before the profiled method, may be {@code null}
      * @param tearDownForMethod the teardown method to be executed after the profiled method, may be {@code null}
      * @param ps the PrintStream for output
      * @return the statistics for this single profiled invocation
@@ -2568,9 +2570,11 @@ public final class Profiler {
          * });
          * stats.printResult(); // Prints to console
          *
-         * // Compare multiple implementations
-         * System.out.println("Testing ArrayList:");
-         * Profiler.run(8, 5000, 5, "ArrayList", () -> {
+         * // Compare collections that support concurrent writes
+         * List<Integer> arrayList = Collections.synchronizedList(new ArrayList<>());
+         * List<Integer> cowList = new CopyOnWriteArrayList<>();
+         * System.out.println("Testing synchronized ArrayList:");
+         * Profiler.run(8, 5000, 5, "SynchronizedArrayList", () -> {
          *     arrayList.add(randomValue());
          * }).printResult();
          *
@@ -2580,12 +2584,13 @@ public final class Profiler {
          * }).printResult();
          * }</pre>
          *
+         * @throws NullPointerException if a stored loop-statistics or method-statistics entry used to render the report is {@code null}
          * @see #writeResult(OutputStream) to write results to a file or custom output stream
          * @see #writeResult(Writer) to write results using a Writer
          * @see #writeHtmlResult(Writer) for HTML-formatted output suitable for web reports
          * @see #writeXmlResult(Writer) for machine-readable XML output
          */
-        public void printResult() {
+        public void printResult() throws NullPointerException {
             writeResult(new PrintWriter(IOUtil.newOutputStreamWriter(System.out))); //NOSONAR
         }
 
@@ -2683,16 +2688,11 @@ public final class Profiler {
          * emailService.sendPerformanceReport(results);
          *
          * // Write to multiple destinations
-         * List<Writer> destinations = Arrays.asList(
-         *     new FileWriter("results.txt"),
-         *     new FileWriter("archive.txt"),
-         *     new StringWriter()
-         * );
-         * for (Writer writer : destinations) {
-         *     try {
+         * try (FileWriter resultsWriter = new FileWriter("results.txt");
+         *      FileWriter archiveWriter = new FileWriter("archive.txt");
+         *      StringWriter memoryWriter = new StringWriter()) {
+         *     for (Writer writer : Arrays.asList(resultsWriter, archiveWriter, memoryWriter)) {
          *         stats.writeResult(writer);
-         *     } finally {
-         *         writer.close();
          *     }
          * }
          * }</pre>

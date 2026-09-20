@@ -242,7 +242,7 @@ public final class Traverser<T> {
      * // Traverse an organizational hierarchy
      * class Employee {
      *     String name;
-     *     List<Employee> directReports;
+     *     List<Employee> directReports = new ArrayList<>();
      *     List<Employee> getDirectReports() { return directReports; }
      *     String getName() { return name; }
      * }
@@ -285,8 +285,9 @@ public final class Traverser<T> {
      *
      * <p><b>Performance notes</b>
      * <ul>
-     *   <li>Traversals require <i>O(n)</i> time (where <i>n</i> is the number of nodes reachable from
-     *       the start node), assuming that the node objects have <i>O(1)</i> {@code equals()} and
+     *   <li>Traversals require <i>O(n + m)</i> time (where <i>n</i> is the number of reachable nodes
+     *       and <i>m</i> is the number of successor edges examined), assuming that successor iteration
+     *       takes constant time per edge and node objects have <i>O(1)</i> {@code equals()} and
      *       {@code hashCode()} implementations.</li>
      *   <li>While traversing, the traverser will use <i>O(n)</i> space (where <i>n</i> is the number
      *       of nodes that have thus far been visited), plus <i>O(H)</i> space (where <i>H</i> is the
@@ -297,14 +298,14 @@ public final class Traverser<T> {
      * <pre>{@code
      * // Traverse a social network graph (which may have cycles)
      * class Person {
-     *     List<Person> friends;
+     *     List<Person> friends = new ArrayList<>();
      *     List<Person> getFriends() { return friends; }
      * }
      *
      * Person person = new Person();
      * Traverser<Person> socialTraverser = Traverser.forGraph(Person::getFriends);
      *
-     * // Find all people within 3 degrees of separation
+     * // Visit at most 1000 people in breadth-first order (this does not impose a depth limit).
      * Set<Person> network = socialTraverser.breadthFirst(person)
      *     .limit(1000)  // stops after 1000 nodes
      *     .toSet();

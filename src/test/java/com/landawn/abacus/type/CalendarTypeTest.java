@@ -290,8 +290,8 @@ public class CalendarTypeTest extends TestBase {
         // serializeTo: the default format measures the range in the calendar's own zone, ISO_8601_* in UTC,
         // and LONG writes any instant (the three cases the @throws now names)
         assertThrows(IllegalArgumentException.class, () -> type.serializeTo(Objectory.createBufferedJsonWriter(), yearOneWest, null));
-        assertThrows(IllegalArgumentException.class, () -> type.serializeTo(Objectory.createBufferedJsonWriter(), max,
-                JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)));
+        assertThrows(IllegalArgumentException.class,
+                () -> type.serializeTo(Objectory.createBufferedJsonWriter(), max, JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP)));
 
         final BufferedJsonWriter isoWriter = Objectory.createBufferedJsonWriter();
         type.serializeTo(isoWriter, yearOneWest, JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP));

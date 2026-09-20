@@ -9,10 +9,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.DiffIgnore;
 
 @Tag("unit")
-public class OpenUtilDifferenceTest {
+public class OpenUtilDifferenceTest extends TestBase {
     @Test
     void ignoredAliasesAreSymmetricAndNeverReadOrCompared() {
         for (final String value : Arrays.asList(null, "", "甲🙂")) {
@@ -54,18 +55,45 @@ public class OpenUtilDifferenceTest {
     public static class LowerName {
         private String username;
         boolean failOnRead;
-        public LowerName() { }
-        LowerName(String value) { username = value; }
-        public String getUsername() { if (failOnRead) throw new AssertionError("excluded getter"); return username; }
-        public void setUsername(String value) { username = value; }
+
+        public LowerName() {
+        }
+
+        LowerName(String value) {
+            username = value;
+        }
+
+        public String getUsername() {
+            if (failOnRead)
+                throw new AssertionError("excluded getter");
+            return username;
+        }
+
+        public void setUsername(String value) {
+            username = value;
+        }
     }
 
     public static class IgnoredCamelName {
-        @DiffIgnore private String userName;
+        @DiffIgnore
+        private String userName;
         boolean failOnRead;
-        public IgnoredCamelName() { }
-        IgnoredCamelName(String value) { userName = value; }
-        public String getUserName() { if (failOnRead) throw new AssertionError("excluded getter"); return userName; }
-        public void setUserName(String value) { userName = value; }
+
+        public IgnoredCamelName() {
+        }
+
+        IgnoredCamelName(String value) {
+            userName = value;
+        }
+
+        public String getUserName() {
+            if (failOnRead)
+                throw new AssertionError("excluded getter");
+            return userName;
+        }
+
+        public void setUserName(String value) {
+            userName = value;
+        }
     }
 }

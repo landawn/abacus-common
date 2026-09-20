@@ -111,8 +111,8 @@ public final class LoggerFactory {
      * Gets a logger instance for the specified name.
      *
      * <p>This method returns a cached logger if one exists for the given name, otherwise
-     * it creates a new logger using the detected logging framework. The detection happens
-     * only once during the first logger creation.</p>
+     * it creates a new logger starting with the last successfully selected logging framework.
+     * If that backend fails to initialize the new logger, selection continues to the next fallback.</p>
      *
      * <p>Cache hits are lock-free. Creation of a missing logger uses double-checked locking
      * so concurrent callers do not serialize on the common (already-cached) path.</p>

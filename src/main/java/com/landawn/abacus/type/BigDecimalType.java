@@ -122,7 +122,8 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * @return a new {@code BigDecimal} constructed from the specified characters,
      *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
-     * @throws NumberFormatException if the character sequence cannot be parsed as a valid {@code BigDecimal},         including a range that contains only whitespace (which trims to the empty string, exactly as         {@code valueOf("   ")} does)
+     * @throws NumberFormatException if the character sequence cannot be parsed as a valid {@code BigDecimal}, including a range that contains only
+     *         whitespace (which trims to the empty string, exactly as {@code valueOf("   ")} does)
      */
     @Override
     public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, NumberFormatException {

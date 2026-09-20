@@ -256,7 +256,6 @@ public class PrimitiveIntArrayTypeTest extends TestBase {
         assertTrue(type.isPrimitiveArray());
     }
 
-
     @Test
     public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
         assertArrayEquals(new int[] { Integer.MAX_VALUE, Integer.MIN_VALUE, 0 }, type.valueOf("[2147483647, -2147483648, 0]"));

@@ -20,6 +20,21 @@ public class ByteBufferTypeTest extends TestBase {
     private final ByteBufferType type = new ByteBufferType();
 
     @Test
+    public void testNullArgumentContracts() {
+        final IllegalArgumentException bufferFailure = Assertions.assertThrowsExactly(IllegalArgumentException.class,
+                () -> ByteBufferType.byteArrayOf(null));
+        final IllegalArgumentException bytesFailure = Assertions.assertThrowsExactly(IllegalArgumentException.class,
+                () -> ByteBufferType.valueOf((byte[]) null));
+
+        assertEquals("'x' cannot be null", bufferFailure.getMessage());
+        assertEquals("'bytes' cannot be null", bytesFailure.getMessage());
+        Assertions.assertNull(type.stringOf(null));
+        Assertions.assertNull(type.valueOf((String) null));
+        Assertions.assertNull(type.valueOf((Object) null));
+        Assertions.assertArrayEquals(new byte[0], ByteBufferType.byteArrayOf(ByteBufferType.valueOf(new byte[0])));
+    }
+
+    @Test
     public void testClazz() {
         Class<ByteBuffer> result = type.javaType();
         assertEquals(ByteBuffer.class, result);
@@ -279,8 +294,7 @@ public class ByteBufferTypeTest extends TestBase {
 
         assertEquals(3, result.position());
         Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(result));
-        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 },
-                ByteBufferType.byteArrayOf(Type.of(ByteBuffer.class).valueOf((Object) new byte[] { 1, 2, 3 })));
+        Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, ByteBufferType.byteArrayOf(Type.of(ByteBuffer.class).valueOf((Object) new byte[] { 1, 2, 3 })));
     }
 
     @Test

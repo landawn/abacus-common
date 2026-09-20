@@ -558,14 +558,11 @@ public class MedianTest extends TestBase {
     }
 
     @Test
-    public void testOf_ComparatorIsValidatedBeforeTheRange() {
-        // The two *range* comparator overloads reject a null comparator BEFORE checking the range, so an
-        // out-of-range index does NOT always win. (The two 2-arg comparator overloads do NOT agree with each
-        // other - see testOf_TwoArgComparatorOverloads_DifferInValidationOrder below.)
-        assertThrows(IllegalArgumentException.class, () -> Median.of(new String[] { "a", "b" }, -1, 99, (Comparator<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Median.of(Arrays.asList("a", "b"), -1, 99, (Comparator<String>) null));
+    public void testOf_RangeIsValidatedBeforeTheComparator() {
+        assertThrows(IndexOutOfBoundsException.class, () -> Median.of(new String[] { "a", "b" }, -1, 99, (Comparator<String>) null));
+        assertThrows(IndexOutOfBoundsException.class, () -> Median.of(Arrays.asList("a", "b"), -1, 99, (Comparator<String>) null));
 
-        // With a non-null comparator the range check runs next, ahead of the empty-input check.
+        // The range check also precedes the empty-input check.
         assertThrows(IndexOutOfBoundsException.class, () -> Median.of(new String[] { "a", "b" }, -1, 99, Comparator.<String> naturalOrder()));
         assertThrows(IndexOutOfBoundsException.class, () -> Median.of(Arrays.asList("a", "b"), -1, 99, Comparator.<String> naturalOrder()));
         assertThrows(IndexOutOfBoundsException.class, () -> Median.of((String[]) null, -1, 99, Comparator.<String> naturalOrder()));
@@ -580,10 +577,7 @@ public class MedianTest extends TestBase {
     }
 
     @Test
-    public void testOf_TwoArgComparatorOverloads_DifferInValidationOrder() {
-        // The 2-arg array overload validates the ARRAY first, so a null/empty array reports the empty-input
-        // failure even when the comparator is also null; its collection twin checks the comparator first.
-        // This is the counter-example to a family-wide "comparator rejected first" reading of the class javadoc.
+    public void testOf_TwoArgComparatorOverloads_ValidateTheSourceFirst() {
         assertEquals("The specified array 'source' cannot be null or empty",
                 assertThrows(IllegalArgumentException.class, () -> Median.of(new String[0], (Comparator<String>) null)).getMessage());
         assertEquals("The specified array 'source' cannot be null or empty",
@@ -592,9 +586,9 @@ public class MedianTest extends TestBase {
         assertEquals("'cmp' cannot be null",
                 assertThrows(IllegalArgumentException.class, () -> Median.of(new String[] { "a", "b" }, (Comparator<String>) null)).getMessage());
 
-        assertEquals("'cmp' cannot be null",
+        assertEquals("Source collection is null or empty",
                 assertThrows(IllegalArgumentException.class, () -> Median.of(Collections.<String> emptyList(), (Comparator<String>) null)).getMessage());
-        assertEquals("'cmp' cannot be null",
+        assertEquals("Source collection is null or empty",
                 assertThrows(IllegalArgumentException.class, () -> Median.of((Collection<String>) null, (Comparator<String>) null)).getMessage());
         assertEquals("'cmp' cannot be null",
                 assertThrows(IllegalArgumentException.class, () -> Median.of(Arrays.asList("a", "b"), (Comparator<String>) null)).getMessage());

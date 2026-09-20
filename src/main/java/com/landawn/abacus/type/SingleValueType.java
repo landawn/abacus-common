@@ -74,7 +74,7 @@ import com.landawn.abacus.util.cs;
  * <p>Detected value members retain their declared generic arguments. Class variables are resolved against
  * this handler's parameters; factory variables are inferred from its generic return type and value argument.
  * Unbound variables and wildcards are parsed using their upper bound. A broader creator parameter does not
- * erase the value member's type. Contradictory concrete arguments on the same generic class are rejected.</p>
+ * erase the value member's type. Contradictory concrete arguments are rejected, including those inherited through a creator's superclass or interface.</p>
  * <p>Nested JSON values are passed through {@link #valueOf(String)} with their numeric tokens intact;
  * that conversion uses the value handler's parsing defaults, not the enclosing parser's property configuration.</p>
  *
@@ -132,8 +132,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Constructs a {@code SingleValueType} using the canonical class name as the type name.
      *
      * @param typeClass the class of the type to handle
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}.
      */
-    protected SingleValueType(final Class<T> typeClass) {
+    protected SingleValueType(final Class<T> typeClass) throws IllegalArgumentException {
         this(ClassUtil.getCanonicalClassName(typeClass), typeClass);
     }
 
@@ -142,6 +143,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Inspects the class for {@code @JsonXmlValue}/{@code @JsonXmlCreator} (or Jackson equivalent)
      * annotations and, if absent, attempts to auto-detect a single-field value pattern
      * by scanning constructors, factory methods, and getter methods.
+     * Creator compatibility includes inherited generic arguments: a {@code List<BigDecimal>} value can be
+     * passed to a {@code Collection<BigDecimal>} creator, but not to a {@code Collection<String>} creator.
      *
      * @param typeName the type name string (may include generic parameters)
      * @param typeClass the class of the type to handle
@@ -683,10 +686,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @param writer the CharacterWriter to write to
      * @param x the value to write, may be null
      * @param config the serialization configuration for formatting options
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the null literal or the selected wrapped/runtime value representation to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

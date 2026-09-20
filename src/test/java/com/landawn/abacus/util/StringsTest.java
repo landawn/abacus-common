@@ -985,9 +985,9 @@ public class StringsTest extends StringsTestSupport {
         assertEquals("", Strings.toUpperCase("", null));
         assertThrows(NullPointerException.class, () -> Strings.toUpperCase("a", null));
 
-        // Primary-first: no-op shuffle bypasses Random; multi-code-point requires it
-        assertEquals("a", Strings.shuffle("a", null));
-        assertNull(Strings.shuffle(null, null));
+        // The random generator is validated before no-op returns.
+        assertThrows(IllegalArgumentException.class, () -> Strings.shuffle("a", null));
+        assertThrows(IllegalArgumentException.class, () -> Strings.shuffle(null, null));
         assertThrows(IllegalArgumentException.class, () -> Strings.shuffle("ab", null));
 
         // Primary-first Base64 charset collaborators
@@ -3072,6 +3072,7 @@ public class StringsTest extends StringsTestSupport {
         assertTrue(index + offset < len);
         assertFalse(index < len - offset);
     }
+
     /**
      * Contract pin for the {@code @return} text of {@code appendIfMissing}, {@code appendIfMissingIgnoreCase},
      * {@code prependIfMissing}, {@code prependIfMissingIgnoreCase} and {@code wrapIfMissing(String,String,String)}:

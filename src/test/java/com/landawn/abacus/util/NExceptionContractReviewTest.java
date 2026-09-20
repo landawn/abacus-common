@@ -18,12 +18,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedInterruptedException;
 import com.landawn.abacus.util.function.BooleanPredicate;
 import com.landawn.abacus.util.function.Predicate;
 
-class NExceptionContractReviewTest {
+class NExceptionContractReviewTest extends TestBase {
     @Test
     void positiveSleepWrapsInterruptionAndRestoresStatus() {
         try {
@@ -55,25 +56,30 @@ class NExceptionContractReviewTest {
     void parallelTraversalPropagatesErrorsAndWrapsCheckedExceptions() {
         final Executor direct = Runnable::run;
         final AssertionError failure = new AssertionError("consumer failed");
-        assertSame(failure, assertThrows(AssertionError.class,
-                () -> N.forEachInParallel(List.of(1), value -> { throw failure; }, 1, direct)));
-        assertSame(failure, assertThrows(AssertionError.class,
-                () -> N.forEachIndexedInParallel(List.of(1), (index, value) -> { throw failure; }, 1, direct)));
+        assertSame(failure, assertThrows(AssertionError.class, () -> N.forEachInParallel(List.of(1), value -> {
+            throw failure;
+        }, 1, direct)));
+        assertSame(failure, assertThrows(AssertionError.class, () -> N.forEachIndexedInParallel(List.of(1), (index, value) -> {
+            throw failure;
+        }, 1, direct)));
         final IOException checked = new IOException("consumer failed");
-        final UncheckedIOException wrapped = assertThrows(UncheckedIOException.class,
-                () -> N.forEachInParallel(List.of(1), value -> { throw checked; }, 1, direct));
+        final UncheckedIOException wrapped = assertThrows(UncheckedIOException.class, () -> N.forEachInParallel(List.of(1), value -> {
+            throw checked;
+        }, 1, direct));
         assertSame(checked, wrapped.getCause());
     }
 
     @Test
     void asyncSubmissionRejectsBeforeCommandRuns() {
         final RejectedExecutionException failure = new RejectedExecutionException("full");
-        final Executor rejecting = command -> { throw failure; };
+        final Executor rejecting = command -> {
+            throw failure;
+        };
         final AtomicInteger calls = new AtomicInteger();
         final Callable<Integer> callable = calls::incrementAndGet;
         assertSame(failure, assertThrows(RejectedExecutionException.class, () -> N.asyncExecute(callable, rejecting)));
-        assertSame(failure, assertThrows(RejectedExecutionException.class,
-                () -> N.asyncExecute((Throwables.Runnable<Exception>) calls::incrementAndGet, rejecting)));
+        assertSame(failure,
+                assertThrows(RejectedExecutionException.class, () -> N.asyncExecute((Throwables.Runnable<Exception>) calls::incrementAndGet, rejecting)));
         assertEquals(0, calls.get());
     }
 
@@ -95,6 +101,8 @@ class NExceptionContractReviewTest {
         final BooleanPredicate primitivePredicate = value -> value;
         assertThrows(IllegalArgumentException.class, () -> primitivePredicate.and(null));
         assertThrows(IllegalArgumentException.class, () -> primitivePredicate.or(null));
-        assertFalse(primitivePredicate.and(value -> { throw new AssertionError("must short circuit"); }).test(false));
+        assertFalse(primitivePredicate.and(value -> {
+            throw new AssertionError("must short circuit");
+        }).test(false));
     }
 }

@@ -88,7 +88,7 @@ import com.landawn.abacus.util.u.OptionalInt;
  * {@code RandomAccess}, and otherwise copies the searched region and the pattern to arrays first, which costs O(n)
  * extra space.
  *
- * <p>All methods are static and read their inputs without modifying them. Concurrent modification of an input is the
+ * <p>All methods are static. Array and collection contents are left unchanged; iterator searches consume input elements. Concurrent modification of an input is the
  * caller's problem, as usual.
  *
  * <p><b>Usage Examples:</b>
@@ -1092,7 +1092,7 @@ public final class Index {
      * starting the search at {@code fromIndex}. It looks for {@code sizeToMatch} elements from {@code subArrayToFind}
      * starting at {@code startIndexOfSubArray}.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
@@ -1117,7 +1117,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -1228,7 +1228,7 @@ public final class Index {
      * starting the search at {@code fromIndex}. It looks for {@code sizeToMatch} elements from {@code subArrayToFind}
      * starting at {@code startIndexOfSubArray}. This allows for flexible partial subarray matching.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
@@ -1260,7 +1260,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -1399,7 +1399,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -1539,7 +1539,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -1657,7 +1657,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], int, boolean[], int, int)} for {@code int} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
@@ -1682,7 +1682,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -1799,7 +1799,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #ofSubArray(boolean[], int, boolean[], int, int)} for {@code long} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
@@ -1824,7 +1824,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -1941,7 +1941,7 @@ public final class Index {
      * starting at {@code startIndexOfSubArray}. Elements are compared using {@link N#equals(float, float)},
      * consistent with {@link Float#compare(float, float)}. This allows for flexible partial subarray matching.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
@@ -1966,7 +1966,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -2083,7 +2083,7 @@ public final class Index {
      * starting at {@code startIndexOfSubArray}. Elements are compared using {@link N#equals(double, double)},
      * consistent with {@link Double#compare(double, double)}. This allows for flexible partial subarray matching.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
@@ -2108,7 +2108,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -2231,7 +2231,7 @@ public final class Index {
      * starting at {@code startIndexOfSubArray}. Elements are compared using {@link N#equals(Object, Object)},
      * which handles {@code null} values correctly. This allows for flexible partial subarray matching.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0 and both arrays are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either array is {@code null}, returns empty OptionalInt</li>
@@ -2263,7 +2263,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the subarray portion is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -2392,7 +2392,7 @@ public final class Index {
      * The implementation is optimized for {@link RandomAccess} lists. For non-RandomAccess lists,
      * it converts sublists to arrays for comparison.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0 and both lists are {@code non-null}, returns {@code fromIndex} (clamped to valid range)</li>
      *   <li>If either list is {@code null}, returns empty OptionalInt</li>
@@ -2424,7 +2424,7 @@ public final class Index {
      * @param startIndexOfSubList the starting index within {@code subListToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subListToFind}
      * @return an OptionalInt containing the zero-based index where the sublist portion is found,
-     *         or an empty OptionalInt if the sublist is not found or inputs are invalid
+     *         or an empty OptionalInt if the sublist is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubList} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subListToFind}
@@ -3413,7 +3413,7 @@ public final class Index {
      * starting the backwards search at {@code startIndexFromBack}. It looks for {@code sizeToMatch} elements from
      * {@code subArrayToFind} starting at {@code startIndexOfSubArray}.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -3441,7 +3441,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -3553,7 +3553,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[], int, int)} for {@code char} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -3581,7 +3581,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -3691,7 +3691,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[], int, int)} for {@code byte} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -3719,7 +3719,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -3832,7 +3832,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[], int, int)} for {@code short} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -3860,7 +3860,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -3973,7 +3973,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[], int, int)} for {@code int} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -4001,7 +4001,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -4114,7 +4114,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[], int, int)} for {@code long} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -4142,7 +4142,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -4257,7 +4257,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[], int, int)} for {@code float} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -4285,7 +4285,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -4400,7 +4400,7 @@ public final class Index {
      * <p>
      * This method works identically to {@link #lastOfSubArray(boolean[], int, boolean[], int, int)} for {@code double} arrays.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -4428,7 +4428,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -4541,7 +4541,7 @@ public final class Index {
      * {@code subArrayToFind} starting at {@code startIndexOfSubArray}. Elements are compared using
      * {@link N#equals(Object, Object)}, which handles {@code null} values correctly.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both arrays are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.length)}</li>
@@ -4569,7 +4569,7 @@ public final class Index {
      * @param startIndexOfSubArray the starting index within {@code subArrayToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subArrayToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the subarray is found,
-     *         or an empty OptionalInt if the subarray is not found or inputs are invalid
+     *         or an empty OptionalInt if the subarray is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubArray} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subArrayToFind}
@@ -4679,7 +4679,7 @@ public final class Index {
      * {@link N#equals(Object, Object)}, which handles {@code null} values correctly. The implementation is
      * optimized for {@link RandomAccess} lists; for non-RandomAccess lists it converts sublists to arrays for comparison.
      * <p>
-     * Special cases:
+     * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
      *   <li>If {@code sizeToMatch} is 0, {@code startIndexFromBack >= 0}, and both lists are {@code non-null},
      *       returns {@code min(startIndexFromBack, source.size())}</li>
@@ -4707,7 +4707,7 @@ public final class Index {
      * @param startIndexOfSubList the starting index within {@code subListToFind} of the portion to match
      * @param sizeToMatch the number of elements to match from {@code subListToFind}
      * @return an OptionalInt containing the zero-based index where the last occurrence of the sub-list is found,
-     *         or an empty OptionalInt if the sub-list is not found or inputs are invalid
+     *         or an empty OptionalInt if the sub-list is not found or either input is {@code null}
      * @throws IllegalArgumentException if {@code sizeToMatch} is negative
      * @throws IndexOutOfBoundsException if {@code startIndexOfSubList} and {@code sizeToMatch} do not denote
      *                                   a valid range in {@code subListToFind}

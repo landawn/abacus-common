@@ -52,8 +52,7 @@ public class AbstractDoubleStreamTest extends TestBase {
             return (double) (left + right);
         })) {
             final com.landawn.abacus.util.DoubleIterator iter = stream.iterator();
-            org.junit.jupiter.api.Assertions.assertSame(failure,
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextDouble));
+            org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextDouble));
             org.junit.jupiter.api.Assertions.assertEquals((double) 2, iter.nextDouble());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertEquals((double) 5, iter.nextDouble());
@@ -963,13 +962,11 @@ public class AbstractDoubleStreamTest extends TestBase {
     @Test
     public void testPrependAppendOptional_nullIsRejectedAndTheStreamIsClosed() {
         final MutableBoolean closed = MutableBoolean.of(false);
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> DoubleStream.of(1d, 2d).onClose(closed::setTrue).prepend((OptionalDouble) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleStream.of(1d, 2d).onClose(closed::setTrue).prepend((OptionalDouble) null));
         assertTrue(closed.isTrue(), "prepend(null) must close the stream before throwing");
 
         closed.setFalse();
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> DoubleStream.of(1d, 2d).onClose(closed::setTrue).append((OptionalDouble) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> DoubleStream.of(1d, 2d).onClose(closed::setTrue).append((OptionalDouble) null));
         assertTrue(closed.isTrue(), "append(null) must close the stream before throwing");
 
         assertArrayEquals(new double[] { 9d, 1d, 2d }, DoubleStream.of(1d, 2d).prepend(OptionalDouble.of(9d)).toArray(), 0.0);

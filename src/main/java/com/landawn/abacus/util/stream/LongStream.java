@@ -162,9 +162,9 @@ import com.landawn.abacus.util.function.ToLongFunction;
  * <p><b>Performance Considerations:</b>
  * <ul>
  *   <li>Use LongStream instead of {@code Stream<Long>} to avoid boxing overhead</li>
- *   <li>Parallel processing benefits large datasets (typically &gt; 10,000 elements)</li>
+ *   <li>The benefit of parallel processing depends on input size, operation cost, and available processors; benchmark representative workloads</li>
  *   <li>Sequential processing is more efficient for small datasets and simple operations</li>
- *   <li>Lazy evaluation means intermediate operations are not executed until terminal operations</li>
+ *   <li>Most intermediate operations defer processing until traversal; consult each operation for eager evaluation or buffering</li>
  * </ul>
  *
  * <p><b>abacus {@code LongStream} vs. {@link java.util.stream.LongStream JDK LongStream} &mdash; how they differ:</b>
@@ -214,7 +214,7 @@ import com.landawn.abacus.util.function.ToLongFunction;
  *       <td><b><i>abacus</i></b>: returns {@code u.OptionalLong} (and {@code u.OptionalDouble} for {@code average()}) &middot; &#9888;&#65039; <b><i>JDK</i></b>: returns {@code java.util.OptionalLong}/{@code OptionalDouble}</td>
  *     </tr>
  *     <tr>
- *       <td><b>null arguments</b> to any operation</td>
+ *       <td><b>null function arguments</b> to stream operations</td>
  *       <td><b><i>abacus</i></b>: throws {@link IllegalArgumentException} (via {@code checkArgNotNull}),
  *           and the stream is <b>closed</b> before the exception propagates &middot; &#9888;&#65039;
  *           <b><i>JDK</i></b>: throws {@link NullPointerException} and leaves the stream open.
@@ -247,8 +247,8 @@ import com.landawn.abacus.util.function.ToLongFunction;
  *
  * <p>The two convert directly: {@link #from(java.util.stream.LongStream)} wraps a JDK {@code LongStream} and
  * {@link #toJdkStream()} returns one, while {@link #boxed()} bridges to the object stream and
- * {@link #asDoubleStream()} bridges to the wider primitive stream (use {@link #asFloatStream()} only
- * with care — it is a lossy conversion and is deprecated).
+ * {@link #asDoubleStream()} bridges to {@code double}, which can round long values beyond 2<sup>53</sup> in magnitude.
+ * {@link #asFloatStream()} has less precision and is deprecated.
  *
  * @see StreamBase
  * @see IntStream
@@ -1443,7 +1443,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
+     * @param init the initial accumulated value; also emitted first when {@code initIncluded} is {@code true}
      * @param initIncluded a boolean value that determines if the initial value should be included as the first element in the returned stream.
      * @param accumulator a {@code LongBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
      * @return a new {@code LongStream} consisting of the results of the scan operation on the elements of the original stream.
@@ -1644,7 +1644,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     // Result: {1="1", 2="2", 3="3"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1685,7 +1685,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * {@link #toMap(Throwables.LongFunction, Throwables.LongFunction, BinaryOperator)} and reports
      * {@code reference to toMap is ambiguous}.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1725,7 +1725,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     // Result: {5=35} (all map to key 5, max value is 35)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1764,7 +1764,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     // Result: LinkedHashMap {1="100,150", 2="200"} (concatenated values in insertion order)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -2194,10 +2194,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * {@code OptionalLong} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
-     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
-     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
-     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.LongStream#findFirst()} API.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2229,10 +2228,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * {@code OptionalLong} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
-     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
-     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
-     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2263,8 +2261,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * {@code OptionalLong}, or an empty {@code OptionalLong} if no element matches. This is a
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
-     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * <p>When several elements match, the one at the smallest encounter-order index in the current
+     * pipeline wins. Parallel intermediate operations may already have reordered the original source.
+     * If that ordering guarantee is not needed,
      * {@link #findAny(Throwables.LongPredicate)} may find a match faster in parallel.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2719,9 +2718,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p><b>Precision Warning:</b> This conversion may lose precision because float uses only 24 bits
      * for the significand (mantissa), while long uses 64 bits. Long values outside the range
-     * [-2^24, 2^24] may not be represented exactly as floats. For values requiring full precision,
-     * consider using {@link #asDoubleStream()} instead, which can represent all long values without
-     * loss of magnitude (though precision loss can still occur for values beyond 2^53).
+     * [-2^24, 2^24] may not be represented exactly as floats. For greater precision,
+     * consider {@link #asDoubleStream()}, which represents every long value from -2^53 through 2^53
+     * exactly; values outside that range may still be rounded.
      *
      * <p><b>Range Considerations:</b>
      * <ul>
@@ -2851,15 +2850,17 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .sum();   // returns 12L (3 + 4 + 5)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * <p>If this stream has close handlers, closing the returned JDK stream closes this stream and
      * invokes those handlers exactly once.</p>
      *
+     * <p>The returned JDK stream preserves this stream's parallel or sequential execution mode.</p>
+     *
      * @return a {@code java.util.stream.LongStream} consisting of the elements of this stream
      * @throws IllegalStateException if the stream is already closed
      */
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public abstract java.util.stream.LongStream toJdkStream() throws IllegalStateException;
 
@@ -2869,6 +2870,9 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *
      * <p>This method converts the stream to a {@code java.util.stream.LongStream}, applies the transformation,
      * and converts back to an abacus-common {@code LongStream}.
+     *
+     * <p>The function receives a JDK stream with this stream's current execution mode. The result adopts
+     * the execution mode of the JDK stream returned by the function. Closing the result also closes this stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2888,7 +2892,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see #toJdkStream()
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public LongStream transformViaJdkStream(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer)
             throws IllegalStateException, IllegalArgumentException {
@@ -2903,8 +2907,12 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * Transforms this stream using the provided transfer function, with an option to defer the transformation.
      * This is an intermediate operation that allows integration with JDK stream operations.
      *
-     * <p>When {@code deferred} is {@code true}, the transformation is not applied until the stream is consumed,
+     * <p>When {@code deferred} is {@code true}, the transformation is not applied until the returned stream is first traversed or closed,
      * allowing for lazy initialization and dynamic stream generation based on runtime conditions.
+     *
+     * <p>The function receives a JDK stream with this stream's current execution mode. Without deferral,
+     * the result adopts the returned JDK pipeline's mode; with deferral, the outer stream starts sequential.
+     * Closing the result also closes this stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2913,11 +2921,11 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .toArray();   // transforms only when toArray() is called
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation. The transfer function is invoked on consumption when
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation. The transfer function is invoked on first traversal or closure when
      * {@code deferred} is {@code true}, and immediately otherwise; buffering and traversal behavior depend on the returned JDK pipeline.
      *
      * @param transfer a function that transforms a {@code java.util.stream.LongStream} to another {@code java.util.stream.LongStream}
-     * @param deferred if {@code true}, the transformation is deferred until the stream is consumed
+     * @param deferred if {@code true}, the transformation is deferred until the returned stream is first traversed or closed
      * @return a new {@code LongStream} that is the result of applying the transfer function
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code transfer} is {@code null}.
@@ -2925,7 +2933,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @see #defer(Supplier)
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public LongStream transformViaJdkStream(final Function<? super java.util.stream.LongStream, ? extends java.util.stream.LongStream> transfer,
             final boolean deferred) throws IllegalStateException, IllegalArgumentException {
@@ -3083,7 +3091,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (exhausted) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3449,8 +3457,8 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * allowing iteration-based data sources to be processed using stream operations.
      *
      * <p>This method provides a bridge between iterator-based APIs and stream-based processing.
-     * The resulting stream will consume elements from the iterator as needed during terminal operations.
-     * Once the stream is consumed, the iterator will be exhausted and cannot be reused.
+     * The resulting stream advances the iterator as elements are requested. A short-circuiting operation
+     * may leave elements unread; closing the stream does not drain the iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3480,7 +3488,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *     .count();   // returns 0
      * }</pre>
      *
-     * @param iterator the LongIterator providing the elements; will be exhausted when the stream is consumed
+     * @param iterator the LongIterator providing the elements; advanced as the stream is traversed
      * @return a LongStream containing the elements from the iterator, or an empty stream if iterator is null
      * @see #of(long[])
      * @see #of(Collection)
@@ -3775,7 +3783,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cnt++ >= count) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3887,7 +3895,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 }
 
                 @Override
-                public long nextLong() {
+                public long nextLong() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3918,7 +3926,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
                 }
 
                 @Override
-                public long nextLong() {
+                public long nextLong() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -4154,7 +4162,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cnt == 0) {
                     if (!extra) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
@@ -4302,7 +4310,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4542,7 +4550,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      *                 {@code 1999 MICROSECONDS} schedules emissions 1 ms apart)
      * @param unit the time unit for both delay and interval parameters
      * @return an infinite LongStream that emits timestamp values at the specified intervals
-     * @throws IllegalArgumentException if {@code unit} is {@code null}, {@code delay} is negative, {@code interval} is not positive, or a positive
+     * @throws IllegalArgumentException if {@code delay} is negative, {@code interval} is not positive, {@code unit} is {@code null}, or a positive
      *         interval is shorter than one millisecond after conversion.
      * @see #interval(long)
      * @see #interval(long, long)
@@ -4551,14 +4559,14 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      */
     @Beta
     public static LongStream interval(final long delay, final long interval, final TimeUnit unit) throws IllegalArgumentException {
-        N.checkArgNotNull(unit, cs.unit);
         N.checkArgNotNegative(delay, cs.delay);
         N.checkArgPositive(interval, cs.interval);
+        N.checkArgNotNull(unit, cs.unit);
+
+        final long intervalInMillis = unit.toMillis(interval);
+        N.checkArgPositive(intervalInMillis, "interval in milliseconds");
 
         final long delayInMillis = unit.toMillis(delay);
-        final long intervalInMillis = unit.toMillis(interval);
-
-        N.checkArgPositive(intervalInMillis, "interval in milliseconds");
 
         return of(new LongIteratorEx() {
             private final long startTime = System.currentTimeMillis();
@@ -4637,7 +4645,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4697,7 +4705,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4717,13 +4725,14 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
     }
 
     /**
-     * Creates a finite stream that iterates from an initial value, applying a function to generate subsequent values,
+     * Creates a stream that iterates from an initial value, applying a function to generate subsequent values,
      * and continues as long as a predicate is satisfied. This is a static factory method that produces a
      * conditionally-terminated sequential stream.
      *
      * <p>This method is useful for generating sequences where the termination condition depends on the
      * value itself, such as mathematical series, countdowns, or converging sequences. The predicate is
      * evaluated on each generated value before it is emitted, allowing for dynamic termination.
+     * The stream is unbounded if the predicate never returns {@code false}.
      *
      * <p><b>Iteration Behavior:</b>
      * <ul>
@@ -4774,7 +4783,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
      * @param hasNext a stateless predicate that tests each value to determine if the stream should continue;
      *                returns {@code true} to continue iteration, {@code false} to terminate
      * @param f a stateless function to apply to the previous element to generate the next element
-     * @return a finite LongStream of elements generated by the iteration while the predicate holds
+     * @return a LongStream of elements generated by the iteration while the predicate holds
      * @throws IllegalArgumentException if {@code hasNext} or {@code f} is {@code null}.
      * @see #iterate(long, LongUnaryOperator)
      * @see #iterate(BooleanSupplier, LongSupplier)
@@ -4823,7 +4832,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5216,7 +5225,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5282,7 +5291,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5338,7 +5347,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5386,7 +5395,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5437,7 +5446,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5482,7 +5491,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 return zipFunction.applyAsLong(iterA.nextLong(), iterB.nextLong());
             }
         });
@@ -5526,7 +5535,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 return zipFunction.applyAsLong(iterA.nextLong(), iterB.nextLong(), iterC.nextLong());
             }
         });
@@ -5668,7 +5677,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5725,7 +5734,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5776,7 +5785,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsLong(iterA.nextLong(), iterB.hasNext() ? iterB.nextLong() : valueForNoneB);
                 } else {
@@ -5828,7 +5837,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsLong(iterA.nextLong(), iterB.hasNext() ? iterB.nextLong() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextLong() : valueForNoneC);
@@ -6006,7 +6015,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursorA < lenA) {
                     if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                         return a[cursorA++];
@@ -6099,7 +6108,7 @@ public abstract class LongStream extends StreamBase<Long, long[], LongPredicate,
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNextA && iterA.hasNext()) {
                     nextA = iterA.nextLong();
                     hasNextA = true;

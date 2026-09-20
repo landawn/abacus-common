@@ -281,7 +281,6 @@ public class IntegerArrayTypeTest extends TestBase {
         assertEquals(Integer[].class, type.javaType());
     }
 
-
     @Test
     public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
         assertArrayEquals(new Integer[] { Integer.MAX_VALUE, null, Integer.MIN_VALUE }, type.valueOf("[2147483647, null, -2147483648]"));

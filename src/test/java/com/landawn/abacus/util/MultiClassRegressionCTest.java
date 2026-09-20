@@ -46,7 +46,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B1: Result.orElseThrow accepts inline lambdas")
-    public class B1ResultOrElseThrowLambda {
+    public class B1ResultOrElseThrowLambda extends TestBase {
 
         @Test
         public void functionLambda_compilesWithoutCast_andIsNotInvokedOnSuccess() {
@@ -147,7 +147,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("O5: Result.ifSuccess / ifFailure")
-    public class O5ResultConditionalConsumers {
+    public class O5ResultConditionalConsumers extends TestBase {
 
         @Test
         public void ifSuccess_runsOnlyForSuccess() {
@@ -191,7 +191,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D3: Result.RR factories")
-    public class D3ResultRr {
+    public class D3ResultRr extends TestBase {
 
         @Test
         public void of_producesAnRr() {
@@ -215,7 +215,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B2: Range.hashCode is value-based")
-    public class B2RangeHashCode {
+    public class B2RangeHashCode extends TestBase {
 
         @Test
         public void equalRangesHashEqually() {
@@ -270,7 +270,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B4: Range.elementCompareTo")
-    public class B4RangeElementCompareTo {
+    public class B4RangeElementCompareTo extends TestBase {
 
         @Test
         public void signsFollowComparableConvention() {
@@ -332,7 +332,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B7: empty Range predicates")
-    public class B7EmptyRange {
+    public class B7EmptyRange extends TestBase {
 
         @Test
         public void bothTrueOnlyForOpenOpenAtTheSharedEndpoint() {
@@ -408,7 +408,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B5: Range.mapEndpoints")
-    public class B5RangeMapEndpoints {
+    public class B5RangeMapEndpoints extends TestBase {
 
         @Test
         public void preservesBoundTypes() {
@@ -448,7 +448,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("J4: Range factory messages")
-    public class J4RangeFactoryMessages {
+    public class J4RangeFactoryMessages extends TestBase {
 
         @Test
         public void nullMinAndNullMaxAreReportedSeparately() {
@@ -480,7 +480,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D10/D11: BoundType.of and Endpoint equality")
-    public class D10D11RangeInternals {
+    public class D10D11RangeInternals extends TestBase {
 
         @Test
         public void boundTypeOfCoversAllFourCombinations() {
@@ -526,7 +526,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B3: forEach requires an Object consumer")
-    public class B3ForEach {
+    public class B3ForEach extends TestBase {
 
         @Test
         public void pairForEachVisitsBothElementsInOrder() {
@@ -597,7 +597,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D13: Pair.toArray(A[])")
-    public class D13PairToArray {
+    public class D13PairToArray extends TestBase {
 
         @Test
         public void reusesASufficientlyLargeArrayAndLeavesTheTailUntouched() {
@@ -636,7 +636,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D5: Pair.setValue through Map.Entry")
-    public class D5PairSetValue {
+    public class D5PairSetValue extends TestBase {
 
         @Test
         public void setValueMutatesTheRightElementAndReturnsThePrevious() {
@@ -652,7 +652,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D4: Tuple.fromArray / fromCollection")
-    public class D4TupleFrom {
+    public class D4TupleFrom extends TestBase {
 
         @Test
         public void fromArrayReturnsTheMatchingArity() {
@@ -719,7 +719,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B10: Duration argument validation")
-    public class B10DurationNullChecks {
+    public class B10DurationNullChecks extends TestBase {
 
         @Test
         public void plusMinusAndCompareToRejectNull() {
@@ -748,7 +748,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("O1: Duration.toString")
-    public class O1DurationToString {
+    public class O1DurationToString extends TestBase {
 
         @Test
         public void formatsTheDocumentedShapes() {
@@ -781,7 +781,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("J10/O2: Holder")
-    public class J10O2Holder {
+    public class J10O2Holder extends TestBase {
 
         @Test
         public void orElseThrowIfNullMessageDescribesAHolder() {
@@ -807,7 +807,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("O3/O4: RateLimiter")
-    public class O3O4RateLimiter {
+    public class O3O4RateLimiter extends TestBase {
 
         @Test
         public void nonPositiveAndNaNRatesAreRejectedWithTheOffendingValue() {
@@ -841,7 +841,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D2: Fraction.ofMixed")
-    public class D2FractionOfMixed {
+    public class D2FractionOfMixed extends TestBase {
 
         @Test
         public void mixedNumbersAreBuiltFromWholeNumeratorDenominator() {
@@ -886,7 +886,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B8/B9/O6: Fraction")
-    public class B8B9O6Fraction {
+    public class B8B9O6Fraction extends TestBase {
 
         @Test
         public void minValueDenominatorIsOnlyRescuedWhenReducing() {
@@ -949,7 +949,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("J9/J11: Fraction rendering")
-    public class J9J11FractionRendering {
+    public class J9J11FractionRendering extends TestBase {
 
         @Test
         public void toProperStringCoversEveryBranch() {
@@ -981,7 +981,7 @@ public class MultiClassRegressionCTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D6: Stopwatch elapsed type")
-    public class D6Stopwatch {
+    public class D6Stopwatch extends TestBase {
 
         @Test
         public void elapsedReturnsAJdkDuration() {

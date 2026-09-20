@@ -248,8 +248,7 @@ public class SheetRowsTest extends SheetTestSupport {
         final IllegalArgumentException rowMismatch = assertThrows(IllegalArgumentException.class, () -> Sheet.rows(rk, ck, new Integer[][] { { 1, 2 } }));
         assertEquals("The length of row array is not equal to size of row key set", rowMismatch.getMessage());
 
-        final IllegalArgumentException colMismatch = assertThrows(IllegalArgumentException.class,
-                () -> Sheet.rows(rk, ck, new Integer[][] { { 1 }, { 2 } }));
+        final IllegalArgumentException colMismatch = assertThrows(IllegalArgumentException.class, () -> Sheet.rows(rk, ck, new Integer[][] { { 1 }, { 2 } }));
         assertEquals("The length of row is not equal to size of column key set", colMismatch.getMessage());
 
         // The column-array twin already distinguished them; pinned here so the two stay symmetric.

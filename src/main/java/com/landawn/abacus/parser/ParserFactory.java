@@ -373,6 +373,9 @@ public final class ParserFactory {
     /**
      * Creates a new abacus-common XML parser instance with default configuration.
      * Uses {@code StAX} (Streaming API for XML) as the default parser type.
+     * Type attributes may name built-ins and already-registered classes by their intrinsic names,
+     * including classes supplied to deserialize or encountered during serialization. Unknown class names
+     * and registration aliases are rejected. Use the approved-class overload for a fixed application-type policy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -391,6 +394,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new abacus-common XML parser instance with specified configurations.
+     * Uses the same registered-class type policy as {@link #createAbacusXmlParser()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -410,6 +414,27 @@ public final class ParserFactory {
      */
     public static XmlParser createAbacusXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) throws NoClassDefFoundError {
         return new AbacusXmlParserImpl(XmlParserType.StAX, xsc, xdc);
+    }
+
+    /**
+     * Creates a parser with an immutable, parser-local set of approved application classes for XML type attributes.
+     * Built-in scalar/container names remain available, including Abacus primitive lists and mutable scalars,
+     * and the exact runtime classes returned by JDK collection factories and wrappers. Type approval does not
+     * guarantee that a container can be instantiated or that its original mutability is preserved.
+     * Neither global type registration nor the former
+     * {@code abacus.xml.allowTypeAttrClassForName} system property grants additional permissions.
+     * The supplied set is copied; subsequent changes cannot alter this parser's policy. Normal target-slot
+     * assignability checks still apply. Include each application class used in array or generic type attributes.
+     *
+     * @param xsc serialization configuration, or null for defaults
+     * @param xdc deserialization configuration, or null for defaults
+     * @param allowedTypeClasses application classes approved for this parser; must not be null or contain null
+     * @return a new parser with the supplied type policy
+     * @throws IllegalArgumentException if the set is null or approved names are ambiguous
+     * @throws NullPointerException if the set contains null
+     */
+    public static XmlParser createAbacusXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc, final Set<Class<?>> allowedTypeClasses) {
+        return new AbacusXmlParserImpl(XmlParserType.StAX, xsc, xdc, allowedTypeClasses);
     }
 
     /**
@@ -445,6 +470,9 @@ public final class ParserFactory {
     /**
      * Creates a new standard XML parser instance with default configuration.
      * Uses {@code StAX} (Streaming API for XML) as the default parser type.
+     * Type attributes may name built-ins and already-registered classes by their intrinsic names,
+     * including classes supplied to deserialize or encountered during serialization. Unknown class names
+     * and registration aliases are rejected. Use the approved-class overload for a fixed application-type policy.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -463,6 +491,7 @@ public final class ParserFactory {
 
     /**
      * Creates a new standard XML parser instance with specified configurations.
+     * Uses the same registered-class type policy as {@link #createXmlParser()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -481,6 +510,27 @@ public final class ParserFactory {
      */
     public static XmlParser createXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc) throws NoClassDefFoundError {
         return new XmlParserImpl(XmlParserType.StAX, xsc, xdc);
+    }
+
+    /**
+     * Creates a parser with an immutable, parser-local set of approved application classes for XML type attributes.
+     * Built-in scalar/container names remain available, including Abacus primitive lists and mutable scalars,
+     * and the exact runtime classes returned by JDK collection factories and wrappers. Type approval does not
+     * guarantee that a container can be instantiated or that its original mutability is preserved.
+     * Neither global type registration nor the former
+     * {@code abacus.xml.allowTypeAttrClassForName} system property grants additional permissions.
+     * The supplied set is copied; subsequent changes cannot alter this parser's policy. Normal target-slot
+     * assignability checks still apply. Include each application class used in array or generic type attributes.
+     *
+     * @param xsc serialization configuration, or null for defaults
+     * @param xdc deserialization configuration, or null for defaults
+     * @param allowedTypeClasses application classes approved for this parser; must not be null or contain null
+     * @return a new parser with the supplied type policy
+     * @throws IllegalArgumentException if the set is null or approved names are ambiguous
+     * @throws NullPointerException if the set contains null
+     */
+    public static XmlParser createXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc, final Set<Class<?>> allowedTypeClasses) {
+        return new XmlParserImpl(XmlParserType.StAX, xsc, xdc, allowedTypeClasses);
     }
 
     /**

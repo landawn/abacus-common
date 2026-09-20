@@ -433,17 +433,23 @@ public class FnTest extends FnTestSupport {
 
         final List<java.util.function.Predicate<String>> predicates = new ArrayList<>();
         predicates.add(value -> value.startsWith("a"));
-        predicates.add(value -> { throw new AssertionError("short-circuited predicate"); });
+        predicates.add(value -> {
+            throw new AssertionError("short-circuited predicate");
+        });
         final Predicate<String> snapshotAnd = Fn.and(predicates);
         final Predicate<String> snapshotOr = Fn.or(predicates);
         predicates.clear();
-        predicates.add(value -> { throw new AssertionError("later-added predicate"); });
+        predicates.add(value -> {
+            throw new AssertionError("later-added predicate");
+        });
         assertFalse(snapshotAnd.test("b"));
         assertTrue(snapshotOr.test("a"));
 
         final List<java.util.function.BiPredicate<String, String>> biPredicates = new ArrayList<>();
         biPredicates.add(String::equals);
-        biPredicates.add((left, right) -> { throw new AssertionError("short-circuited bi-predicate"); });
+        biPredicates.add((left, right) -> {
+            throw new AssertionError("short-circuited bi-predicate");
+        });
         final BiPredicate<String, String> snapshotBiAnd = Fn.and(biPredicates);
         final BiPredicate<String, String> snapshotBiOr = Fn.or(biPredicates);
         biPredicates.clear();
@@ -487,12 +493,10 @@ public class FnTest extends FnTestSupport {
         assertEquals("ok", Fn.futureGet().apply(CompletableFuture.completedFuture("ok")));
         assertEquals("d", Fn.futureGetOrDefaultOnError("d").apply(CompletableFuture.failedFuture(new RuntimeException("e"))));
         final AssertionError taskError = new AssertionError("task error");
-        final RuntimeException wrappedError = assertThrows(RuntimeException.class,
-                () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskError)));
+        final RuntimeException wrappedError = assertThrows(RuntimeException.class, () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskError)));
         assertSame(taskError, wrappedError.getCause());
         final IllegalStateException taskFailure = new IllegalStateException("task failure");
-        assertSame(taskFailure, assertThrows(IllegalStateException.class,
-                () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskFailure))));
+        assertSame(taskFailure, assertThrows(IllegalStateException.class, () -> Fn.futureGet().apply(CompletableFuture.failedFuture(taskFailure))));
     }
 
     // FINDING G20-006: the eight close/shutdown runnables used to synchronize on `this` - the object handed to
@@ -517,11 +521,13 @@ public class FnTest extends FnTestSupport {
         assertEquals(1, a1.getCloseCount());
 
         final MyCloseable a2 = new MyCloseable();
-        assertTrue(runWhileHoldingMonitorOf(Fn.closeAll(List.of(a2))), "Fn.closeAll(Collection).run() blocked on the caller-held monitor of the returned Runnable");
+        assertTrue(runWhileHoldingMonitorOf(Fn.closeAll(List.of(a2))),
+                "Fn.closeAll(Collection).run() blocked on the caller-held monitor of the returned Runnable");
         assertEquals(1, a2.getCloseCount());
 
         final MyCloseable a3 = new MyCloseable();
-        assertTrue(runWhileHoldingMonitorOf(Fn.closeAllQuietly(a3)), "Fn.closeAllQuietly(array).run() blocked on the caller-held monitor of the returned Runnable");
+        assertTrue(runWhileHoldingMonitorOf(Fn.closeAllQuietly(a3)),
+                "Fn.closeAllQuietly(array).run() blocked on the caller-held monitor of the returned Runnable");
         assertEquals(1, a3.getCloseCount());
 
         final MyCloseable a4 = new MyCloseable();

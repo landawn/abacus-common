@@ -641,4 +641,26 @@ public class DatasetSheetIterativeRegressionCTest extends TestBase {
         assertFalse(iterator.hasNext());
         assertThrows(java.util.NoSuchElementException.class, iterator::next);
     }
+
+    /**
+     * {@code RowDataset} distinguishes "no properties" from a caller-supplied map by comparing
+     * {@code _properties} against the shared {@code EMPTY_PROPERTIES} instance with {@code ==}. Static
+     * initializers run in textual order, and {@code EMPTY_DATASET} used to be declared before
+     * {@code EMPTY_PROPERTIES}, so the shared empty dataset was constructed while that field was still
+     * {@code null} - leaving {@code Dataset.empty()} holding {@code null} properties and flipping every
+     * identity guard against it. Observable through the public API as {@code getProperties()} handing back a
+     * freshly wrapped map instead of the shared empty one.
+     */
+    @Test
+    public void test_emptyDataset_propertiesAreTheSharedEmptyMap_regression_20260918() {
+        // Before the fix Dataset.empty()._properties was null, so this returned a wrapper, not the shared map.
+        assertSame(N.<String, Object> emptyMap(), Dataset.empty().getProperties());
+
+        // The identity is stable across calls, which is what the == guards in RowDataset rely on.
+        assertSame(Dataset.empty().getProperties(), Dataset.empty().getProperties());
+
+        // And the empty dataset still behaves as an empty, frozen dataset.
+        assertTrue(Dataset.empty().getProperties().isEmpty());
+        assertTrue(Dataset.empty().isFrozen());
+    }
 }

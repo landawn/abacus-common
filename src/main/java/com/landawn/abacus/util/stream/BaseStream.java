@@ -439,8 +439,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * └─────────────────┴─────────────────────────┴────────────────────────────────────────────────────────────────┘
      * </pre>
      *
-     * <p>In parallel streams, the action may be performed concurrently for multiple dropped elements.
-     * The implementation should ensure the action is thread-safe when used with parallel streams.</p>
+     * <p>In parallel streams, each {@code onDrop} invocation runs with its predicate check under
+     * the same lock. These invocations are serialized, although different worker threads may perform them.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -545,9 +545,10 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     /**
      * Returns a stream consisting of the distinct elements of this stream.
      * This is an intermediate operation that removes duplicate elements based on
-     * their {@code equals} method implementation.
+     * their {@code equals} method implementation. Object-stream array elements are compared by
+     * deep content equality instead of array identity.
      *
-     * <p>Elements are compared for equality using their {@code equals} method. The first
+     * <p>Non-array elements are compared for equality using their {@code equals} method. The first
      * occurrence of an element is retained while subsequent duplicates are discarded.
      * This operation may require storing elements encountered so far for determining duplicates,
      * making it a stateful operation.
@@ -701,7 +702,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
 
     /**
      * Returns a stream consisting of the elements of this stream in reverse order.
-     * This is an intermediate operation that loads all elements into memory when called.
+     * This is an intermediate operation that may load all elements into memory before emitting its first element.
      *
      * <p>The returned stream contains all the elements of the original stream but in the opposite order.
      * For example, if the original stream contains [1, 2, 3], the reversed stream will contain [3, 2, 1].
@@ -738,7 +739,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
 
     /**
      * Returns a stream consisting of the elements of this stream rotated by the specified distance.
-     * This is an intermediate operation that loads all elements into memory when called.
+     * This is an intermediate operation that may load all elements into memory before emitting its first element.
      *
      * <p>The returned stream contains the same elements as the original stream but with their positions
      * shifted by the specified distance. A positive distance rotates elements to the right (ending elements move to the
@@ -785,7 +786,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
 
     /**
      * Returns a stream consisting of the elements of this stream in a random order.
-     * This is an intermediate operation that loads all elements into memory when called.
+     * This is an intermediate operation that may load all elements into memory before emitting its first element.
      *
      * <p>The returned stream contains all the elements of the original stream but in a randomly
      * shuffled order. The randomization is performed using the default random number generator.
@@ -825,7 +826,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
 
     /**
      * Returns a stream consisting of the elements of this stream in a random order determined by the provided Random instance.
-     * This is an intermediate operation that loads all elements into memory when called.
+     * This is an intermediate operation that may load all elements into memory before emitting its first element.
      *
      * <p>The returned stream contains all the elements of the original stream but in a randomly
      * shuffled order. Unlike {@link #shuffled()}, this method allows specifying a custom Random instance,
@@ -869,7 +870,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
 
     /**
      * Returns a stream consisting of the elements of this stream in sorted order.
-     * This is an intermediate operation that loads all elements into memory when called.
+     * This is an intermediate operation that may load all elements into memory before emitting its first element.
      *
      * <p>The returned stream contains all the elements of the original stream but arranged
      * according to their natural ordering. Elements must be comparable to be sorted with this method.
@@ -919,7 +920,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
 
     /**
      * Returns a stream consisting of the elements of this stream in reverse sorted order.
-     * This is an intermediate operation that loads all elements into memory when called.
+     * This is an intermediate operation that may load all elements into memory before emitting its first element.
      *
      * <p>The returned stream contains all the elements of the original stream but arranged
      * in reverse natural ordering (descending order). Elements must be comparable to be sorted with
@@ -989,8 +990,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * }</pre>
      *
      * <p>This method only runs sequentially, even in parallel streams, as noted by the
-     * {@code @SequentialOnly} annotation. The stream produced is infinite unless limited
-     * by operations like {@code limit()} or {@code takeWhile()}.
+     * {@code @SequentialOnly} annotation. An empty source produces an empty stream. A non-empty
+     * source produces an infinite stream unless limited by operations like {@code limit()} or {@code takeWhile()}.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
@@ -1028,8 +1029,9 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p>This method only runs sequentially, even in parallel streams, as noted by the
      * {@code @SequentialOnly} annotation. Unlike {@link #cycled()}, this method produces
-     * a finite stream with the exact number of elements equal to the original count multiplied
-     * by the specified number of rounds.
+     * a finite stream when the source is finite, with the exact number of elements equal to the
+     * original count multiplied by the specified number of rounds. A zero round count produces
+     * an empty stream even for an unbounded source.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
@@ -1157,9 +1159,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p>Unlike the basic {@link #skip(long)} method, this variation allows you to process
      * the skipped elements rather than discarding them entirely.
      *
-     * <p>This method is marked with {@code @ParallelSupported}, meaning the {@code onSkip} may be
-     * performed concurrently for multiple skipped elements when used in a parallel stream.
-     * The implementation should ensure the action is thread-safe in such cases.
+     * <p>In parallel streams, skipping and the associated {@code onSkip} invocations are serialized
+     * to preserve the prefix boundary. Different worker threads may perform the invocations.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -1232,6 +1233,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p>This is a convenience method equivalent to calling {@code skip(offset).limit(maxSize)},
      * but may be more efficient as it can be optimized internally.
+     * {@link Long#MAX_VALUE} is still a finite limit; it does not disable limiting for an unbounded source.
      *
      * <p>Example usage:
      * <pre>{@code
@@ -1326,7 +1328,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * This is an intermediate operation that controls the rate at which elements are pulled from the stream.
      *
      * <p>The returned stream will limit the rate of element emission to approximately the specified number of
-     * permits per second. This is useful for throttling operations when working with rate-limited resources
+     * permits per second on average; stored permits can allow bursts. This is useful for throttling operations when working with rate-limited resources
      * or when you need to control the pace of processing.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1352,14 +1354,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
      *   <tr>
      *     <td>{@link #delay(Duration)}</td>
-     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first; processing and scheduling add to the gap</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Pace a sequence with a fixed gap between elements</td>
      *   </tr>
      *   <tr>
      *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
-     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Acquires a permit for each element at the configured average rate; stored permits can allow bursts</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Cap throughput against a rate-limited resource</td>
@@ -1377,8 +1379,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param permitsPerSecond the rate limit, specified as permits per second. Must be positive.
      * @return a new stream with the rate limit applied.
-     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN.
      * @see #rateLimited(RateLimiter)
      * @see #delay(Duration)
      * @see #debounce(Duration)
@@ -1386,7 +1388,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      */
     @SequentialOnly
     @IntermediateOp
-    default S rateLimited(final double permitsPerSecond) throws IllegalArgumentException, IllegalStateException {
+    default S rateLimited(final double permitsPerSecond) throws IllegalStateException, IllegalArgumentException {
         return rateLimited(RateLimiter.create(permitsPerSecond));
     }
 
@@ -1423,14 +1425,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
      *   <tr>
      *     <td>{@link #delay(Duration)}</td>
-     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first; processing and scheduling add to the gap</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Pace a sequence with a fixed gap between elements</td>
      *   </tr>
      *   <tr>
      *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
-     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Acquires a permit for each element at the configured average rate; stored permits can allow bursts</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Cap throughput against a rate-limited resource</td>
@@ -1469,7 +1471,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * simulating time-based events, rate limiting operations, or creating timed sequences.
      *
      * <p>The delay is applied before each element (except the first) is passed to subsequent operations.
-     * This means the delay occurs between elements, creating a consistent time gap in the stream processing.
+     * Processing time and thread scheduling add to this delay, so the actual time between elements can vary.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1516,14 +1518,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
      *   <tr>
      *     <td>{@link #delay(Duration)}</td>
-     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first; processing and scheduling add to the gap</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Pace a sequence with a fixed gap between elements</td>
      *   </tr>
      *   <tr>
      *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
-     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Acquires a permit for each element at the configured average rate; stored permits can allow bursts</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Cap throughput against a rate-limited resource</td>
@@ -1577,16 +1579,16 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param duration the duration to delay each element in the stream (except the first element). Must not be
      *                 {@code null}. Truncated to whole milliseconds; anything under one millisecond means no delay.
      * @return a new stream with the delay applied to each element.
-     * @throws ArithmeticException if the duration is too large to be represented in milliseconds
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code duration} is {@code null}.
+     * @throws ArithmeticException if the duration is too large to be represented in milliseconds
      * @see #delay(Duration)
      * @see #rateLimited(double)
      * @see #rateLimited(RateLimiter)
      */
     @SequentialOnly
     @IntermediateOp
-    default S delay(java.time.Duration duration) throws ArithmeticException, IllegalStateException, IllegalArgumentException {
+    default S delay(java.time.Duration duration) throws IllegalStateException, IllegalArgumentException, ArithmeticException {
         final Duration durationToUse = duration == null ? null : Duration.ofMillis(duration.toMillis()); // to throw same exception as in the other overload for null.
         return delay(durationToUse);
     }
@@ -1607,7 +1609,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * (e.g. a stream over an in-memory collection), every gap is effectively zero, so only the single last
      * element is emitted.
      *
-     * <p>This differs from {@link #rateLimited(double)}, which spreads permits evenly over time, and from
+     * <p>This differs from {@link #rateLimited(double)}, which acquires a permit for each element, and from
      * window/throttle operators that emit periodically. It is also not a scheduler-based debounce: it does
      * not start a background timer, and pending elements are emitted only while downstream iteration pulls
      * from this stream.
@@ -1642,14 +1644,14 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *   <tr><th>Operator</th><th>Effect</th><th>Emits every element?</th><th>Drops elements?</th><th>Typical use</th></tr>
      *   <tr>
      *     <td>{@link #delay(Duration)}</td>
-     *     <td>Sleeps a fixed {@code duration} before each element except the first (constant spacing between elements)</td>
+     *     <td>Sleeps a fixed {@code duration} before each element except the first; processing and scheduling add to the gap</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Pace a sequence with a fixed gap between elements</td>
      *   </tr>
      *   <tr>
      *     <td>{@link #rateLimited(double)} / {@link #rateLimited(RateLimiter)}</td>
-     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Acquires a permit for each element at the configured average rate; stored permits can allow bursts</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Cap throughput against a rate-limited resource</td>
@@ -1721,8 +1723,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     /**
      * Performs the given action on the elements pulled by downstream/terminal operation.
      *
-     * <p>The action is executed lazily as elements flow through the stream pipeline. It is only invoked
-     * for elements that are actually consumed by a terminal operation.
+     * <p>The action is executed lazily as downstream traversal pulls elements through this stage,
+     * including traversal through a manually obtained iterator.
      *
      * <p>This is an intermediate operation.</p>
      *
@@ -1989,7 +1991,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     }
 
     /**
-     * Throws a {@code NoSuchElementException} in the executed terminal operation if this {@code Stream} is empty.
+     * Throws a {@code NoSuchElementException} when traversal first checks this source if it is empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2008,10 +2010,11 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * <p>When terminal traversal finds the stream empty, the returned stream throws {@link java.util.NoSuchElementException}.</p>
+     * <p>The check also occurs during manual iteration. Downstream operations that do not traverse the source,
+     * such as {@code limit(0)}, do not trigger it.</p>
      *
      * @return a stream with the same elements as this stream, which throws if it turns out to be
-     *         empty when a terminal operation is executed.
+     *         empty when traversal first checks the source.
      * @throws IllegalStateException if the stream is already closed
      */
     @SequentialOnly
@@ -2019,7 +2022,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     S throwIfEmpty() throws IllegalStateException;
 
     /**
-     * Throws a custom exception provided by the specified {@code exceptionSupplier} in the executed terminal operation if this {@code Stream} is empty.
+     * Throws a custom exception provided by the specified {@code exceptionSupplier} when traversal first checks this source if it is empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2038,12 +2041,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * <p>When terminal traversal finds the stream empty, the returned stream throws the exception
-     * provided by {@code exceptionSupplier}; a {@code null} supplied exception causes {@link NullPointerException}.</p>
+     * <p>The check also occurs during manual iteration. Downstream operations that do not traverse the source,
+     * such as {@code limit(0)}, do not trigger it. A {@code null} supplied exception causes {@link NullPointerException}.</p>
      *
      * @param exceptionSupplier the supplier of the exception to be thrown if this stream is empty.
      * @return a stream with the same elements as this stream, which throws if it turns out to be
-     *         empty when a terminal operation is executed.
+     *         empty when traversal first checks the source.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      */
@@ -2109,11 +2112,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param delimiter the sequence of characters to be used as a delimiter between each element in the resulting String.
      * @return a String consisting of the elements of this stream, separated by the specified delimiter.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code delimiter} is {@code null}.
      * @see #join(CharSequence, CharSequence, CharSequence)
      */
     @SequentialOnly
     @TerminalOp
-    default String join(final CharSequence delimiter) throws IllegalStateException {
+    default String join(final CharSequence delimiter) throws IllegalStateException, IllegalArgumentException {
         return join(delimiter, "", "");
     }
 
@@ -2142,12 +2146,13 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param suffix the sequence of characters to be added at the end of the resulting String.
      * @return a String consisting of the elements of this stream, separated by the specified delimiter, and surrounded by the specified prefix and suffix.
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of the delimiter/prefix/suffix arguments is {@code null}.
      * @see #join(CharSequence)
      * @see #joinTo(Joiner)
      */
     @SequentialOnly
     @TerminalOp
-    String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException;
+    String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Joins the elements of this stream into a single String using the provided Joiner.
@@ -2239,9 +2244,10 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * Counts the number of elements in the stream.
      * This is a terminal operation that consumes the stream and closes it after execution.
      *
-     * <p><b>Performance Note:</b> DO NOT use {@code stream.count() > 0} to check if the stream is empty.
-     * For better performance, use {@code stream.first().isPresent()} or {@code stream.first().isEmpty()},
-     * which can short-circuit and avoid processing the entire stream.
+     * <p><b>Performance Note:</b> To test whether the stream is non-empty, use
+     * {@code stream.limit(1).count() > 0}, which can short-circuit after one element.
+     * {@code stream.first().isPresent()} is also suitable when the first element cannot be {@code null};
+     * a null first element causes a {@link NullPointerException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2251,7 +2257,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * boolean hasElements = Stream.of(1, 2, 3).count() > 0;
      *
      * // Efficient: stops after the first element.
-     * boolean hasElementsEfficiently = Stream.of(1, 2, 3).first().isPresent();
+     * boolean hasElementsEfficiently = Stream.of(1, 2, 3).limit(1).count() > 0;
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
@@ -2269,15 +2275,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * {@code Optional} if this stream is empty.
      *
      * <p>This is a short-circuiting terminal operation: it stops at the first element without
-     * processing the rest of the stream, which is then closed. That also makes it the cheapest
-     * way to test whether a stream is non-empty — prefer {@code stream.first().isPresent()}
-     * over {@code stream.count() > 0}.</p>
+     * processing the rest of the stream, which is then closed. It can also test whether a stream
+     * is non-empty when its first element cannot be {@code null}. To include null elements in that
+     * check, use {@code stream.limit(1).count() > 0}.</p>
      *
-     * <p><b>Null elements:</b> primitive streams are unaffected. For object streams
-     * ({@link Stream}, {@link EntryStream}) the returned {@code Optional} is created with
-     * {@code Optional.ofNullable}, so a {@code null} first element yields an <i>empty</i>
-     * {@code Optional} rather than throwing — which makes "the first element was {@code null}"
-     * indistinguishable from "the stream was empty".</p>
+     * <p><b>Null elements:</b> for object streams ({@link Stream}, {@link EntryStream}),
+     * a {@code null} first element causes a {@link NullPointerException}.</p>
      *
      * <p>The concrete return type follows the stream type: {@link Stream} returns {@code Optional<T>},
      * while the primitive streams return their specialized {@code Optional}, e.g. {@code OptionalInt}
@@ -2311,15 +2314,12 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
     /**
      * Returns the last element of this stream wrapped in an {@code Optional}, or an empty {@code Optional} if this stream is empty.
      *
-     * <p>This is a terminal operation: unlike {@link #first()}, it cannot short-circuit — every element must be processed,
-     * because the last element is only known when the stream is exhausted. Only the latest element is retained while
-     * scanning, so memory usage stays constant. The stream is then closed.</p>
+     * <p>This terminal operation scans an iterator source to exhaustion, retaining only its latest
+     * element, so the scan uses constant memory. An array-backed source may access its last element
+     * directly. The stream is then closed.</p>
      *
-     * <p><b>Null elements:</b> primitive streams are unaffected. For object streams
-     * ({@link Stream}, {@link EntryStream}) the returned {@code Optional} is created with
-     * {@code Optional.ofNullable}, so a {@code null} last element yields an <i>empty</i>
-     * {@code Optional} rather than throwing — which makes "the last element was {@code null}"
-     * indistinguishable from "the stream was empty".</p>
+     * <p><b>Null elements:</b> for object streams ({@link Stream}, {@link EntryStream}),
+     * a {@code null} last element causes a {@link NullPointerException}.</p>
      *
      * <p>The concrete return type follows the stream type: {@link Stream} returns {@code Optional<T>},
      * while the primitive streams return their specialized {@code Optional}, e.g. {@code OptionalInt}
@@ -2370,6 +2370,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * @param position the zero-based position of the element to return; must be non-negative.
      * @return an Optional containing the element at the specified position in this stream if it exists, otherwise an empty Optional.
+     * @throws NullPointerException for object streams ({@link Stream}, {@link EntryStream}) if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code position} is negative.
      * @see #first()
@@ -2413,6 +2414,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the only element of this stream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException for object streams ({@link Stream}, {@link EntryStream}) if the sole element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws TooManyElementsException if the stream contains more than one element
      * @see #first()
@@ -3450,6 +3452,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p>The transformation function receives the current stream and can apply any sequence of operations to it,
      * returning a potentially different type of stream. This provides maximum flexibility for stream manipulation.
+     * The input retains its current execution mode, and the result uses the mode selected by the transfer function.
+     * Closing a non-null result also closes this stream.
      *
      * <p>To avoid eager loading by terminal operations invoked in the transfer function, use deferred execution:
      * <pre>{@code
@@ -3475,7 +3479,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; invokes {@code transfer}
      * immediately (the returned pipeline is lazy only if that function returns a lazy stream);
-     * {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * {@link ParallelSupported parallel-supported}; evaluation and buffering depend on the transfer function.
      *
      * @param <RS> the type of the new stream
      * @param transfer the transformation function that takes the current stream and returns a new stream
@@ -3484,7 +3488,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     @SuppressWarnings("rawtypes")
     <RS extends BaseStream> RS transform(Function<? super S, ? extends RS> transfer) throws IllegalStateException, IllegalArgumentException; //NOSONAR
@@ -3495,7 +3499,7 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      *
      * <p>If the stream contains at least one element, the function is applied to the entire stream.
      * If the stream is empty, an empty Optional is returned without invoking the function.
-     * If the function itself returns {@code null}, an empty Optional is returned as well.
+     * If the function returns {@code null}, a {@link NullPointerException} is thrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3516,7 +3520,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * @param <E> the type of exception that the function can throw
      * @param func the function to be applied to the stream if it's not empty
      * @return an Optional containing the result of the function if the stream is not empty,
-     *         or an empty Optional if the stream is empty or the function returns {@code null}
+     *         or an empty Optional if the stream is empty
+     * @throws NullPointerException if the function returns {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code func} is {@code null}
      * @throws E if {@code func} throws while processing this nonempty stream
@@ -3607,8 +3612,8 @@ public interface BaseStream<T, A, P, C, OT, IT, ITER extends Iterator<T>, S exte
      * <p>All registered close handlers (added via {@link #onClose(Runnable)}) are invoked when
      * this method is called, in the order they were registered.
      *
-     * <p>As per the AutoCloseable contract, close methods are idempotent - calling close multiple
-     * times has the same effect as calling it once.
+     * <p>Closing a stream is idempotent: calling {@code close()} multiple times has the same
+     * effect as calling it once.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

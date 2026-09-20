@@ -14,7 +14,6 @@
 
 package com.landawn.abacus.util;
 
-import java.lang.ref.WeakReference;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +23,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Represents a column value in HBase with its associated version (timestamp).
@@ -52,12 +49,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @param <T> the type of the column value
  */
 public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
-
-    private static final AtomicLong nextSequence = new AtomicLong();
-
-    // Both sides must be weak: a representative retains its key, so a strong map value
-    // would keep that key and representative alive after the last column is discarded.
-    private static final Map<Object, WeakReference<ValueOrder>> valueOrders = new WeakHashMap<>();
 
     /** Empty boolean column instance with value {@code false} and version {@code 0}. */
     public static final HBaseColumn<Boolean> EMPTY_BOOLEAN_COLUMN = HBaseColumn.valueOf(false, 0);
@@ -124,43 +115,6 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
     private final T value;
 
     private final long version;
-
-    // Retains the canonical value while this column participates in value ordering.
-    private volatile ValueOrder valueOrder;
-
-    private static final class ValueOrder {
-        final Object value;
-        final long sequence = nextSequence.getAndIncrement();
-
-        ValueOrder(final Object value) {
-            this.value = value;
-        }
-    }
-
-    private ValueOrder valueOrder() {
-        ValueOrder result = valueOrder;
-
-        if (result == null) {
-            synchronized (valueOrders) {
-                final WeakReference<ValueOrder> reference = valueOrders.get(value);
-                result = reference == null ? null : reference.get();
-
-                if (result == null) {
-                    result = new ValueOrder(value);
-                    // WeakHashMap otherwise retains an older equal key, which this
-                    // representative would not keep alive.
-                    valueOrders.remove(value);
-                    valueOrders.put(value, new WeakReference<>(result));
-                }
-
-                // Each column retains the representative (and hence the weak map key) while
-                // it is alive. Equal values must share every tie-break, not just compare as zero.
-                valueOrder = result;
-            }
-        }
-
-        return result;
-    }
 
     /**
      * Constructs an HBaseColumn with the specified value and the latest timestamp.
@@ -614,15 +568,33 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
 
     /**
      * Compares this HBaseColumn with another for ordering.
-     * The primary comparison is ascending order of versions. If the versions are equal,
-     * a value-based tie-break is used so that {@code compareTo} stays consistent with
-     * {@link #equals(Object)}: nulls come first, then {@link Comparable#compareTo} when
-     * applicable to values of the same runtime class, then class-name, hash-code, string-form,
-     * and finally a sequence shared by equal values. Tie-breaks use a shared representative of each
-     * value's equality class, so equal columns have the same order relative to every other column.
-     * Restricting natural comparison to an identical runtime class prevents asymmetric comparisons
-     * between a base-class value and a subclass value. Values must retain stable equality, hash codes,
-     * and ordering while the columns are used for comparison.
+     * The primary comparison is ascending order of versions. If the versions are equal, the values break the
+     * tie using only information derived from the values themselves, so the same columns sort the same way in
+     * every run and in every process:
+     *
+     * <ol>
+     * <li>a {@code null} value comes before a non-{@code null} one;</li>
+     * <li>values that are {@linkplain N#equals(Object, Object) equal} compare as {@code 0}, keeping this
+     *     ordering consistent with {@link #equals(Object)};</li>
+     * <li>otherwise the values are grouped by class name, so that the remaining terms only ever compare values
+     *     of one class;</li>
+     * <li>within a class, a {@link Comparable} value is compared with its own natural order. An identical
+     *     runtime class is required on both sides, which prevents the asymmetric comparison that a base-class
+     *     value and a subclass value would otherwise produce;</li>
+     * <li>finally the {@linkplain Object#hashCode() hash code} and then the {@linkplain Object#toString() string
+     *     form} of the values are compared.</li>
+     * </ol>
+     *
+     * <p>No process-local fallback (an encounter-order sequence or an identity hash code) is applied after those
+     * terms, because such a fallback makes the result depend on the run rather than on the data. Two unequal
+     * values that share a class name, natural order, hash code and string form are therefore indistinguishable
+     * here: they compare as {@code 0} and a {@link SortedSet}/{@link SortedMap} keeps only one of them. Values
+     * that need an order this cannot express - in particular values that are not {@link Comparable} and render
+     * identically, or values whose {@code equals} spans several runtime classes - should be ordered with an
+     * application-supplied {@link Comparator} rather than with this natural order.</p>
+     *
+     * <p>Values must retain stable equality, hash codes, string forms and ordering while the columns are used
+     * for comparison.</p>
      *
      * @param o the HBaseColumn to compare with
      * @return a negative integer, zero, or a positive integer as this column is
@@ -650,40 +622,33 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
             return 1;
         }
 
-        final ValueOrder left = valueOrder();
-        final ValueOrder right = o.valueOrder();
-
-        if (left == right) {
+        if (N.equals(value, o.value)) {
             return 0;
         }
 
-        if ((left.value instanceof Comparable<?>) && left.value.getClass() == right.value.getClass()) {
-            result = ((Comparable<Object>) left.value).compareTo(right.value);
+        // Class name first: the natural-order term below applies to one runtime class only, so every later
+        // term has to be reached by both sides of a comparison for the chain to stay transitive.
+        result = value.getClass().getName().compareTo(o.value.getClass().getName());
+
+        if (result != 0) {
+            return result;
+        }
+
+        if ((value instanceof Comparable<?>) && value.getClass() == o.value.getClass()) {
+            result = ((Comparable<Object>) value).compareTo(o.value);
 
             if (result != 0) {
                 return result;
             }
         }
 
-        result = left.value.getClass().getName().compareTo(right.value.getClass().getName());
+        result = Integer.compare(N.hashCode(value), N.hashCode(o.value));
 
         if (result != 0) {
             return result;
         }
 
-        result = Integer.compare(N.hashCode(left.value), N.hashCode(right.value));
-
-        if (result != 0) {
-            return result;
-        }
-
-        result = N.toString(left.value).compareTo(N.toString(right.value));
-
-        if (result != 0) {
-            return result;
-        }
-
-        return Long.compare(left.sequence, right.sequence);
+        return N.toString(value).compareTo(N.toString(o.value));
     }
 
     /**

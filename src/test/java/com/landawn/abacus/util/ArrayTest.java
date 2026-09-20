@@ -17,11 +17,11 @@ public class ArrayTest extends ArrayTestSupport {
 
     @Test
     public void testUnboxPreservesExistingWrappers() {
-        final Integer[] wrappers = {1000, null, -2000};
+        final Integer[] wrappers = { 1000, null, -2000 };
         final Integer first = wrappers[0];
         final Integer last = wrappers[2];
 
-        assertArrayEquals(new int[] {1000, 0, -2000}, Array.unbox(wrappers));
+        assertArrayEquals(new int[] { 1000, 0, -2000 }, Array.unbox(wrappers));
         assertSame(first, wrappers[0]);
         assertSame(null, wrappers[1]);
         assertSame(last, wrappers[2]);

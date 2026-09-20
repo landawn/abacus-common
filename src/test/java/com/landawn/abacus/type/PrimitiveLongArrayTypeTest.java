@@ -268,7 +268,6 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
         assertTrue(type.isPrimitiveArray());
     }
 
-
     @Test
     public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
         assertArrayEquals(new long[] { Long.MAX_VALUE, Long.MIN_VALUE, 0L }, type.valueOf("[9223372036854775807, -9223372036854775808, 0]"));

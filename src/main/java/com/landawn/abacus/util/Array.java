@@ -245,8 +245,8 @@ import com.landawn.abacus.annotation.NullSafe;
  *
  * <p><b>Name collision with {@link java.lang.reflect.Array}:</b> this class deliberately mirrors, and largely
  * wraps, {@code java.lang.reflect.Array}, and shares its simple name. A compilation unit that does
- * {@code import java.lang.reflect.*} therefore cannot refer to either one as {@code Array} - the reference is
- * ambiguous and will not compile. Import this class explicitly
+ * both {@code import java.lang.reflect.*} and {@code import com.landawn.abacus.util.*} cannot refer to
+ * either one as {@code Array} - the reference is ambiguous and will not compile. Import this class explicitly
  * ({@code import com.landawn.abacus.util.Array;}) or qualify the reflection class in full.</p>
  *
  * <p><b>Attribution:</b>
@@ -377,7 +377,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * Integer element = Array.get(array, 1);   // returns 2
      * }</pre>
      *
-     * @param <T> the type of the array.
+     * @param <T> the type of the returned element (boxed for a primitive array).
      * @param array the array from which to retrieve the element.
      * @param index the index of the element to be retrieved.
      * @return the element at the specified index, or {@code null} if the array is an object array whose element at that index is {@code null}.
@@ -2788,7 +2788,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param n the length of the array to be generated.
      * @param elementClass the class of the elements in the array; this becomes the array's component type. Must not be {@code null}.
      * @return an array of type 'T' and length <i>n</i> with all elements set to <i>element</i>.
-     * @throws IllegalArgumentException if {@code elementClass} is {@code null} or {@link Void#TYPE}, {@code n} is negative, or the resulting array length or dimension count exceeds the supported limit.
+     * @throws IllegalArgumentException if {@code n} is negative, {@code elementClass} is {@code null} or {@link Void#TYPE},
+     *         or the resulting array length or dimension count exceeds the supported limit.
      * @throws ClassCastException if {@code elementClass} is a primitive type other than {@code void}, producing an array that cannot be returned as an object array.
      * @throws ArrayStoreException if at least one value is copied and it is not assignable to the result array component type.
      * @see #repeatNonNull(Object, int)
@@ -2796,8 +2797,8 @@ public abstract sealed class Array permits Array.ArrayUtil {
      */
     public static <T> T[] repeat(final T element, final int n, final Class<? extends T> elementClass)
             throws IllegalArgumentException, ClassCastException, ArrayStoreException {
-        N.checkArgNotNull(elementClass, cs.elementClass);
         N.checkArgNotNegative(n, cs.n);
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
         final T[] a = N.newArray(elementClass, n);
         N.fill(a, element);
@@ -2834,14 +2835,15 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * @param n the number of times to repeat the array (must be non-negative).
      * @param elementClass the class of the elements in the array; this becomes the result's component type. Must not be {@code null}.
      * @return a new array containing the input array repeated n times.
-     * @throws IllegalArgumentException if {@code elementClass} is {@code null} or {@link Void#TYPE}, {@code n} is negative, or the resulting array length or dimension count exceeds the supported limit.
+     * @throws IllegalArgumentException if {@code n} is negative, {@code elementClass} is {@code null} or {@link Void#TYPE},
+     *         or the resulting array length or dimension count exceeds the supported limit.
      * @throws ClassCastException if {@code elementClass} is a primitive type other than {@code void}, producing an array that cannot be returned as an object array.
      * @throws ArrayStoreException if at least one value is copied and it is not assignable to the result array component type.
      */
     public static <T> T[] repeat(final T[] a, final int n, final Class<? extends T> elementClass)
             throws IllegalArgumentException, ClassCastException, ArrayStoreException {
-        N.checkArgNotNull(elementClass, cs.elementClass);
         N.checkArgNotNegative(n, cs.n);
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
         if (N.isEmpty(a)) {
             return Array.newInstance(elementClass, 0);
@@ -2923,11 +2925,10 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * held by {@link N}, shared with the other {@code Array.random(...)} overloads. (It is <i>not</i> the instance
      * used by {@link IntList#random(int)} and the other {@code PrimitiveList}/{@code Stream} {@code random(...)}
      * methods - each of those classes holds its own.) The output is therefore cryptographically strong and
-     * <i>not</i> reproducible - there is no seed to fix. The price is throughput: generation is roughly two orders
-     * of magnitude slower per value than {@link java.util.concurrent.ThreadLocalRandom}, and because the underlying
-     * DRBG serialises internally that instance is a contention point - concurrent callers do not scale. This is
-     * fine for test data, identifiers and sampling; for bulk or hot-path generation that does not need
-     * cryptographic strength, fill the array from {@code ThreadLocalRandom.current()} instead.</p>
+     * <i>not</i> reproducible through this API - there is no seed parameter. Throughput and contention depend on
+     * the installed security provider and its implementation. For bulk generation that does not need
+     * cryptographic strength, consider filling the array from {@link java.util.concurrent.ThreadLocalRandom#current()}
+     * and measuring the difference for the workload.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4495,7 +4496,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] primitives = {1, 2, 3};
-     * Byte[] objects = Array.box(primitives);         // returns {Byte.valueOf(1), Byte.valueOf(2), Byte.valueOf(3)}
+     * Byte[] objects = Array.box(primitives);         // returns {Byte.valueOf((byte) 1), Byte.valueOf((byte) 2), Byte.valueOf((byte) 3)}
      * Byte[] nullResult = Array.box((byte[]) null);   // returns null
      * }</pre>
      *
@@ -4518,7 +4519,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] primitives = {1, 2, 3, 4, 5};
-     * Byte[] objects = Array.box(primitives, 1, 4);   // returns {Byte.valueOf(2), Byte.valueOf(3), Byte.valueOf(4)}
+     * Byte[] objects = Array.box(primitives, 1, 4);   // returns {Byte.valueOf((byte) 2), Byte.valueOf((byte) 3), Byte.valueOf((byte) 4)}
      * Byte[] empty = Array.box(primitives, 2, 2);     // returns empty Byte array
      * }</pre>
      *
@@ -4559,7 +4560,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] primitives = {10, 20, 30};
-     * Short[] objects = Array.box(primitives);          // returns {Short.valueOf(10), Short.valueOf(20), Short.valueOf(30)}
+     * Short[] objects = Array.box(primitives);          // returns {Short.valueOf((short) 10), Short.valueOf((short) 20), Short.valueOf((short) 30)}
      * Short[] nullResult = Array.box((short[]) null);   // returns null
      * }</pre>
      *
@@ -4582,7 +4583,7 @@ public abstract sealed class Array permits Array.ArrayUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] primitives = {10, 20, 30, 40, 50};
-     * Short[] objects = Array.box(primitives, 1, 4);   // returns {Short.valueOf(20), Short.valueOf(30), Short.valueOf(40)}
+     * Short[] objects = Array.box(primitives, 1, 4);   // returns {Short.valueOf((short) 20), Short.valueOf((short) 30), Short.valueOf((short) 40)}
      * Short[] empty = Array.box(primitives, 2, 2);     // returns empty Short array
      * }</pre>
      *

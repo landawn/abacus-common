@@ -201,7 +201,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -292,7 +292,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextByte();
                 right = left;
 
@@ -336,7 +336,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextByte();
                 right = left;
 
@@ -378,7 +378,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public ByteList next() {
+            public ByteList next() throws NoSuchElementException {
                 final ByteList result = new ByteList(9);
                 result.add(hasNext ? next : (next = iter.nextByte()));
 
@@ -423,7 +423,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 byte merged = hasNext ? next : (next = iter.nextByte());
 
                 hasNext = false;
@@ -467,7 +467,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 final byte first = hasNext ? next : (next = iter.nextByte());
                 byte merged = first;
 
@@ -575,7 +575,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 final byte next = iter.nextByte();
                 iter.advance(skip);
                 return next;
@@ -603,7 +603,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (isFirst) {
                     accumulated = iter.nextByte();
                     isFirst = false;
@@ -632,7 +632,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 return (accumulated = accumulator.applyAsByte(accumulated, iter.nextByte()));
             }
         }, false);
@@ -661,7 +661,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (isFirst) {
                     isFirst = false;
                     return init;
@@ -727,7 +727,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -821,7 +821,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -946,7 +946,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1067,7 +1067,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1147,7 +1147,7 @@ abstract class AbstractByteStream extends ByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1361,6 +1361,7 @@ abstract class AbstractByteStream extends ByteStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
@@ -1496,7 +1497,8 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         try (final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer()) {
@@ -1533,7 +1535,8 @@ abstract class AbstractByteStream extends ByteStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

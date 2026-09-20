@@ -240,7 +240,7 @@ import com.landawn.abacus.util.stream.FloatStream;
  *   <li>Use {@code FloatList} when single-precision is sufficient for your application</li>
  *   <li>Specify initial capacity for known data sizes to avoid resizing</li>
  *   <li>Use bulk operations ({@code addAll}, {@code removeAll}) instead of loops</li>
- *   <li>Convert to {@code DoubleList} when higher precision is required</li>
+ *   <li>Convert to {@code DoubleList} for subsequent double-precision calculations; widening cannot recover precision already lost</li>
  *   <li>Be aware of floating-point precision limitations in comparisons</li>
  * </ul>
  *
@@ -368,8 +368,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Constructs a FloatList using the specified array as the backing array for this list.
-     * The array is used directly without copying, so modifications to the list will affect
-     * the original array and vice versa. The size of the list will be equal to the length
+     * The array is used directly without copying, so modifications are shared between the list and
+     * the original array until an operation replaces the backing array. The size of the list will be equal to the length
      * of the array.
      *
      * <p><b>Usage Examples:</b></p>
@@ -419,7 +419,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Creates a new FloatList containing the specified elements. The specified array is used directly
-     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * as the backing array without copying, so subsequent modifications to the array affect the list
+     * until an operation replaces its backing array.
      * If the input array is {@code null}, an empty list is returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -558,9 +559,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param len the number of random float values to generate. Must be non-negative.
      * @return a new FloatList containing the specified number of random float values
@@ -1840,7 +1841,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns a new FloatList containing elements that are present in either this list or the specified list,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * after cancelling matching occurrences. This is the multiset symmetric difference operation.
      * For elements that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both lists.
      *
@@ -1914,7 +1915,7 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
 
     /**
      * Returns a new FloatList containing elements that are present in either this list or the specified array,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * after cancelling matching occurrences. This is the multiset symmetric difference operation.
      * For elements that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
      *
@@ -2198,8 +2199,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * an odd number of elements, this is the exact middle element. For lists with an even number of
      * elements, this method returns the lower of the two middle elements (not the average).</p>
      *
-     * <p><b>Note:</b> NaN values are sorted to the end of the list, so the result is NaN only when NaN
-     * occupies the median position after sorting (i.e. when NaN values reach the middle of the list).</p>
+     * <p><b>Note:</b> The median ordering places NaN after all other values, so the result is NaN only
+     * when NaN occupies the median position. The list is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2224,8 +2225,8 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * For ranges with an odd number of elements, this returns the exact middle element when sorted.
      * For ranges with an even number of elements, this returns the lower of the two middle elements.</p>
      *
-     * <p><b>Note:</b> NaN values are sorted to the end of the range, so the result is NaN only when NaN
-     * occupies the median position after sorting (i.e. when NaN values reach the middle of the range).</p>
+     * <p><b>Note:</b> The median ordering places NaN after all other values, so the result is NaN only
+     * when NaN occupies the median position. The list is not modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2288,6 +2289,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * selected.clear();
      * list.forEach(4, -1, selected::add);   // selected is [5.0, 4.0, 3.0, 2.0, 1.0]
      * }</pre>
+     *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
@@ -2647,6 +2651,9 @@ public final class FloatList extends PrimitiveList<Float, float[], FloatList> {
      * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
      * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
      * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
      *
      * @param fromIndex the index of the first element (inclusive) to copy. Can be greater than toIndex for reverse iteration
      * @param toIndex the index of the last element (exclusive) to copy; use {@code -1} for backward iteration down to and including index 0 ({@code -1} is substituted with 0 only for bounds checking)

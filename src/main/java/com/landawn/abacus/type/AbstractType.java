@@ -1229,20 +1229,20 @@ public abstract class AbstractType<T> implements Type<T> {
 
     /**
      * Checks if a character sequence possibly represents a millisecond timestamp (i.e., a long integer).
-     * A string is considered a possible millisecond value if it has more than 4 characters, the characters at
-     * positions 2 and 4 are both digits - which distinguishes pure numeric values from date strings like
-     * {@code "2023-01-01"} where position 4 is {@code '-'} - and the last character is a digit too, so text
-     * carrying a trailing type suffix ({@code "1700000000000L"}) or a time zone is not read as a timestamp.
+     * A sequence is considered a possible millisecond value if it has more than 4 characters and consists
+     * of decimal digits, optionally preceded by {@code '+'} or {@code '-'}. Hexadecimal prefixes, type
+     * suffixes, and date separators are rejected. This checks the syntax only; the subsequent long parser
+     * checks whether the value fits in the {@code long} range.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Check numeric timestamp
      * boolean result1 = isPossibleMillis("1234567890");
-     * // result1: true (positions 2 and 4 are digits)
+     * // result1: true (decimal integer longer than four characters)
      *
      * // Check ISO date format
      * boolean result2 = isPossibleMillis("2023-01-01");
-     * // result2: false (position 4 is '-', not a digit)
+     * // result2: false (contains date separators)
      *
      * // Check short string
      * boolean result3 = isPossibleMillis("123");
@@ -1255,31 +1255,27 @@ public abstract class AbstractType<T> implements Type<T> {
     protected static boolean isPossibleMillis(final CharSequence dateTime) {
         final int len = dateTime.length();
 
-        if (len > 4) {
-            char ch = dateTime.charAt(2);
+        if (len <= 4) {
+            return false;
+        }
 
-            if (ch >= '0' && ch <= '9') {
-                ch = dateTime.charAt(4);
-
-                return ch >= '0' && ch <= '9' && isDigit(dateTime.charAt(len - 1));
+        for (int i = dateTime.charAt(0) == '-' || dateTime.charAt(0) == '+' ? 1 : 0; i < len; i++) {
+            if (!isDigit(dateTime.charAt(i))) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     /**
      * Checks if a region of a character array possibly represents a millisecond timestamp
-     * (i.e., a long integer). The region is considered a possible millisecond value if it has
-     * more than 4 characters, the characters at relative positions 2 and 4 are both digits -
-     * which distinguishes pure numeric values from date strings where position 4 is a separator -
-     * and the last character of the region is a digit too.
+     * (i.e., a long integer). The region must have more than 4 characters and contain decimal digits,
+     * optionally preceded by {@code '+'} or {@code '-'}. Range checking is left to the subsequent long parser.
      * <p>
-     * The last-character test is what keeps the {@code char[]} readers in step with their {@code String}
-     * counterparts: {@link #parseLong(char[], int, int)} tolerates a trailing {@code l}/{@code L}/{@code f}/
-     * {@code F}/{@code d}/{@code D} type suffix that {@link Long#parseLong(String)} rejects, so without it
-     * {@code "1700000000000L"} would be read as a timestamp from a {@code char[]} and as a date from a
-     * {@code String}.
+     * Checking every digit keeps the {@code char[]} readers in step with their {@code String} counterparts:
+     * {@link #parseLong(char[], int, int)} also accepts type suffixes and, for long tokens, hexadecimal
+     * prefixes that {@link Long#parseLong(String)} rejects. Neither form is a decimal millisecond timestamp.
      * </p>
      *
      * @param cbuf the character array to inspect
@@ -1288,21 +1284,31 @@ public abstract class AbstractType<T> implements Type<T> {
      * @return {@code true} if the character region could represent a millisecond timestamp
      */
     protected static boolean isPossibleMillis(final char[] cbuf, final int offset, final int len) {
-        if (len > 4) {
-            char ch = cbuf[offset + 2];
+        if (len <= 4) {
+            return false;
+        }
 
-            if (ch >= '0' && ch <= '9') {
-                ch = cbuf[offset + 4];
-
-                return ch >= '0' && ch <= '9' && isDigit(cbuf[offset + len - 1]);
+        for (int i = cbuf[offset] == '-' || cbuf[offset] == '+' ? 1 : 0; i < len; i++) {
+            if (!isDigit(cbuf[offset + i])) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     private static boolean isDigit(final char ch) {
         return ch >= '0' && ch <= '9';
+    }
+
+    /**
+     * Returns whether a character is one of the supported numeric literal suffixes.
+     *
+     * @param ch the character to check
+     * @return {@code true} for {@code l}, {@code L}, {@code f}, {@code F}, {@code d}, or {@code D}
+     */
+    protected static boolean isNumericTypeSuffix(final char ch) {
+        return ch == 'l' || ch == 'L' || ch == 'f' || ch == 'F' || ch == 'd' || ch == 'D';
     }
 
     /**
@@ -1341,7 +1347,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
         char ch = cbuf[offset + len - 1];
 
-        if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
+        if (isNumericTypeSuffix(ch)) {
             len = len - 1; // ignore the suffix
 
             if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {
@@ -1418,7 +1424,7 @@ public abstract class AbstractType<T> implements Type<T> {
 
         char ch = cbuf[offset + len - 1];
 
-        if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
+        if (isNumericTypeSuffix(ch)) {
             len = len - 1; // ignore the suffix
 
             if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {

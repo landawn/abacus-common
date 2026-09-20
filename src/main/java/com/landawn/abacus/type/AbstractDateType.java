@@ -38,8 +38,9 @@ public abstract class AbstractDateType<T extends Date> extends AbstractType<T> {
      * Constructs an {@code AbstractDateType} with the specified type name.
      *
      * @param typeName the name of the date type (e.g., "Date", "Time", "Timestamp")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractDateType(final String typeName) {
+    protected AbstractDateType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 

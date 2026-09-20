@@ -127,7 +127,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     IteratorStream(final Iterator<? extends T> values, final boolean sorted, final Comparator<? super T> comparator,
             final Collection<LocalRunnable> closeHandlers) throws IllegalArgumentException {
         super(sorted, comparator, closeHandlers);
-        checkArgNotNull(values);
+        checkArgNotNull(values, cs.values);
 
         ObjIteratorEx<T> tmp = null;
 
@@ -141,7 +141,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     return values.next();
                 }
             };
@@ -202,7 +202,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -254,7 +254,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -313,7 +313,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -330,7 +330,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * Returns a stream consisting of the results of applying the given mapper function
      * to the elements of this stream.
      *
-     * <p>This is a stateless intermediate operation. The resulting stream is not sorted.
+     * <p>This is a stateless intermediate operation. The resulting stream is not marked as sorted.
      *
      * @param <R> the type of elements produced by the mapper
      * @param mapper the function to apply to each element
@@ -351,7 +351,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 return mapper.apply(elements.next());
             }
 
@@ -363,10 +363,10 @@ class IteratorStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment); //NOSONAR
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             @SuppressWarnings("unchecked")
@@ -395,7 +395,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -424,10 +424,10 @@ class IteratorStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             @SuppressWarnings("unchecked")
@@ -462,7 +462,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -514,7 +514,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (isFirst) {
                     final T first = elements.next();
                     isFirst = false;
@@ -564,7 +564,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (isFirst) {
                     final T first = elements.next();
                     isFirst = false;
@@ -593,7 +593,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 next = elements.next();
 
                 if (hasNext = elements.hasNext()) {
@@ -621,7 +621,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 final T next = elements.next();
 
                 if (elements.hasNext()) {
@@ -647,7 +647,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 return mapper.applyAsChar(elements.next());
             }
 
@@ -667,7 +667,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 return mapper.applyAsByte(elements.next());
             }
 
@@ -687,7 +687,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 return mapper.applyAsShort(elements.next());
             }
 
@@ -707,7 +707,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return mapper.applyAsInt(elements.next());
             }
 
@@ -727,7 +727,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 return mapper.applyAsLong(elements.next());
             }
 
@@ -747,7 +747,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 return mapper.applyAsFloat(elements.next());
             }
 
@@ -767,7 +767,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 return mapper.applyAsDouble(elements.next());
             }
 
@@ -807,7 +807,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -854,7 +854,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -893,7 +893,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -936,7 +936,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -994,7 +994,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1037,7 +1037,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1095,7 +1095,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1138,7 +1138,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1196,7 +1196,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1239,7 +1239,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1297,7 +1297,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1340,7 +1340,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1398,7 +1398,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1441,7 +1441,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1499,7 +1499,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1542,7 +1542,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1600,7 +1600,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1608,6 +1608,38 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return cur[idx++];
             }
         }, false);
+    }
+
+    /**
+     * Advances by {@code groups * groupSize - buffered} source elements without truncating a
+     * product that exceeds {@link Long#MAX_VALUE}. The source may contain more than that many
+     * elements, so oversized requests are divided into representable advances until the request
+     * is satisfied or the source is exhausted.
+     *
+     * @param source the source iterator
+     * @param groups the positive number of groups to skip
+     * @param groupSize the positive number of source elements per group
+     * @param buffered the non-negative prefix already removed from the source; must not exceed the product
+     */
+    private static void advanceSource(final ObjIteratorEx<?> source, long groups, final int groupSize, int buffered) {
+        final long groupsPerAdvance = Long.MAX_VALUE / groupSize;
+
+        while (groups > 0) {
+            final long batch = Math.min(groups, groupsPerAdvance);
+            final long distance = batch * groupSize;
+            final int bufferedInBatch = (int) Math.min(distance, buffered);
+
+            if (distance > bufferedInBatch) {
+                source.advance(distance - bufferedInBatch);
+            }
+
+            buffered -= bufferedInBatch;
+            groups -= batch;
+
+            if (groups > 0 && !source.hasNext()) {
+                return;
+            }
+        }
     }
 
     @Override
@@ -1625,7 +1657,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public C next() {
+            public C next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1653,7 +1685,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return;
                 }
 
-                elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
+                advanceSource(elements, n, chunkSize, 0);
             }
         }, false, null);
     }
@@ -1675,7 +1707,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1703,7 +1735,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return;
                 }
 
-                elements.advance(n > Long.MAX_VALUE / chunkSize ? Long.MAX_VALUE : n * chunkSize);
+                advanceSource(elements, n, chunkSize, 0);
             }
         }, false, null);
     }
@@ -1726,7 +1758,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public C next() {
+            public C next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1780,7 +1812,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1840,7 +1872,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public C next() {
+            public C next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1900,10 +1932,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return 0;
                 }
 
-                // ObjIteratorEx.count() is a long-valued contract. Saturate the logical
-                // prefix-plus-source size so a valid Long.MAX_VALUE count cannot wrap negative.
-                final long len = remaining > Long.MAX_VALUE - prevSize ? Long.MAX_VALUE : prevSize + remaining;
-                return countSlidingWindows(len, windowSize, increment);
+                return countSlidingWindows(remaining, windowSize, increment, prevSize);
             }
 
             @Override
@@ -1914,13 +1943,12 @@ class IteratorStream<T> extends AbstractStream<T> {
 
                 if (increment >= windowSize) {
                     //noinspection DuplicateExpressions
-                    elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
+                    advanceSource(elements, n, increment, 0);
                 } else {
-                    @SuppressWarnings("DuplicateExpressions")
-                    final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                     final int prevSize = queue == null ? 0 : queue.size(); //NOSONAR
 
-                    if (m < prevSize) {
+                    if (n <= Long.MAX_VALUE / increment && n * increment < prevSize) {
+                        final long m = n * increment;
                         for (int i = 0; i < m; i++) {
                             queue.removeFirst();
                         }
@@ -1929,9 +1957,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                             queue.clear();
                         }
 
-                        if (m - prevSize > 0) {
-                            elements.advance(m - prevSize);
-                        }
+                        advanceSource(elements, n, increment, prevSize);
                     }
                 }
 
@@ -1979,7 +2005,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2041,10 +2067,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return 0;
                 }
 
-                // ObjIteratorEx.count() is a long-valued contract. Saturate the logical
-                // prefix-plus-source size so a valid Long.MAX_VALUE count cannot wrap negative.
-                final long len = remaining > Long.MAX_VALUE - prevSize ? Long.MAX_VALUE : prevSize + remaining;
-                return countSlidingWindows(len, windowSize, increment);
+                return countSlidingWindows(remaining, windowSize, increment, prevSize);
             }
 
             @Override
@@ -2055,13 +2078,12 @@ class IteratorStream<T> extends AbstractStream<T> {
 
                 if (increment >= windowSize) {
                     //noinspection DuplicateExpressions
-                    elements.advance(n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
+                    advanceSource(elements, n, increment, 0);
                 } else {
-                    @SuppressWarnings("DuplicateExpressions")
-                    final long m = (n > Long.MAX_VALUE / increment ? Long.MAX_VALUE : n * increment);
                     final int prevSize = queue == null ? 0 : queue.size(); //NOSONAR
 
-                    if (m < prevSize) {
+                    if (n <= Long.MAX_VALUE / increment && n * increment < prevSize) {
+                        final long m = n * increment;
                         for (int i = 0; i < m; i++) {
                             queue.removeFirst();
                         }
@@ -2070,9 +2092,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                             queue.clear();
                         }
 
-                        if (m - prevSize > 0) {
-                            elements.advance(m - prevSize);
-                        }
+                        advanceSource(elements, n, increment, prevSize);
                     }
                 }
 
@@ -2093,6 +2113,7 @@ class IteratorStream<T> extends AbstractStream<T> {
     /**
      * Returns a stream consisting of the distinct elements of this stream, preserving encounter order.
      * Equality and hashing, rather than ordering equivalence, determine whether elements are duplicates.
+     * Array elements use deep content equality and hashing.
      * This remains true for naturally sorted streams because a type's natural ordering is not required
      * to be consistent with {@link Object#equals(Object)}.
      *
@@ -2139,7 +2160,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cnt >= maxSize) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2221,7 +2242,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 skipElements();
 
                 return elements.next();
@@ -2288,7 +2309,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -2428,7 +2449,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 final T next = elements.next();
                 action.accept(next);
                 return next;
@@ -2524,10 +2545,10 @@ class IteratorStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment);
 
         try {
             boolean isFirst = true;
@@ -2564,10 +2585,10 @@ class IteratorStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         try {
             boolean isFirst = true;
@@ -2785,6 +2806,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param accumulator a function that combines the running result with the next element
      * @return an Optional containing the result of folding all elements left-to-right,
      *         or an empty Optional if the stream is empty
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
@@ -2805,7 +2827,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 result = accumulator.apply(result, elements.next());
             }
 
-            return Optional.ofNullable(result);
+            return Optional.of(result);
         } finally {
             close();
         }
@@ -2852,6 +2874,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param accumulator the function to combine elements right-to-left
      * @return an Optional containing the result of folding all elements right-to-left,
      *         or an empty Optional if the stream is empty
+     * @throws NullPointerException if the final reduction result is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
@@ -2899,6 +2922,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      *                    elements
      * @return an Optional describing the reduction result, or an empty Optional if the stream
      *         is empty
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
@@ -3045,7 +3069,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -3119,7 +3143,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3141,6 +3165,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param comparator the comparator used to compare elements
      * @return an Optional containing the minimum element, or an empty Optional if the stream is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -3154,7 +3179,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             if (!elements.hasNext()) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator, comparator())) {
-                return Optional.ofNullable(elements.next());
+                return Optional.of(elements.next());
             }
 
             T candidate = elements.next();
@@ -3167,7 +3192,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
             }
 
-            return Optional.ofNullable(candidate);
+            return Optional.of(candidate);
         } finally {
             close();
         }
@@ -3183,6 +3208,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param comparator the comparator used to compare elements
      * @return an Optional containing the maximum element, or an empty Optional if the stream is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -3202,7 +3228,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     next = elements.next();
                 }
 
-                return Optional.ofNullable(next);
+                return Optional.of(next);
             }
 
             T candidate = elements.next();
@@ -3215,7 +3241,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
             }
 
-            return Optional.ofNullable(candidate);
+            return Optional.of(candidate);
         } finally {
             close();
         }
@@ -3242,7 +3268,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     queue.offer(elements.next());
                 }
 
-                return queue.size() < k ? Optional.empty() : Optional.ofNullable(queue.peek());
+                return queue.size() < k ? Optional.empty() : Optional.of(queue.peek());
             }
 
             final Comparator<? super T> cmp = comparator;
@@ -3267,7 +3293,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
             }
 
-            return queue.size() < k ? Optional.empty() : Optional.ofNullable(queue.peek().value());
+            return queue.size() < k ? Optional.empty() : Optional.of(queue.peek().value());
         } finally {
             close();
         }
@@ -3427,6 +3453,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against
      * @return an Optional containing the first matching element, or an empty Optional if none match
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws a checked exception
@@ -3445,7 +3472,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 e = elements.next();
 
                 if (predicate.test(e)) {
-                    return Optional.ofNullable(e);
+                    return Optional.of(e);
                 }
             }
         } finally {
@@ -3465,6 +3492,7 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against
      * @return an Optional containing the last matching element, or an empty Optional if none match
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws a checked exception
@@ -3488,7 +3516,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
             }
 
-            return result == NONE ? Optional.empty() : Optional.ofNullable(result);
+            return result == NONE ? Optional.empty() : Optional.of(result);
         } finally {
             close();
         }
@@ -3515,7 +3543,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }
@@ -3586,7 +3614,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }
@@ -3627,13 +3655,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                             iter = s == null ? ObjIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -3661,7 +3683,7 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }

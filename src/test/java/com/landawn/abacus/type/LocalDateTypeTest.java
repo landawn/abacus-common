@@ -262,8 +262,7 @@ public class LocalDateTypeTest extends TestBase {
 
     @Test
     public void reviewFixes20260906_T1002_T1003_numericGrammarAndOverflow() {
-        for (final String s : new String[] { "170000000000000000000", "9223372036854775808", "-9223372036854775809", "0x1F4A0", "1700000000000L",
-                "12345L" }) {
+        for (final String s : new String[] { "170000000000000000000", "9223372036854775808", "-9223372036854775809", "0x1F4A0", "1700000000000L", "12345L" }) {
             assertThrows(DateTimeParseException.class, () -> localDateType.valueOf(s), s);
             assertThrows(DateTimeParseException.class, () -> localDateType.valueOf(s.toCharArray(), 0, s.length()), s);
         }

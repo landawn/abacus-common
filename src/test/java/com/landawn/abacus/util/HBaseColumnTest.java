@@ -266,66 +266,16 @@ public class HBaseColumnTest extends TestBase {
 
     @Test
     public void testEqualValuesHaveTheSameOrderRelativeToOtherValues() {
-        class Value {
-            final int id;
-            final String label;
-
-            Value(int id, String label) {
-                this.id = id;
-                this.label = label;
-            }
-
-            @Override
-            public boolean equals(Object other) {
-                return other instanceof Value value && id == value.id;
-            }
-
-            @Override
-            public int hashCode() {
-                return 0;
-            }
-
-            @Override
-            public String toString() {
-                return label;
-            }
-        }
-
-        class SubValue extends Value {
-            SubValue(int id, String label) {
-                super(id, label);
-            }
-        }
-
-        for (int scenario = 0; scenario < 3; scenario++) {
-            final int id = scenario * 2;
-            HBaseColumn<Value> first = HBaseColumn.valueOf(new Value(id, "a"), 100L);
-            HBaseColumn<Value> other = HBaseColumn.valueOf(new Value(id + 1, scenario == 0 ? "a" : "m"), 100L);
-            HBaseColumn<Value> equal = HBaseColumn.valueOf(scenario == 2 ? new SubValue(id, "z") : new Value(id, scenario == 0 ? "a" : "z"), 100L);
-
-            for (Comparator<HBaseColumn<Value>> comparator : List.<Comparator<HBaseColumn<Value>>> of(Comparator.naturalOrder(),
-                    HBaseColumn.DESC_HBASE_COLUMN_COMPARATOR::compare)) {
-                Assertions.assertEquals(0, comparator.compare(first, equal));
-                Assertions.assertEquals(Integer.signum(comparator.compare(first, other)), Integer.signum(comparator.compare(equal, other)));
-                Assertions.assertEquals(Integer.signum(comparator.compare(other, first)), Integer.signum(comparator.compare(other, equal)));
-
-                SortedSet<HBaseColumn<Value>> columns = new TreeSet<>(comparator);
-                columns.add(first);
-                columns.add(other);
-                Assertions.assertTrue(columns.contains(equal));
-                Assertions.assertFalse(columns.add(equal));
-                Assertions.assertEquals(2, columns.size());
-            }
-        }
-    }
-
-    @Test
-    public void testReplacementValueOrderRetainsItsOwnWeakMapKey() throws Exception {
-        class Value {
+        class Value implements Comparable<Value> {
             final int id;
 
             Value(int id) {
                 this.id = id;
+            }
+
+            @Override
+            public int compareTo(Value other) {
+                return Integer.compare(id, other.id);
             }
 
             @Override
@@ -337,39 +287,115 @@ public class HBaseColumnTest extends TestBase {
             public int hashCode() {
                 return id;
             }
-        }
 
-        final java.lang.reflect.Field registryField = HBaseColumn.class.getDeclaredField("valueOrders");
-        registryField.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        final Map<Object, java.lang.ref.WeakReference<?>> registry = (Map<Object, java.lang.ref.WeakReference<?>>) registryField.get(null);
-        final Value staleKey = new Value(1);
-        final Value replacementKey = new Value(1);
-        final Value otherKey = new Value(2);
-
-        synchronized (registry) {
-            // Simulate a collected representative with its older equal key still live,
-            // without depending on the timing of a garbage collection.
-            registry.put(staleKey, new java.lang.ref.WeakReference<>(null));
-            try {
-                final HBaseColumn<Value> replacement = HBaseColumn.valueOf(replacementKey, 1);
-                final HBaseColumn<Value> other = HBaseColumn.valueOf(otherKey, 1);
-                final HBaseColumn<Value> equal = HBaseColumn.valueOf(new Value(1), 1);
-                final int sign = Integer.signum(replacement.compareTo(other));
-
-                Assertions.assertSame(replacementKey, registry.keySet().stream().filter(replacementKey::equals).findFirst().orElseThrow());
-                final Object representative = registry.get(replacementKey).get();
-                Assertions.assertNotNull(representative);
-                final java.lang.reflect.Field valueField = representative.getClass().getDeclaredField("value");
-                valueField.setAccessible(true);
-                Assertions.assertSame(replacementKey, valueField.get(representative));
-                Assertions.assertEquals(0, replacement.compareTo(equal));
-                Assertions.assertEquals(sign, Integer.signum(equal.compareTo(other)));
-            } finally {
-                registry.remove(replacementKey);
-                registry.remove(otherKey);
+            @Override
+            public String toString() {
+                return "Value(" + id + ")";
             }
         }
+
+        final HBaseColumn<Value> first = HBaseColumn.valueOf(new Value(1), 100L);
+        final HBaseColumn<Value> equal = HBaseColumn.valueOf(new Value(1), 100L);
+        final HBaseColumn<Value> other = HBaseColumn.valueOf(new Value(2), 100L);
+
+        for (Comparator<HBaseColumn<Value>> comparator : List.<Comparator<HBaseColumn<Value>>> of(Comparator.naturalOrder(),
+                HBaseColumn.DESC_HBASE_COLUMN_COMPARATOR::compare)) {
+            Assertions.assertEquals(0, comparator.compare(first, equal));
+            Assertions.assertEquals(Integer.signum(comparator.compare(first, other)), Integer.signum(comparator.compare(equal, other)));
+            Assertions.assertEquals(Integer.signum(comparator.compare(other, first)), Integer.signum(comparator.compare(other, equal)));
+
+            SortedSet<HBaseColumn<Value>> columns = new TreeSet<>(comparator);
+            columns.add(first);
+            columns.add(other);
+            Assertions.assertTrue(columns.contains(equal));
+            Assertions.assertFalse(columns.add(equal));
+            Assertions.assertEquals(2, columns.size());
+        }
+    }
+
+    @Test
+    public void testValueTieBreakIsDerivedFromTheValuesAndNotFromEncounterOrder() {
+        class Opaque {
+            // Not Comparable, equal only to itself, and every instance renders identically: nothing
+            // reproducible tells two instances apart.
+            @Override
+            public int hashCode() {
+                return 7;
+            }
+
+            @Override
+            public String toString() {
+                return "opaque";
+            }
+        }
+
+        final HBaseColumn<Opaque> first = HBaseColumn.valueOf(new Opaque(), 100L);
+        final HBaseColumn<Opaque> second = HBaseColumn.valueOf(new Opaque(), 100L);
+
+        // The order must not fall back to a process-local sequence or identity hash code, which would make the
+        // same data sort differently from one run to the next.
+        Assertions.assertEquals(0, first.compareTo(second));
+        Assertions.assertEquals(0, second.compareTo(first));
+        Assertions.assertEquals(0, HBaseColumn.DESC_HBASE_COLUMN_COMPARATOR.compare(first, second));
+
+        final TreeSet<HBaseColumn<Opaque>> set = new TreeSet<>();
+        set.add(first);
+        set.add(second);
+        Assertions.assertEquals(1, set.size());
+
+        // No interning table is consulted any more, so nothing is registered for a value.
+        Assertions.assertTrue(java.util.Arrays.stream(HBaseColumn.class.getDeclaredFields())
+                .noneMatch(f -> java.util.WeakHashMap.class.isAssignableFrom(f.getType())));
+    }
+
+    @Test
+    public void testValueOrderDoesNotDependOnConstructionOrder() {
+        final List<String> values = List.of("bb", "a", "ccc");
+        final List<String> ascending = new ArrayList<>();
+        final List<String> descending = new ArrayList<>();
+
+        SortedSet<HBaseColumn<String>> set = new TreeSet<>();
+        for (int i = 0; i < values.size(); i++) {
+            set.add(HBaseColumn.valueOf(values.get(i), 100L));
+        }
+        set.forEach(column -> ascending.add(column.value()));
+
+        set = new TreeSet<>();
+        for (int i = values.size() - 1; i >= 0; i--) {
+            set.add(HBaseColumn.valueOf(values.get(i), 100L));
+        }
+        set.forEach(column -> descending.add(column.value()));
+
+        Assertions.assertEquals(List.of("a", "bb", "ccc"), ascending);
+        Assertions.assertEquals(ascending, descending);
+    }
+
+    @Test
+    public void testCompareToIsATotalOrderAcrossMixedValueTypes() {
+        final List<HBaseColumn<Object>> columns = new ArrayList<>();
+
+        for (Object value : new Object[] { null, "a", "b", 1, 2, 1L, 'c', 3.5d, List.of(1), Set.of(1) }) {
+            columns.add(HBaseColumn.valueOf(value, 100L));
+        }
+
+        for (HBaseColumn<Object> x : columns) {
+            for (HBaseColumn<Object> y : columns) {
+                Assertions.assertEquals(-Integer.signum(y.compareTo(x)), Integer.signum(x.compareTo(y)));
+
+                for (HBaseColumn<Object> z : columns) {
+                    if (x.compareTo(y) < 0 && y.compareTo(z) < 0) {
+                        Assertions.assertTrue(x.compareTo(z) < 0);
+                    }
+
+                    if (x.compareTo(y) == 0) {
+                        Assertions.assertEquals(Integer.signum(x.compareTo(z)), Integer.signum(y.compareTo(z)));
+                    }
+                }
+            }
+        }
+
+        // A TreeSet throws "Comparison method violates its general contract" on an inconsistent order.
+        Assertions.assertEquals(columns.size(), new TreeSet<>(columns).size());
     }
 
     @Test

@@ -90,7 +90,7 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * @param str the string to convert, may be {@code null}
      * @return the {@code Character} value, or the default value if the input is empty or {@code null}
      * @throws NumberFormatException if a multi-character string cannot be parsed as a numeric character code
-     * @throws IllegalArgumentException if a multi-character string parses to a numeric value outside the {@code char}         range.
+     * @throws IllegalArgumentException if a multi-character string parses to a numeric value outside the {@code char} range.
      * @see #valueOf(Object)
      * @see #stringOf(Character)
      */

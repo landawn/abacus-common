@@ -32,7 +32,7 @@ public class SplitterRegressionBTest extends TestBase {
      * method reference is no longer ambiguous. <b>This whole section failing to compile is the regression.</b>
      */
     @Nested
-    public class InlineLambdasAndMethodReferencesCompile {
+    public class InlineLambdasAndMethodReferencesCompile extends TestBase {
 
         @Test
         public void mapperOverloadTakesAMethodReference() {
@@ -93,7 +93,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** B4: a Supplier returning {@code null} used to produce the bare message {@code "supplier result"}. */
     @Nested
-    public class SupplierReturningNullMessage {
+    public class SupplierReturningNullMessage extends TestBase {
 
         @Test
         public void splitterSupplierMessageIsASentence() {
@@ -133,7 +133,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** D6: an empty output array is now a no-op instead of an error; {@code null} still throws. */
     @Nested
-    public class EmptyOutputArrayIsANoOp {
+    public class EmptyOutputArrayIsANoOp extends TestBase {
 
         @Test
         public void emptyArrayIsAccepted() {
@@ -163,7 +163,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** D7: trim and strip are mutually exclusive and the last one called wins, matching {@link Joiner}. */
     @Nested
-    public class TrimAndStripAreLastCallWins {
+    public class TrimAndStripAreLastCallWins extends TestBase {
 
         private static final String SOURCE = "a\t, b ";
 
@@ -206,7 +206,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** B2 (documentation half): {@code trimResults()} removes only {@code U+0020}. */
     @Nested
-    public class TrimResultsIsSpaceOnly {
+    public class TrimResultsIsSpaceOnly extends TestBase {
 
         @Test
         public void tabsAndNewlinesSurviveTrimButNotStrip() {
@@ -235,7 +235,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** J2: the empty-token conversion rule, previously documented only on {@code splitToArray}. */
     @Nested
-    public class EmptyTokenConversion {
+    public class EmptyTokenConversion extends TestBase {
 
         @Test
         public void boxedTypesConvertAnEmptyTokenToNull() {
@@ -270,7 +270,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** J3: the limit counts returned substrings, so omitted empty tokens do not consume it. */
     @Nested
-    public class LimitInteractionWithOmitEmptyStrings {
+    public class LimitInteractionWithOmitEmptyStrings extends TestBase {
 
         @Test
         public void omittedEmptyTokensDoNotConsumeTheLimit() {
@@ -297,7 +297,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** J4: the key rules a {@code MapSplitter} applies when it builds a {@code Map}. */
     @Nested
-    public class MapSplitterKeyRules {
+    public class MapSplitterKeyRules extends TestBase {
 
         @Test
         public void duplicateKeysAreLastOneWins() {
@@ -338,7 +338,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** J7: {@code MapSplitter.omitEmptyStrings(boolean)} is the only way to keep empty entries, so it is kept. */
     @Nested
-    public class MapSplitterKeepsEmptyEntriesOnRequest {
+    public class MapSplitterKeepsEmptyEntriesOnRequest extends TestBase {
 
         @Test
         public void emptyEntriesAreOmittedByDefault() {
@@ -359,7 +359,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** O3: the dead-condition removal in the three iterators must not move any boundary. */
     @Nested
-    public class IteratorBoundariesUnchanged {
+    public class IteratorBoundariesUnchanged extends TestBase {
 
         @Test
         public void allThreeEnginesAgreeOnEveryEdgeShape() {
@@ -402,7 +402,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** D5: the MapSplitter constructor reconfigures the splitters it is handed; the factories pass fresh ones. */
     @Nested
-    public class MapSplitterFactoriesDoNotShareSplitters {
+    public class MapSplitterFactoriesDoNotShareSplitters extends TestBase {
 
         @Test
         public void eachFactoryCallProducesIndependentSplitters() {
@@ -429,7 +429,7 @@ public class SplitterRegressionBTest extends TestBase {
 
     /** O1/J6 have no runtime effect; this only pins the null-argument contracts that surround them. */
     @Nested
-    public class ArgumentValidationUnchanged {
+    public class ArgumentValidationUnchanged extends TestBase {
 
         @Test
         public void nullArgumentsStillThrowIllegalArgumentException() {

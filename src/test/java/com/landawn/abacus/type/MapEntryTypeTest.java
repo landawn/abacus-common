@@ -331,6 +331,7 @@ public class MapEntryTypeTest extends TestBase {
         final MapEntryType<String, Map<String, Integer>> t2 = type;
         assertEquals("{\"é\": {\"é中\": 2}}", t2.stringOf(new AbstractMap.SimpleEntry<>("é", uni)));
     }
+
     // R05-2 sibling (2026-09-08): serializeTo writes the value through AbstractTupleType.serializeSlot, which
     // dispatches on the runtime class for a declared Object slot; appendTo went straight to the declared handler,
     // so a Map.Entry<String, Object> holding a map appended ObjectType's JSON stringOf form ({"k": 1}) where the

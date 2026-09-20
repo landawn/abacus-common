@@ -77,6 +77,31 @@ public class AvroSerConfigTest extends TestBase {
 
     // copy
     @Test
+    public void unknownFieldPolicyParticipatesInTheConfigurationContract() {
+        final Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
+        final AvroSerConfig strict = AvroSerConfig.create().setSchema(schema);
+        assertFalse(strict.isIgnoreUnknownFields());
+
+        final AvroSerConfig projection = strict.copy();
+        assertSame(projection, projection.setIgnoreUnknownFields(true));
+        assertFalse(strict.equals(projection));
+        assertFalse(projection.equals(strict));
+        assertTrue(projection.toString().contains("ignoreUnknownFields=true"));
+        assertTrue(strict.toString().contains("ignoreUnknownFields=false"));
+
+        final AvroSerConfig copy = projection.copy();
+        assertNotSame(projection, copy);
+        assertTrue(copy.isIgnoreUnknownFields());
+        assertEquals(projection, copy);
+        assertEquals(copy, projection);
+        assertEquals(projection.hashCode(), copy.hashCode());
+        copy.setIgnoreUnknownFields(false);
+        assertTrue(projection.isIgnoreUnknownFields());
+        assertEquals(strict, copy);
+        assertEquals(strict.hashCode(), copy.hashCode());
+    }
+
+    @Test
     public void testCopy() {
         Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
         config.setSchema(schema);
@@ -228,8 +253,7 @@ public class AvroSerConfigTest extends TestBase {
     public void reviewFixes20260906_equalsAndHashCodeDelegateToParent() {
         final Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
         final Schema sameSchema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
-        final Schema otherSchema = new Schema.Parser()
-                .parse("{\"type\":\"record\",\"name\":\"Other\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
+        final Schema otherSchema = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Other\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
 
         final AvroSerConfig a = AvroSerConfig.create().setSchema(schema).setExclusion(Exclusion.NULL).setSkipTransientField(false);
         final Set<String> ignored = new HashSet<>();

@@ -6803,6 +6803,7 @@ public class IntStreamTest extends TestBase {
     public void testOfIndicesTreatsNullIndexAsEnd() {
         assertArrayEquals(new int[] { 0, 1 }, IntStream.ofIndices(new int[] { 9, 8, 7 }, (a, i) -> i < 2 ? i : null).toArray());
     }
+
     @Test
     public void testAppendIfEmptyNullSupplierResultAppendsNothing() {
         // Matches IntStream.defer(() -> null) and the object streams: a null fallback appends nothing.
@@ -6841,8 +6842,7 @@ public class IntStreamTest extends TestBase {
         final IntStream b = IntStream.of(3);
         b.close();
 
-        assertThrows(IllegalStateException.class,
-                () -> IntStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
+        assertThrows(IllegalStateException.class, () -> IntStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
         assertEquals(1, closed.get());
     }
 }

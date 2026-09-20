@@ -30,6 +30,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.util.ListMultimap;
+import com.landawn.abacus.util.Multiset;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 
@@ -577,5 +580,60 @@ public class JsonHttpMessageConverterTest extends TestBase {
         // Regression guard: a genuine array body still yields the declared element type.
         List<Object> proper = (List<Object>) converter.read(listOfString, null, jsonMessage("[\"x\",\"λ\"]"));
         assertEquals(List.of("x", "λ"), proper);
+    }
+
+    private static Type parameterized(final Type raw, final Type... args) {
+        return new ParameterizedType() {
+            @Override
+            public Type[] getActualTypeArguments() {
+                return args;
+            }
+
+            @Override
+            public Type getRawType() {
+                return raw;
+            }
+
+            @Override
+            public Type getOwnerType() {
+                return null;
+            }
+        };
+    }
+
+    /**
+     * {@code Multiset} and {@code Multimap} satisfy {@code isStructuredValueType}'s stated rule exactly -
+     * they report neither isArray nor isCollection nor isMap, they are serializable, and their {@code stringOf}
+     * emits JSON object text - but they were missing from its list, so the writer fell through to the scalar
+     * path and emitted the container's JSON as a quoted, escaped <i>string</i>, while the reader rejected a
+     * well-formed object body outright.
+     */
+    @Test
+    public void test_multisetAndMultimap_areStructuredNotScalar_regression_20260918() throws IOException {
+        final Multiset<String> multiset = N.newMultiset();
+        multiset.add("x", 2);
+
+        final Type multisetType = parameterized(Multiset.class, String.class);
+        StringWriter writer = new StringWriter();
+        converter.writeInternal(multiset, multisetType, writer);
+        // Before the fix this was the quoted string "{\"x\": 2}" instead of a JSON object.
+        assertEquals("{\"x\": 2}", writer.toString());
+
+        final ListMultimap<String, String> multimap = N.newListMultimap();
+        multimap.put("k", "v");
+
+        final Type multimapType = parameterized(ListMultimap.class, String.class, String.class);
+        writer = new StringWriter();
+        converter.writeInternal(multimap, multimapType, writer);
+        assertEquals("{\"k\": [\"v\"]}", writer.toString());
+
+        // Before the fix both of these threw "Expected one JSON scalar value".
+        final Object readMultiset = converter.read(multisetType, null, jsonMessage("{\"x\":2}"));
+        assertInstanceOf(Multiset.class, readMultiset);
+        assertEquals(2, ((Multiset<?>) readMultiset).count("x"));
+
+        final Object readMultimap = converter.read(multimapType, null, jsonMessage("{\"k\":[\"v\"]}"));
+        assertInstanceOf(ListMultimap.class, readMultimap);
+        assertEquals(List.of("v"), ((ListMultimap<?, ?>) readMultimap).get("k"));
     }
 }

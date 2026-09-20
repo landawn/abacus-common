@@ -146,6 +146,7 @@ public class CommonUtilAsTest extends CommonUtilTestSupport {
         assertEquals(4, multiset.size());
         assertEquals(2, multiset.count("a"));
     }
+
     private static <T> T[] pairViaAsArray(final T a, final T b) {
         return CommonUtil.asArray(a, b);
     }

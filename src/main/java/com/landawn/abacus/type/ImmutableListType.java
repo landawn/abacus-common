@@ -151,8 +151,9 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
     }
 
     /**
-     * Indicates whether values of this type are immutable.
-     * An {@link ImmutableList} cannot be modified after construction, so its values are immutable by construction.
+     * Indicates that this handler treats the container structure as immutable.
+     * The container prevents mutation through its own API; contained objects may still be mutable.
+     * A container created by wrapping an existing collection or map may also reflect changes to that backing data.
      *
      * @return {@code true}, always
      */
@@ -281,11 +282,10 @@ public class ImmutableListType<E> extends AbstractType<ImmutableList<E>> {
      * @param parameterTypeName the name of the element type
      * @param isDeclaringName {@code true} to generate a declaring name with simple class names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "ImmutableList&lt;String&gt;" or "com.landawn.abacus.util.ImmutableList&lt;java.lang.String&gt;")
-     * @throws NullPointerException if {@code typeClass} is {@code null}.
-     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)
-            throws NullPointerException, IllegalArgumentException {
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {

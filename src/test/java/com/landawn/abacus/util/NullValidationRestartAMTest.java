@@ -80,10 +80,10 @@ public class NullValidationRestartAMTest extends TestBase {
         final Collection<Integer> collection = new LinkedHashSet<>(list);
         assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle(collection, null));
         assertEquals(new LinkedHashSet<>(list), collection);
-        // List checks size before rnd; the Collection overload checks rnd before its size no-op.
-        assertDoesNotThrow(() -> N.shuffle((List<?>) null, null));
-        assertDoesNotThrow(() -> N.shuffle(Collections.emptyList(), null));
-        assertDoesNotThrow(() -> N.shuffle(Collections.singletonList(1), null));
+        // Both overloads validate rnd before an empty or singleton no-op.
+        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle((List<?>) null, null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle(Collections.emptyList(), null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle(Collections.singletonList(1), null));
         assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle((Collection<?>) null, null));
         assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle((Collection<?>) Collections.emptyList(), null));
         assertThrowsExactly(IllegalArgumentException.class, () -> N.shuffle((Collection<?>) Collections.singletonList(1), null));
@@ -96,7 +96,7 @@ public class NullValidationRestartAMTest extends TestBase {
             assertDoesNotThrow(() -> shuffle.invoke(primitiveList, unusedRandom));
         }
         assertThrowsExactly(IllegalArgumentException.class, () -> Iterables.copyInto(list, null));
-        assertDoesNotThrow(() -> Iterables.copyInto(Collections.emptyList(), null));
+        assertThrowsExactly(IllegalArgumentException.class, () -> Iterables.copyInto(Collections.emptyList(), null));
     }
 
     @Test

@@ -121,12 +121,10 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * to a concrete numeric type is therefore not portable between the two facades; deserialize into a typed
  * bean when the numeric type matters.</p>
  *
- * <p><b>An I/O failure on a {@code File} target surfaces as an {@link IllegalArgumentException}</b> (from
- * the underlying {@code IOUtil} file-open check, for example when the target is a directory), where
- * {@link JsonMappers} and {@link XmlMappers} raise a
- * {@link com.landawn.abacus.exception.UncheckedIOException} (this library's own class, not
- * {@link java.io.UncheckedIOException}). Both are unchecked and carry the original
- * {@code FileNotFoundException} as the cause.</p>
+ * <p><b>File failures:</b> a directory target is rejected with an {@link IllegalArgumentException}
+ * by {@code IOUtil}'s argument check. Other failures opening or closing the file surface as this
+ * library's {@link com.landawn.abacus.exception.UncheckedIOException}; failures writing JSON are
+ * wrapped by FastJSON2 in a {@link com.alibaba.fastjson2.JSONException}.</p>
  *
  * <p><b>Byte input must be UTF-8 without a byte-order mark.</b> The {@code byte[]} overloads assume UTF-8:
  * a UTF-16 encoded document, or a UTF-8 document carrying a BOM, fails with a
@@ -137,8 +135,9 @@ import com.landawn.abacus.exception.UncheckedIOException;
  * <p><b>File output:</b> the {@code toJson(..., File, ...)} overloads create any missing parent directories
  * of the target file and truncate an existing file. {@link JsonMappers} requires the parent directory to
  * already exist. Truncation happens before serialization runs, so a call that throws part-way leaves the
- * target empty and its previous content gone; serialize to a {@code String} first when the destination must
- * survive a failure.</p>
+ * target empty or partially written and its previous content gone. Serialize to a {@code String} first
+ * to avoid truncating the destination on a serialization failure; this does not protect against an
+ * I/O failure while writing the resulting text.</p>
  *
  * <p><b>Security:</b> This class does not enable automatic type resolution. Enabling
  * {@link JSONReader.Feature#SupportAutoType} allows JSON input to influence the Java type being

@@ -174,6 +174,7 @@ public class CommonUtilHashTest extends CommonUtilTestSupport {
         assertEquals(CommonUtil.hashCodeEverything(nested), CommonUtil.hashCodeEverything(nested.iterator()));
         assertNotEquals(CommonUtil.hashCodeEverything(left), CommonUtil.hashCodeEverything(Collections.singletonMap("values", nested)));
     }
+
     @Test
     public void testHashCode_arrayRangeNullVsEmptyIsInconsistentWithRangeEquals() {
         assertTrue(CommonUtil.equals((Object[]) null, 0, new Object[0], 0, 0));

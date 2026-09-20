@@ -25,8 +25,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class SetCopyPolicyTest {
+public class SetCopyPolicyTest extends TestBase {
     private enum Flag {
         A, B
     }

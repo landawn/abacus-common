@@ -140,6 +140,7 @@ public class TupleTypeTest extends TestBase {
 
         verify(writer).write(any(char[].class));
     }
+
     // The wrapper/tuple-shaped handlers that route every slot through AbstractTupleType.serializeSlot /
     // AbstractTupleType.appendElement. Each name is paired with a factory that wraps a single payload value.
     private static final String[] SLOT_WRAPPERS = { "Nullable<Object>", "Optional<Object>", "JdkOptional<Object>", "Holder<Object>", "Pair<Object, Object>",

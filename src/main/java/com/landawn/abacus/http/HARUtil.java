@@ -74,6 +74,9 @@ import com.landawn.abacus.util.stream.Stream;
  * );
  * }</pre>
  *
+ * <p>Archive traversal validates all entries before applying URL filters or issuing requests. Missing optional
+ * nodes and explicit null optional nodes are empty; other malformed nodes fail with an IllegalArgumentException naming their HAR path.</p>
+ *
  * @see HttpRequest
  * @see HttpResponse
  * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
@@ -295,7 +298,7 @@ public final class HARUtil {
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
      * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request
      * @throws ParsingException if the HAR content cannot be parsed as a JSON object
-     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} (see {@link HttpMethod#PATCH})
+     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @throws NoSuchElementException if no request entry matches {@code targetUrl}
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -328,13 +331,14 @@ public final class HARUtil {
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
      * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request
      * @throws ParsingException if the HAR content cannot be parsed as a JSON object
-     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} (see {@link HttpMethod#PATCH})
+     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @throws NoSuchElementException if no request entry matches {@code filterForTargetUrl}
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
     public static String sendRequest(final File har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException, NoSuchElementException {
+        N.checkArgNotNull(har, cs.har);
         N.checkArgNotNull(filterForTargetUrl, cs.filterForTargetUrl);
 
         return sendRequest(IOUtil.readAllToString(har), filterForTargetUrl);
@@ -354,11 +358,11 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param targetUrl the exact URL to match in the HAR content.
      * @return the response body as a string.
-     * @throws IllegalArgumentException if the HAR content contains no entries under {@code log.entries}, or the matching entry cannot
+     * @throws IllegalArgumentException if {@code har} is {@code null}, the HAR content contains no entries under {@code log.entries}, or the matching entry cannot
      *         be replayed
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
      * @throws ParsingException if the HAR content cannot be parsed as a JSON object
-     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} (see {@link HttpMethod#PATCH})
+     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails
      * @throws NoSuchElementException if no request entry matches {@code targetUrl}
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
@@ -392,11 +396,11 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}, the HAR content contains no entries under
+     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, the HAR content contains no entries under
      *         {@code log.entries}, or the matching entry cannot be replayed
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
      * @throws ParsingException if the HAR content cannot be parsed as a JSON object
-     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} (see {@link HttpMethod#PATCH})
+     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails
      * @throws NoSuchElementException if no request entry matches {@code filterForTargetUrl}
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
@@ -404,21 +408,16 @@ public final class HARUtil {
      */
     public static String sendRequest(final String har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, ParsingException, UnsupportedOperationException, UncheckedIOException, NoSuchElementException {
+        N.checkArgNotNull(har, cs.har);
         N.checkArgNotNull(filterForTargetUrl, cs.filterForTargetUrl);
 
-        final Map<String, ?> map = N.fromJson(har, Map.class);
-        final Object entriesNode = Maps.getByPath(map, "log.entries");
+        final List<Map<String, Object>> entries = readRequestEntries(har);
 
-        if (!(entriesNode instanceof final List<?> entries) || entries.isEmpty()) {
+        if (entries.isEmpty()) {
             throw new IllegalArgumentException("HAR content must contain at least one entry under log.entries");
         }
 
         return Stream.of(entries) //
-                .map(m -> m instanceof Map ? ((Map<?, ?>) m).get("request") : null)
-                .filter(Map.class::isInstance)
-                .map(m -> (Map<String, Object>) m) //NOSONAR
-                .filter(m -> m.get("url") instanceof String)
-                // .peek(m -> N.println(m.get("url")))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .map(requestEntry -> sendRequestByRequestEntry(requestEntry, String.class))
                 .first()
@@ -454,12 +453,13 @@ public final class HARUtil {
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
      * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request
      * @throws ParsingException if the HAR content cannot be parsed as a JSON object
-     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} (see {@link HttpMethod#PATCH})
+     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
     public static List<String> sendRequests(final File har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
+        N.checkArgNotNull(har, cs.har);
         N.checkArgNotNull(filterForTargetUrl, cs.filterForTargetUrl);
 
         return sendRequests(IOUtil.readAllToString(har), filterForTargetUrl);
@@ -483,31 +483,26 @@ public final class HARUtil {
      * @param filterForTargetUrl predicate to test URLs; all matching URLs' requests will be sent.
      * @return a list of response bodies as strings, in the order they appear in the HAR content;
      *         an empty list if the HAR has no entries under {@code log.entries} or none of them match
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}, or a matching entry cannot be replayed
+     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, or a matching entry cannot be replayed
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
      * @throws ParsingException if the HAR content cannot be parsed as a JSON object
-     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} (see {@link HttpMethod#PATCH})
+     * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
     public static List<String> sendRequests(final String har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, ParsingException, UnsupportedOperationException, UncheckedIOException {
+        N.checkArgNotNull(har, cs.har);
         N.checkArgNotNull(filterForTargetUrl, cs.filterForTargetUrl);
 
-        final Map<String, ?> map = N.fromJson(har, Map.class);
-        final Object entriesNode = Maps.getByPath(map, "log.entries");
+        final List<Map<String, Object>> entries = readRequestEntries(har);
 
-        if (!(entriesNode instanceof final List<?> entries) || entries.isEmpty()) {
+        if (entries.isEmpty()) {
             return N.emptyList();
         }
 
         return Stream.of(entries) //
-                .map(m -> m instanceof Map ? ((Map<?, ?>) m).get("request") : null)
-                .filter(Map.class::isInstance)
-                .map(m -> (Map<String, Object>) m)
-                .filter(m -> m.get("url") instanceof String)
-                // .peek(m -> N.println(m.get("url")))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .map(requestEntry -> sendRequestByRequestEntry(requestEntry, String.class))
                 .toList();
@@ -536,7 +531,7 @@ public final class HARUtil {
      * that pulled it, and no later entry is sent.</p>
      *
      * <p>During stream consumption, replay may throw {@link IllegalArgumentException} for an invalid request entry,
-     * {@link UnsupportedOperationException} for a {@code PATCH} request, or {@link UncheckedIOException} for an I/O error.
+     * {@link UnsupportedOperationException} for a {@code PATCH} or {@code CONNECT} request, or {@link UncheckedIOException} for an I/O error.
      * These failures propagate from the consuming operation; see {@link #sendRequestByRequestEntry(Map, Class)}.</p>
      *
      * @param har the HAR file containing captured HTTP requests.
@@ -551,6 +546,7 @@ public final class HARUtil {
      */
     public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamRequests(final File har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(har, cs.har);
         N.checkArgNotNull(filterForTargetUrl, cs.filterForTargetUrl);
 
         return streamRequests(IOUtil.readAllToString(har), filterForTargetUrl);
@@ -573,7 +569,7 @@ public final class HARUtil {
      * that pulled it, and no later entry is sent.</p>
      *
      * <p>During stream consumption, replay may throw {@link IllegalArgumentException} for an invalid request entry,
-     * {@link UnsupportedOperationException} for a {@code PATCH} request, or {@link UncheckedIOException} for an I/O error.
+     * {@link UnsupportedOperationException} for a {@code PATCH} or {@code CONNECT} request, or {@link UncheckedIOException} for an I/O error.
      * These failures propagate from the consuming operation; see {@link #sendRequestByRequestEntry(Map, Class)}.</p>
      *
      * @param har the HAR content as a JSON string.
@@ -581,28 +577,23 @@ public final class HARUtil {
      * @return a stream of tuples where the first element is the request entry map and the second is the
      *         {@code HttpResponse}; an empty stream if the HAR has no entries under {@code log.entries}
      *         or none of them match
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}
      * @throws ParsingException if the HAR content cannot be parsed as a JSON object
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
     public static Stream<Tuple2<Map<String, Object>, HttpResponse>> streamRequests(final String har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, ParsingException {
+        N.checkArgNotNull(har, cs.har);
         N.checkArgNotNull(filterForTargetUrl, cs.filterForTargetUrl);
 
-        final Map<String, ?> map = N.fromJson(har, Map.class);
-        final Object entriesNode = Maps.getByPath(map, "log.entries");
+        final List<Map<String, Object>> entries = readRequestEntries(har);
 
-        if (!(entriesNode instanceof final List<?> entries) || entries.isEmpty()) {
+        if (entries.isEmpty()) {
             return Stream.empty();
         }
 
         return Stream.of(entries) //
-                .map(m -> m instanceof Map ? ((Map<?, ?>) m).get("request") : null)
-                .filter(Map.class::isInstance)
-                .map(m -> (Map<String, Object>) m)
-                .filter(m -> m.get("url") instanceof String)
-                // .peek(m -> N.println(m.get("url")))
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .map(requestEntry -> Tuple.of(requestEntry, sendRequestByRequestEntry(requestEntry, HttpResponse.class)));
 
@@ -633,12 +624,13 @@ public final class HARUtil {
      * // returns the HttpResponse from replaying the HAR entry (when executed against a live server)
      * }</pre>
      *
-     * <p>The body is attached only for methods that can carry one ({@code POST}, {@code PUT},
-     * {@code DELETE}, {@code OPTIONS}, and {@code PATCH}, which then fails as described below). For any
-     * other method ({@code GET}, {@code HEAD}, {@code TRACE}, {@code CONNECT}) an <i>empty</i>
+     * <p>Among supported methods, the body is attached for {@code POST}, {@code PUT}, {@code DELETE}, and
+     * {@code OPTIONS}. For {@code GET}, {@code HEAD}, and {@code TRACE}, an <i>empty</i>
      * {@code postData.text} is dropped silently (no body is sent and no {@code Content-Type} is derived from
      * {@code postData.mimeType}), whereas a non-empty body is rejected, because dropping it would
-     * change the replayed request.</p>
+     * change the replayed request. {@code PATCH} and {@code CONNECT} cannot be replayed by the underlying
+     * client. Body validation runs first: {@code PATCH} accepts a body before the unsupported-method failure,
+     * while {@code CONNECT} with a non-empty body fails body validation.</p>
      *
      * @param <T> the type of the response.
      * @param requestEntry the HAR request entry map containing request details.
@@ -648,12 +640,15 @@ public final class HARUtil {
      *         recognized {@link HttpMethod}, or the entry carries a non-empty body ({@code postData.text} or
      *         {@code postData.params}) but its method is none of {@code POST}, {@code PUT}, {@code DELETE},
      *         {@code OPTIONS}, {@code PATCH}.
-     * @throws UnsupportedOperationException if the entry's method is {@code PATCH}, which the underlying
-     *         {@code java.net.HttpURLConnection} cannot issue (see {@link HttpMethod#PATCH}).
+     * @throws ClassCastException if the entry's {@code url} field is present but is not a {@code String}
+     * @throws UnsupportedOperationException if the entry's method is {@code PATCH} or {@code CONNECT}, which the underlying
+     *         {@code java.net.HttpURLConnection} cannot issue (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT}).
      * @throws UncheckedIOException if the HTTP request execution fails with an I/O error.
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass)
-            throws IllegalArgumentException, UnsupportedOperationException, UncheckedIOException {
+            throws IllegalArgumentException, ClassCastException, UnsupportedOperationException, UncheckedIOException {
+        N.checkArgNotNull(requestEntry, cs.requestEntry);
+
         final String url = getRequestUrl(requestEntry);
         final HttpMethod httpMethod = getHttpMethodByRequestEntry(requestEntry);
 
@@ -733,6 +728,7 @@ public final class HARUtil {
      */
     public static Optional<Map<String, Object>> findRequestEntry(final File har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(har, cs.har);
         N.checkArgNotNull(filterForTargetUrl, cs.filterForTargetUrl);
 
         return findRequestEntry(IOUtil.readAllToString(har), filterForTargetUrl);
@@ -763,25 +759,21 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs.
      * @return an {@code Optional} containing the first matching request entry map, or empty if no match is found.
-     * @throws IllegalArgumentException if {@code filterForTargetUrl} is {@code null}.
+     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}.
      * @throws ParsingException if the HAR content cannot be parsed as a JSON object
      */
     public static Optional<Map<String, Object>> findRequestEntry(final String har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, ParsingException {
+        N.checkArgNotNull(har, cs.har);
         N.checkArgNotNull(filterForTargetUrl, cs.filterForTargetUrl);
 
-        final Map<String, ?> map = N.fromJson(har, Map.class);
-        final Object entriesNode = Maps.getByPath(map, "log.entries");
+        final List<Map<String, Object>> entries = readRequestEntries(har);
 
-        if (!(entriesNode instanceof final List<?> entries) || entries.isEmpty()) {
+        if (entries.isEmpty()) {
             return Optional.empty();
         }
 
         return Stream.of(entries) //
-                .map(m -> m instanceof Map ? ((Map<?, ?>) m).get("request") : null)
-                .filter(Map.class::isInstance)
-                .map(m -> (Map<String, Object>) m)
-                .filter(m -> m.get("url") instanceof String)
                 .filter(m -> filterForTargetUrl.test((String) m.get("url")))
                 .first();
     }
@@ -839,9 +831,9 @@ public final class HARUtil {
      * <p>This method retrieves all headers from the request entry and applies the
      * configured header filter to determine which headers should be included.
      * Headers that don't pass the filter are excluded from the returned {@code HttpHeaders} object.
-     * A {@code headers} field that is not a JSON array is treated as absent, and array entries that are
-     * not JSON objects, or that have no name, are skipped. A name or value that is not a JSON string
-     * (a number or boolean, for example) is converted with {@code N.stringOf(..)}.</p>
+     * A missing or null headers field produces no headers. Malformed non-null containers, non-object entries,
+     * and missing names are rejected with their HAR path. Numbers and booleans in scalar text slots
+     * retain the existing {@code N.stringOf(..)} conversion; structured values are rejected.</p>
      *
      * <p>Repeated names follow the combination/rejection policy documented by
      * {@link WebUtil#curlToHttpRequestCode(String)}: supported list fields preserve encounter order,
@@ -859,9 +851,9 @@ public final class HARUtil {
      *
      * @param requestEntry the HAR request entry map containing a "headers" array.
      * @return a new {@code HttpHeaders} object containing the filtered headers; empty (never
-     *         {@code null}) if the entry has no {@code headers} array, its {@code headers} field is not
-     *         an array, or nothing passes the filter
-     * @throws IllegalArgumentException if {@code requestEntry} is {@code null}, or included repeated headers cannot be combined without changing their semantics
+     *         {@code null}) if the {@code headers} field is absent or null, or nothing passes the filter
+     * @throws IllegalArgumentException if {@code requestEntry} is {@code null}, the headers container or entries are malformed,
+     *         or included repeated headers cannot be combined without changing their semantics
      * @see #setThreadLocalHeaderFilter(BiPredicate)
      */
     public static HttpHeaders getHeadersByRequestEntry(final Map<String, Object> requestEntry) throws IllegalArgumentException {
@@ -869,30 +861,15 @@ public final class HARUtil {
 
         final BiPredicate<? super String, String> httpHeaderValidatorForHARRequest = httpHeaderFilterForHARRequest_TL.get();
         final HttpHeaders httpHeaders = HttpHeaders.wrap(new java.util.LinkedHashMap<>());
-        final Object headersNode = requestEntry.get("headers");
-        String headerName = null;
-        String headerValue = null;
-
-        // a HAR whose "headers" is an object or a scalar instead of an array is malformed; a checkcast
-        // here would fail with a ClassCastException that names neither the field nor the entry.
-        if (!(headersNode instanceof final List<?> headers) || headers.isEmpty()) {
-            return httpHeaders;
-        }
+        // Validate every header before invoking the filter; a rejected header must not hide malformed input.
+        final List<?> headers = validatedHeaders(requestEntry, "request");
 
         for (final Object e : headers) {
-            if (!(e instanceof final Map<?, ?> m)) {
-                continue;
-            }
+            final Map<?, ?> header = (Map<?, ?>) e;
+            final String headerName = N.stringOf(header.get("name"));
+            final String headerValue = N.stringOf(header.get("value"));
 
-            // HAR producers occasionally emit non-string values; a checkcast here would fail with a
-            // ClassCastException that names neither the header nor the entry.
-            headerName = N.stringOf(m.get("name"));
-            headerValue = N.stringOf(m.get("value"));
-
-            // a malformed HAR header entry without a "name" is skipped defensively - even with a
-            // permissive custom filter installed, HttpHeaders.set(null, ...) would throw from deep
-            // inside without identifying the offending entry.
-            if (headerName != null && httpHeaderValidatorForHARRequest.test(headerName, headerValue)) {
+            if (httpHeaderValidatorForHARRequest.test(headerName, headerValue)) {
                 WebUtil.addCapturedHeader(httpHeaders, headerName, headerValue);
             }
         }
@@ -910,9 +887,8 @@ public final class HARUtil {
      * the returned MIME type is also {@code application/x-www-form-urlencoded}, even if a different
      * (for example multipart) MIME type was recorded without its original body text. Replaying such
      * synthesized data replaces any captured Content-Type with this form type and UTF-8 charset;
-     * replaying original text preserves an explicitly supplied Content-Type header. A
-     * {@code postData.text} or {@code postData.mimeType} that is not a JSON string is converted with
-     * {@code N.stringOf(..)}.</p>
+     * replaying original text preserves an explicitly supplied Content-Type header. Malformed present nodes
+     * are rejected with their HAR path. Scalar numbers and booleans retain the existing text conversion.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -921,53 +897,138 @@ public final class HARUtil {
      * String mimeType = bodyAndType._2;     // "application/json", for example
      * }</pre>
      *
-     * @param requestEntry the HAR request entry map.
+     * @param requestEntry the HAR request entry map. A {@code null} entry is treated as having no
+     *         {@code postData} and yields a tuple of {@code null} body and {@code null} MIME type.
      * @return a tuple where the first element is the request body text (may be {@code null} if the
      *         request has no body) and the second element is the MIME type (may be {@code null} if
      *         no MIME type is present).
      */
     public static Tuple2<String, String> getBodyAndMimeTypeByRequestEntry(final Map<String, Object> requestEntry) {
-        final String requestBody = N.stringOf(Maps.<Object> getByPath(requestEntry, "postData.text"));
-        final String bodyContentType = N.stringOf(Maps.<Object> getByPath(requestEntry, "postData.mimeType"));
-
-        if (Strings.isEmpty(requestBody)) {
-            final String requestBodyFromParams = getRequestBodyFromPostDataParams(requestEntry);
-
-            if (Strings.isNotEmpty(requestBodyFromParams)) {
-                return Tuple.of(requestBodyFromParams, HttpHeaders.Values.APPLICATION_URL_ENCODED);
-            }
-        }
-
-        return Tuple.of(requestBody, bodyContentType);
+        return bodyAndMimeType(requestEntry, "request");
     }
 
-    private static String getRequestBodyFromPostDataParams(final Map<String, Object> requestEntry) {
-        final Object paramsNode = Maps.getByPath(requestEntry, "postData.params");
+    private static Tuple2<String, String> bodyAndMimeType(final Map<String, Object> requestEntry, final String path) {
+        if (requestEntry == null) {
+            return Tuple.of(null, null);
+        }
+        final Map<?, ?> postData = optionalHarMap(requestEntry, "postData", path + ".postData");
+        final String requestBody = harText(postData, "text", path + ".postData.text", false);
+        final String mimeType = harText(postData, "mimeType", path + ".postData.mimeType", false);
+        final List<?> params = validatedPostDataParams(postData, path + ".postData.params");
 
-        // a "postData.params" that is not a JSON array is malformed; treat it as absent rather than
-        // failing with a ClassCastException that names neither the field nor the entry.
-        if (!(paramsNode instanceof final List<?> params) || params.isEmpty()) {
+        // Validate params even when original text wins, but synthesize a body only when it will be used.
+        if (Strings.isEmpty(requestBody) && !params.isEmpty()) {
+            final String paramsBody = getRequestBodyFromPostDataParams(params);
+            if (Strings.isNotEmpty(paramsBody)) {
+                return Tuple.of(paramsBody, HttpHeaders.Values.APPLICATION_URL_ENCODED);
+            }
+        }
+        return Tuple.of(requestBody, mimeType);
+    }
+
+    private static List<?> validatedPostDataParams(final Map<?, ?> postData, final String path) {
+        final List<?> params = optionalHarList(postData, "params", path);
+        for (int i = 0; i < params.size(); i++) {
+            final Map<?, ?> param = harMap(params.get(i), path + "[" + i + "]");
+            harScalar(param, "name", path + "[" + i + "].name", true);
+            harScalar(param, "value", path + "[" + i + "].value", false);
+        }
+        return params;
+    }
+
+    private static String getRequestBodyFromPostDataParams(final List<?> params) {
+        final List<Object> pairs = new ArrayList<>(params.size() * 2);
+        for (final Object value : params) {
+            final Map<?, ?> param = (Map<?, ?>) value;
+            pairs.add(N.stringOf(param.get("name")));
+            pairs.add(N.defaultIfNull(N.stringOf(param.get("value")), Strings.EMPTY));
+        }
+        return URLEncodedUtil.encode(pairs.toArray(), Charsets.UTF_8, NamingPolicy.NO_CHANGE);
+    }
+
+    // Validate the whole archive before returning any replayable entry, including entries after the first match.
+    // Missing/null optional data is empty; malformed non-null data must not produce a partial replay.
+    private static List<Map<String, Object>> readRequestEntries(final String har) {
+        final Map<?, ?> root = harMap(N.fromJson(har, Object.class), "$");
+        final Map<?, ?> log = optionalHarMap(root, "log", "log");
+        final List<?> entries = optionalHarList(log, "entries", "log.entries");
+        final List<Map<String, Object>> requests = new ArrayList<>(entries.size());
+
+        for (int i = 0; i < entries.size(); i++) {
+            final String path = "log.entries[" + i + "]";
+            final Map<?, ?> entry = harMap(entries.get(i), path);
+            final Map<String, Object> request = (Map<String, Object>) harMap(entry.get("request"), path + ".request");
+            harString(request, "url", path + ".request.url", true);
+            harString(request, "method", path + ".request.method", false);
+            validatedHeaders(request, path + ".request");
+            // Archive validation must not encode bodies for metadata lookups or entries that will be filtered out.
+            final Map<?, ?> postData = optionalHarMap(request, "postData", path + ".request.postData");
+            harScalar(postData, "text", path + ".request.postData.text", false);
+            harScalar(postData, "mimeType", path + ".request.postData.mimeType", false);
+            validatedPostDataParams(postData, path + ".request.postData.params");
+            requests.add(request);
+        }
+
+        return requests;
+    }
+
+    private static List<?> validatedHeaders(final Map<?, ?> request, final String path) {
+        final List<?> headers = optionalHarList(request, "headers", path + ".headers");
+        for (int i = 0; i < headers.size(); i++) {
+            final String headerPath = path + ".headers[" + i + "]";
+            final Map<?, ?> header = harMap(headers.get(i), headerPath);
+            harText(header, "name", headerPath + ".name", true);
+            harText(header, "value", headerPath + ".value", false);
+        }
+        return headers;
+    }
+
+    private static Map<?, ?> optionalHarMap(final Map<?, ?> parent, final String key, final String path) {
+        final Object value = parent.get(key);
+        return value == null ? Map.of() : harMap(value, path);
+    }
+
+    private static Map<?, ?> harMap(final Object value, final String path) {
+        if (!(value instanceof Map<?, ?>)) {
+            throw new IllegalArgumentException("Malformed HAR at " + path + ": expected an object");
+        }
+        return (Map<?, ?>) value;
+    }
+
+    private static List<?> optionalHarList(final Map<?, ?> parent, final String key, final String path) {
+        final Object value = parent.get(key);
+        if (value == null) {
+            return List.of();
+        }
+        if (!(value instanceof List<?>)) {
+            throw new IllegalArgumentException("Malformed HAR at " + path + ": expected an array");
+        }
+        return (List<?>) value;
+    }
+
+    private static String harText(final Map<?, ?> parent, final String key, final String path, final boolean required) {
+        return N.stringOf(harScalar(parent, key, path, required));
+    }
+
+    private static Object harScalar(final Map<?, ?> parent, final String key, final String path, final boolean required) {
+        final Object value = parent.get(key);
+        if (value == null && !required) {
             return null;
         }
-
-        final List<Object> pairs = new ArrayList<>(params.size() * 2);
-
-        for (final Object e : params) {
-            if (!(e instanceof final Map<?, ?> param)) {
-                continue;
-            }
-
-            final Object name = param.get("name");
-
-            if (name == null) {
-                continue;
-            }
-
-            pairs.add(N.stringOf(name));
-            pairs.add(N.defaultIfNull(param.get("value"), Strings.EMPTY));
+        if (!(value instanceof String || value instanceof Number || value instanceof Boolean)) {
+            throw new IllegalArgumentException("Malformed HAR at " + path + ": expected a scalar text value");
         }
+        return value;
+    }
 
-        return pairs.isEmpty() ? null : URLEncodedUtil.encode(pairs.toArray(), Charsets.UTF_8, NamingPolicy.NO_CHANGE);
+    private static String harString(final Map<?, ?> parent, final String key, final String path, final boolean required) {
+        if (!required && parent.get(key) == null) {
+            return null;
+        }
+        if (!(parent.get(key) instanceof String)) {
+            throw new IllegalArgumentException("Malformed HAR at " + path + ": expected a string");
+        }
+        return (String) parent.get(key);
     }
 
     private HARUtil() {

@@ -32,7 +32,7 @@ import com.landawn.abacus.util.N;
  * supporting conversions to and from strings, from milliseconds since the epoch, and to and from SQL timestamps.
  *
  * <p>String representations follow the ISO-8601 standard (e.g., {@code "2024-03-15T10:30:00"}).
- * Values produced by {@link #stringOf(LocalDateTime)} omit a zero seconds field (for example,
+ * Values produced by {@link #stringOf(LocalDateTime)} omit the seconds field when seconds and nanoseconds are zero (for example,
  * {@code 2024-03-15T10:30}).
  * Database columns are read and written using JDBC's native {@code LocalDateTime} support with a
  * {@link java.sql.Timestamp} fallback for older drivers.</p>
@@ -80,7 +80,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
     /**
      * Converts a LocalDateTime object to its string representation.
      * Uses {@code LocalDateTime.toString()}, which produces an ISO-8601 compatible string. The
-     * seconds field is omitted when zero (e.g., {@code "2021-01-01T10:30"}), and a fractional
+     * seconds field is omitted when both seconds and nanoseconds are zero (e.g., {@code "2021-01-01T10:30"}), and a fractional
      * part is appended when sub-second precision is present (e.g., {@code "2021-01-01T10:30:00.123456789"}).
      *
      * <p><b>Usage Examples:</b></p>
@@ -166,8 +166,7 @@ public class LocalDateTimeType extends AbstractTemporalType<LocalDateTime> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code LocalDateTime}</li>
-     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
-     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix) are treated as
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only; no {@code 0x} hex, no {@code L} suffix) are treated as
      *       milliseconds since the epoch, interpreted in the system default zone (shorter numeric strings such as
      *       {@code "1234"} are handed to the ISO parser and rejected)</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalDateTime#parse(CharSequence)}</li>

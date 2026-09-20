@@ -78,7 +78,7 @@ public final class WSSecurityUtil {
         // Complete
     }
 
-    /** Cap to prevent a hostile-length call from monopolizing the shared SecureRandom instance (whose nextBytes is internally synchronized) and from allocating a giant array. */
+    /** Caps allocation and work per call to the shared SecureRandom instance; concurrency behavior depends on its provider. */
     private static final int MAX_NONCE_LENGTH = 1024;
 
     /**
@@ -207,6 +207,8 @@ public final class WSSecurityUtil {
      * Digests three logical chunks in order without first combining them into another byte array.
      * Besides avoiding a second in-memory copy of password material, incremental updates avoid an
      * integer overflow when the combined input length is greater than {@link Integer#MAX_VALUE}.
+     *
+     * @throws NoSuchAlgorithmException if {@code algorithm} is not provided by an installed security provider
      */
     private static byte[] generateDigest(final String algorithm, final byte[] first, final byte[] second, final byte[] third) throws NoSuchAlgorithmException {
         final MessageDigest md = MessageDigest.getInstance(algorithm);

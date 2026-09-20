@@ -166,7 +166,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      */
     BufferedReader(final Reader reader) throws NullPointerException {
         super(DUMMY_READER, 1);
-        reinit(java.util.Objects.requireNonNull(reader, "reader"));
+        reinit(java.util.Objects.requireNonNull(reader, cs.reader));
     }
 
     /**
@@ -297,13 +297,14 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * @return the number of characters read, or -1 if the end of the stream
      *         has been reached. Returns 0 if {@code len} is 0
      * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is
      *         negative, or {@code len} is greater than {@code cbuf.length - off}
-     * @throws NullPointerException if {@code cbuf} is null and {@code off} and {@code len} are nonnegative
      */
     @Override
-    public int read(final char[] cbuf, final int off, final int len) throws IOException, IndexOutOfBoundsException, NullPointerException {
+    public int read(final char[] cbuf, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
+        N.requireNonNull(cbuf, cs.cbuf);
 
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();

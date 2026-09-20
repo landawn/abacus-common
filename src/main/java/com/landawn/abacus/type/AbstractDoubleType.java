@@ -62,7 +62,8 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * The argument is <i>not</i> narrowed to {@code double} first: a {@code Double} yields its double text
      * ({@code 1.5d} -> {@code "1.5"}), but any other {@code Number} yields that number's text unchanged
      * ({@code Integer 42} -> {@code "42"}, not {@code "42.0"}; {@code Long.MAX_VALUE} -> {@code "9223372036854775807"}).
-     * Every such string is still accepted by {@link #valueOf(String)}.
+     * These standard numeric strings are accepted by {@link #valueOf(String)}, possibly with loss of
+     * precision or range. A custom {@code Number.toString()} need not produce parseable numeric text.
      * </p>
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -97,7 +98,9 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      *       therefore trims to empty and is rejected with {@code NumberFormatException} (it does not yield the
      *       default value).</li>
      *   <li>If parsing fails and the trimmed string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
-     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, a single suffix is stripped and parsing is retried.
+     *       The suffix must immediately follow the number; repeated or combined suffixes such as
+     *       {@code "1LL"}, {@code "1fD"}, and {@code "1F L"} are rejected.</li>
      *   <li>Valid numeric strings are parsed to {@code Double} values.</li>
      * </ul>
      *
@@ -124,7 +127,11 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
             if (trimmedStr.length() > 1) {
                 final char ch = trimmedStr.charAt(trimmedStr.length() - 1);
 
-                if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
+                final char preceding = trimmedStr.charAt(trimmedStr.length() - 2);
+
+                // The JDK parser trims its input. Removing a suffix after whitespace would turn an invalid
+                // token such as "1 L" into valid "1 "; reject that gap as well as a second suffix.
+                if (isNumericTypeSuffix(ch) && preceding > ' ' && !isNumericTypeSuffix(preceding)) {
                     return Double.valueOf(trimmedStr.substring(0, trimmedStr.length() - 1));
                 }
             }

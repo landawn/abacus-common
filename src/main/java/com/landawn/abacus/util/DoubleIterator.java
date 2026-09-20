@@ -24,15 +24,15 @@ import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.util.stream.DoubleStream;
 
 /**
- * A specialized iterator for primitive double values that does not support element removal
- * ({@link #remove()} always throws {@link UnsupportedOperationException}).
+ * A specialized iterator for primitive double values. Factory-created iterators do not support element removal
+ * ({@link #remove()} throws {@link UnsupportedOperationException}); subclasses may override that method.
  * This class provides efficient iteration over double values without boxing overhead.
  *
  * <p>DoubleIterator is particularly useful when working with large collections of primitive
  * double values where performance is critical. It provides various utility methods for
  * transforming, filtering, and processing double values.</p>
  *
- * <p>The iterator does not support element removal, but it is stateful and is consumed as values
+ * <p>The iterator is stateful and is consumed as values
  * are read. Transformation methods return wrappers over this same source iterator; consuming a
  * wrapper also advances the source.</p>
  *
@@ -207,7 +207,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
 
     /**
      * Creates a {@code DoubleIterator} that is initialized lazily using the provided {@link Supplier}.
-     * The supplier is invoked only when the first method on the returned iterator is called.
+     * The supplier is invoked only on the first traversal operation of the returned iterator.
      * The supplier must not return {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -219,7 +219,14 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
      * });
      * }</pre>
      *
-     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     * <p>The returned iterator initializes its source on its first traversal operation. Its access methods
+     * throw {@link IllegalStateException} if the supplier returns {@code null} or recursively accesses this
+     * iterator during initialization. The supplier is invoked at most once. Initialization exceptions and
+     * errors are cached and rethrown on later access, even if the supplier catches a recursive-access failure.</p>
+     *
+     * <p>The supplier must return a valid source distinct from this deferred iterator and must not create
+     * a cycle through other delegating iterators. Returning this iterator directly throws a cached
+     * {@link IllegalStateException}; indirect delegation cycles are not detected.</p>
      *
      * @param iteratorSupplier a {@link Supplier} that provides the {@code DoubleIterator} when needed
      * @return a lazily initialized {@code DoubleIterator}
@@ -231,6 +238,7 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
         return new DoubleIterator() {
             private DoubleIterator iter = null;
             private volatile boolean isInitialized = false;
+            private boolean isInitializing = false;
             private Throwable initializationFailure = null;
 
             @Override
@@ -248,21 +256,38 @@ public abstract class DoubleIterator extends ImmutableIterator<Double> {
             }
 
             /**
-             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null} or recursively accesses this iterator
              */
             private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
+                            if (isInitializing) {
+                                if (initializationFailure == null) {
+                                    initializationFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                                }
+
+                                throw (IllegalStateException) initializationFailure;
+                            }
+
+                            isInitializing = true;
+
                             try {
                                 iter = iteratorSupplier.get();
+
+                                if (iter == this) {
+                                    throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
+                                }
 
                                 if (iter == null) {
                                     throw new IllegalStateException("Iterator supplier returned null");
                                 }
                             } catch (RuntimeException | Error e) {
-                                initializationFailure = e;
+                                if (initializationFailure == null) {
+                                    initializationFailure = e;
+                                }
                             } finally {
+                                isInitializing = false;
                                 isInitialized = true;
                             }
                         }

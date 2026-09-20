@@ -8,8 +8,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class CsvUnescapeTest {
+public class CsvUnescapeTest extends TestBase {
     @Test
     void everyValidFieldDecodesRegardlessOfWhetherQuotesWereRequired() throws Exception {
         for (final String value : List.of("", " ", "plain", "\uD83D\uDE00", "\u03B1", ",", "\r", "\n", "\"", "a\"b", "\"\"")) {

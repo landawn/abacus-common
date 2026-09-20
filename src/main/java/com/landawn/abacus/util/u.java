@@ -151,7 +151,8 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Primitive optionals: Values are stored without boxing; operations that expose boxed collections,
  *       object streams, or object-typed callbacks may still box</li>
  *   <li>Memory footprint: Minimal - typically one boolean flag and one primitive value</li>
- *   <li>Operation costs: O(1) for all basic operations (get, isPresent, map, filter)</li>
+ *   <li>Operation costs: O(1) container work for get, isPresent, map, and filter,
+ *       plus the time taken by any supplied callback</li>
  *   <li>Stream conversion: O(1) for single-element or empty stream creation</li>
  * </ul>
  *
@@ -1177,7 +1178,7 @@ public class u { // NOSONAR
          */
         @Override
         public int compareTo(final OptionalBoolean optional) throws NullPointerException {
-            Objects.requireNonNull(optional, "optional");
+            Objects.requireNonNull(optional, cs.optional);
 
             if (!optional.isPresent) {
                 return isPresent ? 1 : 0;
@@ -2087,7 +2088,7 @@ public class u { // NOSONAR
          */
         @Override
         public int compareTo(final OptionalChar optional) throws NullPointerException {
-            Objects.requireNonNull(optional, "optional");
+            Objects.requireNonNull(optional, cs.optional);
 
             if (!optional.isPresent()) {
                 return isPresent ? 1 : 0;
@@ -2976,7 +2977,7 @@ public class u { // NOSONAR
          */
         @Override
         public int compareTo(final OptionalByte optional) throws NullPointerException {
-            Objects.requireNonNull(optional, "optional");
+            Objects.requireNonNull(optional, cs.optional);
 
             if (!optional.isPresent) {
                 return isPresent ? 1 : 0;
@@ -3820,7 +3821,7 @@ public class u { // NOSONAR
          */
         @Override
         public int compareTo(final OptionalShort optional) throws NullPointerException {
-            Objects.requireNonNull(optional, "optional");
+            Objects.requireNonNull(optional, cs.optional);
 
             if (!optional.isPresent) {
                 return isPresent ? 1 : 0;
@@ -4072,22 +4073,24 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code OptionalInt} from the specified {@code java.util.OptionalInt}.
-         * A {@code null} argument is treated as an empty {@code java.util.OptionalInt}.
+         * Converts a non-null {@code java.util.OptionalInt} to {@code OptionalInt}.
+         * An empty container produces an empty result; a missing container is rejected.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalInt.from(java.util.OptionalInt.of(42));    // returns OptionalInt with 42
-         * OptionalInt.from(java.util.OptionalInt.empty());   // returns empty OptionalInt
-         * OptionalInt.from(null);                            // returns empty OptionalInt
+         * OptionalInt.from(java.util.OptionalInt.of(42)); // contains 42
+         * OptionalInt.from(java.util.OptionalInt.empty()); // empty
+         * OptionalInt.from(null); // throws IllegalArgumentException
          * }</pre>
          *
-         * @param optional the {@code java.util.OptionalInt} to convert, or {@code null}
-         * @return an {@code OptionalInt} with a present value if the specified
-         *         {@code java.util.OptionalInt} is present, otherwise an empty {@code OptionalInt}
+         * @param optional the non-null container to convert
+         * @return a result containing the source value when present, otherwise an empty result
+         * @throws IllegalArgumentException if {@code optional} is null
          */
-        public static OptionalInt from(final java.util.OptionalInt optional) {
-            if (optional == null || optional.isEmpty()) {
+        public static OptionalInt from(final java.util.OptionalInt optional) throws IllegalArgumentException {
+            N.checkArgNotNull(optional, cs.optional);
+
+            if (optional.isEmpty()) {
                 return empty();
             } else {
                 return of(optional.getAsInt());
@@ -4869,7 +4872,7 @@ public class u { // NOSONAR
          */
         @Override
         public int compareTo(final OptionalInt optional) throws NullPointerException {
-            Objects.requireNonNull(optional, "optional");
+            Objects.requireNonNull(optional, cs.optional);
 
             if (!optional.isPresent) {
                 return isPresent ? 1 : 0;
@@ -5117,22 +5120,24 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code OptionalLong} with the value from the specified {@code java.util.OptionalLong} if present,
-         * otherwise returns an empty {@code OptionalLong}. A {@code null} argument is treated as an empty
-         * {@code java.util.OptionalLong}.
+         * Converts a non-null {@code java.util.OptionalLong} to {@code OptionalLong}.
+         * An empty container produces an empty result; a missing container is rejected.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalLong.from(java.util.OptionalLong.of(42L));   // returns OptionalLong with 42L
-         * OptionalLong.from(java.util.OptionalLong.empty());   // returns empty OptionalLong
-         * OptionalLong.from(null);                             // returns empty OptionalLong
+         * OptionalLong.from(java.util.OptionalLong.of(42L)); // contains 42L
+         * OptionalLong.from(java.util.OptionalLong.empty()); // empty
+         * OptionalLong.from(null); // throws IllegalArgumentException
          * }</pre>
          *
-         * @param optional the {@code java.util.OptionalLong} to convert, or {@code null}
-         * @return an {@code OptionalLong} with the value if present, otherwise an empty {@code OptionalLong}
+         * @param optional the non-null container to convert
+         * @return a result containing the source value when present, otherwise an empty result
+         * @throws IllegalArgumentException if {@code optional} is null
          */
-        public static OptionalLong from(final java.util.OptionalLong optional) {
-            if (optional == null || optional.isEmpty()) {
+        public static OptionalLong from(final java.util.OptionalLong optional) throws IllegalArgumentException {
+            N.checkArgNotNull(optional, cs.optional);
+
+            if (optional.isEmpty()) {
                 return empty();
             } else {
                 return of(optional.getAsLong());
@@ -5827,7 +5832,7 @@ public class u { // NOSONAR
          */
         @Override
         public int compareTo(final OptionalLong optional) throws NullPointerException {
-            Objects.requireNonNull(optional, "optional");
+            Objects.requireNonNull(optional, cs.optional);
 
             if (!optional.isPresent) {
                 return isPresent ? 1 : 0;
@@ -6692,7 +6697,7 @@ public class u { // NOSONAR
          */
         @Override
         public int compareTo(final OptionalFloat optional) throws NullPointerException {
-            Objects.requireNonNull(optional, "optional");
+            Objects.requireNonNull(optional, cs.optional);
 
             if (!optional.isPresent) {
                 return isPresent ? 1 : 0;
@@ -6936,21 +6941,24 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns an {@code OptionalDouble} containing the value from the specified {@code java.util.OptionalDouble} if present, otherwise returns an empty {@code OptionalDouble}.
-         * A {@code null} argument is treated as an empty {@code java.util.OptionalDouble}.
+         * Converts a non-null {@code java.util.OptionalDouble} to {@code OptionalDouble}.
+         * An empty container produces an empty result; a missing container is rejected.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * OptionalDouble.from(java.util.OptionalDouble.of(3.14));   // returns OptionalDouble with 3.14
-         * OptionalDouble.from(java.util.OptionalDouble.empty());    // returns empty OptionalDouble
-         * OptionalDouble.from(null);                                // returns empty OptionalDouble
+         * OptionalDouble.from(java.util.OptionalDouble.of(3.14)); // contains 3.14
+         * OptionalDouble.from(java.util.OptionalDouble.empty()); // empty
+         * OptionalDouble.from(null); // throws IllegalArgumentException
          * }</pre>
          *
-         * @param optional the {@code java.util.OptionalDouble} to convert, or {@code null}
-         * @return an {@code OptionalDouble} containing the value from the specified {@code java.util.OptionalDouble} if present, otherwise an empty {@code OptionalDouble}
+         * @param optional the non-null container to convert
+         * @return a result containing the source value when present, otherwise an empty result
+         * @throws IllegalArgumentException if {@code optional} is null
          */
-        public static OptionalDouble from(final java.util.OptionalDouble optional) {
-            if (optional == null || optional.isEmpty()) {
+        public static OptionalDouble from(final java.util.OptionalDouble optional) throws IllegalArgumentException {
+            N.checkArgNotNull(optional, cs.optional);
+
+            if (optional.isEmpty()) {
                 return empty();
             } else {
                 return of(optional.getAsDouble());
@@ -7636,7 +7644,7 @@ public class u { // NOSONAR
          */
         @Override
         public int compareTo(final OptionalDouble optional) throws NullPointerException {
-            Objects.requireNonNull(optional, "optional");
+            Objects.requireNonNull(optional, cs.optional);
 
             if (!optional.isPresent) {
                 return isPresent ? 1 : 0;
@@ -7977,22 +7985,25 @@ public class u { // NOSONAR
         /**
          * Returns an {@code Optional} containing the value from the specified {@code java.util.Optional} if present, otherwise returns an empty {@code Optional}.
          *
-         * <p>A {@code null} argument is treated as absence and yields {@link #empty()} rather than throwing.
-         * Every {@code from(..)} in this file follows the same rule.
+         * <p>The JDK Optional container must be non-null, consistently with the primitive JDK Optional
+         * conversions. An empty container produces an empty result; a missing container is rejected.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Optional.from(java.util.Optional.of("test"));   // returns Optional with "test"
          * Optional.from(java.util.Optional.empty());      // returns empty Optional
-         * Optional.from(null);                            // returns empty Optional
+         * Optional.from(null);                            // throws IllegalArgumentException
          * }</pre>
          *
          * @param <T> the type of the value
-         * @param optional the {@code java.util.Optional} to convert, or {@code null}
+         * @param optional the non-null {@code java.util.Optional} to convert
          * @return an {@code Optional} containing the value from the specified {@code java.util.Optional} if present, otherwise an empty {@code Optional}
+         * @throws IllegalArgumentException if {@code optional} is null
          */
-        public static <T> Optional<T> from(final java.util.Optional<T> optional) {
-            if (optional == null || optional.isEmpty()) {
+        public static <T> Optional<T> from(final java.util.Optional<T> optional) throws IllegalArgumentException {
+            N.checkArgNotNull(optional, cs.optional);
+
+            if (optional.isEmpty()) {
                 return empty();
             } else {
                 return of(optional.get());
@@ -9101,27 +9112,30 @@ public class u { // NOSONAR
          * Returns a {@code Nullable} containing the value from the specified {@code Optional} if present,
          * otherwise returns an empty {@code Nullable}.
          *
-         * <p>A {@code null} argument is treated as absence and yields {@link #empty()} rather than throwing,
-         * as in every other {@code from(..)} in this file.
+         * <p>The source container must be non-null. An empty container produces an empty result;
+         * a missing container is rejected, consistently with {@link #from(java.util.Optional)}.
          *
          * <p><b>Note on overload resolution:</b> {@code Nullable.from(null)} does not compile - a bare
          * {@code null} is ambiguous between this method and {@link #from(java.util.Optional)}. Cast the
-         * argument ({@code Nullable.from((Optional<String>) null)}) if you need to pick one; both return
-         * {@link #empty()}, so the choice does not affect the result.
+         * argument ({@code Nullable.from((Optional<String>) null)}) to select this overload; both overloads
+         * reject a null container.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Nullable.from(Optional.of("test"));            // returns Nullable with "test"
          * Nullable.from(Optional.empty());               // returns empty Nullable
-         * Nullable.from((Optional<String>) null);        // returns empty Nullable
+         * Nullable.from((Optional<String>) null);        // throws IllegalArgumentException
          * }</pre>
          *
          * @param <T> the type of the value
-         * @param optional the {@code Optional} to convert, or {@code null}
+         * @param optional the non-null {@code Optional} to convert
          * @return a {@code Nullable} containing the value if present in the {@code Optional}, otherwise an empty {@code Nullable}
+         * @throws IllegalArgumentException if {@code optional} is null
          */
-        public static <T> Nullable<T> from(final Optional<T> optional) {
-            if (optional == null || optional.isEmpty()) {
+        public static <T> Nullable<T> from(final Optional<T> optional) throws IllegalArgumentException {
+            N.checkArgNotNull(optional, cs.optional);
+
+            if (optional.isEmpty()) {
                 return Nullable.empty();
             } else {
                 return Nullable.of(optional.get());
@@ -9129,30 +9143,25 @@ public class u { // NOSONAR
         }
 
         /**
-         * Returns a {@code Nullable} containing the value from the specified {@code java.util.Optional} if present,
-         * otherwise returns an empty {@code Nullable}.
-         *
-         * <p>A {@code null} argument is treated as absence and yields {@link #empty()} rather than throwing,
-         * as in every other {@code from(..)} in this file.
-         *
-         * <p><b>Note on overload resolution:</b> {@code Nullable.from(null)} does not compile - a bare
-         * {@code null} is ambiguous between this method and {@link #from(Optional)}. Cast the argument
-         * ({@code Nullable.from((java.util.Optional<String>) null)}) if you need to pick one; both return
-         * {@link #empty()}, so the choice does not affect the result.
+         * Converts a non-null {@code java.util.Optional<T>} to {@code Nullable}.
+         * An empty container produces an empty result; a missing container is rejected.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Nullable.from(java.util.Optional.of("test"));            // returns Nullable with "test"
-         * Nullable.from(java.util.Optional.empty());               // returns empty Nullable
-         * Nullable.from((java.util.Optional<String>) null);        // returns empty Nullable
+         * Nullable.from(java.util.Optional.of("test")); // contains "test"
+         * Nullable.from(java.util.Optional.empty()); // empty
+         * Nullable.from((java.util.Optional<String>) null); // throws IllegalArgumentException
          * }</pre>
          *
          * @param <T> the type of the value
-         * @param optional the {@code java.util.Optional} to convert, or {@code null}
-         * @return a {@code Nullable} containing the value if present in the {@code java.util.Optional}, otherwise an empty {@code Nullable}
+         * @param optional the non-null container to convert
+         * @return a result containing the source value when present, otherwise an empty result
+         * @throws IllegalArgumentException if {@code optional} is null
          */
-        public static <T> Nullable<T> from(final java.util.Optional<T> optional) {
-            if (optional == null || optional.isEmpty()) {
+        public static <T> Nullable<T> from(final java.util.Optional<T> optional) throws IllegalArgumentException {
+            N.checkArgNotNull(optional, cs.optional);
+
+            if (optional.isEmpty()) {
                 return Nullable.empty();
             } else {
                 return Nullable.of(optional.get());

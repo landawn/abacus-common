@@ -63,6 +63,7 @@ public final class cs { // NOSONAR
     public static final String actionOnFailure = "actionOnFailure";
     public static final String actionOnSuccess = "actionOnSuccess";
     public static final String aggregateOnColumnNames = "aggregateOnColumnNames";
+    public static final String allowedTypeClasses = "allowedTypeClasses";
     public static final String appendable = "appendable";
     public static final String arrayType = "arrayType";
     // public static final String arrays = "arrays";
@@ -87,6 +88,7 @@ public final class cs { // NOSONAR
 
     public static final String bufferSize = "bufferSize";
 
+    public static final String byteCount = "byteCount";
     public static final String c = "c";
     public static final String calendar = "calendar";
     public static final String calendar1 = "calendar1";
@@ -94,6 +96,7 @@ public final class cs { // NOSONAR
     public static final String calendarClass = "calendarClass";
     public static final String calendarCreator = "calendarCreator";
     // public static final String CalendarField = "CalendarField";
+    public static final String charCount = "charCount";
     public static final String chunkSize = "chunkSize";
 
     public static final String clazz = "clazz";
@@ -108,8 +111,10 @@ public final class cs { // NOSONAR
     public static final String collector = "collector";
     public static final String comparator = "comparator";
 
+    public static final String columnList = "columnList";
     public static final String columnName = "columnName";
     public static final String columnNameConverter = "columnNameConverter";
+    public static final String columnNameList = "columnNameList";
     public static final String columnNames = "columnNames";
 
     // public static final String conditionToBreak = "conditionToBreak";
@@ -146,6 +151,7 @@ public final class cs { // NOSONAR
     public static final String downstream5 = "downstream5";
     public static final String downstream6 = "downstream6";
     public static final String downstream7 = "downstream7";
+    public static final String dss = "dss";
     public static final String duration = "duration";
     public static final String element = "element";
     public static final String emptyAction = "emptyAction";
@@ -186,6 +192,7 @@ public final class cs { // NOSONAR
     public static final String hasNext = "hasNext";
     public static final String httpHeaderFilterForHARRequest = "httpHeaderFilterForHARRequest";
     // public static final String idPropNames = "idPropNames";
+    public static final String in = "in";
     public static final String increment = "increment";
     public static final String index = "index";
     public static final String indexFunc = "indexFunc";
@@ -480,6 +487,7 @@ public final class cs { // NOSONAR
     public static final String funcOfInclusiveBeginIndex = "funcOfInclusiveBeginIndex";
     public static final String graph = "graph";
     public static final String h = "h";
+    public static final String har = "har";
     public static final String httpClient = "httpClient";
     public static final String idExtractor = "idExtractor";
     public static final String is = "is";
@@ -742,5 +750,39 @@ public final class cs { // NOSONAR
     public static final String outputExcelFile = "outputExcelFile";
     public static final String outputExcelPath = "outputExcelPath";
     public static final String dataset = "dataset";
+    public static final String evictDelayInMillis = "evictDelayInMillis";
+    public static final String maxMemorySize = "maxMemorySize";
+    public static final String key = "key";
+    public static final String gHasher = "gHasher";
+    public static final String gHashFunction = "gHashFunction";
+    public static final String startNode = "startNode";
+    public static final String startNodes = "startNodes";
+    public static final String hashFunctions = "hashFunctions";
+    public static final String hashCodes = "hashCodes";
+    public static final String hashCode = "hashCode";
+    public static final String elementData = "elementData";
+    public static final String indices = "indices";
+    public static final String strValue = "strValue";
+    public static final String cbuf = "cbuf";
+    public static final String original = "original";
+    public static final String newType = "newType";
+    public static final String interfaceClass = "interfaceClass";
+    public static final String interfaceClasses = "interfaceClasses";
+    public static final String replacement = "replacement";
+    public static final String text = "text";
+    public static final String defaultZone = "defaultZone";
+    public static final String defaultZoneSupplier = "defaultZoneSupplier";
+    public static final String stopwatch = "stopwatch";
+    public static final String optional = "optional";
+    public static final String requestBuilder = "requestBuilder";
+    public static final String wrapper = "wrapper";
+    public static final String arguments = "arguments";
+    public static final String test = "test";
+    public static final String greeting = "greeting";
+    public static final String padding = "padding";
+    public static final String items = "items";
+    public static final String intList = "intList";
+    public static final String multiset = "multiset";
+    public static final String multimap = "multimap";
 
 }

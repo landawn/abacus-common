@@ -13,6 +13,36 @@ import org.junit.jupiter.api.Test;
 
 public class SheetToTest extends SheetTestSupport {
     @Test
+    public void testDatasetNameCollisionsExplainArrayIdentityOnce() {
+        final int[] firstArray = { 1, 2 };
+        final int[] secondArray = { 1, 2 };
+        // Cover two arrays and mixed keys with the array on either side of the collision.
+        for (final Object[] keys : new Object[][] { { firstArray, secondArray }, { firstArray, "[1, 2]" }, { "[1, 2]", secondArray } }) {
+            for (final boolean rows : new boolean[] { true, false }) {
+                final Sheet<Object, Object, Integer> target = new Sheet<>(rows ? Arrays.asList(keys) : Arrays.asList("other"),
+                        rows ? Arrays.asList("other") : Arrays.asList(keys));
+                final String message = assertThrows(IllegalArgumentException.class, () -> {
+                    if (rows) {
+                        target.toTransposedDataset();
+                    } else {
+                        target.toDataset();
+                    }
+                }).getMessage();
+                assertTrue(message.contains(rows ? "Row keys" : "Column keys"), message);
+                assertTrue(message.contains("both map to the Dataset column name \"[1, 2]\""), message);
+                for (final Object key : keys) {
+                    if (key.getClass().isArray()) {
+                        assertTrue(message.contains("[1, 2]@" + Integer.toHexString(System.identityHashCode(key))), message);
+                    }
+                }
+                final String note = " (array keys match by identity)";
+                assertTrue(message.endsWith(note), message);
+                assertEquals(message.indexOf(note), message.lastIndexOf(note), message);
+            }
+        }
+    }
+
+    @Test
     public void testToDatasetH() {
         Dataset ds = sheet.toDataset();
         assertNotNull(ds);

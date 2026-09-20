@@ -96,7 +96,8 @@ public class MutableAtomicTypeSerializeToConfigTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertTrue(las.contains("\"oi\": 0,"), las);
 
         // the substituted values read back as PRESENT values - the documented consequence of the flags
-        final ReviewFixesOptionalBean back = com.landawn.abacus.util.N.fromJson(com.landawn.abacus.util.N.toJson(bean, zeroAndFalse), ReviewFixesOptionalBean.class);
+        final ReviewFixesOptionalBean back = com.landawn.abacus.util.N.fromJson(com.landawn.abacus.util.N.toJson(bean, zeroAndFalse),
+                ReviewFixesOptionalBean.class);
         assertEquals(0, back.oi.get());
         assertEquals(0L, back.ol.get());
         assertEquals(0.0d, back.od.get());

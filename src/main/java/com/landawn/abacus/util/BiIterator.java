@@ -105,11 +105,15 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
         }
 
         /**
-         * {@inheritDoc}
-         * @throws NoSuchElementException if no pair or source entry remains
+         * @throws IllegalArgumentException if {@code action} is {@code null}.
+         * @throws NoSuchElementException if {@code action} is non-null, because this iterator is empty
          */
         @Override
-        protected void next(final Throwables.BiConsumer action) throws NoSuchElementException {
+        protected void next(final Throwables.BiConsumer action) throws IllegalArgumentException, NoSuchElementException {
+            // Validated before exhaustion is reported, so that a null action is rejected here exactly as the
+            // other next(action) implementations in this class reject it - with IllegalArgumentException.
+            N.checkArgNotNull(action, cs.action);
+
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
@@ -1280,10 +1284,12 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param <E> the type of exception that the action may throw
      * @param action a {@code BiConsumer} that receives the first and second values of the next pair, must not be {@code null}
+     * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws NoSuchElementException if no pair or source entry remains
      * @throws E if {@code action} throws while processing the next pair
      */
-    protected abstract <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action) throws NoSuchElementException, E;
+    protected abstract <E extends Exception> void next(final Throwables.BiConsumer<? super A, ? super B, E> action)
+            throws IllegalArgumentException, NoSuchElementException, E;
 
     /**
      * Performs the given action for each remaining element in the iterator until all elements
@@ -1979,7 +1985,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      */
     @Deprecated
     public <T> T[] toArray(final T[] a) throws NullPointerException, ArrayStoreException {
-        N.requireNonNull(a, "a");
+        N.requireNonNull(a, cs.a);
         return toList().toArray(a);
     }
 

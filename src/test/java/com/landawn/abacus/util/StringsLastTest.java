@@ -316,6 +316,7 @@ public class StringsLastTest extends StringsTestSupport {
         assertEquals(3, StrUtil.lastIndexOfToken("ab,ab", "ab", ","));
         assertEquals(-1, StrUtil.lastIndexOfToken("xab,abx", "ab", ","));
     }
+
     /**
      * Contract pin for the delimiter-in-token rule now documented on the four {@code lastIndexOfToken} javadocs:
      * with a NON-EMPTY delimiter, a token that itself contains the delimiter spans more than one field and can never

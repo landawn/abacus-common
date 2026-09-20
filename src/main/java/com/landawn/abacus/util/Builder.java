@@ -171,7 +171,7 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Performance Characteristics:</b>
  * <ul>
  *   <li>Builder creation: O(1) constant time</li>
- *   <li>Method chaining: O(1) per operation (depends on underlying data structure)</li>
+ *   <li>Method chaining: constant wrapper overhead; operation cost depends on the underlying data structure</li>
  *   <li>Value extraction: O(1) constant time</li>
  *   <li>Memory overhead: Minimal - single reference to wrapped object</li>
  * </ul>
@@ -182,7 +182,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>Each builder instance should be used by a single thread</li>
  *   <li>Underlying objects may be modified during building operations</li>
  *   <li>Use external synchronization if concurrent access is required</li>
- *   <li>Specialized builders inherit thread safety from their underlying collections</li>
+ *   <li>Wrapping a concurrent collection does not make a chain of builder operations atomic</li>
  * </ul>
  *
  * <p><b>Integration Points:</b>
@@ -3994,7 +3994,8 @@ public class Builder<T> {
 
         /**
          * Adds a new column by applying a function to values from multiple existing columns.
-         * The function receives an array of values from the specified columns for each row.
+         * The function receives a reused {@link DisposableObjArray} view of the selected values for each row;
+         * it must not retain that view.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -5225,9 +5226,9 @@ public class Builder<T> {
      * <p><b>Warning - fuzzy equality is not transitive.</b> With a tolerance of {@code 0.01}, {@code 0}
      * equals {@code 0.009} and {@code 0.009} equals {@code 0.018}, yet {@code 0} does not equal
      * {@code 0.018}. An {@link Object#equals(Object)} built on a chain containing this call therefore
-     * violates the equivalence contract, and the only {@link Object#hashCode()} consistent with it is a
-     * constant - which would put every instance in one hash bucket. Use it for assertions and one-off
-     * checks, not for the identity of a value type.</p>
+     * violates the equivalence contract. Ordinary exact-value hash codes can also disagree for values
+     * treated as equal by this tolerance. Use it for assertions and one-off checks, not for the identity
+     * of a value type.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5274,9 +5275,9 @@ public class Builder<T> {
      * <p><b>Warning - fuzzy equality is not transitive.</b> With a tolerance of {@code 0.01}, {@code 0}
      * equals {@code 0.009} and {@code 0.009} equals {@code 0.018}, yet {@code 0} does not equal
      * {@code 0.018}. An {@link Object#equals(Object)} built on a chain containing this call therefore
-     * violates the equivalence contract, and the only {@link Object#hashCode()} consistent with it is a
-     * constant - which would put every instance in one hash bucket. Use it for assertions and one-off
-     * checks, not for the identity of a value type.</p>
+     * violates the equivalence contract. Ordinary exact-value hash codes can also disagree for values
+     * treated as equal by this tolerance. Use it for assertions and one-off checks, not for the identity
+     * of a value type.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6337,9 +6338,9 @@ public class Builder<T> {
          * <p><b>Warning - fuzzy equality is not transitive.</b> With a tolerance of {@code 0.01}, {@code 0}
          * equals {@code 0.009} and {@code 0.009} equals {@code 0.018}, yet {@code 0} does not equal
          * {@code 0.018}. An {@link Object#equals(Object)} built on a chain containing this call therefore
-         * violates the equivalence contract, and the only {@link Object#hashCode()} consistent with it is a
-         * constant - which would put every instance in one hash bucket. Use it for assertions and one-off
-         * checks, not for the identity of a value type.</p>
+         * violates the equivalence contract. Ordinary exact-value hash codes can also disagree for values
+         * treated as equal by this tolerance. Use it for assertions and one-off checks, not for the identity
+         * of a value type.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -6407,9 +6408,9 @@ public class Builder<T> {
          * <p><b>Warning - fuzzy equality is not transitive.</b> With a tolerance of {@code 0.01}, {@code 0}
          * equals {@code 0.009} and {@code 0.009} equals {@code 0.018}, yet {@code 0} does not equal
          * {@code 0.018}. An {@link Object#equals(Object)} built on a chain containing this call therefore
-         * violates the equivalence contract, and the only {@link Object#hashCode()} consistent with it is a
-         * constant - which would put every instance in one hash bucket. Use it for assertions and one-off
-         * checks, not for the identity of a value type.</p>
+         * violates the equivalence contract. Ordinary exact-value hash codes can also disagree for values
+         * treated as equal by this tolerance. Use it for assertions and one-off checks, not for the identity
+         * of a value type.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -6735,8 +6736,8 @@ public class Builder<T> {
 
         /**
          * Adds the hash code of a double value to the running hash code.
-         * The hash code is computed using {@link Double#doubleToLongBits(double)}
-         * and then converting to int.
+         * The hash code is computed by XORing the high and low 32-bit halves of
+         * {@link Double#doubleToLongBits(double)}, as in {@link Double#hashCode(double)}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

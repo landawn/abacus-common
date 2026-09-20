@@ -18,8 +18,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class FutureTerminalOutcomeTest {
+public class FutureTerminalOutcomeTest extends TestBase {
     @Test
     void mixedGetFormsAndIsDoneRetainTheFirstObservedSuccessIncludingNull() throws Exception {
         for (boolean nullValue : new boolean[] { false, true }) {

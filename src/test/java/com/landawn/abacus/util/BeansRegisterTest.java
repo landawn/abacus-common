@@ -244,8 +244,7 @@ public class BeansRegisterTest extends BeansTestSupport {
 
         Beans.registerNonPropertyAccessor(BuilderInvalidationBean.class, "zzz1");
 
-        assertTimeoutPreemptively(Duration.ofSeconds(10),
-                () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean.Builder.class)));
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean.Builder.class)));
     }
 
     /**
@@ -270,8 +269,7 @@ public class BeansRegisterTest extends BeansTestSupport {
         Beans.getPropSetters(BuilderInvalidationBean2.Builder.class);
         Beans.registerNonPropertyAccessor(BuilderInvalidationBean2.class, "zzz2");
 
-        assertTimeoutPreemptively(Duration.ofSeconds(10),
-                () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean2.Builder.class)));
+        assertTimeoutPreemptively(Duration.ofSeconds(10), () -> assertNotNull(Beans.getPropSetters(BuilderInvalidationBean2.Builder.class)));
     }
 
     /** Separate class from {@link BuilderInvalidationBean} so the two tests cannot influence each other. */

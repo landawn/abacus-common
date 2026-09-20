@@ -308,7 +308,9 @@ public class StreamSeqFnReviewFixes20260903Test extends TestBase {
         }
 
         // Operators that ask hasNext() repeatedly after exhaustion (merge, skip) see a consistent answer.
-        assertEquals(List.of(1), Seq.merge(Seq.<Integer, Exception> empty().cycled(3), Seq.<Integer, Exception> of(1), (a, b) -> com.landawn.abacus.util.MergeResult.TAKE_FIRST).toList());
+        assertEquals(List.of(1),
+                Seq.merge(Seq.<Integer, Exception> empty().cycled(3), Seq.<Integer, Exception> of(1), (a, b) -> com.landawn.abacus.util.MergeResult.TAKE_FIRST)
+                        .toList());
         assertEquals(List.of(), Seq.<Integer, Exception> empty().cycled(3).skip(2).skip(1).toList());
 
         // Non-empty sources are unchanged.

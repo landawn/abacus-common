@@ -10,8 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class IteratorArrayValidationTest {
+public class IteratorArrayValidationTest extends TestBase {
     @Test
     void generatedObjectIteratorRejectsNullBeforeAnyCallback() {
         final AtomicInteger calls = new AtomicInteger();

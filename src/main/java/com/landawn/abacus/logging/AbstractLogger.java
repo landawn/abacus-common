@@ -275,7 +275,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
-     * @deprecated Prefer {@link #trace(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer {@link #trace(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
@@ -617,7 +617,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
-     * @deprecated Prefer {@link #debug(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer {@link #debug(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
@@ -960,7 +960,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
-     * @deprecated Prefer {@link #info(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer {@link #info(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
@@ -1303,7 +1303,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
-     * @deprecated Prefer {@link #warn(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer {@link #warn(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
@@ -1646,7 +1646,7 @@ public abstract class AbstractLogger implements Logger {
      *
      * @param template the message template
      * @param args the arguments to be substituted in the template
-     * @deprecated Prefer {@link #error(Supplier)} for lazy evaluation to avoid object creation
+     * @deprecated Prefer {@link #error(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
@@ -1815,8 +1815,8 @@ public abstract class AbstractLogger implements Logger {
     }
 
     /**
-     * Renders a template argument with {@code N.toString(Object)} without ever letting the argument's own
-     * {@code toString()} abort the log call: any exception, and the {@link StackOverflowError} that
+     * Renders a template argument with {@code N.toString(Object)} while containing failures from the argument's own
+     * {@code toString()}: any exception, and the {@link StackOverflowError} that
      * {@code N.toString} raises for a self-referential collection or array, is replaced by a marker naming
      * the argument's class, its identity hash and the failure type. Every other {@link VirtualMachineError}
      * propagates.
@@ -2093,8 +2093,9 @@ public abstract class AbstractLogger implements Logger {
      * are plain text), there is no escape sequence, and substituted arguments are never re-scanned for
      * placeholders. An empty or {@code null} {@code args} array leaves the template unchanged.</p>
      *
-     * <p><b>Note:</b> this overload is only selected for four or more arguments; calls with one, two
-     * or three arguments bind to the fixed-arity {@code format} overloads instead.</p>
+     * <p><b>Note:</b> calls with one, two or three individual arguments bind to the fixed-arity
+     * {@code format} overloads. This overload accepts zero or four or more individual arguments,
+     * or an explicit {@code Object[]} of any length.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

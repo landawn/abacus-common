@@ -15,8 +15,10 @@ import org.junit.jupiter.api.Test;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class XmlRootTypeTest {
+public class XmlRootTypeTest extends TestBase {
     @XmlRootElement(name = "parent")
     @XmlSeeAlso(Child.class)
     public static class Parent {

@@ -47,8 +47,9 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * Constructs an {@code AbstractByteType} with the specified type name.
      *
      * @param typeName the name of the byte type (e.g., "Byte", "byte")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractByteType(final String typeName) {
+    protected AbstractByteType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -88,7 +89,8 @@ public abstract class AbstractByteType extends NumberType<Number> {
      *   <li>Parsing follows {@link Numbers#toByte(String)}: decimal first; a {@code 0x}/{@code 0X}/{@code #} prefix
      *       (optionally after a sign) selects hexadecimal.</li>
      *   <li>If parsing fails and the string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
-     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, a single suffix is stripped and parsing is retried.
+     *       Repeated or combined suffixes such as {@code "1LL"} and {@code "1fD"} are rejected.</li>
      *   <li>The string is not trimmed; surrounding whitespace is rejected (unlike the float/double types).</li>
      *   <li>All other strings — parsed as a {@code byte} value.</li>
      * </ul>
@@ -116,7 +118,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
             if (str.length() > 1) {
                 final char ch = str.charAt(str.length() - 1);
 
-                if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
+                if (isNumericTypeSuffix(ch) && !isNumericTypeSuffix(str.charAt(str.length() - 2))) {
                     return Numbers.toByte(str.substring(0, str.length() - 1));
                 }
             }
@@ -252,6 +254,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      *
      * @param appendable the {@code Appendable} to write to
      * @param x the {@code Number} value to append as byte
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the value to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -264,7 +267,7 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Number x) throws IOException {
+    public void appendTo(final Appendable appendable, final Number x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -287,10 +290,11 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Number} value to write as byte
      * @param config the serialization configuration, may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the serialized value to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, Number x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         x = x == null && config != null && config.isWriteNullNumberAsZero() ? Numbers.BYTE_ZERO : x;
 
         if (x == null) {

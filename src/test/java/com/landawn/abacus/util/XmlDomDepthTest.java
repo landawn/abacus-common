@@ -9,8 +9,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class XmlDomDepthTest {
+public class XmlDomDepthTest extends TestBase {
     @Test
     void allThreeHelpersHandleDeepFiniteDocuments() {
         final var document = XmlUtil.createDOMParser().newDocument();

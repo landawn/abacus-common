@@ -1284,14 +1284,13 @@ public class HttpRequestTest extends HttpRequestTestSupport {
             final String url = localUrl(server);
 
             // Cookie uses its own list grammar; every other multiply-valued field keeps ", ".
-            assertEquals("a=1; b=2|en, fr", HttpRequest.url(url)
-                    .header("Cookie", Arrays.asList("a=1", "b=2"))
-                    .header("Accept-Language", Arrays.asList("en", "fr"))
-                    .get(String.class));
+            assertEquals("a=1; b=2|en, fr",
+                    HttpRequest.url(url).header("Cookie", Arrays.asList("a=1", "b=2")).header("Accept-Language", Arrays.asList("en", "fr")).get(String.class));
 
             // the name is matched case-insensitively, and headers(Map) routes through header(..) too
             assertEquals("a=1; b=2|en, fr",
-                    HttpRequest.url(url).headers(Map.of("cookie", Arrays.asList("a=1", "b=2"), "accept-language", Arrays.asList("en", "fr")))
+                    HttpRequest.url(url)
+                            .headers(Map.of("cookie", Arrays.asList("a=1", "b=2"), "accept-language", Arrays.asList("en", "fr")))
                             .get(String.class));
         } finally {
             server.stop(0);

@@ -1923,8 +1923,8 @@ public final class Comparators {
      * by consuming elements from both iterators until a difference is found or one is exhausted.
      *
      * <p><strong>Warning:</strong> This comparator consumes elements from the iterators during
-     * comparison. The iterators cannot be reused after comparison. The sole exception is when both
-     * arguments are the same iterator object: the comparator returns {@code 0} without consuming it.</p>
+     * comparison, so later traversal resumes after the consumed elements. When both arguments are
+     * the same iterator object, or either argument is {@code null}, no elements are consumed.</p>
      * A {@code null} iterator is less than any non-{@code null} iterator, including an already-exhausted one.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1950,10 +1950,10 @@ public final class Comparators {
      * by consuming elements from both iterators.
      *
      * <p><strong>Warning:</strong> This comparator consumes elements from the iterators during
-     * comparison. The iterators cannot be reused after comparison. The sole exception is when
-     * both arguments are the same iterator object: the comparator returns {@code 0} without
-     * consuming it. Consider using {@link #comparingIterable(Comparator)} if you need to preserve
-     * the original data.</p>
+     * comparison, so later traversal resumes after the consumed elements. When both arguments are
+     * the same iterator object, or either argument is {@code null}, no elements are consumed.
+     * Use {@link #comparingIterable(Comparator)} with a repeatable iterable if later comparisons
+     * must start from the original contents.</p>
      *
      * <p>The comparison algorithm:</p>
      * <ol>
@@ -2202,8 +2202,8 @@ public final class Comparators {
      * // Employees sorted by age, then name, then salary
      * }</pre>
      *
-     * <p><b>Behavior of the returned comparator:</b> unlike the rest of this class it is <i>not</i>
-     * null-tolerant and validates lazily, because the work is delegated to
+     * <p><b>Behavior of the returned comparator:</b> it rejects {@code null} objects and validates the
+     * compared objects lazily, because the work is delegated to
      * {@link N#compareByProps(Object, Object, Collection)} at comparison time. It throws:</p>
      * <ul>
      *   <li>{@link IllegalArgumentException} if either compared object is {@code null}, is not a bean class,

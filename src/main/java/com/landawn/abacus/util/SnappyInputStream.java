@@ -142,6 +142,14 @@ public final class SnappyInputStream extends InputStream {
     public int read(final byte[] b, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
 
+        // Checked before the range: InputStream.read(byte[], int, int) (and this method's own Javadoc)
+        // require NullPointerException to win over IndexOutOfBoundsException, but the range check below
+        // dereferences b.length last, so a null buffer combined with a negative off/len reported the
+        // wrong exception type.
+        if (b == null) {
+            throw new NullPointerException("b");
+        }
+
         // Enforce InputStream.read(byte[], int, int) contract: org.xerial.snappy.SnappyInputStream
         // does not validate bounds and silently returns 0 for negative len, so we validate here.
         if (off < 0 || len < 0 || len > b.length - off) {
@@ -175,12 +183,11 @@ public final class SnappyInputStream extends InputStream {
     }
 
     /**
-     * Returns an estimate of the number of bytes that can be read (or skipped over)
-     * from this input stream without blocking by the next invocation of a method
-     * for this input stream.
+     * Returns the number of decompressed bytes remaining in the current chunk, loading
+     * the next compressed chunk when the current chunk is exhausted.
      *
-     * <p>Note that this method provides only an estimate; the actual number of bytes
-     * that can be read without blocking may be more or less than the returned value.</p>
+     * <p>The underlying Xerial implementation may read and decompress another chunk during this call,
+     * so this method can block. It is not a nonblocking readiness check or the total remaining length.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -191,7 +198,7 @@ public final class SnappyInputStream extends InputStream {
      * }
      * }</pre>
      *
-     * @return an estimate of the number of bytes that can be read without blocking
+     * @return the decompressed bytes available in the current or newly loaded chunk, or zero at end of stream
      * @throws IOException if this stream is closed, the next compressed chunk is invalid, or reading that chunk fails
      */
     @Override

@@ -10,8 +10,10 @@ import java.nio.charset.UnsupportedCharsetException;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class CharsetNameTest {
+public class CharsetNameTest extends TestBase {
     @Test
     void unicodeCannotCollideWithWarmAsciiNames() {
         Charsets.get("ISO-8859-1");

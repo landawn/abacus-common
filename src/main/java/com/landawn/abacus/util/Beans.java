@@ -102,12 +102,17 @@ import com.landawn.abacus.util.stream.Stream;
  *       its own. See {@link #getPropNameList(Class)} for the exact rule</li>
  *   <li><b>Null Handling:</b> There is no single rule; each method documents its own, and the three shapes
  *       are: the conversion, copy and merge families treat a {@code null} bean or map as "nothing to do"
- *       (an empty map, {@code null}, or an unmodified target); the introspection, creation and randomization
+ *       (an empty map, {@code null}, or an unmodified target); most introspection, creation and randomization
  *       methods reject a {@code null} {@code Class}/{@code bean} argument with
  *       {@link IllegalArgumentException}; and the property accessors that take the bean itself
  *       ({@link #getPropValue(Object, String)}, {@link #getPropValueIfPresent(Object, String)},
- *       {@link #getPropNames(Object, boolean)}) dereference it, so a {@code null} bean is a
- *       {@link NullPointerException}</li>
+ *       {@link #getPropNames(Object, boolean)}) likewise reject a {@code null} bean with
+ *       {@link IllegalArgumentException}. A {@code null} bean passed to
+ *       {@link #getPropValue(Object, Method)}, {@link #setPropValue(Object, Method, Object)} or
+ *       {@link #setPropValueByGetter(Object, Method, Object)} is a {@link NullPointerException} when the
+ *       method is an instance method - for {@code setPropValueByGetter} only when {@code propValue} is
+ *       non-{@code null}, since a {@code null} value is a no-op. The classifiers {@code isBeanClass(null)}
+ *       and {@code isRecordClass(null)} return {@code false}</li>
  *   <li><b>Performance First:</b> Extensive caching of reflection metadata to minimize runtime overhead</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking and runtime validation</li>
  *   <li><b>Flexibility:</b> Support for various object patterns including builders, records, and entities</li>
@@ -229,10 +234,10 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Thread Safety:</b>
  * <ul>
  *   <li><b>Shared Metadata:</b> Reflection metadata and explicit registrations are cached globally;
- *       cache updates are synchronized internally. Deriving a class's property model runs <i>outside</i> that
- *       lock, so a bean whose static initializer, constructor or getter blocks cannot stall introspection of
- *       unrelated classes; the cost is that two threads may derive the same model concurrently, and one of
- *       them then discards its copy</li>
+ *       cache updates are synchronized internally. Deriving a class's property model normally runs <i>outside</i>
+ *       that lock, so unrelated classes can be introspected concurrently. Two threads may derive the same
+ *       model and one then discards its copy. After repeated invalidation by concurrent registrations,
+ *       discovery falls back to holding the metadata lock to ensure progress</li>
  *   <li><b>Concurrent Caching:</b> Thread-safe caching using ConcurrentHashMap</li>
  *   <li><b>Class unloading:</b> the per-class caches this class keeps are held on the class itself (via
  *       {@link ClassValue}) rather than in a {@code Map} keyed by {@code Class}, so introspecting a class
@@ -300,7 +305,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Performance Tips:</b>
  * <ul>
- *   <li>Use property name constants instead of string literals for better performance</li>
+ *   <li>Use property name constants to keep repeated property references consistent</li>
  *   <li>Batch multiple property operations when working with the same object</li>
  *   <li>Consider using flat maps instead of deep conversion for simple use cases</li>
  *   <li>Leverage the caching mechanisms by reusing the same classes</li>
@@ -2200,9 +2205,9 @@ public final class Beans {
      * collection getter can only be recognised by constructing the bean and invoking the getter. Doing that
      * while holding the one global metadata monitor ({@link #METADATA_LOCK}) meant a single bean whose
      * {@code <clinit>} or constructor waited on another thread froze introspection of <i>every other class</i>
-     * process-wide. The scan therefore runs unlocked and only the publication takes the monitor. Two threads
-     * may scan the same class concurrently; the scan is a pure function of the class's shape, so the loser
-     * simply discards its copy.</p>
+     * process-wide. The scan therefore normally runs unlocked and only publication takes the monitor.
+     * Repeated invalidation by registrations eventually triggers a scan under the monitor to ensure progress.
+     * Two threads may scan the same class concurrently; one then discards its derived metadata.</p>
      *
      * @param cls the class to load property getter and setter methods for
      * @throws IllegalArgumentException if {@code cls} is {@code null}
@@ -2400,7 +2405,7 @@ public final class Beans {
 
     /**
      * Derives {@code cls}'s property model from its shape alone - no registration is applied and nothing is
-     * published. Runs without the {@link #METADATA_LOCK} monitor; see
+     * published. Normally runs without the {@link #METADATA_LOCK} monitor; see
      * {@link #loadPropGetSetMethodList(Class)} for why.
      *
      * @param cls the class to scan
@@ -2732,8 +2737,8 @@ public final class Beans {
      *
      * <p>Not thread-safe by design, and it does not need to be: each {@link #scanPropAccessors(Class)} call
      * creates its own instance and never publishes it, so the instance is confined to one thread for its whole
-     * life. (It is <em>not</em> protected by the {@link #METADATA_LOCK} monitor - the scan
-     * deliberately runs outside it; see {@link #loadPropGetSetMethodList(Class)}.)</p>
+     * life. It does not rely on the {@link #METADATA_LOCK} monitor: scans normally run outside it;
+     * see {@link #loadPropGetSetMethodList(Class)}.</p>
      */
     private static final class LazyInstance {
         private final Class<?> cls;
@@ -3137,7 +3142,7 @@ public final class Beans {
     }
 
     /**
-     * Returns the property get method declared in the specified {@code cls}
+     * Returns the property get method available on the specified {@code cls}, including inherited methods,
      * with the specified property name {@code propName}.
      * {@code null} is returned if no matching method is found and {@code cls} is a bean class.
      *
@@ -3154,7 +3159,7 @@ public final class Beans {
      * @param cls the class from which the property get method is to be retrieved; must not be {@code null}.
      * @param propName the name of the property whose get method is to be retrieved. A name longer than 128
      *        characters never matches a property (it is treated as "not found", not as an error).
-     * @return the property get method declared in the specified class, or {@code null} if no matching method
+     * @return the property get method available on the specified class, or {@code null} if no matching method
      *         is found and the class is a bean class.
      * @throws IllegalArgumentException if {@code cls} or {@code propName} is {@code null}, or if no matching method is found and the
      *         specified class is not a bean class.
@@ -3236,7 +3241,7 @@ public final class Beans {
     }
 
     /**
-     * Returns the property set method declared in the specified {@code cls}
+     * Returns the property set method available on the specified {@code cls}, including inherited methods,
      * with the specified property name {@code propName}.
      * {@code null} is returned if no matching method is found and {@code cls} is a bean class.
      *
@@ -3260,7 +3265,7 @@ public final class Beans {
      * @param cls the class from which the property set method is to be retrieved; must not be {@code null}.
      * @param propName the name of the property whose set method is to be retrieved. A name longer than 128
      *        characters never matches a property (it is treated as "not found", not as an error).
-     * @return the property set method declared in the specified class, or {@code null} if no matching method
+     * @return the property set method available on the specified class, or {@code null} if no matching method
      *         is found and the class is a bean class, or the builder class of an already-introspected one.
      * @throws IllegalArgumentException if {@code cls} or {@code propName} is {@code null}, or if no matching method is found and the
      *         specified class is neither a bean class nor the builder class of an already-introspected one.
@@ -3402,13 +3407,14 @@ public final class Beans {
      * @param bean the object from which the property value is to be retrieved.
      * @param propGetMethod the getter method to invoke on the bean.
      * @return the value returned by the getter method; may be {@code null}.
-     * @throws RuntimeException wrapping {@link IllegalAccessException} or {@link InvocationTargetException}
-     *         if the method cannot be invoked.
-     * @throws IllegalArgumentException if {@code propGetMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code propGetMethod} is {@code null}, an instance method receives an
+     *         incompatible {@code bean}, or the method requires arguments.
+     * @throws NullPointerException if {@code bean} is {@code null} and {@code propGetMethod} is an instance method.
+     * @throws RuntimeException if access to the getter is denied or the invoked getter throws an exception.
      */
     @SuppressWarnings("unchecked")
     @MayReturnNull
-    public static <T> T getPropValue(final Object bean, final Method propGetMethod) throws IllegalArgumentException {
+    public static <T> T getPropValue(final Object bean, final Method propGetMethod) throws IllegalArgumentException, NullPointerException, RuntimeException {
         N.checkArgNotNull(propGetMethod, cs.propGetMethod);
 
         try {
@@ -3697,12 +3703,14 @@ public final class Beans {
      *         when {@code propValue} is {@code null} and the setter's parameter type has a {@code null} default
      *         value (e.g. an object/reference type).
      * @throws IllegalArgumentException if {@code propSetMethod} is {@code null}, or if {@code propValue} cannot be converted to the property's type.
+     * @throws NullPointerException if {@code bean} is {@code null} and {@code propSetMethod} is an instance method.
      * @throws RuntimeException wrapping {@link IllegalAccessException} or {@link InvocationTargetException}
      *         if the setter is inaccessible or itself throws; these are propagated immediately, without the
      *         type-converting retry (that retry only applies when the setter rejects the value's type).
      */
     @MayReturnNull
-    public static Object setPropValue(final Object bean, final Method propSetMethod, Object propValue) throws IllegalArgumentException {
+    public static Object setPropValue(final Object bean, final Method propSetMethod, Object propValue)
+            throws IllegalArgumentException, NullPointerException, RuntimeException {
         N.checkArgNotNull(propSetMethod, cs.propSetMethod);
 
         final Class<?>[] paramTypes = propSetMethod.getParameterTypes();
@@ -3860,9 +3868,13 @@ public final class Beans {
      *        If {@code null}, the method does nothing.
      * @throws IllegalArgumentException if {@code propValue} is non-null and {@code propGetMethod} is null,
      *         or if the getter does not return a {@link java.util.Collection} or {@link Map}.
+     * @throws NullPointerException if {@code propValue} is non-{@code null}, {@code bean} is {@code null} and
+     *         {@code propGetMethod} is an instance method.
+     * @throws RuntimeException if access to the getter is denied or the invoked getter throws an exception.
      */
     @SuppressWarnings("unchecked")
-    public static void setPropValueByGetter(final Object bean, final Method propGetMethod, final Object propValue) throws IllegalArgumentException {
+    public static void setPropValueByGetter(final Object bean, final Method propGetMethod, final Object propValue)
+            throws IllegalArgumentException, NullPointerException, RuntimeException {
         if (propValue == null) {
             return;
         }
@@ -4292,9 +4304,10 @@ public final class Beans {
 
             // Validate the selection even when there is nothing to write - this is the same predicate
             // BeanInfo.setPropValue(.., false) uses, and it is what used to reject a bogus name from inside
-            // the write below.
+            // the write below. mapsToBeans applies it via checkSelectPropNames before its empty-input
+            // shortcut, so both entry points reject the same selections.
             if (propInfo == null && beanInfo.getPropInfoChain(propName).isEmpty()) {
-                throw new IllegalArgumentException("No setter method found with property name: " + propName + " in class: " + targetType.getCanonicalName());
+                throw new IllegalArgumentException(noSetterFoundMessage(propName, targetType));
             }
 
             // A selected name the map does not contain is skipped rather than written as the type's default:
@@ -4454,6 +4467,13 @@ public final class Beans {
         final List<T> beanList = new ArrayList<>(size);
 
         if (size == 0) {
+            // Validate the selection before the empty-input shortcut. mapToBean checks every selected name
+            // whether or not the map carries it ("validate the selection even when there is nothing to
+            // write"), so returning early here made the documented @throws fire for
+            // mapsToBeans([oneMap], ["bogus"], T) but not for mapsToBeans([], ["bogus"], T) - the same bad
+            // selection accepted or rejected depending only on how many maps happened to be supplied.
+            checkSelectPropNames(selectPropNames, targetType);
+
             return beanList;
         }
 
@@ -4462,6 +4482,29 @@ public final class Beans {
         }
 
         return beanList;
+    }
+
+    /**
+     * Rejects any name in {@code selectPropNames} that {@code targetType} has no settable property for, using
+     * exactly the predicate {@code mapToBean(Map, Collection, Class)} applies per name. A {@code null} or
+     * empty selection has nothing to check.
+     */
+    private static void checkSelectPropNames(final Collection<String> selectPropNames, final Class<?> targetType) {
+        if (N.isEmpty(selectPropNames)) {
+            return;
+        }
+
+        final ParserUtil.BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
+
+        for (final String propName : selectPropNames) {
+            if (beanInfo.getPropInfo(propName) == null && beanInfo.getPropInfoChain(propName).isEmpty()) {
+                throw new IllegalArgumentException(noSetterFoundMessage(propName, targetType));
+            }
+        }
+    }
+
+    private static String noSetterFoundMessage(final String propName, final Class<?> targetType) {
+        return "No setter method found with property name: " + propName + " in class: " + targetType.getCanonicalName();
     }
 
     /**
@@ -4668,10 +4711,11 @@ public final class Beans {
      * }</pre>
      *
      * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
-     * @param output the map into which the bean's non-{@code null} properties will be put. Existing entries are
-     *        preserved unless overwritten by a generated key.
+     * @param output the map into which the bean's non-{@code null} properties will be put. Existing entries are preserved unless overwritten by a
+     *        generated key. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      */
-    public static void beanToMap(final Object bean, final Map<String, Object> output) {
+    public static void beanToMap(final Object bean, final Map<String, Object> output) throws IllegalArgumentException {
         beanToMap(bean, null, output);
     }
 
@@ -4698,9 +4742,9 @@ public final class Beans {
      * @param selectPropNames a collection of property names to be included in the map.
      *        If {@code null}, all non-{@code null} properties are included. If empty, no properties
      *        are included. Selected properties are included even when their values are {@code null}.
-     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless
-     *        overwritten by a generated key.
-     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
+     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless overwritten by a generated key. Must
+     *        not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if a selected property does not exist in the bean class.
      */
     public static void beanToMap(final Object bean, final Collection<String> selectPropNames, final Map<String, Object> output)
             throws IllegalArgumentException {
@@ -4744,12 +4788,14 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to
      *        {@link NamingPolicy#CAMEL_CASE}. {@link NamingPolicy#CAMEL_CASE} and {@link NamingPolicy#NO_CHANGE}
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
-     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless
-     *        overwritten by a generated key.
-     * @throws IllegalArgumentException if a selected property does not exist in the bean class.
+     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless overwritten by a generated key. Must
+     *        not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if a selected property does not exist in the bean class.
      */
     public static void beanToMap(final Object bean, final Collection<String> selectPropNames, NamingPolicy keyNamingPolicy, final Map<String, Object> output)
             throws IllegalArgumentException {
+        N.checkArgNotNull(output, cs.output);
+
         if (bean == null) {
             return;
         }
@@ -5093,10 +5139,11 @@ public final class Beans {
      *
      * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values are not added to the output map.
-     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless
-     *        overwritten by a generated key.
+     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless overwritten by a generated key. Must
+     *        not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      */
-    public static void beanToMap(final Object bean, final boolean ignoreNullProperty, final Map<String, Object> output) {
+    public static void beanToMap(final Object bean, final boolean ignoreNullProperty, final Map<String, Object> output) throws IllegalArgumentException {
         beanToMap(bean, ignoreNullProperty, null, output);
     }
 
@@ -5121,10 +5168,12 @@ public final class Beans {
      * @param bean the bean object to be converted into a map; if {@code null}, the output map is not modified.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values are not added to the output map.
      * @param ignoredPropNames a set of property names to exclude from the output map; ignored if {@code null}.
-     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless
-     *        overwritten by a generated key.
+     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless overwritten by a generated key. Must
+     *        not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      */
-    public static void beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames, final Map<String, Object> output) {
+    public static void beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames, final Map<String, Object> output)
+            throws IllegalArgumentException {
         beanToMap(bean, ignoreNullProperty, ignoredPropNames, NamingPolicy.CAMEL_CASE, output);
     }
 
@@ -5158,11 +5207,14 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to
      *        {@link NamingPolicy#CAMEL_CASE}. {@link NamingPolicy#CAMEL_CASE} and {@link NamingPolicy#NO_CHANGE}
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
-     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless
-     *        overwritten by a generated key.
+     * @param output the map into which the bean's properties will be put. Existing entries are preserved unless overwritten by a generated key. Must
+     *        not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      */
     public static void beanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames, NamingPolicy keyNamingPolicy,
-            final Map<String, Object> output) {
+            final Map<String, Object> output) throws IllegalArgumentException {
+        N.checkArgNotNull(output, cs.output);
+
         if (bean == null) {
             return;
         }
@@ -5195,13 +5247,14 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * The resulting map uses LinkedHashMap to preserve property order.
      * By default, properties with {@code null} values are omitted.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5223,7 +5276,7 @@ public final class Beans {
      *
      * @param bean the bean to be converted into a Map; if {@code null}, an empty map is returned.
      * @return a {@link java.util.LinkedHashMap} representation of the provided bean; never {@code null}.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean) throws IllegalArgumentException {
@@ -5232,13 +5285,14 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * The map type is determined by the provided mapSupplier.
      * By default, properties with {@code null} values are omitted.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5261,7 +5315,7 @@ public final class Beans {
      * @param mapSupplier a supplier function to create the Map instance. It is used for <i>every</i> map the
      *        conversion creates, including the nested map of each nested bean.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final IntFunction<? extends M> mapSupplier)
@@ -5273,14 +5327,15 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * Only properties specified in selectPropNames are included. If {@code selectPropNames} is
      * {@code null}, all non-{@code null} properties are included. If it is empty, no properties
      * are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5311,7 +5366,7 @@ public final class Beans {
      *        empty nested object in a flat key space, drops it instead. Use {@link Beans#mapBuilder(Object)},
      *        whose null policy applies at every level, when the nested {@code null}s must survive.
      * @return a {@link java.util.LinkedHashMap} representation of the provided bean; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist, or if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if a selected property does not exist, or if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final Collection<String> selectPropNames) throws IllegalArgumentException {
@@ -5320,14 +5375,15 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * Only properties specified in selectPropNames are included, and the map type is determined by mapSupplier.
      * If {@code selectPropNames} is {@code null}, all non-{@code null} properties are included.
      * If it is empty, no properties are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5360,7 +5416,7 @@ public final class Beans {
      * @param mapSupplier a supplier function to create the Map instance. It is used for <i>every</i> map the
      *        conversion creates, including the nested map of each nested bean.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is {@code null}, or if the bean
+     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is {@code null}, or if the traversed bean
      *         graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -5373,14 +5429,15 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * If {@code selectPropNames} is {@code null}, all non-{@code null} properties are included.
      * If it is empty, no properties are included.
      * The keys in the map are transformed according to the specified naming policy.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5418,7 +5475,7 @@ public final class Beans {
      *        put. It is used for <i>every</i> map the conversion creates, including the nested map of each
      *        nested bean.
      * @return a Map of the specified type representing the provided bean; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is {@code null}, or if the bean
+     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is {@code null}, or if the traversed bean
      *         graph contains a reference cycle.
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final Collection<String> selectPropNames,
@@ -5438,12 +5495,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * By default, only non-{@code null} properties are included and stored in the provided output map.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5466,10 +5524,10 @@ public final class Beans {
      * }</pre>
      *
      * @param bean the bean to be converted into a Map; if {@code null}, the output map is not modified.
-     * @param output the map into which the bean's properties will be put.
-     *        Nested beans become {@link java.util.LinkedHashMap}s, since this overload is given a map rather than a
-     *        supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @param output the map into which the bean's properties will be put. Nested beans become {@link java.util.LinkedHashMap}s, since this overload
+     *        is given a map rather than a supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well. Must not be
+     *        {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void deepBeanToMap(final Object bean, final Map<String, Object> output) throws IllegalArgumentException {
@@ -5478,14 +5536,15 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * Only properties specified in selectPropNames are included and stored in the provided output map.
      * If {@code selectPropNames} is {@code null}, all non-{@code null} properties are included.
      * If it is empty, no properties are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5516,10 +5575,11 @@ public final class Beans {
      *        nested map rather than being dropped; the {@code beanToFlatMap} twin, which cannot represent an
      *        empty nested object in a flat key space, drops it instead. Use {@link Beans#mapBuilder(Object)},
      *        whose null policy applies at every level, when the nested {@code null}s must survive.
-     * @param output the map into which the bean's properties will be put.
-     *        Nested beans become {@link java.util.LinkedHashMap}s, since this overload is given a map rather than a
-     *        supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well.
-     * @throws IllegalArgumentException if a selected property does not exist, or if the bean graph contains a reference cycle.
+     * @param output the map into which the bean's properties will be put. Nested beans become {@link java.util.LinkedHashMap}s, since this overload
+     *        is given a map rather than a supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well. Must not be
+     *        {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if a selected property does not exist, or if the traversed bean graph contains a
+     *         reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void deepBeanToMap(final Object bean, final Collection<String> selectPropNames, final Map<String, Object> output)
@@ -5529,14 +5589,15 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * Only properties specified in selectPropNames are included, keys are transformed according to the naming policy, and results are stored in the output map.
      * If {@code selectPropNames} is {@code null}, all non-{@code null} properties are included.
      * If it is empty, no properties are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5570,14 +5631,17 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to
      *        {@link NamingPolicy#CAMEL_CASE}. {@link NamingPolicy#CAMEL_CASE} and {@link NamingPolicy#NO_CHANGE}
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
-     * @param output the map into which the bean's properties will be put.
-     *        Nested beans become {@link java.util.LinkedHashMap}s, since this overload is given a map rather than a
-     *        supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well.
-     * @throws IllegalArgumentException if a selected property does not exist, or if the bean graph contains a reference cycle.
+     * @param output the map into which the bean's properties will be put. Nested beans become {@link java.util.LinkedHashMap}s, since this overload
+     *        is given a map rather than a supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well. Must not be
+     *        {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if a selected property does not exist, or if the traversed bean graph contains a
+     *         reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void deepBeanToMap(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final Map<String, Object> output) throws IllegalArgumentException {
+        N.checkArgNotNull(output, cs.output);
+
         deepBeanToMapSelected(bean, selectPropNames, true, keyNamingPolicy, null, output);
     }
 
@@ -5592,7 +5656,7 @@ public final class Beans {
      * @param keyNamingPolicy the policy applied to the keys
      * @param nestedMapSupplier creates the map for a nested bean; {@code null} means {@link java.util.LinkedHashMap}
      * @param output the map being filled
-     * @throws IllegalArgumentException if a selected property does not exist, or the bean graph is cyclic
+     * @throws IllegalArgumentException if a selected property does not exist, or the traversed bean graph is cyclic
      */
     private static void deepBeanToMapSelected(final Object bean, final Collection<String> selectPropNames, final boolean nestedIgnoreNullProperty,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends Map<String, Object>> nestedMapSupplier, final Map<String, Object> output)
@@ -5634,12 +5698,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * Whether {@code null} values are included is controlled by {@code ignoreNullProperty}.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5657,7 +5722,7 @@ public final class Beans {
      * @param bean the bean object to be converted into a Map; if {@code null}, an empty map is returned.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting Map.
      * @return a {@link java.util.LinkedHashMap} representation of the bean where nested beans are recursively converted to Maps; never {@code null}.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty) throws IllegalArgumentException {
@@ -5666,12 +5731,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * Properties whose names are in the ignoredPropNames set will be excluded from the conversion.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5687,7 +5753,7 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be ignored during the conversion process. Can be {@code null}.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not matched.
      * @return a {@link java.util.LinkedHashMap} representation of the bean with specified properties excluded; never {@code null}.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames)
@@ -5697,12 +5763,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * The resulting Map type can be customized using the mapSupplier function.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5722,7 +5789,7 @@ public final class Beans {
      *        capacity. It is used for <i>every</i> map the conversion creates, including the nested map of each
      *        nested bean.
      * @return a Map of the specified type containing the bean properties; never {@code null}.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -5734,12 +5801,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * The keys in the resulting Map can be transformed according to the specified naming policy.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5765,7 +5833,7 @@ public final class Beans {
      *        {@link NamingPolicy#CAMEL_CASE}. {@link NamingPolicy#CAMEL_CASE} and {@link NamingPolicy#NO_CHANGE}
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
      * @return a {@link java.util.LinkedHashMap} representation of the bean with keys transformed according to the naming policy; never {@code null}.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -5775,12 +5843,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into a Map where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * Provides full control over the conversion process including naming policy and Map type.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5806,7 +5875,7 @@ public final class Beans {
      *        capacity. It is used for <i>every</i> map the conversion creates, including the nested map of each
      *        nested bean.
      * @return a Map of the specified type with full customization applied; never {@code null}.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -5829,12 +5898,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into the specified Map instance where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * The conversion is performed in-place into the provided output Map.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5848,11 +5918,10 @@ public final class Beans {
      *
      * @param bean the bean object to be converted into a Map; if {@code null}, the output map is not modified.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output Map.
-     * @param output the Map instance into which the bean properties will be put. Existing entries are preserved unless
-     *        overwritten by a generated key.
-     *        Nested beans become {@link java.util.LinkedHashMap}s, since this overload is given a map rather than a
-     *        supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @param output the Map instance into which the bean properties will be put. Existing entries are preserved unless overwritten by a generated
+     *        key. Nested beans become {@link java.util.LinkedHashMap}s, since this overload is given a map rather than a supplier; use an overload
+     *        taking a {@code mapSupplier} to control the nested map type as well. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Map<String, Object> output) throws IllegalArgumentException {
@@ -5861,12 +5930,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into the specified Map instance where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * Properties whose names are in the ignoredPropNames set will be excluded from the conversion.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5883,11 +5953,10 @@ public final class Beans {
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output Map.
      * @param ignoredPropNames a set of property names to be ignored during the conversion process.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not matched.
-     * @param output the Map instance into which the bean properties will be put. Existing entries are preserved
-     *        unless overwritten by a generated key. Nested beans become {@link java.util.LinkedHashMap}s, since
-     *        this overload is given a map rather than a supplier; use an overload taking a {@code mapSupplier}
-     *        to control the nested map type as well.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @param output the Map instance into which the bean properties will be put. Existing entries are preserved unless overwritten by a generated
+     *        key. Nested beans become {@link java.util.LinkedHashMap}s, since this overload is given a map rather than a supplier; use an overload
+     *        taking a {@code mapSupplier} to control the nested map type as well. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #deepBeanToMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames, final Map<String, Object> output)
@@ -5897,12 +5966,13 @@ public final class Beans {
 
     /**
      * Converts the provided bean into the specified Map instance where the keys are the property names of the bean and the values are the corresponding property values.
-     * This method performs a deep conversion, meaning that if a property value is itself a bean, it will also be converted into a Map.
+     * This method recursively converts non-null properties declared as nested bean types into maps;
+     * see the class documentation for property types that remain unchanged.
      * The conversion process can be customized by specifying properties to ignore, whether to ignore {@code null} properties, and the naming policy for keys.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5922,13 +5992,15 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to
      *        {@link NamingPolicy#CAMEL_CASE}. {@link NamingPolicy#CAMEL_CASE} and {@link NamingPolicy#NO_CHANGE}
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
-     * @param output the Map instance into which the bean properties will be put.
-     *        Nested beans become {@link java.util.LinkedHashMap}s, since this overload is given a map rather than a
-     *        supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @param output the Map instance into which the bean properties will be put. Nested beans become {@link java.util.LinkedHashMap}s, since this
+     *        overload is given a map rather than a supplier; use an overload taking a {@code mapSupplier} to control the nested map type as well.
+     *        Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if the traversed bean graph contains a reference cycle.
      */
     public static void deepBeanToMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final Map<String, Object> output) throws IllegalArgumentException {
+        N.checkArgNotNull(output, cs.output);
+
         deepBeanToMapAll(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null, output);
     }
 
@@ -5941,7 +6013,7 @@ public final class Beans {
      * @param keyNamingPolicy the policy applied to the keys
      * @param nestedMapSupplier creates the map for a nested bean; {@code null} means {@link java.util.LinkedHashMap}
      * @param output the map being filled
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle
      */
     private static void deepBeanToMapAll(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final IntFunction<? extends Map<String, Object>> nestedMapSupplier, final Map<String, Object> output)
@@ -6024,9 +6096,9 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * By default, properties with {@code null} values are omitted from the result.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6046,7 +6118,7 @@ public final class Beans {
      *
      * @param bean the bean object to be converted into a flat map; if {@code null}, an empty map is returned.
      * @return a map representing the bean object with nested properties flattened using dot notation; never {@code null}.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> beanToFlatMap(final Object bean) throws IllegalArgumentException {
@@ -6058,9 +6130,9 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * The type of Map returned can be customized using the mapSupplier. By default, properties with {@code null} values are omitted.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6075,7 +6147,7 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map; if {@code null}, an empty map is returned.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with nested properties flattened; never {@code null}.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final IntFunction<? extends M> mapSupplier)
@@ -6091,9 +6163,9 @@ public final class Beans {
      * Only properties specified in selectPropNames are included in the result. If {@code selectPropNames} is {@code null},
      * all non-{@code null} properties are included. If it is empty, no properties are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6123,7 +6195,7 @@ public final class Beans {
      *        property must always appear: {@code mapBuilder(user).flat().select("address").toMap()} yields
      *        {@code {address.city=null}}.
      * @return a map with only the selected properties flattened; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist, or if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if a selected property does not exist, or if the traversed bean graph contains a reference cycle.
      */
     public static Map<String, Object> beanToFlatMap(final Object bean, final Collection<String> selectPropNames) throws IllegalArgumentException {
         return beanToFlatMap(bean, selectPropNames, IntFunctions.ofLinkedHashMap());
@@ -6135,9 +6207,9 @@ public final class Beans {
      * Combines property selection with Map type customization. If {@code selectPropNames} is {@code null},
      * all non-{@code null} properties are included. If it is empty, no properties are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6166,7 +6238,7 @@ public final class Beans {
      *        {@code {address.city=null}}.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with selected properties flattened; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is {@code null}, or if the bean
+     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is {@code null}, or if the traversed bean
      *         graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
@@ -6184,9 +6256,9 @@ public final class Beans {
      * If {@code selectPropNames} is {@code null}, all non-{@code null} properties are included.
      * If it is empty, no properties are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6221,7 +6293,7 @@ public final class Beans {
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
      * @param mapSupplier a function that generates a new map instance. The function argument is the initial map capacity.
      * @return a map of the specified type with the bean's (selected) properties flattened using dot notation for nested beans; never {@code null}.
-     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is {@code null}, or if the bean
+     * @throws IllegalArgumentException if a selected property does not exist, or if {@code mapSupplier} is {@code null}, or if the traversed bean
      *         graph contains a reference cycle.
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final Collection<String> selectPropNames,
@@ -6244,9 +6316,9 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * By default, only non-{@code null} properties from the bean are included in the output.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6260,9 +6332,9 @@ public final class Beans {
      * }</pre>
      *
      * @param bean the bean object to be converted into a flat map; if {@code null}, the output map is not modified.
-     * @param output the Map instance into which the flattened bean properties will be put. Existing entries are preserved
-     *        unless overwritten by a generated key.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @param output the Map instance into which the flattened bean properties will be put. Existing entries are preserved unless overwritten by a
+     *        generated key. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void beanToFlatMap(final Object bean, final Map<String, Object> output) throws IllegalArgumentException {
@@ -6275,9 +6347,9 @@ public final class Beans {
      * Only properties specified in selectPropNames are included. If {@code selectPropNames} is {@code null},
      * all non-{@code null} properties are included. If it is empty, no properties are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6305,8 +6377,9 @@ public final class Beans {
      *        {@link Beans#mapBuilder(Object)}, whose null policy applies at every level, when a selected
      *        property must always appear: {@code mapBuilder(user).flat().select("address").toMap()} yields
      *        {@code {address.city=null}}.
-     * @param output the Map instance into which the flattened bean properties will be put.
-     * @throws IllegalArgumentException if a selected property does not exist, or if the bean graph contains a reference cycle.
+     * @param output the Map instance into which the flattened bean properties will be put. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if a selected property does not exist, or if the traversed bean graph contains a
+     *         reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void beanToFlatMap(final Object bean, final Collection<String> selectPropNames, final Map<String, Object> output)
@@ -6320,9 +6393,9 @@ public final class Beans {
      * Provides control over property selection and key naming policy. If {@code selectPropNames} is {@code null},
      * all non-{@code null} properties are included. If it is empty, no properties are included.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6353,12 +6426,15 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to
      *        {@link NamingPolicy#CAMEL_CASE}. {@link NamingPolicy#CAMEL_CASE} and {@link NamingPolicy#NO_CHANGE}
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
-     * @param output the Map instance into which the flattened bean properties will be put.
-     * @throws IllegalArgumentException if a selected property does not exist, or if the bean graph contains a reference cycle.
+     * @param output the Map instance into which the flattened bean properties will be put. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if a selected property does not exist, or if the traversed bean graph contains a
+     *         reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void beanToFlatMap(final Object bean, final Collection<String> selectPropNames, final NamingPolicy keyNamingPolicy,
             final Map<String, Object> output) throws IllegalArgumentException {
+        N.checkArgNotNull(output, cs.output);
+
         beanToFlatMapSelected(bean, selectPropNames, true, keyNamingPolicy, output);
     }
 
@@ -6372,7 +6448,7 @@ public final class Beans {
      *        passes its own {@code skipNulls} so that its null policy is the same at every level
      * @param keyNamingPolicy the policy applied to the keys; {@code null} means {@link NamingPolicy#CAMEL_CASE}
      * @param output the map being filled
-     * @throws IllegalArgumentException if a selected property does not exist, or the bean graph is cyclic
+     * @throws IllegalArgumentException if a selected property does not exist, or the traversed bean graph is cyclic
      */
     private static void beanToFlatMapSelected(final Object bean, final Collection<String> selectPropNames, final boolean nestedIgnoreNullProperty,
             NamingPolicy keyNamingPolicy, final Map<String, Object> output) throws IllegalArgumentException {
@@ -6420,9 +6496,9 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Properties with {@code null} values can be included or excluded based on the ignoreNullProperty parameter.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6439,7 +6515,7 @@ public final class Beans {
      * @param bean the bean object to be converted into a flat map; if {@code null}, an empty map is returned.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the resulting map.
      * @return a flat map representation of the bean with {@code null} handling as specified; never {@code null}.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> beanToFlatMap(final Object bean, final boolean ignoreNullProperty) throws IllegalArgumentException {
@@ -6451,9 +6527,9 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Combines {@code null} value filtering with property name exclusion.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6472,7 +6548,7 @@ public final class Beans {
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not
      *        matched (dotted names such as {@code "address.city"} are not supported).
      * @return a flat map with the specified filtering applied; never {@code null}.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames)
@@ -6485,9 +6561,9 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Provides flexibility in filtering and Map implementation.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6509,7 +6585,7 @@ public final class Beans {
      *        matched (dotted names such as {@code "address.city"} are not supported).
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a map of the specified type with filtering applied; never {@code null}.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -6524,9 +6600,9 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Provides comprehensive control over the flattening process.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6552,7 +6628,7 @@ public final class Beans {
      *        {@link NamingPolicy#CAMEL_CASE}. {@link NamingPolicy#CAMEL_CASE} and {@link NamingPolicy#NO_CHANGE}
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
      * @return a flat map with comprehensive customization applied; never {@code null}.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static Map<String, Object> beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -6565,9 +6641,9 @@ public final class Beans {
      * Values from nested beans are set to the resulting map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * This is the most flexible variant offering complete customization.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6595,7 +6671,7 @@ public final class Beans {
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
      * @param mapSupplier a function that creates a new Map instance. The function argument is the initial capacity.
      * @return a fully customized flat map representation of the bean; never {@code null}.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the bean graph contains a reference cycle.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static <M extends Map<String, Object>> M beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
@@ -6621,9 +6697,9 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * This is an in-place operation that modifies the provided output Map.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6639,8 +6715,8 @@ public final class Beans {
      *
      * @param bean the bean object to be converted into a flat map; if {@code null}, the output map is not modified.
      * @param ignoreNullProperty if {@code true}, properties with {@code null} values will not be included in the output map.
-     * @param output the map into which the flattened bean properties will be put.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @param output the map into which the flattened bean properties will be put. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Map<String, Object> output) throws IllegalArgumentException {
@@ -6652,9 +6728,9 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * Combines in-place operation with {@code null} handling and property exclusion.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6673,8 +6749,8 @@ public final class Beans {
      * @param ignoredPropNames a set of property names to be excluded from the output map.
      *        Applies to TOP-LEVEL property names only; properties inside nested beans are not
      *        matched (dotted names such as {@code "address.city"} are not supported).
-     * @param output the map into which the flattened bean properties will be put.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @param output the map into which the flattened bean properties will be put. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames, final Map<String, Object> output)
@@ -6687,9 +6763,9 @@ public final class Beans {
      * Values from nested beans are set to the map with property names concatenated with a dot, e.g., {@code "address.city"}.
      * This method provides complete control over the in-place flattening operation.
      *
-     * <p><b>Cyclic references are rejected.</b> If the bean graph contains a reference cycle (for example a
-     * bidirectional {@code parent <-> child} pair) this method throws {@link IllegalArgumentException} rather
-     * than silently omitting the branch that would recurse, matching {@link Maps#flatten(Map)}.</p>
+     * <p><b>Cycles encountered while traversing nested-bean properties are rejected.</b> For example, a
+     * bidirectional {@code parent <-> child} pair throws {@link IllegalArgumentException} when both
+     * properties are traversed. Cycles inside values emitted unchanged are not inspected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6713,12 +6789,14 @@ public final class Beans {
      * @param keyNamingPolicy the naming policy applied to map keys; if {@code null}, defaults to
      *        {@link NamingPolicy#CAMEL_CASE}. {@link NamingPolicy#CAMEL_CASE} and {@link NamingPolicy#NO_CHANGE}
      *        both emit the bean's property names unchanged &mdash; see the class documentation.
-     * @param output the map into which the flattened bean properties will be put.
-     * @throws IllegalArgumentException if the bean graph contains a reference cycle.
+     * @param output the map into which the flattened bean properties will be put. Must not be {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}, or if the traversed bean graph contains a reference cycle.
      * @see #beanToFlatMap(Object, Collection, NamingPolicy, IntFunction)
      */
     public static void beanToFlatMap(final Object bean, final boolean ignoreNullProperty, final Set<String> ignoredPropNames,
             final NamingPolicy keyNamingPolicy, final Map<String, Object> output) throws IllegalArgumentException {
+        N.checkArgNotNull(output, cs.output);
+
         beanToFlatMap(bean, ignoreNullProperty, ignoredPropNames, keyNamingPolicy, null, output);
     }
 
@@ -6949,7 +7027,7 @@ public final class Beans {
         }
 
         /**
-         * Converts nested bean-valued properties recursively into nested maps. Mutually exclusive with
+         * Converts properties declared as nested bean types recursively into nested maps. Mutually exclusive with
          * {@link #flat()}: calling both (in either order) throws {@link IllegalStateException}. Calling
          * {@code deep()} more than once is harmless.
          *
@@ -6966,7 +7044,7 @@ public final class Beans {
         }
 
         /**
-         * Flattens nested bean-valued properties into the resulting map using dot-separated keys (e.g.
+         * Flattens properties declared as nested bean types into the resulting map using dot-separated keys (e.g.
          * {@code "address.city"}). Mutually exclusive with {@link #deep()}: calling both (in either order)
          * throws {@link IllegalStateException}. Calling {@code flat()} more than once is harmless.
          *
@@ -7036,7 +7114,7 @@ public final class Beans {
          *
          * <p>{@code values} is {@code null} unless {@code skipNulls} or a {@code propFilter} forced the
          * getters to be read during selection; when it is non-{@code null} it is index-aligned with
-         * {@code names}. Both hold <b>canonical</b> property names, and they are de-duplicated: two accepted
+         * {@code names}. The names are <b>canonical</b> and de-duplicated: two accepted
          * spellings of one property - {@code select("firstName", "FirstName")} - contribute a single entry,
          * read once.</p>
          *
@@ -7262,14 +7340,14 @@ public final class Beans {
     }
 
     /**
-     * Creates a deep clone of the given object using serialization.
+     * Creates a deep clone of the given object using Kryo copying or an XML round trip.
      *
-     * <p>This method performs a deep copy by serializing the object to Kryo or XML format
-     * and then deserializing it back to create a new instance. This ensures that all nested
-     * objects are also cloned, not just the top-level object.</p>
+     * <p>This method first attempts Kryo's object-copy operation when available, then falls back
+     * to serializing and deserializing XML. Both mechanisms copy nested objects as supported by
+     * their serializers; objects treated as immutable may be shared.</p>
      *
-     * <p>The object must be serializable through either Kryo or XML. If Kryo serialization
-     * fails, the method automatically falls back to XML serialization.</p>
+     * <p>The object must support Kryo copying or XML serialization. If the Kryo copy
+     * throws a {@link RuntimeException}, the method falls back to XML serialization.</p>
      *
      * <p>Kryo is used only for a same-class copy when Kryo is on the classpath, and that path
      * preserves cycles and shared identity. {@link #deepCopyAs(Object, Class)} to a different type
@@ -7294,7 +7372,7 @@ public final class Beans {
      * }</pre>
      *
      * @param <T> the type of the object to be cloned.
-     * @param obj the object to clone; must be serializable via Kryo or Abacus XML.
+     * @param obj the object to clone; must support Kryo copying or Abacus XML serialization.
      * @return a deep clone of the object, or {@code null} if {@code obj} is {@code null}.
      * @throws RuntimeException if the object cannot be copied by either mechanism. Kryo failures are absorbed
      *         (the XML round trip is tried next), but a failure of the XML round trip itself propagates as
@@ -7304,7 +7382,7 @@ public final class Beans {
      */
     @MayReturnNull
     @SuppressWarnings("unchecked")
-    public static <T> T deepCopy(final T obj) {
+    public static <T> T deepCopy(final T obj) throws RuntimeException {
         if (obj == null) {
             return null; // NOSONAR
         }
@@ -7315,9 +7393,9 @@ public final class Beans {
     /**
      * Creates a deep clone of the given object and converts it to the specified target type.
      *
-     * <p>This method performs a deep copy by serializing the object and then deserializing it
-     * as an instance of the target type. This is useful for creating type-converted copies
-     * or for ensuring type safety when cloning objects.</p>
+     * <p>A same-class copy may use Kryo's object-copy operation. Otherwise, this method serializes
+     * the object to XML and deserializes it as an instance of the target type. This is useful for
+     * creating type-converted copies or for ensuring type safety when cloning objects.</p>
      *
      * <p>If the source object is {@code null}, the method creates a new instance of the
      * target type by calling {@link #copyAs(Object, Class)} for bean targets or
@@ -7346,7 +7424,7 @@ public final class Beans {
      *         says nothing about the class and must reach the caller.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T deepCopyAs(final Object obj, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T deepCopyAs(final Object obj, @NotNull final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (obj == null) {
@@ -7829,9 +7907,15 @@ public final class Beans {
         return (T) result;
     }
 
+    /**
+     * @throws UnsupportedOperationException if a non-null source would be merged into a finished immutable or builder-based target bean
+     * @throws IllegalArgumentException if a source or target property cannot be resolved or assigned under the requested unmatched-property policy
+     * @throws RuntimeException if inspecting the source bean or reading, converting, or writing a selected property fails
+     */
     @SuppressWarnings("deprecation")
     private static <T> T mergeInto(final Object sourceBean, @NotNull final T targetBean, final boolean ignoreUnmatchedProperty,
-            final Set<String> ignoredPropNames, final BeanInfo targetBeanInfo) throws IllegalArgumentException {
+            final Set<String> ignoredPropNames, final BeanInfo targetBeanInfo)
+            throws UnsupportedOperationException, IllegalArgumentException, RuntimeException {
         if (sourceBean == null) {
             return targetBean;
         }
@@ -8077,6 +8161,10 @@ public final class Beans {
      * source and target beans have different naming conventions. Source properties whose
      * (converted) names have no matching property in the target bean are silently skipped.</p>
      *
+     * <p>When source and target are the same bean, matching source values are read before any target property
+     * is written, including when the converter exchanges property names. For distinct beans, matched values
+     * are applied as they are read; a failure in user code or a setter may leave earlier assignments in place.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Source has camelCase, target has snake_case
@@ -8258,6 +8346,11 @@ public final class Beans {
      * <p>This method provides the most flexible selective merging, combining property selection,
      * name conversion, and custom merge logic.</p>
      *
+     * <p>Matching source values are read before any target property is written when properties are explicitly
+     * selected or source and target are the same bean. With {@code selectPropNames == null} and distinct beans,
+     * matched values are applied as they are read. A failure in user code or a setter may leave earlier
+     * assignments in place.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * SourceBean source = new SourceBean();
@@ -8330,13 +8423,16 @@ public final class Beans {
         final boolean isIdentityPropNameConverter = propNameConverter == Fn.<String> identity();
         final BeanInfo srcBeanInfo = ParserUtil.getBeanInfo(sourceBean.getClass());
         final BinaryOperator<Object> objMergeFunc = (BinaryOperator<Object>) mergeFunc;
-        final boolean selectFirst = objMergeFunc == SELECT_FIRST_MERGE_FUNC;
 
-        Object propValue = null;
         String targetPropName = null;
         PropInfo targetPropInfo = null;
 
         if (selectPropNames == null) {
+            // A self-merge must read all source values before a renamed assignment can overwrite one.
+            // Distinct beans retain the direct-copy path without a list and one record per property.
+            final List<MergeStep> steps = sourceBean == targetBean ? new ArrayList<>(srcBeanInfo.propInfoList.size()) : null;
+            final boolean selectFirst = steps == null && objMergeFunc == SELECT_FIRST_MERGE_FUNC;
+
             for (final PropInfo propInfo : srcBeanInfo.propInfoList) {
                 if (isIdentityPropNameConverter) {
                     targetPropInfo = targetBeanInfo.getPropInfo(propInfo);
@@ -8353,10 +8449,17 @@ public final class Beans {
                 if (targetPropInfo == null) {
                     // unmatched source properties are deliberately skipped on this path
                     // (the selectPropNames-based overload throws for explicitly selected names)
+                } else if (steps != null) {
+                    steps.add(new MergeStep(targetPropInfo, propInfo.getPropValue(sourceBean)));
                 } else {
-                    propValue = propInfo.getPropValue(sourceBean);
-                    targetPropInfo.setPropValue(targetBean, selectFirst ? propValue : objMergeFunc.apply(propValue, targetPropInfo.getPropValue(targetBean)));
+                    final Object sourceValue = propInfo.getPropValue(sourceBean);
+                    targetPropInfo.setPropValue(targetBean,
+                            selectFirst ? sourceValue : objMergeFunc.apply(sourceValue, targetPropInfo.getPropValue(targetBean)));
                 }
+            }
+
+            if (steps != null) {
+                applyMergeSteps(steps, targetBean, objMergeFunc);
             }
         } else {
             // Two passes: an explicitly selected name that is missing from either bean must not leave the
@@ -8399,9 +8502,10 @@ public final class Beans {
     }
 
     /**
-     * One resolved source-value-to-target-property assignment, queued by the {@code mergeInto} overloads that
-     * can reject an input part-way through their scan. Collecting the whole plan before the first
-     * {@code setPropValue} is what keeps those merges all-or-nothing.
+     * One resolved source-value-to-target-property assignment, queued when selected properties need
+     * prevalidation or a self-merge could overwrite unread source values. Collecting the whole plan before
+     * the first {@code setPropValue} also prevents resolution failures from leaving a partially updated target.
+     * A failure while applying the plan can still leave earlier assignments in place.
      *
      * @param targetPropInfo the property to write on the target bean
      * @param sourceValue the value already read from the source bean
@@ -9054,8 +9158,9 @@ public final class Beans {
         N.checkBeanClass(beanClass);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
-        final Object result = beanInfo.createBeanResult();
         final List<PropInfo> propInfos = resolvePropInfos(beanInfo, propNamesToFill);
+
+        final Object result = beanInfo.createBeanResult();
 
         fillInRandomScope(beanClass, result, propInfos);
 
@@ -9182,21 +9287,22 @@ public final class Beans {
      * @param count the number of instances to create; must not be negative.
      * @return a list containing exactly {@code count} newly created bean instances with the specified
      *         properties filled; never {@code null}.
-     * @throws IllegalArgumentException if {@code beanClass} is {@code null}, not a valid bean class, {@code count}
-     *         is negative, {@code propNamesToFill} is {@code null}, or a property name is not found in the class.
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null} or not a valid bean class,
+     *         {@code propNamesToFill} is {@code null} or contains an unknown property name, or {@code count} is negative.
      */
     public static <T> List<T> newRandomBeanList(final Class<? extends T> beanClass, final Collection<String> propNamesToFill, final int count)
             throws IllegalArgumentException {
         N.checkArgNotNull(beanClass, cs.beanClass);
         N.checkBeanClass(beanClass);
-        N.checkArgNotNegative(count, cs.count);
 
-        final List<T> resultList = new ArrayList<>(count);
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(beanClass);
         // Resolve once, up front: with count == 0 the loop below never runs, so validating inside it would
         // let newRandomBeanList(cls, null, 0) and newRandomBeanList(cls, List.of("bogus"), 0) return an empty
         // list instead of throwing, contradicting this method's @throws.
         final List<PropInfo> propInfos = resolvePropInfos(beanInfo, propNamesToFill);
+        N.checkArgNotNegative(count, cs.count);
+
+        final List<T> resultList = new ArrayList<>(count);
         Object result = null;
 
         // One scope around the whole batch, not one per element: entering it is what stops a self-referential
@@ -9224,7 +9330,7 @@ public final class Beans {
      * Resolves every name in {@code propNamesToFill} to its {@link PropInfo}, rejecting the whole request if
      * any name is unknown.
      *
-     * <p>Resolving before the first write is what makes the randomize family all-or-nothing: validating inside
+     * <p>Resolving before the first write prevents unknown-property errors from causing partial updates: validating inside
      * the write loop left {@code randomize(bean, List.of("name", "bogus"))} with a randomized {@code name} and
      * an {@link IllegalArgumentException}.</p>
      *

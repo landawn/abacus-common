@@ -317,7 +317,7 @@ public class ObjectoryTest extends TestBase {
             try {
                 assertSame(owned, Objectory.createBufferedWriter((Writer) owned), owned.getClass().getName());
             } finally {
-                Objectory.recycle(owned);   // exactly once in total, through the owning handle
+                Objectory.recycle(owned); // exactly once in total, through the owning handle
             }
         }
 
@@ -356,7 +356,7 @@ public class ObjectoryTest extends TestBase {
             Objectory.recycle(passThrough);
             assertEquals("hello", inner.toString(), "recycling flushes the buffer to the destination");
 
-            Objectory.recycle(owner);   // the documented mistake: a second recycle of the same instance
+            Objectory.recycle(owner); // the documented mistake: a second recycle of the same instance
 
             assertSame(Objectory.createBufferedWriter(), Objectory.createBufferedWriter(), "one instance was pooled twice");
         } finally {
@@ -379,9 +379,9 @@ public class ObjectoryTest extends TestBase {
             // footprint eightfold, so this is the assertion that catches that change.
             assertEquals(16 * 1024, Objectory.BUFFER_SIZE);
         } else if (IOUtil.MAX_MEMORY_IN_MB >= 128 * 1024) {
-            assertEquals(128 * 1024, Objectory.BUFFER_SIZE);   // saturated, from a 128 GB heap up
+            assertEquals(128 * 1024, Objectory.BUFFER_SIZE); // saturated, from a 128 GB heap up
         } else {
-            assertEquals(IOUtil.MAX_MEMORY_IN_MB, Objectory.BUFFER_SIZE);   // one byte of buffer per megabyte of heap
+            assertEquals(IOUtil.MAX_MEMORY_IN_MB, Objectory.BUFFER_SIZE); // one byte of buffer per megabyte of heap
         }
 
         // "Only buffers of exactly this length are eligible for pooling" - behaviour, not arithmetic. Checked on

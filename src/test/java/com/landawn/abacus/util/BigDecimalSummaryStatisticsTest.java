@@ -417,7 +417,6 @@ public class BigDecimalSummaryStatisticsTest extends TestBase {
         assertEquals(new BigDecimal("5"), stats.getMax());
     }
 
-
     @Test
     public void reviewFixes20260908_toStringRendersWithLocaleRootWhateverTheDefaultLocaleIs() throws Exception {
         final String expectedPlain = "{min=5.250000, max=25.750000, count=3, sum=46.500000, average=15.500000}";

@@ -11,8 +11,10 @@ import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class DurationCancellationTest {
+public class DurationCancellationTest extends TestBase {
     private record Operation(long unit, boolean subtract, BiFunction<Duration, Long, Duration> apply) {
     }
 

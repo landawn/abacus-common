@@ -67,8 +67,8 @@ public class EmailUtilTest extends TestBase {
         final String[] recipients = { "user+tag@example.com", "user.name@example.co.uk" };
         for (final boolean html : new boolean[] { false, true }) {
             for (final String body : new String[] { null, "", "hello", "你好🙂 مرحبا", "<h1>A & B</h1>", "long content ".repeat(10000) }) {
-                final MimeMessage message = EmailUtil.createMessage(recipients, "sender@example.com", "Subject <>&\"' 你好🙂", body,
-                        null, html, null, null, props);
+                final MimeMessage message = EmailUtil.createMessage(recipients, "sender@example.com", "Subject <>&\"' 你好🙂", body, null, html, null, null,
+                        props);
                 final MimeMessage parsed = roundTrip(message);
                 assertEquals("Subject <>&\"' 你好🙂", parsed.getSubject());
                 assertEquals("sender@example.com", ((InternetAddress) parsed.getFrom()[0]).getAddress());
@@ -91,8 +91,8 @@ public class EmailUtilTest extends TestBase {
         try {
             for (final boolean html : new boolean[] { false, true }) {
                 for (final String[] files : new String[][] { null, {}, { tempFile.getPath() }, { tempFile.getPath(), unicode.getPath() } }) {
-                    final MimeMessage parsed = roundTrip(EmailUtil.createMessage(new String[] { "test@example.com" }, "sender@example.com",
-                            "", "body", files, html, null, null, props));
+                    final MimeMessage parsed = roundTrip(
+                            EmailUtil.createMessage(new String[] { "test@example.com" }, "sender@example.com", "", "body", files, html, null, null, props));
                     final MimeMultipart parts = (MimeMultipart) parsed.getContent();
                     assertEquals(1 + (files == null ? 0 : files.length), parts.getCount());
                     assertEquals("body", parts.getBodyPart(0).getContent());
@@ -100,7 +100,8 @@ public class EmailUtilTest extends TestBase {
                         final javax.mail.BodyPart part = parts.getBodyPart(i + 1);
                         assertEquals(new File(files[i]).getName(), part.getFileName());
                         try (java.io.InputStream input = part.getInputStream()) {
-                            org.junit.jupiter.api.Assertions.assertArrayEquals(java.nio.file.Files.readAllBytes(new File(files[i]).toPath()), input.readAllBytes());
+                            org.junit.jupiter.api.Assertions.assertArrayEquals(java.nio.file.Files.readAllBytes(new File(files[i]).toPath()),
+                                    input.readAllBytes());
                         }
                     }
                 }
@@ -123,7 +124,8 @@ public class EmailUtilTest extends TestBase {
                     case 0 -> EmailUtil.sendEmail(recipients, "sender@example.com", "subject", "body", null, null, props);
                     case 1 -> EmailUtil.sendHtmlEmail(recipients, "sender@example.com", "subject", "<b>body</b>", null, null, props);
                     case 2 -> EmailUtil.sendEmailWithAttachment(recipients, "sender@example.com", "subject", "body", attachments, null, null, props);
-                    default -> EmailUtil.sendHtmlEmailWithAttachment(recipients, "sender@example.com", "subject", "<b>body</b>", attachments, null, null, props);
+                    default -> EmailUtil.sendHtmlEmailWithAttachment(recipients, "sender@example.com", "subject", "<b>body</b>", attachments, null, null,
+                            props);
                 }
                 final MimeMessage sent = RecordingTransport.sent.get();
                 org.junit.jupiter.api.Assertions.assertNotNull(sent);
@@ -148,7 +150,8 @@ public class EmailUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> EmailUtil.sendEmail(null, "sender@example.com", "", "", null, null, props));
         assertThrows(IllegalArgumentException.class, () -> EmailUtil.sendEmail(new String[0], "sender@example.com", "", "", null, null, props));
         assertThrows(IllegalArgumentException.class, () -> EmailUtil.sendEmail(new String[] { "test@example.com" }, null, "", "", null, null, props));
-        assertThrows(IllegalArgumentException.class, () -> EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "", "", null, null, null));
+        assertThrows(IllegalArgumentException.class,
+                () -> EmailUtil.sendEmail(new String[] { "test@example.com" }, "sender@example.com", "", "", null, null, null));
     }
 
     private static MimeMessage roundTrip(final MimeMessage message) throws Exception {
@@ -193,6 +196,7 @@ public class EmailUtilTest extends TestBase {
             }
         }
     }
+
     @Test
     public void test_createMessage_nullContentIsSerializedAsEmptyBody() throws Exception {
         final ByteArrayOutputStream plainOutput = new ByteArrayOutputStream();
@@ -230,8 +234,10 @@ public class EmailUtilTest extends TestBase {
 
         try {
             final ByteArrayOutputStream output = new ByteArrayOutputStream();
-            EmailUtil.createMessage(new String[] { "test@example.com" }, "\"" + personal + "\" <sender@example.com>", subject, "body",
-                    new String[] { attachment.getPath() }, false, "username", "password", props).writeTo(output);
+            EmailUtil
+                    .createMessage(new String[] { "test@example.com" }, "\"" + personal + "\" <sender@example.com>", subject, "body",
+                            new String[] { attachment.getPath() }, false, "username", "password", props)
+                    .writeTo(output);
 
             // Re-parse the serialized message: the headers must survive a round trip whatever the JVM's
             // default charset is, and they must say UTF-8 rather than relying on the reader guessing.
@@ -294,8 +300,10 @@ public class EmailUtilTest extends TestBase {
 
     private void assertAttachmentNameIsUtf8InBothHeaders(final File attachment) throws Exception {
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
-        EmailUtil.createMessage(new String[] { "test@example.com" }, "sender@example.com", "subject", "body",
-                new String[] { attachment.getPath() }, false, "username", "password", props).writeTo(output);
+        EmailUtil
+                .createMessage(new String[] { "test@example.com" }, "sender@example.com", "subject", "body", new String[] { attachment.getPath() }, false,
+                        "username", "password", props)
+                .writeTo(output);
 
         final MimeMessage parsed = new MimeMessage(Session.getInstance(new Properties()), new ByteArrayInputStream(output.toByteArray()));
         final MimeBodyPart attachmentPart = (MimeBodyPart) ((MimeMultipart) parsed.getContent()).getBodyPart(1);

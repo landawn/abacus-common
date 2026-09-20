@@ -242,7 +242,6 @@ public class BooleanArrayTypeTest extends TestBase {
         assertTrue(type.isObjectArray());
     }
 
-
     @Test
     public void reviewFixes20260906_valueOfKeepsNullElementsAndMapsUnknownTokensToFalse() {
         // the boxed twin of T7-05: the 4-character literal null is a null element, other unknown tokens are false

@@ -19,7 +19,8 @@
  * {@link ByteStream}, {@link CharStream}, {@link ShortStream}, {@link IntStream}, {@link LongStream},
  * {@link FloatStream}, and {@link DoubleStream}. {@link EntryStream} is a key/value pipeline over
  * {@link java.util.Map.Entry}. All of them implement {@link BaseStream} ({@link AutoCloseable}):
- * intermediate operations are lazy; a terminal operation consumes the pipeline once and closes it.</p>
+ * intermediate operations are generally lazy, with eager behavior documented on individual methods;
+ * a terminal operation consumes the pipeline once and closes it.</p>
  *
  * <p>{@link Collectors} (and nested {@code MoreCollectors}) accumulate streams into lists, sets, maps,
  * multimaps, primitive lists, immutable collections, and statistical summaries. Extended iterators

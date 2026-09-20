@@ -94,8 +94,12 @@ public final class PermutationIterator {
                     return !done;
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if this iterator has no remaining element
+                 */
                 @Override
-                public List<T> next() {
+                public List<T> next() throws NoSuchElementException {
                     if (done) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -129,8 +133,12 @@ public final class PermutationIterator {
                 return hasNext == 1;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public List<T> next() {
+            public List<T> next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -260,8 +268,12 @@ public final class PermutationIterator {
                     return !done;
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if this iterator has no remaining element
+                 */
                 @Override
-                public List<T> next() {
+                public List<T> next() throws NoSuchElementException {
                     if (done) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -297,8 +309,12 @@ public final class PermutationIterator {
                 return hasNext == 1;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public List<T> next() {
+            public List<T> next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }

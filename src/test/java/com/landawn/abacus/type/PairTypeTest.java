@@ -284,7 +284,8 @@ public class PairTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -307,15 +308,19 @@ public class PairTypeTest extends TestBase {
         assertEquals("[{\"k\": 1}, null]", reviewFixes20260906_ser(type, Pair.of(com.landawn.abacus.util.N.asMap("k", 1), null), jsc));
         assertEquals("[[1, 2], 3]", reviewFixes20260906_ser(type, Pair.of(Pair.of(1, 2), 3), jsc));
         assertEquals("[1, a]", reviewFixes20260906_ser(type, Pair.of(1, "a"), null));
-        assertEquals(type.stringOf(Pair.of(1, com.landawn.abacus.util.N.asList(2))), reviewFixes20260906_ser(type, Pair.of(1, com.landawn.abacus.util.N.asList(2)), jsc));
+        assertEquals(type.stringOf(Pair.of(1, com.landawn.abacus.util.N.asList(2))),
+                reviewFixes20260906_ser(type, Pair.of(1, com.landawn.abacus.util.N.asList(2)), jsc));
         assertEquals("null", reviewFixes20260906_ser(type, null, jsc));
         // declared slots keep their declared handler; a declared null slot honours the handler's null flag
-        assertEquals("[\"a\", 0]", reviewFixes20260906_ser(stringIntPairType, Pair.of("a", null), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true)));
+        assertEquals("[\"a\", 0]", reviewFixes20260906_ser(stringIntPairType, Pair.of("a", null),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true)));
         assertEquals("[\"a\", null]", reviewFixes20260906_ser(stringIntPairType, Pair.of("a", null), jsc));
-        assertEquals("[{\"k\": 1}, 2]", reviewFixes20260906_ser(createType("Pair<Map<String, Integer>, Integer>"), Pair.of(com.landawn.abacus.util.N.asMap("k", 1), 2), jsc));
+        assertEquals("[{\"k\": 1}, 2]",
+                reviewFixes20260906_ser(createType("Pair<Map<String, Integer>, Integer>"), Pair.of(com.landawn.abacus.util.N.asMap("k", 1), 2), jsc));
         // real parser
         assertEquals("[[1, 2]]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Pair.of(1, 2))));
-        assertEquals("{\"p\": [1, [2]]}", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap("p", Pair.of(1, com.landawn.abacus.util.N.asList(2)))));
+        assertEquals("{\"p\": [1, [2]]}",
+                com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap("p", Pair.of(1, com.landawn.abacus.util.N.asList(2)))));
     }
 
     // T6-08 (2026-09-06): documented exception types of valueOf.

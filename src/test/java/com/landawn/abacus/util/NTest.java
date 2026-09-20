@@ -895,6 +895,43 @@ public class NTest extends NTestSupport {
     }
 
     @Test
+    public void testRetainAllSnapshotsAliasedLists() {
+        for (List<Integer> values : Arrays.asList(new ArrayList<>(Arrays.asList(0, 1, 2, 1)), new LinkedList<>(Arrays.asList(0, 1, 2, 1)))) {
+            assertTrue(N.retainAll(values, values.subList(1, 3)));
+            assertEquals(Arrays.asList(1, 2, 1), values);
+            assertFalse(N.retainAll(values, values));
+            assertEquals(Arrays.asList(1, 2, 1), values);
+        }
+
+        List<String> values = new ArrayList<>(Arrays.asList("A", "b", "a"));
+        Set<String> keep = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        keep.add("a");
+        assertTrue(N.retainAll(values, keep));
+        assertEquals(Arrays.asList("A", "a"), values);
+
+        // The small-list and hash-set paths must both preserve aliased membership, including nulls.
+        for (int size : new int[] { 9, 10 }) {
+            final List<Integer> input = new ArrayList<>(Arrays.asList(0, 1, null, 1, null));
+            while (input.size() < size) {
+                input.add(input.size());
+            }
+            for (List<Integer> aliased : Arrays.asList(new ArrayList<>(input), new LinkedList<>(input))) {
+                assertTrue(N.retainAll(aliased, aliased.subList(1, 3)));
+                assertEquals(Arrays.asList(1, null, 1, null), aliased);
+            }
+        }
+
+        final String first = new String("equal");
+        final String second = new String("equal");
+        final Set<String> identityKeep = Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+        identityKeep.add(second);
+        final List<String> identityValues = new ArrayList<>(Arrays.asList(first, second));
+        assertTrue(N.retainAll(identityValues, identityKeep));
+        assertEquals(1, identityValues.size());
+        assertSame(second, identityValues.get(0));
+    }
+
+    @Test
     public void testNaNHandling() {
         assertEquals(Float.NaN, N.min(1.0f, Float.NaN), 0.001f);
         assertEquals(Float.NaN, N.max(1.0f, Float.NaN), 0.001f);

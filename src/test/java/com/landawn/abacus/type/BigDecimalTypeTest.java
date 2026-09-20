@@ -259,8 +259,7 @@ public class BigDecimalTypeTest extends TestBase {
         assertNull(N.fromJson("{\"a\":\"\"}", PaddedDecimalBean.class).getA());
         // R11: a blank value is rejected on both paths, so JSON and XML agree
         assertThrows(NumberFormatException.class, () -> N.fromJson("{\"a\":\"   \"}", PaddedDecimalBean.class));
-        assertThrows(NumberFormatException.class,
-                () -> N.fromXml("<paddedDecimalBean><a>   </a></paddedDecimalBean>", PaddedDecimalBean.class));
+        assertThrows(NumberFormatException.class, () -> N.fromXml("<paddedDecimalBean><a>   </a></paddedDecimalBean>", PaddedDecimalBean.class));
         assertEquals(new BigDecimal("1.5"), N.fromXml("<paddedDecimalBean><a> 1.5 </a></paddedDecimalBean>", PaddedDecimalBean.class).getA());
     }
 }

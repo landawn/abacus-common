@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Stream;
 
@@ -80,7 +81,7 @@ public class SeqTransformTest extends SeqTestSupport {
         assertEquals(1, transferCalls.get());
 
         assertEquals(3, Seq.<Integer, Exception> of(1, 2, 3).transformViaStream(s -> s.map(x -> x * 2), true).count());
-        assertEquals(Optional.of(2), Seq.<Integer, Exception> of(1, 2, 3).transformViaStream(s -> s.map(x -> x * 2), true).first());
+        assertEquals(Nullable.of(2), Seq.<Integer, Exception> of(1, 2, 3).transformViaStream(s -> s.map(x -> x * 2), true).first());
         assertThrows(Exception.class, () -> Seq.of(1, 2, 3).transformViaStream(stream -> stream.map(n -> {
             if (n == 2) {
                 throw new RuntimeException("Test exception");

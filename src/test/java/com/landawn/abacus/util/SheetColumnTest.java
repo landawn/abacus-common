@@ -226,8 +226,7 @@ public class SheetColumnTest extends SheetTestSupport {
     public void testColumnValuesViewSizeFailsOnceItsColumnIsGone() {
         // The mirror of testRowValuesViewSizeFailsOnceItsRowIsGone: size() must not keep answering for a
         // column key that is gone while every element read throws.
-        final Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"),
-                new Integer[][] { { 1, 2 }, { 3, 4 } });
+        final Sheet<String, String, Integer> s = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
         final ImmutableList<Integer> removed = s.columnValues("c1");
         assertEquals(2, removed.size());
 
@@ -263,8 +262,7 @@ public class SheetColumnTest extends SheetTestSupport {
         assertTrue(noRowsView.containsAll(Collections.emptyList()));
 
         // A live key is untouched: the view still tracks the other axis.
-        final Sheet<String, String, Integer> live = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"),
-                new Integer[][] { { 1, 2 }, { 3, 4 } });
+        final Sheet<String, String, Integer> live = Sheet.rows(Arrays.asList("r1", "r2"), Arrays.asList("c1", "c2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
         final ImmutableList<Integer> liveView = live.columnValues("c1");
         live.removeColumn("c2");
         assertEquals(2, liveView.size());

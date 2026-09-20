@@ -20,6 +20,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.cs;
 
 /**
  * Type handler for {@link java.nio.ByteBuffer} values.
@@ -61,9 +62,10 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * Instances are created by {@link TypeFactory}; do not instantiate directly.
      *
      * @param cls the specific {@code ByteBuffer} subclass represented by this type handler; also used as the type name source
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    ByteBufferType(final Class<? extends ByteBuffer> cls) {
+    ByteBufferType(final Class<? extends ByteBuffer> cls) throws IllegalArgumentException {
         super(ClassUtil.getSimpleClassName(cls));
 
         typeClass = (Class<ByteBuffer>) cls;
@@ -223,8 +225,10 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      *
      * @param x the {@code ByteBuffer} to extract bytes from; must not be {@code null}
      * @return a new byte array containing the buffer's written bytes (indices {@code 0..position-1})
+     * @throws IllegalArgumentException if {@code x} is {@code null}
      */
-    public static byte[] byteArrayOf(final ByteBuffer x) {
+    public static byte[] byteArrayOf(final ByteBuffer x) throws IllegalArgumentException {
+        N.checkArgNotNull(x, cs.x);
         final ByteBuffer duplicate = x.duplicate();
         final byte[] bytes = new byte[duplicate.position()];
 
@@ -255,8 +259,10 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      *
      * @param bytes the byte array to wrap; must not be {@code null}
      * @return a {@code ByteBuffer} wrapping {@code bytes} with position at {@code bytes.length}
+     * @throws IllegalArgumentException if {@code bytes} is {@code null}
      */
-    public static ByteBuffer valueOf(final byte[] bytes) {
+    public static ByteBuffer valueOf(final byte[] bytes) throws IllegalArgumentException {
+        N.checkArgNotNull(bytes, cs.bytes);
         return ByteBuffer.wrap(bytes, bytes.length, 0);
     }
 }

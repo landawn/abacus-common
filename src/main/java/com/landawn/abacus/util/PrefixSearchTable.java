@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.AbstractMap;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -156,8 +157,12 @@ public final class PrefixSearchTable<K, V> {
                 return next != null;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public Map.Entry<List<K>, V> next() {
+            public Map.Entry<List<K>, V> next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException();
                 }
@@ -299,12 +304,18 @@ public final class PrefixSearchTable<K, V> {
 
             int size = compoundKey.size();
             N.checkArgument(size > 0, "empty key not allowed");
+
+            final List<K> validatedKey = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                validatedKey.add(requireNonNull(compoundKey.get(i)));
+            }
+
             N.checkArgNotNull(value, cs.value);
 
-            Node.Builder<K, V> node = nodes.computeIfAbsent(requireNonNull(compoundKey.get(0)), k -> new Node.Builder<>());
+            Node.Builder<K, V> node = nodes.computeIfAbsent(validatedKey.get(0), k -> new Node.Builder<>());
 
             for (int i = 1; i < size; i++) {
-                node = node.child(compoundKey.get(i));
+                node = node.child(validatedKey.get(i));
             }
 
             N.checkArgument(node.set(value), "conflicting key: %s", compoundKey);

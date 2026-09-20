@@ -9,8 +9,10 @@ import java.io.File;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class DirectoryContainmentTest {
+public class DirectoryContainmentTest extends TestBase {
     @Test
     void backslashOnlyCreatesABoundaryOnWindows() {
         final boolean windows = File.separatorChar == '\\';

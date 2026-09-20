@@ -139,7 +139,13 @@ public abstract class TypeReference<T> {
         }
     }
 
-    private static java.lang.reflect.Type captureTypeArgument(final Class<?> concreteClass) {
+    /**
+     * Resolves the concrete TypeReference argument through the generic superclass chain.
+     *
+     * @throws IllegalArgumentException if the superclass chain has no concrete TypeReference argument, uses an
+     *         unsupported generic superclass representation, or contains a cyclic type-variable substitution
+     */
+    private static java.lang.reflect.Type captureTypeArgument(final Class<?> concreteClass) throws IllegalArgumentException {
         final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables = new HashMap<>();
         Class<?> currentClass = concreteClass;
 
@@ -227,13 +233,23 @@ public abstract class TypeReference<T> {
         return false;
     }
 
-    private static java.lang.reflect.Type resolveType(final java.lang.reflect.Type source,
-            final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables) {
+    /**
+     * Resolves type variables recursively through parameterized, array, and wildcard types.
+     *
+     * @throws IllegalArgumentException if resolving {@code source} encounters a cyclic type-variable substitution
+     */
+    private static java.lang.reflect.Type resolveType(final java.lang.reflect.Type source, final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables)
+            throws IllegalArgumentException {
         return resolveType(source, resolvedVariables, new HashSet<>());
     }
 
+    /**
+     * Resolves type variables recursively through parameterized, array, and wildcard types.
+     *
+     * @throws IllegalArgumentException if resolving {@code source} encounters a cyclic type-variable substitution
+     */
     private static java.lang.reflect.Type resolveType(final java.lang.reflect.Type source, final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables,
-            final Set<TypeVariable<?>> resolvingVariables) {
+            final Set<TypeVariable<?>> resolvingVariables) throws IllegalArgumentException {
         if (source instanceof TypeVariable<?> variable) {
             final java.lang.reflect.Type resolved = resolvedVariables.get(variable);
 
@@ -290,8 +306,14 @@ public abstract class TypeReference<T> {
         return source;
     }
 
+    /**
+     * Resolves each type in an array using the current type-variable substitutions.
+     *
+     * @throws IllegalArgumentException if resolving any element of {@code sources} encounters a cyclic type-variable substitution
+     */
     private static java.lang.reflect.Type[] resolveTypes(final java.lang.reflect.Type[] sources,
-            final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables, final Set<TypeVariable<?>> resolvingVariables) {
+            final Map<TypeVariable<?>, java.lang.reflect.Type> resolvedVariables, final Set<TypeVariable<?>> resolvingVariables)
+            throws IllegalArgumentException {
         final java.lang.reflect.Type[] result = new java.lang.reflect.Type[sources.length];
 
         for (int i = 0; i < sources.length; i++) {

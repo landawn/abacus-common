@@ -15,6 +15,7 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -170,6 +171,62 @@ public class GenericKeyedObjectPoolTest extends TestBase {
 
         Poolable.Caller getDestroyedByCaller() {
             return destroyedByCaller;
+        }
+    }
+
+    /** Records whether {@code hashCode()} ran while the pool lock was held by this thread. */
+    private static final class LockAwareKey {
+        private final String id;
+        AbstractPool pool;
+        int hashCount;
+        int hashesWhilePoolLockHeld;
+
+        LockAwareKey(final String id) {
+            this.id = id;
+        }
+
+        void resetCounts() {
+            hashCount = 0;
+            hashesWhilePoolLockHeld = 0;
+        }
+
+        @Override
+        public int hashCode() {
+            hashCount++;
+            if (pool != null && pool.lock.isHeldByCurrentThread()) {
+                hashesWhilePoolLockHeld++;
+            }
+            return id.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return obj instanceof LockAwareKey other && id.equals(other.id);
+        }
+    }
+
+    /** Records whether a pooled value is hashed while the pool lock is held by this thread. */
+    private static final class LockAwarePoolable extends TestPoolable {
+        AbstractPool pool;
+        int hashCount;
+        int hashesWhilePoolLockHeld;
+
+        LockAwarePoolable(final String value) {
+            super(value);
+        }
+
+        void resetCounts() {
+            hashCount = 0;
+            hashesWhilePoolLockHeld = 0;
+        }
+
+        @Override
+        public int hashCode() {
+            hashCount++;
+            if (pool != null && pool.lock.isHeldByCurrentThread()) {
+                hashesWhilePoolLockHeld++;
+            }
+            return super.hashCode();
         }
     }
 
@@ -827,14 +884,7 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         TestPoolable value = new TestPoolable("v1", 600_000, 60_000);
         value.activityPrint().updateAccessCount();
         assertTrue(pool.put("k1", value));
-        GenericKeyedObjectPool<String, TestPoolable> copy = deserialize(serialize(pool));
-        try {
-            TestPoolable restored = copy.peek("k1");
-            assertEquals("v1", restored.getValue());
-            assertEquals(1, restored.activityPrint().getAccessCount());
-        } finally {
-            copy.close();
-        }
+        assertThrows(NotSerializableException.class, () -> serialize(pool));
 
         GenericKeyedObjectPool<String, PoolableAdapter<String>> adapterPool = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
         try {
@@ -842,15 +892,7 @@ public class GenericKeyedObjectPoolTest extends TestBase {
             adapter.activityPrint().updateAccessCount();
             assertTrue(adapterPool.put("k1", adapter));
             assertTrue(adapterPool.put("k2", Poolable.wrap("汉字 😀")));
-            GenericKeyedObjectPool<String, PoolableAdapter<String>> adapterCopy = deserialize(serialize(adapterPool));
-            try {
-                assertEquals("hello", adapterCopy.peek("k1").value());
-                assertEquals(1, adapterCopy.peek("k1").activityPrint().getAccessCount());
-                assertEquals("汉字 😀", adapterCopy.peek("k2").value());
-                assertSame(adapter, adapterPool.peek("k1"));
-            } finally {
-                adapterCopy.close();
-            }
+            assertThrows(NotSerializableException.class, () -> serialize(adapterPool));
         } finally {
             adapterPool.close();
         }
@@ -861,14 +903,7 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         try {
             measured.put("a", Poolable.wrap("abc"));
             measured.put("b", Poolable.wrap("defgh"));
-            GenericKeyedObjectPool<String, PoolableAdapter<String>> measuredCopy = deserialize(serialize(measured));
-            try {
-                assertEquals(8, measuredCopy.stats().dataSize());
-                assertEquals("abc", measuredCopy.remove("a").value());
-                assertEquals(5, measuredCopy.stats().dataSize());
-            } finally {
-                measuredCopy.close();
-            }
+            assertThrows(NotSerializableException.class, () -> serialize(measured));
         } finally {
             measured.close();
         }
@@ -1217,6 +1252,51 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         } finally {
             pool1.close();
             pool2.close();
+        }
+    }
+
+    @Test
+    public void testHashCode_hashesOutsideThePoolLock() {
+        GenericKeyedObjectPool<LockAwareKey, TestPoolable> p = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+        try {
+            final LockAwareKey a = new LockAwareKey("a");
+            final LockAwareKey b = new LockAwareKey("b");
+            final LockAwarePoolable va = new LockAwarePoolable("va");
+            final LockAwarePoolable vb = new LockAwarePoolable("vb");
+            assertTrue(p.put(a, va));
+            assertTrue(p.put(b, vb));
+            a.pool = p;
+            b.pool = p;
+            va.pool = p;
+            vb.pool = p;
+            a.resetCounts();
+            b.resetCounts();
+            va.resetCounts();
+            vb.resetCounts();
+
+            final int hash = p.hashCode();
+
+            assertEquals(0, a.hashesWhilePoolLockHeld);
+            assertEquals(0, b.hashesWhilePoolLockHeld);
+            assertEquals(0, va.hashesWhilePoolLockHeld);
+            assertEquals(0, vb.hashesWhilePoolLockHeld);
+            assertEquals(1, a.hashCount);
+            assertEquals(1, b.hashCount);
+            assertEquals(1, va.hashCount);
+            assertEquals(1, vb.hashCount);
+            assertEquals(new AbstractMap.SimpleImmutableEntry<>(a, va).hashCode() + new AbstractMap.SimpleImmutableEntry<>(b, vb).hashCode(), hash);
+
+            GenericKeyedObjectPool<LockAwareKey, TestPoolable> q = new GenericKeyedObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
+            try {
+                q.put(a, va);
+                q.put(b, vb);
+                assertEquals(p, q);
+                assertEquals(p.hashCode(), q.hashCode());
+            } finally {
+                q.close();
+            }
+        } finally {
+            p.close();
         }
     }
 

@@ -27,13 +27,11 @@ public class IteratorShortStreamTest extends TestBase {
             for (final boolean empty : new boolean[] { true, false }) {
                 final short[] values = empty ? new short[0] : new short[] { (short) 1 };
                 final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
-                try (final ShortStream stream = arrayBacked ? ShortStream.of(values)
-                        : ShortStream.of(com.landawn.abacus.util.ShortIterator.of(values))) {
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                            () -> stream.groupTo(value -> value, null, () -> {
-                                factoryCalls.incrementAndGet();
-                                return new java.util.HashMap<>();
-                            }));
+                try (final ShortStream stream = arrayBacked ? ShortStream.of(values) : ShortStream.of(com.landawn.abacus.util.ShortIterator.of(values))) {
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> stream.groupTo(value -> value, null, () -> {
+                        factoryCalls.incrementAndGet();
+                        return new java.util.HashMap<>();
+                    }));
                     org.junit.jupiter.api.Assertions.assertEquals(0, factoryCalls.get());
                 }
             }
@@ -154,7 +152,6 @@ public class IteratorShortStreamTest extends TestBase {
             assertEquals(2, attempts.get());
         }
     }
-
 
     // Creates an iterator-backed ShortStream (IteratorShortStream) rather than array-backed
     private ShortStream iter(short... values) {

@@ -46,11 +46,12 @@ import com.landawn.abacus.annotation.Beta;
  * System.out.println(map.descendingMap());   // prints {4=four, 3=three, 2=two, 1=one}
  * }</pre>
  *
- * <p><b>Note:</b> the {@code of(...)} factories accept any key type and throw
- * {@link ClassCastException} at run time if the keys are not mutually comparable, matching
- * {@link #copyOf(Map)}. They deliberately carry no {@code Comparable} bound, and one must not be added: a
- * bound would make them inapplicable to a non-comparable key, so the call would quietly resolve to an
- * inherited unsorted factory and hand back an unsorted map instead of failing.</p>
+ * <p>The natural-order {@code of(...)} factories require {@code K extends Comparable<? super K>}.
+ * {@link #copyOf(Map)} and {@link #wrap(NavigableMap)} remain unbounded so a {@link java.util.Comparator}
+ * can order keys that are not comparable. Because this class extends {@link ImmutableSortedMap} (and
+ * therefore {@link ImmutableMap}), a call written as {@code ImmutableNavigableMap.of(nonComparableKey, value)}
+ * whose result is not demanded as an {@code ImmutableNavigableMap} can still resolve to
+ * {@link ImmutableMap#of(Object, Object)} and return an unsorted map.</p>
  *
  * @param <K> the key type
  * @param <V> the value type
@@ -119,7 +120,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map.firstKey());   // prints "count"
      * }</pre>
      *
-     * @param <K> the type of the key in the ImmutableNavigableMap; the key must be Comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the value in the ImmutableNavigableMap
      * @param k1 the key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the key
@@ -127,7 +128,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if {@code k1} is {@code null}
      * @throws ClassCastException if {@code k1} cannot be compared with itself in natural order
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1) throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -148,7 +149,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * System.out.println(map);   // prints {1=one, 2=two}
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -158,7 +159,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2)
+            throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -180,7 +182,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.floorEntry(2);   // returns 2=b
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -192,7 +194,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3)
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3)
             throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
@@ -216,7 +218,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.higherKey(4);    // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -230,8 +232,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4)
-            throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4) throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -255,7 +257,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.lowerKey(1);   // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -271,8 +273,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
-            final K k5, final V v5) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5) throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -298,7 +300,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.ceilingKey(7);    // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -316,8 +318,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
-            final K k5, final V v5, final K k6, final V v6) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6) throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -344,7 +346,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.higherKey(7);    // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -364,8 +366,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
-            final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -393,7 +395,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.ceilingKey(9);   // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -415,8 +417,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
-            final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8)
+            throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -445,7 +448,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.higherKey(9);   // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -469,8 +472,8 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
-            final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9)
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9)
             throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
@@ -501,7 +504,7 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * map.higherKey(10);    // returns null
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableNavigableMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableNavigableMap
      * @param k1 the first key to be included in the ImmutableNavigableMap
      * @param v1 the value to be associated with the first key
@@ -527,9 +530,9 @@ public class ImmutableNavigableMap<K, V> extends ImmutableSortedMap<K, V> implem
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4,
-            final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10)
-            throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableNavigableMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9,
+            final K k10, final V v10) throws NullPointerException, ClassCastException {
         final NavigableMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);

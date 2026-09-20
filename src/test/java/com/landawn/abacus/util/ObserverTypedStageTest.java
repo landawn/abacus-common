@@ -27,8 +27,10 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class ObserverTypedStageTest {
+public class ObserverTypedStageTest extends TestBase {
     private static <T> List<T> collect(Observer<T> observer) throws Exception {
         List<T> values = new CopyOnWriteArrayList<>();
         AtomicReference<Exception> error = new AtomicReference<>();

@@ -146,9 +146,11 @@ public class TimedType<T> extends AbstractType<Timed<T>> { //NOSONAR
      * @return a Timed object containing the parsed timestamp and value, or {@code null} if {@code str} is {@code null}
      *         or empty (a blank, non-empty string is not treated as empty and is rejected); negative timestamps are
      *         accepted
-     * @throws IllegalArgumentException if the parsed value is not an array with exactly two elements (this includes a         blank string, unbalanced brackets and trailing text)
+     * @throws IllegalArgumentException if the parsed value is not an array with exactly two elements (this includes a blank string, unbalanced brackets
+     *         and trailing text)
      * @throws ParsingException if the value token is not valid JSON for the declared value type
-     * @throws NumberFormatException if the timestamp slot is not an integer literal (fractional or scientific         notation), or a value token cannot be converted to the declared value type
+     * @throws NumberFormatException if the timestamp slot is not an integer literal (fractional or scientific notation), or a value token cannot be
+     *         converted to the declared value type
      * @throws ArithmeticException if the timestamp does not fit in a {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(Timed)

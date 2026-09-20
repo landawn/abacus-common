@@ -131,7 +131,7 @@ public class SeqSplitTest extends SeqTestSupport {
     @Test
     public void testSplitAt_FileLifetimeAndBufferedPredicateBoundary() throws Exception {
         final File file = tempDir.resolve("splitAt-lifetime.txt").toFile();
-        for (final List<String> input : Arrays.asList(Collections.<String>emptyList(), Arrays.asList("", "\u00e9", "\ud83d\ude42", "last"))) {
+        for (final List<String> input : Arrays.asList(Collections.<String> emptyList(), Arrays.asList("", "\u00e9", "\ud83d\ude42", "last"))) {
             IOUtil.writeLines(input, file);
             for (final int position : new int[] { 0, 2, 6 }) {
                 final List<Seq<String, IOException>> parts = Seq.ofLines(file).splitAt(position).toList();

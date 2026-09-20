@@ -405,7 +405,8 @@ public class CollectionTypeTest extends TestBase {
 
         assertEquals("[1, \"a\", null, 2.5, true]", serializeToJson(objList, mixed, jsc));
         assertEquals(objList.stringOf(mixed), serializeToJson(objList, mixed, jsc));
-        assertEquals("[{\"k\": 1}, [1, 2], \"中\"]", serializeToJson(objList, Arrays.asList(com.landawn.abacus.util.N.asMap("k", 1), Arrays.asList(1, 2), "中"), jsc));
+        assertEquals("[{\"k\": 1}, [1, 2], \"中\"]",
+                serializeToJson(objList, Arrays.asList(com.landawn.abacus.util.N.asMap("k", 1), Arrays.asList(1, 2), "中"), jsc));
         assertEquals("[]", serializeToJson(objList, new ArrayList<>(), jsc));
         assertEquals("null", serializeToJson(objList, null, jsc));
 

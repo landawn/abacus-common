@@ -237,12 +237,13 @@ public @interface JsonXmlField {
     boolean ignore() default false;
 
     /**
-     * Indicates whether the field value should be treated as raw JSON/XML content.
-     * When {@code true}, the field's string value is inserted directly into the output
-     * without additional JSON/XML escaping or formatting.
+     * Indicates whether the field value should be written as a JSON payload.
+     * In JSON output, a character-sequence value is inserted directly without additional
+     * quoting or escaping; it must already contain valid JSON. Other values are serialized as JSON.
      *
-     * <p>This is useful when a field contains pre-serialized JSON/XML that should be
-     * embedded as-is in the output.</p>
+     * <p>In XML output, the property value is first serialized as JSON, then embedded as
+     * element text. XML markup characters are entity-escaped, and characters forbidden in
+     * XML text are represented by JSON Unicode escapes. This does not insert raw XML markup.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -256,7 +257,7 @@ public @interface JsonXmlField {
      * }
      * }</pre>
      *
-     * @return {@code true} if the field contains raw JSON/XML content, {@code false} for normal processing
+     * @return {@code true} to write a JSON payload, {@code false} for normal processing
      */
     boolean isJsonRawValue() default false;
 

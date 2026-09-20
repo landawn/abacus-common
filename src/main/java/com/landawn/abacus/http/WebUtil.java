@@ -994,7 +994,7 @@ public final class WebUtil {
      * request.header("Authorization", "Bearer token123")
      *        .header("Content-Type", "application/json")
      *        .jsonBody(requestData)
-     *        .post();
+     *        .post(String.class);
      *
      * // The logHandler will receive something like:
      * // curl -X POST 'http://localhost:18080' \
@@ -1024,12 +1024,12 @@ public final class WebUtil {
      * <p>This method is similar to {@link #createCurlLoggingOkHttpRequest(String, Consumer)}
      * but allows you to specify the quote character used in the generated cURL commands.
      * This is useful when you need to generate cURL commands compatible with specific
-     * shell environments or documentation standards.</p>
+     * POSIX shell quoting styles or documentation standards. Neither quote mode targets Windows cmd.exe or PowerShell.</p>
      *
      * <p>Common quote character choices:</p>
      * <ul>
      *   <li>Single quote ('): Recommended for most Unix/Linux shells, prevents variable expansion</li>
-     *   <li>Double quote ("): May be needed for Windows CMD or when variable expansion is desired</li>
+     *   <li>Double quote ("): An alternative POSIX shell quoting style; expansion characters are escaped</li>
      * </ul>
      *
      * <p>The generated cURL commands will use the specified quote character for:</p>
@@ -1041,7 +1041,7 @@ public final class WebUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Use double quotes in generated cURL commands (e.g., for Windows compatibility)
+     * // Use double quotes in generated cURL commands for a POSIX shell
      * OkHttpRequest request = WebUtil.createCurlLoggingOkHttpRequest(
      *     "http://localhost:18080",
      *     '"',
@@ -1049,7 +1049,7 @@ public final class WebUtil {
      * );
      *
      * request.header("Content-Type", "application/json")
-     *        .post();
+     *        .post(String.class);
      *
      * // Generates:
      * // curl -X POST "http://localhost:18080" \

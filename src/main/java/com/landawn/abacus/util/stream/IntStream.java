@@ -165,9 +165,9 @@ import com.landawn.abacus.util.function.ToIntFunction;
  * <p><b>Performance Considerations:</b>
  * <ul>
  *   <li>Use IntStream instead of {@code Stream<Integer>} to avoid boxing overhead</li>
- *   <li>Parallel processing benefits large datasets (typically &gt; 10,000 elements)</li>
+ *   <li>The benefit of parallel processing depends on input size, operation cost, and available processors; benchmark representative workloads</li>
  *   <li>Sequential processing is more efficient for small datasets and simple operations</li>
- *   <li>Lazy evaluation means intermediate operations are not executed until terminal operations</li>
+ *   <li>Most intermediate operations defer processing until traversal; consult each operation for eager evaluation or buffering</li>
  * </ul>
  *
  * <p><b>abacus {@code IntStream} vs. {@link java.util.stream.IntStream JDK IntStream} &mdash; how they differ:</b>
@@ -217,7 +217,7 @@ import com.landawn.abacus.util.function.ToIntFunction;
  *       <td><b><i>abacus</i></b>: returns {@code u.OptionalInt} (and {@code u.OptionalDouble} for {@code average()}) &middot; &#9888;&#65039; <b><i>JDK</i></b>: returns {@code java.util.OptionalInt}/{@code OptionalDouble}</td>
  *     </tr>
  *     <tr>
- *       <td><b>null arguments</b> to any operation</td>
+ *       <td><b>null function arguments</b> to stream operations</td>
  *       <td><b><i>abacus</i></b>: throws {@link IllegalArgumentException} (via {@code checkArgNotNull}),
  *           and the stream is <b>closed</b> before the exception propagates &middot; &#9888;&#65039;
  *           <b><i>JDK</i></b>: throws {@link NullPointerException} and leaves the stream open.
@@ -1254,9 +1254,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public abstract IntStream mapMulti(IntMapMultiConsumer mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Returns a stream consisting of the elements that have a non-empty result
-     * when the given mapping function is applied to them. Elements that produce
-     * an empty OptionalInt are excluded from the returned stream.
+     * Returns a stream containing the values from the non-empty optional results produced by the
+     * mapping function. Empty optional results contribute no elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1283,9 +1282,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public abstract IntStream mapPartial(IntFunction<OptionalInt> mapper) throws IllegalStateException, IllegalArgumentException;
 
     /**
-     * Returns a stream consisting of the elements that have a non-empty result
-     * when the given mapping function is applied to them. Elements that produce
-     * an empty OptionalInt are excluded from the returned stream.
+     * Returns a stream containing the values from the non-empty optional results produced by the
+     * mapping function. Empty optional results contribute no elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1477,7 +1475,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
     /**
      * Collapses consecutive elements in the stream by applying a merge function when elements are collapsible.
-     * Elements for which the predicate returns {@code true} when applied with the first and last elements of the group are merged using the provided merge function.
+     * Elements for which the predicate returns {@code true} when applied to the first and last elements of the group and the next element are merged using the provided merge function.
      * The collapsible predicate takes three elements: the first and last elements of the group, and the next element in the stream.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1804,7 +1802,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p>This is a terminal operation.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -1852,7 +1850,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * {@link #toMap(Throwables.IntFunction, Throwables.IntFunction, BinaryOperator)} and reports
      * {@code reference to toMap is ambiguous}.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -1903,7 +1901,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *            Math::max);   // returns {"even"=8, "odd"=5}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -1949,7 +1947,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *            Suppliers.ofTreeMap());   // returns TreeMap sorted by keys
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -2509,8 +2507,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * {@code OptionalInt}, or an empty {@code OptionalInt} if no element matches. This is a
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
-     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * <p>When several elements match, the one at the smallest encounter-order index in the current
+     * pipeline wins. Parallel intermediate operations may already have reordered the original source.
+     * If that ordering guarantee is not needed,
      * {@link #findAny(Throwables.IntPredicate)} may find a match faster in parallel.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3153,15 +3152,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * empty.count();   // returns 0
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * <p>If this stream has close handlers, closing the returned JDK stream closes this stream and
      * invokes those handlers exactly once.</p>
      *
+     * <p>The returned JDK stream preserves this stream's parallel or sequential execution mode.</p>
+     *
      * @return a java.util.stream.IntStream containing the elements of this stream
      * @throws IllegalStateException if the stream is already closed
      */
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public abstract java.util.stream.IntStream toJdkStream() throws IllegalStateException;
 
@@ -3169,6 +3170,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * Transforms this IntStream using the provided function that operates on java.util.stream.IntStream.
      * This method allows applying standard Java Stream API operations and converting back to IntStream.
      * The transformation is applied immediately (not deferred).
+     *
+     * <p>The function receives a JDK stream with this stream's current execution mode. The result adopts
+     * the execution mode of the JDK stream returned by the function. Closing the result also closes this stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3192,7 +3196,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public IntStream transformViaJdkStream(final Function<? super java.util.stream.IntStream, ? extends java.util.stream.IntStream> transfer)
             throws IllegalStateException, IllegalArgumentException {
@@ -3206,6 +3210,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     /**
      * Transforms this IntStream using the provided function that operates on java.util.stream.IntStream.
      * This method allows applying standard Java Stream API operations and converting back to IntStream.
+     *
+     * <p>The function receives a JDK stream with this stream's current execution mode. Without deferral,
+     * the result adopts the returned JDK pipeline's mode; with deferral, the outer stream starts sequential.
+     * Closing the result also closes this stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3221,18 +3229,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *     .toArray();   // returns [2, 4, 6]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation. The transfer function is invoked on consumption when
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation. The transfer function is invoked on first traversal or closure when
      * {@code deferred} is {@code true}, and immediately otherwise; buffering and traversal behavior depend on the returned JDK pipeline.
      *
      * @param transfer the function to transform the java.util.stream.IntStream
-     * @param deferred if {@code true}, the transformation is deferred until the stream is consumed;
+     * @param deferred if {@code true}, the transformation is deferred until the returned stream is first traversed or closed;
      *                 if {@code false}, the transformation is applied immediately
      * @return a new IntStream resulting from the transformation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public IntStream transformViaJdkStream(final Function<? super java.util.stream.IntStream, ? extends java.util.stream.IntStream> transfer,
             final boolean deferred) throws IllegalStateException, IllegalArgumentException {
@@ -3366,7 +3374,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (exhausted) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3537,8 +3545,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return an IntStream containing the unboxed elements from the specified range of the array
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
+     *         the array length, or {@code fromIndex} is greater than {@code toIndex}
      */
-    public static IntStream of(final Integer[] a, final int fromIndex, final int toIndex) {
+    public static IntStream of(final Integer[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return Stream.of(a, fromIndex, toIndex).mapToInt(FI.unbox());
     }
 
@@ -3735,8 +3745,6 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @see #splitByChunkCount(int, int, boolean, IntBinaryOperator)
      */
     public static IntStream splitByChunkCount(final int totalSize, final int maxChunkCount, final IntBinaryOperator mapper) throws IllegalArgumentException {
-        N.checkArgNotNull(mapper, cs.mapper);
-
         return splitByChunkCount(totalSize, maxChunkCount, false, mapper);
     }
 
@@ -3796,7 +3804,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 }
 
                 @Override
-                public int nextInt() {
+                public int nextInt() throws NoSuchElementException {
                     if (cursor >= totalSize) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3837,7 +3845,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 }
 
                 @Override
-                public int nextInt() {
+                public int nextInt() throws NoSuchElementException {
                     if (cursor >= totalSize) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3951,7 +3959,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cnt++ >= count) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4037,7 +4045,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 }
 
                 @Override
-                public int nextInt() {
+                public int nextInt() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -4069,7 +4077,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 }
 
                 @Override
-                public int nextInt() {
+                public int nextInt() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -4152,7 +4160,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4255,7 +4263,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4352,7 +4360,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4455,7 +4463,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4553,7 +4561,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4789,6 +4797,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @Beta
     public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final ObjIntFunction<? super AC, Integer> indexFunc)
             throws IllegalArgumentException {
+        N.checkArgNotNegative(fromIndex, cs.fromIndex);
         N.checkArgNotNull(indexFunc, cs.indexFunc);
 
         return ofIndices(source, fromIndex, 1, indexFunc);
@@ -4826,9 +4835,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final int increment, final ObjIntFunction<? super AC, Integer> indexFunc)
             throws IllegalArgumentException {
         N.checkArgNotNegative(fromIndex, cs.fromIndex);
-        N.checkArgNotNull(indexFunc, cs.indexFunc);
-
         N.checkArgument(increment != 0, "'increment' cannot be zero");
+        N.checkArgNotNull(indexFunc, cs.indexFunc);
 
         if (source == null) {
             return IntStream.empty();
@@ -4894,7 +4902,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4952,7 +4960,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5014,7 +5022,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5101,7 +5109,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5341,7 +5349,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5404,7 +5412,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5458,7 +5466,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5507,7 +5515,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5558,7 +5566,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5603,7 +5611,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return zipFunction.applyAsInt(iterA.nextInt(), iterB.nextInt());
             }
         });
@@ -5648,7 +5656,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return zipFunction.applyAsInt(iterA.nextInt(), iterB.nextInt(), iterC.nextInt());
             }
         });
@@ -5793,7 +5801,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5851,7 +5859,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5903,7 +5911,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsInt(iterA.nextInt(), iterB.hasNext() ? iterB.nextInt() : valueForNoneB);
                 } else {
@@ -5956,7 +5964,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsInt(iterA.nextInt(), iterB.hasNext() ? iterB.nextInt() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextInt() : valueForNoneC);
@@ -6133,7 +6141,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursorA < lenA) {
                     if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                         return a[cursorA++];
@@ -6237,7 +6245,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 // Peek both heads before calling the selector so a throwing selector retries the same values.
                 if (!hasNextA && iterA.hasNext()) {
                     nextA = iterA.nextInt();

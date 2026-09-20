@@ -226,9 +226,9 @@ public class IOUtilNullFileReadTest extends TestBase {
         final File missing = new File(tempFolder.toFile(), "no-such-dir");
 
         assertEquals(List.of(), IOUtil.listFiles(null, true, false));
-        assertEquals(List.of(), IOUtil.walk(null).toList());
-        assertEquals(List.of(), IOUtil.walk(null, true, false).toList());
-        assertEquals(List.of(), IOUtil.walk(null, true, true).toList());
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.walk(null));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.walk(null, true, false));
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.walk(null, true, true));
 
         assertEquals(List.of(), IOUtil.listFiles(missing, true, false));
         assertEquals(List.of(), IOUtil.walk(missing, true, false).toList());

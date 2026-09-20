@@ -231,14 +231,13 @@ public class NClobTypeTest extends TestBase {
 
     /** A real (non-mock) NClob backed by the JDK's SerialClob, which rejects getSubString(1, 0) on an empty lob. */
     private static NClob nclobOver(final SerialClob delegate) {
-        return (NClob) java.lang.reflect.Proxy.newProxyInstance(NClob.class.getClassLoader(), new Class<?>[] { NClob.class },
-                (proxy, method, args) -> {
-                    try {
-                        return method.invoke(delegate, args);
-                    } catch (final java.lang.reflect.InvocationTargetException e) {
-                        throw e.getCause();
-                    }
-                });
+        return (NClob) java.lang.reflect.Proxy.newProxyInstance(NClob.class.getClassLoader(), new Class<?>[] { NClob.class }, (proxy, method, args) -> {
+            try {
+                return method.invoke(delegate, args);
+            } catch (final java.lang.reflect.InvocationTargetException e) {
+                throw e.getCause();
+            }
+        });
     }
 
     @Test

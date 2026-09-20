@@ -564,4 +564,36 @@ public class ExceptionUtilTest extends TestBase {
         assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null, true));
         assertEquals("", ExceptionUtil.getErrorMessage((Throwable) null, false));
     }
+
+    /**
+     * An anonymous (or local) exception class has no canonical name - {@code Class.getCanonicalName()}
+     * answers {@code null} for it. {@code getErrorMessage} fell back to exactly that when no message was
+     * available anywhere in the cause chain, so it returned {@code null} from a method whose javadoc
+     * promises the class name and which carries no {@code @MayReturnNull}; with the class-name flag it
+     * rendered the literal string {@code "|null"} (the simple name of an anonymous class is {@code ""}).
+     */
+    @Test
+    public void test_getErrorMessage_anonymousExceptionClass_regression_20260918() {
+        final Exception anonymous = new RuntimeException() {
+            private static final long serialVersionUID = 1L;
+        };
+        final String expectedName = anonymous.getClass().getName();
+
+        // Before the fix both of these were null / "|null".
+        assertNotNull(ExceptionUtil.getErrorMessage(anonymous));
+        assertEquals(expectedName, ExceptionUtil.getErrorMessage(anonymous));
+        assertEquals("|" + expectedName, ExceptionUtil.getErrorMessage(anonymous, true));
+
+        // A local class has no canonical name either.
+        class LocalException extends RuntimeException {
+            private static final long serialVersionUID = 1L;
+        }
+        final LocalException local = new LocalException();
+        assertNotNull(ExceptionUtil.getErrorMessage(local));
+        assertEquals(local.getClass().getName(), ExceptionUtil.getErrorMessage(local));
+
+        // A named class still resolves to its canonical name, exactly as before.
+        final Exception named = new Exception();
+        assertEquals(named.getClass().getCanonicalName(), ExceptionUtil.getErrorMessage(named));
+    }
 }

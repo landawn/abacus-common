@@ -34,9 +34,12 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class OpenUtilFixesTest {
-    @TempDir Path directory;
+public class OpenUtilFixesTest extends TestBase {
+    @TempDir
+    Path directory;
 
     @Test
     void hostlessUrlsAreRejectedInBothEntryPoints() throws Exception {
@@ -60,14 +63,25 @@ public class OpenUtilFixesTest {
             final AssertionError close = new AssertionError("关闭");
             final AtomicInteger closes = new AtomicInteger();
             final LineIterator iterator = LineIterator.of(new Reader() {
-                @Override public int read(char[] buffer, int offset, int length) throws IOException { throw read; }
-                @Override public void close() { closes.incrementAndGet(); throw close; }
+                @Override
+                public int read(char[] buffer, int offset, int length) throws IOException {
+                    throw read;
+                }
+
+                @Override
+                public void close() {
+                    closes.incrementAndGet();
+                    throw close;
+                }
             });
             final int selected = route;
             final com.landawn.abacus.exception.UncheckedIOException failure = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> {
-                if (selected == 0) iterator.hasNext();
-                else if (selected == 1) iterator.next();
-                else iterator.stream().toList();
+                if (selected == 0)
+                    iterator.hasNext();
+                else if (selected == 1)
+                    iterator.next();
+                else
+                    iterator.stream().toList();
             });
             assertSame(read, failure.getCause());
             assertArrayEquals(new Throwable[] { close }, failure.getSuppressed());
@@ -81,10 +95,13 @@ public class OpenUtilFixesTest {
 
     public static class ThrowingTarget {
         int calls;
+
         public String invoke(final String value) throws IOException, InterruptedException {
             calls++;
-            if (value.equals("io")) throw new IOException("读取");
-            if (value.equals("interrupt")) throw new InterruptedException("中断");
+            if (value.equals("io"))
+                throw new IOException("读取");
+            if (value.equals("interrupt"))
+                throw new InterruptedException("中断");
             return value;
         }
     }
@@ -102,7 +119,8 @@ public class OpenUtilFixesTest {
             assertTrue(Thread.currentThread().isInterrupted());
         } finally {
             Thread.interrupted();
-            if (interrupted) Thread.currentThread().interrupt();
+            if (interrupted)
+                Thread.currentThread().interrupt();
         }
         assertEquals(2, target.calls);
         assertEquals("你好🙂", Reflection.on(target).invoke("invoke", "你好🙂"));
@@ -110,7 +128,7 @@ public class OpenUtilFixesTest {
 
     @Test
     void invalidTypedArrayDoesNotAdvanceTheIterator() {
-        for (final List<String> values : List.of(List.<String>of(), Arrays.asList("", "你好🙂", null))) {
+        for (final List<String> values : List.of(List.<String> of(), Arrays.asList("", "你好🙂", null))) {
             final ObjListIterator<String> iterator = ObjListIterator.of(values);
             assertThrows(NullPointerException.class, () -> iterator.toArray((String[]) null));
             assertEquals(0, iterator.nextIndex());
@@ -126,10 +144,17 @@ public class OpenUtilFixesTest {
         assertEquals("b", partial.next());
     }
 
-    public record DecimalRecord(double value) {}
-    public record BoxedRecord(Double value) {}
-    public record IntRecord(int value) {}
-    public record TextRecord(String value) {}
+    public record DecimalRecord(double value) {
+    }
+
+    public record BoxedRecord(Double value) {
+    }
+
+    public record IntRecord(int value) {
+    }
+
+    public record TextRecord(String value) {
+    }
 
     @Test
     void recordsReceiveConvertedScalarConstructorArguments() {
@@ -149,7 +174,8 @@ public class OpenUtilFixesTest {
         final var values = map.values();
         final var entries = map.entrySet();
         final var late = values.spliterator();
-        for (int i = 0; i < 100; i++) map.put(i, "值" + i);
+        for (int i = 0; i < 100; i++)
+            map.put(i, "值" + i);
         assertTrue(late.hasCharacteristics(Spliterator.ORDERED));
         final List<String> copied = new ArrayList<>();
         late.forEachRemaining(copied::add);
@@ -177,13 +203,30 @@ public class OpenUtilFixesTest {
 
     static final class TrackingInput extends ByteArrayInputStream {
         int closes;
-        TrackingInput(String xml) { super(xml.getBytes(StandardCharsets.UTF_8)); }
-        @Override public void close() throws IOException { closes++; super.close(); }
+
+        TrackingInput(String xml) {
+            super(xml.getBytes(StandardCharsets.UTF_8));
+        }
+
+        @Override
+        public void close() throws IOException {
+            closes++;
+            super.close();
+        }
     }
+
     static final class TrackingReader extends StringReader {
         int closes;
-        TrackingReader(String xml) { super(xml); }
-        @Override public void close() { closes++; super.close(); }
+
+        TrackingReader(String xml) {
+            super(xml);
+        }
+
+        @Override
+        public void close() {
+            closes++;
+            super.close();
+        }
     }
 
     @Test
@@ -194,14 +237,20 @@ public class OpenUtilFixesTest {
                 final TrackingReader reader = new TrackingReader(xml);
                 final int selected = route;
                 final org.junit.jupiter.api.function.Executable bytes = () -> {
-                    if (selected == 0) PropertiesUtil.loadFromXml(input);
-                    else if (selected == 1) PropertiesUtil.loadFromXml(input, Properties.class);
-                    else PropertiesUtil.xmlToJava(input, directory.toString(), "example", "Config", false);
+                    if (selected == 0)
+                        PropertiesUtil.loadFromXml(input);
+                    else if (selected == 1)
+                        PropertiesUtil.loadFromXml(input, Properties.class);
+                    else
+                        PropertiesUtil.xmlToJava(input, directory.toString(), "example", "Config", false);
                 };
                 final org.junit.jupiter.api.function.Executable chars = () -> {
-                    if (selected == 0) PropertiesUtil.loadFromXml(reader);
-                    else if (selected == 1) PropertiesUtil.loadFromXml(reader, Properties.class);
-                    else PropertiesUtil.xmlToJava(reader, directory.toString(), "example", "Config", false);
+                    if (selected == 0)
+                        PropertiesUtil.loadFromXml(reader);
+                    else if (selected == 1)
+                        PropertiesUtil.loadFromXml(reader, Properties.class);
+                    else
+                        PropertiesUtil.xmlToJava(reader, directory.toString(), "example", "Config", false);
                 };
                 if (xml.equals("<config>")) {
                     assertThrows(RuntimeException.class, bytes);
@@ -212,8 +261,10 @@ public class OpenUtilFixesTest {
                 }
                 assertEquals(0, input.closes);
                 assertEquals(0, reader.closes);
-                input.close(); reader.close();
-                assertEquals(1, input.closes); assertEquals(1, reader.closes);
+                input.close();
+                reader.close();
+                assertEquals(1, input.closes);
+                assertEquals(1, reader.closes);
             }
         }
     }
@@ -224,7 +275,9 @@ public class OpenUtilFixesTest {
         try {
             Profiler.suspend();
             for (final InvocationTargetException failure : List.of(new InvocationTargetException(null), new InvocationTargetException(new IOException("读取")))) {
-                final Throwables.Runnable<Exception> command = () -> { throw failure; };
+                final Throwables.Runnable<Exception> command = () -> {
+                    throw failure;
+                };
                 final List<Profiler.MultiLoopsStatistics> results = List.of(Profiler.run(1, 1, 1, command), Profiler.run(1, 1, 1, "你好", command),
                         Profiler.run(1, 0, 1, 0, 1, "", command));
                 for (final var result : results) {
@@ -233,7 +286,8 @@ public class OpenUtilFixesTest {
                 }
             }
         } finally {
-            if (!suspended) Profiler.resume();
+            if (!suspended)
+                Profiler.resume();
         }
     }
 
@@ -244,9 +298,11 @@ public class OpenUtilFixesTest {
                 receiver.appendAll(new Object[] { "a", receiver, "b" });
                 assertEquals("a,a,b", receiver.toString());
             }
-            try (Joiner receiver = Joiner.with(",").reuseBuffer(); Joiner other = Joiner.with(",").reuseBuffer()) {
+            try (Joiner receiver = Joiner.with(",").reuseBuffer();
+                 Joiner other = Joiner.with(",").reuseBuffer()) {
                 final Object renderer = new Object() {
-                    @Override public String toString() {
+                    @Override
+                    public String toString() {
                         final String prefix = receiver.toString();
                         other.append("V");
                         return "x(" + prefix + ")";
@@ -259,16 +315,33 @@ public class OpenUtilFixesTest {
         }
         final Joiner closedDuringRender = Joiner.with(",");
         assertThrows(IllegalStateException.class, () -> closedDuringRender.appendAll(new Object[] { "a", new Object() {
-            @Override public String toString() { closedDuringRender.close(); return "b"; }
+            @Override
+            public String toString() {
+                closedDuringRender.close();
+                return "b";
+            }
         } }));
     }
 
     static final class CountedTask extends FutureTask<Integer> {
         int cancels;
         int queries;
-        CountedTask() { super(() -> 1); }
-        @Override public boolean cancel(boolean interrupt) { cancels++; return super.cancel(interrupt); }
-        @Override public boolean isCancelled() { queries++; return super.isCancelled(); }
+
+        CountedTask() {
+            super(() -> 1);
+        }
+
+        @Override
+        public boolean cancel(boolean interrupt) {
+            cancels++;
+            return super.cancel(interrupt);
+        }
+
+        @Override
+        public boolean isCancelled() {
+            queries++;
+            return super.isCancelled();
+        }
     }
 
     @Test
@@ -297,15 +370,21 @@ public class OpenUtilFixesTest {
     void cancellationPreservesOverridesAndRecoversAfterExceptions() {
         final AtomicInteger calls = new AtomicInteger();
         final ContinuableFuture<Integer> custom = new ContinuableFuture<>(new FutureTask<>(() -> 1)) {
-            @Override public boolean cancelAll(boolean interrupt) { calls.incrementAndGet(); return super.cancelAll(interrupt); }
+            @Override
+            public boolean cancelAll(boolean interrupt) {
+                calls.incrementAndGet();
+                return super.cancelAll(interrupt);
+            }
         };
         final var joined = new ContinuableFuture<>(new FutureTask<>(() -> 1), List.of(custom, custom), Runnable::run);
         assertTrue(joined.cancelAll(false));
         assertEquals(1, calls.get());
         final AtomicInteger attempts = new AtomicInteger();
         final ContinuableFuture<Integer> throwing = new ContinuableFuture<>(new FutureTask<>(() -> 1)) {
-            @Override public boolean cancel(boolean interrupt) {
-                if (attempts.incrementAndGet() == 1) throw new IllegalStateException("first attempt");
+            @Override
+            public boolean cancel(boolean interrupt) {
+                if (attempts.incrementAndGet() == 1)
+                    throw new IllegalStateException("first attempt");
                 return super.cancel(interrupt);
             }
         };
@@ -340,9 +419,12 @@ public class OpenUtilFixesTest {
             final ResultSet resultSet = jdbc(ResultSet.class, "result", same, statement, closed);
             final int selected = route;
             assertSame(same, assertThrows(Error.class, () -> {
-                if (selected == 0) DataSourceUtil.close(resultSet, true, true);
-                else if (selected == 1) DataSourceUtil.close(resultSet, statement);
-                else DataSourceUtil.close(statement, connection);
+                if (selected == 0)
+                    DataSourceUtil.close(resultSet, true, true);
+                else if (selected == 1)
+                    DataSourceUtil.close(resultSet, statement);
+                else
+                    DataSourceUtil.close(statement, connection);
             }));
             assertEquals(route == 0 ? 3 : 2, closed.size());
             assertEquals(0, same.getSuppressed().length);
@@ -351,14 +433,25 @@ public class OpenUtilFixesTest {
     }
 
     private static Throwable closeFailure(int kind) {
-        return switch (kind) { case 0 -> new SQLException("SQL 关闭"); case 1 -> new IllegalStateException("runtime 关闭"); default -> new AssertionError("error 关闭"); };
+        return switch (kind) {
+            case 0 -> new SQLException("SQL 关闭");
+            case 1 -> new IllegalStateException("runtime 关闭");
+            default -> new AssertionError("error 关闭");
+        };
     }
 
     private static <T> T jdbc(Class<T> type, String name, Throwable failure, Object parent, List<String> closed) {
         return type.cast(Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, (proxy, method, args) -> {
-            if (method.getName().equals("close")) { closed.add(name); if (failure != null) throw failure; return null; }
-            if (method.getName().equals("getStatement") || method.getName().equals("getConnection")) return parent;
-            if (method.getName().equals("toString")) return name;
+            if (method.getName().equals("close")) {
+                closed.add(name);
+                if (failure != null)
+                    throw failure;
+                return null;
+            }
+            if (method.getName().equals("getStatement") || method.getName().equals("getConnection"))
+                return parent;
+            if (method.getName().equals("toString"))
+                return name;
             return null;
         }));
     }
@@ -368,8 +461,15 @@ public class OpenUtilFixesTest {
         assertArrayEquals("你好🙂".toCharArray(), CharIterator.of("你好🙂".toCharArray()).stream().parallel(2).toArray());
         assertEquals(0, CharIterator.empty().stream().parallel(2).count());
         final RateLimiter.SleepingStopwatch clock = new RateLimiter.SleepingStopwatch() {
-            @Override protected long readMicros() { return 0; }
-            @Override protected void sleepMicrosUninterruptibly(long micros) { assertEquals(0, micros, "No positive wait expected"); }
+            @Override
+            protected long readMicros() {
+                return 0;
+            }
+
+            @Override
+            protected void sleepMicrosUninterruptibly(long micros) {
+                assertEquals(0, micros, "No positive wait expected");
+            }
         };
         final RateLimiter limiter = RateLimiter.create(10, clock);
         assertTrue(limiter.tryAcquire(1000));

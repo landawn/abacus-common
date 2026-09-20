@@ -28,16 +28,220 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Collectors;
 
 public class SeqTest extends SeqTestSupport {
 
     @Test
+    public void testConstructionErrorClosesEveryOwnedSourceAndPreservesIdentity() throws Exception {
+        for (int variant = 0; variant < 8; variant++) {
+            for (boolean cleanupRethrowsPrimary : new boolean[] { false, true }) {
+                final AssertionError failure = new AssertionError("construction failed");
+                final AssertionError cleanupFailure = new AssertionError("cleanup failed");
+                final AtomicInteger closed = new AtomicInteger();
+                final Seq<Integer, Exception> a = org.mockito.Mockito.spy(Seq.<Integer, Exception> of(1).onClose(() -> {
+                    closed.incrementAndGet();
+                    throw cleanupRethrowsPrimary ? failure : cleanupFailure;
+                }));
+                final Seq<Integer, Exception> b = Seq.<Integer, Exception> of(2).onClose(() -> {
+                    closed.incrementAndGet();
+                    if (cleanupRethrowsPrimary) {
+                        throw cleanupFailure;
+                    }
+                });
+                final Seq<Integer, Exception> c = Seq.<Integer, Exception> of(3).onClose(closed::incrementAndGet);
+                final int selected = variant;
+                final AssertionError actual;
+                if (variant < 6) {
+                    // Inject failure at iterator acquisition, before the new sequence can own its inputs.
+                    org.mockito.Mockito.doThrow(failure).when(a).iteratorEx();
+                    actual = assertThrows(AssertionError.class, () -> {
+                        switch (selected) {
+                            case 0 -> Seq.zip(a, b, (x, y) -> x + y);
+                            case 1 -> Seq.zip(a, b, c, (x, y, z) -> x + y + z);
+                            case 2 -> Seq.zip(a, b, 0, 0, (x, y) -> x + y);
+                            case 3 -> Seq.zip(a, b, c, 0, 0, 0, (x, y, z) -> x + y + z);
+                            case 4 -> Seq.merge(a, b, (x, y) -> MergeResult.TAKE_FIRST);
+                            default -> Seq.merge(a, b, c, (x, y) -> MergeResult.TAKE_FIRST);
+                        }
+                    });
+                } else {
+                    // Append/prepend acquire no iterator during construction; fail their delegated factory.
+                    try (org.mockito.MockedStatic<Seq> factories = org.mockito.Mockito.mockStatic(Seq.class, org.mockito.Mockito.CALLS_REAL_METHODS)) {
+                        if (variant == 6) {
+                            factories.when(() -> Seq.concat(a, b)).thenThrow(failure);
+                            actual = assertThrows(AssertionError.class, () -> a.append(b));
+                        } else {
+                            factories.when(() -> Seq.concat(b, a)).thenThrow(failure);
+                            actual = assertThrows(AssertionError.class, () -> a.prepend(b));
+                        }
+                    }
+                }
+                assertSame(failure, actual);
+                assertArrayEquals(new Throwable[] { cleanupFailure }, actual.getSuppressed());
+                assertEquals(variant < 6 && variant % 2 == 1 ? 3 : 2, closed.get());
+                assertThrows(IllegalStateException.class, a::count);
+                assertThrows(IllegalStateException.class, b::count);
+
+                if (variant < 6 && variant % 2 == 1) {
+                    assertThrows(IllegalStateException.class, c::count);
+                } else {
+                    // c was never handed to the failing factory, so cleanup must have left it alone.
+                    assertEquals(1L, c.count(), "An unowned source must remain usable");
+                }
+
+                a.close();
+                b.close();
+                c.close();
+                assertEquals(3, closed.get(), "Repeated close must not repeat source cleanup");
+            }
+        }
+    }
+
+    @Test
+    public void testConstructionFailurePreservesPrimaryWhenClosingThrowsError() {
+        for (int variant = 0; variant < 6; variant++) {
+            AtomicInteger closed = new AtomicInteger();
+            AssertionError closeFailure = new AssertionError("close failed");
+            Seq<Integer, Exception> a = Seq.<Integer, Exception> of(1).onClose(() -> {
+                closed.incrementAndGet();
+                throw closeFailure;
+            });
+            Seq<Integer, Exception> b = Seq.<Integer, Exception> of(2).onClose(closed::incrementAndGet);
+            Seq<Integer, Exception> c = Seq.<Integer, Exception> of(3).onClose(closed::incrementAndGet);
+            int selected = variant;
+            IllegalArgumentException failure = assertThrows(IllegalArgumentException.class, () -> {
+                switch (selected) {
+                    case 0 -> Seq.zip(a, b, null);
+                    case 1 -> Seq.zip(a, b, c, null);
+                    case 2 -> Seq.zip(a, b, 0, 0, null);
+                    case 3 -> Seq.zip(a, b, c, 0, 0, 0, null);
+                    case 4 -> Seq.merge(a, b, null);
+                    default -> Seq.merge(a, b, c, null);
+                }
+            });
+            assertArrayEquals(new Throwable[] { closeFailure }, failure.getSuppressed());
+            assertEquals(variant % 2 == 0 ? 2 : 3, closed.get());
+            a.close();
+            b.close();
+            c.close();
+            assertEquals(3, closed.get());
+        }
+
+        for (boolean prepend : new boolean[] { false, true }) {
+            Seq<Integer, Exception> closed = Seq.empty();
+            closed.close();
+            AssertionError closeFailure = new AssertionError("close failed");
+            AtomicInteger closeCount = new AtomicInteger();
+            Seq<Integer, Exception> suffix = Seq.<Integer, Exception> of(1).onClose(() -> {
+                closeCount.incrementAndGet();
+                throw closeFailure;
+            });
+            IllegalStateException failure = assertThrows(IllegalStateException.class, () -> {
+                if (prepend) {
+                    closed.prepend(suffix);
+                } else {
+                    closed.append(suffix);
+                }
+            });
+            assertArrayEquals(new Throwable[] { closeFailure }, failure.getSuppressed());
+            suffix.close();
+            assertEquals(1, closeCount.get());
+        }
+    }
+
+    @Test
+    public void testSlidingCountPreservesExactCountWhenPrefixPlusRemainingExceedsLongMaxValue() throws Exception {
+        for (final int[] settings : new int[][] { { 2, 1 }, { 3, 1 }, { 3, 2 }, { 5, 3 } }) {
+            final int windowSize = settings[0];
+            final int increment = settings[1];
+            final long expected = java.math.BigInteger.valueOf(Long.MAX_VALUE)
+                    .add(java.math.BigInteger.valueOf(increment - 1))
+                    .divide(java.math.BigInteger.valueOf(increment))
+                    .longValueExact();
+
+            for (boolean collector : new boolean[] { false, true }) {
+                Throwables.Iterator<Integer, Exception> source = new Throwables.Iterator<>() {
+                    private int cursor;
+                    private java.math.BigInteger remaining = java.math.BigInteger.valueOf(Long.MAX_VALUE).add(java.math.BigInteger.valueOf(windowSize));
+
+                    @Override
+                    public boolean hasNext() {
+                        return remaining.signum() > 0;
+                    }
+
+                    @Override
+                    public Integer next() {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException();
+                        }
+                        remaining = remaining.subtract(java.math.BigInteger.ONE);
+                        return ++cursor;
+                    }
+
+                    @Override
+                    public long count() {
+                        final long result = remaining.longValueExact();
+                        remaining = java.math.BigInteger.ZERO;
+                        return result;
+                    }
+                };
+
+                try (Seq<? extends List<Integer>, Exception> windows = collector ? Seq.of(source).sliding(windowSize, increment, Collectors.toList())
+                        : Seq.of(source).sliding(windowSize, increment, ArrayList::new)) {
+                    Throwables.Iterator<? extends List<Integer>, Exception> iter = windows.iteratorEx();
+                    assertEquals(windowSize, iter.next().size());
+                    assertEquals(expected, iter.count());
+                    assertFalse(iter.hasNext());
+                    assertEquals(0, iter.count());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSkipAndLimitHonorsLongMaxValueForUnboundedSource() throws Exception {
+        for (long offset : new long[] { 0, 1 }) {
+            List<Long> advances = new ArrayList<>();
+            Throwables.Iterator<Integer, Exception> source = new Throwables.Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return true;
+                }
+
+                @Override
+                public Integer next() {
+                    return 1;
+                }
+
+                @Override
+                public boolean supportsFailureAtomicAdvance() {
+                    return true;
+                }
+
+                @Override
+                public void advance(final long n) {
+                    advances.add(n);
+                }
+            };
+
+            try (Seq<Integer, Exception> limited = Seq.of(source).skipAndLimit(offset, Long.MAX_VALUE)) {
+                Throwables.Iterator<Integer, Exception> iter = limited.iteratorEx();
+                iter.advance(Long.MAX_VALUE);
+                assertFalse(iter.hasNext());
+                assertThrows(NoSuchElementException.class, iter::next);
+                assertEquals(offset == 0 ? List.of(Long.MAX_VALUE) : List.of(offset, Long.MAX_VALUE), advances);
+            }
+        }
+    }
+
+    @Test
     public void testAverageIntPreservesExtremeIntegerTotals() throws Exception {
         assertEquals(-0.5, Seq.of(Integer.MIN_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
         assertEquals((double) Integer.MAX_VALUE, Seq.of(Integer.MAX_VALUE, Integer.MAX_VALUE).averageInt(value -> value).getAsDouble());
-        assertTrue(Seq.<Integer, Exception>empty().averageInt(value -> value).isEmpty());
+        assertTrue(Seq.<Integer, Exception> empty().averageInt(value -> value).isEmpty());
     }
 
     @Test
@@ -79,9 +283,8 @@ public class SeqTest extends SeqTestSupport {
             assertEquals(2, containers.get());
         }
 
-        assertEquals(Map.of(false, 0L, true, 0L), Seq.<Integer, Exception>empty().partitionTo(value -> value > 0, Collectors.counting()));
-        assertEquals(Arrays.asList(Map.entry(false, 0L), Map.entry(true, 2L)),
-                Seq.of(1, 2).partitionBy(value -> value > 0, Collectors.counting()).toList());
+        assertEquals(Map.of(false, 0L, true, 0L), Seq.<Integer, Exception> empty().partitionTo(value -> value > 0, Collectors.counting()));
+        assertEquals(Arrays.asList(Map.entry(false, 0L), Map.entry(true, 2L)), Seq.of(1, 2).partitionBy(value -> value > 0, Collectors.counting()).toList());
         assertEquals(Map.of(0, 2, 1, 2), Seq.of(1, 2, 3, 4).countBy(value -> value % 2).toMap(Map.Entry::getKey, Map.Entry::getValue));
         assertEquals(3, Seq.of("same", "same", "same").toMultiset().getCount("same"));
     }
@@ -122,10 +325,18 @@ public class SeqTest extends SeqTestSupport {
             };
             Seq<Integer, Exception> zipped;
             switch (variant) {
-                case 0: zipped = Seq.zip(source, source, pair); break;
-                case 1: zipped = Seq.zip(source, source, source, triple); break;
-                case 2: zipped = Seq.zip(source, source, 0, 0, pair); break;
-                default: zipped = Seq.zip(source, source, source, 0, 0, 0, triple); break;
+                case 0:
+                    zipped = Seq.zip(source, source, pair);
+                    break;
+                case 1:
+                    zipped = Seq.zip(source, source, source, triple);
+                    break;
+                case 2:
+                    zipped = Seq.zip(source, source, 0, 0, pair);
+                    break;
+                default:
+                    zipped = Seq.zip(source, source, source, 0, 0, 0, triple);
+                    break;
             }
             int arity = variant % 2 == 0 ? 2 : 3;
             try (zipped) {
@@ -761,7 +972,7 @@ public class SeqTest extends SeqTestSupport {
 
     @Test
     public void testLast() throws Exception {
-        assertEquals(Optional.of(3), Seq.of(1, 2, 3).last());
+        assertEquals(Nullable.of(3), Seq.of(1, 2, 3).last());
         assertTrue(Seq.<Integer, Exception> empty().last().isEmpty());
         assertEquals(Arrays.asList("d", "e"), Seq.of("a", "b", "c", "d", "e").last(2).toList());
     }

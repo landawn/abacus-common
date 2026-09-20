@@ -249,4 +249,33 @@ public class SheetRemoveTest extends SheetTestSupport {
         assertThrows(IllegalStateException.class, () -> objectSheet.removeColumn("C1"));
     }
 
+    /**
+     * {@code set(Point, V)} and {@code remove(Point)} used to disagree on a frozen sheet with a {@code null}
+     * point: {@code set} checked the frozen state first and threw {@link IllegalStateException}, while
+     * {@code remove} checked the argument first and threw {@link IllegalArgumentException}. Three of the four
+     * cell-address mutators &mdash; {@code set(R, C, V)}, {@code remove(R, C)} and {@code set(Point, V)}
+     * &mdash; already checked state first, so {@code remove(Point)} was the outlier.
+     */
+    @Test
+    public void testRemoveByPointChecksTheFrozenStateBeforeTheArgument() {
+        sheet.freeze();
+
+        assertThrows(IllegalStateException.class, () -> sheet.remove((Point) null));
+        assertThrows(IllegalStateException.class, () -> sheet.set((Point) null, 9));
+        assertThrows(IllegalStateException.class, () -> sheet.remove(Point.of(0, 0)));
+    }
+
+    /**
+     * The state check must not swallow the argument check: on an open sheet a {@code null} point is still
+     * reported as {@link IllegalArgumentException}, and a valid point still removes the cell.
+     */
+    @Test
+    public void testRemoveByPointStillRejectsANullPointOnAnOpenSheet() {
+        assertThrows(IllegalArgumentException.class, () -> sheet.remove((Point) null));
+        assertThrows(IllegalArgumentException.class, () -> sheet.set((Point) null, 9));
+
+        assertEquals(1, sheet.remove(Point.of(0, 0)));
+        assertNull(sheet.get(Point.of(0, 0)));
+    }
+
 }

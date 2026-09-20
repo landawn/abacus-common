@@ -33,7 +33,7 @@ import com.landawn.abacus.util.N;
  *
  * <p>String representations follow the ISO-8601 standard (e.g., {@code "10:30:00"} or
  * {@code "10:30:00.123456789"} when sub-second precision is present).
- * Values produced by {@link #stringOf(LocalTime)} omit a zero seconds field (for example, {@code 10:30}).
+ * Values produced by {@link #stringOf(LocalTime)} omit the seconds field when seconds and nanoseconds are zero (for example, {@code 10:30}).
  * Database columns are read and written using JDBC's native {@code LocalTime} support with a
  * {@link java.sql.Time} fallback for older drivers.</p>
  *
@@ -152,8 +152,7 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code LocalTime}</li>
-     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
-     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix) are treated as
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only; no {@code 0x} hex, no {@code L} suffix) are treated as
      *       milliseconds since the epoch, interpreted in the system default zone (shorter numeric strings such as
      *       {@code "1234"} are handed to the ISO parser and rejected)</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalTime#parse(CharSequence)}</li>

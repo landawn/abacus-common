@@ -16,7 +16,8 @@
  * A logging facade with automatic backend detection.
  *
  * <p>{@link LoggerFactory#getLogger(Class)} and {@link LoggerFactory#getLogger(String)} return cached
- * {@link Logger} instances. The factory detects a backend once, in this order:</p>
+ * {@link Logger} instances. The factory initially detects a backend in this order, then reuses that
+ * selection unless creating a later logger requires falling back again:</p>
  * <ol>
  *   <li>Android logger, loaded reflectively from a separate module when running on an Android JVM</li>
  *   <li>SLF4J</li>

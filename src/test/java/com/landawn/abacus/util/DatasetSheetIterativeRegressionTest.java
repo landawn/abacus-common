@@ -76,11 +76,12 @@ public class DatasetSheetIterativeRegressionTest extends TestBase {
         assertStandardSet(sheet.columnKeySet(), column, arrayKey(kind));
         assertTrue(sheet.rowKeySet().contains(new String("\u6D77")));
         assertTrue(sheet.columnKeySet().contains(new String("\uD83D\uDE00")));
-        assertTrue(sheet.containsRow(arrayKey(kind)));
-        assertTrue(sheet.containsColumn(arrayKey(kind)));
-        assertNull(sheet.get(arrayKey(kind), arrayKey(kind)));
-        assertThrows(IllegalArgumentException.class, () -> sheet.addRow(arrayKey(kind), null));
-        assertThrows(IllegalArgumentException.class, () -> sheet.addColumn(arrayKey(kind), null));
+        assertFalse(sheet.containsRow(arrayKey(kind)));
+        assertFalse(sheet.containsColumn(arrayKey(kind)));
+        assertThrows(IllegalArgumentException.class, () -> sheet.get(arrayKey(kind), arrayKey(kind)));
+        assertNull(sheet.get(row, column));
+        assertThrows(IllegalArgumentException.class, () -> sheet.addRow(row, null));
+        assertThrows(IllegalArgumentException.class, () -> sheet.addColumn(column, null));
     }
 
     @Test
@@ -100,24 +101,24 @@ public class DatasetSheetIterativeRegressionTest extends TestBase {
         sheet.addColumn(b, List.of(3, 4));
         assertEquals(List.of(a, b), new ArrayList<>(rows));
         assertEquals(List.of(a, b), new ArrayList<>(columns));
-        sheet.moveRow(new int[] { 2 }, 0);
-        sheet.moveColumn(new int[] { 2 }, 0);
+        sheet.moveRow(b, 0);
+        sheet.moveColumn(b, 0);
         assertEquals(List.of(b, a), new ArrayList<>(rows));
         assertEquals(List.of(b, a), new ArrayList<>(columns));
-        sheet.renameRow(new int[] { 1 }, c);
-        sheet.renameColumn(new int[] { 1 }, c);
+        sheet.renameRow(a, c);
+        sheet.renameColumn(a, c);
         assertEquals(List.of(b, c), new ArrayList<>(rows));
         assertEquals(List.of(b, c), new ArrayList<>(columns));
         assertFalse(rows.contains(a));
         assertFalse(columns.contains(a));
         assertTrue(rows.contains(c));
         assertTrue(columns.contains(c));
-        sheet.removeRow(new int[] { 2 });
-        sheet.removeColumn(new int[] { 2 });
+        sheet.removeRow(b);
+        sheet.removeColumn(b);
         assertEquals(java.util.Set.of(c), rows);
         assertEquals(java.util.Set.of(c).hashCode(), columns.hashCode());
-        sheet.removeRow(new int[] { 3 });
-        sheet.removeColumn(new int[] { 3 });
+        sheet.removeRow(c);
+        sheet.removeColumn(c);
         assertEquals(java.util.Set.of(), rows);
         assertEquals(java.util.Set.of(), columns);
         assertThrows(IllegalArgumentException.class, () -> sheet.addRow(null, null));
@@ -125,28 +126,31 @@ public class DatasetSheetIterativeRegressionTest extends TestBase {
     }
 
     @Test
-    void sheetBulkOperationsAndCloneRetainDeepKeyLookup() {
-        final Sheet<Object, Object, Integer> sheet = Sheet.rows(List.of(arrayKey(0)), List.of(arrayKey(2)), new Integer[][] { { 1 } });
-        final Sheet<Object, Object, Integer> source = Sheet.rows(List.of(arrayKey(0)), List.of(arrayKey(2)), new Integer[][] { { 3 } });
+    void sheetBulkOperationsAndCloneUseRawArrayIdentity() {
+        final Object row = arrayKey(0);
+        final Object column = arrayKey(2);
+        final Sheet<Object, Object, Integer> sheet = Sheet.rows(List.of(row), List.of(column), new Integer[][] { { 1 } });
+        final Sheet<Object, Object, Integer> source = Sheet.rows(List.of(row), List.of(column), new Integer[][] { { 3 } });
         sheet.putAll(source);
-        assertEquals(Integer.valueOf(3), sheet.get(arrayKey(0), arrayKey(2)));
+        assertEquals(Integer.valueOf(3), sheet.get(row, column));
         sheet.putAll(source, Integer::sum);
-        assertEquals(Integer.valueOf(6), sheet.get(arrayKey(0), arrayKey(2)));
-        assertEquals(sheet, sheet.copy(List.of(arrayKey(0)), List.of(arrayKey(2))));
+        assertEquals(Integer.valueOf(6), sheet.get(row, column));
+        assertEquals(sheet, sheet.copy(List.of(row), List.of(column)));
         final Sheet<Object, Object, Integer> merged = sheet.merge(source, Integer::sum);
         assertEquals(1, merged.rowCount());
         assertEquals(1, merged.columnCount());
-        assertEquals(Integer.valueOf(9), merged.get(arrayKey(0), arrayKey(2)));
+        assertEquals(Integer.valueOf(9), merged.get(row, column));
         final Sheet<Object, Object, Integer> clone = sheet.clone(false);
-        assertEquals(sheet, clone);
-        assertEquals(sheet.hashCode(), clone.hashCode());
+        assertNotEquals(sheet, clone);
         assertNotEquals(sheet.rowKeySet(), clone.rowKeySet());
         assertNotEquals(sheet.columnKeySet(), clone.columnKeySet());
-        assertStandardSet(clone.rowKeySet(), clone.rowKeySet().iterator().next(), arrayKey(0));
-        assertStandardSet(clone.columnKeySet(), clone.columnKeySet().iterator().next(), arrayKey(2));
-        assertEquals(Integer.valueOf(6), clone.get(arrayKey(0), arrayKey(2)));
-        assertThrows(IllegalArgumentException.class, () -> sheet.putAll(new Sheet<>(List.of("absent"), List.of(arrayKey(2)))));
-        assertThrows(IllegalArgumentException.class, () -> sheet.putAll(new Sheet<>(List.of(arrayKey(0)), List.of("absent")), Integer::sum));
+        assertFalse(clone.containsRow(row));
+        assertFalse(clone.containsColumn(column));
+        assertStandardSet(clone.rowKeySet(), clone.rowKeySet().iterator().next(), "absent");
+        assertStandardSet(clone.columnKeySet(), clone.columnKeySet().iterator().next(), "absent");
+        assertEquals(Integer.valueOf(6), clone.get(clone.rowKeySet().iterator().next(), clone.columnKeySet().iterator().next()));
+        assertThrows(IllegalArgumentException.class, () -> sheet.putAll(new Sheet<>(List.of("absent"), List.of(column))));
+        assertThrows(IllegalArgumentException.class, () -> sheet.putAll(new Sheet<>(List.of(row), List.of("absent")), Integer::sum));
         assertThrows(IllegalArgumentException.class, () -> sheet.putAll(null));
         assertThrows(IllegalArgumentException.class, () -> sheet.putAll(source, null));
         final Sheet<Double, String, Integer> doubles = new Sheet<>(List.of(-0.0, +0.0, Double.NaN), List.of("x"));

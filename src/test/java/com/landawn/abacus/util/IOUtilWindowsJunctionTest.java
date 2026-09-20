@@ -1010,8 +1010,7 @@ public class IOUtilWindowsJunctionTest extends TestBase {
 
         // a single unencodable file as the source takes the same path
         final File fresh2 = tempDir.resolve("c050c.zip").toFile();
-        final IOException e2 = assertThrows(IOException.class,
-                () -> IOUtil.zip(new File(src, "café-日本.txt"), fresh2, StandardCharsets.US_ASCII));
+        final IOException e2 = assertThrows(IOException.class, () -> IOUtil.zip(new File(src, "café-日本.txt"), fresh2, StandardCharsets.US_ASCII));
         assertTrue(e2.getMessage().contains("cannot be encoded"), e2.getMessage());
 
         // and a source the charset can spell still writes to a fresh target

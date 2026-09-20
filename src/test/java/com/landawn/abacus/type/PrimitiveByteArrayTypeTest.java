@@ -441,7 +441,6 @@ public class PrimitiveByteArrayTypeTest extends TestBase {
         assertTrue(type.isPrimitiveArray());
     }
 
-
     @Test
     public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
         assertArrayEquals(new byte[] { 127, -128, 0 }, type.valueOf("[127, -128, 0]"));

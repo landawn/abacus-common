@@ -168,7 +168,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
     BufferedWriter(final Writer writer) throws NullPointerException {
         // The superclass keeps its own private destination even after our pooled state is reset.
         super(DUMMY_WRITER, 1);
-        out = N.requireNonNull(writer, "writer");
+        out = N.requireNonNull(writer, cs.writer);
         lock = writer;
     }
 
@@ -444,11 +444,13 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * Internal method to write a {@code non-null} string.
      *
      * @param str the string to write (must not be null)
-     * @throws NullPointerException if {@code str} is null
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
+     * @throws NullPointerException if {@code str} is {@code null}
      */
     @Internal
-    void writeNonNull(final String str) throws NullPointerException, IOException {
+    void writeNonNull(final String str) throws IOException, NullPointerException {
+        ensureOpen();
+
         writeNonNull(str, 0, str.length());
     }
 
@@ -459,13 +461,14 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param off the offset from which to start writing; must be {@code >= 0} and {@code <= str.length()}
      * @param len the number of characters to write; must be {@code >= 0} and {@code <= str.length() - off}
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
+     * @throws NullPointerException if {@code str} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
      *         {@code off > str.length()}, or {@code len > str.length() - off}
-     * @throws NullPointerException if {@code str} is null and {@code off} and {@code len} are nonnegative
      */
     @Internal
-    void writeNonNull(final String str, final int off, int len) throws IOException, IndexOutOfBoundsException, NullPointerException {
+    void writeNonNull(final String str, final int off, int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
+        N.requireNonNull(str, cs.str);
 
         if ((off < 0) || (len < 0) || (off > str.length()) || (len > str.length() - off)) {
             throw new IndexOutOfBoundsException();
@@ -561,13 +564,14 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param off the offset from which to start writing; must be {@code >= 0} and {@code <= cbuf.length}
      * @param len the number of characters to write; must be {@code >= 0} and {@code <= cbuf.length - off}
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
      *         {@code off > cbuf.length}, or {@code len > cbuf.length - off}
-     * @throws NullPointerException if {@code cbuf} is null and {@code off} and {@code len} are nonnegative
      */
     @Override
-    public void write(final char[] cbuf, final int off, int len) throws IOException, IndexOutOfBoundsException, NullPointerException {
+    public void write(final char[] cbuf, final int off, int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
+        N.requireNonNull(cbuf, cs.cbuf);
 
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
@@ -640,6 +644,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      */
     @Override
     public Writer append(final CharSequence csq) throws IOException { //NOSONAR
+        ensureOpen();
+
         return super.append(csq);
     }
 
@@ -657,12 +663,15 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param start the index of the first character in the subsequence
      * @param end the index of the character following the last character in the subsequence
      * @return this writer
+     * @throws IOException if this writer is closed, checked before accessing {@code csq} or validating its range,
+     *         or writing characters to the underlying writer fails
      * @throws IndexOutOfBoundsException if start or end are negative, start is greater
      *         than end, or end is greater than the effective sequence length (four when {@code csq} is null)
-     * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      */
     @Override
-    public Writer append(final CharSequence csq, final int start, final int end) throws IndexOutOfBoundsException, IOException { //NOSONAR
+    public Writer append(final CharSequence csq, final int start, final int end) throws IOException, IndexOutOfBoundsException { //NOSONAR
+        ensureOpen();
+
         return super.append(csq, start, end);
     }
 
@@ -989,9 +998,10 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * at least the specified minimum capacity.
      *
      * @param minimumCapacity the desired minimum capacity
-     * @throws OutOfMemoryError if the required capacity exceeds limits
+     * @throws OutOfMemoryError if {@code minimumCapacity} is negative, i.e. the required capacity has overflowed
+     *         {@code int}, or if the new buffer cannot be allocated
      */
-    void expandCapacity(final int minimumCapacity) {
+    void expandCapacity(final int minimumCapacity) throws OutOfMemoryError {
         int newCapacity = (value.length * 2) + 2;
 
         if ((newCapacity - minimumCapacity) < 0) {

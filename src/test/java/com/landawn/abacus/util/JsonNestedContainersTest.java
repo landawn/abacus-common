@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 
 import testfixtures.UtilJsonFactorySources.FilledMap;
@@ -25,7 +26,7 @@ import testfixtures.UtilJsonFactorySources.ReusedList;
 import testfixtures.UtilJsonFactorySources.SourceList;
 
 @Tag("unit")
-public class JsonNestedContainersTest {
+public class JsonNestedContainersTest extends TestBase {
     public static class Bean {
         private List<Integer> values;
 

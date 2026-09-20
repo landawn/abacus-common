@@ -142,7 +142,8 @@ public record PoolStats(int capacity, int size, long putCount, long getCount, lo
      * This computation does not modify the snapshot.
      *
      * <p>Returns {@code 0.0} when {@link #getCount()} is {@code 0} (no get/poll operations have
-     * been performed). Note {@code hitRate() + missRate() == 1.0} whenever {@code getCount > 0}.</p>
+     * been performed). The hit and miss rates sum to approximately {@code 1.0} whenever {@code getCount > 0},
+     * subject to floating-point rounding.</p>
      *
      * @return the fraction of get/poll operations that did not find an object, or {@code 0.0} if
      *         there have been no get/poll operations

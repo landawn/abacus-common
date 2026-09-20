@@ -233,7 +233,8 @@ public class JdkOptionalDoubleTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -251,12 +252,14 @@ public class JdkOptionalDoubleTypeTest extends TestBase {
 
         assertEquals("0.0", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.empty(), zero));
         assertEquals("0.0", reviewFixes20260906_ser(optionalDoubleType, null, zero));
-        assertEquals("0.0", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.empty(), com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
+        assertEquals("0.0", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.empty(),
+                com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
         assertEquals("null", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.empty(), com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("null", reviewFixes20260906_ser(optionalDoubleType, null, com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("null", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.empty(), null));
         assertEquals("null", reviewFixes20260906_ser(optionalDoubleType, null, null));
-        assertEquals("null", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
+        assertEquals("null", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.empty(),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
         assertEquals("7.5", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.of(7.5d), zero));
         assertEquals("7.5", reviewFixes20260906_ser(optionalDoubleType, OptionalDouble.of(7.5d), null));
     }

@@ -115,7 +115,7 @@ public class JoinerRegressionBTest extends TestBase {
      * {@code "key="}) behind. Every one of these fails on the pre-fix code.
      */
     @Nested
-    public class ThrowingElementLeavesNoDanglingSeparator {
+    public class ThrowingElementLeavesNoDanglingSeparator extends TestBase {
 
         /** Runs {@code op} on a Joiner that already holds "a" and asserts the buffer is untouched. */
         private void assertBufferUnchanged(final Consumer<Joiner> op) {
@@ -276,7 +276,7 @@ public class JoinerRegressionBTest extends TestBase {
          * rather than by {@code prepareBuilder()}. The good element must survive; nothing of the bad one may.
          */
         @Nested
-        public class ThrowingElementAfterTheFirst {
+        public class ThrowingElementAfterTheFirst extends TestBase {
 
             private void assertKeepsFirstOnly(final Consumer<Joiner> op, final String expected) {
                 final Joiner joiner = Joiner.with(", ").append("a");
@@ -338,7 +338,7 @@ public class JoinerRegressionBTest extends TestBase {
 
     /** B3: {@code merge(null)} used to throw {@code IllegalArgumentException} with a {@code null} message. */
     @Nested
-    public class MergeNullMessage {
+    public class MergeNullMessage extends TestBase {
 
         @Test
         public void namesTheArgument() {
@@ -351,7 +351,7 @@ public class JoinerRegressionBTest extends TestBase {
 
     /** D3: selected bean properties render {@code null}; {@code appendBean(bean)} skips them. */
     @Nested
-    public class AppendBeanNullPropertyContract {
+    public class AppendBeanNullPropertyContract extends TestBase {
 
         @Test
         public void appendBeanSkipsNullPropertiesButExplicitSelectionRendersThem() {
@@ -382,7 +382,7 @@ public class JoinerRegressionBTest extends TestBase {
 
     /** J1: {@code repeat(Object, int)} renders via {@code N.toString}, not a bare {@code Object.toString()}. */
     @Nested
-    public class RepeatObjectRendering {
+    public class RepeatObjectRendering extends TestBase {
 
         @Test
         public void arraysAreRenderedElementWise() {
@@ -418,7 +418,7 @@ public class JoinerRegressionBTest extends TestBase {
 
     /** O4: the first entry must honor {@code isEmptyKeyValueDelimiter} exactly like every later entry. */
     @Nested
-    public class EmptyKeyValueDelimiterIsUniformAcrossEntries {
+    public class EmptyKeyValueDelimiterIsUniformAcrossEntries extends TestBase {
 
         private final Map<String, Integer> map = new LinkedHashMap<>();
 
@@ -454,7 +454,7 @@ public class JoinerRegressionBTest extends TestBase {
 
     /** O5: the {@code Collection} range overload must give the same answer for every collection shape. */
     @Nested
-    public class CollectionRangeIsShapeIndependent {
+    public class CollectionRangeIsShapeIndependent extends TestBase {
 
         @Test
         public void randomAccessListLinkedListAndSetAgree() {
@@ -518,7 +518,7 @@ public class JoinerRegressionBTest extends TestBase {
 
     /** B5 (documentation half): the deliberate divergence from {@code Appendable} for a {@code null} element. */
     @Nested
-    public class NullElementRangeSemantics {
+    public class NullElementRangeSemantics extends TestBase {
 
         @Test
         public void nullElementAppendsTheWholeNullTextAndIgnoresTheRange() {
@@ -552,7 +552,7 @@ public class JoinerRegressionBTest extends TestBase {
 
     /** Guards the private render-then-commit helpers against collateral damage on ordinary input. */
     @Nested
-    public class BehaviourPreservedForOrdinaryInput {
+    public class BehaviourPreservedForOrdinaryInput extends TestBase {
 
         @Test
         public void separatorPlacementIsUnchanged() {

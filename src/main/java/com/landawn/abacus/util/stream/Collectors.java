@@ -143,7 +143,7 @@ import com.landawn.abacus.util.function.TriFunction;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * // Primitive list collection (avoiding boxing)
+ * // Primitive list collection (primitive storage in the result)
  * IntList numbers = Stream.of(1, 2, 3, 4, 5)
  *     .collect(Collectors.toIntList());
  *
@@ -192,7 +192,7 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p>Two consequences worth calling out: the size-limited collectors
  * {@link #toList(int)} / {@link #toSet(int)} / {@link #toCollection(int, Supplier)} keep an arbitrary
  * <i>n</i> elements rather than the first <i>n</i> under parallel execution (use
- * {@link #first(int)}, which refuses to run in parallel, when you need the first <i>n</i>); and
+ * {@link #first(int)} on a sequential stream when you need the first <i>n</i>); and
  * "first encountered wins" tie-breaks such as {@link #minAll(Comparator, int)} likewise hold only
  * sequentially. Collect from a sequential stream, or sort the result, when order matters.
  *
@@ -211,7 +211,7 @@ import com.landawn.abacus.util.function.TriFunction;
  *
  * <p><b>Primitive Collection Support:</b></p>
  * <ul>
- *   <li><b>Performance Benefit:</b> Avoid boxing/unboxing overhead for primitive types</li>
+ *   <li><b>Primitive Storage:</b> Results store primitive values directly; input wrapper values are unboxed</li>
  *   <li><b>Memory Efficiency:</b> Reduced memory footprint compared to wrapper collections</li>
  *   <li><b>Type Safety:</b> Compile-time type checking for primitive operations</li>
  *   <li><b>Available Types:</b> boolean, byte, char, short, int, long, float, double</li>
@@ -260,7 +260,7 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p><b>Performance Characteristics:</b></p>
  * <ul>
  *   <li>Collection building: O(n) time where n is the number of elements</li>
- *   <li>Grouping operations: O(n) time with O(k) space where k is the number of groups</li>
+ *   <li>Grouping operations: typically O(n) time and O(k) groups, plus downstream storage that may retain all n elements</li>
  *   <li>Map construction: O(n) average time, O(n²) worst case for hash-based maps</li>
  *   <li>Statistical aggregation: O(n) time with O(1) space for most operations</li>
  * </ul>
@@ -951,9 +951,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    // ofNullable: a null reduction winner (e.g. min() over all-null elements with a null-ordering
-    // comparator) must yield an empty Optional, matching the first()/last() finishers.
-    private static final Function<OptHolder<Object>, Optional<Object>> Reducing_Finisher = a -> a.present ? Optional.ofNullable(a.value)
+    private static final Function<OptHolder<Object>, Optional<Object>> Reducing_Finisher = a -> a.present ? Optional.of(a.value)
             : (Optional<Object>) Optional.empty();
 
     private static final BiConsumer<MappingOptHolder<Object, Object>, Object> Reducing_Accumulator_2 = MappingOptHolder::accept;
@@ -971,7 +969,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return a;
     };
 
-    private static final Function<MappingOptHolder<Object, Object>, Optional<Object>> Reducing_Finisher_2 = a -> a.present ? Optional.ofNullable(a.value)
+    private static final Function<MappingOptHolder<Object, Object>, Optional<Object>> Reducing_Finisher_2 = a -> a.present ? Optional.of(a.value)
             : (Optional<Object>) Optional.empty();
 
     // ============================================================================================================
@@ -1216,9 +1214,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * supports {@code null} values. The behavior depends on the collection implementation provided
      * by the factory.</p>
      *
-     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams. When used
-     * with parallel streams, partial results are combined by appending the later segment to
-     * the earlier one, preserving encounter order.</p>
+     * <p><b>Parallel Stream Support:</b> This collector supports parallel streams. The combiner
+     * adds all elements of the second partial collection to the first. Iteration order and
+     * duplicate handling follow the supplied collection's semantics; see the class-level
+     * encounter-order note for abacus parallel streams.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1231,8 +1230,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <C> the type of the resulting collection
      * @param collectionFactory a supplier providing a new empty collection into which
      *                         the results will be inserted
-     * @return a {@code Collector} which collects all input elements into a collection,
-     *         in encounter order
+     * @return a {@code Collector} which collects all input elements using the supplied collection's semantics
      * @throws IllegalArgumentException if {@code collectionFactory} is {@code null}.
      * @see #toCollection(int, Supplier)
      * @see #toCollection(Supplier, BiConsumer)
@@ -1285,11 +1283,11 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param atMostSize the maximum number of elements to collect. &#9888;&#65039; On a parallel
      *        stream these are an <i>arbitrary</i> {@code atMostSize} elements, not the first ones:
      *        workers are fed interleaved elements and share the cursor. Use {@link #first(int)},
-     *        which refuses to run in parallel, when you need the first {@code n}
+     *        on a sequential stream when you need the first {@code n}
      * @param collectionFactory a supplier providing a new empty collection into which
      *                         the results will be inserted
      * @return a {@code Collector} which collects at most the specified number of input
-     *         elements into a collection, in encounter order
+     *         elements into a collection using the supplied collection's semantics
      * @throws IllegalArgumentException if {@code atMostSize} is negative, or if {@code collectionFactory} is
      *         {@code null}.
      * @see #toCollection(Supplier)
@@ -1340,8 +1338,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * the collection. The accumulator function receives the collection and an element,
      * and is responsible for updating the collection.</p>
      *
-     * <p>The combiner uses the default behavior of appending all elements of the later
-     * partial collection to the earlier one, preserving encounter order.</p>
+     * <p>The combiner adds all elements of the second partial collection to the first.
+     * Iteration order and duplicate handling follow the supplied collection's semantics.</p>
      *
      * <p><b>Null Handling:</b> Null handling depends on the custom accumulator implementation.
      * The accumulator function is responsible for handling {@code null} elements appropriately.</p>
@@ -1882,7 +1880,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param atMostSize the maximum number of elements to collect. &#9888;&#65039; On a parallel
      *        stream these are an <i>arbitrary</i> {@code atMostSize} elements, not the first ones:
      *        workers are fed interleaved elements and share the cursor. Use {@link #first(int)},
-     *        which refuses to run in parallel, when you need the first {@code n}
+     *        on a sequential stream when you need the first {@code n}
      * @return a {@code Collector} which collects at most the specified number of input
      *         elements into a {@code List}, in encounter order
      * @throws IllegalArgumentException if {@code atMostSize} is negative.
@@ -1917,7 +1915,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param atMostSize the maximum number of elements to collect. &#9888;&#65039; On a parallel
      *        stream these are an <i>arbitrary</i> {@code atMostSize} elements, not the first ones:
      *        workers are fed interleaved elements and share the cursor. Use {@link #first(int)},
-     *        which refuses to run in parallel, when you need the first {@code n}
+     *        on a sequential stream when you need the first {@code n}
      * @return a {@code Collector} which collects at most the specified number of unique
      *         input elements into a {@code Set}
      * @throws IllegalArgumentException if {@code atMostSize} is negative.
@@ -2132,11 +2130,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Boolean} elements into a {@code BooleanList}.
      *
      * <p>This collector is optimized for primitive boolean values, storing them in a
-     * specialized list implementation that avoids boxing overhead. The {@code BooleanList}
+     * specialized list implementation that stores primitive values directly. The {@code BooleanList}
      * provides efficient storage and access for boolean values.</p>
      *
      * <p>Elements are collected in encounter order. The collector handles both combining
      * partial results in parallel streams and converting to the final {@code BooleanList}.</p>
+     *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2170,6 +2171,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The collector internally uses a {@code BooleanList} for accumulation, then converts
      * to an array as the final step, ensuring efficient memory usage throughout the process.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Boolean stream to primitive array
@@ -2197,11 +2201,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Character} elements into a {@code CharList}.
      *
      * <p>This collector is optimized for primitive char values, storing them in a
-     * specialized list implementation that avoids boxing overhead. The {@code CharList}
+     * specialized list implementation that stores primitive values directly. The {@code CharList}
      * provides efficient storage and access for character values.</p>
      *
      * <p>Elements are collected in encounter order. This is particularly useful when
      * working with character data that needs to be processed as a list.</p>
+     *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2235,6 +2242,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code CharList} for efficient accumulation.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Character stream to primitive array
@@ -2262,11 +2272,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Byte} elements into a {@code ByteList}.
      *
      * <p>This collector is optimized for primitive byte values, storing them in a
-     * specialized list implementation that avoids boxing overhead. The {@code ByteList}
+     * specialized list implementation that stores primitive values directly. The {@code ByteList}
      * provides efficient storage and access for byte values.</p>
      *
      * <p>Elements are collected in encounter order. This is particularly useful when
      * working with binary data or byte-oriented operations.</p>
+     *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2300,6 +2313,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code ByteList} for efficient accumulation.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Byte stream to primitive array
@@ -2327,11 +2343,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Short} elements into a {@code ShortList}.
      *
      * <p>This collector is optimized for primitive short values, storing them in a
-     * specialized list implementation that avoids boxing overhead. The {@code ShortList}
+     * specialized list implementation that stores primitive values directly. The {@code ShortList}
      * provides efficient storage and access for short values.</p>
      *
      * <p>Elements are collected in encounter order. This is useful when working with
      * numeric data that fits within the short range (-32,768 to 32,767).</p>
+     *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2365,6 +2384,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The collector internally uses a {@code ShortList} for efficient accumulation
      * before converting to the final array format.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Short stream to primitive array
@@ -2392,15 +2414,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Integer} elements into an {@code IntList}.
      *
      * <p>This collector is optimized for primitive int values, storing them in a
-     * specialized list implementation that avoids boxing overhead. The {@code IntList}
+     * specialized list implementation that stores primitive values directly. The {@code IntList}
      * provides efficient storage and access for integer values.</p>
      *
      * <p>Elements are collected in encounter order. This is one of the most commonly
      * used primitive collectors for numeric operations.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect integers efficiently (avoids boxing)
+     * // Collect integers efficiently (stores primitives in the result)
      * IntList ints = Stream.of(1, 2, 3, 4, 5)
      *     .collect(Collectors.toIntList());              // returns IntList[1, 2, 3, 4, 5]
      *
@@ -2430,6 +2455,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses an
      * {@code IntList} for efficient accumulation.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Integer stream to primitive array
@@ -2457,15 +2485,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Long} elements into a {@code LongList}.
      *
      * <p>This collector is optimized for primitive long values, storing them in a
-     * specialized list implementation that avoids boxing overhead. The {@code LongList}
+     * specialized list implementation that stores primitive values directly. The {@code LongList}
      * provides efficient storage and access for long values.</p>
      *
      * <p>Elements are collected in encounter order. This is useful for working with
      * large numeric values or timestamps.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect longs efficiently (avoids boxing)
+     * // Collect longs efficiently (stores primitives in the result)
      * LongList longs = Stream.of(1000L, 2000L, 3000L)
      *     .collect(Collectors.toLongList());              // returns LongList[1000, 2000, 3000]
      *
@@ -2495,6 +2526,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code LongList} for efficient accumulation.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Long stream to primitive array
@@ -2522,15 +2556,18 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Float} elements into a {@code FloatList}.
      *
      * <p>This collector is optimized for primitive float values, storing them in a
-     * specialized list implementation that avoids boxing overhead. The {@code FloatList}
+     * specialized list implementation that stores primitive values directly. The {@code FloatList}
      * provides efficient storage and access for floating-point values.</p>
      *
      * <p>Elements are collected in encounter order. This is useful for scientific
      * calculations and graphics programming where float precision is sufficient.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Collect floats efficiently (avoids boxing)
+     * // Collect floats efficiently (stores primitives in the result)
      * FloatList floats = Stream.of(1.5f, 2.5f, 3.5f)
      *     .collect(Collectors.toFloatList());            // returns FloatList[1.5, 2.5, 3.5]
      *
@@ -2560,6 +2597,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code FloatList} for efficient accumulation.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Float stream to primitive array
@@ -2584,11 +2624,14 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * Returns a {@code Collector} that accumulates {@code Double} elements into a {@code DoubleList}.
      *
      * <p>This collector is optimized for primitive double values, storing them in a
-     * specialized list implementation that avoids boxing overhead. The {@code DoubleList}
+     * specialized list implementation that stores primitive values directly. The {@code DoubleList}
      * provides efficient storage and access for double-precision floating-point values.</p>
      *
      * <p>Elements are collected in encounter order. This is useful for high-precision
      * numeric calculations where double precision is required.</p>
+     *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2619,6 +2662,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>Elements are collected in encounter order. The collector internally uses a
      * {@code DoubleList} for efficient accumulation.</p>
      *
+     * <p>Input wrapper values are unboxed during accumulation. A {@code null} input
+     * element causes a {@link NullPointerException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Convert Double stream to primitive array
@@ -2640,8 +2686,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
     }
 
     // Use the NONE sentinel to distinguish "no element yet" from "element present (possibly null)".
-    // Using Optional.empty() as the sentinel breaks duplicate detection when the first element is null,
-    // because Optional.ofNullable(null) is also empty.
+    // Defer wrapping until after duplicate detection, including when the first element is null.
     private static final Supplier<Holder<Object>> onlyOne_supplier = () -> Holder.of(NONE);
 
     private static final BiConsumer<Holder<Object>, Object> onlyOne_accumulator = (holder, val) -> {
@@ -2660,8 +2705,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return t.value() != NONE ? t : u;
     };
 
-    private static final Function<Holder<Object>, Optional<Object>> onlyOne_finisher = h -> h.value() == NONE ? Optional.empty()
-            : Optional.ofNullable(h.value());
+    private static final Function<Holder<Object>, Optional<Object>> onlyOne_finisher = h -> h.value() == NONE ? Optional.empty() : Optional.of(h.value());
 
     /**
      * Returns a {@code Collector} that returns the only collected element, if one is present,
@@ -2669,8 +2713,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector throws a {@code TooManyElementsException} if more than one element
      * is encountered in the stream. It returns an empty {@code Optional} if the stream
-     * is empty. A sole {@code null} element is also represented by an empty {@code Optional},
-     * because {@code Optional} cannot contain {@code null}. This is useful for operations
+     * is empty. A sole {@code null} element causes a {@link NullPointerException}.
+     * This is useful for operations
      * where you expect at most one result.</p>
      *
      * <p>This collector enforces uniqueness and is suitable for queries that should return
@@ -2714,7 +2758,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector filters elements using the provided predicate, then returns the
      * single matching element if present. It throws a {@code TooManyElementsException} if
      * more than one element matches the predicate. It returns an empty {@code Optional} if
-     * no elements match.</p>
+     * no elements match. A sole matching {@code null} element causes a {@link NullPointerException}.</p>
      *
      * <p>This is a combination of filtering and the onlyOne collector, useful for
      * finding a unique element matching specific criteria.</p>
@@ -2760,9 +2804,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         return t.value() != NONE ? t : u;
     };
 
-    // Use Optional.ofNullable so that a null first/last element does not cause an NPE in the finisher.
-    private static final Function<Holder<Object>, Optional<Object>> first_last_finisher = t -> t.value() == NONE ? Optional.empty()
-            : Optional.ofNullable(t.value());
+    private static final Function<Holder<Object>, Optional<Object>> first_last_finisher = t -> t.value() == NONE ? Optional.empty() : Optional.of(t.value());
 
     /**
      * Returns a {@code Collector} that collects the first element of a sequential stream
@@ -2773,8 +2815,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * sequential streams only. Its combiner throws an {@code UnsupportedOperationException}
      * when two nonempty partial results are combined, so parallel use is unsupported even
      * though an empty or otherwise unsplit parallel reduction might happen to complete.
-     * If the first element is {@code null}, the result is empty because {@code Optional}
-     * cannot contain {@code null}.</p>
+     * If the first element is {@code null}, collection throws a {@link NullPointerException}.</p>
      *
      * <p>Note that this is different from {@code findFirst()} as it's implemented as a
      * collector and can be combined with other collectors.</p>
@@ -2811,8 +2852,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * sequential streams only. Its combiner throws an {@code UnsupportedOperationException}
      * when two nonempty partial results are combined, so parallel use is unsupported even
      * though an empty or otherwise unsplit parallel reduction might happen to complete.
-     * If the last element is {@code null}, the result is empty because {@code Optional}
-     * cannot contain {@code null}.</p>
+     * If the last element is {@code null}, collection throws a {@link NullPointerException}.</p>
      *
      * <p>Each element encountered replaces the previous one, so the final result is
      * the last element in encounter order.</p>
@@ -3315,7 +3355,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Flatten a map's values
-     * Map<String, List<Integer>> map = new HashMap<>();
+     * Map<String, List<Integer>> map = new LinkedHashMap<>();
      * map.put("a", Arrays.asList(1, 2));
      * map.put("b", Arrays.asList(3, 4));
      * List<Integer> values = map.entrySet().stream()
@@ -3452,9 +3492,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector tracks whether any elements were accumulated and returns an
      * empty {@code Optional} if the stream was empty, or an {@code Optional} containing
      * the collected result otherwise. If the downstream finisher returns {@code null},
-     * the result is also an empty {@code Optional}, because {@code Optional} cannot contain
-     * {@code null}. This is useful when you want to distinguish between an empty collection
-     * result and no elements being processed.</p>
+     * collection throws a {@link NullPointerException}. This is useful when you want to distinguish
+     * between an empty collection result and no elements being processed.</p>
      *
      * <p>Presence is based on whether this wrapper receives an input element, not on whether
      * the downstream collector retains that element. To make a rejected element count as absent,
@@ -3510,7 +3549,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
         final Function<Pair<A, MutableBoolean>, Optional<R>> newFinisher = a -> {
             if (a.right().isTrue()) {
-                return Optional.ofNullable(downstreamFinisher.apply(a.left()));
+                return Optional.of(downstreamFinisher.apply(a.left()));
             } else {
                 return Optional.empty();
             }
@@ -3711,11 +3750,12 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param exceptionSupplier supplier for the exception to throw if no elements are collected
      * @return a collector which returns the collected result, or throws if no elements
      *         were collected
-     * @throws IllegalArgumentException if {@code exceptionSupplier} or {@code collector} is {@code null}.
+     * @throws IllegalArgumentException if {@code collector} or {@code exceptionSupplier} is {@code null}.
      */
     @Beta
     public static <T, A, R> Collector<T, ?, R> collectingOrElseThrowIfEmpty(final Collector<T, A, R> collector,
             final Supplier<? extends RuntimeException> exceptionSupplier) throws IllegalArgumentException {
+        N.checkArgNotNull(collector, cs.collector);
         N.checkArgNotNull(exceptionSupplier, cs.exceptionSupplier);
 
         return collectingOrElseGetIfEmpty(collector, () -> {
@@ -3830,8 +3870,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * counted only once. This is useful for counting unique properties without collecting
      * the actual elements.</p>
      *
-     * <p>The operation is equivalent to {@code stream.map(mapper).distinct().count()},
-     * but is implemented as a single collector which can be more efficient.</p>
+     * <p>The mapped keys are accumulated into a set, whose size is returned as an {@code Integer}.
+     * Array keys use identity equality, unlike the deep array equality of abacus
+     * {@link Stream#distinct()}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3925,8 +3966,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector finds the minimum element, treating {@code null} as the largest
      * value (using {@code nullsLast} comparison). The result is wrapped in an
-     * {@code Optional} which is empty if the stream is empty, or if the minimal element
-     * itself is {@code null} (i.e., all elements are null).</p>
+     * {@code Optional} which is empty only if the stream is empty. If a nonempty stream
+     * contains only {@code null} elements, collection throws a {@link NullPointerException}.</p>
      *
      * <p>Elements must implement {@code Comparable}. For custom comparison logic,
      * use {@link #min(Comparator)} instead.</p>
@@ -3952,9 +3993,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * {@code Comparator}.
      *
      * <p>This collector finds the minimum element using the provided comparator.
-     * The result is wrapped in an {@code Optional} which is empty if the stream is empty,
-     * or if the selected minimum element is {@code null}, because {@code Optional} cannot
-     * contain {@code null}.
+     * The result is wrapped in an {@code Optional} which is empty if the stream is empty.
+     * A selected {@code null} minimum causes a {@link NullPointerException}.
      * The comparator is used for all comparisons, including handling of {@code null} values
      * if present. If multiple elements are considered equal according to the comparator,
      * the first encountered element is returned.</p>
@@ -4210,6 +4250,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>The returned collector handles {@code null} keys by placing them last in the
      * ordering (null keys are considered greater than {@code non-null} keys).</p>
      *
+     * <p>An empty stream produces an empty {@code Optional}. A selected {@code null} element
+     * causes a {@link NullPointerException} during collection. A non-null element whose
+     * extracted key is {@code null} can still be returned.</p>
+     *
+     * <p>{@code keyMapper} is applied to <i>every</i> element, {@code null} ones included, so it must
+     * tolerate {@code null} whenever the stream may contain one. {@code minBy(Person::getAge)} over a
+     * stream holding a {@code null} element throws a {@link NullPointerException} from the extractor
+     * itself, even when that {@code null} element is not the minimum.</p>
+     *
      * <p><b>Note:</b> the argument is a sort-<i>key extractor</i> ({@link Function}), not a
      * {@link java.util.Comparator}. This differs from {@link java.util.stream.Collectors#minBy(java.util.Comparator)},
      * whose argument IS a Comparator. For the comparator-based form in this class use {@link #min(java.util.Comparator)}.</p>
@@ -4334,8 +4383,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>The returned collector handles {@code null} values by placing them first in the
      * ordering (nulls are considered less than {@code non-null} values). The returned
-     * {@code Optional} is empty if the stream is empty, or if the maximal element itself
-     * is {@code null} (i.e., all elements are null).</p>
+     * {@code Optional} is empty only if the stream is empty. If a nonempty stream contains
+     * only {@code null} elements, collection throws a {@link NullPointerException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4359,8 +4408,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector allows custom comparison logic for finding the maximum
      * element. If multiple elements are considered equal according to the comparator,
      * the first encountered element is returned. The result is empty if the stream is
-     * empty, or if the selected maximum element is {@code null}, because {@code Optional}
-     * cannot contain {@code null}.</p>
+     * empty. A selected {@code null} maximum causes a {@link NullPointerException}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4604,6 +4652,15 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>The returned collector handles {@code null} keys by placing them first in the
      * ordering (null keys are considered less than {@code non-null} keys).</p>
+     *
+     * <p>An empty stream produces an empty {@code Optional}. A selected {@code null} element
+     * causes a {@link NullPointerException} during collection. A non-null element whose
+     * extracted key is {@code null} can still be returned.</p>
+     *
+     * <p>{@code keyMapper} is applied to <i>every</i> element, {@code null} ones included, so it must
+     * tolerate {@code null} whenever the stream may contain one. {@code maxBy(Person::getAge)} over a
+     * stream holding a {@code null} element throws a {@link NullPointerException} from the extractor
+     * itself, even when that {@code null} element is not the maximum.</p>
      *
      * <p><b>Note:</b> the argument is a sort-<i>key extractor</i> ({@link Function}), not a
      * {@link java.util.Comparator}. This differs from {@link java.util.stream.Collectors#maxBy(java.util.Comparator)},
@@ -5542,8 +5599,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>If there are no input elements, the finisher method is not called and
      * empty {@code Optional} is returned. Otherwise, the finisher result is
-     * wrapped into {@code Optional}; a {@code null} finisher result produces an empty
-     * {@code Optional}. Null input elements are passed to the supplied comparator, so
+     * wrapped into {@code Optional}; a {@code null} finisher result causes a
+     * {@link NullPointerException}. Null input elements are passed to the supplied comparator, so
      * null-aware comparators can select {@code null} as a legitimate minimum or maximum.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5566,7 +5623,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
         N.checkArgNotNull(comparator, cs.comparator);
         N.checkArgNotNull(finisher, cs.finisher);
 
-        return minMax(comparator, a -> a.present ? Optional.ofNullable((R) finisher.apply(a.min, a.max)) : Optional.empty());
+        return minMax(comparator, a -> a.present ? Optional.of((R) finisher.apply(a.min, a.max)) : Optional.empty());
     }
 
     /**
@@ -5862,8 +5919,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * applied to the input elements, with the result as a {@code Long}.
      *
      * <p>This collector is similar to {@link #summingInt(ToIntFunction)} but returns
-     * a {@code Long} result to avoid integer overflow issues when summing large
-     * numbers of elements or large values.</p>
+     * a {@code Long} result so the sum can exceed the {@code int} range. Each value is
+     * widened before addition; the {@code long} sum still wraps on overflow.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6983,10 +7040,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * System.out.println("Max: " + stats.getMax());           // 300
      * System.out.println("Average: " + stats.getAverage());   // 187.5
      *
-     * // Analyze port numbers
-     * List<Server> servers = getServers();
-     * ShortSummaryStatistics portStats = servers.stream()
-     *     .collect(Collectors.summarizingShort(Server::getPort));
+     * // Parse and summarize values in the short range
+     * List<String> samples = Arrays.asList("100", "200", "300");
+     * ShortSummaryStatistics sampleStats = samples.stream()
+     *     .collect(Collectors.summarizingShort(Short::parseShort));
      * }</pre>
      *
      * @param <T> the type of input elements
@@ -7407,8 +7464,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * The first element encountered in the stream becomes the initial value for the reduction,
      * and subsequent elements are combined with it using the binary operator.</p>
      *
-     * <p>If the stream is empty, an empty {@code Optional} is returned. This allows for safe
-     * handling of the case where no reduction can be performed.</p>
+     * <p>If the stream is empty, an empty {@code Optional} is returned. A {@code null}
+     * final reduced value causes a {@link NullPointerException}.</p>
      *
      * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
      * characteristic, so encounter-order reduction semantics are retained. The operator must be
@@ -7656,7 +7713,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector first maps each input element using the mapper function, then reduces
      * the mapped values using the binary operator. If no elements are present, an empty
-     * {@code Optional} is returned.</p>
+     * {@code Optional} is returned. A {@code null} final reduced value causes a
+     * {@link NullPointerException} during collection. Mapped values and intermediate reduction
+     * results may be {@code null} if the operator accepts them and the final result is non-null.</p>
      *
      * <p>The returned collector does not have the {@link Characteristics#UNORDERED UNORDERED}
      * characteristic, so encounter-order reduction semantics are retained. The operator must be
@@ -7684,7 +7743,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * @param <R> the type of the result
      * @param mapper a function to map input elements to the type used for reduction
      * @param op a binary operator used to reduce the mapped values
-     * @return a {@code Collector} which reduces the input elements into an {@code Optional}
+     * @return a {@code Collector} which reduces the input elements into an {@code Optional},
+     *         or an empty {@code Optional} if no elements were present
      * @throws IllegalArgumentException if {@code mapper} or {@code op} is {@code null}.
      * @see #reducing(Object, Function, BinaryOperator)
      * @see #reducingOrElseGet(Function, BinaryOperator, Supplier)
@@ -7967,8 +8027,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector finds the longest sequence of characters that appears at the beginning
      * of all input sequences. For empty input, an empty string is returned. The collector
-     * handles Unicode surrogate pairs correctly, ensuring that the prefix doesn't end with
-     * an incomplete surrogate pair.</p>
+     * does not split a valid Unicode surrogate pair at the end of the common prefix.</p>
      *
      * <p>Once the common prefix has been reduced to empty, subsequent elements no longer
      * affect the result, though the stream is still fully traversed.</p>
@@ -8021,8 +8080,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      *
      * <p>This collector finds the longest sequence of characters that appears at the end
      * of all input sequences. For empty input, an empty string is returned. The collector
-     * handles Unicode surrogate pairs correctly, ensuring that the suffix doesn't start with
-     * an incomplete surrogate pair.</p>
+     * does not split a valid Unicode surrogate pair at the start of the common suffix.</p>
      *
      * <p>Once the common suffix has been reduced to empty, subsequent elements no longer
      * affect the result, though the stream is still fully traversed.</p>
@@ -9934,7 +9992,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // Values for same key are stored in a list
      * }</pre>
      *
-     * <p><b>Note:</b> supply {@code multimapSupplier} as a lambda. {@code N::newListMultimap} is an
+     * <p><b>Note:</b> supply {@code mapFactory} as a lambda. {@code N::newListMultimap} is an
      * <i>inexact</i> method reference (there are arity-0 and arity-1 {@code newListMultimap}
      * overloads), so the compiler cannot choose between this overload and
      * {@link #toMultimap(Function)} and reports {@code reference to toMultimap is ambiguous}.
@@ -10006,7 +10064,7 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * // returns {5=[apple, apple], 6=[banana, cherry]}
      * }</pre>
      *
-     * <p><b>Note:</b> supply {@code multimapSupplier} as a lambda. {@code N::newListMultimap} is an
+     * <p><b>Note:</b> supply {@code mapFactory} as a lambda. {@code N::newListMultimap} is an
      * <i>inexact</i> method reference, so the compiler cannot choose between this overload and
      * {@link #toMultimap(Function, Function)} and reports
      * {@code reference to toMultimap is ambiguous}.
@@ -10124,6 +10182,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * values for the same key. The flat value extractor should return a {@code Stream}
      * of values for each input element.</p>
      *
+     * <p>Each nested stream is consumed sequentially and closed after use, including on failure.
+     * A {@code null} nested stream contributes no values.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map each person to multiple skills
@@ -10159,6 +10220,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * <p>This collector allows you to specify the exact type of {@code Multimap} to use
      * while flat mapping values. The flat value extractor should return a {@code Stream}
      * of values for each input element.</p>
+     *
+     * <p>Each nested stream is consumed sequentially and closed after use, including on failure.
+     * A {@code null} nested stream contributes no values.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10318,6 +10382,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * that stream was configured for parallel execution. The outer collector supports parallel
      * streams and preserves the encounter order of values for each key.</p>
      *
+     * <p>Each nested stream is closed after use, including on failure. A {@code null} nested
+     * stream contributes no keys.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Map products to multiple categories
@@ -10359,6 +10426,9 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
      * that stream was configured for parallel execution. The behavior of the resulting multimap
      * (such as whether it allows duplicate key-value pairs) depends on the implementation
      * provided by the map factory.</p>
+     *
+     * <p>Each nested stream is closed after use, including on failure. A {@code null} nested
+     * stream contributes no keys.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -10584,9 +10654,10 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
     /**
      * Associates {@code value} with {@code key} in {@code map}, merging with any value already mapped to
-     * that key. Unlike {@link Map#merge(Object, Object, BiFunction)} this helper never throws on a
-     * {@code null} value: a key that is present with a {@code null} value is treated as an existing
-     * mapping and is passed to {@code remappingFunction}. As with {@code Map.merge}, a {@code null} result of
+     * that key. Unlike {@link Map#merge(Object, Object, BiFunction)} this helper permits a
+     * {@code null} value when the map and remapping function support it. A key present with a {@code null}
+     * value is treated as an existing mapping and is passed to {@code remappingFunction}.
+     * As with {@code Map.merge}, a {@code null} result of
      * {@code remappingFunction} removes the key.
      *
      * @param <K> the key type of the map
@@ -12314,8 +12385,6 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
          */
         public static <T, R> Collector<T, ?, R> combine(final Collection<? extends Collector<? super T, ?, ?>> downstreams, final Function<Object[], R> merger)
                 throws IllegalArgumentException {
-            N.checkArgNotNull(merger, cs.merger);
-
             //NOSONAR
             N.checkArgument(N.notEmpty(downstreams), "The specified 'downstreams' cannot be null or empty");
 
@@ -12326,6 +12395,8 @@ public abstract sealed class Collectors permits Collectors.MoreCollectors { // N
 
                 downstreamList.add(downstream);
             }
+
+            N.checkArgNotNull(merger, cs.merger);
 
             final int size = downstreamList.size();
             final Supplier<Object>[] suppliers = downstreamList.stream().map(Collector::supplier).toArray(i -> new Supplier[size]);

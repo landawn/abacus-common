@@ -143,8 +143,8 @@ public class TimeType extends AbstractDateType<Time> {
 
     /**
      * Creates a Time from a character array.
-     * First attempts to parse as milliseconds if the format suggests a long value (digits ending in a digit, so a
-     * trailing {@code L}/{@code d}/{@code f} type suffix is not accepted), otherwise delegates to
+     * First parses epoch milliseconds when the text has more than four characters and consists of an optional sign
+     * followed only by ASCII decimal digits (no hexadecimal prefix or type suffix); otherwise delegates to
      * {@link #valueOf(String)}, so both overloads give the same answer for the same text.
      *
      * @param cbuf the character buffer containing the value
@@ -152,7 +152,8 @@ public class TimeType extends AbstractDateType<Time> {
      * @param len the number of characters to use
      * @return a Time object, or {@code null} if the input is {@code null} or empty
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
-     * @throws IllegalArgumentException if the text is not a recognized time or numeric form (see         {@link #valueOf(String)}), including numeric text outside the {@code long} range
+     * @throws IllegalArgumentException if the text is not a recognized time or numeric form (see {@link #valueOf(String)}),
+     *         including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
@@ -161,10 +162,9 @@ public class TimeType extends AbstractDateType<Time> {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // IllegalArgumentException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createTime(parseLong(cbuf, offset, len));

@@ -112,8 +112,9 @@ class ArrayShortStream extends AbstractShortStream {
      * }</pre>
      *
      * @param values the short array to stream over
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayShortStream(final short[] values) {
+    ArrayShortStream(final short[] values) throws NullPointerException {
         this(values, 0, values.length);
     }
 
@@ -132,8 +133,9 @@ class ArrayShortStream extends AbstractShortStream {
      *
      * @param values the short array to stream over
      * @param closeHandlers handlers to execute when the stream is closed, can be null
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayShortStream(final short[] values, final Collection<LocalRunnable> closeHandlers) {
+    ArrayShortStream(final short[] values, final Collection<LocalRunnable> closeHandlers) throws NullPointerException {
         this(values, 0, values.length, closeHandlers);
     }
 
@@ -152,8 +154,9 @@ class ArrayShortStream extends AbstractShortStream {
      * @param values the short array to stream over
      * @param sorted whether the array elements are in sorted order
      * @param closeHandlers handlers to execute when the stream is closed, can be null
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayShortStream(final short[] values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
+    ArrayShortStream(final short[] values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) throws NullPointerException {
         this(values, 0, values.length, sorted, closeHandlers);
     }
 
@@ -262,7 +265,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -299,7 +302,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -342,7 +345,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -373,7 +376,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -430,7 +433,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -466,7 +469,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -502,7 +505,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -562,7 +565,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -610,7 +613,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -654,7 +657,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -698,7 +701,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -758,7 +761,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -806,7 +809,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -838,7 +841,7 @@ class ArrayShortStream extends AbstractShortStream {
                 }
 
                 @Override
-                public short nextShort() {
+                public short nextShort() throws NoSuchElementException {
                     if (!hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -916,7 +919,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -995,7 +998,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1388,7 +1391,7 @@ class ArrayShortStream extends AbstractShortStream {
     }
 
     @Override
-    public int sum() throws IllegalStateException {
+    public int sum() throws IllegalStateException, ArithmeticException {
         assertNotClosed();
 
         try {
@@ -1560,7 +1563,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1630,7 +1633,7 @@ class ArrayShortStream extends AbstractShortStream {
                 }
 
                 @Override
-                public short nextShort() {
+                public short nextShort() throws NoSuchElementException {
                     if (iter == null) {
                         init();
                     }
@@ -1668,13 +1671,7 @@ class ArrayShortStream extends AbstractShortStream {
                             iter = s == null ? ShortIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -1706,7 +1703,7 @@ class ArrayShortStream extends AbstractShortStream {
                 }
 
                 @Override
-                public short nextShort() {
+                public short nextShort() throws NoSuchElementException {
                     if (!executed) {
                         executed = true;
                         action.run();
@@ -1761,7 +1758,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (fromIndex >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1796,7 +1793,7 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }

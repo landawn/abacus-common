@@ -378,10 +378,13 @@ public class uNullableTest extends uTestSupport {
 
     @Test
     public void testNullable_from_Optional_Null() {
-        // B3 (2026-09-01): every from(..) treats a null argument as absence.
-        final u.Optional<String> nullOptional = null;
-        final u.Nullable<String> result = u.Nullable.from(nullOptional);
-        assertFalse(result.isPresent());
+        // A missing source container is invalid; only an empty container represents absence.
+        assertThrows(IllegalArgumentException.class, () -> u.Nullable.from((u.Optional<String>) null));
+    }
+
+    @Test
+    public void testNullable_from_Optional_Empty() {
+        assertTrue(u.Nullable.from(u.Optional.<String> empty()).isEmpty());
     }
 
     @Test

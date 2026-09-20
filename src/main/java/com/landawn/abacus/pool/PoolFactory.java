@@ -54,7 +54,7 @@ import com.landawn.abacus.util.cs;
  *         try {
  *             resource.use();
  *         } finally {
- *             pool.add(resource);
+ *             pool.add(resource, true);   // return it, or destroy it if rejected
  *         }
  *     }
  * }
@@ -91,8 +91,9 @@ public final class PoolFactory { //NOSONAR
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
      * @return a new ObjectPool instance with the specified capacity
      * @throws IllegalArgumentException if capacity is negative.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity) throws IllegalArgumentException {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity) throws IllegalArgumentException, IllegalStateException {
         return new GenericObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY_IN_MILLIS, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -117,8 +118,10 @@ public final class PoolFactory { //NOSONAR
      * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new ObjectPool instance with the specified capacity and eviction delay
      * @throws IllegalArgumentException if capacity or eviction delay is negative.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
-    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis) throws IllegalArgumentException {
+    public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis)
+            throws IllegalArgumentException, IllegalStateException {
         return new GenericObjectPool<>(capacity, evictDelayInMillis, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -145,9 +148,10 @@ public final class PoolFactory { //NOSONAR
      * @param evictionPolicy the policy to use for selecting objects to evict; null selects LAST_ACCESS_TIME
      * @return a new ObjectPool instance with the specified configuration
      * @throws IllegalArgumentException if capacity or eviction delay is negative.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy);
     }
 
@@ -179,9 +183,13 @@ public final class PoolFactory { //NOSONAR
      * @param memoryMeasure the function to calculate memory size of pool elements; must not be {@code null}
      * @return a new ObjectPool instance with memory constraints
      * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if memoryMeasure is null.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
-            final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException {
+            final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNegative(capacity, cs.capacity);
+        N.checkArgNotNegative(evictDelayInMillis, cs.evictDelayInMillis);
+        N.checkArgNotNegative(maxMemorySize, cs.maxMemorySize);
         N.checkArgNotNull(memoryMeasure, cs.memoryMeasure);
 
         return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, maxMemorySize, memoryMeasure);
@@ -214,9 +222,10 @@ public final class PoolFactory { //NOSONAR
      * @return a new ObjectPool instance with custom balancing configuration
      * @throws IllegalArgumentException if capacity or eviction delay is negative;
      *         if balanceFactor is non-finite or outside [0, 1].
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
-            final boolean autoBalance, final float balanceFactor) throws IllegalArgumentException {
+            final boolean autoBalance, final float balanceFactor) throws IllegalArgumentException, IllegalStateException {
         return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor);
     }
 
@@ -251,10 +260,16 @@ public final class PoolFactory { //NOSONAR
      * @return a new ObjectPool instance with full configuration
      * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative;
      *         if balanceFactor is non-finite or outside [0, 1]; or if memoryMeasure is null.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <E extends Poolable> ObjectPool<E> createObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy,
             final boolean autoBalance, final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNegative(capacity, cs.capacity);
+        N.checkArgNotNegative(evictDelayInMillis, cs.evictDelayInMillis);
+        N.checkArgument(Float.isFinite(balanceFactor) && balanceFactor >= 0 && balanceFactor <= 1, "balanceFactor must be finite and between 0 and 1: %s",
+                balanceFactor);
+        N.checkArgNotNegative(maxMemorySize, cs.maxMemorySize);
         N.checkArgNotNull(memoryMeasure, cs.memoryMeasure);
 
         return new GenericObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);
@@ -281,8 +296,10 @@ public final class PoolFactory { //NOSONAR
      * @param capacity the maximum number of key-value pairs the pool can hold (must be non-negative)
      * @return a new KeyedObjectPool instance with the specified capacity
      * @throws IllegalArgumentException if capacity is negative.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
-    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity) throws IllegalArgumentException {
+    public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity)
+            throws IllegalArgumentException, IllegalStateException {
         return new GenericKeyedObjectPool<>(capacity, AbstractPool.DEFAULT_EVICT_DELAY_IN_MILLIS, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -308,9 +325,10 @@ public final class PoolFactory { //NOSONAR
      * @param evictDelayInMillis the non-negative delay in milliseconds between eviction runs, or 0 to disable eviction
      * @return a new KeyedObjectPool instance with the specified capacity and eviction delay
      * @throws IllegalArgumentException if capacity or eviction delay is negative.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, EvictionPolicy.LAST_ACCESS_TIME);
     }
 
@@ -338,9 +356,10 @@ public final class PoolFactory { //NOSONAR
      * @param evictionPolicy the policy to use for selecting entries to evict; null selects LAST_ACCESS_TIME
      * @return a new KeyedObjectPool instance with the specified configuration
      * @throws IllegalArgumentException if capacity or eviction delay is negative.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
-            final EvictionPolicy evictionPolicy) throws IllegalArgumentException {
+            final EvictionPolicy evictionPolicy) throws IllegalArgumentException, IllegalStateException {
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy);
     }
 
@@ -374,10 +393,14 @@ public final class PoolFactory { //NOSONAR
      * @param memoryMeasure the function to calculate memory size of key-value pairs; must not be {@code null}
      * @return a new KeyedObjectPool instance with memory constraints
      * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative, or if memoryMeasure is null.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNegative(capacity, cs.capacity);
+        N.checkArgNotNegative(evictDelayInMillis, cs.evictDelayInMillis);
+        N.checkArgNotNegative(maxMemorySize, cs.maxMemorySize);
         N.checkArgNotNull(memoryMeasure, cs.memoryMeasure);
 
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, maxMemorySize, memoryMeasure);
@@ -411,9 +434,10 @@ public final class PoolFactory { //NOSONAR
      * @return a new KeyedObjectPool instance with custom balancing configuration
      * @throws IllegalArgumentException if capacity or eviction delay is negative;
      *         if balanceFactor is non-finite or outside [0, 1].
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
-            final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor) throws IllegalArgumentException {
+            final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor) throws IllegalArgumentException, IllegalStateException {
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor);
     }
 
@@ -451,10 +475,16 @@ public final class PoolFactory { //NOSONAR
      * @return a new KeyedObjectPool instance with full configuration
      * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory is negative;
      *         if balanceFactor is non-finite or outside [0, 1]; or if memoryMeasure is null.
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     public static <K, E extends Poolable> KeyedObjectPool<K, E> createKeyedObjectPool(final int capacity, final long evictDelayInMillis,
             final EvictionPolicy evictionPolicy, final boolean autoBalance, final float balanceFactor, final long maxMemorySize,
-            final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) throws IllegalArgumentException {
+            final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNegative(capacity, cs.capacity);
+        N.checkArgNotNegative(evictDelayInMillis, cs.evictDelayInMillis);
+        N.checkArgument(Float.isFinite(balanceFactor) && balanceFactor >= 0 && balanceFactor <= 1, "balanceFactor must be finite and between 0 and 1: %s",
+                balanceFactor);
+        N.checkArgNotNegative(maxMemorySize, cs.maxMemorySize);
         N.checkArgNotNull(memoryMeasure, cs.memoryMeasure);
 
         return new GenericKeyedObjectPool<>(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize, memoryMeasure);

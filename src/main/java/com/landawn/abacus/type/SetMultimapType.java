@@ -54,8 +54,9 @@ public class SetMultimapType<K, E> extends MultimapType<K, E, Set<E>, SetMultima
      * @param typeClass the Class object for SetMultimap
      * @param keyTypeName the name of the key type
      * @param valueElementTypeName the name of the value element type
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    SetMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
+    SetMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) throws IllegalArgumentException {
         super(typeClass, keyTypeName, valueElementTypeName, null);
     }
 

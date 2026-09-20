@@ -105,7 +105,7 @@ import com.landawn.abacus.util.stream.Stream;
  * Multiset<String> frequency = new Multiset<>(data);
  * frequency.forEach((element, count) ->
  *     System.out.println(element + ": " + count));
- * // Output: a: 3, b: 2, c: 1
+ * // Possible output (key order is not guaranteed): a: 3, b: 2, c: 1
  *
  * // Statistical operations
  * Multiset<Integer> scores = Multiset.of(85, 90, 85, 92, 88, 85);
@@ -149,7 +149,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <ul>
  *   <li><b>Null elements:</b> permitted exactly when the backing map permits {@code null} keys. The default
  *       {@link HashMap} backing does, so {@code multiset.add(null)} succeeds and {@code getCount(null)}
- *       reports its count; a {@link TreeMap}-backed multiset throws {@link NullPointerException} instead.</li>
+ *       reports its count; a {@link TreeMap} using natural ordering throws {@link NullPointerException} instead.
+ *       A custom comparator may permit null keys.</li>
  *   <li><b>Foreign-typed lookup keys:</b> the query methods that accept {@code Object} - {@link #contains(Object)},
  *       {@link #getCount(Object)}, {@link #remove(Object, int)}, {@link #removeAllOccurrencesOf(Object)} - pass the
  *       key straight to the backing map, so they inherit its behaviour for a key of an unrelated type. A
@@ -263,7 +264,7 @@ public final class Multiset<E> implements Collection<E> {
 
     /**
      * Constructs an empty multiset with a default {@link HashMap} as the backing map.
-     * The initial capacity is set to the default initial capacity of HashMap.
+     * Storage grows as distinct elements are added.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -286,7 +287,7 @@ public final class Multiset<E> implements Collection<E> {
      * // Can efficiently store up to 100 distinct elements
      * }</pre>
      *
-     * @param initialCapacity the initial capacity of the backing map.
+     * @param initialCapacity the expected number of distinct elements, used to size the backing map.
      * @throws IllegalArgumentException if the initial capacity is negative.
      */
     public Multiset(final int initialCapacity) throws IllegalArgumentException {
@@ -379,7 +380,7 @@ public final class Multiset<E> implements Collection<E> {
      */
     @SuppressWarnings("rawtypes")
     public Multiset(final Class<? extends Map> valueMapType) throws IllegalArgumentException {
-        this(Suppliers.ofMap(N.checkArgNotNull(valueMapType)));
+        this(Suppliers.ofMap(N.checkArgNotNull(valueMapType, cs.valueMapType)));
     }
 
     /**
@@ -584,7 +585,7 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b", "b", "c", "d");
      * Optional<Pair<Integer, List<String>>> allMin = multiset.allMinOccurrences();
-     * // allMin contains Pair.of(1, ["c", "d"])
+     * // allMin contains Pair.of(1, ["c", "d"]) (list order may vary)
      * }</pre>
      *
      * @return an Optional containing a Pair of (count, list of elements) with minimum occurrences,
@@ -622,7 +623,7 @@ public final class Multiset<E> implements Collection<E> {
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "a", "b", "b", "b", "c");
      * Optional<Pair<Integer, List<String>>> allMax = multiset.allMaxOccurrences();
-     * // allMax contains Pair.of(3, ["a", "b"])
+     * // allMax contains Pair.of(3, ["a", "b"]) (list order may vary)
      * }</pre>
      *
      * @return an Optional containing a Pair of (count, list of elements) with maximum occurrences,
@@ -854,7 +855,8 @@ public final class Multiset<E> implements Collection<E> {
      * Adds a single occurrence of the specified element to this multiset.
      *
      * <p>This method always increments the count of the element by one and increases the total size
-     * of the multiset by one.</p>
+     * of the multiset by one. The reported {@link #size()} remains saturated at {@link Integer#MAX_VALUE}
+     * when the total is larger; {@link #sumOfOccurrences()} reports the exact total.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -895,7 +897,7 @@ public final class Multiset<E> implements Collection<E> {
      * @see #setCount(Object, int)
      */
     public int add(final E element, final int occurrencesToAdd) throws IllegalArgumentException {
-        return addAndGetOldCount(element, occurrencesToAdd, "occurrencesToAdd");
+        return addAndGetOldCount(element, occurrencesToAdd, cs.occurrencesToAdd);
     }
 
     /**
@@ -954,7 +956,7 @@ public final class Multiset<E> implements Collection<E> {
     public int addAndGetCount(final E element, final int occurrences) throws IllegalArgumentException {
         // The helper returns the count before the operation and has already rejected an addition that
         // would overflow, so the sum below is exactly the new count and cannot itself overflow.
-        return addAndGetOldCount(element, occurrences, "occurrences") + occurrences;
+        return addAndGetOldCount(element, occurrences, cs.occurrences) + occurrences;
     }
 
     /**
@@ -1059,7 +1061,7 @@ public final class Multiset<E> implements Collection<E> {
      * @see #removeAllOccurrencesOf(Object)
      */
     public int remove(final Object element, final int occurrencesToRemove) throws IllegalArgumentException {
-        return removeAndGetOldCount(element, occurrencesToRemove, "occurrencesToRemove");
+        return removeAndGetOldCount(element, occurrencesToRemove, cs.occurrencesToRemove);
     }
 
     /**
@@ -1115,7 +1117,7 @@ public final class Multiset<E> implements Collection<E> {
     public int removeAndGetCount(final Object element, final int occurrences) throws IllegalArgumentException {
         // The helper returns the count before the operation and removes the element outright when it holds
         // no more than `occurrences`, so the remainder is clamped at zero rather than going negative.
-        return Math.max(removeAndGetOldCount(element, occurrences, "occurrences") - occurrences, 0);
+        return Math.max(removeAndGetOldCount(element, occurrences, cs.occurrences) - occurrences, 0);
     }
 
     /**
@@ -1738,7 +1740,7 @@ public final class Multiset<E> implements Collection<E> {
      * key, but {@link Entry#equals} compares element and count. A multiset whose backing map separates two
      * elements that {@code equals} calls equal (an {@link java.util.IdentityHashMap}, say) can therefore yield
      * two entries that are equal to <i>each other</i> when their counts also match - which the {@link Set}
-     * contract does not allow. Iterating the view is unaffected and {@link #size()} is correct; the loss only
+     * contract does not allow. Iterating the view is unaffected and the view's {@link Set#size() size} is correct; the loss only
      * appears if the entries are copied into an {@code equals}-based set, as {@code new HashSet<>(entrySet())}
      * would. Use {@link #toMap()} for such a multiset.</p>
      *
@@ -1748,8 +1750,8 @@ public final class Multiset<E> implements Collection<E> {
      * for (Multiset.Entry<String> entry : multiset.entrySet()) {
      *     System.out.println(entry.element() + ": " + entry.count());
      * }
-     * // Prints: a: 2
-     * //         b: 3
+     * // Possible output (entry order may vary): a: 2
+     * //                                     b: 3
      * }</pre>
      *
      * @return a set of entries representing the data of this multiset
@@ -1890,7 +1892,7 @@ public final class Multiset<E> implements Collection<E> {
      * moment. Adding or removing occurrences afterwards therefore leaves {@link Spliterator#estimateSize()}
      * stale. Concurrent-modification behaviour is the backing map's, inherited through {@link #iterator()}:
      * with a fail-fast backing map (the default {@link HashMap}, or {@link LinkedHashMap}/{@link TreeMap}) a
-     * change to the <i>set of distinct elements</i> during traversal raises
+     * change to the <i>set of distinct elements</i> during traversal may raise
      * {@link java.util.ConcurrentModificationException}, while a change to an existing element's count does
      * not (it is not a structural change to the backing map); a weakly consistent backing map such as
      * {@link java.util.concurrent.ConcurrentHashMap} raises nothing at all. Do not modify the multiset while
@@ -2162,7 +2164,9 @@ public final class Multiset<E> implements Collection<E> {
      *
      * <p>This method returns a map where the keys are the elements in this multiset and the values are their corresponding counts.
      * Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
-     * The type of the map is determined by the provided supplier function.</p>
+     * The type of the map is determined by the provided supplier function. If that map treats two
+     * source elements as the same key, the later entry in source iteration order overwrites the earlier
+     * count; counts are not combined. Use a compatible key equivalence to preserve all counts.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2367,7 +2371,9 @@ public final class Multiset<E> implements Collection<E> {
      * Returns an unmodifiable map where the keys are the elements in this multiset and the values are their corresponding counts.
      *
      * <p>Elements that occur multiple times in the multiset will appear only once in the map, with their count as the value.
-     * The type of the map is determined by the provided supplier function.</p>
+     * The type of the map is determined by the provided supplier function. If that map treats two
+     * source elements as the same key, the later entry in source iteration order overwrites the earlier
+     * count; counts are not combined. Use a compatible key equivalence to preserve all counts.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2450,7 +2456,7 @@ public final class Multiset<E> implements Collection<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Multiset<String> multiset = Multiset.of("a", "a", "b");
-     * List<String> list = multiset.elements().toList();   // returns [a, a, b]
+     * List<String> list = multiset.elements().toList();   // returns [a, a, b] (order may vary)
      * }</pre>
      *
      * @return a Stream containing all element occurrences in this multiset
@@ -2523,16 +2529,16 @@ public final class Multiset<E> implements Collection<E> {
      * @param <X> the type of the exception that can be thrown by the function.
      * @param func the function to be applied to this multiset.
      * @return an Optional containing the result of applying the provided function to this multiset, or an empty
-     *         Optional if the multiset is empty. An empty Optional is also returned when the function itself
-     *         returns {@code null}.
+     *         Optional if the multiset is empty.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws NullPointerException if the function returns {@code null}
      * @throws X if the provided function throws an exception of type X
      */
     public <R, X extends Exception> Optional<R> applyIfNotEmpty(final Throwables.Function<? super Multiset<E>, ? extends R, X> func)
             throws IllegalArgumentException, X {
         N.checkArgNotNull(func, cs.func);
 
-        return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
+        return isEmpty() ? Optional.empty() : Optional.of(func.apply(this));
     }
 
     /**
@@ -2782,8 +2788,8 @@ public final class Multiset<E> implements Collection<E> {
          * for (Multiset.Entry<String> entry : multiset.entrySet()) {
          *     System.out.println(entry.toString());
          * }
-         * // Prints: hello
-         * //         world x 3
+         * // Possible output (entry order may vary): hello
+         * //                                     world x 3
          * }</pre>
          *
          * @return a string representation of this entry

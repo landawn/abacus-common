@@ -15,6 +15,7 @@
 package com.landawn.abacus.type;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -185,21 +186,21 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * @param offset the starting position in the character array
      * @param len the number of characters to process
      * @return an XMLGregorianCalendar instance, or {@code null} if the input is {@code null} or empty
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see
      *         {@link #valueOf(String)}, including its default-zone offset restriction on numeric input), or if
      *         numeric text lies outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public XMLGregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) throws IllegalArgumentException {
+    public XMLGregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // IllegalArgumentException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createXMLGregorianCalendar(parseLong(cbuf, offset, len));
@@ -247,7 +248,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * Retrieves an XMLGregorianCalendar value from a ResultSet at the specified column index.
      * <p>
      * This method reads a Timestamp value from the ResultSet and converts it to an
-     * XMLGregorianCalendar using the Dates utility.
+     * XMLGregorianCalendar using the Dates utility's default-zone conversion, preserving nanoseconds.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -265,14 +266,14 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
     @Override
     public XMLGregorianCalendar get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnIndex);
-        return ts == null ? null : Dates.createXMLGregorianCalendar(ts);
+        return ts == null ? null : toXMLGregorianCalendar(ts);
     }
 
     /**
      * Retrieves an XMLGregorianCalendar value from a ResultSet using the specified column label.
      * <p>
      * This method reads a Timestamp value from the ResultSet and converts it to an
-     * XMLGregorianCalendar using the Dates utility.
+     * XMLGregorianCalendar using the Dates utility's default-zone conversion, preserving nanoseconds.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -290,14 +291,17 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
     @Override
     public XMLGregorianCalendar get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException {
         final Timestamp ts = rs.getTimestamp(columnName);
-        return ts == null ? null : Dates.createXMLGregorianCalendar(ts);
+        return ts == null ? null : toXMLGregorianCalendar(ts);
     }
 
     /**
      * Sets an XMLGregorianCalendar value in a PreparedStatement at the specified parameter index.
      * <p>
      * This method converts the XMLGregorianCalendar to a Timestamp and sets it in the
-     * PreparedStatement. If the XMLGregorianCalendar is {@code null}, a NULL value is set.
+     * PreparedStatement, preserving nanoseconds. Fractions finer than nanoseconds are truncated.
+     * Calendar fields are resolved by {@link XMLGregorianCalendar#toGregorianCalendar()}; an undefined
+     * timezone uses the JVM default timezone at conversion time, so changing that default can change the stored instant.
+     * If the XMLGregorianCalendar is {@code null}, a NULL value is set.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -314,14 +318,17 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public void set(final PreparedStatement stmt, final int columnIndex, final XMLGregorianCalendar x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(columnIndex, (x == null) ? null : Dates.createTimestamp(x.toGregorianCalendar()));
+        stmt.setTimestamp(columnIndex, (x == null) ? null : toTimestamp(x));
     }
 
     /**
      * Sets an XMLGregorianCalendar value in a CallableStatement using the specified parameter name.
      * <p>
      * This method converts the XMLGregorianCalendar to a Timestamp and sets it in the
-     * CallableStatement. If the XMLGregorianCalendar is {@code null}, a NULL value is set.
+     * CallableStatement, preserving nanoseconds. Fractions finer than nanoseconds are truncated.
+     * Calendar fields are resolved by {@link XMLGregorianCalendar#toGregorianCalendar()}; an undefined
+     * timezone uses the JVM default timezone at conversion time, so changing that default can change the stored instant.
+     * If the XMLGregorianCalendar is {@code null}, a NULL value is set.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -338,7 +345,43 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @Override
     public void set(final CallableStatement stmt, final String parameterName, final XMLGregorianCalendar x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(parameterName, (x == null) ? null : Dates.createTimestamp(x.toGregorianCalendar()));
+        stmt.setTimestamp(parameterName, (x == null) ? null : toTimestamp(x));
+    }
+
+    /**
+     * Converts a JDBC timestamp using the default-zone calendar fields, restoring any sub-millisecond fraction.
+     *
+     * @param timestamp the non-null JDBC value
+     * @return a new XML calendar retaining nanosecond precision
+     */
+    private static XMLGregorianCalendar toXMLGregorianCalendar(final Timestamp timestamp) {
+        final XMLGregorianCalendar result = Dates.createXMLGregorianCalendar(timestamp);
+
+        if (timestamp.getNanos() % 1_000_000 != 0) {
+            // The Dates factory retains milliseconds. Restore the finer fraction without changing its zone or fields.
+            result.setFractionalSecond(BigDecimal.valueOf(timestamp.getNanos(), 9).stripTrailingZeros());
+        }
+
+        return result;
+    }
+
+    /**
+     * Resolves XML calendar fields and timezone through {@code GregorianCalendar}, then restores
+     * sub-millisecond precision; fractions finer than nanoseconds are truncated.
+     *
+     * @param calendar the non-null XML value, which is left unchanged
+     * @return a new JDBC timestamp for the resolved instant
+     */
+    private static Timestamp toTimestamp(final XMLGregorianCalendar calendar) {
+        final Timestamp result = Dates.createTimestamp(calendar.toGregorianCalendar());
+        final BigDecimal fraction = calendar.getFractionalSecond();
+
+        if (fraction != null) {
+            // Keep GregorianCalendar's field/default-zone resolution; add only the sub-millisecond part it discarded.
+            result.setNanos(result.getNanos() + fraction.movePointRight(9).intValue() % 1_000_000);
+        }
+
+        return result;
     }
 
     /**

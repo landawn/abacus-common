@@ -1375,7 +1375,6 @@ public class HttpClientTest extends TestBase {
         assertEquals("Writer content", writer.toString());
     }
 
-
     // ------------------------------------------------------------------------------------------
     // 2026-09-08 spillover S3 ITEM 1 (finding 42): PATCH/CONNECT are refused by HttpClient itself,
     // with the same UnsupportedOperationException HttpRequest raises, instead of reaching

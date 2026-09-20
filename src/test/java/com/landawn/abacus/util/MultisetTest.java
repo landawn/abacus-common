@@ -2045,12 +2045,10 @@ public class MultisetTest extends MultisetTestSupport {
     }
 
     @Test
-    public void testApplyIfNotEmptyReturnsAnEmptyOptionalForANullResult() {
-        // an empty Optional does not imply an empty multiset: the function's own null result produces one too
+    public void testApplyIfNotEmptyThrowsNPEForANullResult() {
         final Multiset<String> multiset = Multiset.of("x");
         assertFalse(multiset.isEmpty());
-        assertFalse(multiset.applyIfNotEmpty(ms -> (String) null).isPresent());
-        assertEquals(Optional.empty(), multiset.applyIfNotEmpty(ms -> (String) null));
+        assertThrows(NullPointerException.class, () -> multiset.applyIfNotEmpty(ms -> (String) null));
 
         assertEquals(Optional.empty(), new Multiset<String>().applyIfNotEmpty(ms -> "value"));
         assertEquals(Optional.of(1), multiset.applyIfNotEmpty(Multiset::size));

@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class CsvEscapeDocsTest {
+public class CsvEscapeDocsTest extends TestBase {
     @Test
     void explicitEscapeOnlyEscapesQuoteOrItselfInsideQuotes() {
         for (final CsvParser parser : List.of(new CsvParser(',', '"', '\\'), new CsvParser(',', '"', '\\', false), new CsvParser(',', '"', '\\', false, true),

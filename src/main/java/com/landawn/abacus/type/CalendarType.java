@@ -148,8 +148,8 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
 
     /**
      * Converts a region of a character array to a {@link Calendar} instance.
-     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp: digits ending in a
-     * digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted), it is parsed as such; otherwise
+     * If the character sequence has more than four characters and consists of an optional sign followed only by
+     * ASCII decimal digits, it is parsed as epoch milliseconds (no hexadecimal prefix or type suffix); otherwise
      * the characters are converted to a {@link String} and delegated to {@link #valueOf(String)}, so both overloads
      * give the same answer for the same text.
      *
@@ -158,7 +158,7 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * @param len    the number of characters to use
      * @return the parsed calendar value, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
-     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see         {@link #valueOf(String)}), including numeric text outside the {@code long} range
+     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
@@ -167,10 +167,9 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // IllegalArgumentException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createCalendar(parseLong(cbuf, offset, len));

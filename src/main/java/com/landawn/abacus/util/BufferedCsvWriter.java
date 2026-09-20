@@ -21,17 +21,18 @@ import java.io.Writer;
  * A specialized writer for efficient CSV output with character escaping through
  * {@link #writeCharacter(char)} and the other {@code writeCharacter(...)} overloads.
  * This class extends CharacterWriter and provides optimized writing of CSV content
- * with proper escaping of special CSV characters according to RFC 4180.
+ * with RFC 4180 double-quote escaping or optional backslash escaping.
  *
  * <p>The {@code writeCharacter(...)} methods handle the following CSV escaping rules:</p>
  * <ul>
  *   <li>Double quotes ({@code "}) are escaped as {@code ""} or {@code \"} depending on configuration</li>
  *   <li>Backslashes ({@code \}) are passed through literally in the default (RFC 4180) mode; in
  *       backslash-escape mode they are escaped as {@code \\} (the backslash is the escape character there)</li>
- *   <li>Tabs, newlines, carriage returns, backspaces, and form-feeds are passed
- *       through literally (they are part of the quoted field's value per RFC 4180)</li>
- *   <li>Other control characters and Unicode line/paragraph separators are preserved literally;
- *       CSV has no Unicode-escape decoding rule</li>
+ *   <li>Newlines and carriage returns are preserved literally within quoted field content</li>
+ *   <li>Tabs, backspaces, form-feeds, other control characters, and Unicode line/paragraph separators
+ *       are also preserved literally; CSV has no Unicode-escape decoding rule. Some of these
+ *       characters fall outside RFC 4180's grammar, so callers requiring strict conformance
+ *       must validate their field values separately.</li>
  * </ul>
  *
  * <p>The escape mode (double-quote vs backslash) is determined by the

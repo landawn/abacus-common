@@ -3,6 +3,7 @@ package com.landawn.abacus.http.v2;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -50,6 +51,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.HttpResponseException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.http.HttpUtil;
 import com.sun.net.httpserver.HttpServer;
 
@@ -209,6 +211,110 @@ public class HttpErrorTest extends TestBase {
                 final HttpResponseException error = assertThrows(HttpResponseException.class, () -> HttpRequest.url(server.url()).get(String.class));
                 assertError(error, server.url(), 500, "");
             }
+        }
+    }
+
+    /** Malformed error bodies retain HTTP metadata, raw bytes and the failure instead of becoming empty responses. */
+    @Test
+    public void test_untypedMalformedCompressedErrorsRetainDiagnostics_regression_20260918() throws Exception {
+        final byte[] complete = gzip("bad".getBytes(StandardCharsets.UTF_8));
+
+        for (final byte[] bytes : new byte[][] { {}, { 1, 2, 3 }, Arrays.copyOf(complete, complete.length - 4) }) {
+            try (ResponseServer server = server(500, bytes, "text/plain", true, false)) {
+                final HttpResponseException error = assertThrows(HttpResponseException.class, () -> HttpRequest.url(server.url()).get());
+                assertEquals(500, error.statusCode());
+                assertEquals(server.url(), error.requestUrl());
+                org.junit.jupiter.api.Assertions.assertArrayEquals(bytes, error.rawResponseBody());
+                org.junit.jupiter.api.Assertions.assertNotNull(error.responseBodyDecodingFailure());
+            }
+        }
+
+        // A decodable error body is still decoded and reported.
+        try (ResponseServer server = server(500, complete, "text/plain", true, false)) {
+            final HttpResponse<String> response = HttpRequest.url(server.url()).get();
+            assertEquals(500, response.statusCode());
+            assertEquals("bad", response.body());
+        }
+
+        // A successful response is untouched - and a corrupt body on a 2xx must STILL fail loudly,
+        // because there the body is the payload, not a diagnostic.
+        try (ResponseServer server = server(200, gzip("ok".getBytes(StandardCharsets.UTF_8)), "text/plain", true, false)) {
+            assertEquals("ok", HttpRequest.url(server.url()).get().body());
+        }
+
+        try (ResponseServer server = server(200, new byte[] { 1, 2, 3 }, "text/plain", true, false)) {
+            assertThrows(UncheckedIOException.class, () -> HttpRequest.url(server.url()).get());
+        }
+    }
+
+    @Test
+    public void testAsyncMalformedStringErrorRetainsRawBytesAndCause() throws Exception {
+        final byte[] bytes = { 1, 2, 3 };
+        try (ResponseServer server = server(500, bytes, "text/plain", true, false)) {
+            final java.util.concurrent.ExecutionException failure = assertThrows(java.util.concurrent.ExecutionException.class,
+                    () -> HttpRequest.url(server.url()).asyncGet().get(10, TimeUnit.SECONDS));
+            final HttpResponseException error = assertInstanceOf(HttpResponseException.class, failure.getCause());
+            assertEquals(500, error.statusCode());
+            assertEquals(server.url(), error.requestUrl());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(bytes, error.rawResponseBody());
+            org.junit.jupiter.api.Assertions.assertNotNull(error.responseBodyDecodingFailure());
+            final byte[] copy = error.rawResponseBody();
+            copy[0] = 99;
+            org.junit.jupiter.api.Assertions.assertArrayEquals(bytes, error.rawResponseBody());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    public void testMalformedStringErrorBoundsRawDiagnosticsAndUsesResponseCharset(final boolean async) throws Exception {
+        final byte[] bytes = new byte[HttpUtil.MAX_ERROR_BODY_SIZE + 128];
+        Arrays.fill(bytes, (byte) 0xe9); // Invalid gzip data, but valid Latin-1 diagnostic text.
+        final byte[] prefix = Arrays.copyOf(bytes, HttpUtil.MAX_ERROR_BODY_SIZE);
+        try (ResponseServer server = server(502, bytes, "text/plain; charset=ISO-8859-1", true, false)) {
+            final HttpRequest request = HttpRequest.url(server.url(), 1_000, 5_000);
+            final HttpResponseException error;
+            if (async) {
+                final CompletableFuture<HttpResponse<String>> response = request.asyncGet();
+                final java.util.concurrent.ExecutionException failure = assertThrows(java.util.concurrent.ExecutionException.class,
+                        () -> response.get(10, TimeUnit.SECONDS));
+                error = assertInstanceOf(HttpResponseException.class, failure.getCause());
+            } else {
+                error = assertThrows(HttpResponseException.class, request::get);
+            }
+            assertError(error, server.url(), 502, new String(prefix, StandardCharsets.ISO_8859_1));
+            assertArrayEquals(prefix, error.rawResponseBody());
+            assertNotNull(error.responseBodyDecodingFailure());
+            assertSame(error.responseBodyDecodingFailure(), error.getCause().getCause());
+            final byte[] exposed = error.rawResponseBody();
+            exposed[0] = 0;
+            assertArrayEquals(prefix, error.rawResponseBody());
+        }
+    }
+
+    @Test
+    public void testStringDecodingDiagnosticsStayLocalToEachExecution() throws Exception {
+        final byte[] invalid = { 1, 2, (byte) 0xe9 };
+        final String healthyBody = "healthy-\u03bb";
+        try (ResponseServer bad = server(503, invalid, "text/plain; charset=ISO-8859-1", true, false);
+             ResponseServer good = server(200, gzip(healthyBody.getBytes(StandardCharsets.UTF_8)), "text/plain; charset=UTF-8", true, false);
+             HttpClient client = HttpClient.newHttpClient()) {
+            final HttpRequest failingRequest = HttpRequest.create(bad.url(), client);
+            final HttpRequest healthyRequest = HttpRequest.create(good.url(), client);
+            final CompletableFuture<HttpResponse<String>> failing = failingRequest.asyncGet();
+            final CompletableFuture<HttpResponse<String>> healthy = healthyRequest.asyncGet();
+            final java.util.concurrent.ExecutionException failure = assertThrows(java.util.concurrent.ExecutionException.class,
+                    () -> failing.get(10, TimeUnit.SECONDS));
+            final HttpResponseException error = assertInstanceOf(HttpResponseException.class, failure.getCause());
+            assertError(error, bad.url(), 503, new String(invalid, StandardCharsets.ISO_8859_1));
+            assertArrayEquals(invalid, error.rawResponseBody());
+            final HttpResponse<String> response = healthy.get(10, TimeUnit.SECONDS);
+            assertEquals(200, response.statusCode());
+            assertEquals(healthyBody, response.body());
+
+            // A shared client and repeated executions must not reuse a failed handler's mutable diagnostics.
+            assertEquals(healthyBody, healthyRequest.get().body());
+            assertArrayEquals(invalid, assertThrows(HttpResponseException.class, failingRequest::get).rawResponseBody());
+            assertEquals(healthyBody, healthyRequest.asyncGet().get(10, TimeUnit.SECONDS).body());
         }
     }
 

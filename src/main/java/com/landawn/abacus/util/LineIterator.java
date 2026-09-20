@@ -296,10 +296,11 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LineIterator it = LineIterator.of(file);
-     * while (it.hasNext()) {
-     *     String line = it.next();
-     *     // process line
+     * try (LineIterator it = LineIterator.of(file)) {
+     *     while (it.hasNext()) {
+     *         String line = it.next();
+     *         // process line
+     *     }
      * }
      * }</pre>
      *
@@ -350,10 +351,11 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * LineIterator it = LineIterator.of(file);
-     * while (it.hasNext()) {
-     *     String line = it.next();
-     *     System.out.println(line);
+     * try (LineIterator it = LineIterator.of(file)) {
+     *     while (it.hasNext()) {
+     *         String line = it.next();
+     *         System.out.println(line);
+     *     }
      * }
      * }</pre>
      *

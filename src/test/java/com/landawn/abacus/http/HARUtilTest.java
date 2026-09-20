@@ -46,7 +46,7 @@ public class HARUtilTest extends TestBase {
                         final Map<String, Object> postData = new HashMap<>();
                         postData.put("text", originalText);
                         postData.put("mimeType", "multipart/form-data");
-                        postData.put("params", java.util.Arrays.asList(null, Map.of("value", "ignored"), Map.of("name", "a", "value", "two words"),
+                        postData.put("params", java.util.Arrays.asList(Map.of("name", "a", "value", "two words"),
                                 Map.of("name", "a", "value", "caf\u00e9\u4e2d\ud83d\ude00"), Map.of("name", "empty")));
                         entry.put("postData", postData);
                         server.enqueue(new MockResponse().setBody("ok"));
@@ -65,7 +65,7 @@ public class HARUtilTest extends TestBase {
         try (MockWebServer server = new MockWebServer()) {
             server.start();
             for (final String text : new String[] { null, "", "raw caf\u00e9\u4e2d\ud83d\ude00" }) {
-                for (final List<?> params : List.of(List.of(), java.util.Arrays.asList(null, Map.of("value", "no-name")))) {
+                for (final List<?> params : List.of(List.of())) {
                     final Map<String, Object> entry = createRequestEntry(server.url("/raw").toString());
                     entry.put("method", "POST");
                     entry.put("headers", List.of(Map.of("name", "cOnTeNt-TyPe", "value", "text/plain; charset=UTF-8")));
@@ -504,7 +504,7 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testGetHeadersByRequestEntrySkipsNullEntry() {
+    public void testGetHeadersByRequestEntryRejectsNullEntry() {
         final Map<String, Object> requestEntry = new HashMap<>();
         final List<Map<String, String>> headersList = new ArrayList<>();
         headersList.add(null);
@@ -512,10 +512,8 @@ public class HARUtilTest extends TestBase {
         headersList.add(Map.of("name", "Accept", "value", "application/json"));
         requestEntry.put("headers", headersList);
 
-        final HttpHeaders headers = HARUtil.getHeadersByRequestEntry(requestEntry);
-
-        assertEquals(1, headers.headerNames().size());
-        assertEquals("application/json", headers.get("Accept"));
+        assertTrue(
+                assertThrows(IllegalArgumentException.class, () -> HARUtil.getHeadersByRequestEntry(requestEntry)).getMessage().contains("request.headers[0]"));
     }
 
     // --- getBodyAndMimeTypeByRequestEntry ---
@@ -634,14 +632,12 @@ public class HARUtilTest extends TestBase {
     }
 
     @Test
-    public void testFindRequestEntrySkipsMalformedEntries() {
+    public void testFindRequestEntryRejectsMalformedEntries() {
         String har = "{\"log\":{\"entries\":[null, {}, {\"request\":\"not-an-object\"}, {\"request\":{}},"
                 + "{\"request\":{\"method\":\"GET\",\"url\":\"https://api.example.com/valid\",\"headers\":[]}}]}}";
 
-        Optional<Map<String, Object>> result = HARUtil.findRequestEntry(har, url -> url.endsWith("/valid"));
-
-        assertTrue(result.isPresent());
-        assertEquals("https://api.example.com/valid", result.get().get("url"));
+        final IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> HARUtil.findRequestEntry(har, url -> url.endsWith("/valid")));
+        assertTrue(error.getMessage().contains("log.entries[0]"));
     }
 
     // ==================== a08 F-2: bodies on body-less methods ====================
@@ -809,11 +805,12 @@ public class HARUtilTest extends TestBase {
         assertEquals("false", fromJson.getAsString("X-Bool"));
         assertEquals("text/plain", fromJson.getAsString("Accept"));
 
-        // Null / no-name entries are still skipped.
+        // Null / no-name entries are rejected; a named header may retain a null value.
         final Map<String, Object> nullValue = new HashMap<>();
         nullValue.put("name", "X-Null");
         nullValue.put("value", null);
-        assertNull(HARUtil.getHeadersByRequestEntry(Map.of("headers", java.util.Arrays.asList(null, Map.of("value", 3), nullValue))).get("X-Null"));
+        assertThrows(IllegalArgumentException.class,
+                () -> HARUtil.getHeadersByRequestEntry(Map.of("headers", java.util.Arrays.asList(null, Map.of("value", 3), nullValue))));
         assertEquals(List.of("X-Null"), new ArrayList<>(HARUtil.getHeadersByRequestEntry(Map.of("headers", List.of(nullValue))).headerNames()));
     }
 
@@ -861,40 +858,24 @@ public class HARUtilTest extends TestBase {
         }
     }
 
-    // G02-39/40: a HAR container that is not a JSON array (an object or a scalar) is treated as absent instead
-    // of dying with a bare ClassCastException that names neither the field nor the entry; non-object elements
-    // inside such an array are skipped the same way. Each method keeps its own empty-input policy.
     @Test
     public void reviewFixes20260908_malformedHarContainersAreRejectedWithoutClassCastException() {
-        // "headers" that is not an array -> no headers at all
-        assertTrue(HARUtil.getHeadersByRequestEntry(Map.of("headers", Map.of("X-Foo", "1"))).isEmpty());
-        assertTrue(HARUtil.getHeadersByRequestEntry(Map.of("headers", "X-Foo: 1")).isEmpty());
-        assertTrue(HARUtil.getHeadersByRequestEntry(Map.of("headers", 7)).isEmpty());
-        // a non-object element inside the array is skipped, the well-formed ones are kept
-        assertEquals("1", HARUtil.getHeadersByRequestEntry(Map.of("headers", java.util.Arrays.asList("X-Foo: 1", Map.of("name", "X-Foo", "value", "1"))))
-                .get("X-Foo"));
-
-        // "log.entries" that is not an array: each walk method keeps its own empty-input policy
-        for (final String har : new String[] { "{\"log\": {\"entries\": {}}}", "{\"log\": {\"entries\": \"x\"}}" }) {
-            assertThrows(IllegalArgumentException.class, () -> HARUtil.sendRequest(har, url -> true), har);
-            assertEquals(List.of(), HARUtil.sendRequests(har, url -> true), har);
-            assertEquals(0, HARUtil.streamRequests(har, url -> true).count(), har);
-            assertFalse(HARUtil.findRequestEntry(har, url -> true).isPresent(), har);
+        for (Object headers : List.of(Map.of("X-Foo", "1"), "X-Foo: 1", 7, List.of("junk"))) {
+            assertTrue(assertThrows(IllegalArgumentException.class, () -> HARUtil.getHeadersByRequestEntry(Map.of("headers", headers))).getMessage()
+                    .contains("request.headers"));
         }
-
-        // a non-object entry inside log.entries is skipped rather than aborting the walk
-        final String mixed = "{\"log\": {\"entries\": [\"junk\", {\"request\": {\"url\": \"http://h/ok\"}}]}}";
-        assertEquals("http://h/ok", HARUtil.findRequestEntry(mixed, url -> true).get().get("url"));
-
-        // "postData.params" that is not an array is treated as absent
-        final Map<String, Object> scalarParams = new HashMap<>();
-        scalarParams.put("postData", Map.of("params", "a=1"));
-        assertNull(HARUtil.getBodyAndMimeTypeByRequestEntry(scalarParams)._1);
-
-        // a non-object element inside postData.params is skipped
-        final Map<String, Object> mixedParams = new HashMap<>();
-        mixedParams.put("postData", Map.of("params", java.util.Arrays.asList("junk", Map.of("name", "a", "value", "1"))));
-        assertEquals("a=1", HARUtil.getBodyAndMimeTypeByRequestEntry(mixedParams)._1);
+        for (String har : List.of("{\"log\":{\"entries\":{}}}", "{\"log\":{\"entries\":[\"junk\"]}}")) {
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.sendRequest(har, url -> true));
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.sendRequests(har, url -> true));
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.streamRequests(har, url -> true).count());
+            assertThrows(IllegalArgumentException.class, () -> HARUtil.findRequestEntry(har, url -> true));
+        }
+        for (Object params : List.of("a=1", List.of("junk"))) {
+            assertTrue(
+                    assertThrows(IllegalArgumentException.class, () -> HARUtil.getBodyAndMimeTypeByRequestEntry(Map.of("postData", Map.of("params", params))))
+                            .getMessage()
+                            .contains("request.postData.params"));
+        }
     }
 
 }

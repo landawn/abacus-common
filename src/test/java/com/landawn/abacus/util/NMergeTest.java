@@ -106,4 +106,36 @@ public class NMergeTest extends NTestSupport {
         assertThrows(ArithmeticException.class, () -> N.merge(Arrays.<Iterable<Integer>> asList(hugeSingleton, hugeSingleton, Collections.emptyList()),
                 (a, b) -> MergeResult.TAKE_FIRST, IntFunctions.ofList()));
     }
+
+    /**
+     * A single {@code null} element used to produce three different outcomes depending on the collection's
+     * size: size 1 gave a raw {@link NullPointerException} from {@code Dataset.copy()}; size 2 gave
+     * {@link IllegalArgumentException} naming {@code 'a'}/{@code 'b'}, which are parameters of the
+     * <i>two-argument</i> {@code merge} rather than of this method; and size 3 or more gave a raw
+     * {@code NullPointerException} from {@code Dataset.columnNames()}. Validation now completes before any
+     * main logic, so a {@code null} element is always an {@code IllegalArgumentException} naming this
+     * method's own parameter.
+     */
+    @Test
+    public void testMergeDatasetCollectionRejectsANullElementRegardlessOfSize() {
+        final Dataset ds = N.newDataset(Arrays.asList("id"), Arrays.asList(Arrays.asList((Object) 1)));
+
+        final List<Collection<Dataset>> inputs = Arrays.asList(Arrays.asList((Dataset) null), Arrays.asList(null, ds), Arrays.asList(ds, null),
+                Arrays.asList(ds, null, ds), Arrays.asList(ds, ds, ds, null));
+
+        for (final Collection<Dataset> input : inputs) {
+            for (final boolean requiresSameColumns : new boolean[] { false, true }) {
+                final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> N.merge(input, requiresSameColumns),
+                        () -> "size " + input.size() + ", requiresSameColumns=" + requiresSameColumns);
+
+                assertTrue(e.getMessage().contains("dss"), e.getMessage());
+            }
+
+            assertThrows(IllegalArgumentException.class, () -> N.merge(input), () -> "size " + input.size());
+        }
+
+        // A null or empty collection remains the documented no-op that returns an empty Dataset.
+        assertTrue(N.merge((Collection<Dataset>) null).isEmpty());
+        assertTrue(N.merge(Collections.<Dataset> emptyList()).isEmpty());
+    }
 }

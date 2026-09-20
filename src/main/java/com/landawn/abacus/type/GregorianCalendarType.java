@@ -135,8 +135,8 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
     /**
      * Parses a character array into a {@code GregorianCalendar} instance.
      * This method is optimized for performance when parsing from character buffers.
-     * If the character sequence appears to be a {@code long} number (digits ending in a digit, so a trailing
-     * {@code L}/{@code d}/{@code f} type suffix is not accepted), it is interpreted as milliseconds since the epoch.
+     * If the character sequence has more than four characters and consists of an optional sign followed only by
+     * ASCII decimal digits, it is interpreted as milliseconds since the epoch; hexadecimal prefixes and type suffixes are not accepted.
      * Otherwise, the characters are converted to a string and parsed by {@link #valueOf(String)}, so both overloads
      * give the same answer for the same text.
      *
@@ -145,7 +145,8 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * @param len the number of characters to parse
      * @return the parsed {@code GregorianCalendar} instance, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
-     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see         {@link #valueOf(String)}), including numeric text outside the {@code long} range
+     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see {@link #valueOf(String)}),
+     *         including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
@@ -154,10 +155,9 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // IllegalArgumentException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createGregorianCalendar(parseLong(cbuf, offset, len));

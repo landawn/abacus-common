@@ -65,8 +65,7 @@ public class AbstractCharStreamTest extends TestBase {
             return (char) (left + right);
         })) {
             final com.landawn.abacus.util.CharIterator iter = stream.iterator();
-            org.junit.jupiter.api.Assertions.assertSame(failure,
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextChar));
+            org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextChar));
             org.junit.jupiter.api.Assertions.assertEquals((char) 2, iter.nextChar());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertEquals((char) 5, iter.nextChar());

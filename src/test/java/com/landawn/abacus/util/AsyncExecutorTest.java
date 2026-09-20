@@ -39,6 +39,36 @@ import com.landawn.abacus.TestBase;
 
 public class AsyncExecutorTest extends TestBase {
 
+    @Test
+    public void zeroCorePoolStartsAWorkerAndQueuesAdditionalTasks() throws Exception {
+        final AsyncExecutor executor = new AsyncExecutor(0, 4, 60, TimeUnit.SECONDS);
+        final CountDownLatch started = new CountDownLatch(1);
+        final CountDownLatch release = new CountDownLatch(1);
+
+        try {
+            final ThreadPoolExecutor pool = (ThreadPoolExecutor) executor.getExecutor();
+            final ContinuableFuture<Integer> first = executor.execute((Callable<Integer>) () -> {
+                started.countDown();
+                assertTrue(release.await(10, TimeUnit.SECONDS));
+                return 1;
+            });
+            assertTrue(started.await(10, TimeUnit.SECONDS));
+
+            final ContinuableFuture<Integer> second = executor.execute((Callable<Integer>) () -> 2);
+            assertEquals(0, pool.getCorePoolSize());
+            assertEquals(1, pool.getPoolSize());
+            assertEquals(1, pool.getQueue().size());
+            assertFalse(second.isDone());
+
+            release.countDown();
+            assertEquals(1, first.get(10, TimeUnit.SECONDS));
+            assertEquals(2, second.get(10, TimeUnit.SECONDS));
+        } finally {
+            release.countDown();
+            executor.shutdownAndAwait(10, TimeUnit.SECONDS);
+        }
+    }
+
     private static void awaitTerminated(final AsyncExecutor executor) throws InterruptedException {
         final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
         while (!executor.isTerminated() && System.nanoTime() < deadline) {
@@ -537,8 +567,7 @@ public class AsyncExecutorTest extends TestBase {
 
     @Test
     public void reviewFixes20260908_terminatesAfterASaturationPolicyDiscardsATask() throws Exception {
-        ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1),
-                new ThreadPoolExecutor.DiscardPolicy());
+        ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1), new ThreadPoolExecutor.DiscardPolicy());
         AsyncExecutor executor = new AsyncExecutor(pool);
         AtomicBoolean discardedRan = new AtomicBoolean();
         CountDownLatch started = new CountDownLatch(1);
@@ -773,8 +802,7 @@ public class AsyncExecutorTest extends TestBase {
         // useSystemClassLoader=false would hide the test classpath behind an isolated loader and the child would
         // die with NoClassDefFoundError - which is still diagnosable here, because every assertion below embeds
         // the child's own output.
-        final ProcessBuilder builder = new ProcessBuilder(javaBin, "-cp", System.getProperty("java.class.path"),
-                ShutdownHookSubmitProbe.class.getName());
+        final ProcessBuilder builder = new ProcessBuilder(javaBin, "-cp", System.getProperty("java.class.path"), ShutdownHookSubmitProbe.class.getName());
         builder.redirectErrorStream(true);
 
         // The merged output must go to a file, not a pipe. Nothing drains a pipe until waitFor() has returned,

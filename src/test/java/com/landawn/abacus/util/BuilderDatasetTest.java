@@ -603,18 +603,15 @@ public class BuilderDatasetTest extends BuilderTestSupport {
         // checkColumnNames, and reports differently, so the message is pinned rather than just the type.
         final Dataset ds = CommonUtil.newDataset(Arrays.asList("id", "name"), Arrays.asList(Arrays.asList(1, "a")));
 
-        assertEquals("Duplicated new column names found in: (x, x)",
-                assertThrows(IllegalArgumentException.class,
-                        () -> Builder.of(ds).divideColumn("id", Tuple.of("x", "x"), (Object v, Pair<Object, Object> out) -> out.setLeft(v)))
-                                .getMessage());
+        assertEquals("Duplicated new column names found in: (x, x)", assertThrows(IllegalArgumentException.class,
+                () -> Builder.of(ds).divideColumn("id", Tuple.of("x", "x"), (Object v, Pair<Object, Object> out) -> out.setLeft(v))).getMessage());
         assertEquals("Duplicated new column names found in: (x, x, x)",
                 assertThrows(IllegalArgumentException.class,
-                        () -> Builder.of(ds).divideColumn("id", Tuple.of("x", "x", "x"),
-                                (Object v, Triple<Object, Object, Object> out) -> out.setLeft(v))).getMessage());
+                        () -> Builder.of(ds).divideColumn("id", Tuple.of("x", "x", "x"), (Object v, Triple<Object, Object, Object> out) -> out.setLeft(v)))
+                                .getMessage());
 
         // the Collection overloads report through checkColumnNames instead
-        assertThrows(IllegalArgumentException.class,
-                () -> Builder.of(ds).divideColumn("id", Arrays.asList("x", "x"), (Object v) -> Arrays.asList(1, 2)));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).divideColumn("id", Arrays.asList("x", "x"), (Object v) -> Arrays.asList(1, 2)));
 
         // nothing was divided
         assertEquals(Arrays.asList("id", "name"), new ArrayList<>(ds.columnNames()));

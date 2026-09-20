@@ -171,7 +171,7 @@ public final class Hashing {
      *
      * <p>This method returns the fixed version that corrects a bug in Guava's earlier
      * {@code murmur3_32} implementation (which produced incorrect results for strings
-     * containing non-Latin-1 characters), hence the internal name {@code murmur3_32_fixed}.
+     * containing supplementary Unicode characters when hashing text as UTF-8), hence the internal name {@code murmur3_32_fixed}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -195,7 +195,7 @@ public final class Hashing {
      *
      * <p>Like {@link #murmur3_32(int)}, this method returns the fixed version that corrects a bug in
      * Guava's earlier {@code murmur3_32} implementation (incorrect results for strings containing
-     * non-Latin-1 characters); if you relied on the old hash values, migration is required.
+     * supplementary Unicode characters when hashing text as UTF-8); if you relied on the affected old hash values, migration is required.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -759,7 +759,8 @@ public final class Hashing {
     /**
      * Combines two hash codes in an ordered fashion to produce a new hash code with the
      * same bit length as the input hash codes. The combination is order-dependent, meaning
-     * that {@code combineOrdered(a, b)} is different from {@code combineOrdered(b, a)}.
+     * that changing the order can change the result. Equal inputs or hash collisions can still
+     * produce the same result after reordering.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

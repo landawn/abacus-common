@@ -391,7 +391,7 @@ public class SeqRegressionTest extends TestBase {
     public void testB6_stepDoesNotReadTheGapUntilItIsNeeded() {
         final List<Integer> pulled = new ArrayList<>();
 
-        assertEquals(u.Optional.of(1), assertDoesNotThrowChecked(() -> Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6).peek(pulled::add).step(3).first()));
+        assertEquals(u.Nullable.of(1), assertDoesNotThrowChecked(() -> Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6).peek(pulled::add).step(3).first()));
 
         assertEquals(CommonUtil.asList(1), pulled); // used to be [1, 2, 3]: the gap was skipped inside next()
     }
@@ -468,28 +468,28 @@ public class SeqRegressionTest extends TestBase {
             return Integer.compare(a, b);
         };
 
-        assertEquals(u.Optional.of(3), assertDoesNotThrowChecked(() -> Seq.of(1, 2, 3).sorted(counting).max(counting)));
+        assertEquals(u.Nullable.of(3), assertDoesNotThrowChecked(() -> Seq.of(1, 2, 3).sorted(counting).max(counting)));
         // The sort itself compares; max(..) must add nothing on top of it.
         final int afterSortedMax = comparisons.get();
 
         comparisons.set(0);
-        assertEquals(u.Optional.of(3), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).max(counting)));
+        assertEquals(u.Nullable.of(3), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).max(counting)));
         assertTrue(comparisons.get() > 0, "an unsorted sequence must still compare");
 
         comparisons.set(0);
-        assertEquals(u.Optional.of(1), assertDoesNotThrowChecked(() -> Seq.of(1, 2, 3).sorted(counting).min(counting)));
+        assertEquals(u.Nullable.of(1), assertDoesNotThrowChecked(() -> Seq.of(1, 2, 3).sorted(counting).min(counting)));
         assertTrue(afterSortedMax >= 0);
     }
 
     @Test
     public void testB9_maxAndMinAgreeOnEdgeCases() {
-        assertEquals(u.Optional.empty(), assertDoesNotThrowChecked(() -> Seq.<Integer, Exception> empty().max(Comparator.<Integer> naturalOrder())));
-        assertEquals(u.Optional.of(5), assertDoesNotThrowChecked(() -> Seq.of(5).sorted().max(Comparators.<Integer> naturalOrder())));
-        assertEquals(u.Optional.of(9), assertDoesNotThrowChecked(() -> Seq.of(3, 9, 2).max(Comparator.<Integer> naturalOrder())));
-        assertEquals(u.Optional.of(3), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).sorted().max(Comparators.<Integer> naturalOrder())));
-        assertEquals(u.Optional.of(1), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).sorted().min(Comparators.<Integer> naturalOrder())));
+        assertEquals(u.Nullable.empty(), assertDoesNotThrowChecked(() -> Seq.<Integer, Exception> empty().max(Comparator.<Integer> naturalOrder())));
+        assertEquals(u.Nullable.of(5), assertDoesNotThrowChecked(() -> Seq.of(5).sorted().max(Comparators.<Integer> naturalOrder())));
+        assertEquals(u.Nullable.of(9), assertDoesNotThrowChecked(() -> Seq.of(3, 9, 2).max(Comparator.<Integer> naturalOrder())));
+        assertEquals(u.Nullable.of(3), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).sorted().max(Comparators.<Integer> naturalOrder())));
+        assertEquals(u.Nullable.of(1), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).sorted().min(Comparators.<Integer> naturalOrder())));
         // A differently-ordered sequence must not take the shortcut.
-        assertEquals(u.Optional.of(3), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).reverseSorted().max(Comparators.<Integer> naturalOrder())));
+        assertEquals(u.Nullable.of(3), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).reverseSorted().max(Comparators.<Integer> naturalOrder())));
     }
 
     // ------------------------------------------------------------------------------------------------------
@@ -617,11 +617,11 @@ public class SeqRegressionTest extends TestBase {
     /** A no-op skip/sort must not lose the sortedness flag that later operations shortcut on. */
     @Test
     public void testD4_theNewInstancesKeepTheKnownSortOrder() {
-        assertEquals(u.Optional.of(1), //
+        assertEquals(u.Nullable.of(1), //
                 assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).sorted().sorted().min(Comparators.<Integer> naturalOrder())));
-        assertEquals(u.Optional.of(1), //
+        assertEquals(u.Nullable.of(1), //
                 assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).sorted().skip(0).min(Comparators.<Integer> naturalOrder())));
-        assertEquals(u.Optional.of(3), //
+        assertEquals(u.Nullable.of(3), //
                 assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).sorted().skip(0).max(Comparators.<Integer> naturalOrder())));
     }
 
@@ -959,7 +959,7 @@ public class SeqRegressionTest extends TestBase {
         assertEquals(CommonUtil.asList(1, 2), assertDoesNotThrowChecked(() -> Seq.of(1, 2).collect(Collectors.toList())));
         assertEquals(1L, assertDoesNotThrowChecked(() -> Seq.of(new int[] { 1, 2 }, new int[] { 1, 2 }).distinct().count()));
         assertTrue(assertDoesNotThrowChecked(() -> Seq.of(new int[] { 1, 2 }, new int[] { 1, 2 }).containsDuplicates()));
-        assertEquals(u.Optional.of(8), assertDoesNotThrowChecked(() -> Seq.of(5, 3, 8, 1, 9).kthLargest(2, Comparator.<Integer> naturalOrder())));
+        assertEquals(u.Nullable.of(8), assertDoesNotThrowChecked(() -> Seq.of(5, 3, 8, 1, 9).kthLargest(2, Comparator.<Integer> naturalOrder())));
     }
 
     @Test

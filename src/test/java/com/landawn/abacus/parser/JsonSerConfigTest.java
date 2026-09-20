@@ -710,7 +710,6 @@ public class JsonSerConfigTest extends TestBase {
         assertTrue(single.contains("charQuotation=', stringQuotation=\\u0000,"), single);
     }
 
-
     /**
      * A subclass that narrows equality the way {@code AvroSerConfig}/{@code KryoSerConfig} do over
      * {@code SerializationConfig}: {@code instanceof <OwnType> && super.equals(obj)}.

@@ -45,7 +45,7 @@ public class BuilderDifferenceComparatorsFixesTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class MapDifferenceKeyEquality {
+    public class MapDifferenceKeyEquality extends TestBase {
 
         /**
          * The headline defect: a plain natural-ordering {@code TreeMap<BigDecimal>} treats 2.0 and 2.00 as
@@ -304,7 +304,7 @@ public class BuilderDifferenceComparatorsFixesTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class ComparingBeanByPropsValidation {
+    public class ComparingBeanByPropsValidation extends TestBase {
 
         /** Previously constructed fine and only blew up on the first compare(). */
         @Test
@@ -360,7 +360,7 @@ public class BuilderDifferenceComparatorsFixesTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class AcceptPreservesSpecializedBuilder {
+    public class AcceptPreservesSpecializedBuilder extends TestBase {
 
         @Test
         public void testListBuilder() {
@@ -428,7 +428,7 @@ public class BuilderDifferenceComparatorsFixesTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class FuzzyComparisonIsNotTransitive {
+    public class FuzzyComparisonIsNotTransitive extends TestBase {
 
         /** The exact counter-example quoted in the javadoc, so the doc cannot drift from the behaviour. */
         @Test
@@ -498,7 +498,7 @@ public class BuilderDifferenceComparatorsFixesTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class ComparatorsDocumentedBehaviour {
+    public class ComparatorsDocumentedBehaviour extends TestBase {
 
         @Test
         public void testComparingObjArrayAppliesTheComparatorUnchecked() {

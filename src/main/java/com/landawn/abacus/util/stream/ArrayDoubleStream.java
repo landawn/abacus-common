@@ -117,8 +117,9 @@ class ArrayDoubleStream extends AbstractDoubleStream {
      * }</pre>
      *
      * @param values the double array to stream over
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayDoubleStream(final double[] values) {
+    ArrayDoubleStream(final double[] values) throws NullPointerException {
         this(values, 0, values.length);
     }
 
@@ -137,8 +138,9 @@ class ArrayDoubleStream extends AbstractDoubleStream {
      *
      * @param values the double array to stream over
      * @param closeHandlers handlers to execute when the stream is closed, can be null
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayDoubleStream(final double[] values, final Collection<LocalRunnable> closeHandlers) {
+    ArrayDoubleStream(final double[] values, final Collection<LocalRunnable> closeHandlers) throws NullPointerException {
         this(values, 0, values.length, closeHandlers);
     }
 
@@ -157,8 +159,9 @@ class ArrayDoubleStream extends AbstractDoubleStream {
      * @param values the double array to stream over
      * @param sorted whether the array elements are in sorted order
      * @param closeHandlers handlers to execute when the stream is closed, can be null
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayDoubleStream(final double[] values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
+    ArrayDoubleStream(final double[] values, final boolean sorted, final Collection<LocalRunnable> closeHandlers) throws NullPointerException {
         this(values, 0, values.length, sorted, closeHandlers);
     }
 
@@ -277,7 +280,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -324,7 +327,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -376,7 +379,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -420,7 +423,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -486,7 +489,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -531,7 +534,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -576,7 +579,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -621,7 +624,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -667,7 +670,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -736,7 +739,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -793,7 +796,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -846,7 +849,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -899,7 +902,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -968,7 +971,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1037,7 +1040,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1107,7 +1110,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1165,7 +1168,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1206,7 +1209,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                 }
 
                 @Override
-                public double nextDouble() {
+                public double nextDouble() throws NoSuchElementException {
                     if (!hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1314,7 +1317,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1402,7 +1405,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2257,7 +2260,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                 }
 
                 @Override
-                public double nextDouble() {
+                public double nextDouble() throws NoSuchElementException {
                     if (iter == null) {
                         init();
                     }
@@ -2295,13 +2298,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                             iter = s == null ? DoubleIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -2343,7 +2340,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
                 }
 
                 @Override
-                public double nextDouble() {
+                public double nextDouble() throws NoSuchElementException {
                     if (!executed) {
                         executed = true;
                         action.run();
@@ -2428,7 +2425,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (fromIndex >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2476,7 +2473,7 @@ class ArrayDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }

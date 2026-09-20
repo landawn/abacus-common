@@ -1056,52 +1056,22 @@ public class GenericObjectPoolTest extends TestBase {
         second.activityPrint().updateAccessCount();
         assertTrue(pool.add(first));
         assertTrue(pool.add(second));
-        GenericObjectPool<TestPoolable> copy = deserialize(serialize(pool));
-        try {
-            assertEquals(2, copy.size());
-            TestPoolable restoredSecond = copy.poll();
-            assertEquals("second", restoredSecond.getId());
-            assertEquals(3, restoredSecond.activityPrint().getAccessCount());
-            assertEquals("first", copy.poll().getId());
-        } finally {
-            copy.close();
-        }
+        assertThrows(NotSerializableException.class, () -> serialize(pool));
 
         GenericObjectPool<PoolableAdapter<String>> adapterPool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
-        GenericObjectPool<PoolableAdapter<String>> adapterCopy = null;
         try {
             PoolableAdapter<String> adapter = Poolable.wrap("hello", 600_000, 60_000);
             adapter.activityPrint().updateAccessCount();
             assertTrue(adapterPool.add(adapter));
-            adapterCopy = deserialize(serialize(adapterPool));
-            PoolableAdapter<String> restored = adapterCopy.poll();
-            assertEquals("hello", restored.value());
-            assertEquals(2, restored.activityPrint().getAccessCount());
-            assertSame(adapter, adapterPool.poll());
-
-            adapterPool.add(Poolable.wrap("汉字 – ñ – 😀"));
-            GenericObjectPool<PoolableAdapter<String>> unicode = deserialize(serialize(adapterPool));
-            try {
-                assertEquals("汉字 – ñ – 😀", unicode.poll().value());
-            } finally {
-                unicode.close();
-            }
+            assertThrows(NotSerializableException.class, () -> serialize(adapterPool));
         } finally {
             adapterPool.close();
-            if (adapterCopy != null) {
-                adapterCopy.close();
-            }
         }
 
         GenericObjectPool<PoolableAdapter<Object>> nullPool = new GenericObjectPool<>(10, 0, EvictionPolicy.LAST_ACCESS_TIME);
         try {
             assertTrue(nullPool.add(PoolableAdapter.of(null)));
-            GenericObjectPool<PoolableAdapter<Object>> nullCopy = deserialize(serialize(nullPool));
-            try {
-                assertNull(nullCopy.poll().value());
-            } finally {
-                nullCopy.close();
-            }
+            assertThrows(NotSerializableException.class, () -> serialize(nullPool));
             assertTrue(nullPool.add(PoolableAdapter.of(new Object())));
             assertThrows(NotSerializableException.class, () -> serialize(nullPool));
         } finally {
@@ -1113,14 +1083,7 @@ public class GenericObjectPoolTest extends TestBase {
         try {
             assertTrue(measured.add(Poolable.wrap("abc")));
             assertTrue(measured.add(Poolable.wrap("defgh")));
-            GenericObjectPool<PoolableAdapter<String>> measuredCopy = deserialize(serialize(measured));
-            try {
-                assertEquals(8, measuredCopy.stats().dataSize());
-                assertEquals("defgh", measuredCopy.poll().value());
-                assertEquals(3, measuredCopy.stats().dataSize());
-            } finally {
-                measuredCopy.close();
-            }
+            assertThrows(NotSerializableException.class, () -> serialize(measured));
         } finally {
             measured.close();
         }

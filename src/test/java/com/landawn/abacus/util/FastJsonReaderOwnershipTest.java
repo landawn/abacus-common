@@ -12,10 +12,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.alibaba.fastjson2.JSONReader;
 
 @org.junit.jupiter.api.Tag("unit")
-public class FastJsonReaderOwnershipTest {
+public class FastJsonReaderOwnershipTest extends TestBase {
     private static Object parse(final int mode, final Reader reader) {
         return switch (mode) {
             case 0 -> FastJson.fromJson(reader, Object.class);

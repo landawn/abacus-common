@@ -137,10 +137,10 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * <p><b>Memory Efficiency:</b>
  * <ul>
- *   <li><b>Storage:</b> 2 bytes per element (16 bits) with no object overhead</li>
- *   <li><b>vs List&lt;Character&gt;:</b> ~8x less memory usage (no Character wrapper objects)</li>
- *   <li><b>vs String:</b> Mutable with similar memory footprint when capacity matches size</li>
- *   <li><b>vs StringBuilder:</b> Comparable memory usage with primitive-specific operations</li>
+ *   <li><b>Storage:</b> Each array slot stores a 16-bit code unit, plus normal list and array overhead</li>
+ *   <li><b>vs List&lt;Character&gt;:</b> Avoids per-element references and boxing; savings depend on the JVM and values</li>
+ *   <li><b>vs String:</b> Mutable; relative memory use depends on capacity and the String representation</li>
+ *   <li><b>vs StringBuilder:</b> Provides primitive-list operations; relative memory use is implementation-dependent</li>
  *   <li><b>Capacity Management:</b> 1.75x growth factor balances memory and performance</li>
  *   <li><b>Maximum Size:</b> Limited by {@code MAX_ARRAY_SIZE} (typically Integer.MAX_VALUE - 8)</li>
  * </ul>
@@ -187,7 +187,7 @@ import com.landawn.abacus.util.stream.CharStream;
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
  *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation, including through a shared backing array</li>
  * </ul>
  *
  * <p><b>Capacity Management:</b>
@@ -235,9 +235,9 @@ import com.landawn.abacus.util.stream.CharStream;
  *
  * <p><b>Comparison with Alternatives:</b>
  * <ul>
- *   <li><b>vs List&lt;Character&gt;:</b> 8x less memory, significantly faster operations</li>
+ *   <li><b>vs List&lt;Character&gt;:</b> Direct primitive storage and access without per-element references</li>
  *   <li><b>vs char[]:</b> Dynamic sizing, rich API, set operations, text functions</li>
- *   <li><b>vs String:</b> Mutable, can be modified in-place, similar memory footprint</li>
+ *   <li><b>vs String:</b> Mutable code-unit sequence that can be modified in place</li>
  *   <li><b>vs StringBuilder:</b> Primitive operations, set operations, statistical functions</li>
  * </ul>
  *
@@ -388,7 +388,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Constructs a CharList containing the elements of the specified array.
      * The CharList instance uses the specified array as its backing array without copying.
-     * Changes to the array will be reflected in the list and vice versa.
+     * Changes to elements are shared until the list replaces its backing array, for example during growth or trimming.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -408,7 +408,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
     /**
      * Constructs a CharList using the specified array as the element array for this list without copying action.
      * The first {@code size} elements of the array will be used as the initial elements of the list.
-     * Changes to the array will be reflected in the list and vice versa.
+     * Changes to elements are shared until the list replaces its backing array, for example during growth or trimming.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -647,9 +647,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param len the length of the list to create
      * @return a new CharList containing random char values
@@ -677,9 +677,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param startInclusive the minimum value (inclusive)
      * @param endExclusive the maximum value (exclusive)
@@ -706,7 +706,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
 
     /**
      * Creates a CharList of the specified length by randomly selecting from the provided candidate chars.
-     * Each element in the returned list is randomly chosen from the candidates array with uniform distribution.
+     * Each element is chosen by selecting a candidate position uniformly; repeated characters therefore have greater probability.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -717,9 +717,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param candidates the array of candidate chars to choose from; must not be {@code null}, empty,
      *                   or of length {@code Integer.MAX_VALUE}
@@ -761,7 +761,7 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * This method provides direct access to the internal array for performance-critical operations.
      *
      * <p><b>Warning:</b> The returned array is the actual internal storage of this list.
-     * Modifications to the returned array will directly affect this list's contents.
+     * Modifications to the returned array affect this list until its backing array is replaced.
      * The array may be larger than the list size; only indices from 0 to size()-1 contain valid elements.</p>
      *
      * <p>This method is marked as {@code @Beta} and should be used with caution.</p>
@@ -2404,6 +2404,9 @@ public final class CharList extends PrimitiveList<Character, char[], CharList> {
      * StringBuilder back = new StringBuilder();
      * list.forEach(3, -1, back::append);  // backward from index 3 to start; back is now "dcba"
      * }</pre>
+     *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
      *
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or {@code -1} for backward iteration to the start

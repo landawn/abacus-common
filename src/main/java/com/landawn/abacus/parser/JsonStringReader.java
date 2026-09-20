@@ -31,6 +31,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalBoolean;
@@ -131,21 +132,23 @@ class JsonStringReader extends AbstractJsonReader {
      *
      * @param str the JSON string to parse
      * @param cbuf the character buffer to use for parsing
+     * @throws IllegalArgumentException if {@code str} or {@code cbuf} is {@code null}.
      */
-    JsonStringReader(final String str, final char[] cbuf) {
-        this(str, 0, str.length(), cbuf);
+    JsonStringReader(final String str, final char[] cbuf) throws IllegalArgumentException {
+        this(N.checkArgNotNull(str, cs.str), 0, str.length(), cbuf);
     }
 
     /**
      * Constructs a new {@code JsonStringReader} with the specified string range and buffer.
      *
-     * @param str the JSON string to parse
+     * @param str the JSON string to parse; {@code null} is treated as an empty string
      * @param beginIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @param cbuf the character buffer to use for parsing
+     * @throws IllegalArgumentException if the requested string range is invalid, or {@code cbuf} is {@code null}.
      */
     @SuppressWarnings("deprecation")
-    JsonStringReader(final String str, final int beginIndex, final int toIndex, final char[] cbuf) {
+    JsonStringReader(final String str, final int beginIndex, final int toIndex, final char[] cbuf) throws IllegalArgumentException {
         this(com.landawn.abacus.util.InternalUtil.getCharsForReadOnly(str), beginIndex, toIndex, cbuf, null);
     }
 
@@ -157,12 +160,18 @@ class JsonStringReader extends AbstractJsonReader {
      * @param toIndex the ending index (exclusive)
      * @param cbuf the character buffer to use for parsing
      * @param reader the underlying reader (may be {@code null})
-     * @throws IllegalArgumentException if {@code beginIndex} or {@code toIndex} is invalid.
+     * @throws IllegalArgumentException if {@code strValue} is {@code null}, {@code beginIndex} or {@code toIndex} is negative,
+     *         {@code toIndex} is less than {@code beginIndex}, either index exceeds {@code strValue.length},
+     *         or {@code cbuf} is {@code null}.
      */
     JsonStringReader(final char[] strValue, final int beginIndex, final int toIndex, final char[] cbuf, final Reader reader) throws IllegalArgumentException {
+        N.checkArgNotNull(strValue, cs.strValue);
+
         if (beginIndex < 0 || toIndex < 0 || toIndex < beginIndex || beginIndex > strValue.length || toIndex > strValue.length) {
             throw new IllegalArgumentException("Invalid beginIndex or toIndex: " + beginIndex + ", " + toIndex);
         }
+
+        N.checkArgNotNull(cbuf, cs.cbuf);
 
         this.reader = reader;
 
@@ -186,8 +195,9 @@ class JsonStringReader extends AbstractJsonReader {
      * @param str the JSON string to parse
      * @param cbuf the character buffer to use for parsing
      * @return a new {@code JsonReader} instance
+     * @throws IllegalArgumentException if {@code str} or {@code cbuf} is {@code null}.
      */
-    public static JsonReader parse(final String str, final char[] cbuf) {
+    public static JsonReader parse(final String str, final char[] cbuf) throws IllegalArgumentException {
         //        return new JsonStreamReader(new StringReader(str), new char[1], cbuf);
 
         return new JsonStringReader(str, cbuf);
@@ -203,13 +213,14 @@ class JsonStringReader extends AbstractJsonReader {
      * JsonReader reader = JsonStringReader.parse(json, 6, json.length() - 6, new char[256]);
      * }</pre>
      *
-     * @param str the JSON string
+     * @param str the JSON string; {@code null} is treated as an empty string
      * @param beginIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @param cbuf the character buffer to use for parsing
      * @return a new {@code JsonReader} instance
+     * @throws IllegalArgumentException if the requested string range is invalid, or {@code cbuf} is {@code null}.
      */
-    public static JsonReader parse(final String str, final int beginIndex, final int toIndex, final char[] cbuf) {
+    public static JsonReader parse(final String str, final int beginIndex, final int toIndex, final char[] cbuf) throws IllegalArgumentException {
         return new JsonStringReader(str, beginIndex, toIndex, cbuf);
     }
 
@@ -390,8 +401,10 @@ class JsonStringReader extends AbstractJsonReader {
      *
      * @param firstChar the first character of the number
      * @param nextTokenValueType the expected type of the next token value
+     * @throws UncheckedIOException if a stream-backed subclass cannot read more input while scanning the number
+     * @throws ParsingException if token text has an invalid escape or unexpected whitespace, or its character buffer cannot grow
      */
-    protected void readNumber(final int firstChar, final Type<?> nextTokenValueType) {
+    protected void readNumber(final int firstChar, final Type<?> nextTokenValueType) throws UncheckedIOException, ParsingException {
         final boolean negative = firstChar == '-';
         long ret = firstChar == '-' || firstChar == '+' ? 0 : (firstChar - '0');
 
@@ -535,8 +548,11 @@ class JsonStringReader extends AbstractJsonReader {
      *
      * @param expected the character the literal requires at this position
      * @return {@code true} if the next character was consumed and matched {@code expected}
+     * @throws UncheckedIOException if a stream-backed subclass cannot read more input while resolving an escape
+     * @throws ParsingException if the consumed character starts an invalid escape, follows whitespace within an unquoted value, or requires a token
+     *         buffer that cannot grow
      */
-    protected boolean matchLiteralChar(final char expected) {
+    protected boolean matchLiteralChar(final char expected) throws UncheckedIOException, ParsingException {
         if (strBeginIndex >= strEndIndex) {
             return false;
         }
@@ -563,8 +579,10 @@ class JsonStringReader extends AbstractJsonReader {
      *
      * @param ch the input character to consider
      * @return the unescaped character if {@code ch} was a backslash, otherwise the original {@code ch}
+     * @throws UncheckedIOException if a stream-backed subclass cannot read more input while resolving an escape
+     * @throws ParsingException if an escape is malformed, non-whitespace follows whitespace within an unquoted value, or the token buffer cannot grow
      */
-    protected int saveChar(int ch) {
+    protected int saveChar(int ch) throws UncheckedIOException, ParsingException {
         if (nextChar > 0) {
             if (ch == SK._BACKSLASH) {
                 ch = readEscapeCharacter();
@@ -619,8 +637,9 @@ class JsonStringReader extends AbstractJsonReader {
 
     /**
      * Saves the current string range to the internal character buffer.
+     * @throws ParsingException if the token buffer cannot grow enough to hold the pending text
      */
-    protected void saveToBuffer() {
+    protected void saveToBuffer() throws ParsingException {
         endIndexForText = strBeginIndex - 1;
 
         // Loop, not if: a single grow only multiplies cbuf by ~1.75. For tokens much larger than
@@ -686,8 +705,8 @@ class JsonStringReader extends AbstractJsonReader {
                 // Reusing that approximation would lose BigDecimal digits/scale or round a float twice.
                 if (type.javaType() == BigDecimal.class || type.javaType() == BigInteger.class
                         || (type.isNumber() && ((numValue instanceof Float && !type.isFloat()) || (numValue instanceof Double && !type.isDouble())))) {
-                    // The Java type suffix the tokenizer accepts (123L, 1.5f) belongs to no numeric
-                    // grammar: only the integer/long handlers strip one, BigInteger/BigDecimal reject it.
+                    // The tokenizer accepts Java type suffixes (123L, 1.5f), but exact
+                    // BigInteger/BigDecimal parsers require the bare token.
                     final String token = stripNumberTypeSuffix(getText());
 
                     // A fractional token has no integral spelling, so an integral target can only throw below.
@@ -787,9 +806,9 @@ class JsonStringReader extends AbstractJsonReader {
      * Removes the trailing Java numeric type suffix ({@code l}, {@code L}, {@code f}, {@code F},
      * {@code d}, {@code D}) that the number tokenizer accepts on an unquoted value.
      *
-     * <p>Only the integer/long type handlers strip such a suffix themselves; {@code BigInteger},
-     * {@code BigDecimal} and the floating-point parsers reject {@code "123L"} / {@code "1.5f"}
-     * outright, so a raw token handed straight to {@code Type.valueOf(String)} must be bare.</p>
+     * <p>The scalar primitive/boxed handlers accept a suffix, while {@code BigInteger} and
+     * {@code BigDecimal} parsers require a bare numeric token. Removing it here lets a cached
+     * unquoted number be reparsed by those exact numeric handlers.</p>
      *
      * @param token the raw number token
      * @return {@code token} without its type suffix, or {@code token} itself when it carries none

@@ -201,7 +201,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -271,7 +271,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -373,7 +373,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -429,7 +429,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -467,6 +467,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
@@ -476,7 +477,6 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment); //NOSONAR
 
         final List<Iterator<R>> iters = new ArrayList<>(maxThreadNum);
 
@@ -526,7 +526,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if ((ignoreNotPaired ? second == NONE : first == NONE) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -566,6 +566,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum)) {
@@ -575,7 +576,6 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         final List<Iterator<R>> iters = new ArrayList<>(maxThreadNum);
         final MutableBoolean isFirst = MutableBoolean.of(true);
@@ -634,7 +634,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if ((ignoreNotPaired ? third == NONE : first == NONE) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -741,7 +741,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -797,7 +797,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Character next() {
+                public Character next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -854,7 +854,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Byte next() {
+                public Byte next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -911,7 +911,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Short next() {
+                public Short next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -968,7 +968,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Integer next() {
+                public Integer next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1025,7 +1025,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Long next() {
+                public Long next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1082,7 +1082,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Float next() {
+                public Float next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1139,7 +1139,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Double next() {
+                public Double next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1223,7 +1223,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1316,7 +1316,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1419,7 +1419,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Character next() {
+                public Character next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1525,7 +1525,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Byte next() {
+                public Byte next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1631,7 +1631,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Short next() {
+                public Short next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1737,7 +1737,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Integer next() {
+                public Integer next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1843,7 +1843,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Long next() {
+                public Long next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1949,7 +1949,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Float next() {
+                public Float next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -2055,7 +2055,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public Double next() {
+                public Double next() throws NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -2134,7 +2134,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (next == NONE && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -2415,6 +2415,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum)) {
@@ -2423,7 +2424,6 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment);
 
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(maxThreadNum);
         final Holder<Throwable> eHolder = new Holder<>();
@@ -2502,6 +2502,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum)) {
@@ -2510,7 +2511,6 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         }
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(maxThreadNum);
         final Holder<Throwable> eHolder = new Holder<>();
@@ -3009,6 +3009,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param accumulator an associative, non-interfering, stateless function for combining two
      *        values; used both within a thread and to merge partial results across threads
      * @return an {@link Optional} describing the result, or an empty Optional if the stream is empty
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
@@ -3060,7 +3061,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                 }
             }
 
-            return result == NONE ? Optional.empty() : Optional.ofNullable(result);
+            return result == NONE ? Optional.empty() : Optional.of(result);
         }, this, asyncExecutor, asyncExecutorToUse);
     }
 
@@ -3285,6 +3286,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param comparator a comparator to compare elements
      * @return an {@link Optional} describing the minimum element, or an empty Optional if the stream
      *         is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -3300,7 +3302,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             if (!elements.hasNext()) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator, comparator())) {
-                return Optional.ofNullable(elements.next());
+                return Optional.of(elements.next());
             } else {
                 isDone = false;
             }
@@ -3322,6 +3324,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param comparator a comparator to compare elements
      * @return an {@link Optional} describing the maximum element, or an empty Optional if the stream
      *         is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -3343,7 +3346,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                     next = elements.next();
                 }
 
-                return Optional.ofNullable(next);
+                return Optional.of(next);
             } else {
                 isDone = false;
             }
@@ -3618,6 +3621,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the first (lowest-index) matching element, or an empty
      *         Optional if no element matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -3672,7 +3676,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == null ? Optional.empty() : Optional.ofNullable(resultHolder.value().right());
+        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
     }
 
     /**
@@ -3686,6 +3690,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing some matching element, or an empty Optional if no
      *         element matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -3738,7 +3743,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == NONE ? Optional.empty() : Optional.ofNullable(resultHolder.value());
+        return resultHolder.value() == NONE ? Optional.empty() : Optional.of(resultHolder.value());
     }
 
     /**
@@ -3752,6 +3757,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the last (highest-index) matching element, or an empty
      *         Optional if no element matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -3804,7 +3810,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == null ? Optional.empty() : Optional.ofNullable(resultHolder.value().right());
+        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
     }
 
     /**

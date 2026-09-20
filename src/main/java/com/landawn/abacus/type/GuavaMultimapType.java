@@ -70,8 +70,9 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @param typeClass the concrete or abstract Multimap class to handle
      * @param keyTypeName the name of the key type parameter
      * @param valueTypeName the name of the value type parameter
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    GuavaMultimapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) {
+    GuavaMultimapType(final Class<T> typeClass, final String keyTypeName, final String valueTypeName) throws IllegalArgumentException {
         super(getTypeName(typeClass, keyTypeName, valueTypeName, false));
 
         declaringName = getTypeName(typeClass, keyTypeName, valueTypeName, true);
@@ -283,8 +284,10 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      *        full name. In both cases the multimap class itself is rendered with its canonical class name.
      * @return the formatted type name
      *         (e.g., {@code "com.google.common.collect.Multimap<java.lang.String, java.lang.Integer>"})
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueTypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getCanonicalClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;

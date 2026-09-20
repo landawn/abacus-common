@@ -10,15 +10,15 @@ import com.landawn.abacus.TestBase;
 public abstract class uTestSupport extends TestBase {
 
     @Nested
-    public class OptionalTest {
+    public class OptionalTest extends TestBase {
     }
 
     @Nested
-    public class OptionalIntTest {
+    public class OptionalIntTest extends TestBase {
     }
 
     @Nested
-    public class NullableTest {
+    public class NullableTest extends TestBase {
     }
 
     // --- Additional coverage tests for u.Nullable ---

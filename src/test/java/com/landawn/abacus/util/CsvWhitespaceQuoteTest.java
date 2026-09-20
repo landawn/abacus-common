@@ -7,8 +7,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class CsvWhitespaceQuoteTest {
+public class CsvWhitespaceQuoteTest extends TestBase {
     @Test
     void whitespaceQuoteSyntaxWinsInEveryParsingEntryPoint() {
         for (final char quote : new char[] { ' ', '\t', '\u2003' }) {

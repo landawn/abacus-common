@@ -385,7 +385,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
     /**
      * Constructs a DoubleList using the specified array as the backing array.
      * The array is used directly without copying, making this constructor very efficient.
-     * Modifications to the list will directly affect the provided array.
+     * Modifications to the list affect the provided array until an operation replaces the backing array.
      * The size of the list will be equal to the length of the array.
      *
      * <p><b>Usage Examples:</b></p>
@@ -436,7 +436,8 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Creates a new DoubleList containing the specified elements. The specified array is used directly
-     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * as the backing array without copying, so subsequent modifications to the array affect the list
+     * until an operation replaces its backing array.
      * If the input array is {@code null}, an empty list is returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -568,9 +569,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param len the number of random double values to generate. Must be non-negative.
      * @return a new DoubleList containing <i>len</i> random double values
@@ -1880,7 +1881,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns a new DoubleList containing elements that are present in either this list or the specified list,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * after cancelling matching occurrences. This is the multiset symmetric difference operation.
      * For elements that appear multiple times, the symmetric difference contains the absolute difference
      * in occurrences between the two lists.
      *
@@ -1955,7 +1956,7 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
 
     /**
      * Returns a new DoubleList containing elements that are present in either this list or the specified array,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * after cancelling matching occurrences. This is the multiset symmetric difference operation.
      * For elements that appear multiple times, the symmetric difference contains the absolute difference
      * in occurrences between this list and the array.
      *
@@ -2313,6 +2314,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * DoubleList reversed = new DoubleList();
      * list.forEach(4, -1, reversed::add);   // reversed is now [5.0, 4.0, 3.0, 2.0, 1.0] (reverse to start)
      * }</pre>
+     *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
      *
      * @param fromIndex the index of the first element (inclusive) to be processed
      * @param toIndex the index of the last element (exclusive) to be processed,
@@ -2764,6 +2768,9 @@ public final class DoubleList extends PrimitiveList<Double, double[], DoubleList
      * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
      * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
      * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
      *
      * @param fromIndex the index of the first element to be copied
      * @param toIndex the index boundary (exclusive) for copying

@@ -89,14 +89,14 @@ class CurlInterceptor implements Interceptor {
      *                  depending on shell requirements.
      * @param logHandler A consumer function that handles the generated cURL command string.
      *                   This is typically used to log or store the command. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code logHandler} is {@code null}, or {@code quoteChar} is
-     *         neither a single nor a double quote.
+     * @throws IllegalArgumentException if {@code quoteChar} is neither a single nor a double quote,
+     *         or {@code logHandler} is {@code null}.
      */
     public CurlInterceptor(final char quoteChar, final Consumer<? super String> logHandler) throws IllegalArgumentException {
-        N.checkArgNotNull(logHandler, cs.logHandler);
         // Validated here rather than while building the command: intercept() runs on the request
         // path, where throwing would fail the HTTP call instead of just the logging.
         N.checkArgument(quoteChar == '\'' || quoteChar == '"', "quoteChar must be a single (') or double (\") quote, but was: {}", quoteChar);
+        N.checkArgNotNull(logHandler, cs.logHandler);
 
         this.logHandler = logHandler;
         this.quoteChar = quoteChar;

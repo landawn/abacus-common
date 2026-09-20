@@ -210,7 +210,8 @@ public class TripleTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -230,9 +231,11 @@ public class TripleTypeTest extends TestBase {
         assertEquals("[1, \"a\", {\"k\": 1}]", reviewFixes20260906_ser(type, Triple.of(1, "a", com.landawn.abacus.util.N.asMap("k", 1)), jsc));
         assertEquals("[true, [2], null]", reviewFixes20260906_ser(type, Triple.of(true, com.landawn.abacus.util.N.asList(2), null), jsc));
         assertEquals("[1, a, 2.5]", reviewFixes20260906_ser(type, Triple.of(1, "a", 2.5d), null));
-        assertEquals("[[1, \"a\", {\"k\": 1}]]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Triple.of(1, "a", com.landawn.abacus.util.N.asMap("k", 1)))));
+        assertEquals("[[1, \"a\", {\"k\": 1}]]",
+                com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Triple.of(1, "a", com.landawn.abacus.util.N.asMap("k", 1)))));
         // declared null slots honour the element handlers' null flags
-        assertEquals("[\"a\", 0, false]", reviewFixes20260906_ser(tripleType, Triple.of("a", null, null), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteNullBooleanAsFalse(true)));
+        assertEquals("[\"a\", 0, false]", reviewFixes20260906_ser(tripleType, Triple.of("a", null, null),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteNullBooleanAsFalse(true)));
         assertEquals("[\"a\", null, null]", reviewFixes20260906_ser(tripleType, Triple.of("a", null, null), jsc));
     }
 

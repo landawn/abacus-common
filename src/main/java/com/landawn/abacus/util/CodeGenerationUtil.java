@@ -864,9 +864,11 @@ public final class CodeGenerationUtil {
      * @throws IllegalArgumentException if {@code codeConfig} is {@code null}, its {@code entityClasses} is {@code null} or empty, its
      *         class/package/converted property names are not valid Java names, or generated interface/field names collide, {@code extendedInterfaces}
      *         contains a null, non-interface, duplicate, or self-referential type, {@code generateClassPropNameList} is enabled while the entities have
-     *         duplicate simple class names, or no usable entity class remains after filtering out interfaces and Lombok builder classes; a generated type
-     *         named {@code java} prevents the qualified {@code String} or {@code List} reference required by another generated type; or an inherited
-     *         instance method named {@code of} conflicts with the unqualified list factory required by a generated type or field named {@code List}. Also
+     *         duplicate simple class names, or no usable entity class remains after filtering out interfaces and Lombok builder classes; a generated or
+     *         inherited type named {@code java} prevents the qualified {@code String} reference required by a generated or inherited type named
+     *         {@code String}, or the qualified {@code List} reference required by a generated or inherited type named {@code List} when
+     *         {@code generateClassPropNameList} is enabled; or an inherited instance method named {@code of} conflicts with the unqualified list factory
+     *         required by a generated or inherited type or field named {@code List}. Also
      *         if an entity class is null, or an enabled property function has a null/empty key, a null callback, or produces an invalid field identifier.
      * @throws RuntimeException if a configured property-name converter or property function throws an unchecked exception.
      * @throws UncheckedIOException if creating or writing the generated source file throws an {@link IOException} when {@code srcDir} is configured.
@@ -946,11 +948,23 @@ public final class CodeGenerationUtil {
             N.checkArgument(generatedNestedTypeNames.add(functionClassName), "Generated interface names must be unique: %s", functionClassName);
         }
 
-        // Member types shadow imported types throughout the enclosing interface, including before their declaration.
-        final boolean qualifyString = generatedNestedTypeNames.contains("String");
-        final boolean qualifyList = generateClassPropNameList && generatedNestedTypeNames.contains("List");
-        N.checkArgument(!generatedNestedTypeNames.contains("java") || !(qualifyString || qualifyList),
-                "Generated type java conflicts with the qualified String or List type required by another generated type");
+        // Member types, including inherited ones, shadow imported types throughout the enclosing interface.
+        final Set<String> visibleTypeNames = N.newHashSet(generatedNestedTypeNames);
+        if (extendedInterfaces != null) {
+            final Set<Class<?>> interfacesWithMembers = N.newHashSet(extendedInterfaces);
+            for (final Class<?> extendedInterface : extendedInterfaces) {
+                interfacesWithMembers.addAll(ClassUtil.getAllInterfaces(extendedInterface));
+            }
+            for (final Class<?> extendedInterface : interfacesWithMembers) {
+                for (final Class<?> memberType : extendedInterface.getClasses()) {
+                    visibleTypeNames.add(memberType.getSimpleName());
+                }
+            }
+        }
+        final boolean qualifyString = visibleTypeNames.contains("String");
+        final boolean qualifyList = generateClassPropNameList && visibleTypeNames.contains("List");
+        N.checkArgument(!visibleTypeNames.contains("java") || !(qualifyString || qualifyList),
+                "Generated or inherited type java conflicts with the qualified String or List type required by another visible type");
         final String stringType = qualifyString ? "java.lang.String" : "String";
         final String listType = qualifyList ? "java.util.List" : "List";
         boolean outerListShadowed = qualifyList;
@@ -1523,6 +1537,8 @@ public final class CodeGenerationUtil {
          * Classes, duplicate interfaces, {@code null} elements, and the generated interface itself are rejected.
          * Interfaces in the generated package are emitted relative to that package; other interfaces retain
          * their fully qualified canonical names.
+         * Inherited member types named {@code String} or {@code List} cause references to the standard types
+         * to be fully qualified. A visible member type named {@code java} is rejected when it prevents that qualification.
          */
         private Collection<Class<?>> extendedInterfaces;
 

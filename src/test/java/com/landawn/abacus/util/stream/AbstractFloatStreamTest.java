@@ -53,8 +53,7 @@ public class AbstractFloatStreamTest extends TestBase {
             return (float) (left + right);
         })) {
             final com.landawn.abacus.util.FloatIterator iter = stream.iterator();
-            org.junit.jupiter.api.Assertions.assertSame(failure,
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextFloat));
+            org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextFloat));
             org.junit.jupiter.api.Assertions.assertEquals((float) 2, iter.nextFloat());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertEquals((float) 5, iter.nextFloat());

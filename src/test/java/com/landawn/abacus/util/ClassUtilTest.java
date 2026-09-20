@@ -1212,8 +1212,8 @@ public class ClassUtilTest extends TestBase {
 
     @Test
     public void testHierarchySharedInterfacesPreserveDepthFirstOrder() {
-        assertEquals(List.of(HierarchyChild.class, HierarchyDiamond.class, HierarchyLeft.class, HierarchyRoot.class, HierarchyRight.class,
-                HierarchyBase.class, Object.class), ClassUtil.hierarchy(HierarchyChild.class, true).toList());
+        assertEquals(List.of(HierarchyChild.class, HierarchyDiamond.class, HierarchyLeft.class, HierarchyRoot.class, HierarchyRight.class, HierarchyBase.class,
+                Object.class), ClassUtil.hierarchy(HierarchyChild.class, true).toList());
         assertEquals(List.of(HierarchyDiamond.class, HierarchyLeft.class, HierarchyRoot.class, HierarchyRight.class),
                 ClassUtil.hierarchy(HierarchyDiamond.class, true).toList());
     }

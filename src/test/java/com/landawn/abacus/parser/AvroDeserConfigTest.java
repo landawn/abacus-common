@@ -241,8 +241,7 @@ public class AvroDeserConfigTest extends TestBase {
     public void reviewFixes20260906_equalsAndHashCodeDelegateToParent() {
         final Schema schema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
         final Schema sameSchema = new Schema.Parser().parse(TEST_SCHEMA_JSON);
-        final Schema otherSchema = new Schema.Parser()
-                .parse("{\"type\":\"record\",\"name\":\"Other\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
+        final Schema otherSchema = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Other\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
 
         final AvroDeserConfig a = AvroDeserConfig.create()
                 .setSchema(schema)

@@ -54,7 +54,7 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
 
     /** B1: an omitted empty token must neither consume the limit nor survive inside the final element. */
     @Nested
-    public class OmittedEmptyTokensNeverReachTheFinalElement {
+    public class OmittedEmptyTokensNeverReachTheFinalElement extends TestBase {
 
         @ParameterizedTest(name = "{0} engine")
         @ValueSource(strings = { "char", "pattern" })
@@ -123,7 +123,7 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
 
     /** B1 lives in the shared iterator, so every output path must inherit the fix, not just {@code split}. */
     @Nested
-    public class EveryOutputPathGetsTheFix {
+    public class EveryOutputPathGetsTheFix extends TestBase {
 
         private Splitter fresh() {
             return Splitter.with(',').omitEmptyStrings().limit(2);
@@ -169,7 +169,7 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
 
     /** B1 as it reached {@code MapSplitter}, whose entry splitter always omits empty entries. */
     @Nested
-    public class MapSplitterLimitNoLongerAbsorbsEmptyEntries {
+    public class MapSplitterLimitNoLongerAbsorbsEmptyEntries extends TestBase {
 
         @Test
         public void theSecondKeyIsNotPrefixedWithTheEntryDelimiter() {
@@ -215,7 +215,7 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
 
     /** The three engines must stay observationally identical for a literal delimiter. */
     @Nested
-    public class TheThreeEnginesAgree {
+    public class TheThreeEnginesAgree extends TestBase {
 
         @ParameterizedTest(name = "[{index}] src=''{0}'' limit={1} omit={2} trim={3}")
         @CsvSource({ "',,a,b', 1, true, false", "',,a,b,c', 2, true, true", "'a,,,b,c', 2, true, false", "'a,b,,,', 3, true, true", "',', 1, true, false",
@@ -250,7 +250,7 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
 
     /** D1: the supplier overloads were renamed so a constructor reference is no longer ambiguous. */
     @Nested
-    public class SupplierOverloadsTakeAConstructorReference {
+    public class SupplierOverloadsTakeAConstructorReference extends TestBase {
 
         /** Failing to compile is the regression this guards. */
         @Test
@@ -294,7 +294,7 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
 
     /** D2: the boolean setters are the only way to turn a flag back off, so they are no longer deprecated. */
     @Nested
-    public class BooleanSettersResetAndAreNotDeprecated {
+    public class BooleanSettersResetAndAreNotDeprecated extends TestBase {
 
         @Test
         public void eachBooleanSetterTurnsItsFlagBackOff() {
@@ -326,7 +326,7 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
 
     /** B4/J4/J5/O2: documented edge behaviour that had been mis-stated. */
     @Nested
-    public class DocumentedEdgeBehaviour {
+    public class DocumentedEdgeBehaviour extends TestBase {
 
         @Test
         public void aZeroWidthPatternIsAcceptedAndSplitsAtItsMatchPositions() {
@@ -375,7 +375,7 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
      * drift from it.
      */
     @Nested
-    public class DocumentedButPreviouslyUnpinnedBehaviour {
+    public class DocumentedButPreviouslyUnpinnedBehaviour extends TestBase {
 
         /** C-001: a multi-dimensional arrayType converts each token to the nested array type. */
         @Test

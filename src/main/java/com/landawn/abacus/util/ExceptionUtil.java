@@ -857,7 +857,11 @@ public final class ExceptionUtil {
         }
 
         if (Strings.isEmpty(msg)) {
-            msg = e.getClass().getCanonicalName();
+            // Not e.getClass().getCanonicalName(): an anonymous or local exception class has no canonical
+            // name and would hand back null, which then flows out of this non-@MayReturnNull method (and
+            // renders as the literal "null" in the withExceptionClassName form). ClassUtil falls back to
+            // getName() for exactly those classes - the same resolution this file already uses at line 209.
+            msg = ClassUtil.getCanonicalClassName(e.getClass());
         }
 
         if (withExceptionClassName) {

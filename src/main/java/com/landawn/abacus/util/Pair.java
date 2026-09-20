@@ -1031,8 +1031,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * <p>Equal pairs (as determined by {@link #equals(Object)}) are guaranteed to have the same hash
      * code. <b>A {@code Pair} is mutable, however, so its hash code changes when an element is
      * replaced: do not mutate a pair while it is a key in a {@code HashMap} or an element of a
-     * {@code HashSet}.</b> Use {@link #toTuple()} or {@link #toImmutableEntry()} for a snapshot that
-     * is safe to key on. Note that because XOR is commutative, {@code Pair.of(a, b)} and
+     * {@code HashSet}.</b> Use {@link #toTuple()} or {@link #toImmutableEntry()} for a snapshot whose
+     * element references cannot be reassigned. The referenced elements must also retain stable equality
+     * and hash codes while the snapshot is used as a key. Note that because XOR is commutative, {@code Pair.of(a, b)} and
      * {@code Pair.of(b, a)} always have the same hash code, regardless of the element values.</p>
      *
      * <p>The component hash codes follow the {@link Map.Entry} contract and therefore use each

@@ -97,8 +97,8 @@ public final class SnappyOutputStream extends OutputStream {
     }
 
     /**
-     * Writes a single byte of compressed data to the output stream.
-     * The byte is written as the low-order byte of the integer value.
+     * Accepts a single uncompressed byte for compression and output.
+     * Only the low-order byte of the integer value is used.
      *
      * <p>Note: Writing single bytes is generally less efficient than writing
      * arrays of bytes due to compression overhead.

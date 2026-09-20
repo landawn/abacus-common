@@ -47,10 +47,11 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  * another. Checked processing and I/O exceptions are wrapped in runtime exceptions.</p>
  *
  * <p><b>Reuse your config objects.</b> Jackson's config classes do not override {@code equals}/{@code hashCode},
- * so these caches match on object identity. A config obtained from {@link #createSerializationConfig()} or built
- * with {@code with(...)} is a fresh instance every time and carries its own {@code ConfigOverrides}, so calling
- * those inside a loop constructs (and retains) a new mapper per call. Hold a single config instance and pass it
- * repeatedly. The
+ * so these caches match on object identity. Each {@code create...Config()} call creates a fresh config with
+ * independent {@code ConfigOverrides}. Methods such as {@code with(...)} can create another config or return
+ * the same instance when nothing changes; derived configs can share their overrides. Creating a fresh config
+ * for every operation also constructs a new cached mapper each time. Finish configuring a config before use,
+ * retain it, and pass it repeatedly without mutating it or its shared components. The
  * {@code SerializationFeature}/{@code DeserializationFeature} overloads do not use these caches at all - they
  * derive a lightweight {@link ObjectWriter}/{@link ObjectReader} instead - and are the cheaper choice when you only
  * need to toggle features.</p>
@@ -78,8 +79,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  * {@link String}. One exception to the zone-independence: {@link java.sql.Time} is written as wall-clock
  * {@code "HH:mm:ss"} by <i>both</i> facades, carries no date at all, and is therefore zone-dependent in
  * both. Finally, no Java-8 time module is registered here and this library does not declare
- * {@code jackson-datatype-jsr310}, so serializing any {@code java.time} value
- * ({@code Instant}, {@code LocalDate}, {@code ZonedDateTime}, …) throws {@code InvalidDefinitionException};
+ * {@code jackson-datatype-jsr310}, so serializing values such as
+ * {@code Instant}, {@code LocalDate} and {@code ZonedDateTime} fails with a wrapped {@code InvalidDefinitionException};
  * register {@code JavaTimeModule} on your own mapper and {@link #wrap(ObjectMapper)} it.</p>
  *
  * <p><b>A bean with no discoverable properties is rejected.</b> Jackson's
@@ -103,10 +104,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  *
  * <p><b>Byte output escapes characters outside the BMP.</b> Jackson's UTF-8 generator writes a non-BMP
  * character such as an emoji as a {@code &#92;uXXXX&#92;uXXXX} surrogate escape, while the {@code String}- and
- * {@code Writer}-based paths emit it as raw UTF-8. So {@code toJson(obj)} and {@code toJson(obj, outputStream)}
+ * {@code Writer}-based paths emit unescaped UTF-16 characters. When that character output is encoded as UTF-8,
+ * {@code toJson(obj)} and {@code toJson(obj, outputStream)}
  * can produce <i>different bytes</i> for the same object. Both are valid JSON and both parse back to the same
- * value, but do not compare, hash or sign the output of one path against the other. {@link FastJson} and
- * {@link XmlMappers} emit raw UTF-8 on every path.</p>
+ * value, but do not compare, hash or sign the output of one path against the other.</p>
  *
  * <p><b>A failed write does not leave the target file intact.</b> The {@code File} overloads open (and
  * therefore truncate) the target before serialization runs, so if serialization throws part-way the file is
@@ -126,7 +127,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
  *   <li>Pretty printing support for formatted JSON output</li>
  *   <li>Generic type support through TypeReference</li>
  *   <li>Multiple input/output source types (String, File, Stream, URL, etc.)</li>
- *   <li>Internal mapper pooling for performance optimization</li>
+ *   <li>Bounded caches of mappers for custom configuration reuse</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -189,8 +190,8 @@ public final class JsonMappers {
     }
 
     /**
-     * @throws IllegalArgumentException if {@code json} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code offset} or {@code len} is negative, or the range exceeds {@code json.length}.
+     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
+     * @throws IndexOutOfBoundsException if {@code offset} is negative or the range exceeds {@code json.length}.
      */
     private static void checkByteRange(final byte[] json, final int offset, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(json, cs.json);
@@ -217,7 +218,7 @@ public final class JsonMappers {
      * @see #toJson(Object, boolean)
      * @see #toJson(Object, SerializationFeature, SerializationFeature...)
      */
-    public static String toJson(final Object obj) {
+    public static String toJson(final Object obj) throws RuntimeException {
         try {
             return defaultJsonMapper.writeValueAsString(obj);
         } catch (final JsonProcessingException e) {
@@ -250,7 +251,7 @@ public final class JsonMappers {
      * @throws RuntimeException if serialization fails due to invalid object structure or configuration
      * @see #toJson(Object)
      */
-    public static String toJson(final Object obj, final boolean prettyFormat) {
+    public static String toJson(final Object obj, final boolean prettyFormat) throws RuntimeException {
         try {
             if (prettyFormat) {
                 return defaultJsonWriterForPretty.writeValueAsString(obj);
@@ -302,7 +303,8 @@ public final class JsonMappers {
      * @see #toJson(Object, SerializationConfig)
      */
     @SafeVarargs
-    public static String toJson(final Object obj, final SerializationFeature first, final SerializationFeature... features) throws IllegalArgumentException {
+    public static String toJson(final Object obj, final SerializationFeature first, final SerializationFeature... features)
+            throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(first, cs.first);
         N.checkArgNotNull(features, cs.features);
 
@@ -343,7 +345,7 @@ public final class JsonMappers {
      * @see #createSerializationConfig()
      * @see SerializationConfig
      */
-    public static String toJson(final Object obj, final SerializationConfig config) {
+    public static String toJson(final Object obj, final SerializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -375,7 +377,7 @@ public final class JsonMappers {
      * @throws RuntimeException if serialization fails or file cannot be written
      * @see #toJson(Object, File, SerializationConfig)
      */
-    public static void toJson(final Object obj, final File output) {
+    public static void toJson(final Object obj, final File output) throws RuntimeException {
         try {
             defaultJsonMapper.writeValue(output, obj);
         } catch (final IOException e) {
@@ -405,7 +407,7 @@ public final class JsonMappers {
      * @see #toJson(Object, File)
      * @see SerializationConfig
      */
-    public static void toJson(final Object obj, final File output, final SerializationConfig config) {
+    public static void toJson(final Object obj, final File output, final SerializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -440,7 +442,7 @@ public final class JsonMappers {
      * @throws RuntimeException if serialization fails or writing to stream fails
      * @see #toJson(Object, OutputStream, SerializationConfig)
      */
-    public static void toJson(final Object obj, final OutputStream output) {
+    public static void toJson(final Object obj, final OutputStream output) throws RuntimeException {
         try {
             defaultJsonMapper.writeValue(output, obj);
         } catch (final IOException e) {
@@ -472,7 +474,7 @@ public final class JsonMappers {
      * @see #toJson(Object, OutputStream)
      * @see SerializationConfig
      */
-    public static void toJson(final Object obj, final OutputStream output, final SerializationConfig config) {
+    public static void toJson(final Object obj, final OutputStream output, final SerializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -512,7 +514,7 @@ public final class JsonMappers {
      * @throws RuntimeException if serialization fails or writing fails
      * @see #toJson(Object, Writer, SerializationConfig)
      */
-    public static void toJson(final Object obj, final Writer output) {
+    public static void toJson(final Object obj, final Writer output) throws RuntimeException {
         try {
             defaultJsonMapper.writeValue(output, obj);
         } catch (final IOException e) {
@@ -544,7 +546,7 @@ public final class JsonMappers {
      * @see #toJson(Object, Writer)
      * @see SerializationConfig
      */
-    public static void toJson(final Object obj, final Writer output, final SerializationConfig config) {
+    public static void toJson(final Object obj, final Writer output, final SerializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -580,7 +582,7 @@ public final class JsonMappers {
      * @see #toJson(Object, DataOutput, SerializationConfig)
      * @see DataOutput
      */
-    public static void toJson(final Object obj, final DataOutput output) {
+    public static void toJson(final Object obj, final DataOutput output) throws RuntimeException {
         try {
             defaultJsonMapper.writeValue(output, obj);
         } catch (final IOException e) {
@@ -613,7 +615,7 @@ public final class JsonMappers {
      * @see SerializationConfig
      * @see DataOutput
      */
-    public static void toJson(final Object obj, final DataOutput output, final SerializationConfig config) {
+    public static void toJson(final Object obj, final DataOutput output, final SerializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -650,7 +652,7 @@ public final class JsonMappers {
      * @see #fromJson(byte[], int, int, Class)
      * @see #fromJson(byte[], TypeReference)
      */
-    public static <T> T fromJson(final byte[] json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final byte[] json, final Class<? extends T> targetType) throws RuntimeException {
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -687,7 +689,7 @@ public final class JsonMappers {
      * @see #fromJson(byte[], Class)
      */
     public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
         checkByteRange(json, offset, len);
 
         try {
@@ -728,7 +730,7 @@ public final class JsonMappers {
      * @see #fromJson(String, TypeReference)
      * @see #fromJson(String, Class, DeserializationFeature, DeserializationFeature...)
      */
-    public static <T> T fromJson(final String json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final String json, final Class<? extends T> targetType) throws RuntimeException {
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final JsonProcessingException e) {
@@ -757,7 +759,7 @@ public final class JsonMappers {
      * <pre>{@code
      * // Use BigDecimal for floating-point values
      * String json = "{\"name\":\"John\",\"balance\":30.5}";
-     * Account account = JsonMappers.fromJson(json, Account.class,
+     * Map<String, Object> account = JsonMappers.fromJson(json, Map.class,
      *     DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
      *
      * // Accept single value as array
@@ -779,7 +781,7 @@ public final class JsonMappers {
      */
     @SafeVarargs
     public static <T> T fromJson(final String json, final Class<? extends T> targetType, final DeserializationFeature first,
-            final DeserializationFeature... features) throws IllegalArgumentException {
+            final DeserializationFeature... features) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(first, cs.first);
         N.checkArgNotNull(features, cs.features);
@@ -821,7 +823,7 @@ public final class JsonMappers {
      * @see #createDeserializationConfig()
      * @see DeserializationConfig
      */
-    public static <T> T fromJson(final String json, final Class<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final String json, final Class<? extends T> targetType, final DeserializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -835,7 +837,8 @@ public final class JsonMappers {
 
     /**
      * Deserializes JSON from a file to an object of the specified type.
-     * This method reads the entire file content and parses it as JSON.
+     * This method parses a JSON value from the file. Trailing content is rejected only when
+     * Jackson's corresponding validation feature is enabled.
      *
      * <p>The file is expected to contain valid JSON data encoded in UTF-8.
      * The method handles all file I/O operations internally.</p>
@@ -860,7 +863,7 @@ public final class JsonMappers {
      * @see #fromJson(File, Class, DeserializationConfig)
      * @see #fromJson(File, TypeReference)
      */
-    public static <T> T fromJson(final File json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final File json, final Class<? extends T> targetType) throws RuntimeException {
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -894,7 +897,7 @@ public final class JsonMappers {
      * @see #fromJson(File, Class)
      * @see DeserializationConfig
      */
-    public static <T> T fromJson(final File json, final Class<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final File json, final Class<? extends T> targetType, final DeserializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -940,7 +943,7 @@ public final class JsonMappers {
      * @see #fromJson(InputStream, Class, DeserializationConfig)
      * @see #fromJson(InputStream, TypeReference)
      */
-    public static <T> T fromJson(final InputStream json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final InputStream json, final Class<? extends T> targetType) throws RuntimeException {
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -976,7 +979,7 @@ public final class JsonMappers {
      * @see #fromJson(InputStream, Class)
      * @see DeserializationConfig
      */
-    public static <T> T fromJson(final InputStream json, final Class<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final InputStream json, final Class<? extends T> targetType, final DeserializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1020,7 +1023,7 @@ public final class JsonMappers {
      * @see #fromJson(Reader, Class, DeserializationConfig)
      * @see #fromJson(Reader, TypeReference)
      */
-    public static <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final Reader json, final Class<? extends T> targetType) throws RuntimeException {
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -1055,7 +1058,7 @@ public final class JsonMappers {
      * @see #fromJson(Reader, Class)
      * @see DeserializationConfig
      */
-    public static <T> T fromJson(final Reader json, final Class<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final Reader json, final Class<? extends T> targetType, final DeserializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1175,7 +1178,7 @@ public final class JsonMappers {
      * @see #fromJson(DataInput, TypeReference)
      * @see DataInput
      */
-    public static <T> T fromJson(final DataInput json, final Class<? extends T> targetType) {
+    public static <T> T fromJson(final DataInput json, final Class<? extends T> targetType) throws RuntimeException {
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -1211,7 +1214,7 @@ public final class JsonMappers {
      * @see DeserializationConfig
      * @see DataInput
      */
-    public static <T> T fromJson(final DataInput json, final Class<? extends T> targetType, final DeserializationConfig config) {
+    public static <T> T fromJson(final DataInput json, final Class<? extends T> targetType, final DeserializationConfig config) throws RuntimeException {
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1257,7 +1260,7 @@ public final class JsonMappers {
      * @see TypeReference
      * @see #fromJson(byte[], Class)
      */
-    public static <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         try {
@@ -1299,7 +1302,7 @@ public final class JsonMappers {
      * @see #fromJson(byte[], int, int, Class)
      */
     public static <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
         checkByteRange(json, offset, len);
 
         N.checkArgNotNull(targetType, cs.targetType);
@@ -1345,7 +1348,7 @@ public final class JsonMappers {
      * @see #fromJson(String, Class)
      * @see #fromJson(String, TypeReference, DeserializationFeature, DeserializationFeature...)
      */
-    public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         try {
@@ -1373,7 +1376,7 @@ public final class JsonMappers {
      *     new TypeReference<List<String>>() {},
      *     DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
      *
-     * // Use BigDecimal for financial data
+     * // Use BigDecimal for decimal values in Object-typed properties
      * List<FinancialRecord> records = JsonMappers.fromJson(jsonData,
      *     new TypeReference<List<FinancialRecord>>() {},
      *     DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
@@ -1393,7 +1396,7 @@ public final class JsonMappers {
      */
     @SafeVarargs
     public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType, final DeserializationFeature first,
-            final DeserializationFeature... features) throws IllegalArgumentException {
+            final DeserializationFeature... features) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(first, cs.first);
         N.checkArgNotNull(features, cs.features);
@@ -1439,7 +1442,7 @@ public final class JsonMappers {
      * @see #createDeserializationConfig()
      */
     public static <T> T fromJson(final String json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final JsonMapper jsonMapper = getJsonMapper(config);
@@ -1484,7 +1487,7 @@ public final class JsonMappers {
      * @see #fromJson(File, Class)
      * @see #fromJson(File, TypeReference, DeserializationConfig)
      */
-    public static <T> T fromJson(final File json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T fromJson(final File json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         try {
@@ -1525,7 +1528,7 @@ public final class JsonMappers {
      * @see #fromJson(File, TypeReference)
      */
     public static <T> T fromJson(final File json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final JsonMapper jsonMapper = getJsonMapper(config);
@@ -1571,7 +1574,7 @@ public final class JsonMappers {
      * @see #fromJson(InputStream, Class)
      * @see #fromJson(InputStream, TypeReference, DeserializationConfig)
      */
-    public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         try {
@@ -1609,7 +1612,7 @@ public final class JsonMappers {
      * @see #fromJson(InputStream, TypeReference)
      */
     public static <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final JsonMapper jsonMapper = getJsonMapper(config);
@@ -1646,7 +1649,7 @@ public final class JsonMappers {
      * @see #fromJson(Reader, TypeReference, DeserializationConfig)
      * @see #fromJson(Reader, Class)
      */
-    public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         try {
@@ -1684,7 +1687,7 @@ public final class JsonMappers {
      * @see #fromJson(Reader, TypeReference)
      */
     public static <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final JsonMapper jsonMapper = getJsonMapper(config);
@@ -1740,10 +1743,10 @@ public final class JsonMappers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Fetch JSON with custom date handling
+     * // Fetch JSON while ignoring unknown properties
      * URL url = new URL("https://api.example.com/events");
      * DeserializationConfig config = JsonMappers.createDeserializationConfig()
-     *     .with(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS);
+     *     .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
      * List<Event> events = JsonMappers.fromJson(url,
      *     new TypeReference<List<Event>>() {}, config);
      * }</pre>
@@ -1798,7 +1801,7 @@ public final class JsonMappers {
      * @see #fromJson(DataInput, Class)
      * @see DataInput
      */
-    public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         try {
@@ -1836,7 +1839,7 @@ public final class JsonMappers {
      * @see DataInput
      */
     public static <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType, final DeserializationConfig config)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final JsonMapper jsonMapper = getJsonMapper(config);
@@ -1853,16 +1856,15 @@ public final class JsonMappers {
     /**
      * Creates a new SerializationConfig instance with default settings.
      * This method provides a base configuration that can be customized for specific serialization needs.
-     * The returned configuration is a copy and can be modified without affecting other operations.
-     * It carries its own {@code ConfigOverrides}, so {@code withPropertyInclusion(..)} - which writes through that
-     * object in place and returns the same config - changes only the instance it is invoked on. Jackson state
-     * reached <i>through</i> the configuration is <i>not</i> copied: {@code getDefaultPrettyPrinter()},
-     * {@code getDateFormat()} and {@code getAnnotationIntrospector()} hand back process-wide instances, so mutating
-     * one of those in place changes every mapper in the JVM, this class's own included.
+     * It has its own {@code ConfigOverrides}, independent of the default mapper. Configurations derived from
+     * this result with {@code with(...)} or {@code without(...)} can share those overrides, so a later
+     * {@code withPropertyInclusion(...)} call can affect the derived configurations too. Other components,
+     * including the pretty printer, date format and annotation introspector, may remain shared with other
+     * mappers. Supply replacements rather than mutating shared components, and finish all configuration
+     * before passing it to a serialization operation.
      *
-     * <p>Each call builds and discards a complete copy of the default mapper, which costs a few hundred nanoseconds
-     * and several kilobytes of garbage; create the configuration once and pass it repeatedly rather than calling
-     * this per operation.</p>
+     * <p>Each call creates a copy of the default mapper to obtain the configuration. Reuse a completed
+     * configuration to avoid repeating that allocation for every operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1889,15 +1891,13 @@ public final class JsonMappers {
     /**
      * Creates a new DeserializationConfig instance with default settings.
      * This method provides a base configuration that can be customized for specific deserialization needs.
-     * The returned configuration is a copy and can be modified without affecting other operations.
-     * It carries its own {@code ConfigOverrides} rather than sharing this class's mappers'. Jackson state reached
-     * <i>through</i> the configuration is <i>not</i> copied: {@code getDateFormat()} and
-     * {@code getAnnotationIntrospector()} hand back process-wide instances, so mutating one of those in place
-     * changes every mapper in the JVM, this class's own included.
+     * It has its own {@code ConfigOverrides}, independent of the default mapper. Configurations derived from
+     * this result can share those overrides. Other components, including the date format and annotation
+     * introspector, may remain shared with other mappers. Supply replacements rather than mutating shared
+     * components, and finish all configuration before passing it to a deserialization operation.
      *
-     * <p>Each call builds and discards a complete copy of the default mapper, which costs a few hundred nanoseconds
-     * and several kilobytes of garbage; create the configuration once and pass it repeatedly rather than calling
-     * this per operation.</p>
+     * <p>Each call creates a copy of the default mapper to obtain the configuration. Reuse a completed
+     * configuration to avoid repeating that allocation for every operation.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2053,7 +2053,7 @@ public final class JsonMappers {
          * @return a JSON string representation of the object
          * @throws RuntimeException if serialization fails
          */
-        public String toJson(final Object obj) {
+        public String toJson(final Object obj) throws RuntimeException {
             try {
                 return jsonMapper.writeValueAsString(obj);
             } catch (final JsonProcessingException e) {
@@ -2067,7 +2067,7 @@ public final class JsonMappers {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Map<String, Object> data = new HashMap<>();
+         * Map<String, Object> data = new java.util.LinkedHashMap<>();
          * data.put("name", "John");
          * data.put("age", 30);
          *
@@ -2088,7 +2088,7 @@ public final class JsonMappers {
          * @return a JSON string representation of the object
          * @throws RuntimeException if serialization fails
          */
-        public String toJson(final Object obj, final boolean prettyFormat) {
+        public String toJson(final Object obj, final boolean prettyFormat) throws RuntimeException {
             try {
                 if (prettyFormat) {
                     return jsonWriterForPretty.writeValueAsString(obj);
@@ -2119,7 +2119,7 @@ public final class JsonMappers {
          *               parent directory must already exist
          * @throws RuntimeException if serialization fails or the file cannot be written
          */
-        public void toJson(final Object obj, final File output) {
+        public void toJson(final Object obj, final File output) throws RuntimeException {
             try {
                 jsonMapper.writeValue(output, obj);
             } catch (final IOException e) {
@@ -2144,7 +2144,7 @@ public final class JsonMappers {
          * @param output the output stream to write the JSON to; closed after writing by Jackson's default auto-close behavior
          * @throws RuntimeException if serialization fails or writing to the stream fails
          */
-        public void toJson(final Object obj, final OutputStream output) {
+        public void toJson(final Object obj, final OutputStream output) throws RuntimeException {
             try {
                 jsonMapper.writeValue(output, obj);
             } catch (final IOException e) {
@@ -2171,7 +2171,7 @@ public final class JsonMappers {
          * @param output the writer to write the JSON to; closed after writing by Jackson's default auto-close behavior
          * @throws RuntimeException if serialization fails or writing fails
          */
-        public void toJson(final Object obj, final Writer output) {
+        public void toJson(final Object obj, final Writer output) throws RuntimeException {
             try {
                 jsonMapper.writeValue(output, obj);
             } catch (final IOException e) {
@@ -2195,7 +2195,7 @@ public final class JsonMappers {
          * @throws RuntimeException if serialization fails or writing fails
          * @see DataOutput
          */
-        public void toJson(final Object obj, final DataOutput output) {
+        public void toJson(final Object obj, final DataOutput output) throws RuntimeException {
             try {
                 jsonMapper.writeValue(output, obj);
             } catch (final IOException e) {
@@ -2219,7 +2219,7 @@ public final class JsonMappers {
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
-        public <T> T fromJson(final byte[] json, final Class<? extends T> targetType) {
+        public <T> T fromJson(final byte[] json, final Class<? extends T> targetType) throws RuntimeException {
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2233,9 +2233,8 @@ public final class JsonMappers {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * byte[] buffer = new byte[1024];
-         * int bytesRead = inputStream.read(buffer);
-         * Product product = jsonOps.fromJson(buffer, 0, bytesRead, Product.class);
+         * byte[] buffer = inputStream.readAllBytes();   // read the complete JSON document
+         * Product product = jsonOps.fromJson(buffer, 0, buffer.length, Product.class);
          * }</pre>
          *
          * @param <T> the type of the object to deserialize to
@@ -2249,7 +2248,7 @@ public final class JsonMappers {
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
         public <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType)
-                throws IllegalArgumentException, IndexOutOfBoundsException {
+                throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
             checkByteRange(json, offset, len);
 
             try {
@@ -2275,7 +2274,7 @@ public final class JsonMappers {
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any JsonProcessingException that occurs during deserialization
          */
-        public <T> T fromJson(final String json, final Class<? extends T> targetType) {
+        public <T> T fromJson(final String json, final Class<? extends T> targetType) throws RuntimeException {
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final JsonProcessingException e) {
@@ -2285,7 +2284,7 @@ public final class JsonMappers {
 
         /**
          * Deserializes JSON from a File into a Java object of the specified type.
-         * This method reads the entire file content and deserializes it.
+         * This method parses a value from the file using the wrapped mapper's settings.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2299,7 +2298,7 @@ public final class JsonMappers {
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during file reading or deserialization
          */
-        public <T> T fromJson(final File json, final Class<? extends T> targetType) {
+        public <T> T fromJson(final File json, final Class<? extends T> targetType) throws RuntimeException {
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2325,7 +2324,7 @@ public final class JsonMappers {
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
-        public <T> T fromJson(final InputStream json, final Class<? extends T> targetType) {
+        public <T> T fromJson(final InputStream json, final Class<? extends T> targetType) throws RuntimeException {
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2352,7 +2351,7 @@ public final class JsonMappers {
          * @return the deserialized object; {@code null} if JSON contains "null"
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
-        public <T> T fromJson(final Reader json, final Class<? extends T> targetType) {
+        public <T> T fromJson(final Reader json, final Class<? extends T> targetType) throws RuntimeException {
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2405,7 +2404,7 @@ public final class JsonMappers {
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see DataInput
          */
-        public <T> T fromJson(final DataInput json, final Class<? extends T> targetType) {
+        public <T> T fromJson(final DataInput json, final Class<? extends T> targetType) throws RuntimeException {
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2432,7 +2431,7 @@ public final class JsonMappers {
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        public <T> T fromJson(final byte[] json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(targetType, cs.targetType);
 
             try {
@@ -2467,7 +2466,7 @@ public final class JsonMappers {
          * @see TypeReference
          */
         public <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType)
-                throws IllegalArgumentException, IndexOutOfBoundsException {
+                throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
             checkByteRange(json, offset, len);
 
             N.checkArgNotNull(targetType, cs.targetType);
@@ -2502,7 +2501,7 @@ public final class JsonMappers {
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final String json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        public <T> T fromJson(final String json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(targetType, cs.targetType);
 
             try {
@@ -2531,7 +2530,7 @@ public final class JsonMappers {
          * @throws RuntimeException wrapping any IOException that occurs during file reading or deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final File json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        public <T> T fromJson(final File json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(targetType, cs.targetType);
 
             try {
@@ -2563,7 +2562,7 @@ public final class JsonMappers {
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        public <T> T fromJson(final InputStream json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(targetType, cs.targetType);
 
             try {
@@ -2594,7 +2593,7 @@ public final class JsonMappers {
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        public <T> T fromJson(final Reader json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(targetType, cs.targetType);
 
             try {
@@ -2654,7 +2653,7 @@ public final class JsonMappers {
          * @see TypeReference
          * @see DataInput
          */
-        public <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) throws IllegalArgumentException {
+        public <T> T fromJson(final DataInput json, final TypeReference<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
             N.checkArgNotNull(targetType, cs.targetType);
 
             try {

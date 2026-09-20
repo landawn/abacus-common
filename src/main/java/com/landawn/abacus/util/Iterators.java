@@ -59,23 +59,23 @@ import lombok.experimental.Accessors;
  * functional programming patterns as core design principles.
  *
  * <p>The {@code Iterators} class is designed as a final utility class that provides a complete toolkit
- * for iterator processing including filtering, mapping, reducing, searching, sorting, and parallel
+ * for iterator processing including filtering, mapping, counting, searching, sorted merging, and parallel
  * operations. Unlike collection-based utilities, this class focuses specifically on Iterator patterns
  * for memory-efficient, lazy evaluation of large datasets.</p>
  *
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Iterator-Centric Design:</b> Optimized specifically for Iterator patterns and lazy evaluation</li>
- *   <li><b>Memory Efficient:</b> Minimal memory footprint with streaming operations. The exceptions are
- *       {@code distinct}/{@code distinctBy}, which retain every key seen, and the two {@code cycle(Iterable...)}
- *       methods, which snapshot a source that is not a {@link Collection}; each says so on its own javadoc</li>
+ *   <li><b>Memory Use:</b> Many operations stream elements lazily. Others retain data: distinct operations keep
+ *       every key seen, array cycling copies the array, and cycling a non-collection source for multiple rounds
+ *       caches its elements. Combining multiple sources also retains references to those sources</li>
  *   <li><b>Parallel Processing:</b> The {@code forEach} family can read from several iterators and invoke the
  *       element consumer concurrently, configured through {@link IterateOptions}. The worker pool is created
  *       and shut down internally; no method in this class accepts an {@link java.util.concurrent.Executor}.
  *       To run on the library's shared executor, or one you supply, use
  *       {@link N#forEachInParallel(Iterator, Throwables.Consumer, int)} instead</li>
  *   <li><b>Null-Safe Operations:</b> Graceful handling of {@code null} inputs and empty iterators</li>
- *   <li><b>Functional Programming:</b> Comprehensive support for map, filter, reduce, and functional patterns</li>
+ *   <li><b>Functional Programming:</b> Support for mapping, filtering, and functional composition</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
  *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
  *   <li><b>Interoperability:</b> Every adapter returns a plain {@link java.util.Iterator} ({@link ObjIterator} or a
@@ -108,7 +108,7 @@ import lombok.experimental.Accessors;
  *       {@code concat(Map...)} are the exception: each source's iterator is obtained only once the previous
  *       source has been exhausted. {@link #repeatElements(Iterable, long)} goes the other way and additionally
  *       calls {@code hasNext()} on the iterator at construction to detect an empty source, so a source backed by
- *       I/O performs one read before the caller asks for anything; {@link #cycle(Iterable)} probes the same way,
+ *       I/O may perform reads before the caller asks for anything; {@link #cycle(Iterable)} probes the same way,
  *       and so does {@link #cycle(Iterable, long)} for a source that is not a {@link Collection}</li>
  *   <li><b>Consuming Operations:</b> Methods do not call {@link Iterator#remove()}, but they advance
  *       and therefore consume the supplied iterators</li>
@@ -726,9 +726,9 @@ public final class Iterators {
      * // Yields: 1, 1, 1, 2, 2, 2
      * }</pre>
      *
-     * <p><b>Note:</b> {@code c.iterator()} is obtained eagerly, when this method is called, and {@code hasNext()} is
-     * called on it once to detect an empty source - so a source backed by I/O performs one read before the caller
-     * pulls anything.</p>
+     * <p><b>Note:</b> when {@code n > 0}, {@code c.iterator()} is obtained eagerly and {@code hasNext()} is
+     * called on it once to detect an empty source. A source backed by I/O may therefore perform reads before
+     * the caller pulls anything. When {@code n == 0}, the source iterator is not obtained.</p>
      *
      * @param <T> the type of elements in the iterable.
      * @param c the iterable whose elements are to be repeated, or {@code null}/empty to return an empty iterator.
@@ -951,7 +951,7 @@ public final class Iterators {
      * ObjIterator<String> iter = Iterators.cycle(list);
      * // Yields: "A", "B", "C", "A", "B", "C", ... (infinitely)
      *
-     * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2, 3));
+     * Set<Integer> set = new LinkedHashSet<>(Arrays.asList(1, 2, 3));
      * ObjIterator<Integer> numbers = Iterators.cycle(set);
      * // Yields: 1, 2, 3, 1, 2, 3, ... (infinitely, in set iteration order)
      * }</pre>
@@ -1079,7 +1079,7 @@ public final class Iterators {
      * ObjIterator<String> iter = Iterators.cycle(list, 2);
      * // Yields: "A", "B", "C", "A", "B", "C"
      *
-     * Set<Integer> set = new HashSet<>(Arrays.asList(1, 2));
+     * Set<Integer> set = new LinkedHashSet<>(Arrays.asList(1, 2));
      * ObjIterator<Integer> numbers = Iterators.cycle(set, 3);
      * // Yields: 1, 2, 1, 2, 1, 2
      * }</pre>
@@ -1090,9 +1090,9 @@ public final class Iterators {
      * collection's own iterator contract: a fail-fast collection raises
      * {@link java.util.ConcurrentModificationException}, while one whose iterator does not fail fast picks up the
      * change on the next round - and, if the source has been emptied, ends the iteration early instead of walking
-     * the remaining rounds. Any other {@code Iterable} cannot be assumed to be re-iterable, so the first round is
-     * read through to the source and <b>snapshotted</b>: every element is retained for the lifetime of the
-     * returned iterator and later changes to the source are not visible.</p>
+     * the remaining rounds. For a non-{@code Collection} source and more than one requested round, the first
+     * round is read through to the source and <b>snapshotted</b>: every element is retained for later rounds,
+     * which do not see source changes. A single requested round wraps the source iterator without caching.</p>
      *
      * <p><b>Note:</b> {@code iterable.iterator()} is obtained eagerly, when this method is called, in order to
      * detect an empty source.</p>
@@ -2190,7 +2190,7 @@ public final class Iterators {
      * <pre>{@code
      * List<String> list1 = Arrays.asList("A", "B");
      * List<String> list2 = Arrays.asList("C", "D");
-     * Set<String> set = new HashSet<>(Arrays.asList("E", "F"));
+     * Set<String> set = new LinkedHashSet<>(Arrays.asList("E", "F"));
      * ObjIterator<String> iter = Iterators.concat(list1, list2, set);
      * // Yields: "A", "B", "C", "D", "E", "F"
      *
@@ -3284,7 +3284,7 @@ public final class Iterators {
     }
 
     /**
-     * Zips two iterators into a single {@code ObjIterator}, which will iterate over the elements of each iterator in parallel.
+     * Zips two iterators into a single {@code ObjIterator}, which will iterate over the elements of each iterator in matching positions on the calling thread.
      * The resulting elements are determined by the provided {@code BiFunction}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3338,7 +3338,7 @@ public final class Iterators {
     }
 
     /**
-     * Zips two {@code Iterable} objects into a single {@code ObjIterator}, which will iterate over the elements of each {@code Iterable} in parallel.
+     * Zips two {@code Iterable} objects into a single {@code ObjIterator}, which will iterate over the elements of each {@code Iterable} in matching positions on the calling thread.
      * The resulting elements are determined by the provided {@code BiFunction}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3372,7 +3372,7 @@ public final class Iterators {
     }
 
     /**
-     * Zips three iterators into a single {@code ObjIterator}, which will iterate over the elements of each iterator in parallel.
+     * Zips three iterators into a single {@code ObjIterator}, which will iterate over the elements of each iterator in matching positions on the calling thread.
      * The resulting elements are determined by the provided {@code TriFunction}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3428,7 +3428,7 @@ public final class Iterators {
     }
 
     /**
-     * Zips three {@code Iterable} objects into a single {@code ObjIterator}, which will iterate over the elements of each {@code Iterable} in parallel.
+     * Zips three {@code Iterable} objects into a single {@code ObjIterator}, which will iterate over the elements of each {@code Iterable} in matching positions on the calling thread.
      * The resulting elements are determined by the provided {@code TriFunction}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3467,7 +3467,7 @@ public final class Iterators {
 
     /**
      * Zips two Iterators into a single ObjIterator, using default values when one iterator is exhausted.
-     * This method can be used to combine two Iterators into one, which will iterate over the elements of each Iterator in parallel.
+     * This method can be used to combine two Iterators into one, which will iterate over the elements of each Iterator in matching positions on the calling thread.
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided BiFunction {@code zipFunction}.
      *
@@ -3526,7 +3526,7 @@ public final class Iterators {
 
     /**
      * Zips two Iterable objects into a single ObjIterator, using default values when one iterator is exhausted.
-     * This method can be used to combine two Iterable objects into one, which will iterate over the elements of each Iterable in parallel.
+     * This method can be used to combine two Iterable objects into one, which will iterate over the elements of each Iterable in matching positions on the calling thread.
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided BiFunction {@code zipFunction}.
      *
@@ -3563,7 +3563,7 @@ public final class Iterators {
 
     /**
      * Zips three Iterators into a single ObjIterator, using default values when one iterator is exhausted.
-     * This method can be used to combine three Iterators into one, which will iterate over the elements of each Iterator in parallel.
+     * This method can be used to combine three Iterators into one, which will iterate over the elements of each Iterator in matching positions on the calling thread.
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided TriFunction {@code zipFunction}.
      *
@@ -3631,7 +3631,7 @@ public final class Iterators {
 
     /**
      * Zips three Iterable objects into a single ObjIterator, using default values when one iterator is exhausted.
-     * This method can be used to combine three Iterable objects into one, which will iterate over the elements of each Iterable in parallel.
+     * This method can be used to combine three Iterable objects into one, which will iterate over the elements of each Iterable in matching positions on the calling thread.
      * When one iterator is exhausted, the provided default values are used.
      * The resulting elements are determined by the provided TriFunction <i>zipFunction</i>.
      *
@@ -5247,6 +5247,7 @@ public final class Iterators {
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
             final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E {
+        checkOffsetCount(offset, count);
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iter, offset, count, elementConsumer, Fn.emptyAction());
@@ -5283,6 +5284,7 @@ public final class Iterators {
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
+        checkOffsetCount(offset, count);
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
@@ -5318,8 +5320,9 @@ public final class Iterators {
      *
      * <p>The one exception to that symmetry is <i>cancellation</i>: if the calling thread is interrupted while it
      * waits for the workers, this method publishes the cancellation, interrupts them, waits up to one second for
-     * them to stop and then throws the {@link InterruptedException} wrapped in a {@code RuntimeException}. The
-     * wait is bounded so that a consumer which ignores interruption cannot pin the caller indefinitely.</p>
+     * them to stop and then throws {@link UncheckedInterruptedException}, retaining the interruption as its cause
+     * and restoring the calling thread's interrupt status. The wait is bounded so that a consumer which
+     * ignores interruption cannot pin the caller indefinitely.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5338,13 +5341,13 @@ public final class Iterators {
      * @param elementConsumer the action to perform for each selected element.
      * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}. Negative settings are rejected
      *         earlier, by {@code IterateOptions.builder()...build()}.
-     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
     public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final IterateOptions options,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E, UncheckedInterruptedException {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, UncheckedInterruptedException, E {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iter, options, elementConsumer, Fn.emptyAction());
@@ -5382,8 +5385,9 @@ public final class Iterators {
      *
      * <p>The one exception to that symmetry is <i>cancellation</i>: if the calling thread is interrupted while it
      * waits for the workers, this method publishes the cancellation, interrupts them, waits up to one second for
-     * them to stop and then throws the {@link InterruptedException} wrapped in a {@code RuntimeException}. The
-     * wait is bounded so that a consumer which ignores interruption cannot pin the caller indefinitely.</p>
+     * them to stop and then throws {@link UncheckedInterruptedException}, retaining the interruption as its cause
+     * and restoring the calling thread's interrupt status. The wait is bounded so that a consumer which
+     * ignores interruption cannot pin the caller indefinitely.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5405,15 +5409,15 @@ public final class Iterators {
      * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
      * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      *         Negative settings are rejected earlier, by {@code IterateOptions.builder()...build()}.
-     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final IterateOptions options,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
-            throws IllegalArgumentException, E, UncheckedInterruptedException, E2 {
+            throws IllegalArgumentException, UncheckedInterruptedException, E, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
@@ -5516,6 +5520,7 @@ public final class Iterators {
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset, final long count,
             final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E {
+        checkOffsetCount(offset, count);
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iterators, offset, count, elementConsumer, Fn.emptyAction());
@@ -5557,6 +5562,7 @@ public final class Iterators {
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
             final long count, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
             throws IllegalArgumentException, E, E2 {
+        checkOffsetCount(offset, count);
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
@@ -5598,8 +5604,9 @@ public final class Iterators {
      *
      * <p>The one exception to that symmetry is <i>cancellation</i>: if the calling thread is interrupted while it
      * waits for the workers, this method publishes the cancellation, interrupts them, waits up to one second for
-     * them to stop and then throws the {@link InterruptedException} wrapped in a {@code RuntimeException}. The
-     * wait is bounded so that a consumer which ignores interruption cannot pin the caller indefinitely.</p>
+     * them to stop and then throws {@link UncheckedInterruptedException}, retaining the interruption as its cause
+     * and restoring the calling thread's interrupt status. The wait is bounded so that a consumer which
+     * ignores interruption cannot pin the caller indefinitely.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5622,13 +5629,13 @@ public final class Iterators {
      * @param elementConsumer the action to perform for each selected element.
      * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}. Negative settings are rejected
      *         earlier, by {@code IterateOptions.builder()...build()}.
-     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
     public static <T, E extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators, final IterateOptions options,
-            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E, UncheckedInterruptedException {
+            final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, UncheckedInterruptedException, E {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEach(iterators, options, elementConsumer, Fn.emptyAction());
@@ -5674,8 +5681,9 @@ public final class Iterators {
      *
      * <p>The one exception to that symmetry is <i>cancellation</i>: if the calling thread is interrupted while it
      * waits for the workers, this method publishes the cancellation, interrupts them, waits up to one second for
-     * them to stop and then throws the {@link InterruptedException} wrapped in a {@code RuntimeException}. The
-     * wait is bounded so that a consumer which ignores interruption cannot pin the caller indefinitely.</p>
+     * them to stop and then throws {@link UncheckedInterruptedException}, retaining the interruption as its cause
+     * and restoring the calling thread's interrupt status. The wait is bounded so that a consumer which
+     * ignores interruption cannot pin the caller indefinitely.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5700,15 +5708,15 @@ public final class Iterators {
      * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
      * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      *         Negative settings are rejected earlier, by {@code IterateOptions.builder()...build()}.
-     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      * @see #forEach(Collection, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */
     public static <T, E extends Exception, E2 extends Exception> void forEach(final Collection<? extends Iterator<? extends T>> iterators,
             final IterateOptions options, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
-            throws IllegalArgumentException, E, UncheckedInterruptedException, E2 {
+            throws IllegalArgumentException, UncheckedInterruptedException, E, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
@@ -5845,17 +5853,17 @@ public final class Iterators {
      * @param elementConsumer the action to run for each selected element.
      * @param onComplete the action to run once every element has been processed.
      * @throws IllegalArgumentException if any numeric argument is negative, or either action is {@code null}.
-     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
     private static <T, E extends Exception, E2 extends Exception> void doForEach(final Iterator<? extends T> iter, final long offset, final long count,
             final int processThreads, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
-            throws IllegalArgumentException, E, UncheckedInterruptedException, E2 {
-        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
-        N.checkArgNotNull(onComplete, cs.onComplete);
+            throws IllegalArgumentException, UncheckedInterruptedException, E, E2 {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgument(processThreads >= 0 && queueSize >= 0, "'processThreads'=%s and 'queueSize'=%s cannot be negative", processThreads, queueSize);
+        N.checkArgNotNull(elementConsumer, cs.elementConsumer);
+        N.checkArgNotNull(onComplete, cs.onComplete);
 
         if (iter == null) {
             onComplete.run();
@@ -5905,13 +5913,13 @@ public final class Iterators {
      * @param elementConsumer the action to run for each selected element.
      * @param onComplete the action to run once every element has been processed.
      * @throws IllegalArgumentException if any numeric argument is negative, or either action is {@code null}.
-     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
     private static <T, E extends Exception, E2 extends Exception> void doForEach(final Collection<? extends Iterator<? extends T>> iterators, final long offset,
             final long count, final int readThreads, final int processThreads, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer,
-            final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, UncheckedInterruptedException, E2 {
+            final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, UncheckedInterruptedException, E, E2 {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgument(readThreads >= 0 && processThreads >= 0 && queueSize >= 0,
                 "'readThreads'=%s, 'processThreads'=%s and 'queueSize'=%s cannot be negative", readThreads, processThreads, queueSize);

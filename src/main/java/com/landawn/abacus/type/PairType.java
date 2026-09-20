@@ -166,7 +166,8 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * @param str the string to parse, expected to be a JSON array with exactly two elements
      * @return a Pair object created from the parsed values, or {@code null} if the input is {@code null} or empty (a
      *         blank, non-empty string is not treated as empty and is rejected)
-     * @throws IllegalArgumentException if the parsed value is not an array with exactly 2 elements (this includes a         blank string, unbalanced brackets and trailing text)
+     * @throws IllegalArgumentException if the parsed value is not an array with exactly 2 elements (this includes a
+     *         blank string, unbalanced brackets and trailing text)
      * @throws ParsingException if an element token is not valid JSON for its declared element type
      * @throws NumberFormatException if a numeric element token cannot be converted to the declared element type
      * @throws ArithmeticException if a numeric element is outside the range accepted by its declared type.
@@ -276,8 +277,8 @@ public class PairType<L, R> extends AbstractType<Pair<L, R>> {
      * runtime) handler is not {@linkplain Type#isSerializable() serializable} - a bean, a map, a {@code List<Object>} -
      * is written as embedded JSON (not as a quoted JSON string) when {@code config} is a {@code JsonSerConfig}; under any
      * other config its {@code stringOf} text is written with the writer's character escaping. A {@code null} element is
-     * written by its declared handler, so that handler's null-substitution flags apply. The result matches
-     * {@link #stringOf(Pair)} for every element shape.
+     * written by its declared handler, so that handler's null-substitution flags apply. The representation depends on the supplied configuration;
+     * quotation, date formats, and null substitution can differ from {@link #stringOf(Pair)}.
      * <p>
      * <b>serializeTo vs. appendTo:</b> {@code serializeTo} produces machine-readable JSON/XML (quoted and escaped),
      * whereas {@code appendTo} produces a plain, human-readable {@code toString()}-style rendering without JSON/XML

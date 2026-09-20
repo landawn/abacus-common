@@ -11,7 +11,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserUtil.XmlEmbeddedJsonConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
@@ -306,14 +309,15 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * Writes the character representation of a {@link Nullable} to a {@link CharacterWriter}.
      * This method is specifically designed for JSON/XML serialization.
      * <p>
-     * A {@code null} {@code Nullable}, an empty one and one holding {@code null} are all written by the declared
+     * With the default JSON policy, a {@code null} {@code Nullable}, an empty one and one holding {@code null} are all written by the declared
      * element type handler as a {@code null} value, so that handler's null-substitution flags apply:
      * {@code Nullable<Integer>} honours {@code config.isWriteNullNumberAsZero()} (written as {@code 0}),
      * {@code Nullable<Boolean>} honours {@code writeNullBooleanAsFalse} ({@code false}) and {@code Nullable<String>}
      * honours {@code writeNullStringAsEmpty} ({@code ""}); without such a flag the literal {@code null} is written.
      * A substituted value reads back as a {@code Nullable} holding that value. The XML serializers represent an empty
-     * or null-holding {@code Nullable} property with the {@code isNull="true"} attribute form rather than with the
-     * text written here.
+     * {@code Nullable} property with the {@code isNull="true"} attribute form rather than with the text written here.
+     * A present-null Nullable is rejected for XML, including embedded JSON, because its presence state cannot be
+     * preserved. Ordinary JSON serialization retains its default null handling.
      * <p>
      * A present {@code non-null} value is written by the declared element type handler. When the declared element
      * type is {@code Object} the handler of the value's runtime class is used instead, so {@code Nullable.of(1)} inside
@@ -330,11 +334,16 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      * @param config the serialization configuration, may be {@code null}
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
+     * @throws ParsingException if this is a present-null Nullable and the configuration is XML or its internal embedded-JSON configuration
      * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
     public void serializeTo(final CharacterWriter writer, final Nullable<T> x, final JsonXmlSerConfig<?> config)
             throws NullPointerException, IOException, RuntimeException {
+        // Check at the value serializer so nested JSON payloads enforce XML's policy in the same traversal.
+        if (x != null && x.isPresent() && x.get() == null && (config instanceof XmlSerConfig || config instanceof XmlEmbeddedJsonConfig)) {
+            throw new ParsingException("Cannot serialize Nullable.of(null) distinctly from Nullable.empty()");
+        }
         AbstractTupleType.serializeSlot(writer, elementType, (x == null || x.isNull()) ? null : x.get(), config);
     }
 }

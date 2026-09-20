@@ -201,6 +201,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * @param appendable the target to write to
      * @param x the {@code Map.Entry} to append, may be {@code null}
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the entry delimiters, key, value or null literal fails, or flushing the temporary writer fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -213,7 +214,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Map.Entry<K, V> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Map.Entry<K, V> x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -282,10 +283,11 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @param writer the {@code CharacterWriter} to write to
      * @param x the {@code Map.Entry} to write, may be {@code null}
      * @param config the serialization configuration used when writing the key and value; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the entry delimiters, key, value or null literal to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -336,8 +338,10 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @param valueTypeName the name of the value type
      * @param isDeclaringName {@code true} to use declaring (simple) names; {@code false} for canonical names
      * @return the formatted type name string, e.g. {@code "Map.Entry<String, Integer>"}
+     * @throws IllegalArgumentException if {@code keyTypeName} or {@code valueTypeName} is {@code null}, blank, or
+     *         structurally invalid.
      */
-    protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return "Map.Entry" + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;

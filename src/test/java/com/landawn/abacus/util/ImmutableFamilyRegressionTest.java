@@ -47,7 +47,7 @@ import com.landawn.abacus.type.TypeFactory;
 public class ImmutableFamilyRegressionTest extends TestBase {
 
     @Nested
-    public class CopyOfNormalizesComparatorSemantics {
+    public class CopyOfNormalizesComparatorSemantics extends TestBase {
 
         private SortedMap<String, Integer> caseInsensitiveMap() {
             final SortedMap<String, Integer> m = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -222,7 +222,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // checkArgNotNull and therefore throws IllegalArgumentException.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class BiMapReplaceAllRejectsANullFunctionWithNpe {
+    public class BiMapReplaceAllRejectsANullFunctionWithNpe extends TestBase {
 
         @Test
         public void nullFunctionThrowsNullPointerException() {
@@ -272,7 +272,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // argument produced an IllegalArgumentException whose getMessage() was null.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class BuilderNullHolderNamesTheArgument {
+    public class BuilderNullHolderNamesTheArgument extends TestBase {
 
         private void assertNamedIae(final String expectedName, final Executable call) {
             final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
@@ -313,7 +313,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // super() is now a compile error.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class NoAmbiguousTwoArgumentConstructors {
+    public class NoAmbiguousTwoArgumentConstructors extends TestBase {
 
         private void assertNoTwoArgConstructor(final Class<?> type) {
             for (final Constructor<?> c : type.getDeclaredConstructors()) {
@@ -376,7 +376,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // AbstractImmutableMap, re-wrapping views the BiMap already publishes as immutable.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class ImmutableBiMapViewsAreItsBiMapsOwnImmutableSets {
+    public class ImmutableBiMapViewsAreItsBiMapsOwnImmutableSets extends TestBase {
 
         @Test
         public void allThreeViewsAreImmutableSets() {
@@ -474,7 +474,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // AbstractImmutableMap which delegates both.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class BiMapDelegatesForEachAndGetOrDefault {
+    public class BiMapDelegatesForEachAndGetOrDefault extends TestBase {
 
         @Test
         public void forEachVisitsEveryEntryInForwardMapOrder() {
@@ -595,7 +595,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // O2 - BiMap.copyOf(null) allocated both backing maps and their suppliers before putAll rejected null.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class BiMapCopyOfRejectsNullUpFront {
+    public class BiMapCopyOfRejectsNullUpFront extends TestBase {
 
         @Test
         public void nullSourceThrowsNullPointerException() {
@@ -630,7 +630,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // empty instance instead of returning the singleton itself.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class TheEmptyImmutableBiMapIsItsOwnInverse {
+    public class TheEmptyImmutableBiMapIsItsOwnInverse extends TestBase {
 
         @Test
         public void emptyInverseIsTheSingleton() {
@@ -667,7 +667,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // Javadoc-driven behaviours corrected in this pass; pinned so the docs cannot drift from the code.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class DocumentedBehaviours {
+    public class DocumentedBehaviours extends TestBase {
 
         @Test
         public void immutableMapOfKeepsTheLastValueForARepeatedKey() {
@@ -737,7 +737,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     }
 
     @Nested
-    public class ImmutableTypeNamesResolveBySimpleName {
+    public class ImmutableTypeNamesResolveBySimpleName extends TestBase {
 
         private final List<Class<?>> family = List.of(ImmutableList.class, ImmutableSet.class, ImmutableMap.class, ImmutableCollection.class,
                 ImmutableSortedSet.class, ImmutableNavigableSet.class, ImmutableSortedMap.class, ImmutableNavigableMap.class, ImmutableBiMap.class);
@@ -880,7 +880,7 @@ public class ImmutableFamilyRegressionTest extends TestBase {
     // times in its javadoc. ImmutableBiMap claimed nothing either way, so the divergence was invisible.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class ImmutableBiMapOfPreservesInsertionOrder {
+    public class ImmutableBiMapOfPreservesInsertionOrder extends TestBase {
 
         // Keys chosen so that HashMap order differs from insertion order (it used to yield
         // [zeta, mu, beta, omega, alpha]).

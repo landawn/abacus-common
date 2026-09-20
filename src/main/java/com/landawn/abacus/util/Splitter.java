@@ -41,7 +41,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p>Splitter supports multiple delimiter types including single characters, multi-character strings,
  * and regular expression patterns. It provides sophisticated preprocessing options such as trimming
- * whitespace, stripping Unicode whitespace, omitting empty results, and limiting the number of splits.
+ * whitespace, stripping Unicode whitespace, omitting empty results, and limiting the number of results.
  * The class integrates seamlessly with the Stream API and Collections Framework for functional
  * programming patterns and efficient data processing pipelines.</p>
  *
@@ -64,7 +64,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Multiple Delimiter Types:</b> Characters, strings, and regex patterns for flexible parsing</li>
  *   <li><b>Whitespace Handling:</b> Built-in trimming and Unicode-aware whitespace stripping</li>
  *   <li><b>Empty String Management:</b> Option to omit empty results from split operations</li>
- *   <li><b>Result Limiting:</b> Control maximum number of splits with configurable limits</li>
+ *   <li><b>Result Limiting:</b> Control the maximum number of returned substrings with configurable limits</li>
  *   <li><b>Type Conversion:</b> Direct conversion to target types with Type/Class support</li>
  *   <li><b>Stream Integration:</b> Lazy evaluation with Stream API for memory-efficient processing</li>
  *   <li><b>Collection Flexibility:</b> Output to any Collection type with custom suppliers</li>
@@ -138,7 +138,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li>{@link #omitEmptyStrings()} - Skip empty results in output</li>
  *   <li>{@link #trimResults()} - Remove leading/trailing space characters only</li>
  *   <li>{@link #stripResults()} - Remove leading/trailing whitespace per {@link Character#isWhitespace(char)}</li>
- *   <li>{@link #limit(int)} - Limit maximum number of splits performed</li>
+ *   <li>{@link #limit(int)} - Limit the maximum number of returned substrings</li>
  * </ul>
  *
  * <p><b>Output Methods:</b>
@@ -169,7 +169,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li>Character splitting: O(n) time, O(k) space where n is input length, k is result count</li>
+ *   <li>Character splitting: O(n) time and O(n + k) result space where n is input length and k is result count</li>
  *   <li>String splitting: O(n*m) time where m is delimiter length</li>
  *   <li>Pattern splitting: runtime depends on the supplied {@link Pattern}, including any regex backtracking</li>
  *   <li>Memory usage: Lazy evaluation reduces memory footprint for stream operations</li>
@@ -1525,8 +1525,8 @@ public final class Splitter {
      * each substring as it is produced, without creating an intermediate collection,
      * making it memory-efficient for large inputs.
      *
-     * <p>This method provides lazy evaluation - the action is applied to each
-     * substring immediately as it's split, without storing all results in memory.</p>
+     * <p>This call splits and processes the input before returning. The action is applied to each
+     * substring as it is produced, without storing all results in memory.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1582,7 +1582,7 @@ public final class Splitter {
      * strings into Map objects, with support for various configuration options
      * such as trimming, stripping whitespace, and omitting empty entries.</p>
      *
-     * <p>Two behaviours are fixed when a MapSplitter is created:</p>
+     * <p>A new MapSplitter has the following defaults:</p>
      * <ul>
      *   <li>Empty entry strings are omitted &mdash; call {@link #omitEmptyStrings(boolean)
      *       omitEmptyStrings(false)} to keep them</li>
@@ -2612,8 +2612,9 @@ public final class Splitter {
      *
      * <p>The order of those three steps is the contract: a token is materialized (and therefore trimmed or
      * stripped) first, then dropped if it is empty and empty tokens are omitted, and only then counted
-     * against the limit. Tokens dropped by {@code omitEmptyStrings()} therefore neither consume the limit
-     * nor survive inside the final element.</p>
+     * against the limit. Tokens dropped before the final element starts do not consume the limit.
+     * Once the final retained token is found, its result includes the remaining input without further
+     * tokenization, so internal delimiters and empty fields in that remainder are retained.</p>
      */
     abstract static class SplitIterator extends ObjIterator<String> {
 

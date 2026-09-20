@@ -11,8 +11,10 @@ import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class Lz4ZeroReadTest {
+public class Lz4ZeroReadTest extends TestBase {
     @Test
     void zeroReadsValidateWithoutTouchingTheSource() throws IOException {
         try (final var input = new LZ4BlockInputStream(new InputStream() {

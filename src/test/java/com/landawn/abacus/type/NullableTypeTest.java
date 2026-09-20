@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -16,17 +17,55 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserUtil.XmlEmbeddedJsonConfig;
+import com.landawn.abacus.parser.XmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Holder;
+import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.u.Nullable;
 
 public class NullableTypeTest extends TestBase {
+
+    @ParameterizedTest
+    @ValueSource(strings = { "nullable", "holder", "tuple" })
+    public void directValueWritersKeepXmlPresencePolicyInsideStructuredSlots(final String shape) throws IOException {
+        final Type<?> type = Type.of(switch (shape) {
+            case "nullable" -> "Nullable<Integer>";
+            case "holder" -> "Holder<Map<String, Nullable<Integer>>>";
+            case "tuple" -> "Tuple1<Map<String, Nullable<Integer>>>";
+            default -> throw new AssertionError(shape);
+        });
+        for (final JsonXmlSerConfig<?> config : List.of(XmlSerConfig.create().setWriteNullNumberAsZero(true),
+                new XmlEmbeddedJsonConfig().setWriteNullNumberAsZero(true))) {
+            // Type.serializeTo is public too: bypassing XmlParser must not bypass its presence guard.
+            assertThrows(ParsingException.class, () -> reviewFixes20260906_ser(type, nullableSlot(shape, Nullable.of((Integer) null)), config));
+            assertNotNull(reviewFixes20260906_ser(type, nullableSlot(shape, Nullable.empty()), config));
+            assertTrue(reviewFixes20260906_ser(type, nullableSlot(shape, Nullable.of(7)), config).contains("7"));
+        }
+        // Ordinary JSON deliberately keeps its existing present-null handling.
+        assertTrue(reviewFixes20260906_ser(type, nullableSlot(shape, Nullable.of((Integer) null)), JsonSerConfig.create()).contains("null"));
+        assertTrue(reviewFixes20260906_ser(type, nullableSlot(shape, Nullable.empty()), JsonSerConfig.create()).contains("null"));
+    }
+
+    private static Object nullableSlot(final String shape, final Nullable<Integer> value) {
+        return switch (shape) {
+            case "nullable" -> value;
+            case "holder" -> Holder.of(Map.of("value", value));
+            case "tuple" -> Tuple.of(Map.of("value", value));
+            default -> throw new AssertionError(shape);
+        };
+    }
 
     @Test
     public void testHolderTypeJdbcPrimitiveValuesDistinguishSqlNullFromZero() throws SQLException {
@@ -334,7 +373,8 @@ public class NullableTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -435,8 +475,7 @@ public class NullableTypeTest extends TestBase {
         bean.x = 3;
 
         assertEquals("{\"x\": 3}", reviewFixes20260906_ser(Type.of("Holder<" + ReviewFixesHolderBean.class.getCanonicalName() + ">"), Holder.of(bean), jsc));
-        assertEquals("{\"k\": 1}",
-                reviewFixes20260906_ser(Type.of("Holder<Map<String, Integer>>"), Holder.of(com.landawn.abacus.util.N.asMap("k", 1)), jsc));
+        assertEquals("{\"k\": 1}", reviewFixes20260906_ser(Type.of("Holder<Map<String, Integer>>"), Holder.of(com.landawn.abacus.util.N.asMap("k", 1)), jsc));
         assertEquals("[\"a\"]", reviewFixes20260906_ser(Type.of("Holder<List<String>>"), Holder.of(com.landawn.abacus.util.N.asList("a")), jsc));
 
         // An Object slot still dispatches on the runtime class, exactly as the other single-slot wrappers do.

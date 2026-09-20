@@ -7,8 +7,11 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -33,6 +36,7 @@ import org.w3c.dom.Node;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlField;
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.type.AbstractStringType;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.util.BufferedXmlWriter;
 import com.landawn.abacus.util.DateTimeFormat;
@@ -52,6 +56,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 public class XmlParserImplTest extends TestBase {
+    private static java.util.Set<Class<?>> approvedTypes() {
+        final java.util.Set<Class<?>> types = new java.util.HashSet<>(java.util.Arrays.asList(XmlParserImplTest.class.getDeclaredClasses()));
+        types.add(java.time.DayOfWeek.class);
+        return types;
+    }
 
     private XmlParserImpl staxParser;
     private XmlParserImpl domParser;
@@ -61,8 +70,8 @@ public class XmlParserImplTest extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        staxParser = new XmlParserImpl(XmlParserType.StAX);
-        domParser = new XmlParserImpl(XmlParserType.DOM);
+        staxParser = new XmlParserImpl(XmlParserType.StAX, null, null, approvedTypes());
+        domParser = new XmlParserImpl(XmlParserType.DOM, null, null, approvedTypes());
     }
 
     @Data
@@ -233,8 +242,8 @@ public class XmlParserImplTest extends TestBase {
 
     @Test
     public void testConstructor() {
-        Assertions.assertNotNull(new XmlParserImpl(XmlParserType.StAX));
-        Assertions.assertNotNull(new XmlParserImpl(XmlParserType.DOM));
+        Assertions.assertNotNull(new XmlParserImpl(XmlParserType.StAX, null, null, approvedTypes()));
+        Assertions.assertNotNull(new XmlParserImpl(XmlParserType.DOM, null, null, approvedTypes()));
         XmlSerConfig xsc = new XmlSerConfig();
         XmlDeserConfig xdc = new XmlDeserConfig();
         Assertions.assertNotNull(new XmlParserImpl(XmlParserType.StAX, xsc, xdc));
@@ -371,8 +380,8 @@ public class XmlParserImplTest extends TestBase {
 
         Assertions.assertThrows(ParsingException.class, () -> staxParser.serialize(new EmptyBean()));
         XmlSerConfig failOff = new XmlSerConfig().setFailOnEmptyBean(false);
-        Assertions.assertEquals("", staxParser.serialize(new EmptyBean(), failOff));
-        Assertions.assertEquals("", new XmlParserImpl(XmlParserType.StAX, failOff, null).serialize(new EmptyBean()));
+        Assertions.assertEquals("<emptyBean></emptyBean>", staxParser.serialize(new EmptyBean(), failOff));
+        Assertions.assertEquals("<emptyBean></emptyBean>", new XmlParserImpl(XmlParserType.StAX, failOff, null).serialize(new EmptyBean()));
     }
 
     @Test
@@ -1115,6 +1124,78 @@ public class XmlParserImplTest extends TestBase {
         }
     }
 
+    @Test
+    public void emptyScalarElementsRetainEmptyStringsAndTypeDefaults() {
+        // Expected values are explicit: an empty element is not the same as an explicit null marker,
+        // and different scalar handlers intentionally have different empty-string policies.
+        final Object[][] scalarCases = { { BigDecimal.class, null, "12.50", new BigDecimal("12.50") },
+                { BigInteger.class, null, "12345678901234567890", new BigInteger("12345678901234567890") }, { float.class, 0F, "1.25", 1.25F },
+                { Float.class, null, "1.25", 1.25F }, { double.class, 0D, "1.25", 1.25D }, { Double.class, null, "1.25", 1.25D },
+                { boolean.class, false, "true", true }, { Boolean.class, null, "true", true }, { char.class, '\0', "A", 'A' },
+                { Character.class, null, "A", 'A' }, { Date.class, null, "10000", new Date(10000L) },
+                { Instant.class, null, "2024-01-02T03:04:05Z", Instant.parse("2024-01-02T03:04:05Z") },
+                { LocalDate.class, null, "2024-01-02", LocalDate.of(2024, 1, 2) }, { DayOfWeek.class, null, "MONDAY", DayOfWeek.MONDAY } };
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final String elements = "<e/><e></e><e type=\"String\"/><e isNull=\"true\"/>";
+            Assertions.assertEquals(Arrays.asList("", "", "", null), parser.deserialize("<list>" + elements + "</list>", List.class));
+            Assertions.assertArrayEquals(new String[] { "", "", "", null }, parser.deserialize("<array>" + elements + "</array>", String[].class));
+            Assertions.assertEquals(Arrays.asList(0, 0L, null),
+                    parser.deserialize("<list><e type=\"int\"/><e type=\"long\"/><e type=\"Integer\"/></list>", List.class));
+            final TestBean bean = parser.deserialize("<TestBean><tags>" + elements + "</tags></TestBean>", TestBean.class);
+            Assertions.assertEquals(Arrays.asList("", "", "", null), bean.getTags());
+
+            // Map and MapEntity properties have their own scalar-element loops.
+            final XmlDeserConfig config = XmlDeserConfig.create().setValueType("tags", "List<String>");
+            final String nested = "<root><tags>" + elements + "</tags></root>";
+            final Map<?, ?> map = parser.deserialize(nested, config, Map.class);
+            Assertions.assertEquals(Arrays.asList("", "", "", null), map.get("tags"));
+            final MapEntity entity = parser.deserialize(nested, config, MapEntity.class);
+            Assertions.assertEquals(Arrays.asList("", "", "", null), entity.get("tags"));
+
+            for (final Object[] scalarCase : scalarCases) {
+                final Class<?> scalarClass = (Class<?>) scalarCase[0];
+                final XmlDeserConfig scalarConfig = XmlDeserConfig.create().setElementType(scalarClass);
+                final String scalarElements = "<e/><e></e><e><![CDATA[]]></e><e isNull=\"true\"/><e>" + scalarCase[2] + "</e>";
+                final List<?> expected = Arrays.asList(scalarCase[1], scalarCase[1], scalarCase[1], null, scalarCase[3]);
+                Assertions.assertEquals(expected, parser.deserialize("<list>" + scalarElements + "</list>", scalarConfig, List.class), scalarClass.getName());
+                Assertions.assertArrayEquals(expected.toArray(), parser.deserialize("<array>" + scalarElements + "</array>", scalarConfig, Object[].class),
+                        scalarClass.getName());
+            }
+        }
+    }
+
+    @Test
+    public void emptyScalarElementsHonorCustomTypeRejection() {
+        final Type<String> rejectingEmptyType = new AbstractStringType("RejectEmptyXmlScalar") {
+            @Override
+            public String valueOf(final String str) {
+                if (str != null && str.isEmpty()) {
+                    throw new IllegalArgumentException("Empty XML scalar is not allowed");
+                }
+
+                return str;
+            }
+        };
+        final XmlDeserConfig config = XmlDeserConfig.create().setElementType(rejectingEmptyType);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            for (final String element : new String[] { "<e/>", "<e></e>", "<e><![CDATA[]]></e>" }) {
+                final IllegalArgumentException listFailure = Assertions.assertThrows(IllegalArgumentException.class,
+                        () -> parser.deserialize("<list>" + element + "</list>", config, List.class));
+                Assertions.assertEquals("Empty XML scalar is not allowed", listFailure.getMessage());
+                final IllegalArgumentException arrayFailure = Assertions.assertThrows(IllegalArgumentException.class,
+                        () -> parser.deserialize("<array>" + element + "</array>", config, Object[].class));
+                Assertions.assertEquals("Empty XML scalar is not allowed", arrayFailure.getMessage());
+            }
+
+            // Explicit null bypasses conversion; ordinary nonempty text still reaches the handler.
+            Assertions.assertEquals(Arrays.asList(null, "ok"), parser.deserialize("<list><e isNull=\"true\"/><e>ok</e></list>", config, List.class));
+            Assertions.assertArrayEquals(new Object[] { null, "ok" },
+                    parser.deserialize("<array><e isNull=\"true\"/><e>ok</e></array>", config, Object[].class));
+        }
+    }
+
     /**
      * P5-06: an {@code isJsonRawValue} payload was written without any escaping, so any JSON holding
      * {@code <}, {@code &} or {@code ]]>} produced a document neither backend could read.
@@ -1181,12 +1262,10 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> staxParser.serialize(new Object[] { new TestBean("a", 1), "v" + (char) 1 }));
         Assertions.assertThrows(ParsingException.class, () -> staxParser.serialize(Arrays.asList(new TestBean("a", 1), "v" + (char) 1)));
 
-        // An unset char has no XML representation either; it is written as an empty element and read back as 0.
+        // An unset char has no XML representation when explicitly included by Exclusion.NONE.
         final PrimitiveBean primitives = new PrimitiveBean();
-        final String xml = staxParser.serialize(primitives, XmlSerConfig.create().setExclusion(Exclusion.NONE));
-        Assertions.assertTrue(xml.contains("<charVal></charVal>"), xml);
         for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
-            Assertions.assertEquals((char) 0, parser.deserialize(xml, null, PrimitiveBean.class).getCharVal(), xml);
+            Assertions.assertThrows(ParsingException.class, () -> parser.serialize(primitives, XmlSerConfig.create().setExclusion(Exclusion.NONE)));
         }
     }
 
@@ -1300,8 +1379,7 @@ public class XmlParserImplTest extends TestBase {
         // still returned. It is not left intact: the StAX reader buffers ahead, so these small sources are
         // read to EOF and a large one would be left mid-token -- a second document cannot be read from it.
         Assertions.assertEquals("a", staxParser.deserialize(new StringReader(valid + "<testBean/>"), null, TestBean.class).getName());
-        Assertions.assertEquals("a",
-                staxParser.deserialize(new ByteArrayInputStream((valid + "<testBean/>").getBytes()), null, TestBean.class).getName());
+        Assertions.assertEquals("a", staxParser.deserialize(new ByteArrayInputStream((valid + "<testBean/>").getBytes()), null, TestBean.class).getName());
     }
 
     /**
@@ -1358,6 +1436,8 @@ public class XmlParserImplTest extends TestBase {
         empty.setOi(Optional.empty());
         empty.setOi2(OptionalInt.empty());
         empty.setN(Nullable.of(null));
+        Assertions.assertThrows(ParsingException.class, () -> staxParser.serialize(empty));
+        empty.setN(Nullable.empty());
         empty.setP(Pair.of("a,b", 1));
         empty.setT(Tuple.of("x,y", 2));
 
@@ -1448,8 +1528,9 @@ public class XmlParserImplTest extends TestBase {
     }
 
     /**
-     * P5-09 (documented, not changed): an element with no text yields the property default with the StAX parser
-     * type and an empty String with the DOM parser type. Pinned so the divergence cannot change unnoticed.
+     * P5-09 (documented, not changed): a named bean-property element with no text yields the property default
+     * with StAX and an empty String with DOM. This leaf-property convention is separate from the scalar
+     * {@code <e>} wrappers inside arrays/collections, which both backends convert from the empty string.
      */
     @Test
     public void reviewFixes20260906_emptyElementConventionIsBackendSpecific() {
@@ -1464,6 +1545,7 @@ public class XmlParserImplTest extends TestBase {
         Assertions.assertNull(staxParser.deserialize(nullMarker, null, TestBean.class).getName());
         Assertions.assertNull(domParser.deserialize(nullMarker, null, TestBean.class).getName());
     }
+
     /**
      * Self-review R2 of P5-02: the StAX MAP branch resolved a key from the element's local name only, so a
      * {@code tagByPropertyName=false} document read into a {@code Map} (directly, or as an untyped nested value
@@ -1529,6 +1611,8 @@ public class XmlParserImplTest extends TestBase {
         map.put("emptyInt", OptionalInt.empty());
         map.put("presentInt", OptionalInt.of(3));
         map.put("nullableNull", Nullable.of(null));
+        Assertions.assertThrows(ParsingException.class, () -> staxParser.serialize(map));
+        map.put("nullableNull", Nullable.empty());
 
         for (final boolean typeInfo : new boolean[] { false, true }) {
             final String xml = staxParser.serialize(map, XmlSerConfig.create().setWriteTypeInfo(typeInfo));
@@ -1579,7 +1663,7 @@ public class XmlParserImplTest extends TestBase {
     public void reviewFixes20260907_optionalCollectionElementsUseTheNullMarker() {
         final TestBean bean = new TestBean("b", 1);
         final MixedBean mixed = new MixedBean();
-        mixed.setObjs(new Object[] { bean, Optional.empty(), Optional.of(7), Nullable.of(null) });
+        mixed.setObjs(new Object[] { bean, Optional.empty(), Optional.of(7), Nullable.empty() });
         mixed.setLos(new ArrayList<>(Arrays.asList(bean, Optional.empty(), OptionalInt.of(9))));
 
         for (final boolean typeInfo : new boolean[] { false, true }) {
@@ -1840,8 +1924,7 @@ public class XmlParserImplTest extends TestBase {
             Assertions.assertEquals("<map><null>v1</null><k>v2</k></map>", parser.serialize(withNullKey));
 
             // filtered under the name the reader gives it back as
-            Assertions.assertEquals("<map><k>v2</k></map>",
-                    parser.serialize(withNullKey, new XmlSerConfig().setIgnoredPropNames(Map.class, N.asSet("null"))));
+            Assertions.assertEquals("<map><k>v2</k></map>", parser.serialize(withNullKey, new XmlSerConfig().setIgnoredPropNames(Map.class, N.asSet("null"))));
 
             // a Set that rejects a null argument - the shape ParserConfig's own javadoc uses - no longer throws
             Assertions.assertEquals("<map><null>v1</null></map>",
@@ -1955,8 +2038,7 @@ public class XmlParserImplTest extends TestBase {
                     Assertions.assertThrows(ParsingException.class, () -> parser.serialize(surrogate)).getMessage());
 
             // a property that is not written still cannot make serialization fail
-            Assertions.assertEquals("<bean name=\"controlCharXmlPropNameBean\"></bean>",
-                    parser.serialize(new ControlCharXmlPropNameBean(), generic));
+            Assertions.assertEquals("<bean name=\"controlCharXmlPropNameBean\"></bean>", parser.serialize(new ControlCharXmlPropNameBean(), generic));
 
             // and a name that only needs ESCAPING is still written, and still round-trips
             final MarkupXmlPropNameBean markup = new MarkupXmlPropNameBean();

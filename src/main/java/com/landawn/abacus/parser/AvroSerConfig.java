@@ -24,7 +24,7 @@ import com.landawn.abacus.util.N;
  * This class extends {@link SerializationConfig} and adds the Avro {@link Schema} required for
  * serializing types that are not {@code SpecificRecord} instances.
  *
- * <p><b>Settings applied by {@link AvroParser}:</b> only {@link #getSchema()}/{@link #setSchema(Schema)}.
+ * <p><b>Settings applied by {@link AvroParser}:</b> {@link #getSchema()}/{@link #setSchema(Schema)} and {@link #setIgnoreUnknownFields(boolean)}.
  * Inherited options such as exclusion and skip-transient are not consulted; Avro field inclusion is
  * driven by the schema and the Avro type model.</p>
  *
@@ -49,6 +49,27 @@ import com.landawn.abacus.util.N;
 public class AvroSerConfig extends SerializationConfig<AvroSerConfig> {
 
     private Schema schema;
+
+    private boolean ignoreUnknownFields;
+
+    /**
+     * Returns whether source bean/map fields absent from the Avro record schema may be discarded.
+     * @return true for explicit projection mode; false (the default) for strict field validation
+     */
+    public boolean isIgnoreUnknownFields() {
+        return ignoreUnknownFields;
+    }
+
+    /**
+     * Enables explicit projection of source beans/maps onto the record schema, including nested records.
+     * By default, unknown fields fail serialization with the field and schema names, even when their values are null.
+     * @param ignoreUnknownFields whether to discard source fields absent from the schema
+     * @return this configuration
+     */
+    public AvroSerConfig setIgnoreUnknownFields(final boolean ignoreUnknownFields) {
+        this.ignoreUnknownFields = ignoreUnknownFields;
+        return this;
+    }
 
     /**
      * Constructs a new instance of {@code AvroSerConfig} with default settings.
@@ -85,7 +106,8 @@ public class AvroSerConfig extends SerializationConfig<AvroSerConfig> {
 
     /**
      * Sets the Avro {@link Schema} for serialization.
-     * The schema is required for serializing objects that are not {@code SpecificRecord} instances.
+     * For a non-null value, the schema is required unless the value is a {@code SpecificRecord} or a nonempty,
+     * homogeneous collection of non-null {@code SpecificRecord}s. An empty collection requires an explicit schema.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -108,21 +130,21 @@ public class AvroSerConfig extends SerializationConfig<AvroSerConfig> {
     /**
      * Computes a hash code for this configuration based on its settings.
      *
-     * <p>The hash code combines the schema setting with the hash code of the settings
+     * <p>The hash code combines the schema and unknown-field policy with the hash code of the settings
      * inherited from the parent class.</p>
      *
      * @return a hash code value for this configuration
      */
     @Override
     public int hashCode() {
-        return 31 * super.hashCode() + N.hashCode(schema);
+        return 31 * (31 * super.hashCode() + N.hashCode(schema)) + Boolean.hashCode(ignoreUnknownFields);
     }
 
     /**
      * Compares this configuration with another object for equality.
      * Two configurations are considered equal if they are of exactly the same class, all settings
      * inherited from the parent class are equal (see {@link SerializationConfig#equals(Object)}),
-     * and they have the same schema.
+     * and they have the same schema and unknown-field policy.
      *
      * @param obj the object to compare with
      * @return {@code true} if the objects are equal, {@code false} otherwise
@@ -130,21 +152,22 @@ public class AvroSerConfig extends SerializationConfig<AvroSerConfig> {
     @SuppressFBWarnings
     @Override
     public boolean equals(final Object obj) {
-        return this == obj || (obj instanceof AvroSerConfig other && super.equals(obj) && N.equals(schema, other.schema));
+        return this == obj || (obj instanceof AvroSerConfig other && super.equals(obj) && N.equals(schema, other.schema)
+                && ignoreUnknownFields == other.ignoreUnknownFields);
     }
 
     /**
      * Returns a string representation of this configuration.
      *
      * <p>The string includes all configuration settings in the format:
-     * {@code {ignoredPropNames=..., exclusion=..., skipTransientField=..., schema=...}}</p>
+     * {@code {ignoredPropNames=..., exclusion=..., skipTransientField=..., schema=..., ignoreUnknownFields=...}}</p>
      *
      * @return a string representation of this configuration
      */
     @Override
     public String toString() {
         return "{ignoredPropNames=" + N.toString(getIgnoredPropNames()) + ", exclusion=" + N.toString(getExclusion()) + ", skipTransientField="
-                + N.toString(isSkipTransientField()) + ", schema=" + N.toString(schema) + "}";
+                + N.toString(isSkipTransientField()) + ", schema=" + N.toString(schema) + ", ignoreUnknownFields=" + ignoreUnknownFields + "}";
     }
 
     /**
@@ -153,8 +176,7 @@ public class AvroSerConfig extends SerializationConfig<AvroSerConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AvroSerConfig config = AvroSerConfig.create()
-     *     .setSchema(schema)
-     *     .setSkipTransientField(true);
+     *     .setSchema(schema);
      * }</pre>
      *
      * @return a new {@code AvroSerConfig} instance

@@ -88,7 +88,8 @@ public final class Objectory {
 
     /**
      * The default buffer size used by the {@code char[]}, {@code byte[]}, {@link StringBuilder} and
-     * {@link ByteArrayOutputStream} factories. Only buffers of exactly this length are eligible for pooling.
+     * {@link ByteArrayOutputStream} factories. Only {@code char[]} and {@code byte[]} buffers of exactly this
+     * length are eligible for pooling; builders and output streams may have smaller capacities.
      *
      * <p><b>Units.</b> The expression below is {@code clamp(IOUtil.MAX_MEMORY_IN_MB, 16 * KB, 128 * KB)}:
      * {@link IOUtil#MAX_MEMORY_IN_MB} is a megabyte count, but it is used here as a raw scaling number

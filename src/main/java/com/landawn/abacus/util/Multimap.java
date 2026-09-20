@@ -348,7 +348,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <ul>
      *   <li>If the key has never been added: returns {@code null}</li>
      *   <li>If all values for the key have been removed: returns {@code null} (key is removed from map)</li>
-     *   <li>If the key exists with values: returns mutable collection</li>
+     *   <li>If the key exists with values: returns its stored collection</li>
      * </ul>
      *
      * <p><b>This is DIFFERENT from Guava's Multimap</b> which returns an empty collection
@@ -396,7 +396,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * {@link #removeEntry(Object, Object)}, {@link #removeAll(Object)} - which maintain the invariant.</p>
      *
      * @param key the key whose associated values are to be returned
-     * @return the mutable collection of values for the key, or {@code null} if the key is not present
+     * @return the stored collection of values for the key, or {@code null} if the key is not present;
+     *         its supported mutations depend on the configured or wrapped collection
      * @see #containsKey(Object)
      * @see #getOrDefault(Object, Collection)
      */
@@ -939,7 +940,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * }</pre>
      *
      * <p><b>Note:</b> The returned collection is the actual collection that was stored
-     * in the Multimap, not a copy. Modifying it after removal may lead to unexpected behavior.</p>
+     * in the Multimap, not a copy. The mapping is removed, but other references to that collection
+     * still observe changes to it.</p>
      *
      * @param key the key whose entire mapping is to be removed
      * @return the collection of values that were associated with the key,
@@ -1093,7 +1095,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
             if (N.notEmpty(values) && N.notEmpty(elements)) {
                 for (final E value : values) {
-                    if (elements.contains(value)) {
+                    // containsSafely, not contains - see removeValues(Object, Collection).
+                    if (containsSafely(elements, value)) {
                         matchingValues.add(value);
                     }
                 }
@@ -1444,7 +1447,10 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
             if (values != null) {
                 for (final E value : values) {
-                    if (valuesToRemove.contains(value)) {
+                    // containsSafely, not contains: a stored null probed against a null-hostile removal
+                    // collection must count as "not a member", the same rule removeValues(Object, Collection)
+                    // applies and this class's javadoc states is shared by every bulk removal form.
+                    if (containsSafely(valuesToRemove, value)) {
                         matchingValues.add(value);
                     }
                 }
@@ -1459,7 +1465,11 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             final K key = keys.get(i);
             final V values = backingMap.get(key);
 
-            if (N.notEmpty(values)) {
+            // The match set must be non-empty too: Collection.removeIf on an unmodifiable value collection
+            // throws UnsupportedOperationException unconditionally, without first checking whether anything
+            // would actually be removed. Both sibling removals guard the same way (see removeValues(Object,
+            // Collection) and removeValues(Map)), so a no-op bulk removal must not throw where they do not.
+            if (N.notEmpty(values) && !removals.get(i).isEmpty()) {
                 // Identity records exactly which target objects matched the original argument;
                 // equals-based removal could also remove equal objects that did not match it.
                 wasModified |= values.removeIf(removals.get(i)::contains);
@@ -1706,7 +1716,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
     /**
      * Replaces a live value collection while preserving its identity. If the configured collection
-     * rejects the replacement, the previous contents are restored before an exception is reported.
+     * rejects the replacement, restoration of the previous contents is attempted before an exception is reported.
      *
      * <p>{@code replacement} must be non-empty. Every caller reaches this method only after its own
      * {@code N.isEmpty} guard has routed the empty case to outright removal of the mapping, because an empty
@@ -2333,7 +2343,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *   <li>If the key exists, the remapping function receives the current collection and the new elements,
      *       allowing you to define custom merge logic (e.g., union, intersection, custom filtering)</li>
      *   <li>If the function returns {@code null} or an empty collection, the key is removed from the Multimap</li>
-     *   <li>If the function returns the same collection instance (oldValue == newValue), no update occurs</li>
+     *   <li>If the function returns the same non-empty collection instance (oldValue == newValue),
+     *       it is retained, including any changes the function made to it</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2415,7 +2426,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      *   <li>If the key exists, the remapping function receives the current collection and the new element,
      *       allowing custom logic to determine the final collection state</li>
      *   <li>If the function returns {@code null} or an empty collection, the key is removed</li>
-     *   <li>If the function returns the same collection instance, no update occurs (optimization)</li>
+     *   <li>If the function returns the same non-empty collection instance, it is retained,
+     *       including any changes the function made to it</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2554,7 +2566,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
     /**
      * Creates a shallow copy of this Multimap with the same structure and contents.
-     * The new Multimap is independent - modifications to either won't affect the other.
+     * The new Multimap has independent map and collection structure; keys and individual elements are shared.
      *
      * <p>This is a shallow copy, meaning:</p>
      * <ul>
@@ -2584,9 +2596,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * faithfully rather than dropped, so {@code copy().equals(this)} always holds.</p>
      *
      * @return a new Multimap containing the same key-value mappings as this one
+     * @throws IllegalArgumentException if the map supplier returns a {@code null} or non-empty map, or the copy would share the backing map or a live
+     *         value collection with this Multimap
+     * @throws NullPointerException if the value supplier returns {@code null} while copying a stored entry, or a stored value collection is {@code null}
+     * @throws UnsupportedOperationException if a supplied map or value collection does not support the mutations needed to copy entries
      * @see #invert(IntFunction)
      */
-    public Multimap<K, E, V> copy() {
+    public Multimap<K, E, V> copy() throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         final Multimap<K, E, V> copy = new Multimap<>(mapSupplier, valueSupplier);
 
         copyInto(copy);
@@ -2849,7 +2865,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * Each element in the returned collection is itself a collection of values for a key.
      *
      * <p><b>Live View:</b> The returned collection is the backing map's own {@code values()} view, so it
-     * reflects subsequent changes to this Multimap. It is <i>modifiable</i>, and mutating it bypasses this
+     * reflects subsequent changes to this Multimap. Its supported removals are those of the backing map,
+     * and mutating an inner collection bypasses this
      * class's key lifecycle:</p>
      * <ul>
      *   <li>{@code add} and {@code addAll} throw {@link UnsupportedOperationException}, as for any
@@ -2984,7 +3001,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * multimap.entryStream().forEach((key, value) -> {
      *     System.out.println(key + ":" + value);
      * });
-     * // Output:
+     * // Possible output (key order follows the backing map and is not guaranteed):
      * // a:1
      * // a:2
      * // b:3
@@ -3069,9 +3086,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * <p>The returned iterator walks the backing map's own entry set, so it is a live view and inherits that
      * map's concurrent-modification behaviour: with a fail-fast backing map (the default {@link HashMap}, or
      * {@link java.util.LinkedHashMap}/{@link java.util.TreeMap}) adding or removing a key during iteration
-     * raises {@link java.util.ConcurrentModificationException}, whereas a weakly consistent one such as
-     * {@link java.util.concurrent.ConcurrentHashMap} does not. {@link Iterator#remove()} is supported and
-     * removes the whole mapping, as {@link #removeAll(Object)} would.</p>
+     * may raise {@link java.util.ConcurrentModificationException}, whereas a weakly consistent one such as
+     * {@link java.util.concurrent.ConcurrentHashMap} does not. {@link Iterator#remove()} delegates to the backing iterator
+     * and, when supported, removes the whole mapping, as {@link #removeAll(Object)} would.</p>
      *
      * <p><b>{@link Map.Entry#setValue} is not supported and throws {@link UnsupportedOperationException}.</b>
      * It would install a caller-supplied collection directly into the backing map, bypassing both the value
@@ -3079,8 +3096,8 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * {@link #put(Object, Object)}, {@link #putValues(Object, Collection)}, {@link #removeEntry(Object, Object)}
      * and {@link #replaceValues(Object, Collection)} fail for that key until the whole mapping is dropped with
      * {@link #removeAll(Object)}. Use {@link #replaceValues(Object, Collection)} to swap a key's contents.
-     * Mutating the value collection an entry hands back is still permitted and still bypasses the key
-     * lifecycle - see {@link #get(Object)} for what that implies.</p>
+     * Mutating the value collection an entry hands back is permitted when that collection supports the operation,
+     * and bypasses the key lifecycle - see {@link #get(Object)} for what that implies.</p>
      *
      * @return an iterator over the key-collection entries in this Multimap
      * @see #stream()
@@ -3216,14 +3233,14 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
 
     /**
      * Converts this Multimap to a standard Map with independent collection copies.
-     * Each value collection is copied to ensure the returned Map is completely independent.
+     * Each value collection is copied; the keys and individual elements themselves are shared.
      *
      * <p>The returned Map:</p>
      * <ul>
      *   <li>Uses a compatible independent map (common concrete types and sorted-map comparators are preserved;
      *       uninstantiable runtime wrapper types fall back to HashMap)</li>
      *   <li>Contains copies of all value collections (not references to original collections)</li>
-     *   <li>Is completely independent - changes to either the Map or Multimap don't affect each other</li>
+     *   <li>Has independent map and collection structure; mutations to shared keys or element objects remain visible through both</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3286,9 +3303,13 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param supplier function that creates a new Map instance, receives Multimap size as parameter
      * @return a new Map of the specified type containing all key-collection pairs
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if this Multimap is nonempty and {@code supplier} returns {@code null}, or a stored key is {@code null} and the supplied map rejects null-key insertion
+     * @throws ClassCastException if a stored key cannot be compared or inserted into the supplied map
+     * @throws UnsupportedOperationException if entries are copied and the supplied map does not support insertion
      * @see #toMap()
      */
-    public <M extends Map<K, V>> M toMap(final IntFunction<? extends M> supplier) throws IllegalArgumentException {
+    public <M extends Map<K, V>> M toMap(final IntFunction<? extends M> supplier)
+            throws IllegalArgumentException, NullPointerException, ClassCastException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         final M result = supplier.apply(keyCount());
@@ -3549,8 +3570,9 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
      * @param <X> the type of exception that may be thrown
      * @param func the function to apply if the Multimap is not empty
      * @return an Optional containing the result if this Multimap is not empty, otherwise an empty
-     *         Optional. An empty Optional is also returned when the function itself returns {@code null}.
+     *         Optional.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws NullPointerException if the function returns {@code null}
      * @throws X if the function throws an exception
      * @see #apply(Throwables.Function)
      * @see #acceptIfNotEmpty(Throwables.Consumer)
@@ -3559,7 +3581,7 @@ public sealed class Multimap<K, E, V extends Collection<E>> implements Iterable<
             throws IllegalArgumentException, X {
         N.checkArgNotNull(func, cs.func);
 
-        return isEmpty() ? Optional.empty() : Optional.ofNullable(func.apply(this));
+        return isEmpty() ? Optional.empty() : Optional.of(func.apply(this));
     }
 
     /**

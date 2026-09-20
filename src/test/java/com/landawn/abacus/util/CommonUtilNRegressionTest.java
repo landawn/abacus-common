@@ -1,6 +1,7 @@
 package com.landawn.abacus.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,7 +22,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -36,8 +36,6 @@ import com.landawn.abacus.TestBase;
  * Covers the fixes applied on 2026-08-31 after the second full review pass over {@code CommonUtil}/{@code N}:
  *
  * <ul>
- *   <li>{@code probeUnmodifiable(Collection)} rolled the probe sentinel back <i>by position</i>, corrupting any
- *       {@code List} whose {@code add} does not append at the tail.</li>
  *   <li>{@code deepToString(Object[], int, int)} sized its cycle-detection set by the whole array rather than the
  *       requested range.</li>
  *   <li>The no-{@code Random} {@code shuffle} overloads used a shared {@code SecureRandom}.</li>
@@ -51,252 +49,6 @@ import com.landawn.abacus.TestBase;
  * </ul>
  */
 public class CommonUtilNRegressionTest extends TestBase {
-
-    // ================================================================================================
-    // B1 - probeUnmodifiable(Collection): the sentinel must be rolled back by equality, not by position
-    // ================================================================================================
-
-    /** A {@code List} whose {@code add(E)} inserts at the front instead of appending. */
-    private static final class FrontInsertingList<E> extends ArrayList<E> {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public boolean add(final E e) {
-            super.add(0, e);
-            return true;
-        }
-    }
-
-    /** A {@code List} whose {@code add(E)} inserts in the middle, so the sentinel is neither first nor last. */
-    private static final class MiddleInsertingList<E> extends ArrayList<E> {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public boolean add(final E e) {
-            super.add(size() / 2, e);
-            return true;
-        }
-    }
-
-    /** An {@code ArrayList} subclass, so it is not short-circuited by {@code KNOWN_MUTABLE_CLASSES}. */
-    private static final class PlainSubList<E> extends ArrayList<E> {
-        private static final long serialVersionUID = 1L;
-    }
-
-    /**
-     * Rejects a non-{@code String} element the way a runtime-type-checked list does, which drives
-     * {@code probeUnmodifiable} onto its {@code null}-sentinel retry path. Appends at the tail.
-     */
-    private static class StringOnlyList extends ArrayList<Object> {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public boolean add(final Object e) {
-            if (e != null && !(e instanceof String)) {
-                throw new ClassCastException("String expected");
-            }
-
-            return doAdd(e);
-        }
-
-        boolean doAdd(final Object e) {
-            return super.add(e);
-        }
-    }
-
-    /** As {@link StringOnlyList}, but the accepted element is inserted at the front. */
-    private static final class StringOnlyFrontInsertingList extends StringOnlyList {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        boolean doAdd(final Object e) {
-            super.add(0, e);
-            return true;
-        }
-    }
-
-    /** A non-{@code List} collection that rejects a non-{@code String} element: exercises the third rollback branch. */
-    private static final class StringOnlySet extends HashSet<Object> {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public boolean add(final Object e) {
-            if (e != null && !(e instanceof String)) {
-                throw new ClassCastException("String expected");
-            }
-
-            return super.add(e);
-        }
-    }
-
-    /**
-     * Reports a successful {@code add} but silently drops the element once it is full - the "evicting container"
-     * the {@code probeUnmodifiable} javadoc warns about. The sentinel is therefore never stored, so the rollback
-     * must find nothing and leave the list alone.
-     */
-    private static final class SaturatedList<E> extends ArrayList<E> {
-        private static final long serialVersionUID = 1L;
-
-        private final int capacity;
-
-        SaturatedList(final int capacity) {
-            this.capacity = capacity;
-        }
-
-        @Override
-        public boolean add(final E e) {
-            return size() >= capacity || super.add(e);
-        }
-    }
-
-    /** Rejects {@code add} outright, so the probe must classify it as unmodifiable without a rollback. */
-    private static final class RejectingList<E> extends ArrayList<E> {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public boolean add(final E e) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private static final class ImmutableMarkerList<E> extends ArrayList<E> implements Immutable {
-        private static final long serialVersionUID = 1L;
-    }
-
-    @Test
-    public void probeUnmodifiable_frontInsertingList_isFullyRestored() {
-        final FrontInsertingList<String> list = new FrontInsertingList<>();
-        list.addAll(Arrays.asList("x", "y", "z")); // addAll does not go through the overridden add
-
-        assertFalse(CommonUtil.probeUnmodifiable(list));
-
-        // Before the fix this was [java.lang.Object@..., x, y]: the sentinel stayed and "z" was deleted.
-        assertEquals(Arrays.asList("x", "y", "z"), list);
-        for (final Object e : list) {
-            assertTrue(e instanceof String, "probe sentinel leaked into the list: " + e);
-        }
-    }
-
-    @Test
-    public void probeUnmodifiable_middleInsertingList_isFullyRestored() {
-        final MiddleInsertingList<String> list = new MiddleInsertingList<>();
-        list.addAll(Arrays.asList("b", "c", "d"));
-
-        assertFalse(CommonUtil.probeUnmodifiable(list));
-
-        // The sentinel lands at index 1, so removing the tail would have dropped "d" and kept the sentinel.
-        assertEquals(Arrays.asList("b", "c", "d"), list);
-    }
-
-    @Test
-    public void probeUnmodifiable_plainAppendingList_isFullyRestored() {
-        final PlainSubList<String> list = new PlainSubList<>();
-        list.addAll(Arrays.asList("x", "y", "z"));
-
-        assertFalse(CommonUtil.probeUnmodifiable(list));
-
-        assertEquals(Arrays.asList("x", "y", "z"), list);
-    }
-
-    @Test
-    public void probeUnmodifiable_typeRestrictedNonListCollection_isFullyRestored() {
-        // Not a List and the Object sentinel is rejected: the third rollback branch, c.remove(null).
-        final StringOnlySet set = new StringOnlySet();
-        set.addAll(Arrays.asList("x", "y"));
-
-        assertFalse(CommonUtil.probeUnmodifiable(set));
-
-        assertEquals(CommonUtil.asSet("x", "y"), new HashSet<>(set));
-        assertEquals(2, set.size());
-    }
-
-    @Test
-    public void probeUnmodifiable_rejectingCollection_isUnmodifiableAndUntouched() {
-        // Not short-circuited by any registry, so the mutation test really runs and must report true.
-        final RejectingList<String> list = new RejectingList<>();
-        list.addAll(Arrays.asList("x", "y")); // addAll does not go through the overridden add
-
-        assertTrue(CommonUtil.probeUnmodifiable(list));
-        assertEquals(Arrays.asList("x", "y"), list);
-    }
-
-    @Test
-    public void probeUnmodifiable_saturatedList_isLeftAloneWhenTheSentinelWasNeverStored() {
-        final SaturatedList<String> list = new SaturatedList<>(3);
-        list.addAll(Arrays.asList("x", "y", "z")); // addAll bypasses the overridden add
-
-        // add(sentinel) returns true but stores nothing, so the collection is still modifiable ...
-        assertFalse(CommonUtil.probeUnmodifiable(list));
-
-        // ... and the rollback must not fall back to deleting the tail. Before the fix this left [x, y].
-        assertEquals(Arrays.asList("x", "y", "z"), list);
-    }
-
-    @Test
-    public void probeUnmodifiable_typeRestrictedList_keepsExistingNullsInPlace() {
-        // A type-restricted list rejects the Object sentinel with a ClassCastException, so the probe retries with
-        // null. The pre-existing null must survive, in its original position.
-        final StringOnlyList list = new StringOnlyList();
-        list.addAll(Arrays.asList(null, "a", "b"));
-
-        assertFalse(CommonUtil.probeUnmodifiable(list));
-
-        assertEquals(Arrays.asList(null, "a", "b"), list);
-    }
-
-    @Test
-    public void probeUnmodifiable_typeRestrictedFrontInsertingList_isFullyRestored() {
-        // Null-sentinel path *and* a non-appending add: the old positional rollback deleted the tail element.
-        final StringOnlyFrontInsertingList list = new StringOnlyFrontInsertingList();
-        list.addAll(Arrays.asList("a", "b"));
-
-        assertFalse(CommonUtil.probeUnmodifiable(list));
-
-        assertEquals(Arrays.asList("a", "b"), list);
-    }
-
-    @Test
-    public void probeUnmodifiable_knownAnswersAreUnchanged() {
-        assertTrue(CommonUtil.probeUnmodifiable((Collection<?>) null));
-        assertTrue(CommonUtil.probeUnmodifiable(Collections.emptyList()));
-        assertTrue(CommonUtil.probeUnmodifiable(Collections.unmodifiableList(new ArrayList<>(Arrays.asList("a")))));
-        assertTrue(CommonUtil.probeUnmodifiable(List.of("a", "b")));
-        assertTrue(CommonUtil.probeUnmodifiable(Collections.singleton("v")));
-        assertFalse(CommonUtil.probeUnmodifiable(new ArrayList<>()));
-        assertFalse(CommonUtil.probeUnmodifiable(new HashSet<>()));
-        assertFalse(CommonUtil.probeUnmodifiable(new LinkedList<>()));
-
-        // The documented add-only heuristic: fixed-size but writable still reports true.
-        assertTrue(CommonUtil.probeUnmodifiable(Arrays.asList("a", "b")));
-    }
-
-    /** D4: the {@code Immutable} answer is derived, not cached - it must still be reported correctly. */
-    @Test
-    public void probeUnmodifiable_immutableMarker_isReportedWithoutMutating() {
-        final ImmutableMarkerList<String> list = new ImmutableMarkerList<>();
-        list.addAll(Arrays.asList("x", "y"));
-
-        assertTrue(CommonUtil.probeUnmodifiable(list));
-        assertTrue(CommonUtil.probeUnmodifiable(list)); // second call: still true, still not mutated
-        assertEquals(Arrays.asList("x", "y"), list);
-    }
-
-    @Test
-    public void probeUnmodifiable_map_isUnchanged() {
-        assertTrue(CommonUtil.probeUnmodifiable((Map<?, ?>) null));
-        assertTrue(CommonUtil.probeUnmodifiable(Collections.emptyMap()));
-        assertTrue(CommonUtil.probeUnmodifiable(Map.of("k", "v")));
-
-        final Map<String, String> m = CommonUtil.newLinkedHashMap();
-        m.put("k", "v");
-        m.put("k2", "v2");
-
-        assertFalse(CommonUtil.probeUnmodifiable(m));
-        assertEquals(2, m.size());
-        assertEquals("v", m.get("k"));
-        assertEquals("v2", m.get("k2"));
-        assertEquals(Arrays.asList("k", "k2"), new ArrayList<>(m.keySet()), "the probe entry must not disturb iteration order");
-    }
 
     // ================================================================================================
     // B2 - deepToString(Object[], from, to) must not scale with the array length
@@ -851,17 +603,23 @@ public class CommonUtilNRegressionTest extends TestBase {
     }
 
     // ================================================================================================
-    // J4 - the message supplier is validated eagerly
+    // SN 1220 - diagnostic suppliers are intentionally required only on the failure path
     // ================================================================================================
 
     @Test
-    public void checkArgumentAndCheckState_validateTheSupplierEagerly() {
-        assertEquals("'errorMessageSupplier' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(true, (java.util.function.Supplier<String>) null)).getMessage());
-        assertEquals("'errorMessageSupplier' cannot be null",
-                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkState(true, (java.util.function.Supplier<String>) null)).getMessage());
+    public void diagnosticMessageSuppliers_areOnlyRequiredOnFailure() {
+        // Intentional exception to eager callback validation: successful checks do not need diagnostics.
+        final java.util.function.Supplier<String> nullSupplier = null;
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, nullSupplier));
+        assertDoesNotThrow(() -> CommonUtil.checkState(true, nullSupplier));
+        final Object value = new Object();
+        assertSame(value, CommonUtil.requireNonNull(value, nullSupplier));
 
-        // ... and it is still not invoked when the check passes.
+        assertThrows(NullPointerException.class, () -> CommonUtil.checkArgument(false, nullSupplier));
+        assertThrows(NullPointerException.class, () -> CommonUtil.checkState(false, nullSupplier));
+        assertThrows(NullPointerException.class, () -> CommonUtil.requireNonNull(null, nullSupplier));
+
+        // Non-null suppliers are also left untouched when the main condition succeeds.
         final int[] invocations = { 0 };
         CommonUtil.checkArgument(true, () -> {
             invocations[0]++;
@@ -871,10 +629,20 @@ public class CommonUtilNRegressionTest extends TestBase {
             invocations[0]++;
             return "nope";
         });
+        assertSame(value, CommonUtil.requireNonNull(value, () -> {
+            invocations[0]++;
+            return "nope";
+        }));
         assertEquals(0, invocations[0]);
 
-        assertEquals("boom", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, () -> "boom")).getMessage());
-        assertEquals("boom", assertThrows(IllegalStateException.class, () -> CommonUtil.checkState(false, () -> "boom")).getMessage());
+        final java.util.function.Supplier<String> messageSupplier = () -> {
+            invocations[0]++;
+            return "diagnostic message";
+        };
+        assertEquals("diagnostic message", assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, messageSupplier)).getMessage());
+        assertEquals("diagnostic message", assertThrows(IllegalStateException.class, () -> CommonUtil.checkState(false, messageSupplier)).getMessage());
+        assertEquals("diagnostic message", assertThrows(NullPointerException.class, () -> CommonUtil.requireNonNull(null, messageSupplier)).getMessage());
+        assertEquals(3, invocations[0]);
     }
 
     // ================================================================================================

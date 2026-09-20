@@ -34,6 +34,101 @@ import com.landawn.abacus.util.u.Optional;
 public class IteratorStreamTest extends TestBase {
 
     @Test
+    public void testSplitAdvanceDoesNotTruncateOverflowingSourceDistance() {
+        for (boolean collector : new boolean[] { false, true }) {
+            for (boolean consumeFirst : new boolean[] { false, true }) {
+                try (Stream<Long> source = Stream.of(fullLongRangeIterator());
+                     Stream<List<Long>> chunks = collector ? source.split(2, Collectors.toList()) : source.split(2)) {
+                    ObjIteratorEx<List<Long>> iterator = chunks.iteratorEx();
+                    if (consumeFirst) {
+                        assertEquals(Arrays.asList(Long.MIN_VALUE, Long.MIN_VALUE + 1), iterator.next());
+                    }
+                    iterator.advance(Long.MAX_VALUE - (consumeFirst ? 1 : 0));
+                    assertEquals(Arrays.asList(Long.MAX_VALUE - 1, Long.MAX_VALUE), iterator.next());
+                    assertFalse(iterator.hasNext());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testSlidingAdvanceDoesNotTruncateOverflowingSourceDistance() {
+        for (boolean collector : new boolean[] { false, true }) {
+            for (int windowSize : new int[] { 1, 2, 3, 4 }) {
+                for (boolean consumeFirst : new boolean[] { false, true }) {
+                    try (Stream<Long> source = Stream.of(fullLongRangeIterator());
+                         Stream<List<Long>> windows = collector ? source.sliding(windowSize, 2, Collectors.toList()) : source.sliding(windowSize, 2)) {
+                        ObjIteratorEx<List<Long>> iterator = windows.iteratorEx();
+                        if (consumeFirst) {
+                            iterator.next();
+                        }
+                        iterator.advance(Long.MAX_VALUE - (consumeFirst ? 1 : 0));
+                        if (windowSize < 4) {
+                            assertEquals(windowSize == 1 ? Collections.singletonList(Long.MAX_VALUE - 1) : Arrays.asList(Long.MAX_VALUE - 1, Long.MAX_VALUE),
+                                    iterator.next());
+                        }
+                        assertFalse(iterator.hasNext());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testOverflowingGroupAdvanceStopsAtSourceExhaustion() {
+        for (boolean collector : new boolean[] { false, true }) {
+            AtomicInteger advances = new AtomicInteger();
+            ObjIteratorEx<Integer> source = new ObjIteratorEx<>() {
+                private boolean remaining = true;
+
+                @Override
+                public boolean hasNext() {
+                    return remaining;
+                }
+
+                @Override
+                public Integer next() {
+                    throw new AssertionError("The source supports bulk advancement");
+                }
+
+                @Override
+                public void advance(long n) {
+                    assertTrue(n > 0);
+                    advances.incrementAndGet();
+                    remaining = false;
+                }
+            };
+            try (Stream<Integer> stream = Stream.of(source);
+                 Stream<List<Integer>> chunks = collector ? stream.split(Integer.MAX_VALUE, Collectors.toList()) : stream.split(Integer.MAX_VALUE)) {
+                ObjIteratorEx<List<Integer>> iterator = chunks.iteratorEx();
+                iterator.advance(Long.MAX_VALUE);
+                assertFalse(iterator.hasNext());
+                assertEquals(1, advances.get());
+            }
+        }
+    }
+
+    private static ObjIteratorEx<Long> fullLongRangeIterator() {
+        final LongIteratorEx source = LongStream.rangeClosed(Long.MIN_VALUE, Long.MAX_VALUE).iteratorEx();
+        return new ObjIteratorEx<>() {
+            @Override
+            public boolean hasNext() {
+                return source.hasNext();
+            }
+
+            @Override
+            public Long next() {
+                return source.nextLong();
+            }
+
+            @Override
+            public void advance(long n) {
+                source.advance(n);
+            }
+        };
+    }
+
+    @Test
     public void testSkipLastResumesPartiallyFilledBufferAfterSourceFailure() {
         for (boolean failHasNext : new boolean[] { false, true }) {
             for (int size : new int[] { 2, 4 }) {
@@ -96,8 +191,7 @@ public class IteratorStreamTest extends TestBase {
                 return delivered.incrementAndGet();
             }).limit(2);
 
-            try (Stream<Integer> mapped = mapElse ? source.mapFirstOrElse(value -> value * 10, value -> value * 100)
-                    : source.mapFirst(value -> value * 10)) {
+            try (Stream<Integer> mapped = mapElse ? source.mapFirstOrElse(value -> value * 10, value -> value * 100) : source.mapFirst(value -> value * 10)) {
                 ObjIteratorEx<Integer> iterator = mapped.iteratorEx();
                 org.junit.jupiter.api.Assertions.assertSame(failure, assertThrows(IllegalStateException.class, iterator::next));
                 assertEquals(10, iterator.next());
@@ -351,7 +445,6 @@ public class IteratorStreamTest extends TestBase {
         }
     }
 
-
     @Test
     public void testLimitPreservesQuotaWhenSupplierFailsBeforeProducingValue() {
         final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
@@ -371,7 +464,6 @@ public class IteratorStreamTest extends TestBase {
             assertEquals(2, attempts.get());
         }
     }
-
 
     @Test
     public void testToJdkStreamCloseRunsSourceHandlersOnce() {
@@ -924,40 +1016,58 @@ public class IteratorStreamTest extends TestBase {
     }
 
     @Test
-    public void testSlidingCountSaturatesPrefixPlusRemainingAtLongMaxValue() {
-        assertSlidingCountSaturates(createVirtuallyHugeIteratorStream().sliding(2, 1, ArrayList::new));
-        assertSlidingCountSaturates(createVirtuallyHugeIteratorStream().sliding(2, 1, com.landawn.abacus.util.stream.Collectors.toList()));
+    public void testSlidingCountPreservesExactCountWhenPrefixPlusRemainingExceedsLongMaxValue() {
+        for (final int[] settings : new int[][] { { 2, 1 }, { 3, 1 }, { 3, 2 }, { 5, 3 } }) {
+            final int windowSize = settings[0];
+            final int increment = settings[1];
+            final long expected = java.math.BigInteger.valueOf(Long.MAX_VALUE)
+                    .add(java.math.BigInteger.valueOf(increment - 1))
+                    .divide(java.math.BigInteger.valueOf(increment))
+                    .longValueExact();
+
+            assertHugeSlidingCount(createVirtuallyHugeIteratorStream(windowSize).sliding(windowSize, increment, ArrayList::new), windowSize, expected);
+            assertHugeSlidingCount(createVirtuallyHugeIteratorStream(windowSize).sliding(windowSize, increment, Collectors.toList()), windowSize, expected);
+        }
     }
 
-    private static Stream<Integer> createVirtuallyHugeIteratorStream() {
+    private static Stream<Integer> createVirtuallyHugeIteratorStream(final int initialWindowSize) {
         return Stream.of(new ObjIteratorEx<>() {
             private int cursor;
+            private java.math.BigInteger remaining = java.math.BigInteger.valueOf(Long.MAX_VALUE).add(java.math.BigInteger.valueOf(initialWindowSize));
 
             @Override
             public boolean hasNext() {
-                return cursor < 2;
+                return remaining.signum() > 0;
             }
 
             @Override
             public Integer next() {
+                if (!hasNext()) {
+                    throw new java.util.NoSuchElementException();
+                }
+
+                remaining = remaining.subtract(java.math.BigInteger.ONE);
                 return ++cursor;
             }
 
             @Override
             public long count() {
-                cursor = 2;
-                return Long.MAX_VALUE;
+                final long result = remaining.longValueExact();
+                remaining = java.math.BigInteger.ZERO;
+                return result;
             }
         });
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static void assertSlidingCountSaturates(final Stream<? extends List<Integer>> stream) {
+    private static void assertHugeSlidingCount(final Stream<? extends List<Integer>> stream, final int windowSize, final long expectedCount) {
         try {
             final ObjIteratorEx<? extends List<Integer>> iter = (ObjIteratorEx) stream.iteratorEx();
 
-            assertEquals(Arrays.asList(1, 2), iter.next());
-            assertEquals(Long.MAX_VALUE - 1, iter.count());
+            assertEquals(windowSize, iter.next().size());
+            assertEquals(expectedCount, iter.count());
+            assertFalse(iter.hasNext());
+            assertEquals(0, iter.count());
         } finally {
             stream.close();
         }

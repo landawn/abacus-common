@@ -154,10 +154,12 @@ public class FloatSummaryStatistics implements FloatConsumer {
      * }</pre>
      *
      * @param other another {@code FloatSummaryStatistics} to be combined with this one; must not be {@code null}
-     * @throws NullPointerException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      * @throws ArithmeticException if the combined observation count would overflow; this instance is unchanged
      */
-    public void combine(final FloatSummaryStatistics other) throws NullPointerException, ArithmeticException {
+    public void combine(final FloatSummaryStatistics other) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(other, cs.other);
+
         summation.combine(other.summation);
 
         min = Math.min(min, other.min);

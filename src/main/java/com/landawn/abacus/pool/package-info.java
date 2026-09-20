@@ -64,10 +64,11 @@
  * on exit. Runtime metrics are available as an immutable {@link PoolStats} snapshot from
  * {@link Pool#stats()}.</p>
  *
- * <p>Every {@link Pool} is {@link java.io.Serializable}. {@link AbstractPoolable} is serializable so
- * pooled values can be written with the pool; a subclass (or a {@link PoolableAdapter} around a
- * value) is serializable only when all of its non-transient state is. Serializing a non-serializable
- * pooled value fails with {@link java.io.NotSerializableException}.</p>
+ * <p>Every {@link Pool} is {@link java.io.Serializable}. {@link AbstractPoolable} is not: it
+ * represents a live pooled resource. Serializing a pool that still contains {@code AbstractPoolable}
+ * or {@link PoolableAdapter} values fails with {@link java.io.NotSerializableException}. An empty
+ * pool still serializes. If persistence is wanted, snapshot configuration or statistics and
+ * reconstruct live resources from that snapshot.</p>
  *
  * <h2>Usage example</h2>
  * <pre>{@code
@@ -97,7 +98,7 @@
  *     try {
  *         resource.use();
  *     } finally {
- *         pool.add(resource);                 // return it for reuse
+ *         pool.add(resource, true);   // return it, or destroy it if rejected
  *     }
  * }   // close() destroys everything still pooled
  * }</pre>

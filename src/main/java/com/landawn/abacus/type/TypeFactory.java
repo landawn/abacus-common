@@ -119,7 +119,7 @@ import com.landawn.abacus.util.u.Optional;
  *       {@code Number}, {@code Map}, {@code HashMap}, {@code List}, {@code java.util.Date},
  *       {@code java.util.Optional}, arrays, ... throws IllegalArgumentException whether or not the class has
  *       been looked up yet</li>
- *   <li>Any lookup caches a default type: once a class has been resolved by {@code getType(Class)}, bean
+ *   <li>A lookup by class caches a default type: once a class has been resolved by {@code getType(Class)}, bean
  *       introspection or serialization, {@code registerType(Class, ...)} for it throws IllegalArgumentException
  *       ("already registered") even though nothing was explicitly registered - register custom types before the
  *       class is first used</li>
@@ -159,7 +159,7 @@ import com.landawn.abacus.util.u.Optional;
  * TypeFactory.registerType(
  *     MyCustomClass.class,
  *     (obj, parser) -> obj.toJson(),                                // Serialization with parser
- *     (str, parser) -> parser.deserialize(str, MyCustomClass.class) // Deserialization with parser
+ *     (str, parser) -> MyCustomClass.fromString(str)                 // Construct without recursively parsing MyCustomClass
  * );
  *
  * // Named type registration for specialized handling
@@ -2165,8 +2165,9 @@ public final class TypeFactory {
      * <p>This method never returns {@code null}: for an unrecognized type it fabricates and caches an
      * {@link com.landawn.abacus.type.ObjectType ObjectType} fallback (the same behavior as
      * {@link #getType(Class)} / {@link #getType(String)}) rather than failing. An
-     * {@link IllegalArgumentException} is thrown only for a {@code null} argument or for structurally
-     * malformed generic/parameter syntax (e.g., a wrong number of type arguments).</p>
+     * {@link IllegalArgumentException} is thrown for a {@code null} argument, structurally
+     * malformed generic/parameter syntax (e.g., a wrong number of type arguments), or metadata rejected by
+     * the selected handler (for example, incompatible value/creator annotations).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2247,7 +2248,8 @@ public final class TypeFactory {
      * This method never returns {@code null}: an unrecognized or unresolvable name does <b>not</b> throw —
      * it fabricates and caches an {@link com.landawn.abacus.type.ObjectType ObjectType} fallback
      * (a usable, generic {@code Object}-backed {@code Type}) and returns it. An
-     * {@link IllegalArgumentException} is thrown only for a {@code null}, empty or blank name, or for structurally
+     * {@link IllegalArgumentException} is thrown for a {@code null}, empty or blank name, metadata rejected by
+     * the selected handler (for example, incompatible value/creator annotations), or structurally
      * malformed generic/parameter syntax: a type-parameter count that does not match the container
      * ({@code "Map<String>"}, {@code "Pair<String>"}), constructor arguments on a resolved class whose handler
      * takes none ({@code "String(MD5)"}, {@code "Integer(1)"}, {@code "Date(yyyy)"} - only {@code Password(...)},
@@ -2332,8 +2334,8 @@ public final class TypeFactory {
      * @param fromStringFunc the function to convert a String to an object of type T, receives the string and a JsonParser
      * @throws IllegalArgumentException if {@code targetClass}, {@code toStringFunc}, or {@code fromStringFunc} is
      *         {@code null}, if {@code targetClass} has a built-in type, or if a type has already been resolved and
-     *         cached for it by any prior lookup ({@code getType(Class)}, {@code getType(String)} with the class's
-     *         canonical name, bean introspection, serialization) - register before the class is first used.
+     *         cached for it by a prior lookup by class ({@code getType(Class)}, bean introspection, serialization).
+     *         A fabricated fallback cached only by canonical name may be superseded.
      * @see #registerType(Class, Function, Function)
      * @see #registerType(Class, Type)
      */
@@ -2383,8 +2385,8 @@ public final class TypeFactory {
      * @param fromStringFunc the function to convert a String to an object of type T
      * @throws IllegalArgumentException if {@code cls}, {@code toStringFunc}, or {@code fromStringFunc} is
      *         {@code null}, if {@code cls} has a built-in type, or if a type has already been resolved and cached
-     *         for it by any prior lookup ({@code getType(Class)}, {@code getType(String)} with the class's canonical
-     *         name, bean introspection, serialization) - register before the class is first used.
+     *         for it by a prior lookup by class ({@code getType(Class)}, bean introspection, serialization).
+     *         A fabricated fallback cached only by canonical name may be superseded.
      * @see #registerType(Class, BiFunction, BiFunction)
      * @see #registerType(Class, Type)
      */
@@ -2499,7 +2501,8 @@ public final class TypeFactory {
      * The type is always reachable by the custom type name. It also becomes the type of {@code targetClass}
      * when nothing already answers for that class; a class that has a built-in handler ({@code Map},
      * {@code List}, {@code java.util.Date}, {@code LocalDateTime}, ...) or whose type a prior lookup has already
-     * resolved keeps the type it has, so a lookup by class and a lookup by name cannot disagree.
+     * resolved keeps the type it has. Lookups by class and its canonical name retain that handler;
+     * the newly registered custom name can intentionally select a different handler.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2526,14 +2529,11 @@ public final class TypeFactory {
     public static <T> void registerType(String typeName, final Class<T> targetClass, final BiFunction<? super T, JsonParser, String> toStringFunc,
             final BiFunction<? super String, JsonParser, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotEmpty(typeName, cs.typeName);
+        typeName = N.checkArgNotEmpty(typeName.trim(), cs.typeName);
+        TypeAttrParser.parse(typeName);
         N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(toStringFunc, cs.toStringFunc);
         N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
-
-        // registerType(String, Type) below publishes the trimmed name, and getType(String) trims what it looks up, so
-        // normalize before the handler bakes the name into Type.name(): a padded name would otherwise keep its padding
-        // in name()/xmlName() and be published a second time under an intrinsic-name key nothing can reach.
-        typeName = N.checkArgNotEmpty(typeName.trim(), cs.typeName);
 
         final Type<T> type = new AbstractType<>(typeName) {
             @Override
@@ -2591,14 +2591,11 @@ public final class TypeFactory {
     public static <T> void registerType(String typeName, final Class<T> targetClass, final Function<? super T, String> toStringFunc,
             final Function<? super String, T> fromStringFunc) throws IllegalArgumentException {
         N.checkArgNotEmpty(typeName, cs.typeName);
+        typeName = N.checkArgNotEmpty(typeName.trim(), cs.typeName);
+        TypeAttrParser.parse(typeName);
         N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(toStringFunc, cs.toStringFunc);
         N.checkArgNotNull(fromStringFunc, cs.fromStringFunc);
-
-        // registerType(String, Type) below publishes the trimmed name, and getType(String) trims what it looks up, so
-        // normalize before the handler bakes the name into Type.name(): a padded name would otherwise keep its padding
-        // in name()/xmlName() and be published a second time under an intrinsic-name key nothing can reach.
-        typeName = N.checkArgNotEmpty(typeName.trim(), cs.typeName);
 
         final Type<T> type = new AbstractType<>(typeName) {
             @Override
@@ -2682,13 +2679,13 @@ public final class TypeFactory {
      */
     public static void registerType(String typeName, final Type<?> type) throws IllegalArgumentException {
         N.checkArgNotEmpty(typeName, cs.typeName);
-        N.checkArgNotNull(type, cs.type);
 
         // getType(String) trims and parses its argument, so an alias published under a padded or unparsable
         // spelling ("  ", "X<Y") could be reached only by that exact spelling, or never. Validate before publishing.
         typeName = typeName.trim();
         N.checkArgNotEmpty(typeName, cs.typeName);
         TypeAttrParser.parse(typeName);
+        N.checkArgNotNull(type, cs.type);
 
         final String intrinsicTypeName = N.checkArgNotEmpty(type.name(), "type.name()");
 

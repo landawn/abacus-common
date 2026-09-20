@@ -139,11 +139,11 @@ public class CsvParser {
      */
     private final char escape;
     /**
-     * Determines if the field is between quotes (true) or between separators (false).
+     * Whether characters outside quoted regions are ignored.
      */
     private final boolean strictQuotes;
     /**
-     * Whether to ignore any leading white space at the start of the field.
+     * Whether to strip surrounding whitespace from unquoted fields and skip whitespace after separators.
      */
     private final boolean ignoreLeadingWhitespace;
     /**
@@ -309,13 +309,13 @@ public class CsvParser {
     }
 
     /**
-     * Checks to see if any two of the three characters are the same.
+     * Checks to see if any two enabled characters are the same.
      * This is because in opencsv the separator, quote, and escape characters must be different.
      *
      * @param separator the defined separator character
      * @param quoteChar the defined quotation character
      * @param escape the defined escape character
-     * @return {@code true} if any two of the three are the same, {@code false} otherwise
+     * @return {@code true} if any two non-{@link #NULL_CHARACTER} characters are the same, {@code false} otherwise
      */
     private boolean anyCharactersAreTheSame(final char separator, final char quoteChar, final char escape) {
         return isSameCharacter(separator, quoteChar) || isSameCharacter(separator, escape) || isSameCharacter(quoteChar, escape);

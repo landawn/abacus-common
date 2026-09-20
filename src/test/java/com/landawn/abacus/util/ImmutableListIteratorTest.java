@@ -288,8 +288,7 @@ public class ImmutableListIteratorTest extends TestBase {
         // (3) ImmutableList's own views are AbstractList-backed, so the NoSuchElementException carries the
         // internal IndexOutOfBoundsException as its cause - the message is that exception's toString, so only
         // the cause type is pinned here
-        final NoSuchElementException pastEnd = Assertions.assertThrows(NoSuchElementException.class,
-                () -> ImmutableList.of("a", "b").listIterator(2).next());
+        final NoSuchElementException pastEnd = Assertions.assertThrows(NoSuchElementException.class, () -> ImmutableList.of("a", "b").listIterator(2).next());
         Assertions.assertInstanceOf(IndexOutOfBoundsException.class, pastEnd.getCause());
 
         final NoSuchElementException beforeStart = Assertions.assertThrows(NoSuchElementException.class,
@@ -297,8 +296,8 @@ public class ImmutableListIteratorTest extends TestBase {
         Assertions.assertInstanceOf(IndexOutOfBoundsException.class, beforeStart.getCause());
 
         // the reversed view wraps the forward one, so it reports the same way from the opposite end
-        Assertions.assertInstanceOf(IndexOutOfBoundsException.class, Assertions
-                .assertThrows(NoSuchElementException.class, () -> ImmutableList.of("a", "b").reversed().listIterator(0).previous()).getCause());
+        Assertions.assertInstanceOf(IndexOutOfBoundsException.class,
+                Assertions.assertThrows(NoSuchElementException.class, () -> ImmutableList.of("a", "b").reversed().listIterator(0).previous()).getCause());
         Assertions.assertInstanceOf(IndexOutOfBoundsException.class,
                 Assertions.assertThrows(NoSuchElementException.class, () -> ImmutableList.of("a", "b").reversed().listIterator(2).next()).getCause());
 

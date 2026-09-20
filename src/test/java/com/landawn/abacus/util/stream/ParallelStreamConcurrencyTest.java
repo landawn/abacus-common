@@ -564,8 +564,7 @@ public class ParallelStreamConcurrencyTest extends TestBase {
                 // let any worker still unwinding finish; a leak is permanent, so waiting only removes noise
                 Thread.sleep(300);
 
-                assertEquals(opened.get(), closed.get(),
-                        "round " + round + (iteratorBacked ? " (iterator)" : " (array)") + ": mapped sub-streams left open");
+                assertEquals(opened.get(), closed.get(), "round " + round + (iteratorBacked ? " (iterator)" : " (array)") + ": mapped sub-streams left open");
             }
         }
     }
@@ -612,18 +611,15 @@ public class ParallelStreamConcurrencyTest extends TestBase {
             final AtomicInteger openedA = new AtomicInteger();
             final AtomicInteger closedA = new AtomicInteger();
 
-            Stream.of(source)
-                    .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(8).build())
-                    .flatMap(x -> {
-                        final long until = System.nanoTime() + 200_000L;
-                        while (System.nanoTime() < until) {
-                            Thread.onSpinWait();
-                        }
+            Stream.of(source).parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(8).build()).flatMap(x -> {
+                final long until = System.nanoTime() + 200_000L;
+                while (System.nanoTime() < until) {
+                    Thread.onSpinWait();
+                }
 
-                        openedA.incrementAndGet();
-                        return Stream.of(x, x).onClose(closedA::incrementAndGet);
-                    })
-                    .first();
+                openedA.incrementAndGet();
+                return Stream.of(x, x).onClose(closedA::incrementAndGet);
+            }).first();
 
             // (b) flatMapToInt - a primitive mapped sub-stream rather than an object one
             final AtomicInteger openedB = new AtomicInteger();

@@ -417,30 +417,50 @@ public class DatasetSheetContractTest extends TestBase {
     }
 
     @Test
-    void pivotAndSheetUseDeepArrayKeysThroughout() {
-        final Dataset data = Dataset.rows(List.of("r", "c", "v"), new Object[][] { { new int[] { 1 }, new String[] { "x" }, 10 },
-                { new int[] { 1 }, new String[] { "y" }, 20 }, { new int[] { 1 }, new String[] { "x" }, 5 } });
+    void pivotGroupsArraysDeeplyAndRetainsOriginalKeysForSheetLookup() {
+        final int[] row = { 1 };
+        final String[] x = { "x" };
+        final Dataset data = Dataset.rows(List.of("r", "c", "v"),
+                new Object[][] { { row, x, 10 }, { new int[] { 1 }, new String[] { "y" }, 20 }, { new int[] { 1 }, new String[] { "x" }, 5 } });
         final Sheet<int[], String[], Integer> result = data.pivot("r", "c", "v", java.util.stream.Collectors.summingInt(v -> (Integer) v));
         assertEquals(1, result.rowCount());
         assertEquals(2, result.columnCount());
-        assertEquals(Integer.valueOf(15), result.get(new int[] { 1 }, new String[] { "x" }));
-        assertTrue(result.containsRow(new int[] { 1 }));
-        assertTrue(result.containsColumn(new String[] { "y" }));
-        assertThrows(IllegalArgumentException.class, () -> result.addRow(new int[] { 1 }, List.of(1, 2)));
-        final var equal = Sheet.rows(List.of(new int[] { 1 }), Arrays.asList(new String[] { "x" }, new String[] { "y" }), new Integer[][] { { 15, 20 } });
+        assertSame(row, result.rowKeySet().iterator().next());
+        assertSame(x, result.columnKeySet().iterator().next());
+        final String[] y = new ArrayList<>(result.columnKeySet()).get(1);
+        assertEquals(Integer.valueOf(15), result.get(row, x));
+        assertTrue(result.containsRow(row));
+        assertTrue(result.containsColumn(y));
+        assertFalse(result.containsRow(new int[] { 1 }));
+        assertFalse(result.containsColumn(new String[] { "y" }));
+        assertThrows(IllegalArgumentException.class, () -> result.addRow(row, List.of(1, 2)));
+        final var equal = Sheet.rows(List.of(row), Arrays.asList(x, y), new Integer[][] { { 15, 20 } });
         assertEquals(equal, result);
-        assertEquals(Integer.valueOf(20), result.copy(List.of(new int[] { 1 }), Collections.singletonList(new String[] { "y" })).getAt(0, 0));
-        assertEquals(Integer.valueOf(30), result.merge(equal, Integer::sum).get(new int[] { 1 }, new String[] { "x" }));
-        assertThrows(IllegalArgumentException.class, () -> new Sheet<>(Arrays.asList(new int[] { 1 }, new int[] { 1 }), List.of("x")));
+        assertEquals(Integer.valueOf(20), result.copy(List.of(row), Collections.singletonList(y)).getAt(0, 0));
+        assertEquals(Integer.valueOf(30), result.merge(equal, Integer::sum).get(row, x));
+        assertThrows(IllegalArgumentException.class, () -> new Sheet<>(Arrays.asList(row, row), List.of("x")));
         assertEquals(equal.hashCode(), result.hashCode());
         assertEquals(new java.util.HashSet<>(result.rowKeySet()).hashCode(), result.rowKeySet().hashCode());
-        result.set(new int[] { 1 }, new String[] { "y" }, 30);
+        result.set(row, y, 30);
         assertEquals(Integer.valueOf(30), result.getAt(0, 1));
-        result.moveColumn(new String[] { "y" }, 0);
+        result.moveColumn(y, 0);
         assertEquals(Integer.valueOf(30), result.getAt(0, 0));
-        result.removeColumn(new String[] { "x" });
+        result.removeColumn(x);
         assertEquals(1, result.columnCount());
-        assertEquals(Integer.valueOf(30), result.get(new int[] { 1 }, new String[] { "y" }));
+        assertEquals(Integer.valueOf(30), result.get(row, y));
+    }
+
+    @Test
+    void pivotWithExplicitWrappersSupportsContentLookupAndStandardKeySets() {
+        final Dataset data = Dataset.rows(List.of("r", "c", "v"), new Object[][] { { Wrapper.of(new int[] { 1 }), Wrapper.of(new String[] { "x" }), 10 },
+                { Wrapper.of(new int[] { 1 }), Wrapper.of(new String[] { "y" }), 20 }, { Wrapper.of(new int[] { 1 }), Wrapper.of(new String[] { "x" }), 5 } });
+        final Sheet<Wrapper<int[]>, Wrapper<String[]>, Integer> result = data.pivot("r", "c", "v", java.util.stream.Collectors.summingInt(v -> (Integer) v));
+        assertEquals(1, result.rowCount());
+        assertEquals(2, result.columnCount());
+        assertEquals(Integer.valueOf(15), result.get(Wrapper.of(new int[] { 1 }), Wrapper.of(new String[] { "x" })));
+        assertEquals(Integer.valueOf(20), result.get(Wrapper.of(new int[] { 1 }), Wrapper.of(new String[] { "y" })));
+        assertTrue(result.rowKeySet().contains(Wrapper.of(new int[] { 1 })));
+        assertTrue(result.columnKeySet().contains(Wrapper.of(new String[] { "x" })));
     }
 
     @Test
@@ -501,18 +521,23 @@ public class DatasetSheetContractTest extends TestBase {
     }
 
     @Test
-    void deepClonesPreserveCyclesAndArrayKeyEquivalence() {
-        final Sheet<int[], String, Object> original = Sheet.rows(List.of(new int[] { 1 }), List.of("cell"), new Object[][] { { null } });
-        original.set(new int[] { 1 }, "cell", original);
+    void deepClonesPreserveCyclesAndArrayKeyIdentity() {
+        final int[] originalKey = { 1 };
+        final Sheet<int[], String, Object> original = Sheet.rows(List.of(originalKey), List.of("cell"), new Object[][] { { null } });
+        original.set(originalKey, "cell", original);
         final Sheet<int[], String, Object> clone = original.clone(false);
-        assertSame(clone, clone.get(new int[] { 1 }, "cell"));
-        assertNotSame(original.rowKeySet().iterator().next(), clone.rowKeySet().iterator().next());
-        assertTrue(clone.containsRow(new int[] { 1 }));
-        assertTrue(clone.rowKeySet().contains(clone.rowKeySet().iterator().next()));
+        final int[] clonedKey = clone.rowKeySet().iterator().next();
+        assertSame(clone, clone.get(clonedKey, "cell"));
+        assertNotSame(originalKey, clonedKey);
+        assertFalse(clone.containsRow(originalKey));
+        assertFalse(clone.containsRow(new int[] { 1 }));
+        assertTrue(clone.containsRow(clonedKey));
+        assertTrue(clone.rowKeySet().contains(clonedKey));
         assertFalse(clone.rowKeySet().contains(new int[] { 1 }));
-        clone.addRow(new int[] { 2 }, List.of("added"));
-        clone.swapRows(new int[] { 1 }, new int[] { 2 });
-        assertSame(clone, clone.get(new int[] { 1 }, "cell"));
+        final int[] addedKey = { 2 };
+        clone.addRow(addedKey, List.of("added"));
+        clone.swapRows(clonedKey, addedKey);
+        assertSame(clone, clone.get(clonedKey, "cell"));
         final int[] emptyKey = new int[0];
         final Sheet<int[], String, Object> emptyArrayKey = Sheet.rows(List.of(emptyKey), List.of("cell"), new Object[][] { { original } });
         assertSame(emptyKey, emptyArrayKey.rowMajorCells().iterator().next().rowKey());
@@ -693,7 +718,7 @@ public class DatasetSheetContractTest extends TestBase {
         return Dataset.rows(List.of("id", "name", "age"), new Object[][] { { 1, "Alice", 25 }, { 2, "Bob", 30 }, { 3, "Carol", 35 } });
     }
 
-    /** G18-001: {@code updateAll}/{@code replaceIf}/{@code updateColumn} reject a null callback with IAE, before the frozen check. */
+    /** G18-001: {@code updateAll}/{@code replaceIf}/{@code updateColumn} reject a null callback after checking frozen state. */
     @Test
     public void testUpdateAllAndReplaceIfRejectNullCallback() {
         assertThrows(IllegalArgumentException.class, () -> pinData().updateAll((Function<?, ?>) null));
@@ -702,10 +727,10 @@ public class DatasetSheetContractTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> pinData().replaceIf((IntBiObjPredicate<String, ?>) null, 9));
         assertThrows(IllegalArgumentException.class, () -> pinData().updateColumn("name", null));
 
-        // The null check precedes checkFrozen(), so the IAE wins over the documented IllegalStateException.
+        // Frozen state takes precedence even when the callback is null.
         final Dataset frozen = pinData();
         frozen.freeze();
-        assertThrows(IllegalArgumentException.class, () -> frozen.updateAll((Function<?, ?>) null));
+        assertThrows(IllegalStateException.class, () -> frozen.updateAll((Function<?, ?>) null));
         assertThrows(IllegalStateException.class, () -> frozen.updateAll(v -> v));
     }
 
@@ -717,10 +742,10 @@ public class DatasetSheetContractTest extends TestBase {
         assertEquals(2, empty.columnCount());
         assertEquals(0, empty.currentRowIndex());
 
-        final List<Consumer<Dataset>> cursorReads = List.of(d -> d.get("a"), d -> d.get(0), d -> d.getBoolean("a"), d -> d.getBoolean(0),
-                d -> d.getChar("a"), d -> d.getChar(0), d -> d.getByte("a"), d -> d.getByte(0), d -> d.getShort("a"), d -> d.getShort(0),
-                d -> d.getInt("a"), d -> d.getInt(0), d -> d.getLong("a"), d -> d.getLong(0), d -> d.getFloat("a"), d -> d.getFloat(0),
-                d -> d.getDouble("a"), d -> d.getDouble(0), d -> d.isNull("a"), d -> d.isNull(0), d -> d.set("a", 1), d -> d.set(0, 1));
+        final List<Consumer<Dataset>> cursorReads = List.of(d -> d.get("a"), d -> d.get(0), d -> d.getBoolean("a"), d -> d.getBoolean(0), d -> d.getChar("a"),
+                d -> d.getChar(0), d -> d.getByte("a"), d -> d.getByte(0), d -> d.getShort("a"), d -> d.getShort(0), d -> d.getInt("a"), d -> d.getInt(0),
+                d -> d.getLong("a"), d -> d.getLong(0), d -> d.getFloat("a"), d -> d.getFloat(0), d -> d.getDouble("a"), d -> d.getDouble(0),
+                d -> d.isNull("a"), d -> d.isNull(0), d -> d.set("a", 1), d -> d.set(0, 1));
         assertEquals(22, cursorReads.size());
         for (final Consumer<Dataset> read : cursorReads) {
             assertThrows(IndexOutOfBoundsException.class, () -> read.accept(empty));
@@ -859,8 +884,7 @@ public class DatasetSheetContractTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> pinData().combineColumns(names, null, (DisposableObjArray a) -> a.get(0)));
         assertThrows(IllegalArgumentException.class, () -> pinData().combineColumns(names, "", (DisposableObjArray a) -> a.get(0)));
         assertThrows(IllegalArgumentException.class, () -> pinData().combineColumns(names, "combined", (Class<?>) null));
-        assertThrows(IllegalArgumentException.class,
-                () -> pinData().combineColumns(names, "combined", (Function<? super DisposableObjArray, ?>) null));
+        assertThrows(IllegalArgumentException.class, () -> pinData().combineColumns(names, "combined", (Function<? super DisposableObjArray, ?>) null));
         assertThrows(IllegalArgumentException.class, () -> pinData().combineColumns(names, "age", Map.class));
 
         final Dataset combined = pinData();
@@ -898,7 +922,7 @@ public class DatasetSheetContractTest extends TestBase {
         assertEquals(List.of("name", "age"), pinData().mapColumn("age", "age", List.of("name"), v -> v).columnNames());
     }
 
-    /** G18-010: {@code removeColumns(Predicate)} rejects a null filter with IAE, ahead of the frozen check. */
+    /** G18-010: {@code removeColumns(Predicate)} rejects a null filter after checking frozen state. */
     @Test
     public void testRemoveColumnsRejectsNullFilter() {
         assertThrows(IllegalArgumentException.class, () -> pinData().removeColumns((Predicate<String>) null));
@@ -906,7 +930,7 @@ public class DatasetSheetContractTest extends TestBase {
 
         final Dataset frozen = pinData();
         frozen.freeze();
-        assertThrows(IllegalArgumentException.class, () -> frozen.removeColumns((Predicate<String>) null));
+        assertThrows(IllegalStateException.class, () -> frozen.removeColumns((Predicate<String>) null));
 
         // The documented zero-row carve-out: removing every column is allowed when no rows remain.
         final Dataset noRows = Dataset.rows(List.of("a", "b"), new Object[0][]);
@@ -914,7 +938,7 @@ public class DatasetSheetContractTest extends TestBase {
         assertEquals(0, noRows.columnCount());
     }
 
-    /** G18-011: both {@code distinctBy(.., Function)} overloads reject a null keyExtractor with IAE, ahead of the column check. */
+    /** G18-011: both {@code distinctBy(.., Function)} overloads reject a null keyExtractor after checking column names. */
     @Test
     public void testDistinctByRejectsNullKeyExtractor() {
         assertThrows(IllegalArgumentException.class, () -> pinData().distinctBy("id", null));
@@ -923,13 +947,13 @@ public class DatasetSheetContractTest extends TestBase {
         assertEquals(3, pinData().distinctBy("id", v -> v).size());
 
         // The two removeDuplicateRowsBy(.., Function) overloads are the @see siblings of these two and reject a
-        // null keyExtractor identically, ahead of both the column check and checkFrozen().
+        // null keyExtractor after checking frozen state and column names.
         assertThrows(IllegalArgumentException.class, () -> pinData().removeDuplicateRowsBy("id", null));
         assertThrows(IllegalArgumentException.class, () -> pinData().removeDuplicateRowsBy(List.of("id", "name"), null));
         assertThrows(IllegalArgumentException.class, () -> pinData().removeDuplicateRowsBy("nosuch", null));
         final Dataset frozen = pinData();
         frozen.freeze();
-        assertThrows(IllegalArgumentException.class, () -> frozen.removeDuplicateRowsBy("id", null));
+        assertThrows(IllegalStateException.class, () -> frozen.removeDuplicateRowsBy("id", null));
 
         final Dataset deduped = pinData();
         deduped.removeDuplicateRowsBy("id", v -> v);

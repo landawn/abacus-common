@@ -27,15 +27,21 @@ import java.util.Map;
 import java.util.Set;
 
 import com.landawn.abacus.util.ClassUtil;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /** Resolves the value and creator metadata of a single-value wrapper before numeric inference. */
 final class ValueTypeResolver {
     private final Map<TypeVariable<?>, java.lang.reflect.Type> bindings = new HashMap<>();
 
     /**
-     * @throws IllegalArgumentException if a wildcard type argument contradicts its declared type-variable bound
+     * @throws IllegalArgumentException if {@code wrapper} or {@code arguments} is {@code null}, or a wildcard type
+     *         argument contradicts its declared type-variable bound
      */
     ValueTypeResolver(final Class<?> wrapper, final List<Type<?>> arguments) throws IllegalArgumentException {
+        N.checkArgNotNull(wrapper, cs.wrapper);
+        N.checkArgNotNull(arguments, cs.arguments);
+
         final TypeVariable<?>[] variables = wrapper.getTypeParameters();
         for (int i = 0; i < Math.min(variables.length, arguments.size()); i++) {
             bindings.put(variables[i], reflectionType(arguments.get(i)));
@@ -162,11 +168,14 @@ final class ValueTypeResolver {
             if (resolved != variable) {
                 bindings.putIfAbsent(variable, resolved);
             }
-        } else if (pattern instanceof ParameterizedType a && resolved instanceof ParameterizedType b && a.getRawType().equals(b.getRawType())) {
-            final java.lang.reflect.Type[] left = a.getActualTypeArguments();
-            final java.lang.reflect.Type[] right = b.getActualTypeArguments();
-            for (int i = 0; i < left.length; i++) {
-                infer(left[i], right[i], factory);
+        } else if (pattern instanceof ParameterizedType a) {
+            final java.lang.reflect.Type projected = asSupertype(resolved, (Class<?>) a.getRawType());
+            if (projected instanceof ParameterizedType b) {
+                final java.lang.reflect.Type[] left = a.getActualTypeArguments();
+                final java.lang.reflect.Type[] right = b.getActualTypeArguments();
+                for (int i = 0; i < left.length; i++) {
+                    infer(left[i], right[i], factory);
+                }
             }
         } else if (pattern instanceof GenericArrayType array) {
             if (resolved instanceof GenericArrayType other) {
@@ -225,18 +234,78 @@ final class ValueTypeResolver {
                     : raw(source).getComponentType();
             return accepts(targetComponent, sourceComponent, visiting);
         }
-        // Compare invariant arguments where both sides declare the same generic class. Raw and broader
-        // creator types remain legal; rejecting unprovable mismatches would reject safe existing factories.
-        if (target instanceof ParameterizedType a && source instanceof ParameterizedType b && a.getRawType().equals(b.getRawType())) {
-            final java.lang.reflect.Type[] left = a.getActualTypeArguments();
-            final java.lang.reflect.Type[] right = b.getActualTypeArguments();
-            for (int i = 0; i < left.length; i++) {
-                if (!acceptsArgument(left[i], right[i], visiting)) {
-                    return false;
+        // Project inherited arguments onto the creator's generic class before comparing them invariantly.
+        // Raw creator types remain legal when no concrete argument mismatch can be established.
+        if (target instanceof ParameterizedType a) {
+            final java.lang.reflect.Type projected = asSupertype(source, (Class<?>) a.getRawType());
+            if (projected instanceof ParameterizedType b) {
+                final java.lang.reflect.Type[] left = a.getActualTypeArguments();
+                final java.lang.reflect.Type[] right = b.getActualTypeArguments();
+                for (int i = 0; i < left.length; i++) {
+                    if (!acceptsArgument(left[i], right[i], visiting)) {
+                        return false;
+                    }
                 }
             }
         }
         return true;
+    }
+
+    /**
+     * Views a value type through a creator's superclass or interface while retaining inherited type arguments.
+     * For example, {@code List<BigDecimal>} is a {@code Collection<BigDecimal>}, not a raw {@code Collection}.
+     */
+    private java.lang.reflect.Type asSupertype(java.lang.reflect.Type source, final Class<?> target) {
+        source = dereference(source);
+        if (source instanceof TypeVariable<?> variable) {
+            return asSupertype(variable.getBounds()[0], target);
+        } else if (source instanceof WildcardType wildcard) {
+            return asSupertype(wildcard.getUpperBounds()[0], target);
+        }
+        final Class<?> sourceClass = raw(source);
+        if (!target.isAssignableFrom(sourceClass)) {
+            return null;
+        }
+        if (sourceClass == target) {
+            return source;
+        }
+
+        final Map<TypeVariable<?>, java.lang.reflect.Type> inherited = new HashMap<>();
+        if (source instanceof ParameterizedType parameterized) {
+            final TypeVariable<?>[] variables = sourceClass.getTypeParameters();
+            final java.lang.reflect.Type[] arguments = parameterized.getActualTypeArguments();
+            for (int i = 0; i < variables.length; i++) {
+                inherited.put(variables[i], arguments[i]);
+            }
+        }
+
+        for (final java.lang.reflect.Type superInterface : sourceClass.getGenericInterfaces()) {
+            final java.lang.reflect.Type result = asSupertype(substituteInherited(superInterface, inherited), target);
+            if (result != null) {
+                return result;
+            }
+        }
+        final java.lang.reflect.Type superclass = sourceClass.getGenericSuperclass();
+        return superclass == null ? null : asSupertype(substituteInherited(superclass, inherited), target);
+    }
+
+    private java.lang.reflect.Type substituteInherited(final java.lang.reflect.Type type, final Map<TypeVariable<?>, java.lang.reflect.Type> inherited) {
+        if (type instanceof TypeVariable<?> variable) {
+            return inherited.getOrDefault(variable, dereference(variable));
+        } else if (type instanceof ParameterizedType parameterized) {
+            final java.lang.reflect.Type[] arguments = parameterized.getActualTypeArguments();
+            for (int i = 0; i < arguments.length; i++) {
+                arguments[i] = substituteInherited(arguments[i], inherited);
+            }
+            return new Parameterized((Class<?>) parameterized.getRawType(), arguments);
+        } else if (type instanceof GenericArrayType array) {
+            return new GenericArray(substituteInherited(array.getGenericComponentType(), inherited));
+        } else if (type instanceof WildcardType wildcard) {
+            final java.lang.reflect.Type[] lower = wildcard.getLowerBounds();
+            return new Wildcard(substituteInherited(wildcard.getUpperBounds()[0], inherited),
+                    lower.length == 0 ? null : substituteInherited(lower[0], inherited));
+        }
+        return type;
     }
 
     private boolean acceptsArgument(java.lang.reflect.Type target, java.lang.reflect.Type source, final Set<TypeVariable<?>> visiting) {

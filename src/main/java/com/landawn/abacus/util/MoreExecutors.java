@@ -137,8 +137,8 @@ public final class MoreExecutors {
     public static ExecutorService getExitingExecutorService(final ThreadPoolExecutor executor, final long terminationTimeout, final TimeUnit timeUnit)
             throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(executor, cs.executor);
-        N.checkArgNotNull(timeUnit, cs.timeUnit);
         N.checkArgNotNegative(terminationTimeout, cs.terminationTimeout);
+        N.checkArgNotNull(timeUnit, cs.timeUnit);
 
         final ThreadFactory originalThreadFactory = executor.getThreadFactory();
         final ThreadFactory daemonThreadFactory = useDaemonThreadFactory(executor);
@@ -229,8 +229,8 @@ public final class MoreExecutors {
     public static ScheduledExecutorService getExitingScheduledExecutorService(final ScheduledThreadPoolExecutor executor, final long terminationTimeout,
             final TimeUnit timeUnit) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(executor, cs.executor);
-        N.checkArgNotNull(timeUnit, cs.timeUnit);
         N.checkArgNotNegative(terminationTimeout, cs.terminationTimeout);
+        N.checkArgNotNull(timeUnit, cs.timeUnit);
 
         final ThreadFactory originalThreadFactory = executor.getThreadFactory();
         final ThreadFactory daemonThreadFactory = useDaemonThreadFactory(executor);
@@ -274,9 +274,9 @@ public final class MoreExecutors {
      */
     public static void addDelayedShutdownHook(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit)
             throws IllegalArgumentException, IllegalStateException {
-        N.checkArgNotNull(service);
-        N.checkArgNotNull(timeUnit);
+        N.checkArgNotNull(service, cs.service);
         N.checkArgNotNegative(terminationTimeout, cs.terminationTimeout);
+        N.checkArgNotNull(timeUnit, cs.timeUnit);
 
         addShutdownHook(MoreExecutors.newThread("DelayedShutdownHook-for-" + service, () -> {
             try {
@@ -299,11 +299,12 @@ public final class MoreExecutors {
      * This is a package-private utility method.
      *
      * @param hook the thread to add as a shutdown hook
+     * @throws SecurityException if a security manager is installed and denies the
+     *         {@code RuntimePermission("shutdownHooks")} needed to register shutdown hooks
      * @throws IllegalStateException if the virtual machine is already shutting down
      * @throws IllegalArgumentException if {@code hook} has already been registered or started
-     * @throws SecurityException if the runtime denies permission to register shutdown hooks
      */
-    static void addShutdownHook(final Thread hook) throws IllegalStateException, IllegalArgumentException, SecurityException {
+    static void addShutdownHook(final Thread hook) throws SecurityException, IllegalStateException, IllegalArgumentException {
         Runtime.getRuntime().addShutdownHook(hook);
     }
 
@@ -386,8 +387,8 @@ public final class MoreExecutors {
      * @throws IllegalArgumentException if {@code name} or {@code runnable} is {@code null}.
      */
     static Thread newThread(final String name, final Runnable runnable) throws IllegalArgumentException {
-        N.checkArgNotNull(name);
-        N.checkArgNotNull(runnable);
+        N.checkArgNotNull(name, cs.name);
+        N.checkArgNotNull(runnable, cs.runnable);
 
         final Thread result = Executors.defaultThreadFactory().newThread(runnable);
         try {

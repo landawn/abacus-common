@@ -69,7 +69,7 @@ import java.math.BigInteger;
  * <ul>
  *   <li>This class implements {@link Immutable}, guaranteeing that instances cannot be modified after creation</li>
  *   <li>Both {@code numerator} and {@code denominator} fields are final and set only during construction</li>
- *   <li>All arithmetic operations return new Fraction instances rather than modifying existing ones</li>
+ *   <li>Arithmetic operations return reduced results without modifying their operands; an existing instance may be reused</li>
  *   <li>Thread-safe by design due to immutability and lack of mutable state</li>
  * </ul>
  *
@@ -957,7 +957,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * Gets the proper numerator of the fraction, always positive.
+     * Gets the non-negative proper numerator of the fraction.
      * An improper fraction like 7/4 can be expressed as the mixed number 1 3/4.
      * This method returns the numerator of the fractional part (3 in this example).
      *
@@ -976,7 +976,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * int pn3 = f3.getProperNumerator();   // returns 0
      * }</pre>
      *
-     * @return the positive proper numerator
+     * @return the non-negative proper numerator
      * @deprecated replaced by {@link #properNumerator()}
      */
     @Deprecated
@@ -985,7 +985,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
     }
 
     /**
-     * Gets the proper numerator of the fraction, always positive.
+     * Gets the non-negative proper numerator of the fraction.
      * An improper fraction like 7/4 can be expressed as the mixed number 1 3/4.
      * This method returns the numerator of the fractional part (3 in this example).
      *
@@ -1004,7 +1004,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * int pn3 = f3.properNumerator();     // returns 0
      * }</pre>
      *
-     * @return the positive proper numerator
+     * @return the non-negative proper numerator
      */
     public int properNumerator() {
         return Math.abs(numerator % denominator);
@@ -1584,7 +1584,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * <li>If the numerator is zero, returns "0"</li>
      * <li>If the fraction equals 1, returns "1"</li>
      * <li>If the fraction equals -1, returns "-1"</li>
-     * <li>If the fraction is proper (numerator &lt; denominator), returns "numerator/denominator"</li>
+     * <li>If the fraction is proper (the absolute value of the numerator is less than the denominator), returns "numerator/denominator"</li>
      * <li>If the fraction is improper, returns "whole numerator/denominator" format</li>
      * <li>If the fraction has no fractional part, returns just the whole number</li>
      * </ul>
@@ -1744,7 +1744,7 @@ public final class Fraction extends Number implements Comparable<Fraction>, Immu
      * The hash code is calculated using both the numerator and denominator to ensure
      * that equal fractions (as defined by {@link #equals(Object)}) have equal hash codes.
      *
-     * <p>The hash code is computed once and cached since this class is immutable.</p>
+     * <p>The hash code is computed lazily and cached since this class is immutable. Concurrent callers may compute it more than once.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

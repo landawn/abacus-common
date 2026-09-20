@@ -2297,8 +2297,7 @@ public class SheetTest extends SheetTestSupport {
         assertEquals(Integer.valueOf(3), sortedValues.get(2));
 
         for (boolean multipleKeys : new boolean[] { false, true }) {
-            Sheet<String, String, Integer> values = Sheet.rows(List.of("r1", "r2"), List.of("c1", "c2"),
-                    new Integer[][] { { 4, 2 }, { 3, 1 } });
+            Sheet<String, String, Integer> values = Sheet.rows(List.of("r1", "r2"), List.of("c1", "c2"), new Integer[][] { { 4, 2 }, { 3, 1 } });
             Comparator<Object[]> byFirstValue = (a, b) -> {
                 assertNotNull(a);
                 assertNotNull(b);

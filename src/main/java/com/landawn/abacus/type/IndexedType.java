@@ -145,9 +145,12 @@ public class IndexedType<T> extends AbstractType<Indexed<T>> {
      * @param str the JSON array string to parse (e.g., {@code "[5,\"hello\"]"}); may be {@code null} or empty
      * @return the deserialized indexed value, or {@code null} if {@code str} is {@code null} or empty (a blank,
      *         non-empty string is not treated as empty and is rejected)
-     * @throws IllegalArgumentException if the parsed value is not an array with exactly two elements (this includes a         blank string, unbalanced brackets and trailing text), or if the index is negative (which         {@link Indexed#of(Object, long)} rejects)
+     * @throws IllegalArgumentException if the parsed value is not an array with exactly two elements (this includes a
+     *         blank string, unbalanced brackets and trailing text), or if the index is negative (which
+     *         {@link Indexed#of(Object, long)} rejects)
      * @throws ParsingException if the value token is not valid JSON for the declared value type
-     * @throws NumberFormatException if the index slot is not an integer literal (fractional or scientific notation),         or a value token cannot be converted to the declared value type
+     * @throws NumberFormatException if the index slot is not an integer literal (fractional or scientific notation),
+     *         or a value token cannot be converted to the declared value type
      * @throws ArithmeticException if the index does not fit in a {@code long}
      * @see #valueOf(Object)
      * @see #stringOf(Indexed)

@@ -256,6 +256,51 @@ public class FunctionAPITest extends TestBase {
     }
 
     @Test
+    public void testToFloatFunctionFromNumberRoundsBeforeOverflow() {
+        final double justAboveMax = Math.nextUp((double) Float.MAX_VALUE);
+
+        assertEquals(Float.MAX_VALUE, ToFloatFunction.FROM_NUM.applyAsFloat(justAboveMax));
+        assertEquals(-Float.MAX_VALUE, ToFloatFunction.FROM_NUM.applyAsFloat(-justAboveMax));
+        assertEquals(Float.POSITIVE_INFINITY, ToFloatFunction.FROM_NUM.applyAsFloat(Double.MAX_VALUE));
+        assertEquals(Float.NEGATIVE_INFINITY, ToFloatFunction.FROM_NUM.applyAsFloat(-Double.MAX_VALUE));
+    }
+
+    @Test
+    public void testToFloatFunctionFromNumberUsesCustomFloatValue() {
+        final AtomicBoolean floatValueCalled = new AtomicBoolean();
+        final Number number = new Number() {
+            @Override
+            public int intValue() {
+                return 11;
+            }
+
+            @Override
+            public long longValue() {
+                return 12L;
+            }
+
+            @Override
+            public float floatValue() {
+                floatValueCalled.set(true);
+                return 17.25f;
+            }
+
+            @Override
+            public double doubleValue() {
+                return 13.0;
+            }
+
+            @Override
+            public String toString() {
+                return "14";
+            }
+        };
+
+        assertEquals(17.25f, ToFloatFunction.FROM_NUM.applyAsFloat(number));
+        assertTrue(floatValueCalled.get());
+    }
+
+    @Test
     public void testRandomInstancesNotNull() {
         assertNotNull(BooleanSupplier.RANDOM);
     }

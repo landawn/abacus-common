@@ -47,7 +47,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // B2' - a Sheet move/swap onto a key's own position must not touch the Sheet or its live Streams.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetSamePositionMoveIsNoOp {
+    public class SheetSamePositionMoveIsNoOp extends TestBase {
 
         @Test
         public void moveRowToOwnPositionLeavesLiveStreamsValid() {
@@ -140,7 +140,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // B7 - moveRow and moveColumn resolve the key before validating the index.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetMoveValidationOrder {
+    public class SheetMoveValidationOrder extends TestBase {
 
         @Test
         public void bothOverloadsReportTheUnknownKeyFirst() {
@@ -167,7 +167,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // B1 - Sheet.columns(from, to, mapper) must never hand the mapper another column's values.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetColumnsMapperDoesNotReuseStaleData {
+    public class SheetColumnsMapperDoesNotReuseStaleData extends TestBase {
 
         @Test
         public void columnsMapperReadsEachColumnCorrectly() {
@@ -226,7 +226,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // D4 / B8 - Sheet.putAll writes through the unchecked accessors and validates its source.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetPutAll {
+    public class SheetPutAll extends TestBase {
 
         @Test
         public void putAllCopiesByKeyRegardlessOfAxisOrder() {
@@ -307,7 +307,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // O1 / D9 - Sheet.hashCode's fused pass and the index-map sizing must not change any result.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetHashCodeAndIndexMaps {
+    public class SheetHashCodeAndIndexMaps extends TestBase {
 
         @Test
         public void uninitializedAndAllNullSheetsAgree() {
@@ -360,7 +360,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // D8 - setColumn writes straight through; behaviour must be unchanged.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetSetColumn {
+    public class SheetSetColumn extends TestBase {
 
         @Test
         public void setColumnReplacesValuesInPlaceKeepingViewsLive() {
@@ -385,7 +385,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // B4 - Dataset mutators that change nothing must not invalidate live lazy sources.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DatasetNoOpMutatorsDoNotBumpModCount {
+    public class DatasetNoOpMutatorsDoNotBumpModCount extends TestBase {
 
         @Test
         public void emptyRemoveRowsAtKeepsStreamsValid() {
@@ -452,7 +452,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // O2 - removeRowsAt's single-pass compaction must match the old semantics exactly.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DatasetRemoveRowsAt {
+    public class DatasetRemoveRowsAt extends TestBase {
 
         @Test
         public void removesTheRequestedRowsOnly() {
@@ -509,7 +509,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // B5 - property maps are copied with newTargetMap, so a SortedMap keeps its comparator.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DatasetPropertyMapType {
+    public class DatasetPropertyMapType extends TestBase {
 
         @Test
         public void aSortedPropertiesMapStaysSorted() {
@@ -547,7 +547,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // D2 - the documented properties-propagation rule.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DatasetPropertiesPropagation {
+    public class DatasetPropertiesPropagation extends TestBase {
 
         private Dataset withProperties() {
             return new RowDataset(new ArrayList<>(CommonUtil.asList("a", "b")), new ArrayList<>(CommonUtil
@@ -629,7 +629,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // B3 - the first column of a zero-column Dataset establishes the row count.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DatasetAddColumnToEmptyDataset {
+    public class DatasetAddColumnToEmptyDataset extends TestBase {
 
         @Test
         public void addColumnEstablishesTheRowCount() {
@@ -685,7 +685,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // D3 - renameColumns validates the resulting name list, so permutations are accepted.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DatasetRenameColumnsPermutation {
+    public class DatasetRenameColumnsPermutation extends TestBase {
 
         @Test
         public void namesCanBeSwapped() {
@@ -770,7 +770,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // D7 - hoisting the right-hand column views must not change any join result.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DatasetJoinResults {
+    public class DatasetJoinResults extends TestBase {
 
         private final Dataset left = Dataset.rows(N.asList("id", "name"), new Object[][] { { 1, "a" }, { 2, "b" }, { 3, "c" } });
         private final Dataset right = Dataset.rows(N.asList("id", "tag"), new Object[][] { { 1, "t1" }, { 1, "t2" }, { 2, "t3" } });
@@ -812,7 +812,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // B6 - BiMap's backing-map equality requirement (documented; these pin the equals-consistent case).
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class BiMapContracts {
+    public class BiMapContracts extends TestBase {
 
         @Test
         public void valueSideViewsAgreeWithEqualsConsistentBackingMaps() {
@@ -862,7 +862,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // O3 - SetMultimap.wrap names the offending key instead of rendering the whole map.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SetMultimapWrapDiagnostics {
+    public class SetMultimapWrapDiagnostics extends TestBase {
 
         @Test
         public void wrapNamesTheOffendingKeyAndNotTheWholeMap() {
@@ -917,7 +917,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // D1 - the documented (deliberate) shallow-vs-deep equality split between Sheet and Dataset.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetAndDatasetEqualityAreDocumentedToDiffer {
+    public class SheetAndDatasetEqualityAreDocumentedToDiffer extends TestBase {
 
         @Test
         public void sheetIsShallowAndDatasetIsDeepForArrayCells() {
@@ -951,7 +951,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // cell grid mutually consistent, whatever sequence of no-op and real operations is applied.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetMutatorInvariants {
+    public class SheetMutatorInvariants extends TestBase {
 
         @Test
         public void randomMutationSequencesKeepEveryKeyResolvable() {
@@ -1014,7 +1014,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // Dataset structural invariants around the changed mutators.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DatasetMutatorInvariants {
+    public class DatasetMutatorInvariants extends TestBase {
 
         @Test
         public void columnCachesStayConsistentAcrossRenamesAndStructuralEdits() {
@@ -1065,7 +1065,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // Sheet.copy(Collection, Collection) rejects duplicate keys (now documented).
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetCopyKeySelection {
+    public class SheetCopyKeySelection extends TestBase {
 
         @Test
         public void duplicateKeysAreRejected() {
@@ -1091,7 +1091,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // J2 - the all-null short-circuit in the value-based sorts.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class SheetValueSortsOnAllNullKeys {
+    public class SheetValueSortsOnAllNullKeys extends TestBase {
 
         @Test
         public void anAllNullKeyColumnOrRowLeavesTheOrderUnchanged() {
@@ -1123,7 +1123,7 @@ public class DatasetSheetRegressionTest extends TestBase {
     // Collection-level smoke checks for the classes touched only by Javadoc/diagnostics changes.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class UntouchedBehaviourStillHolds {
+    public class UntouchedBehaviourStillHolds extends TestBase {
 
         @Test
         public void setMultimapCoreOperations() {

@@ -124,13 +124,22 @@ public final class ByteArrayOutputStream extends OutputStream {
      * @param b the byte array containing data to write
      * @param off the start offset in the data
      * @param len the number of bytes to write
-     * @throws NullPointerException if {@code b} is {@code null}
+     * @throws IllegalArgumentException if {@code b} is {@code null}. Note that this deliberately departs from
+     *         {@link java.io.OutputStream#write(byte[], int, int)}, which specifies
+     *         {@code NullPointerException} for a null buffer: argument validation in this library is reported
+     *         as {@code IllegalArgumentException}, the same way {@code N.checkArgNotNull} reports it everywhere
+     *         else.
      * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
      *         or {@code off + len} is greater than the length of the array {@code b}
      * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or an enlarged buffer cannot be allocated
      */
     @Override
-    public void write(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, OutOfMemoryError {
+    public void write(final byte[] b, final int off, final int len) throws IllegalArgumentException, IndexOutOfBoundsException, OutOfMemoryError {
+        // Checked before the range: the null argument must win over IndexOutOfBoundsException, but the range
+        // check below short-circuits on (off < 0) before it ever dereferences b.length, so a null buffer
+        // combined with a negative off would otherwise report the wrong exception type.
+        N.checkArgNotNull(b, cs.b);
+
         if ((off < 0) || (off > b.length) || (len < 0) || (len > b.length - off)) {
             throw new IndexOutOfBoundsException();
         }

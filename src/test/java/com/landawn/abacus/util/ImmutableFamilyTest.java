@@ -42,7 +42,7 @@ public class ImmutableFamilyTest extends TestBase {
     //      later put() calls mutated. The other three builders have thrown IllegalStateException all along.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class BiMapBuilderIsConsumedByBuild {
+    public class BiMapBuilderIsConsumedByBuild extends TestBase {
 
         @Test
         public void put_afterBuild_throwsIllegalStateException() {
@@ -129,7 +129,7 @@ public class ImmutableFamilyTest extends TestBase {
     //      NoSuchElementException (removeFirst) instead of reporting that the collection is read-only.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class SequencedMutatorsAreBlockedEvenWhenEmpty {
+    public class SequencedMutatorsAreBlockedEvenWhenEmpty extends TestBase {
 
         @Test
         public void sortedMap_pollFirstEntry_onEmpty() {
@@ -220,7 +220,7 @@ public class ImmutableFamilyTest extends TestBase {
     //      List.sort that was outright wrong: null is a legal argument meaning "natural ordering".
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class NullArgumentDoesNotMaskUnsupportedOperation {
+    public class NullArgumentDoesNotMaskUnsupportedOperation extends TestBase {
 
         @Test
         public void list_sort_null() {
@@ -281,7 +281,7 @@ public class ImmutableFamilyTest extends TestBase {
     //      BiMap.values() is an ImmutableSet.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class BiMapValuesIsASet {
+    public class BiMapValuesIsASet extends TestBase {
 
         @Test
         public void values_isAnImmutableSet() {
@@ -364,7 +364,7 @@ public class ImmutableFamilyTest extends TestBase {
     // D4 - Range views of a navigable map/set used to come back as the merely-sorted supertype.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class NavigableRangeViewsStayNavigable {
+    public class NavigableRangeViewsStayNavigable extends TestBase {
 
         @Test
         public void navigableMap_rangeViewTypes() {
@@ -518,7 +518,7 @@ public class ImmutableFamilyTest extends TestBase {
     //      and ImmutableBiMap is not one. inverse() also dropped the source's ownership flag.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class BiMapCopyOfAcceptsAnyMap {
+    public class BiMapCopyOfAcceptsAnyMap extends TestBase {
 
         @Test
         public void copyOf_snapshotsAWrappedView() {
@@ -656,7 +656,7 @@ public class ImmutableFamilyTest extends TestBase {
     //      IllegalArgumentException, so the exception depended on what the caller happened to wrap.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class SubListRangeCheckIsUniform {
+    public class SubListRangeCheckIsUniform extends TestBase {
 
         /**
          * A {@code List} that follows the {@link List#subList(int, int)} specification literally: the spec
@@ -755,7 +755,7 @@ public class ImmutableFamilyTest extends TestBase {
     // copyOf(E[]) used to build an intermediate ArrayList and then copy it a second time.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class ArrayCopyOfIsStillDefensive {
+    public class ArrayCopyOfIsStillDefensive extends TestBase {
 
         @Test
         public void list_copyOfArray() {
@@ -818,7 +818,7 @@ public class ImmutableFamilyTest extends TestBase {
     // Javadoc-driven behaviours the review documented; pinned so the docs cannot drift from the code.
     // ---------------------------------------------------------------------------------------------
     @Nested
-    public class DocumentedBehaviours {
+    public class DocumentedBehaviours extends TestBase {
 
         @Test
         public void copyOfDropsASourcesComparatorBasedMembership() {

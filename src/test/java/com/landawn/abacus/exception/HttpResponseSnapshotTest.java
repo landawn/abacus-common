@@ -1,13 +1,17 @@
 package com.landawn.abacus.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -19,6 +23,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.http.HttpUtil;
 
 public class HttpResponseSnapshotTest extends TestBase {
     @Test
@@ -63,6 +68,46 @@ public class HttpResponseSnapshotTest extends TestBase {
         assertNull(restored.header("X-Null"));
         assertTrue(restored.headers("X-Null").isEmpty());
         assertTrue(restored.headers("X-Empty").isEmpty());
+        assertNull(restored.rawResponseBody());
+        assertNull(restored.responseBodyDecodingFailure());
+    }
+
+    @Test
+    public void serializedDecodingFailureRetainsRawPrefixAndCauseIdentity() throws Exception {
+        final byte[] bytes = new byte[HttpUtil.MAX_ERROR_BODY_SIZE + 7];
+        Arrays.fill(bytes, (byte) 42);
+        final byte[] prefix = Arrays.copyOf(bytes, HttpUtil.MAX_ERROR_BODY_SIZE);
+        final EOFException failure = new EOFException("truncated gzip trailer");
+        final HttpResponseException original = new HttpResponseException("https://example.test/error", 502, null, Map.of("Content-Encoding", List.of("gzip")),
+                "best effort", bytes, failure);
+        bytes[0] = 1;
+
+        final HttpResponseException restored = roundTrip(original);
+        assertArrayEquals(prefix, original.rawResponseBody());
+        assertArrayEquals(prefix, restored.rawResponseBody());
+        assertEquals(original.requestUrl(), restored.requestUrl());
+        assertEquals(original.statusCode(), restored.statusCode());
+        assertEquals(original.headers(), restored.headers());
+        assertEquals(original.responseBody(), restored.responseBody());
+        assertEquals(original.getMessage(), restored.getMessage());
+        assertEquals(EOFException.class, restored.responseBodyDecodingFailure().getClass());
+        assertEquals(failure.getMessage(), restored.responseBodyDecodingFailure().getMessage());
+        assertNotSame(failure, restored.responseBodyDecodingFailure());
+        // Serialization must preserve the shared reference between diagnostics and the cause chain.
+        assertSame(restored.responseBodyDecodingFailure(), restored.getCause().getCause());
+        final byte[] exposed = restored.rawResponseBody();
+        exposed[0] = 2;
+        assertArrayEquals(prefix, restored.rawResponseBody());
+    }
+
+    @Test
+    public void serializedRawDiagnosticsPreserveAbsentAndEmptyValues() throws Exception {
+        for (final byte[] raw : new byte[][] { null, new byte[0], { 1, 2, 3 } }) {
+            final HttpResponseException restored = roundTrip(new HttpResponseException(null, 500, null, null, null, raw, null));
+            assertArrayEquals(raw, restored.rawResponseBody());
+            assertNull(restored.responseBodyDecodingFailure());
+            assertNull(restored.getCause().getCause());
+        }
     }
 
     @Test

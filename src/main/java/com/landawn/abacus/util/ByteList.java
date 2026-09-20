@@ -57,7 +57,7 @@ import com.landawn.abacus.util.stream.ByteStream;
  *   <li><b>Memory Efficiency:</b> Compact byte array storage with minimal memory overhead</li>
  *   <li><b>High Performance:</b> Optimized algorithms for byte-specific operations</li>
  *   <li><b>Rich Byte API:</b> Specialized methods for byte manipulation and binary operations</li>
- *   <li><b>Set Operations:</b> Efficient intersection, union, and difference operations</li>
+ *   <li><b>Occurrence Operations:</b> Intersection, difference, and symmetric difference with multiset semantics</li>
  *   <li><b>Statistical Operations:</b> Min, max, median calculations on byte ranges</li>
  *   <li><b>Random Access:</b> O(1) element access and modification by index</li>
  *   <li><b>Dynamic Sizing:</b> Automatic capacity management with intelligent growth</li>
@@ -349,7 +349,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     /**
      * Constructs a ByteList using the specified array as the backing array for this list.
      * The array is used directly without copying, making this constructor very efficient.
-     * Changes to the array will be reflected in the list and vice versa.
+     * Changes to elements are shared until the list replaces its backing array, for example during growth or trimming.
      * The size of the list will be set to the length of the array.
      *
      * <p><b>Usage Examples:</b></p>
@@ -671,9 +671,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param len the number of random byte values to generate. Must be non-negative.
      * @return a new ByteList containing {@code len} random byte values
@@ -696,7 +696,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * This method provides direct access to the internal array for performance-critical operations.
      *
      * <p><b>Warning:</b> The returned array is the actual internal storage of this list.
-     * Modifications to the returned array will directly affect this list's contents.
+     * Modifications to the returned array affect this list until its backing array is replaced.
      * The array may be larger than the list size; only indices from 0 to size()-1 contain valid elements.
      *
      * <p>This method is marked as {@code @Beta} and should be used with caution.
@@ -2989,9 +2989,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * primitive byte values in this list. The order of elements is preserved. This is useful when
      * you need to interface with APIs that require object types rather than primitives.</p>
      *
-     * <p>Note: Boxing primitive values has memory and performance overhead. Each byte value will
-     * be wrapped in a Byte object, which typically requires 16+ bytes of memory compared to 1 byte
-     * for the primitive value.</p>
+     * <p>Boxing uses cached {@link Byte} instances, so it does not require a new wrapper for every
+     * element. The returned list still stores one reference per element, plus list and array overhead.</p>
      *
      * @return a new List&lt;Byte&gt; containing boxed versions of all elements
      */

@@ -24,6 +24,10 @@ import com.landawn.abacus.util.SK;
  * <p>This class extends {@link JsonXmlSerConfig} to provide XML-specific
  * serialization options such as tag naming strategies and type information handling.</p>
  *
+ * <p>{@code failOnEmptyBean(false)} writes an empty element for beans with no serializable properties
+ * and ordinary property-less classes handled as generic objects. Dedicated unsupported structured types
+ * still fail. This option controls serialization only; it does not add a reader for a property-less class.</p>
+ *
  * <p>Note: XML serialization does not use quotation marks for values, so the
  * quotation-related methods inherited from the parent class should not be used.</p>
  *
@@ -325,7 +329,7 @@ public class XmlSerConfig extends JsonXmlSerConfig<XmlSerConfig> {
     /**
      * Returns a string representation of this configuration object.
      * The string contains all configuration settings in a readable format.
-     * The (always disabled) quotation chars are rendered as the text <code>&#92;u0000</code>, never as a raw NUL character.
+     * Disabled quotation chars are rendered as the text <code>&#92;u0000</code>, never as a raw NUL character.
      *
      * @return a string representation of this configuration
      */

@@ -294,8 +294,6 @@ public class BugFixVerificationTest extends TestBase {
     // -----------------------------------------------------------------
 
     public static class TestPoolable extends AbstractPoolable {
-        private static final long serialVersionUID = 1L;
-
         public TestPoolable() {
             super(60_000L, 60_000L);
         }
@@ -774,7 +772,6 @@ public class BugFixVerificationTest extends TestBase {
      * unbounded user code). The fix re-evaluates isExpired() inside the lock.
      */
     public static class FlaggablePoolable extends AbstractPoolable {
-        private static final long serialVersionUID = 1L;
         private final java.util.concurrent.atomic.AtomicBoolean expiredFlag;
 
         public FlaggablePoolable(java.util.concurrent.atomic.AtomicBoolean expiredFlag) {

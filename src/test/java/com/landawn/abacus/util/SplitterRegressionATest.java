@@ -30,7 +30,7 @@ public class SplitterRegressionATest extends TestBase {
 
     /** J4/D1 (doc half): configuration mutates in place and returns {@code this}, never a copy. */
     @Nested
-    public class ConfigurationMutatesInPlace {
+    public class ConfigurationMutatesInPlace extends TestBase {
 
         @Test
         public void everyConfigurationMethodReturnsTheSameInstance() {
@@ -54,7 +54,7 @@ public class SplitterRegressionATest extends TestBase {
 
     /** J3: a {@code null} source yields nothing; an empty source yields one empty token. */
     @Nested
-    public class NullSourceVersusEmptySource {
+    public class NullSourceVersusEmptySource extends TestBase {
 
         @Test
         public void nullSourceYieldsNoElements() {
@@ -99,7 +99,7 @@ public class SplitterRegressionATest extends TestBase {
 
     /** Cleanup: the multi-character delimiter's char[] is extracted once, not per split call. */
     @Nested
-    public class MultiCharDelimiterSplittingIsUnchanged {
+    public class MultiCharDelimiterSplittingIsUnchanged extends TestBase {
 
         @Test
         public void repeatedSplitsOnACachedSplitterAgree() {
@@ -137,7 +137,7 @@ public class SplitterRegressionATest extends TestBase {
 
     /** Cleanup: the pattern splitter's duplicated "no more matches" branch was collapsed into one. */
     @Nested
-    public class PatternSplittingIsUnchanged {
+    public class PatternSplittingIsUnchanged extends TestBase {
 
         @Test
         public void basicPatternSplit() {
@@ -241,7 +241,7 @@ public class SplitterRegressionATest extends TestBase {
 
     /** D4 + cleanup: the mapper overloads are variance-correct and no longer reuse a raw list. */
     @Nested
-    public class MapperOverloads {
+    public class MapperOverloads extends TestBase {
 
         @Test
         public void splitWithMapperProducesTheMappedList() {
@@ -294,7 +294,7 @@ public class SplitterRegressionATest extends TestBase {
      * malformed-entry check remains, and the message now says what is wrong.
      */
     @Nested
-    public class MapSplitterEntryValidation {
+    public class MapSplitterEntryValidation extends TestBase {
 
         @Test
         public void anEntryWithoutTheDelimiterIsRejectedWithADescriptiveMessage() {

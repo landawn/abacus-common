@@ -1088,6 +1088,84 @@ public class MapsBeansRegressionTest extends TestBase {
         assertTrue(offenders.isEmpty(), () -> "null arguments produced an undocumented NullPointerException: " + offenders);
     }
 
+    /**
+     * Companion to {@link #testC025_nullArgumentsNeverProduceAnUndocumentedNpe()}, which structurally cannot see
+     * this defect: that sweep passes {@code null} for <i>every</i> reference parameter, so {@code bean == null}
+     * short-circuited and the {@code output} map was never reached.
+     *
+     * <p>Every {@code void beanToMap}/{@code deepBeanToMap}/{@code beanToFlatMap(bean, .., Map output)} overload
+     * used to answer a {@code null} output map with a bare {@code NullPointerException} from
+     * {@code output.put(..)} &mdash; and only once a surviving property actually reached it, so the failure was
+     * data-dependent. Validation now completes before any main logic or early return, so a {@code null}
+     * {@code output} is rejected with {@code IllegalArgumentException} whatever {@code bean} is, while a
+     * {@code null} bean with a usable map remains the documented no-op.
+     */
+    @Test
+    public void testC026_toMapOverloadsRejectANullOutputMapEagerly() throws Exception {
+        final java.util.Set<String> family = CommonUtil.asSet("beanToMap", "deepBeanToMap", "beanToFlatMap");
+
+        final SplitSub bean = new SplitSub();
+        bean.setName("John");
+        bean.setAge(25);
+
+        final List<String> notRejected = new ArrayList<>();
+        final List<String> noLongerANoOp = new ArrayList<>();
+        int covered = 0;
+
+        for (final Method m : Beans.class.getDeclaredMethods()) {
+            final Class<?>[] paramTypes = m.getParameterTypes();
+
+            if (!java.lang.reflect.Modifier.isPublic(m.getModifiers()) || !java.lang.reflect.Modifier.isStatic(m.getModifiers()) || m.isSynthetic()
+                    || m.getReturnType() != void.class || !family.contains(m.getName()) || paramTypes.length < 2 || paramTypes[0] != Object.class
+                    || paramTypes[paramTypes.length - 1] != Map.class) {
+                continue;
+            }
+
+            covered++;
+
+            final String id = m.getName() + "/" + paramTypes.length;
+            final Object[] args = new Object[paramTypes.length];
+
+            for (int i = 0; i < args.length; i++) {
+                args[i] = defaultArg(paramTypes[i]);
+            }
+
+            // A null output map is rejected before any main logic runs, for a present bean and an absent one alike.
+            for (final Object beanArg : new Object[] { bean, null }) {
+                args[0] = beanArg;
+
+                try {
+                    m.invoke(null, args);
+                    notRejected.add(id + " (bean=" + (beanArg == null ? "null" : "present") + ") -> no exception");
+                } catch (final java.lang.reflect.InvocationTargetException e) {
+                    if (!(e.getCause() instanceof IllegalArgumentException) || !String.valueOf(e.getCause().getMessage()).contains("output")) {
+                        notRejected.add(id + " (bean=" + (beanArg == null ? "null" : "present") + ") -> " + e.getCause());
+                    }
+                }
+            }
+
+            // A null bean with a usable map stays the documented no-op.
+            final Map<String, Object> target = new LinkedHashMap<>();
+            target.put("preexisting", 1);
+            args[0] = null;
+            args[args.length - 1] = target;
+
+            try {
+                m.invoke(null, args);
+
+                if (target.size() != 1 || !Integer.valueOf(1).equals(target.get("preexisting"))) {
+                    noLongerANoOp.add(id + " -> modified the map: " + target);
+                }
+            } catch (final java.lang.reflect.InvocationTargetException e) {
+                noLongerANoOp.add(id + " -> " + e.getCause());
+            }
+        }
+
+        assertEquals(18, covered, "expected 18 void beanToMap/deepBeanToMap/beanToFlatMap(bean, .., Map output) overloads");
+        assertTrue(notRejected.isEmpty(), () -> "a null output map was not rejected with IllegalArgumentException: " + notRejected);
+        assertTrue(noLongerANoOp.isEmpty(), () -> "a null bean must remain a documented no-op: " + noLongerANoOp);
+    }
+
     private static Object defaultArg(final Class<?> t) {
         if (!t.isPrimitive()) {
             return null;

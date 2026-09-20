@@ -345,9 +345,13 @@ final class ReflectASM<T> {
         return (V) fieldAccess.get(instance, fieldName);
     }
 
-    // Preserve the exact declaring class selected by Reflection when fields hide one another.
     /**
-     * Performs get using the configured resource or operation.
+     * Reads the exact field selected by reflection, preserving its declaring class when a
+     * subclass hides an inherited field with the same name.
+     *
+     * @param <V> the expected field value type
+     * @param field the field to read
+     * @return the field value, cast to {@code V}
      * @throws RuntimeException if field access cannot be created or the specified field cannot be accessed
      * @throws NullPointerException if an instance field is accessed without an instance
      */
@@ -426,9 +430,12 @@ final class ReflectASM<T> {
         return this;
     }
 
-    // FieldAccess's name lookup alone can select a different field in the inheritance hierarchy.
     /**
-     * Performs set using the configured resource or operation.
+     * Writes the exact field selected by reflection, preserving its declaring class when a
+     * subclass hides an inherited field with the same name.
+     *
+     * @param field the field to write
+     * @param value the value to assign
      * @throws RuntimeException if field access cannot be created or the specified field cannot be accessed
      * @throws ClassCastException if {@code value} is not assignable to the field type or its primitive wrapper type
      * @throws NullPointerException if a field is accessed without an instance, or {@code value} is {@code null} for a primitive field

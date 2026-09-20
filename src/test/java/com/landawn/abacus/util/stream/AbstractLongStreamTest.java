@@ -53,8 +53,7 @@ public class AbstractLongStreamTest extends TestBase {
             return (long) (left + right);
         })) {
             final com.landawn.abacus.util.LongIterator iter = stream.iterator();
-            org.junit.jupiter.api.Assertions.assertSame(failure,
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextLong));
+            org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextLong));
             org.junit.jupiter.api.Assertions.assertEquals((long) 2, iter.nextLong());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertEquals((long) 5, iter.nextLong());

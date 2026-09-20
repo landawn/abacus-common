@@ -97,8 +97,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public Object next() {
+        public Object next() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
 
@@ -153,8 +157,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 return !done;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (done) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -233,8 +241,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 return cursor < toIndex;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -243,8 +255,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
             }
 
             @Override
-            public <A> A[] toArray(A[] output) {
-                N.requireNonNull(output, "a"); // match the base implementation's named check, not a bare JVM NPE
+            public <A> A[] toArray(A[] output) throws NullPointerException, ArrayStoreException {
+                N.requireNonNull(output, cs.a); // match the base implementation's named check, not a bare JVM NPE
 
                 final int remaining = toIndex - cursor;
 
@@ -394,6 +406,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      *
      * <p>Initialization happens on the returned iterator. Recursive access during initialization throws {@link IllegalStateException}; supplier runtime exceptions and errors are cached and rethrown by later iterator access.</p>
      *
+     * <p>Any non-null source returned by the supplier must be distinct from this deferred iterator and must not
+     * create a cycle through other delegating iterators. Returning this iterator directly throws a cached
+     * {@link IllegalStateException}; indirect delegation cycles are not detected.</p>
+     *
      * @param <T> the type of elements returned by this iterator
      * @param iteratorSupplier a {@code Supplier} that produces the {@code Iterator} when needed
      * @return an {@code ObjIterator} that lazily initializes using the supplier
@@ -438,6 +454,10 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
                             try {
                                 iter = iteratorSupplier.get();
+
+                                if (iter == this) {
+                                    throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
+                                }
 
                                 if (iter == null) {
                                     iter = ObjIterator.empty();
@@ -543,8 +563,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -608,8 +632,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -672,8 +700,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 return hasNextValue;
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -724,8 +756,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -780,8 +816,12 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 return cnt > 0 && iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1024,7 +1064,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * @throws ArrayStoreException if a remaining element is not assignable to the runtime component type of {@code a}
      */
     public <A> A[] toArray(final A[] a) throws NullPointerException, ArrayStoreException {
-        N.requireNonNull(a, "a");
+        N.requireNonNull(a, cs.a);
         return toList().toArray(a);
     }
 
@@ -1127,8 +1167,13 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                 return iter.hasNext();
             }
 
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator has no remaining element
+             * @throws ArithmeticException if an element remains after the index has reached {@link Long#MAX_VALUE}
+             */
             @Override
-            public Indexed<T> next() {
+            public Indexed<T> next() throws NoSuchElementException, ArithmeticException {
                 if (indexOverflow) {
                     if (!iter.hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);

@@ -80,7 +80,7 @@ public enum EvictionPolicy {
      * </ul>
      *
      * <p>Objects with the earliest {@link ActivityPrint#getExpirationTime()} are evicted first.
-     * This ensures objects are used for as much of their lifetime as possible.
+     * This gives objects with more remaining lifetime priority to stay in the pool.
      */
     EXPIRATION_TIME,
 
@@ -97,7 +97,8 @@ public enum EvictionPolicy {
      * </ul>
      *
      * <p>Objects with the lowest {@link ActivityPrint#getAccessCount()} are evicted first.
-     * Note that this policy may keep old but frequently accessed objects indefinitely.
+     * This policy favors old but frequently accessed objects during balancing; lifetime and idle-time
+     * expiration still apply.
      */
     ACCESS_COUNT,
 

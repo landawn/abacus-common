@@ -268,7 +268,8 @@ public class MapTypeTest extends TestBase {
         // only an unquoted null key reads back as a null key
         assertTrue(mapType.valueOf("{null: 1}").containsKey(null));
 
-        final MapType<Integer, Integer, Map<Integer, Integer>> intKeyType = (MapType<Integer, Integer, Map<Integer, Integer>>) createType("Map<Integer, Integer>");
+        final MapType<Integer, Integer, Map<Integer, Integer>> intKeyType = (MapType<Integer, Integer, Map<Integer, Integer>>) createType(
+                "Map<Integer, Integer>");
         final Map<Integer, Integer> mi = new HashMap<>();
         mi.put(null, 1);
         assertEquals("{\"null\": 1}", intKeyType.stringOf(mi));

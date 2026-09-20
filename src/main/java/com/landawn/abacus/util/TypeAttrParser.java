@@ -199,8 +199,8 @@ public final class TypeAttrParser {
      *         suffix, while a parameterized qualified-member segment costs two (its owner arguments are
      *         validated, then the normalized name is re-parsed). A declaration that repeats one of the
      *         two-level shapes, {@code A<...>[]} or {@code Owner<...>.Member}, is therefore rejected beyond 32
-     *         textual levels. Array dimensions on their own, such as {@code int[][][]}, do not recurse per
-     *         dimension and are not limited at all.
+     *         textual levels. Array dimensions on their own, such as {@code int[][][]} or {@code int[] [] []},
+     *         do not recurse per dimension and are not limited by this nesting limit.
      * @see #getClassName()
      * @see #getTypeParameters()
      * @see #getParameters()
@@ -230,19 +230,31 @@ public final class TypeAttrParser {
             componentEnd--;
         }
 
-        final int arrayEnd = componentEnd;
+        int arrayDimensions = 0;
         while (componentEnd >= 2 && attr.charAt(componentEnd - 2) == '[' && attr.charAt(componentEnd - 1) == ']') {
             componentEnd -= 2;
+            arrayDimensions++;
+
+            int previousDimensionEnd = componentEnd;
+            while (previousDimensionEnd > 0 && Character.isWhitespace(attr.charAt(previousDimensionEnd - 1))) {
+                previousDimensionEnd--;
+            }
+
+            if (previousDimensionEnd < 2 || attr.charAt(previousDimensionEnd - 2) != '[' || attr.charAt(previousDimensionEnd - 1) != ']') {
+                break;
+            }
+
+            componentEnd = previousDimensionEnd;
         }
 
-        if (componentEnd < arrayEnd) {
+        if (arrayDimensions > 0) {
             final String componentName = attr.substring(0, componentEnd).trim();
             if (componentName.endsWith(")")) {
                 throw new IllegalArgumentException("Malformed type attribute: array dimensions after constructor arguments in: " + attr);
             }
 
             final TypeAttrParser component = parse(componentName, depth + 1, root);
-            return new TypeAttrParser(component.className + attr.substring(componentEnd, arrayEnd), component.typeParameters, component.parameters);
+            return new TypeAttrParser(component.className + "[]".repeat(arrayDimensions), component.typeParameters, component.parameters);
         }
 
         final String normalizedMemberType = normalizeQualifiedMemberType(attr, depth, root);
@@ -415,8 +427,11 @@ public final class TypeAttrParser {
      * clause. For example, {@code Owner<String>.Member<Integer>} becomes
      * {@code Owner.Member<Integer>}. The original owner arguments are still validated before they
      * are removed; callers that need them retain them in the original reflection type or type name.
+     *
+     * @throws IllegalArgumentException if an owner or member class name is missing, a generic clause has unmatched
+     *         delimiters, an owner type has malformed syntax, trailing text is invalid, or owner validation exceeds the nesting limit
      */
-    private static String normalizeQualifiedMemberType(final String attr, final int depth, final String root) {
+    private static String normalizeQualifiedMemberType(final String attr, final int depth, final String root) throws IllegalArgumentException {
         final int firstParenthesisIndex = attr.indexOf(_PARENTHESIS_L);
         final int classSyntaxEndIndex = firstParenthesisIndex < 0 ? attr.length() : firstParenthesisIndex;
         final int firstGenericStart = attr.substring(0, classSyntaxEndIndex).indexOf('<');
@@ -509,8 +524,11 @@ public final class TypeAttrParser {
      * Finds the closing angle bracket paired with {@code beginIndex}. Angle brackets inside a
      * nested type's parenthesized, double-quoted CSV constructor arguments are treated as data.
      * Backslash-escaped and doubled double quotes follow the explicitly configured argument parser's rules.
+     *
+     * @throws IllegalArgumentException if the generic clause beginning at {@code beginIndex} contains an unmatched
+     *         closing parenthesis or has no matching closing angle bracket
      */
-    private static int findClosingGeneric(final String attr, final int beginIndex) {
+    private static int findClosingGeneric(final String attr, final int beginIndex) throws IllegalArgumentException {
         int depth = 0;
         int parenthesisDepth = 0;
         boolean inQuotes = false;
@@ -564,8 +582,10 @@ public final class TypeAttrParser {
      * Finds the closing parenthesis paired with {@code beginIndex}. Parentheses inside double-quoted
      * CSV constructor arguments are treated as data, while balanced nested parentheses are allowed.
      * Backslash-escaped and doubled double quotes follow the explicitly configured argument parser's rules.
+     *
+     * @throws IllegalArgumentException if the constructor clause beginning at {@code beginIndex} has no matching closing parenthesis
      */
-    private static int findClosingParenthesis(final String attr, final int beginIndex) {
+    private static int findClosingParenthesis(final String attr, final int beginIndex) throws IllegalArgumentException {
         int depth = 0;
         boolean inQuotes = false;
 

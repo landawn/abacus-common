@@ -645,8 +645,8 @@ public class MultiClassRegressionGTest extends TestBase {
             final File att = tempDir.resolve(name).toFile();
             Files.write(att.toPath(), new byte[0]);
             final String wire = messageWire(new String[] { "to@example.com" }, "from@example.com", "s", new String[] { att.getAbsolutePath() });
-            final javax.mail.internet.MimeMessage parsed = new javax.mail.internet.MimeMessage(
-                    javax.mail.Session.getInstance(new java.util.Properties()), new ByteArrayInputStream(wire.getBytes(StandardCharsets.ISO_8859_1)));
+            final javax.mail.internet.MimeMessage parsed = new javax.mail.internet.MimeMessage(javax.mail.Session.getInstance(new java.util.Properties()),
+                    new ByteArrayInputStream(wire.getBytes(StandardCharsets.ISO_8859_1)));
             final javax.mail.BodyPart attachment = ((javax.mail.Multipart) parsed.getContent()).getBodyPart(1);
             final String disposition = attachment.getHeader("Content-Disposition")[0];
 

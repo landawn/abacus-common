@@ -38,7 +38,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *
  * // Retry a value-returning operation if result is null or a timeout occurs
  * Retry<String> retry2 = Retry.withFixedDelay(3, 500,
- *     (result, ex) -> result == null || ex instanceof java.util.concurrent.TimeoutException);
+ *     (result, ex) -> (ex == null && result == null) || ex instanceof java.util.concurrent.TimeoutException);
  * String data = retry2.call(() -> fetchDataFromServer());
  * }</pre>
  *
@@ -396,7 +396,7 @@ public final class Retry<R> {
      * <pre>{@code
      * // Retry up to 3 times with 1 second interval if result is null or TimeoutException occurs
      * Retry<String> retry = Retry.withFixedDelay(3, 1000,
-     *     (result, ex) -> result == null || ex instanceof java.util.concurrent.TimeoutException);
+     *     (result, ex) -> (ex == null && result == null) || ex instanceof java.util.concurrent.TimeoutException);
      * String result = retry.call(() -> fetchDataFromServer());
      * }</pre>
      *

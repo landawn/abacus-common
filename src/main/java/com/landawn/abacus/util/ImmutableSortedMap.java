@@ -33,11 +33,12 @@ import com.landawn.abacus.annotation.Beta;
  * use {@link #copyOf(Map)} when an independent immutable value is required - it copies a wrapped view
  * rather than returning it unchanged.</p>
  *
- * <p><b>Note:</b> the {@code of(...)} factories accept any key type and throw {@link ClassCastException}
- * at run time if the keys are not mutually comparable, matching {@link #copyOf(Map)}. They deliberately
- * carry no {@code Comparable} bound, and one must not be added: a bound would make them inapplicable to a
- * non-comparable key, so the call would quietly resolve to the inherited
- * {@link ImmutableMap#of(Object, Object)} and hand back an unsorted map instead of failing.</p>
+ * <p>The natural-order {@code of(...)} factories require {@code K extends Comparable<? super K>}.
+ * {@link #copyOf(Map)} and {@link #wrap(SortedMap)} remain unbounded so a {@link Comparator} can order
+ * keys that are not comparable. Because this class extends {@link ImmutableMap}, a call written as
+ * {@code ImmutableSortedMap.of(nonComparableKey, value)} whose result is not demanded as an
+ * {@code ImmutableSortedMap} can still resolve to {@link ImmutableMap#of(Object, Object)} and return
+ * an unsorted map.</p>
  *
  * <p>This class provides several static factory methods for creating instances:
  * <ul>
@@ -127,7 +128,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(singleEntry.firstKey());   // prints "count"
      * }</pre>
      *
-     * @param <K> the type of the key in the ImmutableSortedMap; the key must be Comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the value in the ImmutableSortedMap
      * @param k1 the key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the key
@@ -135,7 +136,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if {@code k1} is {@code null}
      * @throws ClassCastException if {@code k1} cannot be compared with itself in natural order
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1) throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -157,7 +158,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map);   // prints {1=one, 2=two}
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -167,7 +168,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2)
+            throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -189,7 +191,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map);   // prints {1=one, 2=two, 3=three}
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -201,7 +203,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3)
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3)
             throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
@@ -225,7 +227,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map);   // prints {1=one, 2=two, 3=three, 4=four}
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -239,8 +241,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4)
-            throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4) throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -264,7 +266,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map.firstKey());   // prints "apple"
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -280,8 +282,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5) throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -306,7 +308,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map.lastKey());   // prints 6
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -324,8 +326,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5, final K k6, final V v6) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6) throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -351,7 +353,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map);   // prints {a=1, b=2, c=3, d=4, e=5, f=6, g=7}
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -371,8 +373,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5, final K k6, final V v6, final K k7, final V v7) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7) throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -400,7 +402,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map.lastKey());    // prints 8
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -422,8 +424,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8) throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8)
+            throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -452,7 +455,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map.size());   // prints 9
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -476,8 +479,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9)
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9)
             throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
@@ -508,7 +511,7 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * System.out.println(map.lastKey());   // prints 10
      * }</pre>
      *
-     * @param <K> the type of the keys in the ImmutableSortedMap; keys must be mutually comparable
+     * @param <K> the key type; must extend {@code Comparable<? super K>}
      * @param <V> the type of the values in the ImmutableSortedMap
      * @param k1 the first key to be included in the ImmutableSortedMap
      * @param v1 the value to be associated with the first key
@@ -534,9 +537,9 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * @throws NullPointerException if any key is {@code null}
      * @throws ClassCastException if the keys are not mutually comparable
      */
-    public static <K, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3, final K k4, final V v4, final K k5,
-            final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9, final K k10, final V v10)
-            throws NullPointerException, ClassCastException {
+    public static <K extends Comparable<? super K>, V> ImmutableSortedMap<K, V> of(final K k1, final V v1, final K k2, final V v2, final K k3, final V v3,
+            final K k4, final V v4, final K k5, final V v5, final K k6, final V v6, final K k7, final V v7, final K k8, final V v8, final K k9, final V v9,
+            final K k10, final V v10) throws NullPointerException, ClassCastException {
         final SortedMap<K, V> map = new TreeMap<>();
 
         map.put(k1, v1);
@@ -878,20 +881,16 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
         return sortedMap.firstKey();
     }
 
+    // Overrides SortedMap.pollFirstEntry(), whose default returns null on an EMPTY map instead of
+    // throwing - the same silent no-op that AbstractImmutableMap.replaceAll() is overridden to block.
+    // ImmutableNavigableMap already blocks it unconditionally; this brings ImmutableSortedMap in line.
     /**
      * This operation is not supported by this immutable map.
      * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @return never returns normally.
-     * @throws UnsupportedOperationException always.
+     * @throws UnsupportedOperationException always, because this immutable map does not support mutation.
      * @deprecated this immutable map does not support modification operations.
-     */
-    // Overrides SortedMap.pollFirstEntry(), whose default returns null on an EMPTY map instead of
-    // throwing - the same silent no-op that AbstractImmutableMap.replaceAll() is overridden to block.
-    // ImmutableNavigableMap already blocks it unconditionally; this brings ImmutableSortedMap in line.
-    /**
-     * {@inheritDoc}
-     * @throws UnsupportedOperationException always, because this object does not support this mutation
      */
     @Deprecated
     @Override
@@ -899,18 +898,14 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
         throw new UnsupportedOperationException();
     }
 
+    // See pollFirstEntry(): the inherited SortedMap default returns null on an empty map.
     /**
      * This operation is not supported by this immutable map.
      * Attempting to call this method will always throw an {@link UnsupportedOperationException}.
      *
      * @return never returns normally.
-     * @throws UnsupportedOperationException always.
+     * @throws UnsupportedOperationException always, because this immutable map does not support mutation.
      * @deprecated this immutable map does not support modification operations.
-     */
-    // See pollFirstEntry(): the inherited SortedMap default returns null on an empty map.
-    /**
-     * {@inheritDoc}
-     * @throws UnsupportedOperationException always, because this object does not support this mutation
      */
     @Deprecated
     @Override

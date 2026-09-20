@@ -11,8 +11,10 @@ import java.util.List;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class CharacterWriterSliceTest {
+public class CharacterWriterSliceTest extends TestBase {
     @Test
     void stringSlicesMatchCharacterArrayEscapingIncludingUtf16Boundaries() throws Exception {
         for (final String input : List.of("", "plain", "\"\\\n", "\uD83D\uDE00", "\uD800x\uDC00", "a<b>&c")) {

@@ -88,7 +88,7 @@ public class BuilderDifferenceComparatorsTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class MapDifferenceInconsistentKeyEquality {
+    public class MapDifferenceInconsistentKeyEquality extends TestBase {
 
         /**
          * B1: a right-hand map whose key equality is coarser than {@code equals} but whose type does not
@@ -407,7 +407,7 @@ public class BuilderDifferenceComparatorsTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class NullSelectionIsUnambiguous {
+    public class NullSelectionIsUnambiguous extends TestBase {
 
         @Test
         public void mapDifferenceAcceptsNullKeysToCompare() {
@@ -475,7 +475,7 @@ public class BuilderDifferenceComparatorsTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class BuilderApiFixes {
+    public class BuilderApiFixes extends TestBase {
 
         /** D5: the two removal forms can no longer collide when the element type is itself a collection. */
         @Test
@@ -649,7 +649,7 @@ public class BuilderDifferenceComparatorsTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class DatasetBuilderContract {
+    public class DatasetBuilderContract extends TestBase {
 
         private Dataset ymd() {
             return Dataset.rows(Arrays.asList("year", "month", "day"), new Object[][] { { 2020, 1, 2 }, { 2021, 3, 4 } });
@@ -721,7 +721,7 @@ public class BuilderDifferenceComparatorsTest extends TestBase {
     }
 
     @Nested
-    public class SerializableKeyExtractorComparators {
+    public class SerializableKeyExtractorComparators extends TestBase {
 
         @SuppressWarnings("unchecked")
         private <T> Comparator<T> roundTrip(final Comparator<T> cmp) throws Exception {
@@ -904,7 +904,7 @@ public class BuilderDifferenceComparatorsTest extends TestBase {
     }
 
     @Nested
-    public class ComparatorsContract {
+    public class ComparatorsContract extends TestBase {
 
         /** B6: the class javadoc claimed a lazy NPE; every factory validates eagerly with an IAE. */
         @Test
@@ -1068,7 +1068,7 @@ public class BuilderDifferenceComparatorsTest extends TestBase {
     // ---------------------------------------------------------------------------------------------------
 
     @Nested
-    public class Cycle1 {
+    public class Cycle1 extends TestBase {
 
         /**
          * C-001: {@code areEqual()} now measures each result container on its own type. It used to decide the

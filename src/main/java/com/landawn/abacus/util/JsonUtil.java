@@ -58,7 +58,7 @@ import com.landawn.abacus.type.Type;
  * <p><b>{@code null} inputs are not treated uniformly across the {@code wrap} overloads.</b>
  * {@link #wrap(Map)}, {@link #wrap(Object)} and {@link #wrap(Collection)} accept {@code null} and produce an
  * empty {@link JSONObject} / {@link JSONArray}. The nine array overloads ({@code boolean[]} through
- * {@code double[]}, plus {@link #wrap(Object[])}) reject {@code null} with a {@link NullPointerException}.
+ * {@code double[]}, plus {@link #wrap(Object[])}) reject {@code null} with an {@link IllegalArgumentException}.
  * The {@code unwrap} and {@code toList} methods reject a {@code null} source or target type with an
  * {@link IllegalArgumentException}.
  *
@@ -161,7 +161,8 @@ public final class JsonUtil {
      * <p>If {@code bean} is a {@link Map} instance, it is passed directly to the
      * {@link JSONObject} constructor. Otherwise, the object is first converted to a
      * {@link Map} via {@code Beans.deepBeanToMap(bean, true)}, which recursively
-     * resolves nested bean properties, collections, and maps. The second argument
+     * resolves properties declared as nested bean types. Collections, arrays, maps, and other
+     * values are then wrapped by the {@link JSONObject} constructor. The second argument
      * ({@code ignoreNullProperty == true}) means properties whose value is {@code null}
      * are omitted from the resulting {@link JSONObject}.
      *

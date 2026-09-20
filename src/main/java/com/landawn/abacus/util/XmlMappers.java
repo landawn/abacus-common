@@ -206,7 +206,12 @@ public final class XmlMappers {
         return new XmlMapper(newSecureXmlInputFactory(), newValidatingXmlOutputFactory());
     }
 
-    private static XMLOutputFactory newValidatingXmlOutputFactory() {
+    /**
+     * Creates an XML output factory that validates element and attribute names.
+     *
+     * @throws IllegalStateException if the selected factory rejects or ignores required XML name validation
+     */
+    private static XMLOutputFactory newValidatingXmlOutputFactory() throws IllegalStateException {
         final XMLOutputFactory factory = XMLOutputFactory.newFactory();
 
         // Validate in the writer because Jackson's name processor does not cover root names.
@@ -411,10 +416,10 @@ public final class XmlMappers {
      *
      * @param obj the object to serialize
      * @param output the output file to write the XML to
-     * @throws RuntimeException if the object cannot be serialized as XML, or opening, writing, flushing, or closing the output file fails
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the object cannot be serialized as XML, or opening, writing, flushing, or closing the output file fails
      */
-    public static void toXml(final Object obj, final File output) throws RuntimeException, IllegalArgumentException {
+    public static void toXml(final Object obj, final File output) throws IllegalArgumentException, RuntimeException {
         try {
             defaultXmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
@@ -435,10 +440,10 @@ public final class XmlMappers {
      * @param obj the object to serialize
      * @param output the output file to write the XML to
      * @param config the serialization configuration to use; if {@code null}, uses default configuration
-     * @throws RuntimeException if the object cannot be serialized as XML, or opening, writing, flushing, or closing the output file fails
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the object cannot be serialized as XML, or opening, writing, flushing, or closing the output file fails
      */
-    public static void toXml(final Object obj, final File output, final SerializationConfig config) throws RuntimeException, IllegalArgumentException {
+    public static void toXml(final Object obj, final File output, final SerializationConfig config) throws IllegalArgumentException, RuntimeException {
         final XmlMapper xmlMapper = getXmlMapper(config);
 
         try {
@@ -465,10 +470,10 @@ public final class XmlMappers {
      *
      * @param obj the object to serialize
      * @param output the output stream to write the XML to
-     * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
      */
-    public static void toXml(final Object obj, final OutputStream output) throws RuntimeException, IllegalArgumentException {
+    public static void toXml(final Object obj, final OutputStream output) throws IllegalArgumentException, RuntimeException {
         try {
             defaultXmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
@@ -486,16 +491,16 @@ public final class XmlMappers {
      * SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
      * ByteArrayOutputStream out = new ByteArrayOutputStream();
      * XmlMappers.toXml(N.asMap("name", "Bob"), out, config);   // writes indented <ImmutableMap>...</ImmutableMap>
-     * String xml = out.toString();                             // contains "<name>Bob</name>"
+     * String xml = out.toString(java.nio.charset.StandardCharsets.UTF_8);                             // contains "<name>Bob</name>"
      * }</pre>
      *
      * @param obj the object to serialize
      * @param output the output stream to write the XML to
      * @param config the serialization configuration to use; if {@code null}, uses default configuration
-     * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
      */
-    public static void toXml(final Object obj, final OutputStream output, final SerializationConfig config) throws RuntimeException, IllegalArgumentException {
+    public static void toXml(final Object obj, final OutputStream output, final SerializationConfig config) throws IllegalArgumentException, RuntimeException {
         final XmlMapper xmlMapper = getXmlMapper(config);
 
         try {
@@ -523,10 +528,10 @@ public final class XmlMappers {
      *
      * @param obj the object to serialize
      * @param output the writer to write the XML to
-     * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
      */
-    public static void toXml(final Object obj, final Writer output) throws RuntimeException, IllegalArgumentException {
+    public static void toXml(final Object obj, final Writer output) throws IllegalArgumentException, RuntimeException {
         try {
             defaultXmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
@@ -550,10 +555,10 @@ public final class XmlMappers {
      * @param obj the object to serialize
      * @param output the writer to write the XML to
      * @param config the serialization configuration to use; if {@code null}, uses default configuration
-     * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
      */
-    public static void toXml(final Object obj, final Writer output, final SerializationConfig config) throws RuntimeException, IllegalArgumentException {
+    public static void toXml(final Object obj, final Writer output, final SerializationConfig config) throws IllegalArgumentException, RuntimeException {
         final XmlMapper xmlMapper = getXmlMapper(config);
 
         try {
@@ -574,15 +579,15 @@ public final class XmlMappers {
      * ByteArrayOutputStream bytes = new ByteArrayOutputStream();
      * DataOutput out = new DataOutputStream(bytes);
      * XmlMappers.toXml(N.asMap("name", "Bob"), out);   // writes <ImmutableMap><name>Bob</name></ImmutableMap>
-     * String xml = bytes.toString();                   // contains "<name>Bob</name>"
+     * String xml = bytes.toString(java.nio.charset.StandardCharsets.UTF_8);                   // contains "<name>Bob</name>"
      * }</pre>
      *
      * @param obj the object to serialize
      * @param output the DataOutput to write the XML to
-     * @throws RuntimeException if the object cannot be serialized as XML or writing the XML to {@code output} fails
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the object cannot be serialized as XML or writing the XML to {@code output} fails
      */
-    public static void toXml(final Object obj, final DataOutput output) throws RuntimeException, IllegalArgumentException {
+    public static void toXml(final Object obj, final DataOutput output) throws IllegalArgumentException, RuntimeException {
         try {
             defaultXmlMapper.writeValue(output, obj);
         } catch (final IOException e) {
@@ -599,16 +604,16 @@ public final class XmlMappers {
      * ByteArrayOutputStream bytes = new ByteArrayOutputStream();
      * DataOutput out = new DataOutputStream(bytes);
      * XmlMappers.toXml(N.asMap("name", "Bob"), out, config);   // writes indented XML
-     * String xml = bytes.toString();                           // contains "<name>Bob</name>"
+     * String xml = bytes.toString(java.nio.charset.StandardCharsets.UTF_8);                           // contains "<name>Bob</name>"
      * }</pre>
      *
      * @param obj the object to serialize
      * @param output the DataOutput to write the XML to
      * @param config the serialization configuration to use; if {@code null}, uses default configuration
-     * @throws RuntimeException if the object cannot be serialized as XML or writing the XML to {@code output} fails
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws RuntimeException if the object cannot be serialized as XML or writing the XML to {@code output} fails
      */
-    public static void toXml(final Object obj, final DataOutput output, final SerializationConfig config) throws RuntimeException, IllegalArgumentException {
+    public static void toXml(final Object obj, final DataOutput output, final SerializationConfig config) throws IllegalArgumentException, RuntimeException {
         final XmlMapper xmlMapper = getXmlMapper(config);
 
         try {
@@ -625,7 +630,7 @@ public final class XmlMappers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] xmlBytes = "<Person><name>John</name><age>30</age></Person>".getBytes();
+     * byte[] xmlBytes = "<Person><name>John</name><age>30</age></Person>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
      * Person person = XmlMappers.fromXml(xmlBytes, Person.class);
      * }</pre>
      *
@@ -650,7 +655,7 @@ public final class XmlMappers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] bytes = "##<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes();
+     * byte[] bytes = "##<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
      * Map<String, Object> map = XmlMappers.fromXml(bytes, 2, bytes.length - 2, Map.class);
      * // map -> {name=Bob}; the leading "##" is skipped via offset 2
      * }</pre>
@@ -876,7 +881,7 @@ public final class XmlMappers {
      * <pre>{@code
      * DeserializationConfig config = XmlMappers.createDeserializationConfig();
      * String xml = "<LinkedHashMap><name>Bob</name></LinkedHashMap>";
-     * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+     * try (InputStream in = new ByteArrayInputStream(xml.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
      *     Map<String, Object> map = XmlMappers.fromXml(in, Map.class, config);   // map -> {name=Bob}
      * }
      * }</pre>
@@ -1110,7 +1115,7 @@ public final class XmlMappers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] xmlBytes = "<ArrayList><item>a</item><item>b</item></ArrayList>".getBytes();
+     * byte[] xmlBytes = "<ArrayList><item>a</item><item>b</item></ArrayList>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
      * List<String> list = XmlMappers.fromXml(xmlBytes, new TypeReference<List<String>>() {});
      * }</pre>
      *
@@ -1137,7 +1142,7 @@ public final class XmlMappers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] bytes = "##<List><item>a</item><item>b</item></List>".getBytes();
+     * byte[] bytes = "##<List><item>a</item><item>b</item></List>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
      * List<String> list = XmlMappers.fromXml(bytes, 2, bytes.length - 2,
      *         new TypeReference<List<String>>() {});
      * // list -> [a, b]; the leading "##" is skipped via offset 2
@@ -1340,7 +1345,7 @@ public final class XmlMappers {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<List><item>a</item><item>b</item></List>";
-     * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+     * try (InputStream in = new ByteArrayInputStream(xml.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
      *     List<String> list = XmlMappers.fromXml(in, new TypeReference<List<String>>() {});   // list -> [a, b]
      * }
      * }</pre>
@@ -1373,7 +1378,7 @@ public final class XmlMappers {
      * <pre>{@code
      * DeserializationConfig config = XmlMappers.createDeserializationConfig();
      * String xml = "<List><item>a</item><item>b</item></List>";
-     * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+     * try (InputStream in = new ByteArrayInputStream(xml.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
      *     List<String> list = XmlMappers.fromXml(in, new TypeReference<List<String>>() {}, config);   // list -> [a, b]
      * }
      * }</pre>
@@ -1615,16 +1620,16 @@ public final class XmlMappers {
     /**
      * Creates a new SerializationConfig instance with default settings.
      * This config can be customized and used with the toXml methods for fine-grained control over serialization.
-     * The returned configuration carries its own {@code ConfigOverrides}, so {@code withPropertyInclusion(..)} -
-     * which writes through that object in place and returns the same config - changes only the instance it is
-     * invoked on. Jackson state reached <i>through</i> the configuration is <i>not</i> copied:
-     * {@code getDefaultPrettyPrinter()} and {@code getDateFormat()} hand back process-wide instances, and
-     * {@code getAnnotationIntrospector()} an object shared with this class's other configurations, so mutating one
-     * of those in place changes output for mappers this caller never touched.
+     * The returned configuration has {@code ConfigOverrides} independent of this class's default mapper.
+     * Configurations derived from it with {@code with(...)} can share those overrides, so an in-place change
+     * such as {@code withPropertyInclusion(..)} can affect those derived configurations too.
+     * Referenced components such as date formats, pretty printers and annotation introspectors are not
+     * necessarily deep-copied. Treat shared components as immutable; mutating them can affect other
+     * configurations or mappers that retain the same instances.
      *
-     * <p>Each call builds and discards a complete copy of the default mapper, which costs a few hundred nanoseconds
-     * and several kilobytes of garbage; create the configuration once and pass it repeatedly rather than calling
-     * this per operation.</p>
+     * <p>Each call copies the default mapper to obtain an independent configuration. Reuse the returned
+     * configuration across operations to avoid repeated mapper copies and configuration-cache misses;
+     * allocation and execution costs depend on the Jackson version and runtime.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1651,13 +1656,13 @@ public final class XmlMappers {
      * Creates a new {@link DeserializationConfig} instance with default settings.
      * This config can be customized and used with the fromXml methods for fine-grained control over deserialization.
      * The returned configuration carries its own {@code ConfigOverrides} rather than sharing this class's mappers'.
-     * Jackson state reached <i>through</i> the configuration is <i>not</i> copied: {@code getDateFormat()} hands
-     * back a process-wide instance and {@code getAnnotationIntrospector()} an object shared with this class's other
-     * configurations, so mutating one of those in place changes output for mappers this caller never touched.
+     * Configurations derived from the result can share those overrides. Referenced date formats and
+     * annotation introspectors are not necessarily deep-copied; mutating a shared component can affect
+     * other configurations or mappers that retain the same instance.
      *
-     * <p>Each call builds and discards a complete copy of the default mapper, which costs a few hundred nanoseconds
-     * and several kilobytes of garbage; create the configuration once and pass it repeatedly rather than calling
-     * this per operation.</p>
+     * <p>Each call copies the default mapper to obtain an independent configuration. Reuse the returned
+     * configuration across operations to avoid repeated mapper copies and configuration-cache misses;
+     * allocation and execution costs depend on the Jackson version and runtime.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1676,8 +1681,8 @@ public final class XmlMappers {
     }
 
     /**
-     * Retrieves the mapper permanently bound to the specified serialization configuration, creating a
-     * security-hardened mapper if this configuration has not been seen before.
+     * Retrieves the mapper cached for the specified serialization configuration, creating a
+     * security-hardened mapper if this configuration is not currently cached.
      *
      * @param config the serialization configuration to apply, or {@code null} to use the default mapper
      * @return an XmlMapper configured with the specified serialization config
@@ -1692,8 +1697,8 @@ public final class XmlMappers {
             if (mapper == null) {
                 // copy() reuses the default mapper's already-hardened XMLInputFactory instead of running a fresh
                 // XMLInputFactory.newFactory() ServiceLoader lookup and re-applying the security properties. That
-                // makes the hardening structurally guaranteed here rather than re-derived, and is ~80x cheaper -
-                // which matters because this runs while the pool monitor is held.
+                // preserves the configured factory properties without repeating provider lookup while the
+                // pool monitor is held.
                 mapper = defaultXmlMapper.copy();
                 mapper.setConfig(config);
                 serializationMapperPool.put(config, mapper);
@@ -1704,8 +1709,8 @@ public final class XmlMappers {
     }
 
     /**
-     * Retrieves the mapper permanently bound to the specified deserialization configuration, creating a
-     * security-hardened mapper if this configuration has not been seen before.
+     * Retrieves the mapper cached for the specified deserialization configuration, creating a
+     * security-hardened mapper if this configuration is not currently cached.
      *
      * @param config the deserialization configuration to apply, or {@code null} to use the default mapper
      * @return an XmlMapper configured with the specified deserialization config
@@ -1720,8 +1725,8 @@ public final class XmlMappers {
             if (mapper == null) {
                 // copy() reuses the default mapper's already-hardened XMLInputFactory instead of running a fresh
                 // XMLInputFactory.newFactory() ServiceLoader lookup and re-applying the security properties. That
-                // makes the hardening structurally guaranteed here rather than re-derived, and is ~80x cheaper -
-                // which matters because this runs while the pool monitor is held.
+                // preserves the configured factory properties without repeating provider lookup while the
+                // pool monitor is held.
                 mapper = defaultXmlMapper.copy();
                 mapper.setConfig(config);
                 deserializationMapperPool.put(config, mapper);
@@ -1887,10 +1892,10 @@ public final class XmlMappers {
          *
          * @param obj the object to serialize
          * @param output the output file to write the XML to
-         * @throws RuntimeException if the object cannot be serialized as XML, or opening, writing, flushing, or closing the output file fails
          * @throws IllegalArgumentException if {@code output} is {@code null}
+         * @throws RuntimeException if the object cannot be serialized as XML, or opening, writing, flushing, or closing the output file fails
          */
-        public void toXml(final Object obj, final File output) throws RuntimeException, IllegalArgumentException {
+        public void toXml(final Object obj, final File output) throws IllegalArgumentException, RuntimeException {
             try {
                 xmlMapper.writeValue(output, obj);
             } catch (final IOException e) {
@@ -1912,10 +1917,10 @@ public final class XmlMappers {
          *
          * @param obj the object to serialize
          * @param output the output stream to write the XML to
-         * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
          * @throws IllegalArgumentException if {@code output} is {@code null}
+         * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
          */
-        public void toXml(final Object obj, final OutputStream output) throws RuntimeException, IllegalArgumentException {
+        public void toXml(final Object obj, final OutputStream output) throws IllegalArgumentException, RuntimeException {
             try {
                 xmlMapper.writeValue(output, obj);
             } catch (final IOException e) {
@@ -1937,10 +1942,10 @@ public final class XmlMappers {
          *
          * @param obj the object to serialize
          * @param output the writer to write the XML to
-         * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
          * @throws IllegalArgumentException if {@code output} is {@code null}
+         * @throws RuntimeException if the object cannot be serialized as XML, or writing, flushing, or closing {@code output} fails
          */
-        public void toXml(final Object obj, final Writer output) throws RuntimeException, IllegalArgumentException {
+        public void toXml(final Object obj, final Writer output) throws IllegalArgumentException, RuntimeException {
             try {
                 xmlMapper.writeValue(output, obj);
             } catch (final IOException e) {
@@ -1956,15 +1961,15 @@ public final class XmlMappers {
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
          * ByteArrayOutputStream bytes = new ByteArrayOutputStream();
          * DataOutput out = new DataOutputStream(bytes);
-         * xmlMappers.toXml(N.asMap("name", "Bob"), out);   // bytes.toString() contains "<name>Bob</name>"
+         * xmlMappers.toXml(N.asMap("name", "Bob"), out);   // bytes.toString(java.nio.charset.StandardCharsets.UTF_8) contains "<name>Bob</name>"
          * }</pre>
          *
          * @param obj the object to serialize
          * @param output the DataOutput to write the XML to
-         * @throws RuntimeException if the object cannot be serialized as XML or writing the XML to {@code output} fails
          * @throws IllegalArgumentException if {@code output} is {@code null}
+         * @throws RuntimeException if the object cannot be serialized as XML or writing the XML to {@code output} fails
          */
-        public void toXml(final Object obj, final DataOutput output) throws RuntimeException, IllegalArgumentException {
+        public void toXml(final Object obj, final DataOutput output) throws IllegalArgumentException, RuntimeException {
             try {
                 xmlMapper.writeValue(output, obj);
             } catch (final IOException e) {
@@ -1979,7 +1984,7 @@ public final class XmlMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
-         * byte[] bytes = "<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes();
+         * byte[] bytes = "<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
          * Map<String, Object> map = xmlMappers.fromXml(bytes, Map.class);   // map -> {name=Bob}
          * }</pre>
          *
@@ -2006,7 +2011,7 @@ public final class XmlMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
-         * byte[] bytes = "##<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes();
+         * byte[] bytes = "##<LinkedHashMap><name>Bob</name></LinkedHashMap>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
          * Map<String, Object> map = xmlMappers.fromXml(bytes, 2, bytes.length - 2, Map.class);   // map -> {name=Bob}
          * }</pre>
          *
@@ -2095,7 +2100,7 @@ public final class XmlMappers {
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
          * String xml = "<LinkedHashMap><name>Bob</name></LinkedHashMap>";
-         * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+         * try (InputStream in = new ByteArrayInputStream(xml.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
          *     Map<String, Object> map = xmlMappers.fromXml(in, Map.class);   // map -> {name=Bob}
          * }
          * }</pre>
@@ -2217,7 +2222,7 @@ public final class XmlMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
-         * byte[] bytes = "<List><item>a</item><item>b</item></List>".getBytes();
+         * byte[] bytes = "<List><item>a</item><item>b</item></List>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
          * List<String> list = xmlMappers.fromXml(bytes, new TypeReference<List<String>>() {});   // list -> [a, b]
          * }</pre>
          *
@@ -2246,7 +2251,7 @@ public final class XmlMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
-         * byte[] bytes = "##<List><item>a</item><item>b</item></List>".getBytes();
+         * byte[] bytes = "##<List><item>a</item><item>b</item></List>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
          * List<String> list = xmlMappers.fromXml(bytes, 2, bytes.length - 2,
          *         new TypeReference<List<String>>() {});   // list -> [a, b]
          * }</pre>
@@ -2342,7 +2347,7 @@ public final class XmlMappers {
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
          * String xml = "<List><item>a</item><item>b</item></List>";
-         * try (InputStream in = new ByteArrayInputStream(xml.getBytes())) {
+         * try (InputStream in = new ByteArrayInputStream(xml.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
          *     List<String> list = xmlMappers.fromXml(in, new TypeReference<List<String>>() {});   // list -> [a, b]
          * }
          * }</pre>

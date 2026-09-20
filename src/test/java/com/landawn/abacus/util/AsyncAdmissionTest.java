@@ -23,8 +23,10 @@ import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class AsyncAdmissionTest {
+public class AsyncAdmissionTest extends TestBase {
     private static void await(CountDownLatch latch) {
         try {
             assertTrue(latch.await(5, TimeUnit.SECONDS));

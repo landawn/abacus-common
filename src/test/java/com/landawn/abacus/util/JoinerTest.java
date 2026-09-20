@@ -304,8 +304,8 @@ public class JoinerTest extends JoinerTestSupport {
     public void testClose() {
         final Joiner skipped = Joiner.with(",").skipNulls();
         skipped.close();
-        assertSame(skipped, skipped.appendAll(new String[0]));
-        assertSame(skipped, skipped.append((String) null));
+        assertThrows(IllegalStateException.class, () -> skipped.appendAll(new String[0]));
+        assertThrows(IllegalStateException.class, () -> skipped.append((String) null));
         assertThrows(IllegalStateException.class, () -> skipped.append((CharSequence) null));
         assertThrows(IllegalStateException.class, () -> skipped.merge(Joiner.with(",")));
 
@@ -491,8 +491,8 @@ public class JoinerTest extends JoinerTestSupport {
                 // Both counters go into one message: the first failing assertion aborts the method, so the second
                 // symptom would otherwise never be reported on a red build.
                 final String summary = doubleRecycled + " of " + trials
-                        + " toString()/close() races returned the same pooled StringBuilder to Objectory twice, and "
-                        + wrongValue + " of " + trials + " racing toString() calls did not return \"a,b\"";
+                        + " toString()/close() races returned the same pooled StringBuilder to Objectory twice, and " + wrongValue + " of " + trials
+                        + " racing toString() calls did not return \"a,b\"";
 
                 assertEquals(0, doubleRecycled, summary);
                 assertEquals(0, wrongValue, summary);

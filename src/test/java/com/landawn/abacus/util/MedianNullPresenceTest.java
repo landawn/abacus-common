@@ -12,8 +12,10 @@ import java.util.Comparator;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class MedianNullPresenceTest {
+public class MedianNullPresenceTest extends TestBase {
     @Test
     void upperNullRemainsPresentForEveryEvenSizeAcrossArrayAndCollectionOverloads() {
         for (int length = 1; length <= 8; length++) {

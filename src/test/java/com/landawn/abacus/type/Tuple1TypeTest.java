@@ -44,7 +44,8 @@ public class Tuple1TypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -63,16 +64,22 @@ public class Tuple1TypeTest extends TestBase {
         final com.landawn.abacus.parser.JsonSerConfig jsc = com.landawn.abacus.parser.JsonSerConfig.create();
 
         org.junit.jupiter.api.Assertions.assertEquals("[1]", reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of(1), jsc));
-        org.junit.jupiter.api.Assertions.assertEquals("[[1]]", reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of(com.landawn.abacus.util.N.asList(1)), jsc));
-        org.junit.jupiter.api.Assertions.assertEquals("[{\"k\": 1}]", reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of(com.landawn.abacus.util.N.asMap("k", 1)), jsc));
+        org.junit.jupiter.api.Assertions.assertEquals("[[1]]",
+                reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of(com.landawn.abacus.util.N.asList(1)), jsc));
+        org.junit.jupiter.api.Assertions.assertEquals("[{\"k\": 1}]",
+                reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of(com.landawn.abacus.util.N.asMap("k", 1)), jsc));
         org.junit.jupiter.api.Assertions.assertEquals("[\"s\"]", reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of("s"), jsc));
         org.junit.jupiter.api.Assertions.assertEquals("[null]", reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of((Object) null), jsc));
         org.junit.jupiter.api.Assertions.assertEquals("[1]", reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of(1), null));
-        org.junit.jupiter.api.Assertions.assertEquals(objType.stringOf(com.landawn.abacus.util.Tuple.of(com.landawn.abacus.util.N.asList(1))), reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of(com.landawn.abacus.util.N.asList(1)), jsc));
-        org.junit.jupiter.api.Assertions.assertEquals("[[1]]", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(com.landawn.abacus.util.Tuple.of(1))));
+        org.junit.jupiter.api.Assertions.assertEquals(objType.stringOf(com.landawn.abacus.util.Tuple.of(com.landawn.abacus.util.N.asList(1))),
+                reviewFixes20260906_ser(objType, com.landawn.abacus.util.Tuple.of(com.landawn.abacus.util.N.asList(1)), jsc));
+        org.junit.jupiter.api.Assertions.assertEquals("[[1]]",
+                com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(com.landawn.abacus.util.Tuple.of(1))));
         // declared slots keep the declared handler; a declared null Integer slot honours writeNullNumberAsZero
         org.junit.jupiter.api.Assertions.assertEquals("[\"s\"]", reviewFixes20260906_ser(type, com.landawn.abacus.util.Tuple.of("s"), jsc));
-        org.junit.jupiter.api.Assertions.assertEquals("[0]", reviewFixes20260906_ser(Type.of("Tuple1<Integer>"), com.landawn.abacus.util.Tuple.of((Integer) null), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true)));
-        org.junit.jupiter.api.Assertions.assertEquals("[null]", reviewFixes20260906_ser(Type.of("Tuple1<Integer>"), com.landawn.abacus.util.Tuple.of((Integer) null), jsc));
+        org.junit.jupiter.api.Assertions.assertEquals("[0]", reviewFixes20260906_ser(Type.of("Tuple1<Integer>"),
+                com.landawn.abacus.util.Tuple.of((Integer) null), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true)));
+        org.junit.jupiter.api.Assertions.assertEquals("[null]",
+                reviewFixes20260906_ser(Type.of("Tuple1<Integer>"), com.landawn.abacus.util.Tuple.of((Integer) null), jsc));
     }
 }

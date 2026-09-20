@@ -306,7 +306,6 @@ public class CharacterArrayTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf(sb.toString()));
     }
 
-
     @Test
     public void reviewFixes20260906_stringOfEscapesNonAsciiAndSlashButNotDel() {
         // T7-06: what the javadoc now says: a backslash-u escape for everything outside U+0020..U+007F, \/ for the slash, DEL as-is

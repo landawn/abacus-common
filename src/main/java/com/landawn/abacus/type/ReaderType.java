@@ -115,8 +115,9 @@ public class ReaderType extends AbstractType<Reader> {
      * This constructor is package-private and intended to be called only by the TypeFactory.
      *
      * @param cls the specific Reader subclass to create a type handler for
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
-    ReaderType(final Class<Reader> cls) {
+    ReaderType(final Class<Reader> cls) throws IllegalArgumentException {
         super(ClassUtil.getSimpleClassName(cls));
 
         typeClass = cls;
@@ -470,6 +471,7 @@ public class ReaderType extends AbstractType<Reader> {
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Reader whose content should be appended; may be {@code null}, in which case
      *          the literal {@code "null"} is appended
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending to the destination fails, or reading {@code x} fails while copying directly to a {@code Writer}
      * @throws UncheckedIOException if reading non-null {@code x} fails when {@code appendable} is not a {@code Writer}
      * @implNote
@@ -483,7 +485,7 @@ public class ReaderType extends AbstractType<Reader> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Reader x) throws IOException, UncheckedIOException {
+    public void appendTo(final Appendable appendable, final Reader x) throws NullPointerException, IOException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -536,11 +538,12 @@ public class ReaderType extends AbstractType<Reader> {
      * @param x the Reader whose content should be written; may be {@code null}, in which case
      *          the literal {@code "null"} is written
      * @param config the serialization configuration that determines string quotation; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if reading characters from {@code x}, writing their escaped representation, or writing quotation marks or the
      *         null literal to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Reader x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Reader x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

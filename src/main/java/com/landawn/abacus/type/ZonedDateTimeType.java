@@ -115,14 +115,14 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <p>
      * This method uses the standard {@link ZonedDateTime#toString()} representation, including both
      * the UTC offset and the region zone ID when one is present (for example,
-     * {@code "2023-10-15T10:30:00+01:00[Europe/Paris]"}). If the input is {@code null}, this method
+     * {@code "2023-10-15T10:30:45+02:00[Europe/Paris]"}). If the input is {@code null}, this method
      * returns {@code null}.
      * </p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ZonedDateTime zdt = ZonedDateTime.now();
-     * String str = type.stringOf(zdt);   // e.g. "2023-10-15T10:30:00+01:00[Europe/Paris]"
+     * String str = type.stringOf(zdt);   // e.g. "2023-10-15T10:30:45+02:00[Europe/Paris]"
      * }</pre>
      *
      * <p>The returned string is a serializable representation designed to be parsed by {@link #valueOf(String)}.
@@ -164,10 +164,13 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param obj the object to convert to ZonedDateTime
      * @return a ZonedDateTime instance, or {@code null} if the input is null
+     * @throws IllegalArgumentException if the input is a non-lenient calendar containing invalid field values.
+     * @throws DateTimeParseException if the text representation is neither a supported millisecond value nor a valid
+     *         ISO-8601 {@code ZonedDateTime} (see {@link #valueOf(String)}).
      */
     @MayReturnNull
     @Override
-    public ZonedDateTime valueOf(final Object obj) {
+    public ZonedDateTime valueOf(final Object obj) throws IllegalArgumentException, DateTimeParseException {
         if (obj == null) {
             return null;
         } else if (obj instanceof ZonedDateTime zonedDateTime) {
@@ -197,8 +200,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal "null" returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current ZonedDateTime</li>
-     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
-     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix) are interpreted as
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only; no {@code 0x} hex, no {@code L} suffix) are interpreted as
      *       epoch milliseconds in the system default zone (shorter numeric strings such as {@code "1234"} are handed
      *       to the ISO parser and rejected)</li>
      *   <li>ISO 8601 date-time strings with 'Z' suffix (20 chars) are parsed as ISO date-time</li>
@@ -299,20 +301,20 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param offset the starting position in the character array
      * @param len the number of characters to process
      * @return a ZonedDateTime instance, or {@code null} if the input is {@code null} or empty
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws DateTimeParseException if the text is neither a millisecond number nor a valid ISO-8601 representation
      *         (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int len) throws DateTimeParseException {
+    public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, DateTimeParseException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // DateTimeParseException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
@@ -448,6 +450,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param appendable the Appendable to write to
      * @param x the ZonedDateTime value to append
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the formatted date/time text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -460,7 +463,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final ZonedDateTime x) throws IOException {
+    public void appendTo(final Appendable appendable, final ZonedDateTime x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -505,12 +508,14 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * @param writer the CharacterWriter to write to
      * @param x the ZonedDateTime value to write
      * @param config the serialization configuration controlling format and quoting; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the selected date/time representation, quotation marks or null literal to {@code writer} fails
      * @throws ArithmeticException if the LONG format is selected and the epoch-millisecond value overflows a long
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final ZonedDateTime x, final JsonXmlSerConfig<?> config) throws IOException, ArithmeticException {
+    public void serializeTo(final CharacterWriter writer, final ZonedDateTime x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, ArithmeticException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

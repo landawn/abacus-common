@@ -87,8 +87,9 @@ public class InputStreamType extends AbstractType<InputStream> {
      * Text construction is supported only for the content-preserving classes listed in {@link #valueOf(String)}.
      *
      * @param cls the {@link InputStream} class (or subclass) this type handler represents
+     * @throws IllegalArgumentException if {@code cls} is {@code null}.
      */
-    InputStreamType(final Class<InputStream> cls) {
+    InputStreamType(final Class<InputStream> cls) throws IllegalArgumentException {
         super(ClassUtil.getSimpleClassName(cls));
 
         typeClass = cls;
@@ -320,6 +321,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x the {@link InputStream} to read from; may be {@code null}
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending to the destination fails, or reading and decoding {@code x} fails while copying directly to a
      *         {@code Writer}
      * @throws UncheckedIOException if reading and decoding non-null {@code x} fails when {@code appendable} is not a {@code Writer}
@@ -334,7 +336,7 @@ public class InputStreamType extends AbstractType<InputStream> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final InputStream x) throws IOException, UncheckedIOException {
+    public void appendTo(final Appendable appendable, final InputStream x) throws NullPointerException, IOException, UncheckedIOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -363,11 +365,13 @@ public class InputStreamType extends AbstractType<InputStream> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x the {@link InputStream} to write; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing escaped stream content, quotation marks or the null literal to {@code writer} fails
      * @throws UncheckedIOException if reading and decoding the remaining bytes of non-null {@code x} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config) throws IOException, UncheckedIOException {
+    public void serializeTo(final CharacterWriter writer, final InputStream x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, UncheckedIOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

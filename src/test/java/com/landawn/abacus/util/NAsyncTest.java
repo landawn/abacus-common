@@ -29,8 +29,13 @@ public class NAsyncTest extends NTestSupport {
         java.util.concurrent.Executor direct = Runnable::run;
         Thread caller = Thread.currentThread();
         List<Thread> executions = new ArrayList<>();
-        Throwables.Runnable<Exception> runnable = () -> { executions.add(Thread.currentThread()); };
-        Callable<Thread> callable = () -> { executions.add(Thread.currentThread()); return Thread.currentThread(); };
+        Throwables.Runnable<Exception> runnable = () -> {
+            executions.add(Thread.currentThread());
+        };
+        Callable<Thread> callable = () -> {
+            executions.add(Thread.currentThread());
+            return Thread.currentThread();
+        };
 
         ContinuableFuture<Void> run = N.asyncExecute(runnable, direct);
         assertTrue(run.isDone());
@@ -194,8 +199,8 @@ public class NAsyncTest extends NTestSupport {
     public void testRunAsync_collectionIteratorDecidesTheCompletionCount() {
         final java.util.concurrent.Executor direct = Runnable::run;
         final AtomicInteger ran = new AtomicInteger();
-        final List<Throwables.Runnable<? extends Exception>> twoCommands = Arrays
-                .<Throwables.Runnable<? extends Exception>> asList(ran::incrementAndGet, ran::incrementAndGet);
+        final List<Throwables.Runnable<? extends Exception>> twoCommands = Arrays.<Throwables.Runnable<? extends Exception>> asList(ran::incrementAndGet,
+                ran::incrementAndGet);
 
         // size() smaller than the traversal: every command that ran must still publish its completion.
         final ObjIterator<Void> iter = N.runAsync(new InconsistentSizeCollection<>(twoCommands, 1), direct);
@@ -212,8 +217,7 @@ public class NAsyncTest extends NTestSupport {
         // size() larger than the traversal: the iterator must end instead of waiting forever for a completion
         // that is never published.
         final AtomicInteger ranOnce = new AtomicInteger();
-        final List<Throwables.Runnable<? extends Exception>> oneCommand = Arrays
-                .<Throwables.Runnable<? extends Exception>> asList(ranOnce::incrementAndGet);
+        final List<Throwables.Runnable<? extends Exception>> oneCommand = Arrays.<Throwables.Runnable<? extends Exception>> asList(ranOnce::incrementAndGet);
 
         org.junit.jupiter.api.Assertions.assertTimeoutPreemptively(java.time.Duration.ofSeconds(10), () -> {
             final ObjIterator<Void> it = N.runAsync(new InconsistentSizeCollection<>(oneCommand, 2), direct);

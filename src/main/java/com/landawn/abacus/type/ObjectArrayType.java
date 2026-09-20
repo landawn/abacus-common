@@ -501,7 +501,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Computes a deep hash code for the given array.
-     * This method recursively computes hash codes for nested arrays and objects.
+     * This method recursively hashes nested arrays; non-array elements use their own {@code hashCode()}.
      *
      * @param x the array to hash
      * @return the computed deep hash code
@@ -527,7 +527,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Performs a deep comparison of two arrays for equality.
-     * This method recursively compares nested arrays and objects.
+     * This method recursively compares nested arrays; non-array elements use their own {@code equals(Object)}.
      *
      * @param x the first array
      * @param y the second array
@@ -559,7 +559,7 @@ public class ObjectArrayType<T> extends AbstractArrayType<T[]> { //NOSONAR
 
     /**
      * Creates a deep string representation of the array.
-     * This method recursively converts nested arrays and objects to strings.
+     * This method recursively renders nested arrays; non-array elements use their own {@code toString()}.
      *
      * @param x the array to convert to string
      * @return deep string representation of the array, {@code null} if input is {@code null}, or {@code "[]"} for empty arrays

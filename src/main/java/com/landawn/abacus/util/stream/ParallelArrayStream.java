@@ -188,7 +188,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public T next() {
+                    public T next() throws NoSuchElementException {
                         if (!hasNext && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -230,7 +230,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public T next() {
+                    public T next() throws NoSuchElementException {
                         if (!hasNext && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -302,7 +302,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -405,7 +405,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -458,7 +458,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -489,7 +489,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -527,6 +527,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -536,7 +537,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment); //NOSONAR
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
 
@@ -562,7 +562,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if (cursor == -1 && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -598,6 +598,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -607,7 +608,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
         final List<Iterator<R>> iters = new ArrayList<>(threadNum);
@@ -632,7 +632,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if (cursor == -1 && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -762,7 +762,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Character next() {
+                    public Character next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -793,7 +793,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Character next() {
+                    public Character next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -849,7 +849,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Byte next() {
+                    public Byte next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -880,7 +880,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Byte next() {
+                    public Byte next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -936,7 +936,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Short next() {
+                    public Short next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -967,7 +967,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Short next() {
+                    public Short next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1023,7 +1023,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Integer next() {
+                    public Integer next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1054,7 +1054,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Integer next() {
+                    public Integer next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1110,7 +1110,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Long next() {
+                    public Long next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1141,7 +1141,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Long next() {
+                    public Long next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1197,7 +1197,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Float next() {
+                    public Float next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1228,7 +1228,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Float next() {
+                    public Float next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1284,7 +1284,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Double next() {
+                    public Double next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1315,7 +1315,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Double next() {
+                    public Double next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1402,7 +1402,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1476,7 +1476,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1564,7 +1564,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1603,7 +1603,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public R next() {
+                    public R next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1708,7 +1708,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Character next() {
+                    public Character next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1783,7 +1783,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Character next() {
+                    public Character next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1891,7 +1891,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Byte next() {
+                    public Byte next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -1966,7 +1966,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Byte next() {
+                    public Byte next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2074,7 +2074,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Short next() {
+                    public Short next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2149,7 +2149,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Short next() {
+                    public Short next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2257,7 +2257,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Integer next() {
+                    public Integer next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2332,7 +2332,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Integer next() {
+                    public Integer next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2440,7 +2440,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Long next() {
+                    public Long next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2515,7 +2515,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Long next() {
+                    public Long next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2623,7 +2623,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Float next() {
+                    public Float next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2698,7 +2698,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Float next() {
+                    public Float next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2806,7 +2806,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Double next() {
+                    public Double next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2881,7 +2881,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public Double next() {
+                    public Double next() throws NoSuchElementException {
                         if ((cur == null || !cur.hasNext()) && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2958,7 +2958,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public T next() {
+                    public T next() throws NoSuchElementException {
                         if (cursor >= to) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -2991,7 +2991,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     }
 
                     @Override
-                    public T next() {
+                    public T next() throws NoSuchElementException {
                         if (next == NONE && !hasNext()) {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
@@ -3375,6 +3375,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -3383,7 +3384,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment);
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
@@ -3440,6 +3440,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
         if (canBeSequential(maxThreadNum, fromIndex, toIndex)) {
@@ -3448,7 +3449,6 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
         }
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         final int threadNum = N.min(maxThreadNum, (toIndex - fromIndex));
         final List<ContinuableFuture<Void>> futureList = new ArrayList<>(threadNum);
@@ -4070,6 +4070,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@link Optional} describing the result of the reduction, or an empty Optional if the
      *         stream is empty
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
@@ -4162,7 +4163,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 }
             }
 
-            return result == NONE ? Optional.empty() : Optional.ofNullable(result);
+            return result == NONE ? Optional.empty() : Optional.of(result);
         }, this, asyncExecutor, asyncExecutorToUse);
     }
 
@@ -4471,6 +4472,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param comparator a non-interfering, stateless comparator to compare elements
      * @return an {@link Optional} describing the minimum element, or an empty Optional if the stream
      *         is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -4486,7 +4488,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.ofNullable(elements[fromIndex]);
+                return Optional.of(elements[fromIndex]);
             } else {
                 isDone = false;
             }
@@ -4507,6 +4509,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param comparator a non-interfering, stateless comparator to compare elements
      * @return an {@link Optional} describing the maximum element, or an empty Optional if the stream
      *         is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -4522,7 +4525,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.ofNullable(elements[toIndex - 1]);
+                return Optional.of(elements[toIndex - 1]);
             } else {
                 isDone = false;
             }
@@ -4892,6 +4895,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the first (lowest-index) matching element, or an empty
      *         Optional if no element matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -4981,7 +4985,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == null ? Optional.empty() : Optional.ofNullable(resultHolder.value().right());
+        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
     }
 
     /**
@@ -4995,6 +4999,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing any matching element, or an empty Optional if no element
      *         matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -5082,7 +5087,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == NONE ? Optional.empty() : Optional.ofNullable(resultHolder.value());
+        return resultHolder.value() == NONE ? Optional.empty() : Optional.of(resultHolder.value());
     }
 
     /**
@@ -5095,6 +5100,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the last (highest-index) matching element, or an empty
      *         Optional if no element matches
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -5184,7 +5190,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
         completeAndShutdownTempExecutor(futureList, eHolder, this, asyncExecutor, asyncExecutorToUse);
 
-        return resultHolder.value() == null ? Optional.empty() : Optional.ofNullable(resultHolder.value().right());
+        return resultHolder.value() == null ? Optional.empty() : Optional.of(resultHolder.value().right());
     }
 
     /**

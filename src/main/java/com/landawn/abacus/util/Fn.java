@@ -150,10 +150,10 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Naming Convention for Shorthand Abbreviations:</b></p>
  * <p>This class provides concise shorthand methods for creating functional interfaces:</p>
  * <ul>
- *   <li>{@link #s(Supplier) s} / {@link #ss(Throwables.Supplier) ss} - <b>S</b>upplier / Throwable-safe <b>S</b>upplier</li>
- *   <li>{@link #p(Predicate) p} / {@link #pp(Throwables.Predicate) pp} - <b>P</b>redicate / Throwable-safe <b>P</b>redicate</li>
- *   <li>{@link #c(Consumer) c} / {@link #cc(Throwables.Consumer) cc} - <b>C</b>onsumer / Throwable-safe <b>C</b>onsumer</li>
- *   <li>{@link #f(Function) f} / {@link #ff(Throwables.Function) ff} - <b>F</b>unction / Throwable-safe <b>F</b>unction</li>
+ *   <li>{@link #s(Supplier) s} / {@link #ss(Throwables.Supplier) ss} - <b>S</b>upplier / checked-exception adapter for <b>S</b>upplier</li>
+ *   <li>{@link #p(Predicate) p} / {@link #pp(Throwables.Predicate) pp} - <b>P</b>redicate / checked-exception adapter for <b>P</b>redicate</li>
+ *   <li>{@link #c(Consumer) c} / {@link #cc(Throwables.Consumer) cc} - <b>C</b>onsumer / checked-exception adapter for <b>C</b>onsumer</li>
+ *   <li>{@link #f(Function) f} / {@link #ff(Throwables.Function) ff} - <b>F</b>unction / checked-exception adapter for <b>F</b>unction</li>
  *   <li>{@link #o(UnaryOperator) o} - <b>O</b>perator (Unary or Binary)</li>
  * </ul>
  * <p>These shorthands are particularly useful in stream pipelines and functional compositions to reduce boilerplate.</p>
@@ -331,7 +331,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Safe Wrappers:</b> Convert exception-throwing operations to safe variants with default values</li>
  *   <li><b>Exception Conversion:</b> Transform checked exceptions to runtime exceptions when appropriate</li>
  *   <li><b>Graceful Degradation:</b> Provide meaningful default behavior when operations fail</li>
- *   <li><b>Error Logging:</b> Optional error logging for debugging failed operations</li>
+ *   <li><b>Error Logging:</b> Resource-closing helpers log suppressed closing exceptions</li>
  * </ul>
  *
  * <p><b>Integration with Java Streams:</b>
@@ -646,7 +646,7 @@ public final class Fn {
      *
      * @param <T> the type of the value supplied
      * @param supplier the supplier whose result should be memoized
-     * @return a memoized Supplier that caches the result of the first invocation
+     * @return a memoized Supplier that caches the first successful result, including {@code null}
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
      */
     public static <T> Supplier<T> memoize(final java.util.function.Supplier<T> supplier) throws IllegalArgumentException {
@@ -673,8 +673,8 @@ public final class Fn {
      * safely call {@code get()} concurrently. The implementation uses double-checked locking to
      * ensure that a successful delegate call is made at most once per expiration period, even under
      * concurrent access. Refreshes are serialized on a private monitor, not on the returned supplier
-     * itself, so caller code that synchronizes on the returned object can neither block nor interleave
-     * with a refresh. If the delegate throws, the failure is not cached and a later call retries it.
+     * itself. Locking the returned supplier does not acquire the refresh monitor or coordinate with
+     * refreshes. If the delegate throws, the failure is not cached and a later call retries it.
      * Re-entering {@code get()} from within the delegate throws {@link IllegalStateException}; that failure
      * is not cached and a later call may retry once the recursive attempt has unwound.
      *
@@ -729,14 +729,14 @@ public final class Fn {
     public static <T> Supplier<T> memoizeWithExpiration(final java.util.function.Supplier<T> supplier, final long duration, final TimeUnit unit)
             throws IllegalArgumentException {
         N.checkArgNotNull(supplier, cs.supplier);
+        N.checkArgPositive(duration, cs.duration);
         N.checkArgNotNull(unit, cs.unit);
-        N.checkArgument(duration > 0, "duration (%s %s) must be > 0", duration, unit);
 
         return new Supplier<>() {
             private final java.util.function.Supplier<T> delegate = supplier;
             private final long durationNanos = unit.toNanos(duration);
             // A private monitor rather than `this`: the returned supplier is handed to the caller, and a caller
-            // doing `synchronized (memoizedSupplier) { ... }` must not be able to block or interleave with a
+            // doing `synchronized (memoizedSupplier) { ... }` does not acquire the monitor used for a
             // refresh. Same reason memoize(Function) uses its own resultMapLock.
             private final Object lock = new Object();
             private volatile T value;
@@ -806,8 +806,8 @@ public final class Fn {
      * safely call {@code get()} concurrently. The implementation uses double-checked locking to
      * ensure that a successful delegate call is made at most once per expiration period, even under
      * concurrent access. Refreshes are serialized on a private monitor, not on the returned supplier
-     * itself, so caller code that synchronizes on the returned object can neither block nor interleave
-     * with a refresh. If the delegate throws, the failure is not cached and a later call retries it.
+     * itself. Locking the returned supplier does not acquire the refresh monitor or coordinate with
+     * refreshes. If the delegate throws, the failure is not cached and a later call retries it.
      * Re-entering {@code get()} from within the delegate throws {@link IllegalStateException}; that failure
      * is not cached and a later call may retry once the recursive attempt has unwound.
      *
@@ -854,7 +854,7 @@ public final class Fn {
      *
      * <p>This implementation is <b>thread-safe</b> and uses a {@link ConcurrentHashMap} internally
      * for caching {@code non-null} inputs and a double-checked locking pattern for {@code null} inputs.
-     * The function will only be invoked once per unique input, even in concurrent scenarios.
+     * The first successful result for each unique input is cached, even in concurrent scenarios; failed calls may be retried.
      * Cached <i>hits</i> are lock-free, but <i>misses</i> are not: every invocation of the underlying function is
      * serialized on a single lock owned by the returned function, so two threads computing two <i>different</i>
      * keys still wait for one another, and the underlying function runs while that lock is held. Do not memoize a
@@ -959,7 +959,11 @@ public final class Fn {
                 return result == none ? null : result;
             }
 
-            private R compute(final T key) {
+            /**
+             * @throws IllegalStateException if computing {@code key} recursively requests the same memoized value
+             * @throws RuntimeException if the memoized function throws while computing {@code key}
+             */
+            private R compute(final T key) throws IllegalStateException, RuntimeException {
                 Set<T> keys = keysInProgress.get();
 
                 if (keys == null) {
@@ -1000,7 +1004,10 @@ public final class Fn {
                 }
             }
 
-            private void failIfRecursive(final T key) {
+            /**
+             * @throws IllegalStateException if {@code key} is already being computed by this thread
+             */
+            private void failIfRecursive(final T key) throws IllegalStateException {
                 final Set<T> keys = keysInProgress.get();
 
                 if (keys != null && keys.contains(key)) {
@@ -1072,7 +1079,7 @@ public final class Fn {
 
     /**
      * Returns a Runnable that closes the specified AutoCloseable resource.
-     * The returned Runnable ensures the resource is closed only once, even if called multiple times.
+     * The returned Runnable attempts to close the resource once; later calls do not retry a failed close.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1096,7 +1103,7 @@ public final class Fn {
             public void run() {
                 // No unsynchronized fast path: it let a concurrent second caller return while the close
                 // was still in flight, because isClosed means "someone has STARTED closing". Entering the
-                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // monitor makes that caller wait until the closing attempt finishes - the guarantee
                 // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
                 // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
                 // runnable) short-circuits on the reentrant monitor instead of closing twice.
@@ -1115,17 +1122,18 @@ public final class Fn {
 
     /**
      * Returns a Runnable that closes all specified AutoCloseable resources.
-     * The returned Runnable ensures all resources are closed only once, even if called multiple times.
+     * The returned Runnable performs one closing pass; later calls do not retry failed closes.
+     * Repeated references in the input are processed separately.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.closeAll(s1,s2).run();                                  // closes all
      * }</pre>
      *
-     * <p>The resources are read <i>live</i>: {@code run()} closes whatever {@code a} holds at the moment it is
-     * called, not what it held when this method returned. Nulling its elements first therefore closes nothing
-     * and reports success, and replacing them afterwards brings the new resources in. Pass an array you do not
-     * mutate (or copy it yourself) if you want the set frozen at construction.</p>
+     * <p>The array is read during the first closing pass, so changes made after this method returns but
+     * before the first {@code run()} affect which resources are closed. Changes after that pass do not
+     * trigger further closes. Copy the array before passing it to freeze its entries at construction,
+     * and do not modify it during the closing pass.</p>
      *
      * @param a the array of AutoCloseable resources to close
      * @return a Runnable that closes all resources when executed
@@ -1145,7 +1153,7 @@ public final class Fn {
             public void run() {
                 // No unsynchronized fast path: it let a concurrent second caller return while the close
                 // was still in flight, because isClosed means "someone has STARTED closing". Entering the
-                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // monitor makes that caller wait until the closing attempt finishes - the guarantee
                 // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
                 // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
                 // runnable) short-circuits on the reentrant monitor instead of closing twice.
@@ -1164,18 +1172,18 @@ public final class Fn {
 
     /**
      * Returns a Runnable that closes all AutoCloseable resources in the specified collection.
-     * The returned Runnable ensures all resources are closed only once, even if called multiple times.
+     * The returned Runnable performs one closing pass; later calls do not retry failed closes.
+     * Repeated references in the input are processed separately.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.closeAll(Arrays.asList(s1, s2)).run();                  // closes all
      * }</pre>
      *
-     * <p>The resources are read <i>live</i>: {@code run()} closes whatever {@code c} holds at the moment it is
-     * called, not what it held when this method returned. Emptying {@code c} first therefore closes nothing and
-     * reports success, and adding to it afterwards brings the new resources in. Pass a collection you do not
-     * mutate (or copy it yourself) if you want the set frozen at construction, and do not let another thread
-     * modify {@code c} while {@code run()} is iterating it.</p>
+     * <p>The collection is read during the first closing pass, so changes made after this method returns
+     * but before the first {@code run()} affect which resources are closed. Changes after that pass do
+     * not trigger further closes. Copy the collection before passing it to freeze its entries at
+     * construction, and do not modify it during the closing pass.</p>
      *
      * @param c the collection of AutoCloseable resources to close
      * @return a Runnable that closes all resources when executed
@@ -1194,7 +1202,7 @@ public final class Fn {
             public void run() {
                 // No unsynchronized fast path: it let a concurrent second caller return while the close
                 // was still in flight, because isClosed means "someone has STARTED closing". Entering the
-                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // monitor makes that caller wait until the closing attempt finishes - the guarantee
                 // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
                 // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
                 // runnable) short-circuits on the reentrant monitor instead of closing twice.
@@ -1214,7 +1222,7 @@ public final class Fn {
     /**
      * Returns a Runnable that quietly closes the specified AutoCloseable resource.
      * Any exceptions thrown during closing are suppressed. The returned Runnable
-     * ensures the resource is closed only once, even if called multiple times.
+     * attempts to close the resource once; later calls do not retry a failed close.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1238,7 +1246,7 @@ public final class Fn {
             public void run() {
                 // No unsynchronized fast path: it let a concurrent second caller return while the close
                 // was still in flight, because isClosed means "someone has STARTED closing". Entering the
-                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // monitor makes that caller wait until the closing attempt finishes - the guarantee
                 // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
                 // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
                 // runnable) short-circuits on the reentrant monitor instead of closing twice.
@@ -1258,17 +1266,18 @@ public final class Fn {
     /**
      * Returns a Runnable that quietly closes all specified AutoCloseable resources.
      * Any exceptions thrown during closing are suppressed. The returned Runnable
-     * ensures all resources are closed only once, even if called multiple times.
+     * performs one closing pass; later calls do not retry failed closes.
+     * Repeated references in the input are processed separately.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.closeAllQuietly(s1,s2).run();                           // closes all quietly
      * }</pre>
      *
-     * <p>The resources are read <i>live</i>: {@code run()} closes whatever {@code a} holds at the moment it is
-     * called, not what it held when this method returned. Nulling its elements first therefore closes nothing
-     * and reports success, and replacing them afterwards brings the new resources in. Pass an array you do not
-     * mutate (or copy it yourself) if you want the set frozen at construction.</p>
+     * <p>The array is read during the first closing pass, so changes made after this method returns but
+     * before the first {@code run()} affect which resources are closed. Changes after that pass do not
+     * trigger further closes. Copy the array before passing it to freeze its entries at construction,
+     * and do not modify it during the closing pass.</p>
      *
      * @param a the array of AutoCloseable resources to close quietly
      * @return a Runnable that closes all resources quietly when executed
@@ -1288,7 +1297,7 @@ public final class Fn {
             public void run() {
                 // No unsynchronized fast path: it let a concurrent second caller return while the close
                 // was still in flight, because isClosed means "someone has STARTED closing". Entering the
-                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // monitor makes that caller wait until the closing attempt finishes - the guarantee
                 // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
                 // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
                 // runnable) short-circuits on the reentrant monitor instead of closing twice.
@@ -1308,18 +1317,18 @@ public final class Fn {
     /**
      * Returns a Runnable that quietly closes all AutoCloseable resources in the specified collection.
      * Any exceptions thrown during closing are suppressed. The returned Runnable
-     * ensures all resources are closed only once, even if called multiple times.
+     * performs one closing pass; later calls do not retry failed closes.
+     * Repeated references in the input are processed separately.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.closeAllQuietly(Arrays.asList(s1, s2)).run();           // closes all quietly
      * }</pre>
      *
-     * <p>The resources are read <i>live</i>: {@code run()} closes whatever {@code c} holds at the moment it is
-     * called, not what it held when this method returned. Emptying {@code c} first therefore closes nothing and
-     * reports success, and adding to it afterwards brings the new resources in. Pass a collection you do not
-     * mutate (or copy it yourself) if you want the set frozen at construction, and do not let another thread
-     * modify {@code c} while {@code run()} is iterating it.</p>
+     * <p>The collection is read during the first closing pass, so changes made after this method returns
+     * but before the first {@code run()} affect which resources are closed. Changes after that pass do
+     * not trigger further closes. Copy the collection before passing it to freeze its entries at
+     * construction, and do not modify it during the closing pass.</p>
      *
      * @param c the collection of AutoCloseable resources to close quietly
      * @return a Runnable that closes all resources quietly when executed
@@ -1338,7 +1347,7 @@ public final class Fn {
             public void run() {
                 // No unsynchronized fast path: it let a concurrent second caller return while the close
                 // was still in flight, because isClosed means "someone has STARTED closing". Entering the
-                // monitor makes that caller wait until the resource really is closed - the guarantee
+                // monitor makes that caller wait until the closing attempt finishes - the guarantee
                 // Fn.shutdown(ExecutorService) has always given by acting inside the lock. isClosed is
                 // still flipped before the close so a RE-ENTRANT call (a close handler that runs this same
                 // runnable) short-circuits on the reentrant monitor instead of closing twice.
@@ -1434,8 +1443,8 @@ public final class Fn {
      */
     public static Runnable shutdown(final ExecutorService service, final long terminationTimeout, final TimeUnit timeUnit) throws IllegalArgumentException {
         N.checkArgNotNull(service, cs.service);
-        N.checkArgNotNull(timeUnit, cs.timeUnit);
         N.checkArgNotNegative(terminationTimeout, cs.terminationTimeout);
+        N.checkArgNotNull(timeUnit, cs.timeUnit);
 
         return new Runnable() {
             // A private monitor rather than `this`: the returned runnable is handed to the caller, so a caller
@@ -1647,7 +1656,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.rateLimiter(5.0).accept("task");                       // waits to honor 5 permits/sec, then proceeds
+     * Fn.rateLimiter(5.0).accept("task");                       // acquires a permit, waiting if required
      * }</pre>
      *
      * @param <T> the type of the input
@@ -1669,7 +1678,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.rateLimiter(RateLimiter.create(5.0)).accept("task");   // waits to honor the given RateLimiter
+     * Fn.rateLimiter(RateLimiter.create(5.0)).accept("task");   // acquires a permit, waiting if required
      * }</pre>
      *
      * @param <T> the type of the input
@@ -1715,7 +1724,7 @@ public final class Fn {
      * @param <U> the type of the second input
      * @param separator the separator to use between the two values
      * @return a BiConsumer that prints both inputs with separator
-     * @throws IllegalArgumentException if separator is null.
+     * @throws IllegalArgumentException if {@code separator} is {@code null}.
      * @see N#println(Object)
      */
     public static <T, U> BiConsumer<T, U> println(final String separator) throws IllegalArgumentException {
@@ -2369,7 +2378,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a UnaryOperator that trims strings by removing leading and trailing whitespace.
+     * Returns a UnaryOperator that removes leading and trailing UTF-16 code units at or below {@code U+0020}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2628,7 +2637,7 @@ public final class Fn {
      * @param <U> the target type
      * @param clazz the class to cast to
      * @return a Function that performs type casting
-     * @throws IllegalArgumentException if clazz is null.
+     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
      * @see Class#cast(Object)
      */
     public static <T, U> Function<T, U> cast(final Class<U> clazz) throws IllegalArgumentException {
@@ -2732,7 +2741,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is empty.
+     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is {@code null} or empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2773,7 +2782,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is blank.
+     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is {@code null}, empty, or whitespace-only.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2910,7 +2919,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is not empty.
+     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is non-null and non-empty.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2951,7 +2960,7 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is not blank.
+     * Returns a Predicate that tests if a CharSequence extracted by valueExtractor is non-null and contains a non-whitespace character.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3152,7 +3161,6 @@ public final class Fn {
      * Fn.greaterThan(5).test(3);    // returns false
      * }</pre>
      *
-     *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
      * {@code non-null}.</p>
@@ -3175,7 +3183,6 @@ public final class Fn {
      * Fn.greaterThanOrEqual(5).test(5);    // returns true
      * Fn.greaterThanOrEqual(5).test(3);    // returns false
      * }</pre>
-     *
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
@@ -3200,7 +3207,6 @@ public final class Fn {
      * Fn.lessThan(5).test(10);   // returns false
      * }</pre>
      *
-     *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
      * {@code non-null}.</p>
@@ -3223,7 +3229,6 @@ public final class Fn {
      * Fn.lessThanOrEqual(5).test(5);    // returns true
      * Fn.lessThanOrEqual(5).test(10);   // returns false
      * }</pre>
-     *
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
@@ -3248,7 +3253,6 @@ public final class Fn {
      * Fn.gtAndLt(5,15).test(5);    // returns false
      * Fn.gtAndLt(5,15).test(15);   // returns false
      * }</pre>
-     *
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
@@ -3275,7 +3279,6 @@ public final class Fn {
      * Fn.geAndLt(5,15).test(15);   // returns false
      * }</pre>
      *
-     *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
      * {@code non-null}.</p>
@@ -3300,7 +3303,6 @@ public final class Fn {
      * Fn.geAndLe(5,15).test(15);   // returns true
      * Fn.geAndLe(5,15).test(4);    // returns false
      * }</pre>
-     *
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
@@ -3327,7 +3329,6 @@ public final class Fn {
      * Fn.gtAndLe(5,15).test(5);    // returns false
      * }</pre>
      *
-     *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
      * {@code non-null}.</p>
@@ -3352,7 +3353,6 @@ public final class Fn {
      * Fn.between(5,15).test(5);    // returns false
      * Fn.between(5,15).test(15);   // returns false
      * }</pre>
-     *
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
      * {@code null} below every {@code non-null} value; neither the tested value nor the bound has to be
@@ -3389,7 +3389,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param c the collection to check membership in
      * @return a Predicate that tests for collection membership
-     * @throws IllegalArgumentException if c is null.
+     * @throws IllegalArgumentException if {@code c} is {@code null}.
      * @see Collection#contains(Object)
      */
     public static <T> Predicate<T> in(final Collection<?> c) throws IllegalArgumentException {
@@ -3420,7 +3420,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param c the collection to check membership in
      * @return a Predicate that tests for non-membership in a collection
-     * @throws IllegalArgumentException if c is null.
+     * @throws IllegalArgumentException if {@code c} is {@code null}.
      * @see Collection#contains(Object)
      */
     public static <T> Predicate<T> notIn(final Collection<?> c) throws IllegalArgumentException {
@@ -3445,7 +3445,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param clazz the class to test instance membership
      * @return a Predicate that tests if objects are instances of clazz
-     * @throws IllegalArgumentException if clazz is null.
+     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
      * @see Class#isInstance(Object)
      */
     public static <T> Predicate<T> instanceOf(final Class<?> clazz) throws IllegalArgumentException {
@@ -3471,7 +3471,7 @@ public final class Fn {
      *
      * @param clazz the superclass to test against
      * @return a Predicate that tests if classes are subtypes of clazz
-     * @throws IllegalArgumentException if clazz is null.
+     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
      * @see Class#isAssignableFrom(Class)
      * @see #instanceOf(Class)
      */
@@ -3494,7 +3494,7 @@ public final class Fn {
      *
      * @param prefix the prefix to test for
      * @return a Predicate that tests if strings start with prefix; a {@code null} input tests {@code false}
-     * @throws IllegalArgumentException if prefix is null.
+     * @throws IllegalArgumentException if {@code prefix} is {@code null}.
      * @see String#startsWith(String)
      */
     public static Predicate<String> startsWith(final String prefix) throws IllegalArgumentException {
@@ -3516,7 +3516,7 @@ public final class Fn {
      *
      * @param suffix the suffix to test for
      * @return a Predicate that tests if strings end with suffix; a {@code null} input tests {@code false}
-     * @throws IllegalArgumentException if suffix is null.
+     * @throws IllegalArgumentException if {@code suffix} is {@code null}.
      * @see String#endsWith(String)
      */
     public static Predicate<String> endsWith(final String suffix) throws IllegalArgumentException {
@@ -3538,7 +3538,7 @@ public final class Fn {
      *
      * @param valueToFind the substring to search for
      * @return a Predicate that tests if strings contain the substring; a {@code null} input tests {@code false}
-     * @throws IllegalArgumentException if valueToFind is null.
+     * @throws IllegalArgumentException if {@code valueToFind} is {@code null}.
      * @see String#contains(CharSequence)
      */
     public static Predicate<String> contains(final String valueToFind) throws IllegalArgumentException {
@@ -3560,7 +3560,7 @@ public final class Fn {
      *
      * @param prefix the prefix to test against
      * @return a Predicate that tests if strings don't start with prefix; a {@code null} input tests {@code true}
-     * @throws IllegalArgumentException if prefix is null.
+     * @throws IllegalArgumentException if {@code prefix} is {@code null}.
      * @see String#startsWith(String)
      */
     public static Predicate<String> notStartsWith(final String prefix) throws IllegalArgumentException {
@@ -3582,7 +3582,7 @@ public final class Fn {
      *
      * @param suffix the suffix to test against
      * @return a Predicate that tests if strings don't end with suffix; a {@code null} input tests {@code true}
-     * @throws IllegalArgumentException if suffix is null.
+     * @throws IllegalArgumentException if {@code suffix} is {@code null}.
      * @see String#endsWith(String)
      */
     public static Predicate<String> notEndsWith(final String suffix) throws IllegalArgumentException {
@@ -3604,7 +3604,7 @@ public final class Fn {
      *
      * @param str the substring to test against
      * @return a Predicate that tests if strings don't contain the substring; a {@code null} input tests {@code true}
-     * @throws IllegalArgumentException if str is null.
+     * @throws IllegalArgumentException if {@code str} is {@code null}.
      * @see String#contains(CharSequence)
      */
     public static Predicate<String> notContains(final String str) throws IllegalArgumentException {
@@ -3626,7 +3626,7 @@ public final class Fn {
      * @param pattern the Pattern to match against
      * @return a Predicate that tests if CharSequences contain a match for the pattern (a partial match is
      *         enough); a {@code null} input tests {@code false}
-     * @throws IllegalArgumentException if pattern is null.
+     * @throws IllegalArgumentException if {@code pattern} is {@code null}.
      * @see Pattern#matcher(CharSequence)
      * @see Matcher#find()
      */
@@ -5358,7 +5358,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param count the maximum number of elements to accept (must be non-negative)
      * @return a stateful Predicate that limits elements
-     * @throws IllegalArgumentException if count is negative.
+     * @throws IllegalArgumentException if {@code count} is negative.
      * @see #limitThenFilter(int, java.util.function.Predicate)
      * @see #filterThenLimit(java.util.function.Predicate, int)
      */
@@ -5457,7 +5457,7 @@ public final class Fn {
      * <p><b>Contrast with {@link #filterThenLimit(java.util.function.Predicate, int)}:</b>
      * <ul>
      *   <li>{@code limitThenFilter(3, p)} - Tests only first 3 elements, filters those that match p</li>
-     *   <li>{@code filterThenLimit(p, 3)} - Tests all elements, but stops after 3 matches</li>
+     *   <li>{@code filterThenLimit(p, 3)} - Tests every element, accepting only the first 3 matches</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -5638,7 +5638,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param timeInMillis the time limit in milliseconds, counted from this call
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException if timeInMillis is negative.
+     * @throws IllegalArgumentException if {@code timeInMillis} is negative.
      */
     @Beta
     @Stateful
@@ -5679,7 +5679,7 @@ public final class Fn {
      * @param <T> the type of the input to the predicate
      * @param duration the time limit as a Duration, counted from this call
      * @return a stateful {@code Predicate}. Don't save or cache for reuse, but it can be used in parallel stream.
-     * @throws IllegalArgumentException if duration is {@code null} or negative.
+     * @throws IllegalArgumentException if {@code duration} is {@code null} or negative.
      */
     @Beta
     @Stateful
@@ -6419,7 +6419,7 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.from((java.util.function.UnaryOperator<String>) String::toUpperCase).apply("hi");  // returns "HI"
+     * Fn.from((java.util.function.UnaryOperator<String>) Strings::toUpperCase).apply("hi");  // returns "HI"
      * }</pre>
      *
      * @param <T> the type of the operand and result of the operator
@@ -7153,7 +7153,7 @@ public final class Fn {
      * // Using mc() to help with type inference in a stream operation
      * Stream<List<String>> listStream = Stream.of(N.asList("a", "b"), N.asList("c"));
      * Stream<String> flatStream = listStream.mapMulti(
-     *     Fn.mc((List<String> list, Consumer<String> consumer) -> {
+     *     Fn.mc((List<String> list, java.util.function.Consumer<String> consumer) -> {
      *         for (String item : list) {
      *             if (item != null && !item.isEmpty()) {
      *                 consumer.accept(item);
@@ -8390,7 +8390,7 @@ public final class Fn {
     }
 
     /**
-     * Converts a consumer to a function that returns void (null) after executing the consumer.
+     * Converts a consumer to a function that returns {@code null} with result type {@link Void} after executing the consumer.
      *
      * <p>This method is useful when you need to use a consumer in a context that requires a function,
      * such as in stream map operations where you want side effects but also need to continue the stream.</p>
@@ -8450,7 +8450,7 @@ public final class Fn {
     }
 
     /**
-     * Converts a bi-consumer to a bi-function that returns void (null) after executing the bi-consumer.
+     * Converts a bi-consumer to a bi-function that returns {@code null} with result type {@link Void} after executing the bi-consumer.
      *
      * <p>This method is useful when you need to use a bi-consumer in a context that requires a bi-function,
      * allowing you to perform side effects while maintaining functional composition.</p>
@@ -8513,7 +8513,7 @@ public final class Fn {
     }
 
     /**
-     * Converts a tri-consumer to a tri-function that returns void (null) after executing the tri-consumer.
+     * Converts a tri-consumer to a tri-function that returns {@code null} with result type {@link Void} after executing the tri-consumer.
      *
      * <p>This method is useful when you need to use a tri-consumer in a context that requires a tri-function,
      * allowing you to perform side effects while maintaining functional composition.</p>
@@ -8814,7 +8814,7 @@ public final class Fn {
 
     /**
      * <b>{@code r2c}</b> stands for <b>Runnable to Callable</b>.
-     * Converts a runnable to a callable that returns void (null).
+     * Converts a runnable to a callable that returns {@code null} with result type {@link Void}.
      *
      * <p>This method is useful when you need to use a runnable in a context that requires a callable,
      * such as with executor services when you want to track completion but don't need a return value.

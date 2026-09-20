@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
@@ -59,12 +60,18 @@ public abstract class AbstractParserTest extends AbstractTest {
     protected static final Random rand = new Random();
     protected static final JsonParser jsonParser = ParserFactory.createJsonParser();
     protected static final AvroParser avroParser = ParserFactory.createAvroParser();
-    public static final XmlParser abacusXmlParser = ParserFactory.createAbacusXmlParser();
-    public static final XmlParser abacusXMLSAXParser = ParserFactory.createAbacusXmlSAXParser();
-    public static final XmlParser abacusXMLStAXParser = ParserFactory.createAbacusXmlStAXParser();
-    public static final XmlParser abacusXMLDOMParser = ParserFactory.createAbacusXmlDOMParser();
-    public static final XmlParser xmlParser = ParserFactory.createXmlParser();
-    public static final XmlParser xmlDOMParser = ParserFactory.createXmlDOMParser();
+    // Positive round-trip fixtures opt in explicitly. Security tests create separate restrictive parsers.
+    // Utility tests share these parsers and use a distinct nested XBean; approval of parser.entity.XBean does not cover it.
+    private static final Set<Class<?>> XML_FIXTURE_TYPES = Set.of(XBean.class, PersonType.class, WeekDay.class, ContainerBean.class,
+            com.landawn.abacus.util.NTestSupport.XBean.class, com.landawn.abacus.parser.entity.GenericEntity.class,
+            testfixtures.entity.extendDirty.basic.Account.class, testfixtures.entity.extendDirty.basic.AccountContact.class,
+            testfixtures.entity.extendDirty.basic.AccountDevice.class, XmlParserImplTest.OuterBean.class, XmlParserImplTest.NullableOnlyBean.class);
+    public static final XmlParser abacusXmlParser = ParserFactory.createAbacusXmlParser(null, null, XML_FIXTURE_TYPES);
+    public static final XmlParser abacusXMLSAXParser = new AbacusXmlParserImpl(XmlParserType.SAX, null, null, XML_FIXTURE_TYPES);
+    public static final XmlParser abacusXMLStAXParser = new AbacusXmlParserImpl(XmlParserType.StAX, null, null, XML_FIXTURE_TYPES);
+    public static final XmlParser abacusXMLDOMParser = new AbacusXmlParserImpl(XmlParserType.DOM, null, null, XML_FIXTURE_TYPES);
+    public static final XmlParser xmlParser = ParserFactory.createXmlParser(null, null, XML_FIXTURE_TYPES);
+    public static final XmlParser xmlDOMParser = new XmlParserImpl(XmlParserType.DOM, null, null, XML_FIXTURE_TYPES);
     protected static final XmlParser jaxbXmlParser = ParserFactory.createJaxbParser();
     protected static final KryoParser kryoParser = ParserFactory.createKryoParser();
     protected static final JsonSerConfig jsc = JsonSerConfig.create().setQuotePropName(true).setQuoteMapKey(true);
@@ -411,8 +418,7 @@ public abstract class AbstractParserTest extends AbstractTest {
         empty.setMap(Collections.emptyMap());
         empty.setList(Collections.emptyList());
 
-        final XmlParser[] parsers = { ParserFactory.createAbacusXmlParser(), ParserFactory.createAbacusXmlSAXParser(),
-                ParserFactory.createAbacusXmlDOMParser(), ParserFactory.createXmlParser(), ParserFactory.createXmlDOMParser() };
+        final XmlParser[] parsers = { abacusXmlParser, abacusXMLSAXParser, abacusXMLDOMParser, xmlParser, xmlDOMParser };
         final XmlSerConfig config = XmlSerConfig.create().setWriteTypeInfo(true);
 
         for (final XmlParser xmlParser : parsers) {
@@ -446,8 +452,8 @@ public abstract class AbstractParserTest extends AbstractTest {
         final Object[] objects = AbstractParser.collectionToArray(Arrays.asList("a", 1, new ArrayList<>()), Type.of(Object[].class));
         assertSame(Object[].class, objects.getClass());
         assertEquals(3, objects.length);
-        assertArrayEquals(new String[] { "a" }, ((String[][]) AbstractParser.collectionToArray(Arrays.asList((Object) new String[] { "a" }),
-                Type.of(String[][].class)))[0]);
+        assertArrayEquals(new String[] { "a" },
+                ((String[][]) AbstractParser.collectionToArray(Arrays.asList((Object) new String[] { "a" }), Type.of(String[][].class)))[0]);
         assertArrayEquals(new int[] { 1, 2 }, (int[]) AbstractParser.collectionToArray(Arrays.asList(1, 2), Type.of(int[].class)));
         assertEquals(0, ((int[]) AbstractParser.collectionToArray(new ArrayList<>(), Type.of(int[].class))).length);
         assertEquals(1, ((List<?>[]) AbstractParser.collectionToArray(Arrays.asList((Object) new ArrayList<>()), Type.of("List<String>[]"))).length);

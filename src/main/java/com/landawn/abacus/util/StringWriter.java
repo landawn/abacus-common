@@ -22,7 +22,7 @@ package com.landawn.abacus.util;
  * internal buffer. It provides all standard Writer operations plus additional
  * methods for efficient string building.
  *
- * <p>Key differences from java.io.StringWriter:
+ * <p>Implementation features:
  * <ul>
  *   <li>Not thread-safe (no synchronization overhead)</li>
  *   <li>Built on {@link StringBuilder} rather than a synchronized buffer</li>

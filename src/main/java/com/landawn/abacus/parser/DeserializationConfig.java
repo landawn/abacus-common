@@ -60,8 +60,8 @@ import com.landawn.abacus.util.cs;
  * }</pre>
  *
  * <p>Dotted keys such as {@code "address.city"} are matched only as literal key strings by
- * {@link #getValueType(String)}; they are not resolved as paths and are not consulted by the
- * parsers during deserialization.</p>
+ * {@link #getValueType(String)}; they are not resolved as paths. They can match an actual property
+ * or map key containing a dot, but do not select a nested property by its path.</p>
  *
  * @param <C> the concrete configuration type for method chaining
  * @see JsonDeserConfig

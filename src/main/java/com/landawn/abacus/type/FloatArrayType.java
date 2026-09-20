@@ -173,7 +173,7 @@ public final class FloatArrayType extends ObjectArrayType<Float> {
     /**
      * Writes a {@code Float[]} to a {@link CharacterWriter}.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Null elements are written as {@code null}; {@code non-null} values use the writer's optimized
+     * Null elements are written as {@code null}, or {@code 0.0} when {@code writeNullNumberAsZero} is enabled; non-null values use the writer's optimized
      * float-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes numeric literals and {@code null}

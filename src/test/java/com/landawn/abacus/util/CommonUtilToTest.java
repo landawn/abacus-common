@@ -468,6 +468,7 @@ public class CommonUtilToTest extends CommonUtilTestSupport {
         assertEquals("e", CommonUtil.toLinkedHashMap("a", 1, "b", 2, "c", 3, "d", 4, "e", 5).keySet().toArray()[4]);
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.toLinkedHashMap("a", 1, "b"));
     }
+
     @Test
     public void testToString_nestedArrayIsRenderedByContent() {
         final Object[] nested = { new int[] { 1, 2 } };

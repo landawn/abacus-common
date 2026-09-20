@@ -201,67 +201,67 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Nested
     @DisplayName("Filter Operations")
-    public class FilterOperationsTest {
+    public class FilterOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Mapping Operations")
-    public class MappingOperationsTest {
+    public class MappingOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("FlatMap Operations")
-    public class FlatMapOperationsTest {
+    public class FlatMapOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Side Effect Operations")
-    public class SideEffectOperationsTest {
+    public class SideEffectOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Collection Operations")
-    public class CollectionOperationsTest {
+    public class CollectionOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Reduction Operations")
-    public class ReductionOperationsTest {
+    public class ReductionOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Min/Max Operations")
-    public class MinMaxOperationsTest {
+    public class MinMaxOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Matching Operations")
-    public class MatchingOperationsTest {
+    public class MatchingOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Finding Operations")
-    public class FindingOperationsTest {
+    public class FindingOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Set Operations")
-    public class SetOperationsTest {
+    public class SetOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Stream Combination Operations")
-    public class StreamCombinationOperationsTest {
+    public class StreamCombinationOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Zip Operations")
-    public class ZipOperationsTest {
+    public class ZipOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Edge Cases and Error Handling")
-    public class EdgeCasesTest {
+    public class EdgeCasesTest extends TestBase {
 
         @ParameterizedTest
         @ValueSource(ints = { 1, 2, 4, 8 })
@@ -278,72 +278,72 @@ public class ParallelArrayStreamTest extends TestBase {
 
     @Nested
     @DisplayName("FlatMap Array Operations")
-    public class FlatMapArrayOperationsTest {
+    public class FlatMapArrayOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Additional Array Operations")
-    public class AdditionalArrayOperationsTest {
+    public class AdditionalArrayOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Stream Splitting Operations")
-    public class StreamSplittingOperationsTest {
+    public class StreamSplittingOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Sliding Window Operations")
-    public class SlidingWindowOperationsTest {
+    public class SlidingWindowOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Stream Limiting and Skipping")
-    public class LimitingSkippingOperationsTest {
+    public class LimitingSkippingOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Distinct and Sorting Operations")
-    public class DistinctSortingOperationsTest {
+    public class DistinctSortingOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Collection Conversion Operations")
-    public class CollectionConversionOperationsTest {
+    public class CollectionConversionOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Optional and Single Element Operations")
-    public class OptionalSingleElementOperationsTest {
+    public class OptionalSingleElementOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Fold Operations")
-    public class FoldOperationsTest {
+    public class FoldOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Special Collection Operations")
-    public class SpecialCollectionOperationsTest {
+    public class SpecialCollectionOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Stream State and Lifecycle Operations")
-    public class StreamStateLifecycleOperationsTest {
+    public class StreamStateLifecycleOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Conditional Operations")
-    public class ConditionalOperationsTest {
+    public class ConditionalOperationsTest extends TestBase {
     }
 
     @Nested
     @DisplayName("JDK Stream Conversion")
-    public class JDKStreamConversionTest {
+    public class JDKStreamConversionTest extends TestBase {
     }
 
     @Nested
     @DisplayName("Performance and Concurrency")
-    public class PerformanceConcurrencyTest {
+    public class PerformanceConcurrencyTest extends TestBase {
     }
 
     @Test
@@ -3023,7 +3023,6 @@ public class ParallelArrayStreamTest extends TestBase {
         }
     }
 
-
     @Test
     public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
         final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
@@ -3042,10 +3041,11 @@ public class ParallelArrayStreamTest extends TestBase {
         final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();
         final Stream<Integer> source = Stream.of(1, 2, 3).parallel(2);
 
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> source.flatGroupTo(value -> java.util.Arrays.asList(0), (key, value) -> value, null, () -> {
-            mapCreated.set(true);
-            return new java.util.HashMap<Integer, Object>();
-        }));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> source.flatGroupTo(value -> java.util.Arrays.asList(0), (key, value) -> value, null, () -> {
+                    mapCreated.set(true);
+                    return new java.util.HashMap<Integer, Object>();
+                }));
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }

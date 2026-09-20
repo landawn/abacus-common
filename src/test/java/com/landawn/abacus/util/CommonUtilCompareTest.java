@@ -253,6 +253,7 @@ public class CommonUtilCompareTest extends CommonUtilTestSupport {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.compareByProps(null, right, Arrays.asList("name")));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.compareByProps(left, null, Arrays.asList("name")));
     }
+
     @Test
     public void testCompare_floatAndDoubleFollowWrapperCompareSemantics() {
         assertEquals(1, CommonUtil.compare(0.0f, -0.0f));

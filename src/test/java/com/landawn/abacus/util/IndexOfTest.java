@@ -409,7 +409,7 @@ public class IndexOfTest extends IndexTestSupport {
         assertEquals(OptionalInt.empty(), Index.ofIgnoreCase(source, "SS", 0));
         assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(source, "SS"));
         assertEquals(OptionalInt.empty(), Index.lastOfIgnoreCase(source, "SS", source.length()));
-        assertEquals("STRASSE", source.toUpperCase(Locale.ROOT));   // a case-folding search WOULD match here
+        assertEquals("STRASSE", source.toUpperCase(Locale.ROOT)); // a case-folding search WOULD match here
 
         // same-length non-ASCII mappings DO match, so the contract is "same-length", not "ASCII only"
         assertEquals(OptionalInt.of(0), Index.ofIgnoreCase("cafÉ", "café"));

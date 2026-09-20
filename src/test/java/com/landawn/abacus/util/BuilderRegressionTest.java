@@ -31,7 +31,7 @@ public class BuilderRegressionTest extends TestBase {
      * out-of-range index is reported consistently rather than only when there is something to insert.
      */
     @Nested
-    public class ListBuilderAddAllAtIndexValidatesTheIndex {
+    public class ListBuilderAddAllAtIndexValidatesTheIndex extends TestBase {
 
         @Test
         public void emptyCollectionWithAnOutOfRangeIndexThrows() {
@@ -98,7 +98,7 @@ public class BuilderRegressionTest extends TestBase {
      * the result.
      */
     @Nested
-    public class FuzzyToleranceIsValidatedEagerly {
+    public class FuzzyToleranceIsValidatedEagerly extends TestBase {
 
         @Test
         public void comparisonBuilderDoubleRejectsNegativeToleranceAfterShortCircuit() {
@@ -167,7 +167,7 @@ public class BuilderRegressionTest extends TestBase {
 
     /** D2: a multimap with a different value-collection type can be copied in, matching Multimap.putValues. */
     @Nested
-    public class MultimapBuilderPutManyAcceptsAnyValueCollectionType {
+    public class MultimapBuilderPutManyAcceptsAnyValueCollectionType extends TestBase {
 
         @Test
         public void aSetMultimapCanBeCopiedIntoAListMultimap() {
@@ -208,7 +208,7 @@ public class BuilderRegressionTest extends TestBase {
 
     /** D3: the Dataset column parameter accepts any Collection, as Dataset.addColumn itself does. */
     @Nested
-    public class DatasetBuilderAddColumnAcceptsAnyCollection {
+    public class DatasetBuilderAddColumnAcceptsAnyCollection extends TestBase {
 
         private Dataset newDataset() {
             return Dataset.rows(Arrays.asList("name"), new Object[][] { { "Alice" }, { "Bob" } });
@@ -258,7 +258,7 @@ public class BuilderRegressionTest extends TestBase {
 
     /** D4: the three invariant generic parameters now accept the wider argument types they always should have. */
     @Nested
-    public class GenericWidenings {
+    public class GenericWidenings extends TestBase {
 
         @Test
         public void putIfAbsentAcceptsASupplierOfASubtype() {
@@ -317,7 +317,7 @@ public class BuilderRegressionTest extends TestBase {
      * not changed by accident; the seed is deliberate, not a defect.
      */
     @Nested
-    public class HashCodeBuilderSeedIsZero {
+    public class HashCodeBuilderSeedIsZero extends TestBase {
 
         @Test
         public void aSingleValueChainIsTheIdentity() {
@@ -362,7 +362,7 @@ public class BuilderRegressionTest extends TestBase {
 
     /** J5 (doc-only): arrays go through N.equals / N.hashCode, i.e. by identity. */
     @Nested
-    public class ArraysAreComparedAndHashedByIdentity {
+    public class ArraysAreComparedAndHashedByIdentity extends TestBase {
 
         @Test
         public void twoEqualContentArraysAreNotEqual() {

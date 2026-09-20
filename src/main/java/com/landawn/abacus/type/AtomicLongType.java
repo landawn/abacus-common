@@ -165,8 +165,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
     /**
      * Parses an integer string and returns a new {@link java.util.concurrent.atomic.AtomicLong}
      * containing the parsed value. Leading and trailing whitespace is trimmed before parsing; the trimmed text is
-     * then parsed with the same grammar as {@link Numbers#toLong(String)} - the grammar {@code LongType} and
-     * {@code MutableLongType} use - so decimal is tried first (a leading zero is padding, never octal), a
+     * then parsed with the same grammar as {@link Numbers#toLong(String)}; decimal is tried first (a leading zero is padding, never octal), a
      * {@code 0x}/{@code 0X}/{@code #} prefix selects hexadecimal, a trailing {@code L}/{@code l} long-literal suffix is
      * ignored, and only ASCII digits are accepted. This is a different grammar from {@link Long#parseLong(String)}:
      * non-ASCII Unicode digits such as Arabic-Indic digits are rejected where {@code parseLong} accepts them, and
@@ -211,6 +210,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      *
      * @param appendable the target {@code Appendable}
      * @param x the {@code AtomicLong} value to append; may be {@code null}
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the current numeric value or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -223,7 +223,7 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final AtomicLong x) throws IOException {
+    public void appendTo(final Appendable appendable, final AtomicLong x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -250,11 +250,12 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * @param x the {@code AtomicLong} value to write; may be {@code null}
      * @param config the serialization configuration (honors {@code writeNullNumberAsZero} and
      *               {@code writeLongAsString}/{@code stringQuotation}); may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the current numeric value, configured null representation or quotation marks to {@code writer}
      *         fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final AtomicLong x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final AtomicLong x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null && !(config != null && config.isWriteNullNumberAsZero())) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

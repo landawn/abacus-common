@@ -18,8 +18,10 @@ import org.junit.jupiter.api.io.TempDir;
 
 import testfixtures.UtilExceptionSources.Cause;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class ExceptionCacheLifetimeTest {
+public class ExceptionCacheLifetimeTest extends TestBase {
     @TempDir
     Path directory;
 

@@ -15,8 +15,10 @@ import testfixtures.UtilConverterSources.Child;
 import testfixtures.UtilConverterSources.FacadeSource;
 import testfixtures.UtilConverterSources.Source;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class ConverterInputTypeTest {
+public class ConverterInputTypeTest extends TestBase {
     @TempDir
     Path directory;
 

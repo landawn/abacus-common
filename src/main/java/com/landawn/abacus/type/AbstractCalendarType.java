@@ -44,8 +44,9 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * Constructs a new {@code AbstractCalendarType} with the specified type name.
      *
      * @param typeName the name of the {@code Calendar} type (e.g., "Calendar", "GregorianCalendar")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractCalendarType(final String typeName) {
+    protected AbstractCalendarType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -81,7 +82,9 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
 
     /**
      * Converts the specified {@code Calendar} value to its string representation.
-     * Uses the default date format provided by {@link Dates#format(Calendar)}.
+     * Uses the default date format provided by {@link Dates#format(Calendar)}. The text preserves
+     * the instant and rendered offset, but not all Calendar state such as its named time zone,
+     * leniency, first day of week or minimal days in the first week.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
@@ -109,11 +112,12 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @param stmt the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Calendar} value to set, or {@code null} for SQL {@code NULL}
+     * @throws IllegalArgumentException if {@code x} is a non-lenient calendar containing invalid field values.
      * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws IllegalArgumentException, NullPointerException, SQLException {
         stmt.setTimestamp(columnIndex, (x == null) ? null : Dates.createTimestamp(x));
     }
 
@@ -125,11 +129,13 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * @param stmt the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Calendar} value to set, or {@code null} for SQL {@code NULL}
+     * @throws IllegalArgumentException if {@code x} is a non-lenient calendar containing invalid field values.
      * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Calendar x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement stmt, final String parameterName, final Calendar x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         stmt.setTimestamp(parameterName, (x == null) ? null : Dates.createTimestamp(x));
     }
 

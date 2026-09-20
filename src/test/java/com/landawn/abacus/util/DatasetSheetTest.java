@@ -111,7 +111,7 @@ public class DatasetSheetTest extends TestBase {
     // B1 - filter(...) sized its result columns from the whole Dataset instead of the scanned range.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B1_FilterCapacityIsBoundedByTheScannedRange {
+    public class B1_FilterCapacityIsBoundedByTheScannedRange extends TestBase {
 
         /**
          * The capacity is not observable through the public API, so this measures the allocation instead: on
@@ -156,7 +156,7 @@ public class DatasetSheetTest extends TestBase {
     //      appended the toString() fallback on top of it, producing unparseable JSON/XML.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B2_PartialSerializationDoesNotCorruptTheOutput {
+    public class B2_PartialSerializationDoesNotCorruptTheOutput extends TestBase {
 
         @Test
         public void toJsonStaysParseableWhenACellFailsToSerialize() {
@@ -196,7 +196,7 @@ public class DatasetSheetTest extends TestBase {
     // B3 - mutators that changed nothing still bumped modCount and invalidated live lazy sources.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B3_NoOpMutatorsAreNotStructuralModifications {
+    public class B3_NoOpMutatorsAreNotStructuralModifications extends TestBase {
 
         @Test
         public void moveRowsWithAnEmptyRangeLeavesStreamsValid() {
@@ -289,7 +289,7 @@ public class DatasetSheetTest extends TestBase {
     // B4 - a failed conversion left the Dataset half converted.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B4_ColumnConversionIsAllOrNothing {
+    public class B4_ColumnConversionIsAllOrNothing extends TestBase {
 
         @Test
         public void convertColumnLeavesTheColumnUntouchedWhenAValueCannotBeConverted() {
@@ -338,7 +338,7 @@ public class DatasetSheetTest extends TestBase {
     // B5 - moveRow/moveColumn discarded the key-index map instead of repairing it.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B5_SheetMoveRepairsTheKeyIndexMap {
+    public class B5_SheetMoveRepairsTheKeyIndexMap extends TestBase {
 
         @Test
         public void aLiveCellStreamSurvivesAMoveRow() {
@@ -465,7 +465,7 @@ public class DatasetSheetTest extends TestBase {
     // B6 - toDataset()'s key-collision diagnostic came from the RowDataset constructor.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B6_ToDatasetNamesTheOffendingKeys {
+    public class B6_ToDatasetNamesTheOffendingKeys extends TestBase {
 
         @Test
         public void collidingColumnKeysAreReportedWithBothKeys() {
@@ -512,7 +512,7 @@ public class DatasetSheetTest extends TestBase {
     // B7 - rollup/cube hard-wired "count" and failed on a Dataset that had a key column of that name.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B7_CountColumnNameAvoidsTheKeyColumns {
+    public class B7_CountColumnNameAvoidsTheKeyColumns extends TestBase {
 
         @Test
         public void rollupWorksWhenAKeyColumnIsNamedCount() {
@@ -583,7 +583,7 @@ public class DatasetSheetTest extends TestBase {
     // B8 - Paginated cached every page it ever produced.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B8_PaginatedDoesNotRetainEveryPage {
+    public class B8_PaginatedDoesNotRetainEveryPage extends TestBase {
 
         /**
          * Only the most recently returned page is kept, so re-reading an older page rebuilds it. On the
@@ -645,7 +645,7 @@ public class DatasetSheetTest extends TestBase {
     // B9 - a zero-row table printed as a single cell spanning every column.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B9_ZeroRowPrintlnKeepsColumnSeparators {
+    public class B9_ZeroRowPrintlnKeepsColumnSeparators extends TestBase {
 
         @Test
         public void datasetWithColumnsButNoRows() {
@@ -702,7 +702,7 @@ public class DatasetSheetTest extends TestBase {
     //      surfaced as the RowDataset constructor's "Duplicated column names found in: [k, k]".
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class J4_GroupByReportsADuplicateResultNameLikeItsSiblings {
+    public class J4_GroupByReportsADuplicateResultNameLikeItsSiblings extends TestBase {
 
         @Test
         public void singleKeyColumnWithARowType() {
@@ -752,7 +752,7 @@ public class DatasetSheetTest extends TestBase {
     // Documented-behaviour pins: these already passed before the fixes; they guard the new javadoc.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DocumentedBehaviourPins {
+    public class DocumentedBehaviourPins extends TestBase {
 
         @Test
         public void unionAllConcatenatesAndNeverMatchesRows() {
@@ -862,7 +862,7 @@ public class DatasetSheetTest extends TestBase {
     // both the pre-fix and the fixed code; they exist so a future edit cannot quietly change behaviour.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class RewritesThatMustNotChangeBehaviour {
+    public class RewritesThatMustNotChangeBehaviour extends TestBase {
 
         /** merge() now lets addColumn build the null padding instead of hand-rolling the list. */
         @Test
@@ -994,7 +994,7 @@ public class DatasetSheetTest extends TestBase {
     // Edge cases the line-by-line review of the new code surfaced.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class EdgeCasesOfTheNewCode {
+    public class EdgeCasesOfTheNewCode extends TestBase {
 
         /** Sheet's index-map repair must survive long chains of moves, not just a single one. */
         @Test
@@ -1141,7 +1141,7 @@ public class DatasetSheetTest extends TestBase {
     //         killed outstanding streams. Only an actual structural change may invalidate them.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class C018_EmptyAppendPrependMergeAreNotStructuralModifications {
+    public class C018_EmptyAppendPrependMergeAreNotStructuralModifications extends TestBase {
 
         private Dataset base() {
             return Dataset.rows(CommonUtil.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" } });

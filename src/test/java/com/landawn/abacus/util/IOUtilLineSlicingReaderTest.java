@@ -346,7 +346,7 @@ public class IOUtilLineSlicingReaderTest extends TestBase {
         assertEquals(List.of(), IOUtil.listFiles(missing, true, true));
         assertEquals(List.of(), IOUtil.listDirectories(null));
         assertEquals(List.of(), IOUtil.listDirectories(missing, true));
-        assertEquals(List.of(), IOUtil.walk(null).toList());
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.walk(null));
         assertEquals(List.of(), IOUtil.walk(missing, true, false).toList());
     }
 

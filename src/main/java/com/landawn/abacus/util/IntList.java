@@ -222,7 +222,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * <p><b>Mathematical and Statistical Operations:</b>
  * <ul>
  *   <li><b>Aggregation:</b> Sum, min, max operations via stream API</li>
- *   <li><b>Central Tendency:</b> Median calculation with efficient sorting</li>
+ *   <li><b>Central Tendency:</b> Median selection without reordering this list</li>
  *   <li><b>Occurrence Counting:</b> {@code frequency()} for frequency analysis</li>
  *   <li><b>Duplicate Detection:</b> {@code containsDuplicates()}, {@code removeDuplicates()}</li>
  * </ul>
@@ -277,7 +277,7 @@ import com.landawn.abacus.util.stream.IntStream;
  * IntList dataset = IntList.random(1, 1000, 10000);   // returns 10K random numbers
  *
  * // Statistical analysis
- * dataset.sort();                          // Sort for median calculation
+ * dataset.sort();                          // Optional: keep the dataset in sorted order
  * OptionalInt min = dataset.min();         // Minimum value
  * OptionalInt max = dataset.max();         // Maximum value
  * OptionalInt median = dataset.lowerMedian();   // Lower median value
@@ -371,7 +371,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * length of the array.
      *
      * <p><b>Note:</b> Since the array is used directly, any external modifications to the
-     * array will affect this list and vice versa.
+     * array will affect this list and vice versa until an operation replaces the backing array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -394,7 +394,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * The list will contain the first <i>size</i> elements from the array.
      *
      * <p><b>Note:</b> Since the array is used directly, any external modifications to the
-     * array will affect this list and vice versa.
+     * array will affect this list and vice versa until an operation replaces the backing array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -420,7 +420,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Creates a new IntList containing the specified elements. The specified array is used directly
-     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * as the backing array without copying, so modifications are shared until the list replaces its backing array.
      * If the input array is {@code null}, an empty list is returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -558,7 +558,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param endExclusive the ending value (exclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new IntList containing the sequence of integers
-     * @throws IllegalArgumentException if by is zero, or if the number of elements in the range
+     * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range
      *         exceeds {@code Integer.MAX_VALUE}.
      */
     public static IntList range(final int startInclusive, final int endExclusive, final int by) throws IllegalArgumentException {
@@ -609,7 +609,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param endInclusive the ending value (inclusive)
      * @param by the step value for incrementing. Must not be zero.
      * @return a new IntList containing the sequence of integers
-     * @throws IllegalArgumentException if by is zero, or if the number of elements in the range
+     * @throws IllegalArgumentException if {@code by} is zero, or if the number of elements in the range
      *         exceeds {@code Integer.MAX_VALUE}.
      */
     public static IntList rangeClosed(final int startInclusive, final int endInclusive, final int by) throws IllegalArgumentException {
@@ -630,7 +630,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param element the int value to be repeated
      * @param len the number of times to repeat the element. Must be non-negative.
      * @return a new IntList containing the repeated elements
-     * @throws IllegalArgumentException if len is negative.
+     * @throws IllegalArgumentException if {@code len} is negative.
      */
     public static IntList repeat(final int element, final int len) throws IllegalArgumentException {
         return of(Array.repeat(element, len));
@@ -648,9 +648,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new IntList containing random int values
@@ -682,9 +682,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param startInclusive the lower bound (inclusive) for the random values
      * @param endExclusive the upper bound (exclusive) for the random values
@@ -1964,7 +1964,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns a new IntList containing elements that are present in either this list or the specified list,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * after cancelling matching occurrences from the two inputs. This is a multiset symmetric difference.
      * For elements that appear multiple times, the result contains the absolute difference
      * in the number of occurrences.
      *
@@ -2034,7 +2034,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
 
     /**
      * Returns a new IntList containing elements that are present in either this list or the specified array,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * after cancelling matching occurrences from the two inputs. This is a multiset symmetric difference.
      * For elements that appear multiple times, the result contains the absolute difference
      * in the number of occurrences.
      *
@@ -2820,6 +2820,9 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
      * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
      *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
+     *
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy
      * @param step the interval between selected elements. Must not be zero.
@@ -2827,7 +2830,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      *             negative values select elements in reverse direction
      * @return a new IntList containing the selected elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} is permitted for reverse traversal.
-     * @throws IllegalArgumentException if step is zero.
+     * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(int[], int, int, int)
      */
     @Override
@@ -2862,7 +2865,7 @@ public final class IntList extends PrimitiveList<Integer, int[], IntList> {
      * @param chunkSize the desired size of each chunk. Must be greater than 0
      * @return a List containing the IntList chunks
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
-     * @throws IllegalArgumentException if chunkSize &lt;= 0.
+     * @throws IllegalArgumentException if {@code chunkSize <= 0}.
      */
     @Override
     public List<IntList> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException, IllegalArgumentException {

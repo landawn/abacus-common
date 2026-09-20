@@ -1597,4 +1597,59 @@ public class EscapeUtilTest extends TestBase {
         assertTrue("translation-started".equals(outcome) || "OutOfMemoryError".equals(outcome),
                 "the capacity estimate must not overflow, but the call ended with: " + outcome);
     }
+
+    @Test
+    public void testUnicodeUnescaperHandlesOffsetsNearIntegerMaxValue() throws IOException {
+        for (final String suffix : new String[] { "\\u", "\\u0", "\\uu+0" }) {
+            final StringWriter out = new StringWriter();
+            assertThrows(IllegalArgumentException.class,
+                    () -> EscapeUtil.UNESCAPE_JAVA.translate(sequenceEndingWith(suffix), Integer.MAX_VALUE - suffix.length(), out));
+            assertEquals("", out.toString());
+        }
+
+        for (final String suffix : new String[] { "\\u0041", "\\uu+0041" }) {
+            final StringWriter out = new StringWriter();
+            assertEquals(suffix.length(), EscapeUtil.UNESCAPE_JAVA.translate(sequenceEndingWith(suffix), Integer.MAX_VALUE - suffix.length(), out));
+            assertEquals("A", out.toString());
+        }
+    }
+
+    @Test
+    public void testLookupTranslatorHandlesOffsetsNearIntegerMaxValue() throws IOException {
+        final StringWriter javaOut = new StringWriter();
+        assertEquals(1, EscapeUtil.UNESCAPE_JAVA.translate(sequenceEndingWith("\\"), Integer.MAX_VALUE - 1, javaOut));
+        assertEquals("", javaOut.toString());
+
+        final StringWriter xmlOut = new StringWriter();
+        assertEquals(0, EscapeUtil.UNESCAPE_XML.translate(sequenceEndingWith("&"), Integer.MAX_VALUE - 1, xmlOut));
+        assertEquals("", xmlOut.toString());
+        assertEquals(5, EscapeUtil.UNESCAPE_XML.translate(sequenceEndingWith("&amp;"), Integer.MAX_VALUE - 5, xmlOut));
+        assertEquals("&", xmlOut.toString());
+    }
+
+    private static CharSequence sequenceEndingWith(final String suffix) {
+        final int suffixStart = Integer.MAX_VALUE - suffix.length();
+        return new CharSequence() {
+            @Override
+            public int length() {
+                return Integer.MAX_VALUE;
+            }
+
+            @Override
+            public char charAt(final int index) {
+                java.util.Objects.checkIndex(index, length());
+                return index < suffixStart ? 'a' : suffix.charAt(index - suffixStart);
+            }
+
+            @Override
+            public CharSequence subSequence(final int start, final int end) {
+                java.util.Objects.checkFromToIndex(start, end, length());
+                final StringBuilder result = new StringBuilder(end - start);
+                for (int index = start; index < end; index++) {
+                    result.append(charAt(index));
+                }
+                return result;
+            }
+        };
+    }
 }

@@ -44,6 +44,8 @@ import com.landawn.abacus.type.TypeFactory;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.Multimap;
+import com.landawn.abacus.util.Multiset;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Tuple;
@@ -479,7 +481,13 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
         // Keep their root parser path: erased element handlers can otherwise quote nested JSON values.
         return type.isPrimitiveList() || type instanceof MapEntryType<?, ?> || type instanceof ImmutableMapEntryType<?, ?> || type instanceof TimedType<?>
                 || type instanceof IndexedType<?> || type instanceof PairType<?, ?> || type instanceof TripleType<?, ?, ?>
-                || Tuple.class.isAssignableFrom(type.javaType());
+                || Tuple.class.isAssignableFrom(type.javaType())
+                // Multiset and Multimap match the rule above exactly - isArray/isCollection/isMap all false,
+                // isSerializable true, and stringOf emits JSON object text - but were missing, so the writer
+                // took the scalar path and emitted the container's JSON as a quoted, escaped *string*
+                // ("{\"x\": 2}" instead of {"x": 2}), while the reader rejected a well-formed object body
+                // with "Expected one JSON scalar value". Multimap covers ListMultimap/SetMultimap.
+                || Multiset.class.isAssignableFrom(type.javaType()) || Multimap.class.isAssignableFrom(type.javaType());
     }
 
     private static boolean isCustomValueType(final com.landawn.abacus.type.Type<?> type) {

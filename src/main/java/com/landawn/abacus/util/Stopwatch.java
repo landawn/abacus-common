@@ -230,8 +230,8 @@ public final class Stopwatch {
     }
 
     /**
-     * Returns {@code true} if {@link #start()} has been called on this stopwatch, and {@link #stop()}
-     * has not been called since the last call to {@code start()}.
+     * Returns {@code true} if {@link #start()} has been called on this stopwatch, and neither {@link #stop()}
+     * nor {@link #reset()} has been called since the last call to {@code start()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -559,9 +559,9 @@ public final class Stopwatch {
      *
      * @param unit the time unit to abbreviate
      * @return the abbreviated string representation of the time unit
-     * @throws AssertionError if {@code unit} is not handled by the {@code switch} (unreachable for the standard {@link TimeUnit} values)
+     * @throws NullPointerException if {@code unit} is {@code null}
      */
-    private static String abbreviate(final TimeUnit unit) {
+    private static String abbreviate(final TimeUnit unit) throws NullPointerException {
         switch (unit) {
             case NANOSECONDS:
                 return "ns";

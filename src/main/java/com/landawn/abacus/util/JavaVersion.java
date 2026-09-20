@@ -216,7 +216,7 @@ public enum JavaVersion {
     /**
      * Java 19.
      * <p>
-     * Released in September 2022, introduced virtual threads (preview) and structured concurrency (preview).
+     * Released in September 2022, introduced virtual threads (preview) and structured concurrency (incubator).
      * </p>
      */
     JAVA_19(19.0f, "19"),
@@ -240,8 +240,8 @@ public enum JavaVersion {
     /**
      * Java 22.
      * <p>
-     * Released in March 2024, introduced unnamed variables and patterns, statements before super(),
-     * and string templates (preview).
+     * Released in March 2024, finalized unnamed variables and patterns, previewed statements before super(),
+     * and included the second preview of string templates.
      * </p>
      */
     JAVA_22(22.0f, "22"),
@@ -282,7 +282,7 @@ public enum JavaVersion {
     /**
      * Java 27.
      * <p>
-     * Expected release in September 2026. Features are subject to change until official release.
+     * Released in September 2026.
      * </p>
      */
     JAVA_27(27.0f, "27"),
@@ -497,13 +497,12 @@ public enum JavaVersion {
      * This method is a package-private helper intended for static import use.
      *
      * @param nom the Java version string (e.g., "1.8", "11")
-     * @return the corresponding {@code JavaVersion} enum constant
-     * @throws IllegalArgumentException if the version string is {@code null}, empty, or unrecognized.
+     * @return the corresponding {@code JavaVersion} enum constant, or {@link #JAVA_RECENT} for versions &gt; 39
+     * @throws IllegalArgumentException if {@code nom} is {@code null}, empty, or its recognized version prefix is
+     *         neither a known Java version nor ASCII decimal digits denoting a version number greater than 39.
+     * @see #get(String)
      */
     // helper for static importing
-    /**
-     * @throws IllegalArgumentException if {@code nom} is null, empty, or does not contain a supported version number
-     */
     static JavaVersion getJavaVersion(final String nom) throws IllegalArgumentException {
         return get(nom);
     }

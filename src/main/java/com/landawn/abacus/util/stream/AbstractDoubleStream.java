@@ -204,7 +204,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -336,7 +336,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextDouble();
                 right = left;
 
@@ -380,7 +380,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextDouble();
                 right = left;
 
@@ -422,7 +422,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public DoubleList next() {
+            public DoubleList next() throws NoSuchElementException {
                 final DoubleList result = new DoubleList(9);
                 result.add(hasNext ? next : (next = iter.nextDouble()));
 
@@ -467,7 +467,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 double res = hasNext ? next : (next = iter.nextDouble());
 
                 hasNext = false;
@@ -511,7 +511,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 final double first = hasNext ? next : (next = iter.nextDouble());
                 double res = first;
 
@@ -619,7 +619,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 final double next = iter.nextDouble();
                 iter.advance(skip);
                 return next;
@@ -647,7 +647,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (isFirst) {
                     res = iter.nextDouble();
                     isFirst = false;
@@ -676,7 +676,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 return (res = accumulator.applyAsDouble(res, iter.nextDouble()));
             }
         }, false);
@@ -705,7 +705,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (isFirst) {
                     isFirst = false;
                     return init;
@@ -770,7 +770,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -864,7 +864,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -989,7 +989,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1110,7 +1110,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1190,7 +1190,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1417,6 +1417,7 @@ abstract class AbstractDoubleStream extends DoubleStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
@@ -1604,7 +1605,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         try (final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer()) {
@@ -1641,7 +1643,8 @@ abstract class AbstractDoubleStream extends DoubleStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjDoubleConsumer<? super R> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public <R> R collect(final Supplier<R> supplier, final ObjDoubleConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

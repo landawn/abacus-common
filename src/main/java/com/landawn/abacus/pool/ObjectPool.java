@@ -33,7 +33,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * <p>ObjectPool is designed for scenarios where you need to reuse expensive objects like:
  * <ul>
  *   <li>Database connections</li>
- *   <li>Thread instances</li>
+ *   <li>Reusable task-processing resources</li>
  *   <li>Large buffers or arrays</li>
  *   <li>Complex initialized objects</li>
  * </ul>
@@ -84,7 +84,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *     try {
  *         // use borrowed object
  *     } finally {
- *         pool.add(borrowed);   // adds it back to the pool
+ *         pool.add(borrowed, true);   // return it, or destroy it if rejected
  *     }
  * }
  * }</pre>
@@ -211,7 +211,8 @@ public interface ObjectPool<E extends Poolable> extends Pool {
 
     /**
      * Retrieves and removes an object from the pool immediately, or returns {@code null} if the pool is empty.
-     * This method never waits for an object to become available. The object's activity print is updated to reflect this access.
+     * This method never waits for an object to become available, but acquiring the pool lock or running
+     * expired-object cleanup can block. The object's activity print is updated to reflect this access.
      *
      * <p>Expired objects encountered during polling are destroyed (with {@link Poolable.Caller#EVICT})
      * and skipped over; this method only returns {@code null} once no valid object remains in the
@@ -229,7 +230,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);   // adds it back to the pool
+     *         pool.add(obj, true);   // return it, or destroy it if rejected
      *     }
      * }
      * }</pre>
@@ -255,7 +256,7 @@ public interface ObjectPool<E extends Poolable> extends Pool {
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);   // adds it back to the pool
+     *         pool.add(obj, true);   // return it, or destroy it if rejected
      *     }
      * } else {
      *     // timeout - pool was empty

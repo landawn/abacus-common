@@ -111,8 +111,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns the current system time</li>
-     *   <li>Numeric strings (an optional sign followed by decimal digits only, as accepted by
-     *       {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix): parsed as milliseconds since the
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only;
+     *       no {@code 0x} hex, no {@code L} suffix): parsed as milliseconds since the
      *       epoch</li>
      *   <li>20-character strings ending in {@code 'Z'}/{@code 'z'}: parsed as ISO-8601 date-time
      *       ({@code "yyyy-MM-dd'T'HH:mm:ss'Z'"})</li>
@@ -179,8 +179,8 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
 
     /**
      * Converts a region of a character array to a Joda {@link DateTime} instance.
-     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp: digits ending in a
-     * digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted), it is parsed as such; otherwise
+     * If the character sequence has more than four characters and consists of an optional sign followed only by
+     * ASCII decimal digits, it is parsed as epoch milliseconds (no hexadecimal prefix or type suffix); otherwise
      * the characters are converted to a {@link String} and delegated to {@link #valueOf(String)}, so both overloads
      * give the same answer for the same text.
      *
@@ -189,7 +189,7 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * @param len    the number of characters to use
      * @return the parsed Joda date-time value, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
-     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see         {@link #valueOf(String)}), including numeric text outside the {@code long} range
+     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
@@ -198,10 +198,9 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // IllegalArgumentException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return new DateTime(parseLong(cbuf, offset, len));

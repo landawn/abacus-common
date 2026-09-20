@@ -1062,8 +1062,8 @@ public class URLEncodedUtilTest extends AbstractTest {
             assertEquals(expected,
                     assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("a=1", StandardCharsets.UTF_8, targetType)).getMessage());
             assertEquals(expected, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decodeLenient("a=1", targetType)).getMessage());
-            assertEquals(expected, assertThrows(IllegalArgumentException.class,
-                    () -> URLEncodedUtil.decodeLenient("a=1", StandardCharsets.UTF_8, targetType)).getMessage());
+            assertEquals(expected,
+                    assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decodeLenient("a=1", StandardCharsets.UTF_8, targetType)).getMessage());
         }
 
         // Map targets whose substitution still satisfies the request are untouched.
@@ -1096,12 +1096,12 @@ public class URLEncodedUtilTest extends AbstractTest {
         assertEquals(
                 "The Map created for this call (java.util.concurrent.ConcurrentSkipListMap) does not permit null values, but the query contains"
                         + " the valueless token \"verbose\". Use a null-tolerant Map or decodeToMultimap(..).",
-                assertThrows(NullPointerException.class,
-                        () -> URLEncodedUtil.decode("a=1&verbose&b=2", java.util.concurrent.ConcurrentNavigableMap.class)).getMessage());
+                assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("a=1&verbose&b=2", java.util.concurrent.ConcurrentNavigableMap.class))
+                        .getMessage());
 
         // the Supplier entry points and both lenient families reach the same guard
-        assertNotNull(assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("flag", StandardCharsets.UTF_8, java.util.Hashtable::new))
-                .getMessage());
+        assertNotNull(
+                assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("flag", StandardCharsets.UTF_8, java.util.Hashtable::new)).getMessage());
         assertNotNull(assertThrows(NullPointerException.class,
                 () -> URLEncodedUtil.decodeLenient("flag", StandardCharsets.UTF_8, java.util.concurrent.ConcurrentHashMap::new)).getMessage());
         assertNotNull(assertThrows(NullPointerException.class, () -> URLEncodedUtil.decodeLenient("flag", java.util.Hashtable.class)).getMessage());
@@ -1110,14 +1110,13 @@ public class URLEncodedUtilTest extends AbstractTest {
         // The token is interpolated from the query, so it is bounded and its control characters escaped: a
         // crafted token must not be able to forge a line in a log that records this message, and a huge one
         // must not allocate a message as large as the query.
-        final String crafted = assertThrows(NullPointerException.class,
-                () -> URLEncodedUtil.decode("%0A%0DFAKE%20LOG%20LINE", java.util.Hashtable.class)).getMessage();
+        final String crafted = assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("%0A%0DFAKE%20LOG%20LINE", java.util.Hashtable.class))
+                .getMessage();
         assertFalse(crafted.contains("\n"), crafted);
         assertFalse(crafted.contains("\r"), crafted);
         assertTrue(crafted.contains("\\u000A\\u000DFAKE LOG LINE"), crafted);
 
-        final String huge = assertThrows(NullPointerException.class,
-                () -> URLEncodedUtil.decode("x".repeat(200_000), java.util.Hashtable.class)).getMessage();
+        final String huge = assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode("x".repeat(200_000), java.util.Hashtable.class)).getMessage();
         assertTrue(huge.length() < 300, "message length " + huge.length() + " grows with the token");
         assertTrue(huge.contains("\"" + "x".repeat(61) + "...\""), huge);
 
@@ -1151,8 +1150,7 @@ public class URLEncodedUtilTest extends AbstractTest {
         assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", (Object) new java.util.ArrayList<>()));
         assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", (Object) new int[0]));
         assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", new java.util.ArrayList<>(), StandardCharsets.UTF_8));
-        assertEquals("http://x/p?%5B%5D",
-                URLEncodedUtil.encode("http://x/p", new int[0], StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE));
+        assertEquals("http://x/p?%5B%5D", URLEncodedUtil.encode("http://x/p", new int[0], StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE));
         assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) new Object[0]));
         assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) ""));
         assertEquals("http://x/p", URLEncodedUtil.encode("http://x/p", (Object) new LinkedHashMap<>()));
@@ -1167,21 +1165,22 @@ public class URLEncodedUtilTest extends AbstractTest {
 
         assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue)).getMessage());
         assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode("http://x", emptyNameNullValue)).getMessage());
-        assertEquals(message,
-                assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue, new StringBuilder())).getMessage());
+        assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue, new StringBuilder())).getMessage());
         assertEquals(message, assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode((Object) new Object[] { "", null })).getMessage());
 
         // the @throws sentence now stands on every encode overload, so all nine are covered here
-        assertEquals(message, assertThrows(IllegalArgumentException.class,
-                () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8)).getMessage());
-        assertEquals(message, assertThrows(IllegalArgumentException.class,
-                () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE)).getMessage());
-        assertEquals(message, assertThrows(IllegalArgumentException.class,
-                () -> URLEncodedUtil.encode("http://x", emptyNameNullValue, StandardCharsets.UTF_8)).getMessage());
+        assertEquals(message,
+                assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8)).getMessage());
+        assertEquals(message,
+                assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE))
+                        .getMessage());
+        assertEquals(message,
+                assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode("http://x", emptyNameNullValue, StandardCharsets.UTF_8)).getMessage());
         assertEquals(message, assertThrows(IllegalArgumentException.class,
                 () -> URLEncodedUtil.encode("http://x", emptyNameNullValue, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE)).getMessage());
-        assertEquals(message, assertThrows(IllegalArgumentException.class,
-                () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8, new StringBuilder())).getMessage());
+        assertEquals(message,
+                assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8, new StringBuilder()))
+                        .getMessage());
         assertEquals(message, assertThrows(IllegalArgumentException.class,
                 () -> URLEncodedUtil.encode(emptyNameNullValue, StandardCharsets.UTF_8, NamingPolicy.NO_CHANGE, new StringBuilder())).getMessage());
     }

@@ -192,8 +192,11 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * ResultSet rs = statement.executeQuery("SELECT ROWID, name FROM users");
-     * RowId rowId = type.get(rs, 1);   // Get RowId from first column
+     * try (ResultSet rs = statement.executeQuery("SELECT ROWID, name FROM users")) {
+     *     if (rs.next()) {
+     *         RowId rowId = type.get(rs, 1);   // Get RowId from first column
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -214,8 +217,11 @@ public class RowIdType extends AbstractType<RowId> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<RowId> type = TypeFactory.getType(RowId.class);
-     * ResultSet rs = statement.executeQuery("SELECT ROWID as row_id, name FROM users");
-     * RowId rowId = type.get(rs, "row_id");   // Get RowId by column name
+     * try (ResultSet rs = statement.executeQuery("SELECT ROWID as row_id, name FROM users")) {
+     *     if (rs.next()) {
+     *         RowId rowId = type.get(rs, "row_id");   // Get RowId by column name
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -301,10 +307,11 @@ public class RowIdType extends AbstractType<RowId> {
      * @param writer the CharacterWriter to write to
      * @param x the RowId to write
      * @param config the serialization configuration (currently unused for RowId)
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the row identifier representation or null literal to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final RowId x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final RowId x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

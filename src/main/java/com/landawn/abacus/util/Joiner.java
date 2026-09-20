@@ -16,6 +16,7 @@ package com.landawn.abacus.util;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -177,7 +178,7 @@ import com.landawn.abacus.util.u.Optional;
  * <ul>
  *   <li>Use {@link #reuseBuffer()} for high-frequency operations</li>
  *   <li>Call {@link #close()} or use try-with-resources when buffer reuse is enabled</li>
- *   <li>Internal buffer is automatically recycled after {@link #toString()}</li>
+ *   <li>When buffer reuse is enabled, the internal buffer is recycled after {@link #toString()}</li>
  *   <li>Consider buffer reuse for operations with many small strings</li>
  * </ul>
  *
@@ -218,7 +219,7 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Error Handling:</b>
  * <ul>
  *   <li>Throws {@link IllegalArgumentException} for {@code null} factory method parameters</li>
- *   <li>Throws {@link IllegalStateException} when an append operation needs a builder after the Joiner is closed</li>
+ *   <li>Throws {@link IllegalStateException} when an append or configuration operation is called after the Joiner is closed</li>
  *   <li>Throws {@link IndexOutOfBoundsException} for invalid range operations</li>
  *   <li>Propagates {@link IOException} from {@link #appendTo(Appendable)} operations</li>
  * </ul>
@@ -283,8 +284,9 @@ public final class Joiner implements Closeable {
      * Uses {@link #DEFAULT_KEY_VALUE_DELIMITER} as the key-value delimiter, and empty strings for prefix and suffix.
      *
      * @param separator the delimiter inserted between joined elements; must not be {@code null}
+     * @throws IllegalArgumentException if {@code separator} is {@code null}
      */
-    Joiner(final CharSequence separator) {
+    Joiner(final CharSequence separator) throws IllegalArgumentException {
         this(separator, DEFAULT_KEY_VALUE_DELIMITER);
     }
 
@@ -294,8 +296,9 @@ public final class Joiner implements Closeable {
      *
      * @param separator the delimiter inserted between joined elements; must not be {@code null}
      * @param keyValueDelimiter the delimiter inserted between keys and values in key-value pairs; must not be {@code null}
+     * @throws IllegalArgumentException if {@code separator} or {@code keyValueDelimiter} is {@code null}
      */
-    Joiner(final CharSequence separator, final CharSequence keyValueDelimiter) {
+    Joiner(final CharSequence separator, final CharSequence keyValueDelimiter) throws IllegalArgumentException {
         this(separator, keyValueDelimiter, Strings.EMPTY, Strings.EMPTY);
     }
 
@@ -306,8 +309,9 @@ public final class Joiner implements Closeable {
      * @param separator the delimiter inserted between joined elements; must not be {@code null}
      * @param prefix the string prepended to the result; must not be {@code null}
      * @param suffix the string appended to the result; must not be {@code null}
+     * @throws IllegalArgumentException if {@code separator}, {@code prefix}, or {@code suffix} is {@code null}
      */
-    Joiner(final CharSequence separator, final CharSequence prefix, final CharSequence suffix) {
+    Joiner(final CharSequence separator, final CharSequence prefix, final CharSequence suffix) throws IllegalArgumentException {
         this(separator, DEFAULT_KEY_VALUE_DELIMITER, prefix, suffix);
     }
 
@@ -319,14 +323,14 @@ public final class Joiner implements Closeable {
      * @param keyValueDelimiter the delimiter inserted between keys and values in key-value pairs; must not be {@code null}
      * @param prefix the string prepended to the result; must not be {@code null}
      * @param suffix the string appended to the result; must not be {@code null}
-     * @throws IllegalArgumentException if any of {@code prefix}, {@code separator}, {@code keyValueDelimiter}, or
+     * @throws IllegalArgumentException if any of {@code separator}, {@code keyValueDelimiter}, {@code prefix}, or
      *         {@code suffix} is {@code null}.
      */
     Joiner(final CharSequence separator, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix)
             throws IllegalArgumentException {
-        N.checkArgNotNull(prefix, "The prefix must not be null");
         N.checkArgNotNull(separator, "The separator must not be null");
         N.checkArgNotNull(keyValueDelimiter, "The keyValueDelimiter must not be null");
+        N.checkArgNotNull(prefix, "The prefix must not be null");
         N.checkArgNotNull(suffix, "The suffix must not be null");
 
         // make defensive copies of arguments
@@ -386,6 +390,9 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Joiner.with(", ", "=").appendEntry("key", "value").toString();   // returns: "key=value"
+     * Map<String, Integer> map = new LinkedHashMap<>();
+     * map.put("a", 1);
+     * map.put("b", 2);
      * Joiner.with("; ", ": ").appendEntries(map).toString();           // returns: "a: 1; b: 2"
      * }</pre>
      *
@@ -458,10 +465,15 @@ public final class Joiner implements Closeable {
      *
      * @param emptyValue the value to return when no elements have been added, must not be {@code null}.
      * @return this Joiner instance for method chaining.
+     * @throws IllegalStateException if this Joiner has been closed
      * @throws IllegalArgumentException if emptyValue is {@code null}.
      */
-    public Joiner setEmptyValue(final CharSequence emptyValue) throws IllegalArgumentException {
-        this.emptyValue = N.checkArgNotNull(emptyValue, "The empty value must not be null").toString();
+    public Joiner setEmptyValue(final CharSequence emptyValue) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
+        N.checkArgNotNull(emptyValue, "The empty value must not be null");
+
+        this.emptyValue = emptyValue.toString();
 
         return this;
     }
@@ -479,9 +491,12 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @return this Joiner instance for method chaining.
+     * @throws IllegalStateException if this Joiner has been closed
      * @see #stripBeforeAppend()
      */
-    public Joiner trimBeforeAppend() {
+    public Joiner trimBeforeAppend() throws IllegalStateException {
+        assertNotClosed();
+
         trimBeforeAppend = true;
         stripBeforeAppend = false;
 
@@ -504,10 +519,13 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @return this Joiner instance for method chaining.
+     * @throws IllegalStateException if this Joiner has been closed
      * @see #trimBeforeAppend()
      * @see Strings#strip(String)
      */
-    public Joiner stripBeforeAppend() {
+    public Joiner stripBeforeAppend() throws IllegalStateException {
+        assertNotClosed();
+
         stripBeforeAppend = true;
         trimBeforeAppend = false;
 
@@ -528,8 +546,11 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @return this Joiner instance for method chaining.
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner skipNulls() {
+    public Joiner skipNulls() throws IllegalStateException {
+        assertNotClosed();
+
         skipNulls = true;
 
         return this;
@@ -548,8 +569,11 @@ public final class Joiner implements Closeable {
      *
      * @param nullText the string to use for {@code null} values, if {@code null} is passed, "null" will be used.
      * @return this Joiner instance for method chaining.
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner useForNull(final String nullText) {
+    public Joiner useForNull(final String nullText) throws IllegalStateException {
+        assertNotClosed();
+
         this.nullText = nullText == null ? Strings.NULL : nullText;
 
         return this;
@@ -713,9 +737,11 @@ public final class Joiner implements Closeable {
      *
      * @param element the String to append, may be null
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} {@code element} skipped by {@link #skipNulls()} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner append(final String element) throws IllegalStateException {
+        assertNotClosed();
+
         if (element != null || !skipNulls) {
             prepareBuilder().append(format(element));
         }
@@ -774,7 +800,8 @@ public final class Joiner implements Closeable {
      * @param end the end index (exclusive); ignored when {@code element} is {@code null}
      * @return this Joiner instance for method chaining
      * @throws IllegalStateException if this Joiner has been closed. Checked before range validation.
-     * @throws IndexOutOfBoundsException if {@code element} is not {@code null} and {@code start} or {@code end} is out of range
+     * @throws IndexOutOfBoundsException if {@code element} is not {@code null} and {@code start < 0},
+     *         {@code end < start}, or {@code end > element.length()}
      */
     public Joiner append(final CharSequence element, final int start, final int end) throws IllegalStateException, IndexOutOfBoundsException {
         assertNotClosed();
@@ -813,9 +840,11 @@ public final class Joiner implements Closeable {
      *
      * @param element the StringBuilder to append, may be null
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} {@code element} skipped by {@link #skipNulls()} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner append(final StringBuilder element) throws IllegalStateException {
+        assertNotClosed();
+
         if (element != null || !skipNulls) {
             if (element == null) {
                 prepareBuilder().append(nullText);
@@ -908,10 +937,12 @@ public final class Joiner implements Closeable {
      * @param supplier the supplier that provides the value to append when {@code b} is {@code true}. The supplied value is appended via
      *        {@link #append(Object)}, so it is subject to the {@code skipNulls} and {@code useForNull} settings.
      * @return this Joiner instance for method chaining
+     * @throws IllegalStateException if this Joiner has been closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
-     * @throws IllegalStateException if this Joiner has been closed and {@code b} is {@code true}. Checked after argument validation.
      */
-    public Joiner appendIf(final boolean b, final Supplier<?> supplier) throws IllegalArgumentException, IllegalStateException {
+    public Joiner appendIf(final boolean b, final Supplier<?> supplier) throws IllegalStateException, IllegalArgumentException {
+        assertNotClosed();
+
         N.checkArgNotNull(supplier, cs.supplier);
 
         if (b) {
@@ -934,9 +965,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the boolean array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final boolean[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -958,10 +991,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final boolean[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -997,9 +1033,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the char array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final char[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1021,10 +1059,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final char[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1060,9 +1101,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the byte array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final byte[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1084,10 +1127,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final byte[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1123,9 +1169,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the short array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final short[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1147,10 +1195,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final short[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1186,9 +1237,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the int array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final int[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1210,10 +1263,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final int[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1249,9 +1305,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the long array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final long[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1273,10 +1331,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final long[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1312,9 +1373,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the float array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final float[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1336,10 +1399,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final float[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1375,9 +1441,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the double array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final double[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1399,10 +1467,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final double[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1439,9 +1510,11 @@ public final class Joiner implements Closeable {
      *
      * @param a the Object array to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code a} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final Object[] a) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(a)) {
             return appendAll(a, 0, a.length);
         }
@@ -1464,10 +1537,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final Object[] a, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, a == null ? 0 : a.length);
 
         if (N.isEmpty(a) || fromIndex == toIndex) {
@@ -1497,10 +1573,12 @@ public final class Joiner implements Closeable {
      *
      * @param c the BooleanList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final BooleanList c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1522,11 +1600,14 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final BooleanList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1548,10 +1629,12 @@ public final class Joiner implements Closeable {
      *
      * @param c the CharList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final CharList c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1573,11 +1656,14 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final CharList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1599,10 +1685,12 @@ public final class Joiner implements Closeable {
      *
      * @param c the ByteList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final ByteList c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1624,11 +1712,14 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final ByteList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1650,10 +1741,12 @@ public final class Joiner implements Closeable {
      *
      * @param c the ShortList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final ShortList c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1675,11 +1768,14 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final ShortList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1701,10 +1797,12 @@ public final class Joiner implements Closeable {
      *
      * @param c the IntList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final IntList c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1726,11 +1824,14 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final IntList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1752,10 +1853,12 @@ public final class Joiner implements Closeable {
      *
      * @param c the LongList to append, may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final LongList c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1777,11 +1880,14 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final LongList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1804,10 +1910,12 @@ public final class Joiner implements Closeable {
      *
      * @param c the FloatList to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final FloatList c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1830,11 +1938,14 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final FloatList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1857,10 +1968,12 @@ public final class Joiner implements Closeable {
      *
      * @param c the DoubleList to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final DoubleList c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c.internalArray(), 0, c.size());
         }
@@ -1883,11 +1996,14 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     @SuppressWarnings("deprecation")
     public Joiner appendAll(final DoubleList c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1914,9 +2030,11 @@ public final class Joiner implements Closeable {
      *
      * @param c the Collection to append; may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final Collection<?> c) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(c)) {
             return appendAll(c, 0, c.size());
         }
@@ -1943,10 +2061,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendAll(final Collection<?> c, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, c == null ? 0 : c.size());
 
         if (N.isEmpty(c) || fromIndex == toIndex) {
@@ -1995,9 +2116,11 @@ public final class Joiner implements Closeable {
      *
      * @param c the Iterable to append; may be {@code null}
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code c} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final Iterable<?> c) throws IllegalStateException {
+        assertNotClosed();
+
         if (c != null) {
             StringBuilder sb = null;
 
@@ -2062,9 +2185,11 @@ public final class Joiner implements Closeable {
      *
      * @param iter the Iterator to append from; may be {@code null}
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code iter} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendAll(final Iterator<?> iter) throws IllegalStateException {
+        assertNotClosed();
+
         if (iter != null) {
             StringBuilder sb = null;
             Object e = null;
@@ -2431,9 +2556,11 @@ public final class Joiner implements Closeable {
      *
      * @param m the map containing the entries to be appended; may be {@code null} or empty
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. A {@code null} or empty {@code m} is a no-op and does not check.
+     * @throws IllegalStateException if this Joiner has been closed
      */
     public Joiner appendEntries(final Map<?, ?> m) throws IllegalStateException {
+        assertNotClosed();
+
         if (N.notEmpty(m)) {
             return appendEntries(m, 0, m.size());
         }
@@ -2457,10 +2584,13 @@ public final class Joiner implements Closeable {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return this Joiner instance for method chaining
-     * @throws IllegalStateException if this Joiner has been closed. Checked after range validation; an empty range is a no-op and does not check.
-     * @throws IndexOutOfBoundsException if fromIndex or toIndex is out of range
+     * @throws IllegalStateException if this Joiner has been closed
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < fromIndex}, or
+     *         {@code toIndex} exceeds the input size (zero for a {@code null} input)
      */
     public Joiner appendEntries(final Map<?, ?> m, final int fromIndex, final int toIndex) throws IllegalStateException, IndexOutOfBoundsException {
+        assertNotClosed();
+
         N.checkFromToIndex(fromIndex, toIndex, m == null ? 0 : m.size());
 
         if (N.isEmpty(m) || fromIndex == toIndex) {
@@ -2709,7 +2839,8 @@ public final class Joiner implements Closeable {
      * @param bean the bean object whose selected properties to append; may be {@code null}
      * @param selectPropNames collection of property names to include; if {@code null} or empty, no properties are
      *            appended (an intentional "null = nothing" carve-out — see the note above). Every name must be a
-     *            readable property of {@code bean}'s class.
+     *            readable property of {@code bean}'s class. All names, including nested paths, are resolved before
+     *            any property values are read or appended.
      * @return this Joiner instance for method chaining
      * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code bean} is not {@code null} and its class is not a valid JavaBean
@@ -2721,7 +2852,7 @@ public final class Joiner implements Closeable {
     public Joiner appendBean(final Object bean, final Collection<String> selectPropNames) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        if (bean == null || N.isEmpty(selectPropNames)) {
+        if (bean == null) {
             return this;
         }
 
@@ -2729,12 +2860,26 @@ public final class Joiner implements Closeable {
 
         N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods"); //NOSONAR
 
+        if (N.isEmpty(selectPropNames)) {
+            return this;
+        }
+
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
+
+        final List<String> validatedPropNames = new ArrayList<>(selectPropNames.size());
+
+        for (final String propName : selectPropNames) {
+            if (beanInfo.getPropInfo(propName) == null && beanInfo.getPropInfoChain(propName).isEmpty()) {
+                throw new IllegalArgumentException("No getter method found with property name: " + propName + " in class: " + cls.getCanonicalName());
+            }
+
+            validatedPropNames.add(propName);
+        }
 
         StringBuilder sb = null;
         Object propValue = null;
 
-        for (final String propName : selectPropNames) {
+        for (final String propName : validatedPropNames) {
             propValue = beanInfo.getPropValue(bean, propName);
 
             sb = appendRenderedEntry(sb, propName, toString(propValue));
@@ -2853,6 +2998,10 @@ public final class Joiner implements Closeable {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        if (bean != null) {
+            N.checkArgument(Beans.isBeanClass(bean.getClass()), "'bean' must be bean class with getter/setter methods");
+        }
+
         N.checkArgNotNull(filter, cs.filter);
 
         if (bean == null) {
@@ -2860,8 +3009,6 @@ public final class Joiner implements Closeable {
         }
 
         final Class<?> cls = bean.getClass();
-
-        N.checkArgument(Beans.isBeanClass(cls), "'bean' must be bean class with getter/setter methods");
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(cls);
         StringBuilder sb = null;
@@ -3194,9 +3341,8 @@ public final class Joiner implements Closeable {
      * If the Joiner is already closed then invoking this method has no effect.
      *
      * <p><b>Closing ends writing, not reading.</b> Operations that append content throw
-     * {@link IllegalStateException} once this Joiner is closed. Some no-op paths, such as appending an
-     * empty array or a skipped null String, return unchanged; methods that check the closed state
-     * up front, including {@link #merge(Joiner)}, reject even a no-op. The
+     * {@link IllegalStateException} once this Joiner is closed, including empty inputs, skipped nulls,
+     * and conditional no-ops. Configuration methods also reject a closed Joiner. The
      * content accumulated so far stays readable: {@link #toString()}, {@link #length()},
      * {@link #appendTo(Appendable)}, {@link #map(Function)} and {@link #mapIfNotEmpty(Function)} keep
      * reporting it, and another Joiner can still {@link #merge(Joiner) merge} this one. Closing therefore
@@ -3242,8 +3388,9 @@ public final class Joiner implements Closeable {
      * Renders a foreign {@code CharSequence}. A closed Joiner is rejected first: {@code text.toString()} is
      * user code, and the bulk append/appendEntry paths render before they reach {@link #prepareBuilder()}, so
      * without this check a closed Joiner would run one round of it before refusing the write.
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    private String format(final CharSequence text) {
+    private String format(final CharSequence text) throws IllegalStateException {
         assertNotClosed();
 
         return text == null ? nullText : format(text.toString());
@@ -3253,8 +3400,9 @@ public final class Joiner implements Closeable {
      * Renders a foreign element/value. A closed Joiner is rejected first, for the reason given on
      * {@link #format(CharSequence)}: this is the single rendering funnel every {@code append}, {@code appendAll},
      * {@code appendEntry}, {@code appendEntries} and {@code appendBean} path goes through.
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    private String toString(final Object obj) {
+    private String toString(final Object obj) throws IllegalStateException {
         assertNotClosed();
 
         return obj == null ? nullText : format(N.toString(obj));
@@ -3272,8 +3420,9 @@ public final class Joiner implements Closeable {
      *        of this operation has been appended yet
      * @param rendered the fully rendered element text
      * @return the builder to pass to the next call
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    private StringBuilder appendRendered(final StringBuilder sb, final String rendered) {
+    private StringBuilder appendRendered(final StringBuilder sb, final String rendered) throws IllegalStateException {
         assertNotClosed();
         // Rendering can call this joiner's toString(), returning the cached builder to the pool.
         // Only reuse it while this receiver still owns it; otherwise resume from its saved text.
@@ -3294,8 +3443,9 @@ public final class Joiner implements Closeable {
      * @param key the fully rendered key text
      * @param value the fully rendered value text
      * @return the builder to pass to the next call
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    private StringBuilder appendRenderedEntry(final StringBuilder sb, final String key, final String value) {
+    private StringBuilder appendRenderedEntry(final StringBuilder sb, final String key, final String value) throws IllegalStateException {
         return appendKeyValueDelimiter(appendRendered(sb, key)).append(value);
     }
 
@@ -3309,8 +3459,9 @@ public final class Joiner implements Closeable {
      *
      * @param renderedKey the fully rendered key text
      * @return the builder to append the value to
+     * @throws IllegalStateException if this Joiner has been closed
      */
-    private StringBuilder appendEntryPrefix(final String renderedKey) {
+    private StringBuilder appendEntryPrefix(final String renderedKey) throws IllegalStateException {
         return appendKeyValueDelimiter(prepareBuilder().append(renderedKey));
     }
 
@@ -3318,7 +3469,10 @@ public final class Joiner implements Closeable {
         return isEmptyKeyValueDelimiter ? sb : sb.append(keyValueDelimiter);
     }
 
-    private StringBuilder prepareBuilder() {
+    /**
+     * @throws IllegalStateException if this Joiner has been closed
+     */
+    private StringBuilder prepareBuilder() throws IllegalStateException {
         assertNotClosed();
 
         if (buffer != null) {

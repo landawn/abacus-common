@@ -48,11 +48,28 @@ public class NullValidationRestartHttpTest extends TestBase {
         assertNull(HttpUtil.getContentType((HttpSettings) null));
         final InputStream body = new ByteArrayInputStream(new byte[] { 42 });
         final HttpURLConnection connection = new HttpURLConnection(URI.create("http://localhost/").toURL()) {
-            @Override public void connect() { }
-            @Override public void disconnect() { }
-            @Override public boolean usingProxy() { return false; }
-            @Override public Map<String, List<String>> getHeaderFields() { return Map.of("Content-Type", List.of("application/json")); }
-            @Override public InputStream getInputStream() { return body; }
+            @Override
+            public void connect() {
+            }
+
+            @Override
+            public void disconnect() {
+            }
+
+            @Override
+            public boolean usingProxy() {
+                return false;
+            }
+
+            @Override
+            public Map<String, List<String>> getHeaderFields() {
+                return Map.of("Content-Type", List.of("application/json"));
+            }
+
+            @Override
+            public InputStream getInputStream() {
+                return body;
+            }
         };
         assertEquals("application/json", HttpUtil.getContentType(connection));
         assertEquals(ContentFormat.JSON, HttpUtil.getContentFormat(connection));

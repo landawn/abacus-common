@@ -528,8 +528,8 @@ public class JsonStringReaderTest extends TestBase {
     // the document. The string reader never had the bug; it is the reference here.
     @Test
     public void reviewFixes20260906_P7_01_trailingWhitespaceAfterRootIsNotText() {
-        final String[] inputs = { "[1]\n", "[1] ", "[1]\r\n", " [1] \n ", "[1]\n\n  ", "{\"a\":1}\n", "[\"x\"]\n", "[true]\n", "\"x\"\n", "[1] \t",
-                "[1,2]\n", "{\"a\":1}\r\n", "{\"a\":\"x\"}   ", "[]\n", "{}\n" };
+        final String[] inputs = { "[1]\n", "[1] ", "[1]\r\n", " [1] \n ", "[1]\n\n  ", "{\"a\":1}\n", "[\"x\"]\n", "[true]\n", "\"x\"\n", "[1] \t", "[1,2]\n",
+                "{\"a\":1}\r\n", "{\"a\":\"x\"}   ", "[]\n", "{}\n" };
 
         for (final String json : inputs) {
             final List<String> expected = reviewFixes20260906_P7_trace(JsonStringReader.parse(json, new char[256]));
@@ -783,7 +783,6 @@ public class JsonStringReaderTest extends TestBase {
         // an out-of-range value is still rejected (as ArithmeticException), never silently truncated
         assertThrows(ArithmeticException.class, () -> fixG08_readNumber("999999999999.5", byte.class));
     }
-
 
     // R03: the fractional-token short circuit added to readValue must answer exactly what the raw-token
     // attempt answered through its NumberFormatException, for every class it now short-circuits - the

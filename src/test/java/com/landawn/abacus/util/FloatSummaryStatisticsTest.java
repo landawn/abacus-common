@@ -237,7 +237,6 @@ public class FloatSummaryStatisticsTest extends TestBase {
         assertEquals("{min=1.000000, max=2.000000, count=2, sum=3.000000, average=1.500000}", str);
     }
 
-
     // FINDING 27: FloatSummaryStatistics was the only member of the family pinned to Locale.ROOT; the guarantee was
     // neither documented nor tested, and Byte/Char/Short still used the default locale. All four now render the same
     // text on every machine, and each toString() javadoc says so.

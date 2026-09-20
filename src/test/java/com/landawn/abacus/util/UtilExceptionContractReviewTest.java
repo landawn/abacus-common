@@ -15,20 +15,25 @@ import java.util.concurrent.RejectedExecutionException;
 
 import org.junit.jupiter.api.Test;
 
-class UtilExceptionContractReviewTest {
+import com.landawn.abacus.TestBase;
+
+class UtilExceptionContractReviewTest extends TestBase {
     @Test
     void futureSubmissionRejectionPropagatesImmediately() {
         final var rejection = new RejectedExecutionException("executor stopped");
-        final Executor rejecting = command -> { throw rejection; };
-        assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> ContinuableFuture.run(() -> { }, rejecting)));
+        final Executor rejecting = command -> {
+            throw rejection;
+        };
+        assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> ContinuableFuture.run(() -> {
+        }, rejecting)));
         assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> ContinuableFuture.call(() -> 1, rejecting)));
-        assertSame(rejection, assertThrows(RejectedExecutionException.class,
-                () -> ContinuableFuture.completed(1).thenUse(rejecting).thenCallAsync(value -> value + 1)));
+        assertSame(rejection,
+                assertThrows(RejectedExecutionException.class, () -> ContinuableFuture.completed(1).thenUse(rejecting).thenCallAsync(value -> value + 1)));
     }
 
     @Test
     void prefixBuilderRejectsNullValueAsAnArgumentBeforeAddingNodes() {
-        final var builder = PrefixSearchTable.<String, Integer>builder();
+        final var builder = PrefixSearchTable.<String, Integer> builder();
         assertThrows(IllegalArgumentException.class, () -> builder.add(List.of("key"), null));
         assertTrue(builder.build().get(List.of("key")).isEmpty());
         assertThrows(NullPointerException.class, () -> builder.add(Arrays.asList("key", null), 1));
@@ -37,7 +42,7 @@ class UtilExceptionContractReviewTest {
 
     @Test
     void prefixBulkAddPreservesNullAndEmptyNoOpsButRejectsNullValues() {
-        final var builder = PrefixSearchTable.<String, Integer>builder();
+        final var builder = PrefixSearchTable.<String, Integer> builder();
         assertSame(builder, builder.addAll(null));
         assertSame(builder, builder.addAll(Map.of()));
         final Map<List<String>, Integer> entries = new HashMap<>();
@@ -62,9 +67,9 @@ class UtilExceptionContractReviewTest {
     }
 
     @Test
-    void bufferedReaderChecksClosedStateThenBoundsBeforeNullBuffer() throws IOException {
+    void bufferedReaderChecksClosedStateThenNullBufferBeforeBounds() throws IOException {
         final var reader = new BufferedReader("text");
-        assertThrows(IndexOutOfBoundsException.class, () -> reader.read(null, -1, 1));
+        assertThrows(NullPointerException.class, () -> reader.read(null, -1, 1));
         assertThrows(NullPointerException.class, () -> reader.read(null, 0, 1));
         reader.close();
         assertThrows(IOException.class, () -> reader.read(null, -1, 1));

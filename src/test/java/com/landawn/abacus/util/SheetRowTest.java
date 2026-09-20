@@ -344,8 +344,7 @@ public class SheetRowTest extends SheetTestSupport {
         assertTrue(noColumnsView.containsAll(Collections.emptyList()));
 
         // A live key is untouched: the view still tracks the other axis.
-        final Sheet<String, String, Integer> live = Sheet.rows(Arrays.asList("R1", "R2"), Arrays.asList("C1", "C2"),
-                new Integer[][] { { 1, 2 }, { 3, 4 } });
+        final Sheet<String, String, Integer> live = Sheet.rows(Arrays.asList("R1", "R2"), Arrays.asList("C1", "C2"), new Integer[][] { { 1, 2 }, { 3, 4 } });
         final ImmutableList<Integer> liveView = live.rowValues("R1");
         live.removeRow("R2");
         assertEquals(2, liveView.size());

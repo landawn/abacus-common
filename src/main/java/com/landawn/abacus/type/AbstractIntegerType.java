@@ -91,7 +91,8 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      *   <li>Parsing follows {@link Numbers#toInt(String)}: decimal first; a {@code 0x}/{@code 0X}/{@code #} prefix
      *       (optionally after a sign) selects hexadecimal.</li>
      *   <li>If parsing fails and the string ends with {@code 'l'}, {@code 'L'}, {@code 'f'},
-     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, the suffix is stripped and parsing is retried.</li>
+     *       {@code 'F'}, {@code 'd'}, or {@code 'D'}, a single suffix is stripped and parsing is retried.
+     *       Repeated or combined suffixes such as {@code "1LL"} and {@code "1fD"} are rejected.</li>
      *   <li>The string is not trimmed; surrounding whitespace is rejected (unlike the float/double types).</li>
      *   <li>Valid numeric strings are parsed to {@code Integer} values.</li>
      * </ul>
@@ -119,7 +120,7 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
             if (str.length() > 1) {
                 final char ch = str.charAt(str.length() - 1);
 
-                if ((ch == 'l') || (ch == 'L') || (ch == 'f') || (ch == 'F') || (ch == 'd') || (ch == 'D')) {
+                if (isNumericTypeSuffix(ch) && !isNumericTypeSuffix(str.charAt(str.length() - 2))) {
                     return Numbers.toInt(str.substring(0, str.length() - 1));
                 }
             }

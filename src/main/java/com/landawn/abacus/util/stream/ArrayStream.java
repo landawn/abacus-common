@@ -107,8 +107,9 @@ class ArrayStream<T> extends AbstractStream<T> {
      * Constructs an ArrayStream from the entire object array.
      *
      * @param values the object array to stream
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayStream(final T[] values) {
+    ArrayStream(final T[] values) throws NullPointerException {
         this(values, 0, values.length);
     }
 
@@ -117,8 +118,9 @@ class ArrayStream<T> extends AbstractStream<T> {
      *
      * @param values the object array to stream
      * @param closeHandlers handlers to execute when the stream is closed
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayStream(final T[] values, final Collection<LocalRunnable> closeHandlers) {
+    ArrayStream(final T[] values, final Collection<LocalRunnable> closeHandlers) throws NullPointerException {
         this(values, 0, values.length, closeHandlers);
     }
 
@@ -129,8 +131,10 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param sorted whether the array elements are in sorted order
      * @param comparator the comparator for ordering elements, or {@code null} if using natural order
      * @param closeHandlers handlers to execute when the stream is closed
+     * @throws NullPointerException if {@code values} is {@code null}
      */
-    ArrayStream(final T[] values, final boolean sorted, final Comparator<? super T> comparator, final Collection<LocalRunnable> closeHandlers) {
+    ArrayStream(final T[] values, final boolean sorted, final Comparator<? super T> comparator, final Collection<LocalRunnable> closeHandlers)
+            throws NullPointerException {
         this(values, 0, values.length, sorted, comparator, closeHandlers);
     }
 
@@ -219,7 +223,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -269,7 +273,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -324,7 +328,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -373,7 +377,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -425,7 +429,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * Returns a stream consisting of the results of applying the given mapper function
      * to the elements of this stream.
      *
-     * <p>This is a stateless intermediate operation. The resulting stream is not sorted.
+     * <p>This is a stateless intermediate operation. The resulting stream is not marked as sorted.
      *
      * @param <R> the type of elements produced by the mapper
      * @param mapper the function to apply to each element
@@ -448,7 +452,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -479,10 +483,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment); //NOSONAR
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
@@ -493,7 +497,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -513,10 +517,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(mapper, cs.mapper);
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
@@ -527,7 +531,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -563,7 +567,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (cursor >= toIndex) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -648,7 +652,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 }
 
                 @Override
-                public R next() {
+                public R next() throws NoSuchElementException {
                     if (cursor >= toIndex) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -704,7 +708,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (cursor >= toIndex) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -757,7 +761,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -806,7 +810,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -842,7 +846,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -878,7 +882,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -914,7 +918,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -950,7 +954,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -986,7 +990,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1022,7 +1026,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1077,7 +1081,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1125,7 +1129,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1165,7 +1169,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1209,7 +1213,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1268,7 +1272,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1312,7 +1316,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1371,7 +1375,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1415,7 +1419,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1474,7 +1478,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1518,7 +1522,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1577,7 +1581,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1621,7 +1625,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1680,7 +1684,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1724,7 +1728,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1783,7 +1787,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1827,7 +1831,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1886,7 +1890,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1910,7 +1914,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public List<T> next() {
+            public List<T> next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1960,7 +1964,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public C next() {
+            public C next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2015,7 +2019,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2067,7 +2071,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public List<T> next() {
+            public List<T> next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2110,7 +2114,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public C next() {
+            public C next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2160,7 +2164,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2229,7 +2233,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public Stream<T> next() {
+            public Stream<T> next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2288,7 +2292,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public C next() {
+            public C next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2351,7 +2355,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public R next() {
+            public R next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2509,7 +2513,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -2601,7 +2605,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2715,10 +2719,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment);
 
         try {
             int cursor = fromIndex;
@@ -2738,10 +2742,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
+        checkArgPositive(increment, cs.increment);
         checkArgNotNull(action, cs.action);
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         try {
             int cursor = fromIndex;
@@ -2987,7 +2991,8 @@ class ArrayStream<T> extends AbstractStream<T> {
      *
      * <p>This is a terminal short-circuit operation. The stream is closed after this call.
      *
-     * @return an Optional containing the first element, or an empty Optional if the stream is empty
+     * @return an Optional containing the first element, or empty if the stream is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
@@ -2995,8 +3000,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         assertNotClosed();
 
         try {
-            // ofNullable: a null stream element must not NPE; empty matches Collectors.first().
-            return fromIndex < toIndex ? Optional.ofNullable(elements[fromIndex]) : Optional.empty();
+            return fromIndex < toIndex ? Optional.of(elements[fromIndex]) : Optional.empty();
         } finally {
             close();
         }
@@ -3008,7 +3012,8 @@ class ArrayStream<T> extends AbstractStream<T> {
      *
      * <p>This is a terminal operation. The stream is closed after this call.
      *
-     * @return an Optional containing the last element, or an empty Optional if the stream is empty
+     * @return an Optional containing the last element, or empty if the stream is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      */
     @Override
@@ -3016,8 +3021,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         assertNotClosed();
 
         try {
-            // ofNullable: a null stream element must not NPE; empty matches Collectors.last().
-            return fromIndex < toIndex ? Optional.ofNullable(elements[toIndex - 1]) : Optional.empty();
+            return fromIndex < toIndex ? Optional.of(elements[toIndex - 1]) : Optional.empty();
         } finally {
             close();
         }
@@ -3030,7 +3034,7 @@ class ArrayStream<T> extends AbstractStream<T> {
 
         try {
             if (position < toIndex - fromIndex) {
-                return Optional.ofNullable(elements[fromIndex + (int) position]);
+                return Optional.of(elements[fromIndex + (int) position]);
             } else {
                 return Optional.empty();
             }
@@ -3050,7 +3054,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (size == 0) {
                 return Optional.empty();
             } else if (size == 1) {
-                return Optional.ofNullable(elements[fromIndex]);
+                return Optional.of(elements[fromIndex]);
             } else {
                 throw new TooManyElementsException(
                         "There are at least two elements: " + Strings.concat(N.toString(elements[fromIndex]), ", ", N.toString(elements[fromIndex + 1])));
@@ -3062,13 +3066,14 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     /**
      * Performs a left fold on the elements of this stream using the given binary operator,
-     * returning an Optional containing the result or an empty Optional if the stream is empty.
+     * returning an Optional containing the result, or empty if the stream is empty.
      *
      * <p>This is a terminal operation. The stream is closed after this call.
      *
      * @param accumulator a function that combines the running result with the next element
      * @return an Optional containing the result of folding all elements left-to-right,
      *         or an empty Optional if the stream is empty
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
@@ -3089,7 +3094,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 result = accumulator.apply(result, elements[i]);
             }
 
-            return Optional.ofNullable(result);
+            return Optional.of(result);
         } finally {
             close();
         }
@@ -3137,6 +3142,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      *                    (applied right-to-left)
      * @return an Optional containing the result of folding all elements right-to-left,
      *         or an empty Optional if the stream is empty
+     * @throws NullPointerException if the final reduction result is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
@@ -3150,7 +3156,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (toIndex - fromIndex == 1) {
-                return Optional.ofNullable(elements[fromIndex]);
+                return Optional.of(elements[fromIndex]);
             }
 
             T result = elements[toIndex - 1];
@@ -3159,7 +3165,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 result = accumulator.apply(result, elements[i]);
             }
 
-            return Optional.ofNullable(result);
+            return Optional.of(result);
         } finally {
             close();
         }
@@ -3200,7 +3206,7 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     /**
      * Performs a reduction on the elements of this stream using the given binary operator,
-     * returning an Optional with the result or an empty Optional if the stream is empty.
+     * returning an Optional with the result, or empty if the stream is empty.
      * This method delegates to {@link #foldLeft(BinaryOperator)}.
      *
      * <p>This is a terminal operation. The stream is closed after this call.
@@ -3208,6 +3214,7 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param accumulator the associative function used to reduce elements
      * @return an Optional describing the reduction result, or an empty Optional if the stream
      *         is empty
+     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      */
@@ -3375,7 +3382,8 @@ class ArrayStream<T> extends AbstractStream<T> {
      * the given comparator, the first element is returned directly in O(1) time.
      *
      * @param comparator the comparator used to compare elements
-     * @return an Optional containing the minimum element, or an empty Optional if the stream is empty
+     * @return an Optional containing the minimum element, or empty if the stream is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -3389,10 +3397,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.ofNullable(elements[fromIndex]);
+                return Optional.of(elements[fromIndex]);
             }
 
-            return Optional.ofNullable(N.min(elements, fromIndex, toIndex, comparator));
+            return Optional.of(N.min(elements, fromIndex, toIndex, comparator));
         } finally {
             close();
         }
@@ -3406,7 +3414,8 @@ class ArrayStream<T> extends AbstractStream<T> {
      * the given comparator, the last element is returned directly in O(1) time.
      *
      * @param comparator the comparator used to compare elements
-     * @return an Optional containing the maximum element, or an empty Optional if the stream is empty
+     * @return an Optional containing the maximum element, or empty if the stream is empty
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
@@ -3420,10 +3429,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.ofNullable(elements[toIndex - 1]);
+                return Optional.of(elements[toIndex - 1]);
             }
 
-            return Optional.ofNullable(N.max(elements, fromIndex, toIndex, comparator));
+            return Optional.of(N.max(elements, fromIndex, toIndex, comparator));
         } finally {
             close();
         }
@@ -3494,10 +3503,10 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (k > toIndex - fromIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.ofNullable(elements[toIndex - k]);
+                return Optional.of(elements[toIndex - k]);
             }
 
-            return Optional.ofNullable(N.kthLargest(elements, fromIndex, toIndex, k, comparator));
+            return Optional.of(N.kthLargest(elements, fromIndex, toIndex, k, comparator));
         } finally {
             close();
         }
@@ -3658,7 +3667,8 @@ class ArrayStream<T> extends AbstractStream<T> {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against
-     * @return an Optional containing the first matching element, or an empty Optional if none match
+     * @return an Optional containing the first matching element, or empty if none match
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws a checked exception
@@ -3673,7 +3683,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         try {
             for (int i = fromIndex; i < toIndex; i++) {
                 if (predicate.test(elements[i])) {
-                    return Optional.ofNullable(elements[i]);
+                    return Optional.of(elements[i]);
                 }
             }
 
@@ -3692,7 +3702,8 @@ class ArrayStream<T> extends AbstractStream<T> {
      *
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against
-     * @return an Optional containing the last matching element, or an empty Optional if none match
+     * @return an Optional containing the last matching element, or empty if none match
+     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws a checked exception
@@ -3707,7 +3718,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         try {
             for (int i = toIndex - 1; i >= fromIndex; i--) {
                 if (predicate.test(elements[i])) {
-                    return Optional.ofNullable(elements[i]);
+                    return Optional.of(elements[i]);
                 }
             }
 
@@ -3718,17 +3729,18 @@ class ArrayStream<T> extends AbstractStream<T> {
     }
 
     /**
-     * Returns an infinite stream that cycles through the elements of this stream repeatedly.
+     * Returns a stream that cycles through the elements of this stream repeatedly.
+     * The result is infinite for a non-empty source and empty for an empty source.
      *
-     * <p>This is an intermediate operation. The stream must be terminated with a limit operation
-     * to avoid an infinite loop.
+     * <p>This is an intermediate operation. Use a short-circuiting operation such as {@code limit}
+     * before collecting all elements from a non-empty source.
      *
      * <pre>{@code
      * // Produces [1, 2, 3, 1, 2, 3, 1]
      * Stream.of(1, 2, 3).cycled().limit(7);
      * }</pre>
      *
-     * @return a new infinite stream cycling through this stream's elements
+     * @return a stream cycling through this stream's elements, or empty if this stream is empty
      * @throws IllegalStateException if the stream is already closed
      * @see #cycled(long)
      */
@@ -3745,7 +3757,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (fromIndex >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3793,7 +3805,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3846,7 +3858,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (iter == null) {
                         init();
                     }
@@ -3884,13 +3896,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                             iter = s == null ? ObjIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -3922,7 +3928,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                 }
 
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (!executed) {
                         executed = true;
                         action.run();

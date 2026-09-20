@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -145,9 +145,22 @@ public class EventBus {
                 defaultExecutor = MoreExecutors.getExitingExecutorService(threadPoolExecutor, 120, TimeUnit.SECONDS);
             } catch (final IllegalStateException e) {
                 // This class is being loaded while the JVM is already shutting down, so no hook can be
-                // registered - and there is nothing left to wait for. Fall back to the pool itself, whose
-                // threads getExitingExecutorService already made daemons before registering the hook;
-                // failing here would leave the class permanently unusable with an ExceptionInInitializerError.
+                // registered - and there is nothing left to wait for. Fall back to the pool itself; failing
+                // here would leave the class permanently unusable with an ExceptionInInitializerError.
+                //
+                // The daemon thread factory has to be re-installed: getExitingExecutorService does install
+                // one, but its own catch block calls restoreThreadFactory(..) to put the ORIGINAL factory
+                // back before rethrowing (MoreExecutors.getExitingExecutorService). The pool handed back
+                // here therefore still has ThreadPoolExecutor's default, non-daemon factory - which would
+                // pin the JVM exactly as the comment above describes.
+                final ThreadFactory originalThreadFactory = threadPoolExecutor.getThreadFactory();
+
+                threadPoolExecutor.setThreadFactory(r -> {
+                    final Thread t = originalThreadFactory.newThread(r);
+                    t.setDaemon(true);
+                    return t;
+                });
+
                 defaultExecutor = threadPoolExecutor;
             }
 
@@ -628,7 +641,8 @@ public class EventBus {
      * }</pre>
      *
      * @param subscriber the subscriber to register
-     * @param eventId the event ID to filter events; must be non-empty for lambda-based subscribers; {@code null} for no filtering otherwise
+     * @param eventId the event ID override; must be non-empty for lambda-based subscribers; {@code null} or empty
+     *                preserves each handler's annotation-level event ID (or no ID if none is declared)
      * @param threadMode the thread mode override for event delivery, or {@code null} to use the thread mode declared in each subscriber method's {@link Subscribe} annotation
      * @return this {@code EventBus} instance for method chaining
      * @throws IllegalArgumentException if {@code subscriber} is {@code null}, or if the thread mode is not supported or no subscriber methods are
@@ -992,7 +1006,7 @@ public class EventBus {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * eventBus.unregister(mySubscriber);
-     * // mySubscriber will no longer receive any events
+     * // Future posts will not select mySubscriber; deliveries already queued may still run.
      * }</pre>
      *
      * @param subscriber the subscriber to unregister
@@ -1451,11 +1465,13 @@ public class EventBus {
      * and for both thread modes, so they follow the order and spacing in which events are <i>posted</i> rather
      * than the order in which an executor happens to run them. A suppressed asynchronous event is never
      * handed to the executor. An accepted asynchronous event is enqueued as an invoke-only task (it does not
-     * pass through {@link #post(SubIdentifier, Object)} again); if the executor rejects it, the reservation is
-     * released again - the delivery never happened, so it must not throttle or deduplicate later events -
-     * and the {@link RejectedExecutionException} propagates to the caller (which logs it). A reservation that a
-     * later post has already superseded is left alone, since that newer reservation now owns the filter state.
-     * A delivery that was attempted still counts as an attempt even when the callback fails.</p>
+     * pass through {@link #post(SubIdentifier, Object)} again). Its reservation becomes permanent when
+     * {@link Executor#execute(Runnable)} returns successfully or the task begins its callback, whichever
+     * happens first. If any throwable escapes {@code execute} before either point, the reservation is released
+     * so it cannot throttle or deduplicate later events. The original throwable propagates from this method;
+     * public posting methods log exceptions, while errors propagate. Overlapping failed submissions are removed
+     * from the reservation history regardless of failure order; newer accepted submissions keep their filter state.
+     * An attempted callback still counts even if the callback fails or an inline executor subsequently throws.</p>
      *
      * @param identifier the subscriber identifier containing delivery configuration including thread mode,
      *                   subscriber instance, and method to invoke
@@ -1477,9 +1493,13 @@ public class EventBus {
 
                 if (reservation.accepted) {
                     try {
-                        executor.execute(() -> invoke(identifier, event));
-                    } catch (final RejectedExecutionException e) {
-                        // Nothing was delivered, so give the reserved interval slot and "previous event" back.
+                        executor.execute(() -> {
+                            identifier.commit(reservation);
+                            invoke(identifier, event);
+                        });
+                        identifier.commit(reservation);
+                    } catch (final Throwable e) {
+                        // Give the filter state back unless an inline executor already attempted the callback.
                         identifier.release(reservation);
 
                         throw e;
@@ -1502,8 +1522,8 @@ public class EventBus {
      * <p><b>Thread Safety:</b> Filtering atomically reserves each accepted delivery attempt before
      * logging or invoking the subscriber. Equality checks, logging and subscriber callbacks execute
      * outside the filtering monitor, so reentrant posts cannot invert handler locks. Distinct accepted
-     * callbacks may execute concurrently. Failed callbacks still count as accepted attempts for
-     * throttling and deduplication.</p>
+     * callbacks may execute concurrently. The reservation is committed before invoking the callback;
+     * failed callbacks still count as accepted attempts for throttling and deduplication.</p>
      *
      * <p><b>Event Filtering:</b></p>
      * <ul>
@@ -1518,9 +1538,9 @@ public class EventBus {
      * <p><b>Error Handling:</b> Any exception thrown by the subscriber method, or by the reflective
      * invocation itself, is caught and logged; it is never propagated to the caller.</p>
      *
-     * <p><b>Scope:</b> This method carries out {@link ThreadMode#DEFAULT} deliveries and keeps its
-     * reserve-then-invoke semantics for subclasses and other direct callers. Asynchronous
-     * ({@link ThreadMode#THREAD_POOL_EXECUTOR}) deliveries do <b>not</b> pass through it:
+     * <p><b>Scope:</b> This method carries out {@link ThreadMode#DEFAULT} deliveries. For subclasses and
+     * other direct callers, it reserves and commits each accepted attempt before invoking the callback.
+     * Asynchronous ({@link ThreadMode#THREAD_POOL_EXECUTOR}) deliveries do <b>not</b> pass through it:
      * {@link #dispatch(SubIdentifier, Object)} makes the reservation on the posting thread and the
      * executor task invokes the subscriber method directly.</p>
      *
@@ -1530,7 +1550,9 @@ public class EventBus {
      */
     protected void post(final SubIdentifier sub, final Object event) {
         try {
-            if (reserve(sub, event).accepted) {
+            final Reservation reservation = reserve(sub, event);
+            if (reservation.accepted) {
+                sub.commit(reservation);
                 invoke(sub, event);
             }
         } catch (final Exception e) {
@@ -1598,9 +1620,9 @@ public class EventBus {
     /**
      * The outcome of one filtering decision. A suppressed decision is the shared {@link #INTERVAL} or
      * {@link #DUPLICATE} constant. An accepted decision is {@link #UNFILTERED} when the subscriber filters
-     * nothing and there is consequently no state to undo; otherwise it is a new instance carrying the filter
-     * state that the reservation overwrote, so {@link SubIdentifier#release(Reservation)} can restore it when
-     * the reserved delivery is never attempted.
+     * nothing and there is consequently no state to undo; otherwise it records the resulting filter state
+     * and its predecessor. Pending submissions retain that history so rejecting them in either order can
+     * restore the most recent non-rejected state. Successful submissions discard older history.
      */
     private static final class Reservation {
 
@@ -1616,32 +1638,40 @@ public class EventBus {
         /** Whether the delivery attempt was accepted and must now be carried out. */
         final boolean accepted;
 
-        /** The reservation version this reservation installed, or {@code 0} if it wrote no filter state. */
-        final long version;
-
-        /** The subscriber's {@code lastPostTimeNanos} before this reservation. */
+        /** The subscriber's {@code lastPostTimeNanos} after this reservation. */
         final long lastPostTimeNanos;
 
-        /** The subscriber's {@code hasPosted} before this reservation. */
+        /** The subscriber's {@code hasPosted} after this reservation. */
         final boolean hasPosted;
 
-        /** The subscriber's {@code previousEvent} before this reservation. */
+        /** The subscriber's {@code previousEvent} after this reservation. */
         final Object previousEvent;
+
+        /** Earlier filter state, needed only while this submission can still be rejected. Guarded by the subscriber monitor. */
+        Reservation previous;
+
+        /**
+         * Whether this submission was accepted or its callback began. Written under the subscriber monitor,
+         * after clearing predecessor history; once true it never changes, allowing later operations to skip the monitor.
+         */
+        volatile boolean committed;
+
+        /** Whether the executor rejected this submission. Guarded by the subscriber monitor. */
+        boolean rejected;
 
         private Reservation(final boolean accepted) {
             this.accepted = accepted;
-            version = 0;
             lastPostTimeNanos = 0;
             hasPosted = false;
             previousEvent = null;
         }
 
-        Reservation(final long version, final long lastPostTimeNanos, final boolean hasPosted, final Object previousEvent) {
+        Reservation(final long lastPostTimeNanos, final boolean hasPosted, final Object previousEvent, final Reservation previous) {
             accepted = true;
-            this.version = version;
             this.lastPostTimeNanos = lastPostTimeNanos;
             this.hasPosted = hasPosted;
             this.previousEvent = previousEvent;
+            this.previous = previous;
         }
     }
 
@@ -1708,10 +1738,14 @@ public class EventBus {
         Object previousEvent = null;
 
         /**
-         * Changes on each accepted reservation and on each released one, including reentrant posts made by
-         * equality callbacks. It identifies the reservation that currently owns the filter state.
+         * Changes whenever a reservation updates or restores the filter state, including reentrant posts
+         * made by equality callbacks. This generation is independent of reservation identity and never
+         * rewinds when a rejected submission restores an earlier state.
          */
         private long reservationVersion;
+
+        /** Latest filter state, including pending submissions; guarded by this subscriber's monitor. */
+        private Reservation currentReservation;
 
         private Reservation reservePost(final Object event) {
             for (;;) {
@@ -1723,10 +1757,7 @@ public class EventBus {
                         return Reservation.INTERVAL;
                     }
                     if (!deduplicate) {
-                        final Reservation reservation = new Reservation(reservationVersion + 1, lastPostTimeNanos, hasPosted, previousEvent);
-                        recordPostTime(now);
-                        reservationVersion++;
-                        return reservation;
+                        return recordReservation(now, event);
                     }
                     previous = previousEvent;
                     version = reservationVersion;
@@ -1746,39 +1777,69 @@ public class EventBus {
                     if (duplicate) {
                         return Reservation.DUPLICATE;
                     }
-                    final Reservation reservation = new Reservation(reservationVersion + 1, lastPostTimeNanos, hasPosted, previousEvent);
-                    if (intervalMillis > 0) {
-                        recordPostTime(now);
-                    }
-                    previousEvent = event;
-                    reservationVersion++;
-                    return reservation;
+                    return recordReservation(now, event);
+                }
+            }
+        }
+
+        /** Records an accepted filtering decision while holding this subscriber's monitor. */
+        private Reservation recordReservation(final long now, final Object event) {
+            if (intervalMillis > 0) {
+                recordPostTime(now);
+            }
+            if (deduplicate) {
+                previousEvent = event;
+            }
+            currentReservation = new Reservation(lastPostTimeNanos, hasPosted, previousEvent, currentReservation);
+            reservationVersion++;
+            return currentReservation;
+        }
+
+        /** Makes a submitted or attempted delivery permanent, discarding history that can no longer affect filtering. */
+        void commit(final Reservation reservation) {
+            if (!reservation.accepted || reservation == Reservation.UNFILTERED || reservation.committed) {
+                return;
+            }
+
+            synchronized (this) {
+                if (!reservation.committed && !reservation.rejected) {
+                    reservation.previous = null;
+                    reservation.committed = true;
                 }
             }
         }
 
         /**
-         * Restores the filter state that {@code reservation} overwrote, for a delivery that was reserved but
-         * never attempted (the executor rejected the task). Nothing is restored once a later reservation has
-         * superseded this one: that reservation is still outstanding and now owns the state.
+         * Removes a rejected submission from the filter history. If it is the latest reservation, restores
+         * the nearest non-rejected predecessor; otherwise its rejection is remembered in case newer pending
+         * submissions are also rejected. Committed deliveries are never undone.
          *
-         * @param reservation an accepted reservation for this subscriber; one that wrote no filter state
-         *                    (an unfiltered subscriber) is ignored
+         * @param reservation a reservation for this subscriber; shared decisions that wrote no filter state
+         *                    (suppressed events or an unfiltered subscriber) are ignored
          */
         void release(final Reservation reservation) {
-            if (reservation.version == 0) {
-                // The subscriber filters nothing, so the reservation wrote no state.
+            if (!reservation.accepted || reservation == Reservation.UNFILTERED || reservation.committed) {
+                // Shared decisions wrote no state, and permanent reservations can never be undone.
                 return;
             }
 
             synchronized (this) {
-                if (reservationVersion != reservation.version) {
+                if (reservation.committed || reservation.rejected) {
                     return;
                 }
 
-                lastPostTimeNanos = reservation.lastPostTimeNanos;
-                hasPosted = reservation.hasPosted;
-                previousEvent = reservation.previousEvent;
+                reservation.rejected = true;
+                if (currentReservation != reservation) {
+                    return;
+                }
+
+                do {
+                    currentReservation = currentReservation.previous;
+                } while (currentReservation != null && currentReservation.rejected);
+
+                lastPostTimeNanos = currentReservation == null ? 0 : currentReservation.lastPostTimeNanos;
+                hasPosted = currentReservation != null && currentReservation.hasPosted;
+                previousEvent = currentReservation == null ? null : currentReservation.previousEvent;
 
                 // Invalidate the deduplication snapshot of any equals() call still running against the
                 // released reservation, so it re-reads the restored previous event instead of the released one.

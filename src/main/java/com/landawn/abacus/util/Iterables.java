@@ -122,12 +122,13 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Null Safety:</b> Read-only methods handle {@code null} inputs gracefully, typically returning
  *       an empty {@code Optional}/{@code Nullable} rather than throwing. The mutators are stricter, mirroring
  *       {@link N}: {@link #fill(Object[], Supplier)} ignores a {@code null} array, but {@link #fill(List, Supplier)}
- *       rejects a {@code null} list with {@code IllegalArgumentException}, and {@link #copyInto(List, List)} throws
- *       {@code NullPointerException} for a {@code null} destination when the source is non-empty</li>
+ *       rejects a {@code null} list with {@code IllegalArgumentException}, and {@link #copyInto(List, List)} likewise
+ *       rejects a {@code null} destination with {@code IllegalArgumentException}, even when the source is
+ *       {@code null} or empty</li>
  *   <li><b>Read-Only by Default:</b> Most methods only read input parameters; the {@code fill}
  *       and {@code copyInto} methods mutate the supplied destination/array as documented</li>
- *   <li><b>Exception Minimization:</b> Exceptions are thrown only when method contracts are violated
- *       (e.g., invalid index ranges), not for edge cases like empty collections</li>
+ *   <li><b>Empty Inputs:</b> Empty inputs normally produce empty results. Invalid arguments and
+ *       failures from supplied callbacks still propagate as documented</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -2430,7 +2431,7 @@ public final class Iterables {
 
     /**
      * Returns the sum of the integer values of the provided numbers as an {@code OptionalLong},
-     * accumulating the result as a {@code long} to avoid overflow when summing many large {@code int} values.
+     * accumulating as a {@code long} to avoid {@code int} overflow. If the sum exceeds the {@code long} range, it wraps.
      * Each element's value is extracted via {@link Number#intValue()}; a {@code null} element is treated as {@code 0}.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
@@ -2450,7 +2451,7 @@ public final class Iterables {
 
     /**
      * Returns the sum of the integer values extracted from the elements in the provided iterable by the input {@code func} function as an {@code OptionalLong},
-     * accumulating the result as a {@code long} to avoid overflow.
+     * accumulating as a {@code long} to avoid {@code int} overflow. If the sum exceeds the {@code long} range, it wraps.
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalLong}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2550,8 +2551,8 @@ public final class Iterables {
      * {@code 1.100000023841858}. {@link #averageDouble(Iterable)} uses the same conversion.</p>
      *
      * <p>Summation is compensated (Kahan), so the result can differ in the last bits from a naive left-to-right
-     * {@code +=} over the same values; that is what keeps this method consistent with {@code averageDouble} multiplied
-     * by the element count. A {@code NaN} or infinite value propagates per IEEE 754 - in particular a mix of
+     * {@code +=} over the same values. This uses the same compensated accumulator as {@code averageDouble};
+     * rounding and the average's finite-overflow fallback mean multiplying that average by the count need not reproduce this sum. A {@code NaN} or infinite value propagates per IEEE 754 - in particular a mix of
      * {@link Double#POSITIVE_INFINITY} and {@link Double#NEGATIVE_INFINITY} yields {@code NaN}. Signed zero is the
      * one IEEE 754 case the accumulator does not carry through: it starts from {@code +0.0} and {@code 0.0 + -0.0}
      * is {@code +0.0}, so a sum of nothing but {@code -0.0} returns {@code +0.0} rather than {@code -0.0}. That
@@ -2577,8 +2578,8 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code OptionalDouble}.
      *
      * <p>Summation is compensated (Kahan), so the result can differ in the last bits from a naive left-to-right
-     * {@code +=} over the same values; that is what keeps this method consistent with {@code averageDouble} multiplied
-     * by the element count. A {@code NaN} or infinite value propagates per IEEE 754 - in particular a mix of
+     * {@code +=} over the same values. This uses the same compensated accumulator as {@code averageDouble};
+     * rounding and the average's finite-overflow fallback mean multiplying that average by the count need not reproduce this sum. A {@code NaN} or infinite value propagates per IEEE 754 - in particular a mix of
      * {@link Double#POSITIVE_INFINITY} and {@link Double#NEGATIVE_INFINITY} yields {@code NaN}. Signed zero is the
      * one IEEE 754 case the accumulator does not carry through: it starts from {@code +0.0} and {@code 0.0 + -0.0}
      * is {@code +0.0}, so a sum of nothing but {@code -0.0} returns {@code +0.0} rather than {@code -0.0}. That
@@ -2651,10 +2652,10 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigInteger>}.
      *
      * <p><b>Presence, and how it differs from {@code averageBigInteger}:</b> the result is present whenever the
-     * source had at least one element. A {@code null} contributes the additive identity, so
-     * {@code sumBigInteger} of a two-element all-{@code null} source is {@code Optional[0]} - a real sum of zero
+     * source had at least one element. A {@code null} extractor result contributes the additive identity, so
+     * {@code sumBigInteger} of a two-element source whose extracted values are both {@code null} is {@code Optional[0]} - a real sum of zero
      * over zero contributing values. {@code averageBigInteger} reports presence differently, on whether at least
-     * one non-{@code null} value existed, because a divisor of {@code 0} has no answer; it returns
+     * one non-{@code null} extracted value existed, because a divisor of {@code 0} has no answer; it returns
      * {@code Optional.empty()} for that same source. The two are answering different questions.</p>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2722,10 +2723,10 @@ public final class Iterables {
      * If the iterable is {@code null} or empty, it returns an empty {@code Optional<BigDecimal>}.
      *
      * <p><b>Presence, and how it differs from {@code averageBigDecimal}:</b> the result is present whenever the
-     * source had at least one element. A {@code null} contributes the additive identity, so
-     * {@code sumBigDecimal} of a two-element all-{@code null} source is {@code Optional[0]} - a real sum of zero
+     * source had at least one element. A {@code null} extractor result contributes the additive identity, so
+     * {@code sumBigDecimal} of a two-element source whose extracted values are both {@code null} is {@code Optional[0]} - a real sum of zero
      * over zero contributing values. {@code averageBigDecimal} reports presence differently, on whether at least
-     * one non-{@code null} value existed, because a divisor of {@code 0} has no answer; it returns
+     * one non-{@code null} extracted value existed, because a divisor of {@code 0} has no answer; it returns
      * {@code Optional.empty()} for that same source. The two are answering different questions.</p>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3054,7 +3055,8 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @return the average of the integer values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex}
+     *         exceeds the array length (zero for a null array).
      * @see N#averageInt(Number[], int, int)
      */
     public static <T extends Number> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -3106,14 +3108,14 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract an integer value from each element.
      * @return the average of the extracted integer values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @see N#averageInt(Object[], int, int, ToIntFunction)
      */
     public static <T> OptionalDouble averageInt(final T[] a, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(func, cs.func);
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -3140,7 +3142,8 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @return an {@code OptionalDouble} containing the average if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex}
+     *         exceeds the collection size (zero for a null collection).
      * @see N#averageInt(Collection, int, int)
      */
     public static OptionalDouble averageInt(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -3164,14 +3167,14 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract an integer value from each element.
      * @return the average of the extracted integer values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @see N#averageInt(Collection, int, int, ToIntFunction)
      */
     public static <T> OptionalDouble averageInt(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToIntFunction<? super T> func)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(func, cs.func);
+        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -3286,7 +3289,8 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex}
+     *         exceeds the array length (zero for a null array).
      * @see N#averageLong(Number[], int, int)
      */
     public static <T extends Number> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -3338,14 +3342,14 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a long value from each element.
      * @return the average of the extracted long values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @see N#averageLong(Object[], int, int, ToLongFunction)
      */
     public static <T> OptionalDouble averageLong(final T[] a, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(func, cs.func);
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -3371,7 +3375,8 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @return the average of the long values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex}
+     *         exceeds the collection size (zero for a null collection).
      * @see N#averageLong(Collection, int, int)
      */
     public static OptionalDouble averageLong(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -3395,14 +3400,14 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a long value from each element.
      * @return the average of the extracted long values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @see N#averageLong(Collection, int, int, ToLongFunction)
      */
     public static <T> OptionalDouble averageLong(final Collection<? extends T> c, final int fromIndex, final int toIndex, final ToLongFunction<? super T> func)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(func, cs.func);
+        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -3526,7 +3531,8 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > a.length}).
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex}
+     *         exceeds the array length (zero for a null array).
      * @see N#averageDouble(Number[], int, int)
      */
     public static <T extends Number> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -3579,14 +3585,14 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a double value from each element.
      * @return the average of the extracted double values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @see N#averageDouble(Object[], int, int, ToDoubleFunction)
      */
     public static <T> OptionalDouble averageDouble(final T[] a, final int fromIndex, final int toIndex, final ToDoubleFunction<? super T> func)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(func, cs.func);
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -3623,7 +3629,8 @@ public final class Iterables {
      * @param fromIndex the start index of the range, inclusive.
      * @param toIndex the end index of the range, exclusive.
      * @return the average of the double values of the provided numbers in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if the range is invalid: ({@code fromIndex < 0 || fromIndex > toIndex || toIndex > c.size()}).
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex}
+     *         exceeds the collection size (zero for a null collection).
      * @see N#averageDouble(Collection, int, int)
      */
     public static OptionalDouble averageDouble(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -3647,14 +3654,14 @@ public final class Iterables {
      * @param toIndex the end index of the range, exclusive.
      * @param func the function to extract a double value from each element.
      * @return the average of the extracted double values in the specified range as an {@code OptionalDouble} if the range is not empty, otherwise an empty {@code OptionalDouble}.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @see N#averageDouble(Collection, int, int, ToDoubleFunction)
      */
     public static <T> OptionalDouble averageDouble(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final ToDoubleFunction<? super T> func) throws IndexOutOfBoundsException, IllegalArgumentException {
-        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
+            final ToDoubleFunction<? super T> func) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(func, cs.func);
+        N.checkFromToIndex(fromIndex, toIndex, N.size(c));
 
         if (fromIndex == toIndex) {
             return OptionalDouble.empty();
@@ -3786,7 +3793,7 @@ public final class Iterables {
      * The average is computed with {@link java.math.MathContext#DECIMAL128} precision.
      * {@code null} values returned by the extractor are skipped and not counted in the divisor.
      * <p>Every "nothing to average" case is reported the same way, as {@code Optional.empty()}: a {@code null} or
-     * empty iterable, and equally a non-empty iterable whose values are all {@code null} (which would leave the
+     * empty iterable, and equally a non-empty iterable whose extracted values are all {@code null} (which would leave the
      * divisor at {@code 0}). A genuine average of zero therefore stays distinguishable from the absence of one.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3865,7 +3872,7 @@ public final class Iterables {
      * The average is computed with {@link java.math.MathContext#DECIMAL128} precision.
      * {@code null} values returned by the extractor are skipped and not counted in the divisor.
      * <p>Every "nothing to average" case is reported the same way, as {@code Optional.empty()}: a {@code null} or
-     * empty iterable, and equally a non-empty iterable whose values are all {@code null} (which would leave the
+     * empty iterable, and equally a non-empty iterable whose extracted values are all {@code null} (which would leave the
      * divisor at {@code 0}). A genuine average of zero therefore stays distinguishable from the absence of one.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -4521,8 +4528,8 @@ public final class Iterables {
      * @param fromIndex the start index of the range to fill (inclusive).
      * @param toIndex the end index of the range to fill (exclusive).
      * @param supplier the non-null provider of the value to fill each slot; called once per element.
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the input size (zero for a null input).
      * @throws ArrayStoreException if a value returned by {@code supplier} cannot be stored in the runtime component type of {@code a}.
      * @see Arrays#fill(Object[], int, int, Object)
      * @see N#fill(Object[], Object)
@@ -4534,9 +4541,9 @@ public final class Iterables {
      */
     @Beta
     public static <T> void fill(final T[] a, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException, ArrayStoreException {
-        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
+            throws IllegalArgumentException, IndexOutOfBoundsException, ArrayStoreException {
         N.checkArgNotNull(supplier, cs.supplier);
+        N.checkFromToIndex(fromIndex, toIndex, N.len(a));
 
         if (fromIndex == toIndex) {
             return;
@@ -4637,6 +4644,7 @@ public final class Iterables {
     public static <T> void fill(final List<? super T> list, final int fromIndex, final int toIndex, final Supplier<? extends T> supplier)
             throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedOperationException {
         N.checkArgNotNull(list, cs.list);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         // Not N.checkFromToIndex(fromIndex, toIndex, len): toIndex may legitimately exceed list.size()
         // (the list is extended), so there is no upper bound to check against. Passing Integer.MAX_VALUE
@@ -4645,8 +4653,6 @@ public final class Iterables {
         if (fromIndex < 0 || fromIndex > toIndex) {
             throw new IndexOutOfBoundsException("Index range [" + fromIndex + ", " + toIndex + ") is invalid: expected 0 <= fromIndex <= toIndex");
         }
-
-        N.checkArgNotNull(supplier, cs.supplier);
 
         final int size = list.size();
 
@@ -4713,8 +4719,8 @@ public final class Iterables {
      *
      * @param <T> the type of the elements.
      * @param src the source list from which elements are to be copied. May be {@code null} or empty; in that case the method does nothing.
-     * @param dest the destination list into which elements are to be copied. Must not be {@code null} unless {@code src} is {@code null} or empty (in which case it is never accessed).
-     * @throws IllegalArgumentException if {@code dest} is {@code null} and {@code src} is non-empty.
+     * @param dest the destination list into which elements are to be copied. Must not be {@code null}, including when {@code src} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code dest} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code dest.size() < src.size()} (the source does not fit in the destination).
      * @throws UnsupportedOperationException if at least one element is copied and the destination does not support replacing existing elements.
      * @see #copyInto(List, int, List, int, int)
@@ -4723,11 +4729,11 @@ public final class Iterables {
      */
     public static <T> void copyInto(final List<? extends T> src, final List<? super T> dest)
             throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedOperationException {
+        N.checkArgNotNull(dest, cs.dest);
+
         if (N.isEmpty(src)) {
             return;
         }
-
-        N.checkArgNotNull(dest, cs.dest);
 
         if (src.size() > dest.size()) {
             throw new IndexOutOfBoundsException("Source of size " + src.size() + " does not fit in dest of size " + dest.size());
@@ -6010,8 +6016,8 @@ public final class Iterables {
      *
      * <p><b>Size caveat:</b> the returned collection reports {@code n!} through {@link Collection#size()}, which
      * saturates at {@link Integer#MAX_VALUE} once {@code n >= 13} (13! already exceeds the {@code int} range).
-     * Iteration still yields every permutation, but any {@code size()}-driven operation is then wrong or fails:
-     * {@code toArray()} and copying into another collection throw {@link OutOfMemoryError}, and
+     * Iteration still yields every permutation, but operations that rely on the reported size have limits:
+     * {@code toArray()} and array-backed copies can throw {@link OutOfMemoryError}, and
      * {@code stream().count()} silently returns the saturated {@code Integer.MAX_VALUE} rather than the true count.
      * For large inputs iterate the result directly, or use {@link com.landawn.abacus.util.stream.Stream}/{@link Seq}.</p>
      *
@@ -6068,8 +6074,8 @@ public final class Iterables {
      * of elements that compare equal under the natural ordering - which saturates at {@link Integer#MAX_VALUE}
      * once that count exceeds the {@code int} range. It is therefore the <i>distinct</i> count that decides
      * saturation, not {@code n}: 13 distinct elements already saturate, while 20 mutually equal ones report 1.
-     * Iteration still yields every permutation, but once saturated any {@code size()}-driven operation is wrong or
-     * fails: {@code toArray()} and copying into another collection throw {@link OutOfMemoryError}, and
+     * Iteration still yields every permutation, but once the size saturates, operations relying on it have limits:
+     * {@code toArray()} and array-backed copies can throw {@link OutOfMemoryError}, and
      * {@code stream().count()} silently returns the saturated {@code Integer.MAX_VALUE} rather than the true count.
      * For large inputs iterate the result directly, or use {@link com.landawn.abacus.util.stream.Stream}/{@link Seq}.</p>
      *
@@ -6152,8 +6158,8 @@ public final class Iterables {
      * of elements this {@code comparator} considers equal - which saturates at {@link Integer#MAX_VALUE} once that
      * count exceeds the {@code int} range. It is therefore the <i>distinct</i> count that decides saturation, not
      * {@code n}: 13 distinct elements already saturate, while 20 mutually equal ones report 1.
-     * Iteration still yields every permutation, but once saturated any {@code size()}-driven operation is wrong or
-     * fails: {@code toArray()} and copying into another collection throw {@link OutOfMemoryError}, and
+     * Iteration still yields every permutation, but once the size saturates, operations relying on it have limits:
+     * {@code toArray()} and array-backed copies can throw {@link OutOfMemoryError}, and
      * {@code stream().count()} silently returns the saturated {@code Integer.MAX_VALUE} rather than the true count.
      * For large inputs iterate the result directly, or use {@link com.landawn.abacus.util.stream.Stream}/{@link Seq}.</p>
      *
@@ -6204,7 +6210,7 @@ public final class Iterables {
      *
      * <p>Each tuple is built on demand by {@link java.util.List#get(int)} and is a <i>new, modifiable</i>
      * {@code List} that is not retained: mutating a returned tuple does not change the product, and the next
-     * {@code get(i)} for the same index returns a fresh tuple. Copy a tuple if you need to keep or modify it.</p>
+     * {@code get(i)} for the same index returns a fresh tuple. A returned tuple can be kept and modified directly.</p>
      *
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
@@ -6237,9 +6243,9 @@ public final class Iterables {
      * {@code new ArrayList<>(...)} if you want the tuples themselves printed.</p>
      *
      * <p>{@code equals} and {@code hashCode} are the inherited {@link java.util.AbstractList} implementations,
-     * so unlike {@code toString()} they <i>do</i> walk the whole product - {@code O(size())} tuple allocations
-     * each. That is unremarkable for a small product and prohibitive for a large one, so avoid comparing these
-     * lists or using them as map keys unless the product is genuinely small.</p>
+     * so {@code hashCode} walks the whole product and {@code equals} may do so, though it can return early.
+     * These operations can allocate {@code O(size())} tuples. Avoid comparing these lists or using them
+     * as map keys when the product is large.</p>
      *
      * @param <T> any common base class shared by all axes (often just {@link Object})
      * @param cs the collections to choose elements from, in the order that
@@ -6284,7 +6290,7 @@ public final class Iterables {
      *
      * <p>Each tuple is built on demand by {@link java.util.List#get(int)} and is a <i>new, modifiable</i>
      * {@code List} that is not retained: mutating a returned tuple does not change the product, and the next
-     * {@code get(i)} for the same index returns a fresh tuple. Copy a tuple if you need to keep or modify it.</p>
+     * {@code get(i)} for the same index returns a fresh tuple. A returned tuple can be kept and modified directly.</p>
      *
      * <p>The result is guaranteed to be in the "traditional", lexicographical
      * order for Cartesian products that you would get from nesting for loops:
@@ -6315,9 +6321,9 @@ public final class Iterables {
      * {@code new ArrayList<>(...)} if you want the tuples themselves printed.</p>
      *
      * <p>{@code equals} and {@code hashCode} are the inherited {@link java.util.AbstractList} implementations,
-     * so unlike {@code toString()} they <i>do</i> walk the whole product - {@code O(size())} tuple allocations
-     * each. That is unremarkable for a small product and prohibitive for a large one, so avoid comparing these
-     * lists or using them as map keys unless the product is genuinely small.</p>
+     * so {@code hashCode} walks the whole product and {@code equals} may do so, though it can return early.
+     * These operations can allocate {@code O(size())} tuples. Avoid comparing these lists or using them
+     * as map keys when the product is large.</p>
      *
      * @param <T> any common base class shared by all axes (often just {@link Object})
      * @param cs the collections to choose elements from, in the order that
@@ -6440,8 +6446,12 @@ public final class Iterables {
                     return new SubSet<>(inputSet, elements, position++);
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws UnsupportedOperationException always, because this view does not support element removal
+                 */
                 @Override
-                public void remove() {
+                public void remove() throws UnsupportedOperationException {
                     throw new UnsupportedOperationException();
                 }
             };
@@ -6542,8 +6552,12 @@ public final class Iterables {
                     return elements.get(index);
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws UnsupportedOperationException always, because this view does not support element removal
+                 */
                 @Override
-                public void remove() {
+                public void remove() throws UnsupportedOperationException {
                     throw new UnsupportedOperationException();
                 }
             };
@@ -6934,16 +6948,14 @@ public final class Iterables {
          * Creates a slice over the {@code [fromIndex, toIndex)} range of the specified list.
          * The list is wrapped, not copied, so later changes to it are visible through this slice.
          *
-         * @param c the backing list.
+         * @param c the backing list; must not be {@code null}.
          * @param fromIndex the start index of the slice, inclusive.
          * @param toIndex the end index of the slice, exclusive.
-         * @throws NullPointerException if {@code c} is {@code null}.
+         * @throws IllegalArgumentException if {@code c} is {@code null}, or if a list-backed slice has {@code fromIndex > toIndex}.
          * @throws IndexOutOfBoundsException if a list-backed slice has a negative start index or an end index beyond the list size.
-         * @throws IllegalArgumentException if a list-backed slice has {@code fromIndex > toIndex}.
          */
-        Slice(final List<? extends T> c, final int fromIndex, final int toIndex)
-                throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException {
-            super(fromIndex == 0 && toIndex == c.size() ? c : c.subList(fromIndex, toIndex));
+        Slice(final List<? extends T> c, final int fromIndex, final int toIndex) throws IllegalArgumentException, IndexOutOfBoundsException {
+            super(listSliceBacking(N.checkArgNotNull(c, cs.c), fromIndex, toIndex));
             this.fromIndex = 0;
             this.toIndex = toIndex - fromIndex;
         }
@@ -6952,19 +6964,22 @@ public final class Iterables {
          * Creates a slice over the {@code [fromIndex, toIndex)} range of the specified collection.
          * The collection is wrapped, not copied, so later changes to it are visible through this slice.
          * When {@code c} is not a {@code List} the range is applied by skipping/limiting during iteration.
+         * A {@code null} collection is stored as an empty backing and yields an empty slice.
          *
-         * @param c the backing collection.
+         * @param c the backing collection; may be {@code null}, in which case the slice is empty.
          * @param fromIndex the start index of the slice, inclusive.
          * @param toIndex the end index of the slice, exclusive.
-         * @throws NullPointerException if {@code c} is {@code null}.
          * @throws IndexOutOfBoundsException if a list-backed slice has a negative start index or an end index beyond the list size.
          * @throws IllegalArgumentException if a list-backed slice has {@code fromIndex > toIndex}.
          */
-        Slice(final Collection<? extends T> c, final int fromIndex, final int toIndex)
-                throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException {
+        Slice(final Collection<? extends T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException, IllegalArgumentException {
             super(c instanceof List ? ((List<T>) c).subList(fromIndex, toIndex) : c);
             this.fromIndex = c instanceof List ? 0 : fromIndex;
             this.toIndex = c instanceof List ? toIndex - fromIndex : toIndex;
+        }
+
+        private static <E> List<? extends E> listSliceBacking(final List<? extends E> c, final int fromIndex, final int toIndex) {
+            return fromIndex == 0 && toIndex == c.size() ? c : c.subList(fromIndex, toIndex);
         }
 
         @Override

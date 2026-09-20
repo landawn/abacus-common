@@ -61,6 +61,106 @@ public class NumberTypeTest extends TestBase {
         assertNull(type.valueOf((String) null));
     }
 
+    @Test
+    public void testCopyConstructorDoesNotRecursivelyResolveItsOwnType() {
+        final Type<CopyConstructorNumber> type = Type.of(CopyConstructorNumber.class);
+        assertEquals(CopyConstructorNumber.class, type.javaType());
+        assertNull(type.valueOf((String) null));
+        assertThrows(UnsupportedOperationException.class, () -> type.valueOf("12"));
+    }
+
+    @Test
+    public void testCopyFactoryDoesNotRecursivelyResolveItsOwnType() {
+        final Type<CopyFactoryNumber> type = Type.of(CopyFactoryNumber.class);
+        assertEquals(CopyFactoryNumber.class, type.javaType());
+        assertNull(type.valueOf((String) null));
+        assertThrows(UnsupportedOperationException.class, () -> type.valueOf("12"));
+    }
+
+    @Test
+    public void testNumericConstructorRemainsAvailableAlongsideCopyConstructor() {
+        final Type<CopyAndLongConstructorNumber> type = Type.of(CopyAndLongConstructorNumber.class);
+        assertEquals(123L, type.valueOf("123").longValue());
+        assertEquals(Long.MIN_VALUE, type.valueOf(Long.toString(Long.MIN_VALUE)).longValue());
+    }
+
+    @Test
+    public void testNumericFactoryRemainsAvailableAlongsideCopyFactory() {
+        final Type<CopyAndLongFactoryNumber> type = Type.of(CopyAndLongFactoryNumber.class);
+        assertEquals(123L, type.valueOf("123").longValue());
+        assertEquals(Long.MIN_VALUE, type.valueOf(Long.toString(Long.MIN_VALUE)).longValue());
+        assertEquals(Long.MAX_VALUE, type.valueOf(Long.toString(Long.MAX_VALUE)).longValue());
+        assertNull(type.valueOf((String) null));
+    }
+
+    public abstract static class ReviewNumber extends Number {
+        private final long value;
+
+        protected ReviewNumber(final long value) {
+            this.value = value;
+        }
+
+        @Override
+        public int intValue() {
+            return (int) value;
+        }
+
+        @Override
+        public long longValue() {
+            return value;
+        }
+
+        @Override
+        public float floatValue() {
+            return value;
+        }
+
+        @Override
+        public double doubleValue() {
+            return value;
+        }
+    }
+
+    public static final class CopyConstructorNumber extends ReviewNumber {
+        public CopyConstructorNumber(final CopyConstructorNumber value) {
+            super(value.longValue());
+        }
+    }
+
+    public static final class CopyFactoryNumber extends ReviewNumber {
+        private CopyFactoryNumber(final long value) {
+            super(value);
+        }
+
+        public static CopyFactoryNumber copy(final CopyFactoryNumber value) {
+            return new CopyFactoryNumber(value.longValue());
+        }
+    }
+
+    public static final class CopyAndLongConstructorNumber extends ReviewNumber {
+        public CopyAndLongConstructorNumber(final CopyAndLongConstructorNumber value) {
+            super(value.longValue());
+        }
+
+        public CopyAndLongConstructorNumber(final long value) {
+            super(value);
+        }
+    }
+
+    public static final class CopyAndLongFactoryNumber extends ReviewNumber {
+        private CopyAndLongFactoryNumber(final long value) {
+            super(value);
+        }
+
+        public static CopyAndLongFactoryNumber of(final CopyAndLongFactoryNumber value) {
+            return new CopyAndLongFactoryNumber(value.longValue());
+        }
+
+        public static CopyAndLongFactoryNumber of(final long value) {
+            return new CopyAndLongFactoryNumber(value);
+        }
+    }
+
     private NumberType<Integer> intNumberType;
     private NumberType<Double> doubleNumberType;
     private NumberType<Long> longNumberType;

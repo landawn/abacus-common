@@ -83,6 +83,8 @@ import com.landawn.abacus.util.cs;
  *
  * <p>Format notes:</p>
  * <ul>
+ *   <li>A present-null {@code u.Nullable} is rejected because XML cannot preserve its distinction from an
+ *       empty Nullable. The check also applies inside embedded JSON payloads; empty Nullable values remain supported.</li>
  *   <li>A map entry is written as an element named after its key, so every key must be a valid XML element
  *       name (an NCName). A {@code Map<Integer, ?>} key, a key holding a space or markup, and a key holding
  *       {@code ':'} are rejected with a {@link ParsingException} instead of producing a document that no XML
@@ -98,19 +100,22 @@ import com.landawn.abacus.util.cs;
  *   <li>Text that XML 1.0 cannot carry (control characters other than tab, LF and CR, isolated surrogates,
  *       {@code U+FFFE} and {@code U+FFFF}) is rejected with a {@link ParsingException} when it is written as
  *       element text. The same characters inside an array or collection that is written as an embedded JSON
- *       payload survive instead, because the JSON escape represents them losslessly. A {@code char} value of
- *       {@code '\0'} is written as an empty element, which reads back as {@code '\0'}.</li>
+ *       payload survive instead, because the JSON escape represents them losslessly. NUL written directly as
+ *       character element text is rejected, including a boxed Character.</li>
  *   <li>An array or collection whose elements are not all JSON-serializable is written element by element;
  *       a scalar element is wrapped in an {@code <e>} element so that consecutive scalars stay separate
  *       values instead of being concatenated into one text node. {@code e} is therefore reserved: a bean whose
  *       own element name is {@code e} is read back as text when it appears in an {@code Object}-typed mixed
  *       array or collection (a declared element type that is a bean, map or map entity is honoured). An
- *       {@code <e>} wrapper is also the one place where a {@code type} attribute naming a class the allowlist
- *       does not carry is ignored - the declared element type is used instead - rather than rejected with a
- *       {@link ParsingException}, on both backends.</li>
+ *       {@code <e>} wrapper applies the same type-attribute approval policy as other elements; unapproved
+ *       nonblank type names are rejected with a {@link ParsingException} on both backends.</li>
  *   <li>With {@link XmlParserType#StAX} an element with no text ({@code <s/>}, {@code <s></s>}) yields the
  *       property's default value ({@code null} for a String); with {@link XmlParserType#DOM} it yields an
- *       empty String.</li>
+ *       empty String. Scalar {@code <e>} wrappers inside arrays and collections are converted from
+ *       the empty string on both backends, so an empty String element remains empty. Enum properties and map values
+ *       also pass an empty token to their codec, allowing annotated enum values of {@code ""} to round-trip.
+ *       An annotated enum whose codec rejects {@code ""} fails on an empty element; empty name-based enum
+ *       tokens and explicit {@code isNull="true"} markers remain null.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>
@@ -157,6 +162,11 @@ final class XmlParserImpl extends AbstractXmlParser {
      */
     XmlParserImpl(final XmlParserType parserType, final XmlSerConfig xsc, final XmlDeserConfig xdc) {
         super(xsc, xdc);
+        this.parserType = parserType;
+    }
+
+    XmlParserImpl(final XmlParserType parserType, final XmlSerConfig xsc, final XmlDeserConfig xdc, final java.util.Set<Class<?>> allowedTypeClasses) {
+        super(xsc, xdc, allowedTypeClasses);
         this.parserType = parserType;
     }
 
@@ -233,6 +243,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param obj the object to serialize; may be {@code null}
      * @param config the serialization configuration (may be {@code null} for default behavior)
      * @param output the file to write the XML content to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws ParsingException if the object type is not supported for serialization, if a map key, a
      *         {@code MapEntity} name or a bean property's custom name is not a valid XML element name, if a
      *         name or a value holds text that XML 1.0 cannot carry, or if more than
@@ -241,7 +252,10 @@ final class XmlParserImpl extends AbstractXmlParser {
      *         while producing XML, fails
      */
     @Override
-    public void serialize(final Object obj, final XmlSerConfig config, final File output) throws ParsingException, UncheckedIOException {
+    public void serialize(final Object obj, final XmlSerConfig config, final File output)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
         Writer writer = null;
 
         try {
@@ -280,6 +294,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param obj the object to serialize; may be {@code null}
      * @param config the serialization configuration (may be {@code null} for default behavior)
      * @param output the output stream to write the XML content to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws ParsingException if the object type is not supported for serialization, if a map key, a
      *         {@code MapEntity} name or a bean property's custom name is not a valid XML element name, if a
      *         name or a value holds text that XML 1.0 cannot carry, or if more than
@@ -288,7 +303,10 @@ final class XmlParserImpl extends AbstractXmlParser {
      *         serialization, fails
      */
     @Override
-    public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) throws ParsingException, UncheckedIOException {
+    public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
         final XmlSerConfig configToUse = check(config);
         final BufferedXmlWriter bw = Objectory.createBufferedXmlWriter(output);
         final IdentityHashSet<Object> serializedObjects = !configToUse.isCircularReferenceSupported() ? null : new IdentityHashSet<>();
@@ -325,6 +343,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param obj the object to serialize; may be {@code null}
      * @param config the serialization configuration (may be {@code null} for default behavior)
      * @param output the writer to write the XML content to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws ParsingException if the object type is not supported for serialization, if a map key, a
      *         {@code MapEntity} name or a bean property's custom name is not a valid XML element name, if a
      *         name or a value holds text that XML 1.0 cannot carry, or if more than
@@ -333,7 +352,10 @@ final class XmlParserImpl extends AbstractXmlParser {
      *         serialization, fails
      */
     @Override
-    public void serialize(final Object obj, final XmlSerConfig config, final Writer output) throws ParsingException, UncheckedIOException {
+    public void serialize(final Object obj, final XmlSerConfig config, final Writer output)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
         final XmlSerConfig configToUse = check(config);
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output);
@@ -381,7 +403,7 @@ final class XmlParserImpl extends AbstractXmlParser {
             final BufferedXmlWriter bw, final boolean flush) throws ParsingException, IOException {
         final XmlSerConfig configToUse = check(config);
 
-        if (hasCircularReference(obj, serializedObjects, configToUse, bw)) {
+        if (serializedObjects != null && hasCircularReference(obj, serializedObjects, configToUse, bw)) {
             return;
         }
 
@@ -408,7 +430,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
         if (depth != null && ++depth[0] > MAX_SERIALIZATION_DEPTH) {
             // Undo this level's increment: the finally block below is not reached from here, while the outer
-            // levels unwind through theirs and release the thread-local at the root.
+            // levels unwind through theirs and restore the counter to zero at the root.
             depth[0]--;
 
             throw new ParsingException("Serialization nesting depth exceeded " + MAX_SERIALIZATION_DEPTH + " while writing " + ClassUtil.getClassName(cls)
@@ -424,7 +446,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     } else if (type.isCollection()) {
                         writeCollection((Collection<?>) obj, configToUse, indentation, serializedObjects, type, bw);
                     } else {
-                        type.serializeTo(bw, obj, configToUse);
+                        writeXmlScalar(bw, type, obj, configToUse, "Root value");
                     }
 
                     break;
@@ -455,17 +477,16 @@ final class XmlParserImpl extends AbstractXmlParser {
                     break;
 
                 default:
-                    if (configToUse.isFailOnEmptyBean()) {
-                        throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
-                                + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
-                    } else {
-                        // ignore bw.write("");
+                    if (writeEmptyObject(type, configToUse, indentation, bw)) {
+                        break;
                     }
+                    throw new ParsingException("Unsupported class: " + ClassUtil.getCanonicalClassName(cls)
+                            + ". Only Array/List/Map and Bean class with getter/setter methods are supported");
             }
         } finally {
-            // Leaving the outermost level: discard the counter so no state lingers on pooled threads.
-            if (depth != null && --depth[0] == 0) {
-                SERIALIZATION_DEPTH.remove();
+            // Reuse the zeroed primitive counter; it retains no serialized objects or configuration.
+            if (depth != null) {
+                --depth[0];
             }
 
             // Path-based cycle detection (like JsonParserImpl.write): without removing the object
@@ -1011,10 +1032,9 @@ final class XmlParserImpl extends AbstractXmlParser {
         Type<Object> eleType = value == null ? null : Type.of(value.getClass());
 
         if (eleType != null && eleType.isOptionalOrNullable()) {
-            // Unwrapped BEFORE the null and structured tests, as AbacusXmlParserImpl.writeArray does: an empty
-            // wrapper is then the null element marker (the readers map it back to an empty wrapper) instead of an
-            // empty <e>, which StAX reads as null and DOM as "", and a present one carries its own type rather
-            // than the wrapper's, which describes the wrong shape.
+            // Unwrap before the null and structured tests, as AbacusXmlParserImpl.writeArray does. An absent
+            // optional needs the explicit null marker: both DOM and StAX apply the selected type's empty-string
+            // conversion to an empty <e>. A present value carries its own type and structure, not the wrapper's.
             value = unwrapOptional(value);
             eleType = value == null ? null : Type.of(value.getClass());
         }
@@ -1240,8 +1260,6 @@ final class XmlParserImpl extends AbstractXmlParser {
         //        return;
         //    }
 
-        final String what = propInfo == null ? "Value" : "Property '" + propInfo.name + "'";
-
         if (propInfo != null && propInfo.isJsonRawValue) {
             writeRawJson(bw, serializeEmbeddedJson(value, config));
         } else if (valueType.isSerializable()) {
@@ -1256,13 +1274,14 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Object unwrapped = unwrapOptional(value);
 
                 if (unwrapped != null) {
-                    writeUnwrappedValue(bw, valueType.isOptionalOrNullable() ? valueType.elementType() : valueType, unwrapped, config, what);
+                    writeUnwrappedValue(bw, valueType.isOptionalOrNullable() ? valueType.elementType() : valueType, unwrapped, config,
+                            propInfo == null ? "Value" : "Property '" + propInfo.name + "'");
                 }
             } else {
                 if (propInfo != null && propInfo.hasFormat) {
                     propInfo.writePropValue(bw, value, config);
                 } else {
-                    writeXmlScalar(bw, valueType, value, config, what);
+                    writeXmlScalar(bw, valueType, value, config, "Value", propInfo == null ? null : propInfo.name);
                 }
             }
         } else if (valueType.isObjectArray()) {
@@ -1274,6 +1293,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 strType.serializeTo(bw, serializeEmbeddedJson(a, config), config);
             } else {
+                final String what = propInfo == null ? "Value" : "Property '" + propInfo.name + "'";
                 for (final Object e : a) {
                     writeElement(e, config, nextIndentation, serializedObjects, bw, what);
                 }
@@ -1293,6 +1313,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 strType.serializeTo(bw, serializeEmbeddedJson(c, config), config);
             } else {
+                final String what = propInfo == null ? "Value" : "Property '" + propInfo.name + "'";
                 for (final Object e : c) {
                     writeElement(e, config, nextIndentation, serializedObjects, bw, what);
                 }
@@ -1423,13 +1444,16 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}; returns the target type's default value if {@code source} is {@code null} or empty
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming the XML
      *         text
      */
     @Override
     public <T> T deserialize(final String source, final XmlDeserConfig config, final Class<? extends T> targetClass)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1460,16 +1484,17 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetType the Type descriptor of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
-     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or {@code source} is a directory
      * @throws UncheckedIOException if opening {@code source} fails, or the DOM backend reports an {@code IOException} while reading the
      *         XML file
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException, UncheckedIOException {
-        N.checkArgNotNull(targetType, cs.targetType);
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
         N.checkArgNotNull(source, cs.source);
+        N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
+        N.checkArgNotNull(targetType, cs.targetType);
 
         InputStream is = null;
 
@@ -1502,13 +1527,18 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
+     * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}, or {@code source} is a directory
      * @throws UncheckedIOException if opening {@code source} fails, or the DOM backend reports an {@code IOException} while reading the
      *         XML file
+     * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Class<? extends T> targetClass)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1553,8 +1583,8 @@ final class XmlParserImpl extends AbstractXmlParser {
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Type<? extends T> targetType)
             throws IllegalArgumentException, ParsingException, UncheckedIOException {
-        N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(targetType, cs.targetType);
 
         return read(source, config, null, targetType, false);
     }
@@ -1579,12 +1609,16 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      * @throws UncheckedIOException if the DOM backend reports an {@code IOException} while reading XML from {@code source}
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1627,8 +1661,8 @@ final class XmlParserImpl extends AbstractXmlParser {
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Type<? extends T> targetType)
             throws IllegalArgumentException, ParsingException, UncheckedIOException {
-        N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(targetType, cs.targetType);
 
         // BufferedReader? will the target parser create the BufferedReader internally?
         return read(source, config, null, targetType, false);
@@ -1654,12 +1688,16 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}
      * @throws ParsingException if the XML structure doesn't match the target type or is malformed
      * @throws UncheckedIOException if the DOM backend reports an {@code IOException} while reading XML from {@code source}
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1725,12 +1763,15 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetClass the class of the object to create; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}
      * @throws ParsingException if the XML structure doesn't match the target type
      */
     @Override
     public <T> T deserialize(final Node source, final XmlDeserConfig config, final Class<? extends T> targetClass)
             throws IllegalArgumentException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -1759,13 +1800,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
+     * @throws IllegalArgumentException if {@code source} is {@code null} or is a directory
      * @throws UncheckedIOException if opening {@code source} fails, or the DOM backend reports an {@code IOException} while reading the
      *         XML file
+     * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException {
         InputStream is = null;
 
         try {
@@ -2201,11 +2243,7 @@ final class XmlParserImpl extends AbstractXmlParser {
     }
 
     private static void exitXmlNesting() {
-        final int[] depth = XML_NESTING_DEPTH.get();
-        if (--depth[0] <= 0) {
-            depth[0] = 0;
-            XML_NESTING_DEPTH.remove();
-        }
+        --XML_NESTING_DEPTH.get()[0];
     }
 
     /**
@@ -2242,6 +2280,12 @@ final class XmlParserImpl extends AbstractXmlParser {
     @SuppressWarnings({ "null", "deprecation" })
     private <T> T readByStreamParserBody(final XMLStreamReader xmlReader, final XmlDeserConfig config, PropInfo propInfo, Type<?> propType, Type<?> targetType)
             throws XMLStreamException, ParsingException {
+        if (xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT) {
+            final Type<?> attributeType = resolvePresentTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE));
+            if (attributeType != null) {
+                targetType = chooseDeclaredType(attributeType, targetType);
+            }
+        }
         if (targetType.javaType().equals(Object.class)) {
             targetType = mapEntityType;
         }
@@ -2264,6 +2308,7 @@ final class XmlParserImpl extends AbstractXmlParser {
         String text = null;
         StringBuilder sb = null;
         boolean advanceEvent = true;
+        boolean isNullValue = false;
 
         switch (serializationType) {
             case ENTITY: {
@@ -2278,7 +2323,6 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Collection<String> ignoredClassPropNames = configToUse.getIgnoredPropNames(targetClass);
                 final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType.reflectType());
                 final Object result = beanInfo.createBeanResult();
-                int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader
                         .hasNext(); event = advanceEvent ? xmlReader.next() : xmlReader.getEventType(), advanceEvent = true) {
@@ -2308,32 +2352,14 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     }
                                 }
 
+                                // Approval applies even when a declared/configured type takes precedence.
+                                final Type<?> attributeType = resolvePresentTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE));
+                                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XmlConstants.IS_NULL));
                                 propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                                 if (propType == null) {
-                                    if (propInfo.jsonXmlType.isSerializable()) {
-                                        propType = propInfo.jsonXmlType;
-                                    } else {
-                                        attrCount = xmlReader.getAttributeCount();
-
-                                        if (attrCount == 1) {
-                                            if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(0))) {
-                                                propType = resolveTypeAttribute(xmlReader.getAttributeValue(0));
-                                            }
-                                        } else if (attrCount > 1) {
-                                            for (int i = 0; i < attrCount; i++) {
-                                                if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(i))) {
-                                                    propType = resolveTypeAttribute(xmlReader.getAttributeValue(i));
-
-                                                    break;
-                                                }
-                                            }
-                                        }
-
-                                        // The attribute wins only when it adds information: a bare
-                                        // type="ArrayList" must not erase a declared List<Inner>.
-                                        propType = chooseDeclaredType(propType, propInfo.jsonXmlType);
-                                    }
+                                    propType = propInfo.jsonXmlType.isSerializable() ? propInfo.jsonXmlType
+                                            : chooseDeclaredType(attributeType, propInfo.jsonXmlType);
                                 }
 
                             } else {
@@ -2366,7 +2392,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         final Type<?> propEleType = getPropEleType(propType);
 
                                         do {
-                                            if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
+                                            if (isNullElement(xmlReader)) {
                                                 c.add(null);
 
                                                 nextStructuralEvent(xmlReader);
@@ -2435,7 +2461,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     break;
                                 }
 
-                                propValue = propInfo.hasFormat ? propInfo.readPropValue(text) : propType.valueOf(text);
+                                propValue = isNullValue ? null : (propInfo.hasFormat ? propInfo.readPropValue(text) : propType.valueOf(text));
 
                                 if (event == XMLStreamConstants.END_ELEMENT) {
                                     if (propInfo.jsonXmlExpose == JsonXmlField.Direction.SERIALIZE_ONLY
@@ -2462,7 +2488,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         || (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName))) {
                                     // ignore;
                                 } else {
-                                    propInfo.setPropValue(result, propValue == null ? propType.defaultValue() : propValue);
+                                    propInfo.setPropValue(result, propValue == null ? emptyElementValue(propType, isNullValue) : propValue);
                                 }
 
                                 propName = null;
@@ -2514,7 +2540,6 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 @SuppressWarnings("rawtypes")
                 final Map<Object, Object> map = N.newMap((Class<Map>) targetClass);
-                int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader
                         .hasNext(); event = advanceEvent ? xmlReader.next() : xmlReader.getEventType(), advanceEvent = true) {
@@ -2534,28 +2559,13 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     continue;
                                 }
 
+                                // Approval applies even when a declared/configured type takes precedence.
+                                final Type<?> attributeType = resolvePresentTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE));
+                                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XmlConstants.IS_NULL));
                                 propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                                 if (propType == null) {
-                                    attrCount = xmlReader.getAttributeCount();
-
-                                    if (attrCount == 1) {
-                                        if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(0))) {
-                                            propType = resolveTypeAttribute(xmlReader.getAttributeValue(0));
-                                        }
-                                    } else if (attrCount > 1) {
-                                        for (int i = 0; i < attrCount; i++) {
-                                            if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(i))) {
-                                                propType = resolveTypeAttribute(xmlReader.getAttributeValue(i));
-
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (propType == null) {
-                                        propType = valueType;
-                                    }
+                                    propType = attributeType == null ? valueType : attributeType;
                                 }
                             } else {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2587,7 +2597,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         final Type<?> propEleType = getPropEleType(propType);
 
                                         do {
-                                            if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
+                                            if (isNullElement(xmlReader)) {
                                                 c.add(null);
 
                                                 nextStructuralEvent(xmlReader);
@@ -2658,7 +2668,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 break;
                             }
 
-                            propValue = propType.valueOf(text);
+                            propValue = isNullValue ? null : propType.valueOf(text);
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2681,7 +2691,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     // ignore;
                                 } else {
-                                    map.put(isStringKey ? propName : keyType.valueOf(propName), propValue == null ? propType.defaultValue() : propValue);
+                                    map.put(isStringKey ? propName : keyType.valueOf(propName),
+                                            propValue == null ? emptyElementValue(propType, isNullValue) : propValue);
                                 }
 
                                 propName = null;
@@ -2714,7 +2725,6 @@ final class XmlParserImpl extends AbstractXmlParser {
                 }
 
                 final MapEntity mapEntity = new MapEntity(xmlReader.getLocalName());
-                int attrCount = 0;
 
                 for (int event = xmlReader.next(); xmlReader
                         .hasNext(); event = advanceEvent ? xmlReader.next() : xmlReader.getEventType(), advanceEvent = true) {
@@ -2729,28 +2739,13 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     continue;
                                 }
 
+                                // Approval applies even when a declared/configured type takes precedence.
+                                final Type<?> attributeType = resolvePresentTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE));
+                                isNullValue = Boolean.parseBoolean(getAttribute(xmlReader, XmlConstants.IS_NULL));
                                 propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                                 if (propType == null) {
-                                    attrCount = xmlReader.getAttributeCount();
-
-                                    if (attrCount == 1) {
-                                        if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(0))) {
-                                            propType = resolveTypeAttribute(xmlReader.getAttributeValue(0));
-                                        }
-                                    } else if (attrCount > 1) {
-                                        for (int i = 0; i < attrCount; i++) {
-                                            if (XmlConstants.TYPE.equals(xmlReader.getAttributeLocalName(i))) {
-                                                propType = resolveTypeAttribute(xmlReader.getAttributeValue(i));
-
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (propType == null) {
-                                        propType = valueType;
-                                    }
+                                    propType = attributeType == null ? valueType : attributeType;
                                 }
                             } else {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2782,7 +2777,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         final Type<?> propEleType = getPropEleType(propType);
 
                                         do {
-                                            if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
+                                            if (isNullElement(xmlReader)) {
                                                 c.add(null);
 
                                                 nextStructuralEvent(xmlReader);
@@ -2854,7 +2849,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 break;
                             }
 
-                            propValue = propType.valueOf(text);
+                            propValue = isNullValue ? null : propType.valueOf(text);
 
                             if (event == XMLStreamConstants.END_ELEMENT) {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2877,7 +2872,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     // ignore;
                                 } else {
-                                    mapEntity.set(propName, propValue == null ? propType.defaultValue() : propValue);
+                                    mapEntity.set(propName, propValue == null ? emptyElementValue(propType, isNullValue) : propValue);
                                 }
 
                                 propName = null;
@@ -2914,7 +2909,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                         switch (event) {
                             case XMLStreamConstants.START_ELEMENT: {
-                                if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
+                                if (isNullElement(xmlReader)) {
                                     list.add(null);
 
                                     // consume the null element's END_ELEMENT so the loop update doesn't mistake it
@@ -3020,7 +3015,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                     switch (event) {
                         case XMLStreamConstants.START_ELEMENT: {
-                            if (xmlReader.getAttributeCount() > 0 && TRUE.equals(xmlReader.getAttributeValue(null, XmlConstants.IS_NULL))) {
+                            if (isNullElement(xmlReader)) {
                                 result.add(null);
 
                                 // consume the null element's END_ELEMENT so the loop update doesn't mistake it
@@ -3154,15 +3149,19 @@ final class XmlParserImpl extends AbstractXmlParser {
      * when it names an allowed type; otherwise {@code eleType} is used, and an {@code Object} element type
      * yields a String -- which is what the DOM backend returns for the same document.
      *
+     * <p>An element without text is passed to the selected type as {@code ""}, not {@code null}. Its
+     * {@code valueOf(String)} policy therefore determines the value or conversion exception, including for
+     * custom handlers. The callers handle an explicit {@code isNull="true"} marker before reaching this method.</p>
+     *
      * @param xmlReader the stream reader positioned on the element's {@code START_ELEMENT} event; it is left on
      *        the matching {@code END_ELEMENT}
      * @param eleType the declared element type, or {@code null}
-     * @return the converted value, or {@code null} for an element with no text
+     * @return the converted text; an element with no text is converted from the empty string, as in the DOM backend
      * @throws XMLStreamException if advancing {@code xmlReader} through the scalar element encounters malformed XML or cannot read its
      *         underlying input
      */
     private Object readScalarElement(final XMLStreamReader xmlReader, final Type<?> eleType) throws XMLStreamException {
-        Type<?> valueType = xmlReader.getAttributeCount() > 0 ? resolveTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE)) : null;
+        Type<?> valueType = xmlReader.getAttributeCount() > 0 ? resolvePresentTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE)) : null;
 
         if (valueType == null || valueType.isObject()) {
             valueType = eleType == null || eleType.isObject() ? strType : eleType;
@@ -3197,7 +3196,7 @@ final class XmlParserImpl extends AbstractXmlParser {
             text = sb.toString();
         }
 
-        return text == null ? null : valueType.valueOf(text);
+        return valueType.valueOf(text == null ? Strings.EMPTY : text);
     }
 
     /**
@@ -3216,6 +3215,21 @@ final class XmlParserImpl extends AbstractXmlParser {
         }
 
         return isTextEvent(event) ? "text: " + xmlReader.getText() : "event type " + event;
+    }
+
+    /**
+     * Resolves a StAX element without text. Enum codecs receive the empty token unless the element is
+     * explicitly null; other types retain their established empty-element defaults.
+     *
+     * @param type the declared or configured value type
+     * @param isNullValue whether the element carries an explicit null marker
+     * @return the decoded empty enum token, or the type's default value
+     * @throws RuntimeException if an annotated enum codec rejects the empty token
+     */
+    private static Object emptyElementValue(final Type<?> type, final boolean isNullValue) {
+        // An annotated enum can own the empty token. Only an explicit null marker bypasses its codec;
+        // other scalar types keep the StAX reader's established empty-element defaults.
+        return !isNullValue && type.javaType().isEnum() ? type.valueOf(Strings.EMPTY) : type.defaultValue();
     }
 
     /**
@@ -3284,8 +3298,8 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @return the type to read the node with
      * @throws ParsingException if the node carries a type attribute that is not allowed
      */
-    private static Type<?> resolveDeclaredType(final Node node, final Type<?> declaredType) throws ParsingException {
-        final Type<?> attrType = resolveTypeAttribute(XmlUtil.getAttribute(node, XmlConstants.TYPE));
+    private Type<?> resolveDeclaredType(final Node node, final Type<?> declaredType) throws ParsingException {
+        final Type<?> attrType = resolvePresentTypeAttribute(XmlUtil.getAttribute(node, XmlConstants.TYPE));
 
         if (attrType == null) {
             // Still routed through getConcreteClass: it fails closed on a type attribute that is not allowed.
@@ -3840,8 +3854,21 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param node the node to inspect
      * @return {@code true} if the node stands for a {@code null} value
      */
-    private static boolean isNullNode(final Node node) {
-        return Boolean.parseBoolean(XmlUtil.getAttribute(node, XmlConstants.IS_NULL));
+    private boolean isNullNode(final Node node) {
+        if (!Boolean.parseBoolean(XmlUtil.getAttribute(node, XmlConstants.IS_NULL))) {
+            return false;
+        }
+        resolvePresentTypeAttribute(XmlUtil.getAttribute(node, XmlConstants.TYPE));
+        return true;
+    }
+
+    private boolean isNullElement(final XMLStreamReader xmlReader) {
+        if (!TRUE.equals(getAttribute(xmlReader, XmlConstants.IS_NULL))) {
+            return false;
+        }
+        // Null items skip value conversion, but must still validate any explicit type metadata.
+        resolvePresentTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE));
+        return true;
     }
 
     /**
@@ -3868,12 +3895,15 @@ final class XmlParserImpl extends AbstractXmlParser {
      * when it names an allowed type; otherwise {@code eleType} is used, and an {@code Object} element type
      * yields a String.
      *
+     * <p>Empty text is converted through the selected type's {@code valueOf("")}; a custom handler may reject it.
+     * An explicit {@code isNull="true"} marker bypasses conversion in {@link #getPropValue(String, Type, PropInfo, Node)}.</p>
+     *
      * @param node the {@code <e>} element
      * @param eleType the declared element type, or {@code null}
      * @return the converted value
      */
     private Object readScalarNode(final Node node, final Type<?> eleType) {
-        Type<?> valueType = resolveTypeAttribute(XmlUtil.getAttribute(node, XmlConstants.TYPE));
+        Type<?> valueType = resolvePresentTypeAttribute(XmlUtil.getAttribute(node, XmlConstants.TYPE));
 
         if (valueType == null || valueType.isObject()) {
             valueType = eleType == null || eleType.isObject() ? strType : eleType;
@@ -3884,6 +3914,8 @@ final class XmlParserImpl extends AbstractXmlParser {
 
     private Object getPropValue(Node propNode, final XmlDeserConfig config, final String propName, Type<?> propType, final PropInfo propInfo,
             final boolean checkedAttr, final boolean isTagByPropertyName, final boolean ignoreTypeInfo, final boolean isProp, final Type<?> inputType) {
+        // Validate the wrapper too when a structured property is read through its child element.
+        resolvePresentTypeAttribute(XmlUtil.getAttribute(propNode, XmlConstants.TYPE));
         Object propValue = null;
 
         if (XmlUtil.isTextElement(propNode)) {

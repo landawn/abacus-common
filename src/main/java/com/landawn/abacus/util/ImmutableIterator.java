@@ -49,6 +49,9 @@ import com.landawn.abacus.annotation.Beta;
  *     }
  *
  *     public String next() {
+ *         if (!hasNext()) {
+ *             throw new java.util.NoSuchElementException();
+ *         }
  *         return data[index++];
  *     }
  * };

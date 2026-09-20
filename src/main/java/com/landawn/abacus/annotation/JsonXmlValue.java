@@ -36,8 +36,9 @@ import java.lang.annotation.Target;
  *   <li>When applied to a {@link ElementType#METHOD}, the method must be a no-arg "getter" that
  *       returns the wrapped value.</li>
  *   <li>When applied to a {@link ElementType#FIELD}, the field holds the wrapped value directly.</li>
- *   <li>The wrapped value's type must match the parameter of the class's
- *       {@link JsonXmlCreator}-annotated {@code static} factory method.</li>
+ *   <li>The wrapped value's type must be compatible with the parameter of the class's
+ *       {@link JsonXmlCreator}-annotated {@code static} factory method, including generic
+ *       arguments when the parameter is a supertype of the wrapped value.</li>
  * </ul>
  *
  * <p><b>Usage Examples:</b></p>

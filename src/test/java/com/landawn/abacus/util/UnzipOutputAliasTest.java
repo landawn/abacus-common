@@ -11,8 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class UnzipOutputAliasTest {
+public class UnzipOutputAliasTest extends TestBase {
     @Test
     void pairOutputsRejectAliasesWithoutConsumingOrMutatingCollections() {
         final AtomicInteger calls = new AtomicInteger();

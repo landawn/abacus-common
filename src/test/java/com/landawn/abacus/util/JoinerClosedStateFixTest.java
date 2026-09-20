@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import com.landawn.abacus.TestBase;
+import com.landawn.abacus.annotation.AccessFieldByMethod;
 
 /**
  * Regression tests for the {@link Joiner} review of 2026-09-01 (second pass).
@@ -32,7 +33,7 @@ public class JoinerClosedStateFixTest extends TestBase {
 
     /** B2: close() must preserve the accumulated content instead of discarding it with the pooled builder. */
     @Nested
-    public class ClosingPreservesContent {
+    public class ClosingPreservesContent extends TestBase {
 
         @Test
         public void aClosedPooledJoinerStillReportsItsContent() {
@@ -140,7 +141,7 @@ public class JoinerClosedStateFixTest extends TestBase {
 
     /** B3 / B3b: merge reads a closed source, and rejects a closed receiver unconditionally. */
     @Nested
-    public class MergeHonoursTheClosedStatePolicy {
+    public class MergeHonoursTheClosedStatePolicy extends TestBase {
 
         @Test
         public void aClosedPooledSourceStillContributesItsContent() {
@@ -197,7 +198,7 @@ public class JoinerClosedStateFixTest extends TestBase {
 
     /** D4b: enabling buffer reuse on a closed Joiner can never take effect, so it must be rejected. */
     @Nested
-    public class ReuseBufferRejectsAClosedJoiner {
+    public class ReuseBufferRejectsAClosedJoiner extends TestBase {
 
         @Test
         public void reuseBufferOnAClosedPooledJoinerThrows() {
@@ -238,7 +239,7 @@ public class JoinerClosedStateFixTest extends TestBase {
 
     /** B5: toString() no longer appends the suffix into the buffer and rewinds it. */
     @Nested
-    public class ToStringDoesNotMutateTheBuffer {
+    public class ToStringDoesNotMutateTheBuffer extends TestBase {
 
         @Test
         public void repeatedToStringIsStable() {
@@ -282,7 +283,7 @@ public class JoinerClosedStateFixTest extends TestBase {
      * keeping their typed {@code append(value)} call, so their output must be byte-identical to before.
      */
     @Nested
-    public class EntryRenderingIsUnchanged {
+    public class EntryRenderingIsUnchanged extends TestBase {
 
         @Test
         public void everyPrimitiveEntryOverloadRendersAsBefore() {
@@ -349,7 +350,7 @@ public class JoinerClosedStateFixTest extends TestBase {
 
     /** J7: repeat(String, int) documents trim/strip and null handling; the behaviour is asserted here. */
     @Nested
-    public class RepeatStringSemantics {
+    public class RepeatStringSemantics extends TestBase {
 
         @Test
         public void repeatAppliesTrimOnceAndIgnoresSkipNulls() {
@@ -367,7 +368,7 @@ public class JoinerClosedStateFixTest extends TestBase {
      * arbitrary {@code toString()} - or build a whole {@code Strings.repeat()} run - before refusing the write.
      */
     @Nested
-    public class ClosedStateIsCheckedBeforeRendering {
+    public class ClosedStateIsCheckedBeforeRendering extends TestBase {
 
         private Joiner closed() {
             final Joiner j = Joiner.with(", ").append("a");
@@ -449,7 +450,7 @@ public class JoinerClosedStateFixTest extends TestBase {
      * entry points must now refuse first, including ahead of argument validation.
      */
     @Nested
-    public class TheBulkFamilyAlsoRefusesBeforeRunningUserCode {
+    public class TheBulkFamilyAlsoRefusesBeforeRunningUserCode extends TestBase {
 
         private final int[] calls = { 0 };
 
@@ -572,10 +573,10 @@ public class JoinerClosedStateFixTest extends TestBase {
             final Map<String, Object> map = new LinkedHashMap<>();
             map.put("k", e);
 
-            // Range-only overloads still validate the range first: they do not call assertNotClosed() themselves.
-            assertThrows(IndexOutOfBoundsException.class, () -> closed().appendAll(new Object[] { e }, 0, 9));
-            assertThrows(IndexOutOfBoundsException.class, () -> closed().appendAll(Arrays.asList(e), 0, 9));
-            assertThrows(IndexOutOfBoundsException.class, () -> closed().appendEntries(map, 0, 9));
+            // Closed state takes precedence over invalid ranges in every append overload.
+            assertThrows(IllegalStateException.class, () -> closed().appendAll(new Object[] { e }, 0, 9));
+            assertThrows(IllegalStateException.class, () -> closed().appendAll(Arrays.asList(e), 0, 9));
+            assertThrows(IllegalStateException.class, () -> closed().appendEntries(map, 0, 9));
 
             assertEquals("Joiner has been closed",
                     assertThrows(IllegalStateException.class, () -> closed().appendAll(Arrays.asList(e), (Predicate<Object>) null)).getMessage());
@@ -588,14 +589,13 @@ public class JoinerClosedStateFixTest extends TestBase {
         }
 
         @Test
-        public void anEmptyBulkRequestIsStillANoOpOnAClosedJoinerUnlessTheMethodChecksClosedFirst() {
-            // Overloads that do not call assertNotClosed() themselves still treat an empty source as a no-op.
-            assertEquals("a", closed().appendAll(new Object[0]).toString());
-            assertEquals("a", closed().appendAll(new Object[] { "z" }, 1, 1).toString());
-            assertEquals("a", closed().appendAll(Collections.emptyList()).toString());
-            assertEquals("a", closed().appendAll((Iterable<Object>) Collections.<Object> emptyList()).toString());
-            assertEquals("a", closed().appendAll(Collections.emptyList().iterator()).toString());
-            assertEquals("a", closed().appendEntries(new LinkedHashMap<>()).toString());
+        public void emptyBulkRequestsRequireAnOpenJoiner() {
+            assertThrows(IllegalStateException.class, () -> closed().appendAll(new Object[0]));
+            assertThrows(IllegalStateException.class, () -> closed().appendAll(new Object[] { "z" }, 1, 1));
+            assertThrows(IllegalStateException.class, () -> closed().appendAll(Collections.emptyList()));
+            assertThrows(IllegalStateException.class, () -> closed().appendAll((Iterable<Object>) Collections.<Object> emptyList()));
+            assertThrows(IllegalStateException.class, () -> closed().appendAll(Collections.emptyList().iterator()));
+            assertThrows(IllegalStateException.class, () -> closed().appendEntries(new LinkedHashMap<>()));
 
             // Overloads that check closed first refuse even an empty or null source.
             assertEquals("Joiner has been closed",
@@ -630,6 +630,7 @@ public class JoinerClosedStateFixTest extends TestBase {
     /** A bean whose getter calls are observable. */
     public static class CountingBean {
         int reads = 0;
+        @AccessFieldByMethod
         private String name = "n";
 
         public String getName() {
@@ -640,6 +641,56 @@ public class JoinerClosedStateFixTest extends TestBase {
 
         public void setName(final String name) {
             this.name = name;
+        }
+    }
+
+    @Test
+    public void selectedBeanNamesAreValidatedBeforeGettersOrAppends() {
+        final CountingBean bean = new CountingBean();
+        final Joiner joiner = Joiner.with(", ").append("saved");
+        assertThrows(IllegalArgumentException.class, () -> joiner.appendBean(bean, Arrays.asList("name", "missing")));
+        assertEquals(0, bean.reads);
+        assertEquals("saved", joiner.toString());
+        assertThrows(IllegalArgumentException.class, () -> joiner.appendBean(bean, Arrays.asList("name", null)));
+        assertEquals(0, bean.reads);
+        assertEquals("saved", joiner.toString());
+
+        joiner.appendBean(bean, Arrays.asList("name", "name"));
+        assertEquals(2, bean.reads);
+        assertEquals("saved, name=n, name=n", joiner.toString());
+        bean.setName(null);
+        assertEquals("name=missing", Joiner.with(", ").useForNull("missing").skipNulls().appendBean(bean, List.of("name")).toString());
+        assertEquals(3, bean.reads);
+    }
+
+    @Test
+    public void selectedNestedBeanPathsRetainTheirLookupAndNullSemantics() {
+        final NestedCountingBean bean = new NestedCountingBean();
+        final Joiner joiner = Joiner.with(", ");
+        assertThrows(IllegalArgumentException.class, () -> joiner.appendBean(bean, List.of("child.name", "child.missing")));
+        assertEquals(0, bean.reads);
+        assertEquals(0, bean.child.reads);
+        assertEquals("", joiner.toString());
+        assertEquals("child.name=n", joiner.appendBean(bean, List.of("child.name")).toString());
+        assertEquals(1, bean.reads);
+        assertEquals(1, bean.child.reads);
+        bean.setChild(null);
+        assertEquals("child.name=null", Joiner.with(", ").appendBean(bean, List.of("child.name")).toString());
+        assertEquals(2, bean.reads);
+    }
+
+    public static class NestedCountingBean {
+        int reads;
+        @AccessFieldByMethod
+        private CountingBean child = new CountingBean();
+
+        public CountingBean getChild() {
+            reads++;
+            return child;
+        }
+
+        public void setChild(final CountingBean child) {
+            this.child = child;
         }
     }
 
@@ -668,12 +719,8 @@ public class JoinerClosedStateFixTest extends TestBase {
     }
 
     /**
-     * Pins the {@code @throws IllegalStateException} contract that the append family now documents. Of the 74
-     * public {@code append*} members, 73 refuse a closed Joiner and only {@code appendTo} - a read path - does
-     * not. Every call below passes an argument that no no-op path covers, so each one reaches the closed check.
-     * Two of them, {@code append(String)} and {@code append(StringBuilder)}, do have a no-op path for a
-     * {@code null} element under {@link Joiner#skipNulls()} - which is why those two carry the <i>qualified</i>
-     * sentence, and why the next test pins that escape separately.
+     * Verifies the closed-state contract for value appends and the read-only {@code appendTo} operation.
+     * The next test covers skipped elements, empty inputs, and invalid arguments.
      */
     @Test
     public void everyValueShapedAppendOverloadRefusesAClosedJoiner() throws Exception {
@@ -709,40 +756,37 @@ public class JoinerClosedStateFixTest extends TestBase {
     }
 
     /**
-     * Pins the three documented escapes from the closed check: a {@code null} or empty bulk source, a
-     * {@code null} element that {@link Joiner#skipNulls()} drops, and {@code appendIf} with a {@code false}
-     * condition. {@code appendIf} also validates its supplier before it ever reaches the closed check.
+     * Verifies that append operations check the closed state before argument validation or no-op returns.
      */
     @Test
-    public void theDocumentedNoOpAndValidationOrderEscapesHold() {
-        // skipNulls() turns a null String/StringBuilder element into a no-op that never checks the closed state.
+    public void closedStatePrecedesNoOpsAndArgumentValidation() {
+        // Skipped elements still require an open receiver.
         final Joiner skipping = Joiner.with(", ").skipNulls().append("a");
         skipping.close();
-        assertEquals("a", skipping.append((String) null).toString());
+        refusesWithIse(() -> skipping.append((String) null));
 
         final Joiner skipping2 = Joiner.with(", ").skipNulls().append("a");
         skipping2.close();
-        assertEquals("a", skipping2.append((StringBuilder) null).toString());
+        refusesWithIse(() -> skipping2.append((StringBuilder) null));
 
-        // Without skipNulls() the very same call renders the null text, so it does check.
+        // Appending the configured null text also requires an open receiver.
         refusesWithIse(() -> closedJoiner().append((String) null));
         refusesWithIse(() -> closedJoiner().append((StringBuilder) null));
 
-        // A null or empty primitive source is a no-op on a closed Joiner.
-        assertEquals("a", closedJoiner().appendAll((int[]) null).toString());
-        assertEquals("a", closedJoiner().appendAll(new int[0]).toString());
-        assertEquals("a", closedJoiner().appendAll((IntList) null).toString());
-        assertEquals("a", closedJoiner().appendAll(new int[] { 1, 2 }, 1, 1).toString());
+        // Null sources and empty ranges still require an open receiver.
+        refusesWithIse(() -> closedJoiner().appendAll((int[]) null));
+        refusesWithIse(() -> closedJoiner().appendAll(new int[0]));
+        refusesWithIse(() -> closedJoiner().appendAll((IntList) null));
+        refusesWithIse(() -> closedJoiner().appendAll(new int[] { 1, 2 }, 1, 1));
 
-        // ... and so is a null or empty map: appendEntries(m) documents that escape for its parameter m.
-        assertEquals("a", closedJoiner().appendEntries((Map<?, ?>) null).toString());
-        assertEquals("a", closedJoiner().appendEntries(new LinkedHashMap<>()).toString());
+        refusesWithIse(() -> closedJoiner().appendEntries((Map<?, ?>) null));
+        refusesWithIse(() -> closedJoiner().appendEntries(new LinkedHashMap<>()));
         refusesWithIse(() -> closedJoiner().appendEntries(Collections.singletonMap("k", "v")));
 
-        // appendIf: the supplier is validated first, and a false condition never reaches the closed check.
-        assertEquals("a", closedJoiner().appendIf(false, () -> "z").toString());
-        assertThrows(IllegalArgumentException.class, () -> closedJoiner().appendIf(true, null));
-        assertThrows(IllegalArgumentException.class, () -> closedJoiner().appendIf(false, null));
+        // The condition and invalid supplier cannot bypass the closed check.
+        refusesWithIse(() -> closedJoiner().appendIf(false, () -> "z"));
+        refusesWithIse(() -> closedJoiner().appendIf(true, null));
+        refusesWithIse(() -> closedJoiner().appendIf(false, null));
         refusesWithIse(() -> closedJoiner().appendIf(true, () -> "z"));
     }
 }

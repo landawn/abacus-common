@@ -7,10 +7,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.type.Type;
 
 @org.junit.jupiter.api.Tag("unit")
-public class SplitterEmptyDocsTest {
+public class SplitterEmptyDocsTest extends TestBase {
     @Test
     void emptyTokensFollowTheRequestedTargetTypeForBothOverloads() {
         final Splitter splitter = Splitter.with(",");

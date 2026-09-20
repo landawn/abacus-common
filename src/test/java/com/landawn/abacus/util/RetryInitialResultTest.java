@@ -10,10 +10,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.RetryExhaustedException;
 
 @org.junit.jupiter.api.Tag("unit")
-public class RetryInitialResultTest {
+public class RetryInitialResultTest extends TestBase {
     @Test
     void zeroRetriesStillChecksAndRejectsTheInitialResult() {
         final AtomicInteger operations = new AtomicInteger();

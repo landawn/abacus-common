@@ -1218,4 +1218,55 @@ public class MultimapRemoveTest extends MultimapTestSupport {
         assertTrue(backing.isEmpty());
         assertEquals(Arrays.asList(1, 2, 3), retained);
     }
+
+    /**
+     * {@code Collection.removeIf} on an unmodifiable collection throws {@code UnsupportedOperationException}
+     * unconditionally - it does not first check whether anything would actually be removed. The shared body
+     * behind both {@code removeValuesIf} overloads guarded only on the value collection being non-empty, not
+     * on the match set being non-empty, so a removal that matched nothing still reached {@code removeIf} and
+     * threw - while the sibling {@code removeValues(Object, Collection)} and {@code removeValues(Map)} forms,
+     * which do carry that guard, returned {@code false} on the very same data.
+     */
+    @Test
+    public void test_removeValuesIf_noMatchOnUnmodifiableValues_regression_20260918() {
+        final Map<String, List<String>> backing = new HashMap<>();
+        backing.put("k", Collections.unmodifiableList(new ArrayList<>(Arrays.asList("a", "b"))));
+        final ListMultimap<String, String> wrapped = ListMultimap.wrap(backing);
+
+        // Before the fix this threw UnsupportedOperationException.
+        assertFalse(wrapped.removeValuesIf(k -> true, Arrays.asList("no-such-value")));
+        assertEquals(Arrays.asList("a", "b"), backing.get("k"));
+
+        // The siblings always behaved this way - they are the reference for the fixed behaviour.
+        assertFalse(wrapped.removeValues("k", Arrays.asList("no-such-value")));
+        assertFalse(wrapped.removeValues(Collections.singletonMap("k", Arrays.asList("no-such-value"))));
+    }
+
+    /**
+     * A stored {@code null} probed against a null-hostile removal collection (such as {@code List.of(..)})
+     * must count as "not a member" - that is what the private {@code containsSafely} helper exists for, and
+     * what {@code removeValues(Object, Collection)} has always done. The bulk forms - {@code removeValues(Map)}
+     * and the shared body behind both {@code removeValuesIf} overloads - called {@code contains} raw instead,
+     * so the same data threw {@code NullPointerException} through them.
+     */
+    @Test
+    public void test_bulkRemoval_storedNullAgainstNullHostileCollection_regression_20260918() {
+        // Reference behaviour: the single-key form tolerates the stored null.
+        final Map<String, List<String>> control = new HashMap<>();
+        control.put("k", new ArrayList<>(Arrays.asList((String) null, "a")));
+        assertTrue(ListMultimap.wrap(control).removeValues("k", List.of("a")));
+        assertEquals(Collections.singletonList(null), control.get("k"));
+
+        // Before the fix this threw NullPointerException.
+        final Map<String, List<String>> viaPredicate = new HashMap<>();
+        viaPredicate.put("k", new ArrayList<>(Arrays.asList((String) null, "a")));
+        assertTrue(ListMultimap.wrap(viaPredicate).removeValuesIf(k -> true, List.of("a")));
+        assertEquals(Collections.singletonList(null), viaPredicate.get("k"));
+
+        // Before the fix this threw NullPointerException too.
+        final Map<String, List<String>> viaMap = new HashMap<>();
+        viaMap.put("k", new ArrayList<>(Arrays.asList((String) null, "a")));
+        assertTrue(ListMultimap.wrap(viaMap).removeValues(Collections.singletonMap("k", List.of("a"))));
+        assertEquals(Collections.singletonList(null), viaMap.get("k"));
+    }
 }

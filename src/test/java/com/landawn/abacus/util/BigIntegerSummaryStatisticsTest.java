@@ -263,7 +263,6 @@ public class BigIntegerSummaryStatisticsTest extends TestBase {
         assertEquals(new BigInteger("7"), stats.getMax());
     }
 
-
     @Test
     public void reviewFixes20260908_toStringRendersWithLocaleRootWhateverTheDefaultLocaleIs() {
         final BigIntegerSummaryStatistics stats = new BigIntegerSummaryStatistics();

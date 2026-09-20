@@ -161,17 +161,18 @@ public class TimestampType extends AbstractDateType<Timestamp> {
     /**
      * Parses a character array into a Timestamp.
      * <p>
-     * This method first attempts to parse the character array as a long value representing
-     * milliseconds since epoch (digits ending in a digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is
-     * not accepted). If that fails, it converts the character array to a string and parses it with
+     * This method parses epoch milliseconds when the text has more than four characters and consists of an optional
+     * sign followed only by ASCII decimal digits (no hexadecimal prefix or type suffix).
+     * Otherwise, it converts the character array to a string and parses it with
      * {@link #valueOf(String)}, so both overloads give the same answer for the same text.
      *
      * @param cbuf the character array containing the timestamp representation
      * @param offset the starting position in the character array
      * @param len the number of characters to parse
      * @return a Timestamp parsed from the character array, or {@code null} if the array is {@code null} or length is 0
-     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
-     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see         {@link #valueOf(String)}), including numeric text outside the {@code long} range
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero {@code len} returns {@code null} without reading.
+     * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see
+     *         {@link #valueOf(String)}), including numeric text outside the {@code long} range.
      */
     @MayReturnNull
     @Override
@@ -180,10 +181,9 @@ public class TimestampType extends AbstractDateType<Timestamp> {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // IllegalArgumentException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Dates.createTimestamp(parseLong(cbuf, offset, len));

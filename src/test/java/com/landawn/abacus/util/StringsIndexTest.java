@@ -586,6 +586,7 @@ public class StringsIndexTest extends StringsTestSupport {
         assertEquals(7, Strings.indexOfDifference("i am a machine", "i am a robot", "i am a maniac"));
         assertEquals(1, Strings.indexOfDifference("abc", "abc", "a"));
     }
+
     /**
      * Contract pin for the "Passing exactly one character" note on {@code indexOfAny(String, char...)}: all four
      * overloads exist, so BOTH {@code char} overloads take part in the ambiguity and a single {@code char} has to be
@@ -607,16 +608,14 @@ public class StringsIndexTest extends StringsTestSupport {
         assertEquals(3, Strings.maxLastIndexOfAll("hello", new char[] { 'l' }));
 
         // the overload set the note describes: both char overloads exist alongside both String ones
-        for (final String name : new String[] { "indexOfAny", "lastIndexOfAny", "minIndexOfAll", "maxIndexOfAll", "minLastIndexOfAll",
-                "maxLastIndexOfAll" }) {
+        for (final String name : new String[] { "indexOfAny", "lastIndexOfAny", "minIndexOfAll", "maxIndexOfAll", "minLastIndexOfAll", "maxLastIndexOfAll" }) {
             Assertions.assertDoesNotThrow(() -> Strings.class.getMethod(name, String.class, char[].class), name);
             Assertions.assertDoesNotThrow(() -> Strings.class.getMethod(name, String.class, int.class, char[].class), name);
             Assertions.assertDoesNotThrow(() -> Strings.class.getMethod(name, String.class, String[].class), name);
             Assertions.assertDoesNotThrow(() -> Strings.class.getMethod(name, String.class, int.class, String[].class), name);
         }
         Assertions.assertThrows(NoSuchMethodException.class, () -> Strings.class.getMethod("indexOfAnyBut", String.class, String[].class));
-        Assertions.assertThrows(NoSuchMethodException.class,
-                () -> Strings.class.getMethod("indexOfAnyBut", String.class, int.class, String[].class));
+        Assertions.assertThrows(NoSuchMethodException.class, () -> Strings.class.getMethod("indexOfAnyBut", String.class, int.class, String[].class));
     }
 
     /**

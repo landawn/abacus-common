@@ -142,46 +142,39 @@ public class RowDatasetFilterTest extends RowDatasetTestSupport {
     }
 
     @Test
-    public void testFilterResolvesColumnSelectionBeforeRowRange() {
-        // Both Collection overloads checked the row range first, so the same pair of bad arguments reported
-        // IndexOutOfBoundsException there and IllegalArgumentException from the String/Tuple2/Tuple3
-        // overloads and from forEach(int, int, Collection, ...). The argument precedence is now: filter,
-        // then the column selection, then the row range, then max.
+    public void testFilterValidatesRowRangeBeforeColumnsAndCallback() {
+        // All overloads follow signature order: row range, column selection, filter, then max.
         final RowDataset ds = createFiveRowCityDataset();
         final int badTo = ds.size() + 99;
         final Predicate<DisposableObjArray> any = row -> true;
 
-        assertThrows(IllegalArgumentException.class, () -> ds.filter(0, badTo, "nope", (Predicate<Object>) v -> true));
-        assertThrows(IllegalArgumentException.class, () -> ds.filter(0, badTo, Tuple.of("nope", "name"), (BiPredicate<Object, Object>) (a, b) -> true));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, "nope", (Predicate<Object>) v -> true));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, Tuple.of("nope", "name"), (BiPredicate<Object, Object>) (a, b) -> true));
 
-        // an unknown column name beats the bad row range, in the 4-arg and the 5-arg overload alike
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> ds.filter(0, badTo, Arrays.asList("nope"), any));
-        assertTrue(ex.getMessage().contains("nope"), ex.getMessage());
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, Arrays.asList("nope"), any));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, Arrays.asList("nope"), any, 1));
 
-        ex = assertThrows(IllegalArgumentException.class, () -> ds.filter(0, badTo, Arrays.asList("nope"), any, 1));
-        assertTrue(ex.getMessage().contains("nope"), ex.getMessage());
-
-        // so does a null or an empty columnNames
+        // The range also takes precedence over null and empty column selections.
         for (final Collection<String> noColumns : Arrays.<Collection<String>> asList(null, new ArrayList<>())) {
-            ex = assertThrows(IllegalArgumentException.class, () -> ds.filter(0, badTo, noColumns, any));
-            assertTrue(ex.getMessage().contains("columnNames"), ex.getMessage());
-
-            ex = assertThrows(IllegalArgumentException.class, () -> ds.filter(0, badTo, noColumns, any, 1));
-            assertTrue(ex.getMessage().contains("columnNames"), ex.getMessage());
+            assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, noColumns, any));
+            assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, noColumns, any, 1));
+            assertThrows(IllegalArgumentException.class, () -> ds.filter(0, ds.size(), noColumns, any));
         }
 
         // a valid column selection with a bad row range still reports the range
         assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, Arrays.asList("name"), any));
         assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, Arrays.asList("name"), any, 1));
 
-        // A null filter now beats the bad row range in the 5-arg overload too: only the 4-arg overload used
-        // to check 'filter' before the range, and the 5-arg one reported the range here. So it is the
-        // null-filter message - not the unknown-column one - that both overloads must report.
-        ex = assertThrows(IllegalArgumentException.class, () -> ds.filter(0, badTo, Arrays.asList("name"), (Predicate<DisposableObjArray>) null, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, Arrays.asList("name"), (Predicate<DisposableObjArray>) null, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> ds.filter(0, badTo, Arrays.asList("nope"), (Predicate<DisposableObjArray>) null, 1));
+
+        // With a valid range, a valid selection reaches callback validation; an unknown column fails first.
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> ds.filter(0, ds.size(), Arrays.asList("name"), (Predicate<DisposableObjArray>) null, 1));
         assertTrue(ex.getMessage().contains("filter"), ex.getMessage());
 
-        ex = assertThrows(IllegalArgumentException.class, () -> ds.filter(0, badTo, Arrays.asList("nope"), (Predicate<DisposableObjArray>) null, 1));
-        assertTrue(ex.getMessage().contains("filter"), ex.getMessage());
+        ex = assertThrows(IllegalArgumentException.class, () -> ds.filter(0, ds.size(), Arrays.asList("nope"), (Predicate<DisposableObjArray>) null, 1));
+        assertTrue(ex.getMessage().contains("nope"), ex.getMessage());
     }
 
     // ========== filter - empty dataset ==========

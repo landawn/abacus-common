@@ -714,8 +714,8 @@ public class ReflectionTest extends TestBase {
             final String classpath = dir + java.io.File.pathSeparator + codeSourceOf(Reflection.class) + java.io.File.pathSeparator
                     + codeSourceOf(ReflectionTest.class) + java.io.File.pathSeparator + System.getProperty("java.class.path");
 
-            final Process process = new ProcessBuilder(java.nio.file.Paths.get(System.getProperty("java.home"), "bin", "java").toString(), "-cp",
-                    classpath, ReflectAsmProbe.class.getName()).redirectErrorStream(true).start();
+            final Process process = new ProcessBuilder(java.nio.file.Paths.get(System.getProperty("java.home"), "bin", "java").toString(), "-cp", classpath,
+                    ReflectAsmProbe.class.getName()).redirectErrorStream(true).start();
 
             final String output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             assertTrue(process.waitFor(2, java.util.concurrent.TimeUnit.MINUTES), "the probe JVM must finish");
@@ -745,8 +745,8 @@ public class ReflectionTest extends TestBase {
             final String got = Reflection.on(new TestClass()).get("publicField");
             final Object created = Reflection.on(TestClass.class).newInstance().instance();
 
-            System.out.println("PROBE available=" + Reflection.isReflectASMAvailable + " get=" + got + " newInstance="
-                    + (created instanceof TestClass ? "ok" : "FAILED"));
+            System.out.println(
+                    "PROBE available=" + Reflection.isReflectASMAvailable + " get=" + got + " newInstance=" + (created instanceof TestClass ? "ok" : "FAILED"));
         }
     }
 }

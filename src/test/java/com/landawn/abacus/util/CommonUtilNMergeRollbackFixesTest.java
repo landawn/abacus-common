@@ -134,8 +134,7 @@ public class CommonUtilNMergeRollbackFixesTest extends TestBase {
     }
 
     /**
-     * A set that accepts the probe element but refuses to give it back - the shape that makes
-     * {@code probeUnmodifiable} throw instead of answering.
+     * A partially mutable set: insertion succeeds but removal is unsupported.
      */
     private static final class UnremovableSet<T> extends LinkedHashSet<T> {
         private static final long serialVersionUID = 1L;
@@ -628,20 +627,12 @@ public class CommonUtilNMergeRollbackFixesTest extends TestBase {
     // ------------------------------------------------------------------ C-016
 
     @Test
-    public void probeUnmodifiableThrowsWhenItCannotUndoItsOwnProbe() {
-        // C-016. The @return clause reads as "anything unexpected just means false", but a container that
-        // ACCEPTS the probe and then refuses to give it back leaves the method unable to answer: it throws
-        // IllegalStateException wrapping the rollback failure, and the collection keeps the probe element.
-        // That is now documented on both overloads; this pins it.
+    public void mutabilityClassificationDoesNotInsertIntoAnUnremovableSet() {
         final UnremovableSet<Object> set = new UnremovableSet<>();
         set.add("a");
 
-        final IllegalStateException ex = assertThrows(IllegalStateException.class, () -> CommonUtil.probeUnmodifiable(set));
-
-        assertNotNull(ex.getCause());
-        assertEquals(UnsupportedOperationException.class, ex.getCause().getClass());
-        // the probe element really is still in there - the reason the method cannot just answer "false"
-        assertEquals(2, set.size());
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(set));
+        assertEquals(Collections.singleton("a"), set);
     }
 
     @Test

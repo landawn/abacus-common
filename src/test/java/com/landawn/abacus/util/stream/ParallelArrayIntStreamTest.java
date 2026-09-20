@@ -1430,7 +1430,6 @@ public class ParallelArrayIntStreamTest extends TestBase {
         assertEquals(Integer.MAX_VALUE, result[6]);
     }
 
-
     @Test
     public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
         final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();

@@ -165,7 +165,7 @@ public class Properties<K, V> implements Map<K, V> {
      * @throws IllegalArgumentException if {@code targetType} is {@code null} or the stored value cannot be converted to it
      * @throws NumberFormatException if the stored value is a string that cannot be parsed to the target numeric type
      * @throws ArithmeticException if a numeric value overflows the requested integer type
-     * @throws RuntimeException if another conversion error occurs
+     * @throws RuntimeException if the converter for a non-{@code null} stored value throws a runtime exception
      * @see N#convert(Object, Class)
      * @see #get(Object)
      * @see #getOrDefault(Object, Object)
@@ -226,11 +226,11 @@ public class Properties<K, V> implements Map<K, V> {
      * @param targetType the class of the type to which a found, non-{@code null} value should be converted
      * @return the value associated with the specified property name, converted to the specified target type;
      *         or {@code defaultValue} (returned as-is, without conversion) if the property is not found or its value is {@code null}
-     * @throws IllegalArgumentException if a non-{@code null} stored value must be converted and {@code targetType} is {@code null},
+     * @throws IllegalArgumentException if {@code targetType} is {@code null},
      *         or the value cannot be converted to that type
      * @throws NumberFormatException if a found value is a string that cannot be parsed to the target numeric type
      * @throws ArithmeticException if a found numeric value overflows the requested integer type
-     * @throws RuntimeException if another conversion error occurs
+     * @throws RuntimeException if the converter for a present value throws a runtime exception
      * @see N#convert(Object, Class)
      * @see #get(Object)
      * @see #get(Object, Class)
@@ -238,6 +238,7 @@ public class Properties<K, V> implements Map<K, V> {
      */
     public <T> T getOrDefault(final Object propName, final T defaultValue, final Class<? extends T> targetType)
             throws IllegalArgumentException, NumberFormatException, ArithmeticException, RuntimeException {
+        N.checkArgNotNull(targetType, cs.targetType);
         @SuppressWarnings("SuspiciousMethodCalls")
         final Object result = values.get(propName);
 
@@ -245,7 +246,6 @@ public class Properties<K, V> implements Map<K, V> {
             return defaultValue;
         }
 
-        N.checkArgNotNull(targetType, cs.targetType);
         return N.convert(result, targetType);
     }
 

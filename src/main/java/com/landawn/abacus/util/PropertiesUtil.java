@@ -189,7 +189,17 @@ public final class PropertiesUtil {
     private static final Runnable refreshTask = () -> {
         synchronized (registeredAutoRefreshProperties) {
             for (final Map.Entry<Resource, Properties<String, ?>> entry : registeredAutoRefreshProperties.entrySet()) {
-                refreshIfNeeded(entry.getKey(), entry.getValue());
+                // Per-entry containment. scheduleWithFixedDelay cancels the task for good - silently - if its
+                // body ever throws, and refreshTaskFuture stays non-null so it is never rescheduled; one
+                // resource raising something refreshIfNeeded does not catch (it only guards the reload, and
+                // only against Exception) would therefore stop auto-refresh for EVERY registered resource,
+                // permanently. Containing it here also stops one bad resource from skipping the rest of the
+                // loop on this pass.
+                try {
+                    refreshIfNeeded(entry.getKey(), entry.getValue());
+                } catch (final Throwable e) { // NOSONAR - deliberately broad: the poll must survive anything.
+                    logger.error(e, "Failed to auto-refresh properties from resource: {}", entry.getKey());
+                }
             }
         }
     };
@@ -1345,9 +1355,16 @@ public final class PropertiesUtil {
         return loadFromXml(node, null, true, null, targetClass);
     }
 
+    /**
+     * Loads properties from an XML element, recursively resolving nested properties and typed values.
+     *
+     * @throws RuntimeException if sibling element names collide after property-name normalization, or constructing,
+     *         converting, or assigning a property value throws a runtime exception
+     * @throws ParsingException if an XML element declares a type attribute that is not allowed
+     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static <T extends Properties<String, Object>> T loadFromXml(final Node source, Method propSetMethod, final boolean isFirstCall, final T output,
-            final Class<T> inputClass) {
+            final Class<T> inputClass) throws RuntimeException, ParsingException {
 
         // Normalized sibling names are map keys and therefore cannot be represented independently.
         if (hasDuplicatedPropName(source)) {
@@ -1576,12 +1593,13 @@ public final class PropertiesUtil {
      * Stores the specified properties to the given Writer with optional comments.
      * Non-string keys and values are converted with {@link String#valueOf(Object)}.
      *
-     * <p><b>Character encoding:</b> this character-oriented overload writes characters <i>verbatim</i>,
-     * with no {@code \u005CuXXXX} escaping, in whatever charset the supplied {@code Writer} encodes to -
+     * <p><b>Character encoding:</b> this character-oriented overload writes non-ASCII characters in keys
+     * and values without {@code \u005CuXXXX} escaping, in whatever charset the supplied {@code Writer} encodes to -
      * the same rule as {@link java.util.Properties#store(java.io.Writer, String)}. Read it back with
      * {@link #load(Reader)} using that same charset: {@link #load(File)} and {@link #load(InputStream)}
-     * decode ISO-8859-1 and would mis-decode it. A character the writer's charset cannot represent is
-     * replaced by that encoder, losing data.</p>
+     * decode ISO-8859-1 and would mis-decode it. Normal properties-format escaping still applies to
+     * separators and control characters. The writer's encoder determines whether an unrepresentable
+     * character is replaced or rejected.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1659,7 +1677,7 @@ public final class PropertiesUtil {
      * @param rootElementName the name of the root element in the XML.
      * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
-     *                      When {@code false}, all values are written as plain text without type attributes.
+     *                      When {@code false}, type attributes are omitted; nested properties still use nested elements.
      * @param output the file to which the properties will be stored, encoded as UTF-8. The file is created if it does not already exist.
      * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; if the root name
      *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
@@ -1721,7 +1739,7 @@ public final class PropertiesUtil {
      * @param rootElementName the name of the root element in the XML.
      * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
-     *                      When {@code false}, all values are written as plain text without type attributes.
+     *                      When {@code false}, type attributes are omitted; nested properties still use nested elements.
      * @param output the OutputStream to which the properties will be stored, encoded as UTF-8. The stream is flushed but not closed.
      * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; if the root name
      *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
@@ -1771,7 +1789,7 @@ public final class PropertiesUtil {
      * @param rootElementName the name of the root element in the XML.
      * @param writeTypeInfo if {@code true}, type information will be written as attributes in the XML.
      *                      For example: {@code <port type="int">8080</port>} or {@code <enabled type="boolean">true</enabled>}.
-     *                      When {@code false}, all values are written as plain text without type attributes.
+     *                      When {@code false}, type attributes are omitted; nested properties still use nested elements.
      * @param output the Writer to which the properties will be stored. The writer is flushed but not closed.
      * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; if the root name
      *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
@@ -1820,7 +1838,16 @@ public final class PropertiesUtil {
         validateXmlProperties(properties, ancestors, writeTypeInfo);
     }
 
-    private static void validateXmlProperties(final Properties<?, ?> properties, final Set<Properties<?, ?>> ancestors, final boolean writeTypeInfo) {
+    /**
+     * Validates the property graph before XML output is produced.
+     *
+     * @throws IllegalArgumentException if the graph contains a reference cycle, the key of a non-null value is
+     *         not a valid XML element name, or {@code writeTypeInfo} is true and a value has no loadable type attribute
+     * @throws NullPointerException if a property with a non-null value has a null key
+     * @throws IllegalStateException if no DOM implementation is available to validate a property name
+     */
+    private static void validateXmlProperties(final Properties<?, ?> properties, final Set<Properties<?, ?>> ancestors, final boolean writeTypeInfo)
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         if (!ancestors.add(properties)) {
             throw new IllegalArgumentException("Nested properties contain a reference cycle");
         }
@@ -2283,7 +2310,12 @@ public final class PropertiesUtil {
         }
     }
 
-    private static void checkJavaIdentifier(final String identifier, final String argumentName) {
+    /**
+     * Validates a generated Java identifier.
+     *
+     * @throws IllegalArgumentException if {@code identifier} is null, empty, or not a valid Java identifier
+     */
+    private static void checkJavaIdentifier(final String identifier, final String argumentName) throws IllegalArgumentException {
         if (!Strings.isValidJavaIdentifier(identifier)) {
             throw new IllegalArgumentException(argumentName + " must be a valid Java identifier: " + identifier);
         }
@@ -2294,20 +2326,35 @@ public final class PropertiesUtil {
      * so the restricted identifiers {@code permits}, {@code record}, {@code sealed}, {@code var} and
      * {@code yield} are rejected even though they are legal identifiers elsewhere (a generated field may
      * still be named {@code record}).
+     *
+     * @throws IllegalArgumentException if {@code identifier} is null, empty, or not a valid Java type identifier,
+     *         including a restricted type identifier such as {@code record} or {@code var}
      */
-    private static void checkJavaTypeIdentifier(final String identifier, final String argumentName) {
+    private static void checkJavaTypeIdentifier(final String identifier, final String argumentName) throws IllegalArgumentException {
         if (!Strings.isValidJavaTypeIdentifier(identifier)) {
             throw new IllegalArgumentException(argumentName + " must be a valid Java type name: " + identifier);
         }
     }
 
-    private static String generatedClassName(final Node node) {
+    /**
+     * Derives and validates a Java class name from an XML element name.
+     *
+     * @throws IllegalArgumentException if the normalized and capitalized element name is not a valid Java type identifier
+     */
+    private static String generatedClassName(final Node node) throws IllegalArgumentException {
         final String className = Strings.capitalize(Beans.normalizePropName(node.getNodeName()));
         checkJavaTypeIdentifier(className, "XML element name");
         return className;
     }
 
-    private static void validateGeneratedStructure(final Node node, final String className, final Set<String> enclosingClassNames) {
+    /**
+     * Validates names used by the generated class and its nested classes.
+     *
+     * @throws IllegalArgumentException if a generated class or property name is not a valid Java identifier for its
+     *         declaration, or a nested class has the same name as one of its enclosing classes
+     */
+    private static void validateGeneratedStructure(final Node node, final String className, final Set<String> enclosingClassNames)
+            throws IllegalArgumentException {
         checkJavaTypeIdentifier(className, "generated class name");
 
         if (!enclosingClassNames.add(className)) {
@@ -2476,7 +2523,12 @@ public final class PropertiesUtil {
         output.write(spaces + "}" + IOUtil.LINE_SEPARATOR_UNIX);
     }
 
-    private static String getTypeName(final Node node, final String propName) {
+    /**
+     * Resolves the Java source type of an XML property.
+     *
+     * @throws IllegalArgumentException if a declared XML type cannot be resolved, denotes {@code void}, or has no canonical Java source name
+     */
+    private static String getTypeName(final Node node, final String propName) throws IllegalArgumentException {
         // A node with an element child is a nested Properties type; a text-only node is a String property.
         // Must match loadFromXml's detection (XmlUtil.isTextElement) — see comment in xmlPropertiesToJava.
         String typeName = XmlUtil.isTextElement(node) ? "java.lang.String" : Strings.capitalize(propName);

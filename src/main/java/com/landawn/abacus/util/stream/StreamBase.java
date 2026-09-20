@@ -109,8 +109,8 @@ import com.landawn.abacus.util.u.Optional;
  *   <li>Common terminal and intermediate operations</li>
  * </ul>
  *
- * <p>The class uses a lazy evaluation model, deferring computation until a terminal operation
- * is invoked. It supports both sequential and parallel execution modes, with sophisticated
+ * <p>Element processing is generally deferred until traversal; individual operations document
+ * any eager behavior. It supports both sequential and parallel execution modes, with sophisticated
  * thread pool management to avoid deadlocks and optimize resource usage.
  *
  * <p>Thread Pool Management:
@@ -476,6 +476,12 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         this.cmp = cmp;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws IllegalStateException if this stream is already closed
+     * @throws IllegalArgumentException if {@code permitsPerSecond} is negative, zero, or NaN
+     */
     @Override
     public S rateLimited(final double permitsPerSecond) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
@@ -487,14 +493,15 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * {@inheritDoc}
      *
      * @throws IllegalStateException if this stream is already closed
-     * @throws ArithmeticException if the duration cannot be represented as a long number of milliseconds
-     * @throws IllegalArgumentException if the duration is null
+     * @throws IllegalArgumentException if {@code duration} is {@code null}
+     * @throws ArithmeticException if {@code duration} cannot be represented as a {@code long} number of milliseconds
      */
     @Override
-    public S delay(final java.time.Duration duration) throws IllegalStateException, ArithmeticException, IllegalArgumentException {
+    public S delay(final java.time.Duration duration) throws IllegalStateException, IllegalArgumentException, ArithmeticException {
         assertNotClosed();
+        checkArgNotNull(duration, cs.duration);
 
-        final com.landawn.abacus.util.Duration durationToUse = duration == null ? null : com.landawn.abacus.util.Duration.ofMillis(duration.toMillis());
+        final com.landawn.abacus.util.Duration durationToUse = com.landawn.abacus.util.Duration.ofMillis(duration.toMillis());
 
         return delay(durationToUse);
     }
@@ -540,10 +547,9 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         checkArgNotNegative(offset, cs.offset);
         checkArgNotNegative(maxSize, cs.maxSize);
 
+        // Long.MAX_VALUE is a finite quota; an unbounded source must still stop after that many elements.
         if (offset == 0) {
-            return maxSize == Long.MAX_VALUE ? (S) this : limit(maxSize);
-        } else if (maxSize == Long.MAX_VALUE) {
-            return skip(offset);
+            return limit(maxSize);
         } else {
             return skip(offset).limit(maxSize);
         }
@@ -552,13 +558,15 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     /**
      * Returns an Optional containing the element at the given zero-based {@code position}
      * in encounter order, or an empty Optional if the stream has fewer than
-     * {@code position + 1} elements.
+     * {@code position + 1} elements. For an object stream, selecting a {@code null} element
+     * throws a {@link NullPointerException}.
      *
      * <p>This is a terminal short-circuit operation. The stream is closed after this call.
      *
      * @param position the zero-based index of the element to retrieve; must be non-negative
      * @return an Optional containing the element at {@code position}, or an empty Optional
      *         if the stream has fewer elements
+     * @throws NullPointerException if this is an object stream and the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code position} is negative.
      */
@@ -647,7 +655,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     /**
      * Returns the elements of this stream as an array plus the {@code [fromIndex, toIndex)} range
-     * within it that is actually in use, for intermediate operations that can work in place.
+     * within it that is actually in use, for intermediate operations that can use an existing array range.
      * Array-backed subclasses override this to hand back their existing backing array instead of a
      * copy, so callers must treat the returned array as read-only.
      *
@@ -674,13 +682,13 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     /**
      * Returns a stream with the same elements as this stream, but if the stream is empty,
-     * a {@link java.util.NoSuchElementException} will be thrown when the terminal operation
-     * is eventually executed.
+     * a {@link java.util.NoSuchElementException} will be thrown when traversal first checks this source.
+     * Downstream operations that do not traverse the source, such as {@code limit(0)}, do not trigger the check.
      *
      * <p>This is an intermediate operation.
      *
      * @return a stream with the same elements, with an empty-check guard that throws when
-     *         a terminal operation is invoked on an empty stream
+     *         traversal first checks the empty source
      * @throws IllegalStateException if the stream is already closed
      * @see #throwIfEmpty(Supplier)
      */
@@ -693,14 +701,14 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     /**
      * Returns a stream with the same elements as this stream, but if the stream is empty,
-     * the exception produced by {@code exceptionSupplier} will be thrown when the terminal
-     * operation is eventually executed.
+     * the exception produced by {@code exceptionSupplier} will be thrown when traversal first checks this source.
+     * Downstream operations that do not traverse the source, such as {@code limit(0)}, do not trigger the check.
      *
      * <p>This is an intermediate operation.
      *
      * @param exceptionSupplier a supplier that produces the exception to throw if the stream is empty
      * @return a stream with the same elements, with an empty-check guard that throws when
-     *         a terminal operation is invoked on an empty stream
+     *         traversal first checks the empty source
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code exceptionSupplier} is {@code null}.
      */
@@ -717,8 +725,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
     /**
      * Applies the given function to this stream if it is not empty, and returns an Optional
-     * containing the result. If the stream is empty, returns an empty Optional. An empty
-     * Optional is also returned when the function itself returns {@code null}.
+     * containing the result. If the stream is empty, returns an empty Optional.
+     * If the function returns {@code null}, a {@link NullPointerException} is thrown.
      *
      * <p>This is a terminal operation. The stream is always closed after this call.
      *
@@ -730,7 +738,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param <E> the type of exception that the function may throw
      * @param func the function to apply to this stream if it is non-empty
      * @return an Optional containing the result of applying {@code func} to this stream,
-     *         or an empty Optional if the stream is empty or the function returns {@code null}
+     *         or an empty Optional if the stream is empty
+     * @throws NullPointerException if the function returns {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws E if the function throws a checked exception
@@ -746,7 +755,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
             if (isEmpty()) {
                 return Optional.empty();
             } else {
-                return Optional.ofNullable(func.apply((S) this));
+                return Optional.of(func.apply((S) this));
             }
         } finally {
             close();
@@ -925,7 +934,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param ps the parallel settings to apply; must not be {@code null}
      * @return a parallel stream configured according to {@code ps}
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code ps} is {@code null} or contains invalid settings.
+     * @throws IllegalArgumentException if {@code ps} is {@code null} or {@code ps.maxThreadNum()} is negative.
      */
     @SuppressWarnings("deprecation")
     @Override
@@ -1017,9 +1026,9 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         checkArgNotNull(ops, cs.ops);
 
         if (isParallel()) {
-            return linkCloseToThis((SS) ops.apply((S) this).sequential());
+            return linkCloseToThisAfter(() -> (SS) ops.apply((S) this).sequential());
         } else {
-            return linkCloseToThis((SS) ops.apply(this.parallel()).sequential());
+            return linkCloseToThisAfter(() -> (SS) ops.apply(this.parallel()).sequential());
         }
     }
 
@@ -1046,12 +1055,13 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         checkArgNotNull(ops, cs.ops);
 
         if (isParallel() && maxThreadNum == maxThreadNum()) {
-            return linkCloseToThis((SS) ops.apply((S) this).sequential());
+            return linkCloseToThisAfter(() -> (SS) ops.apply((S) this).sequential());
         } else {
             final int checkedMaxThreadNum = checkMaxThreadNum(maxThreadNum, asyncExecutor());
             // final int checkedVirtualTaskNum = checkExecutorNumForVirtualThread(checkedMaxThreadNum);
 
-            return linkCloseToThis((SS) ops.apply(parallel(checkedMaxThreadNum, splitStrategy(), asyncExecutor(), cancelUncompletedThreads())).sequential());
+            return linkCloseToThisAfter(
+                    () -> (SS) ops.apply(parallel(checkedMaxThreadNum, splitStrategy(), asyncExecutor(), cancelUncompletedThreads())).sequential());
         }
     }
 
@@ -1082,8 +1092,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
 
         final AsyncExecutor asyncExecutor = createAsyncExecutor(executor);
 
-        return linkCloseToThis(
-                (SS) ops.apply(parallel(checkMaxThreadNum(maxThreadNum, asyncExecutor), splitStrategy(), asyncExecutor, cancelUncompletedThreads()))
+        return linkCloseToThisAfter(
+                () -> (SS) ops.apply(parallel(checkMaxThreadNum(maxThreadNum, asyncExecutor), splitStrategy(), asyncExecutor, cancelUncompletedThreads()))
                         .sequential());
     }
 
@@ -1109,10 +1119,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         checkArgNotNull(ops, cs.ops);
 
         if (isParallel()) {
-            return linkCloseToThis(
-                    (SS) ((StreamBase) ops.apply(this.sequential())).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads()));
+            return linkCloseToThisAfter(() -> (SS) ((StreamBase) ops.apply(this.sequential())).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(),
+                    cancelUncompletedThreads()));
         } else {
-            return linkCloseToThis((SS) ops.apply((S) this).parallel());
+            return linkCloseToThisAfter(() -> (SS) ops.apply((S) this).parallel());
         }
     }
 
@@ -1141,7 +1151,7 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         //
         // Stream.defer(delayInitializer)... to RS
 
-        return linkCloseToThis(transfer.apply((S) this)); // TODO not lazy evaluation?
+        return linkCloseToThisAfter(() -> transfer.apply((S) this)); // TODO not lazy evaluation?
     }
 
     /**
@@ -1156,6 +1166,39 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param result the stream produced by the caller-supplied function; may be {@code null}
      * @return {@code result}, linked to this stream's lifecycle
      */
+    /**
+     * Evaluates {@code op} - a caller-supplied {@code ops}/{@code transfer} function and the stream plumbing
+     * around it - and links the result to this stream's lifecycle.
+     *
+     * <p>The evaluation has to happen inside this method rather than in the argument expression: if it throws,
+     * there is no result to hand ownership of this stream to, so this stream must be closed here or it leaks
+     * along with any file or JDBC handle behind it. That is the same reasoning {@link #linkCloseToThis(BaseStream)}
+     * already applies to a function that returns {@code null}, and what the sibling {@code Seq.transform} does
+     * via {@code closeAfterFailure}.</p>
+     *
+     * @param <RS> the returned stream type
+     * @param op supplies the stream produced by the caller-supplied function
+     * @return the produced stream, linked to this stream's lifecycle
+     */
+    @SuppressWarnings("rawtypes")
+    <RS extends BaseStream> RS linkCloseToThisAfter(final Supplier<RS> op) {
+        final RS result;
+
+        try {
+            result = op.get();
+        } catch (final Throwable e) {
+            try {
+                close();
+            } catch (final Throwable e2) {
+                e.addSuppressed(e2);
+            }
+
+            throw e;
+        }
+
+        return linkCloseToThis(result);
+    }
+
     @SuppressWarnings("rawtypes")
     <RS extends BaseStream> RS linkCloseToThis(final RS result) {
         if (result == null) {
@@ -1282,8 +1325,8 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
     }
 
     /**
-     * Returns whether {@link #close()} has already run on this stream. Once closed, any further
-     * operation on it fails with an {@code IllegalStateException}.
+     * Returns whether {@link #close()} has already run on this stream. Once closed, operations
+     * requiring an open stream fail with an {@code IllegalStateException}.
      *
      * @return {@code true} if this stream has been closed
      */
@@ -1678,7 +1721,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1689,7 +1735,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b, final String errorMessage) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b, final String errorMessage) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1700,7 +1749,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b, final String errorMessageTemplate, final int p1) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b, final String errorMessageTemplate, final int p1) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1711,7 +1763,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b, final String errorMessageTemplate, final long p1) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b, final String errorMessageTemplate, final long p1) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1722,7 +1777,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b, final String errorMessageTemplate, final Object p1) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b, final String errorMessageTemplate, final Object p1) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1733,7 +1791,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b, final String errorMessageTemplate, final int p1, final int p2) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1744,7 +1805,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b, final String errorMessageTemplate, final long p1, final long p2) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1755,7 +1819,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -1766,7 +1833,10 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         }
     }
 
-    final void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3) {
+    /**
+     * @throws IllegalStateException if {@code b} is {@code false}.
+     */
+    final void checkState(final boolean b, final String errorMessageTemplate, final Object p1, final Object p2, final Object p3) throws IllegalStateException {
         if (!b) {
             try {
                 //noinspection ConstantValue,DataFlowIssue
@@ -2433,13 +2503,32 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
                     break;
                 }
                 if (s != null) {
-                    try {
-                        s.close();
-                    } catch (final Exception ce) {
-                        e.addSuppressed(ce);
-                    }
+                    closeOpenedSource(s, e);
                 }
             }
+            throw e;
+        }
+    }
+
+    /**
+     * Opens the supplied sources in order, preserving an opening failure and closing only the
+     * successfully opened prefix. A null source may be translated to an empty iterator by the opener.
+     */
+    static <S extends AutoCloseable, I> I[] iterateAll(final List<? extends S> sources, final I[] iterators, final Function<? super S, ? extends I> opener) {
+        int opened = 0;
+
+        try {
+            for (final S source : sources) {
+                iterators[opened] = opener.apply(source);
+                opened++;
+            }
+
+            return iterators;
+        } catch (final RuntimeException | Error e) {
+            for (int i = 0; i < opened; i++) {
+                closeOpenedSource(sources.get(i), e);
+            }
+
             throw e;
         }
     }
@@ -2472,12 +2561,21 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return DoubleIteratorEx.from(iter);
     }
 
+    /**
+     * Closes an already opened source after construction fails, preserving the original failure.
+     * Distinct cleanup failures, including errors, are suppressed so the caller can close the
+     * remaining sources; rethrowing the original failure from a close handler does not suppress it
+     * onto itself.
+     *
+     * @param source the source to close, or {@code null}
+     * @param e the original failure
+     */
     static void closeOpenedSource(final AutoCloseable source, final Throwable e) {
         if (source != null) {
             try {
                 source.close();
-            } catch (final Exception ce) {
-                e.addSuppressed(ce);
+            } catch (final Throwable ce) {
+                addSuppressedIfDistinct(e, ce);
             }
         }
     }
@@ -2566,8 +2664,29 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
      * @param windowSize the size of each sliding window
      * @param increment the step size between consecutive window start positions
      * @return the number of windows that will be produced, or {@code 0} if {@code remaining <= 0}
+     * @see #countSlidingWindows(long, int, int, int)
      */
     static long countSlidingWindows(final long remaining, final int windowSize, final int increment) {
+        return countSlidingWindows(remaining, windowSize, increment, 0);
+    }
+
+    /**
+     * Counts the remaining windows when the iterator has already buffered {@code bufferedPrefix} elements
+     * of the next window. Overlapping {@code sliding(..)} iterators retain the tail of the window they just
+     * emitted, so the elements still to be read are fewer than the window they will complete.
+     * <p>
+     * {@code Seq} keeps its own copy of this arithmetic, because this helper is package-private to
+     * {@code com.landawn.abacus.util.stream}; the two must stay in step.
+     *
+     * @param remaining the number of source elements still to be read
+     * @param windowSize the size of each sliding window
+     * @param increment the step size between consecutive window start positions
+     * @param bufferedPrefix the number of already-buffered elements of the next window; always {@code 0}
+     *        when {@code increment >= windowSize}, which retains nothing between windows
+     * @return the number of windows that will be produced, or {@code 0} if {@code remaining <= 0} - a
+     *         buffered prefix alone starts no window, because sliding stops once the source is exhausted
+     */
+    static long countSlidingWindows(final long remaining, final int windowSize, final int increment, final int bufferedPrefix) {
         if (remaining <= 0) {
             return 0;
         }
@@ -2575,11 +2694,15 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
             final long result = remaining / increment;
             return result + (remaining % increment > 0 ? 1 : 0);
         }
-        if (remaining <= windowSize) {
+        // Subtract the elements still needed to finish the first window instead of adding the buffered
+        // prefix to `remaining`: that sum can overflow even when the exact window count fits in a long.
+        final long afterFirstWindow = remaining - (windowSize - bufferedPrefix);
+
+        if (afterFirstWindow <= 0) {
             return 1;
         }
-        final long len = remaining - windowSize;
-        return 1 + (len % increment == 0 ? len / increment : len / increment + 1);
+
+        return 1 + afterFirstWindow / increment + (afterFirstWindow % increment == 0 ? 0 : 1);
     }
 
     static int sum(final char[] a) {
@@ -3151,6 +3274,15 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return N.slice(a, fromIndex, toIndex);
     }
 
+    /**
+     * Selects the supplied executor, or uses the shared executor when it has room for the
+     * requested workers. If the shared executor is too busy, creates an owned temporary executor
+     * that the operation must release through {@code shutdownTempExecutor}.
+     *
+     * @param asyncExecutor the requested executor; {@code null} selects the shared executor when possible
+     * @param threadNum the positive number of workers needed by the operation
+     * @return the executor selected for the operation
+     */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     protected static AsyncExecutor checkAsyncExecutor(AsyncExecutor asyncExecutor, final int threadNum) {
         if (asyncExecutor == null || asyncExecutor == DEFAULT_ASYNC_EXECUTOR) {
@@ -3179,19 +3311,63 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return asyncExecutor;
     }
 
+    /**
+     * Submits a worker without retaining its future. A busy shared executor is replaced with
+     * an owned temporary executor; callers must retain and eventually release the returned executor.
+     *
+     * @param asyncExecutorToUse the current executor; {@code null} selects the shared executor when possible
+     * @param maxThreadNum the maximum number of workers planned for the operation
+     * @param taskIndex the zero-based index of this worker, used to size a fallback executor
+     * @param cmd the worker to execute
+     * @return the executor used for submission
+     */
     protected static AsyncExecutor execute(final AsyncExecutor asyncExecutorToUse, final int maxThreadNum, final int taskIndex, final Runnable cmd) {
         return execute(asyncExecutorToUse, maxThreadNum, taskIndex, Fn.r2c(cmd));
     }
 
+    /**
+     * Submits a callable worker without retaining its future or result.
+     * Callers must retain and eventually release any returned temporary executor.
+     *
+     * @param asyncExecutorToUse the current executor; {@code null} selects the shared executor when possible
+     * @param maxThreadNum the maximum number of workers planned for the operation
+     * @param taskIndex the zero-based index of this worker, used to size a fallback executor
+     * @param cmd the worker to execute
+     * @return the executor used for submission
+     */
     protected static AsyncExecutor execute(final AsyncExecutor asyncExecutorToUse, final int maxThreadNum, final int taskIndex, final Callable<?> cmd) {
         return execute(asyncExecutorToUse, maxThreadNum, taskIndex, null, cmd);
     }
 
+    /**
+     * Submits a worker and optionally appends its future to the operation's future list.
+     * Callers must retain and eventually release any returned temporary executor.
+     *
+     * @param asyncExecutorToUse the current executor; {@code null} selects the shared executor when possible
+     * @param maxThreadNum the maximum number of workers planned for the operation
+     * @param taskIndex the zero-based index of this worker, used to size a fallback executor
+     * @param futureList the list that receives the submitted future, or {@code null} to discard it
+     * @param cmd the worker to execute
+     * @return the executor used for submission
+     */
     protected static AsyncExecutor execute(final AsyncExecutor asyncExecutorToUse, final int maxThreadNum, final int taskIndex,
             final List<ContinuableFuture<Void>> futureList, final Runnable cmd) {
         return execute(asyncExecutorToUse, maxThreadNum, taskIndex, futureList, Fn.r2c(cmd));
     }
 
+    /**
+     * Submits a callable worker, creating an owned temporary executor if the shared executor is
+     * too busy. The returned executor must be reused for subsequent submissions and released when
+     * the operation completes. Submission failures propagate to the caller.
+     *
+     * @param <R> the worker result type
+     * @param asyncExecutorToUse the current executor; {@code null} selects the shared executor when possible
+     * @param maxThreadNum the maximum number of workers planned for the operation
+     * @param taskIndex the zero-based index of this worker, used to size a fallback executor
+     * @param futureList the list that receives the submitted future, or {@code null} to discard it
+     * @param cmd the worker to execute
+     * @return the executor used for submission
+     */
     protected static <R> AsyncExecutor execute(AsyncExecutor asyncExecutorToUse, final int maxThreadNum, final int taskIndex,
             final List<ContinuableFuture<R>> futureList, final Callable<? extends R> cmd) {
         // if (executorNumForVirtualThread == 0 || isVirtualThreadSupported == false) {
@@ -3236,11 +3412,38 @@ abstract class StreamBase<T, A, P, C, OT, IT, ITER extends Iterator<T>, S extend
         return asyncExecutorToUse;
     }
 
+    /**
+     * Submits a worker while recording submission or execution failures in the shared error holder.
+     * No worker is submitted if a failure has already been recorded.
+     *
+     * @param asyncExecutorToUse the current executor; {@code null} selects the shared executor when possible
+     * @param maxThreadNum the maximum number of workers planned for the operation
+     * @param taskIndex the zero-based index of this worker, used to size a fallback executor
+     * @param futureList the list that receives the submitted future, or {@code null} to discard it
+     * @param eHolder the operation's shared error holder, checked before submission
+     * @param cmd the worker to execute
+     * @return the executor selected on successful submission, or the current executor when skipped or rejected
+     */
     protected static AsyncExecutor execute(final AsyncExecutor asyncExecutorToUse, final int maxThreadNum, final int taskIndex,
             final List<ContinuableFuture<Void>> futureList, final Holder<Throwable> eHolder, final Runnable cmd) {
         return execute(asyncExecutorToUse, maxThreadNum, taskIndex, futureList, eHolder, Fn.r2c(cmd));
     }
 
+    /**
+     * Submits a callable worker while recording submission or execution failures in the shared
+     * error holder. A worker that fails completes with a {@code null} result; the operation's
+     * completion helper must inspect the error holder before using collected results.
+     * No worker is submitted if a failure has already been recorded.
+     *
+     * @param <R> the worker result type
+     * @param asyncExecutorToUse the current executor; {@code null} selects the shared executor when possible
+     * @param maxThreadNum the maximum number of workers planned for the operation
+     * @param taskIndex the zero-based index of this worker, used to size a fallback executor
+     * @param futureList the list that receives the submitted future, or {@code null} to discard it
+     * @param eHolder the operation's shared error holder, checked before submission
+     * @param cmd the worker to execute
+     * @return the executor selected on successful submission, or the current executor when skipped or rejected
+     */
     protected static <R> AsyncExecutor execute(final AsyncExecutor asyncExecutorToUse, final int maxThreadNum, final int taskIndex,
             final List<ContinuableFuture<R>> futureList, final Holder<Throwable> eHolder, final Callable<? extends R> cmd) {
         if (eHolder.value() != null) {

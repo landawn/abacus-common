@@ -27,13 +27,11 @@ public class IteratorIntStreamTest extends TestBase {
             for (final boolean empty : new boolean[] { true, false }) {
                 final int[] values = empty ? new int[0] : new int[] { (int) 1 };
                 final java.util.concurrent.atomic.AtomicInteger factoryCalls = new java.util.concurrent.atomic.AtomicInteger();
-                try (final IntStream stream = arrayBacked ? IntStream.of(values)
-                        : IntStream.of(com.landawn.abacus.util.IntIterator.of(values))) {
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                            () -> stream.groupTo(value -> value, null, () -> {
-                                factoryCalls.incrementAndGet();
-                                return new java.util.HashMap<>();
-                            }));
+                try (final IntStream stream = arrayBacked ? IntStream.of(values) : IntStream.of(com.landawn.abacus.util.IntIterator.of(values))) {
+                    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> stream.groupTo(value -> value, null, () -> {
+                        factoryCalls.incrementAndGet();
+                        return new java.util.HashMap<>();
+                    }));
                     org.junit.jupiter.api.Assertions.assertEquals(0, factoryCalls.get());
                 }
             }
@@ -137,7 +135,6 @@ public class IteratorIntStreamTest extends TestBase {
         }
     }
 
-
     @Test
     public void testLimitPreservesQuotaWhenSupplierFailsBeforeProducingValue() {
         final java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
@@ -157,7 +154,6 @@ public class IteratorIntStreamTest extends TestBase {
             assertEquals(2, attempts.get());
         }
     }
-
 
     // Creates an iterator-backed IntStream (IteratorIntStream) rather than array-backed
     private IntStream iter(int... values) {

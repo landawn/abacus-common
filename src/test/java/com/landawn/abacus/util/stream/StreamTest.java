@@ -157,7 +157,6 @@ import com.landawn.abacus.util.stream.Stream.WindowHandler;
 
 import com.landawn.abacus.TestBase;
 
-
 public class StreamTest extends AbstractTest {
 
     @TempDir
@@ -5840,8 +5839,8 @@ public class StreamTest extends AbstractTest {
         final AtomicInteger closed = new AtomicInteger();
         final Stream<Integer> stream = Stream.of(1, 2).peek(value -> consumed.incrementAndGet()).onClose(closed::incrementAndGet);
 
-        assertTrue(assertThrows(IllegalArgumentException.class,
-                () -> stream.cartesianProduct((Collection<Collection<Integer>>) null)).getMessage().contains("cs"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> stream.cartesianProduct((Collection<Collection<Integer>>) null)).getMessage()
+                .contains("cs"));
         assertEquals(0, consumed.get());
         assertEquals(1, closed.get());
         assertThrows(IllegalStateException.class, stream::count);
@@ -11501,9 +11500,7 @@ public class StreamTest extends AbstractTest {
             Assumptions.abort("directory junctions are a Windows concept");
         }
 
-        final Process p = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.getAbsolutePath(), target.getAbsolutePath())
-                .redirectErrorStream(true)
-                .start();
+        final Process p = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.getAbsolutePath(), target.getAbsolutePath()).redirectErrorStream(true).start();
 
         p.waitFor();
 
@@ -12261,8 +12258,7 @@ public class StreamTest extends AbstractTest {
                 sources.add(Arrays.asList(2, 3).iterator());
                 sources.add(nullIndex, null);
 
-                final Stream<Integer> stream = explicitBufferSize ? Stream.parallelConcatIterators(sources, 1, 1)
-                        : Stream.parallelConcatIterators(sources, 1);
+                final Stream<Integer> stream = explicitBufferSize ? Stream.parallelConcatIterators(sources, 1, 1) : Stream.parallelConcatIterators(sources, 1);
 
                 assertEquals(Arrays.asList(1, null, 2, 3), stream.toList());
             }
@@ -15588,8 +15584,7 @@ public class StreamTest extends AbstractTest {
                 final AtomicInteger nextCalls = new AtomicInteger();
                 final Stream<Integer> source = Stream.of(countingIterator(Arrays.asList(1, 2), nextCalls)).onClose(closeCalls::incrementAndGet);
                 // This verifies closure, so allow a generous worker-startup delay before emitting a timeout value.
-                final Stream<Integer> result = suppliedDefault ? source.maxWait(Duration.ofSeconds(5), () -> 99)
-                        : source.maxWait(Duration.ofSeconds(5), 99);
+                final Stream<Integer> result = suppliedDefault ? source.maxWait(Duration.ofSeconds(5), () -> 99) : source.maxWait(Duration.ofSeconds(5), 99);
 
                 if (mode == 0) {
                     result.close();
@@ -15646,8 +15641,7 @@ public class StreamTest extends AbstractTest {
                     final Duration duration = Duration.ofMillis(initialBoundary ? Long.MAX_VALUE : 2);
                     final Stream<Long> source = (iteratorSource ? Stream.of(Arrays.asList(event).iterator()) : Stream.of(event))
                             .onClose(closeCalls::incrementAndGet);
-                    final Stream<List<Long>> windows = sliding
-                            ? source.window(duration, duration, () -> start, handler, Collectors.toList())
+                    final Stream<List<Long>> windows = sliding ? source.window(duration, duration, () -> start, handler, Collectors.toList())
                             : source.window(duration, 1, () -> start, handler, Collectors.toList());
 
                     assertThrows(ArithmeticException.class, windows::toList);
@@ -15661,8 +15655,7 @@ public class StreamTest extends AbstractTest {
         final long start = Long.MAX_VALUE - 4;
         assertEquals(Arrays.asList(Arrays.asList(start)),
                 Stream.of(start).window(Duration.ofMillis(2), Duration.ofMillis(2), () -> start, handler, Collectors.toList()).toList());
-        assertEquals(Arrays.asList(Arrays.asList(start)),
-                Stream.of(start).window(Duration.ofMillis(2), 1, () -> start, handler, Collectors.toList()).toList());
+        assertEquals(Arrays.asList(Arrays.asList(start)), Stream.of(start).window(Duration.ofMillis(2), 1, () -> start, handler, Collectors.toList()).toList());
     }
 
     @Test
@@ -15743,8 +15736,8 @@ public class StreamTest extends AbstractTest {
 
     private static void assertSubscriberOfferPreservesInterrupt(final int operation) {
         final AtomicReference<Runnable> subscriberTask = new AtomicReference<>();
-        final com.landawn.abacus.util.Throwables.Consumer<Stream<Integer>, RuntimeException> subscriber =
-                attached -> assertThrows(RuntimeException.class, attached::count);
+        final com.landawn.abacus.util.Throwables.Consumer<Stream<Integer>, RuntimeException> subscriber = attached -> assertThrows(RuntimeException.class,
+                attached::count);
         final Stream<Integer> source = Stream.of(1, 2);
         final Stream<Integer> main = switch (operation) {
             case 0 -> source.addSubscriber(subscriber, 1, 1, subscriberTask::set);
@@ -15823,8 +15816,7 @@ public class StreamTest extends AbstractTest {
         final Stream<Integer> pClosed = Stream.of(3);
         pClosed.close();
 
-        assertThrows(IllegalArgumentException.class,
-                () -> Stream.parallelZip(Arrays.asList(pa, pClosed), Arrays.asList(0), list -> 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(Arrays.asList(pa, pClosed), Arrays.asList(0), list -> 0, 2));
         assertEquals(0, closedParallel.get());
         assertEquals(Arrays.asList(1, 2), pa.toList());
     }
@@ -15905,6 +15897,7 @@ public class StreamTest extends AbstractTest {
         assertFalse(iter.hasNext());
         assertEquals(2, fCalls.get());
     }
+
     @Test
     public void testParallelZipClosesOpenedSourceWhenSiblingIterateFails() {
         final AtomicInteger closed = new AtomicInteger();
@@ -15928,5 +15921,56 @@ public class StreamTest extends AbstractTest {
                 .toList();
 
         assertEquals(Arrays.asList("k/<null>", "missing/<null>"), result);
+    }
+
+    /**
+     * {@code transform}/{@code sps}/{@code psp} hand the pipeline to a caller-supplied function and link this
+     * stream's {@code close()} onto the result, so that closing the result releases this one. The function was
+     * evaluated in the argument expression, so when it threw, {@code linkCloseToThis} never ran and this
+     * stream - plus any file or JDBC handle behind it - leaked. {@code linkCloseToThis} already closes this
+     * stream when the function returns {@code null} ("a function that returns null cannot be chained; still
+     * release this stream rather than leak it"); a throwing function is the same situation, and the sibling
+     * {@code Seq.transform} already closes on failure.
+     */
+    @Test
+    public void test_transformSpsPsp_closeUpstreamWhenFunctionThrows_regression_20260918() {
+        // Reference behaviour: Seq.transform has always closed the source on failure.
+        final AtomicBoolean seqClosed = new AtomicBoolean(false);
+        final Seq<Integer, RuntimeException> seq = Seq.<Integer, RuntimeException> of(1, 2, 3).onClose(() -> seqClosed.set(true));
+        assertThrows(IllegalStateException.class, () -> seq.transform(s -> {
+            throw new IllegalStateException("boom");
+        }));
+        assertTrue(seqClosed.get());
+
+        // Before the fix each of these left the upstream stream open.
+        final AtomicBoolean transformClosed = new AtomicBoolean(false);
+        final Stream<Integer> forTransform = Stream.of(1, 2, 3).onClose(() -> transformClosed.set(true));
+        assertThrows(IllegalStateException.class, () -> forTransform.transform(s -> {
+            throw new IllegalStateException("boom");
+        }));
+        assertTrue(transformClosed.get(), "transform must close the upstream when the transfer function throws");
+
+        final AtomicBoolean spsClosed = new AtomicBoolean(false);
+        final Stream<Integer> forSps = Stream.of(1, 2, 3).onClose(() -> spsClosed.set(true));
+        assertThrows(IllegalStateException.class, () -> forSps.sps(s -> {
+            throw new IllegalStateException("boom");
+        }));
+        assertTrue(spsClosed.get(), "sps must close the upstream when the ops function throws");
+
+        final AtomicBoolean pspClosed = new AtomicBoolean(false);
+        final Stream<Integer> forPsp = Stream.of(1, 2, 3).onClose(() -> pspClosed.set(true));
+        assertThrows(IllegalStateException.class, () -> forPsp.psp(s -> {
+            throw new IllegalStateException("boom");
+        }));
+        assertTrue(pspClosed.get(), "psp must close the upstream when the ops function throws");
+
+        // A function that succeeds must still hand ownership to the result, not close early.
+        final AtomicBoolean okClosed = new AtomicBoolean(false);
+        final Stream<Integer> ok = Stream.of(1, 2, 3).onClose(() -> okClosed.set(true));
+        final Stream<Integer> mapped = ok.transform(s -> s.map(i -> i * 2));
+        assertFalse(okClosed.get(), "a successful transform must not close the upstream eagerly");
+        assertEquals(Arrays.asList(2, 4, 6), mapped.toList());
+        mapped.close();
+        assertTrue(okClosed.get(), "closing the result must release the upstream");
     }
 }

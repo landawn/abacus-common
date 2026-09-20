@@ -26,8 +26,7 @@ import com.landawn.abacus.TestBase;
  *   <li>{@code tryOrDefaultIfExceptionOccurred(..., R)} accepts a default that is not {@link Comparable},</li>
  *   <li>{@code copyOfRange(..., step)} rejects an out-of-range {@code fromIndex} for a descending range instead of
  *       silently clamping it and returning a shorter result,</li>
- *   <li>{@code probeUnmodifiable} answers from the statically registered classification instead of probe-mutating a
- *       container whose class is already known,</li>
+ *   <li>{@code mutabilityOf} classifies containers without changing their contents or invalidating iterators,</li>
  *   <li>{@code reverse}/{@code rotate}/{@code shuffle} on a non-{@code List} {@code Collection} restore the original
  *       content when re-populating fails, rather than leaving the collection emptied,</li>
  *   <li>{@code format(String, Object...)} returns its pooled buffer even when an argument's {@code toString()} throws,</li>
@@ -147,15 +146,15 @@ public class MultiClassRegressionBTest extends TestBase {
         Assertions.assertEquals("edc", CommonUtil.copyOfRange("abcde", 4, 1, -1));
     }
 
-    // ------------------------------------------------------------------ probeUnmodifiable
+    // ------------------------------------------------------------------ mutabilityOf
 
     @Test
-    public void testProbeUnmodifiable_knownModifiableClassIsNotMutated() {
+    public void testMutabilityOf_knownModifiableClassIsNotMutated() {
         final List<String> list = new ArrayList<>(Arrays.asList("a", "b"));
-        // A live iterator fails fast on any structural change, so it detects the probe's add/remove pair.
+        // A live iterator detects transient structural changes even if the contents would be restored.
         final Iterator<String> iter = list.iterator();
 
-        Assertions.assertFalse(CommonUtil.probeUnmodifiable(list));
+        Assertions.assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(list));
 
         Assertions.assertEquals("a", iter.next());
         Assertions.assertEquals("b", iter.next());
@@ -163,32 +162,30 @@ public class MultiClassRegressionBTest extends TestBase {
     }
 
     @Test
-    public void testProbeUnmodifiable_knownModifiableMapIsNotMutated() {
+    public void testMutabilityOf_knownModifiableMapIsNotMutated() {
         final java.util.Map<String, String> map = new java.util.HashMap<>();
         map.put("k", "v");
         final Iterator<java.util.Map.Entry<String, String>> iter = map.entrySet().iterator();
 
-        Assertions.assertFalse(CommonUtil.probeUnmodifiable(map));
+        Assertions.assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(map));
 
         Assertions.assertEquals("k", iter.next().getKey());
         Assertions.assertEquals(1, map.size());
     }
 
     @Test
-    public void testProbeUnmodifiable_classificationUnchanged() {
-        // The no-mutation shortcut must not change any answer. In particular Arrays.asList(...) is deliberately
-        // NOT treated as known-mutable: it rejects add(), so the documented add-only heuristic still reports it
-        // as unmodifiable (see CommonUtilTest#testUnmodifiableNotPoisonedByProbeUnmodifiableProbe).
-        Assertions.assertTrue(CommonUtil.probeUnmodifiable(Arrays.asList("a", "b")));
+    public void testMutabilityOf_classifiesOnlyKnownImplementations() {
+        // Fixed-size lists permit replacement but not insertion, so their classification is UNKNOWN.
+        Assertions.assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(Arrays.asList("a", "b")));
 
-        Assertions.assertTrue(CommonUtil.probeUnmodifiable(List.of("a", "b")));
-        Assertions.assertTrue(CommonUtil.probeUnmodifiable((Collection<?>) null));
-        Assertions.assertFalse(CommonUtil.probeUnmodifiable(new ArrayList<>()));
-        Assertions.assertFalse(CommonUtil.probeUnmodifiable(new TreeSet<>()));
-        Assertions.assertFalse(CommonUtil.probeUnmodifiable(new java.util.LinkedList<>()));
-        Assertions.assertFalse(CommonUtil.probeUnmodifiable(new LinkedHashSet<>()));
-        Assertions.assertFalse(CommonUtil.probeUnmodifiable(new java.util.HashMap<>()));
-        Assertions.assertFalse(CommonUtil.probeUnmodifiable(new java.util.TreeMap<>()));
+        Assertions.assertEquals(Mutability.KNOWN_UNMODIFIABLE, CommonUtil.mutabilityOf(List.of("a", "b")));
+        Assertions.assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf((Collection<?>) null));
+        Assertions.assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(new ArrayList<>()));
+        Assertions.assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(new TreeSet<>()));
+        Assertions.assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(new java.util.LinkedList<>()));
+        Assertions.assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(new LinkedHashSet<>()));
+        Assertions.assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(new java.util.HashMap<>()));
+        Assertions.assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(new java.util.TreeMap<>()));
     }
 
     // ------------------------------------------------------------------ reverse/rotate/shuffle rollback

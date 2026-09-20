@@ -153,9 +153,9 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p><b>Performance Considerations:</b>
  * <ul>
  *   <li>Use ByteStream instead of {@code Stream<Byte>} to avoid boxing overhead</li>
- *   <li>Parallel processing benefits large datasets (typically &gt; 10,000 elements)</li>
+ *   <li>The benefit of parallel processing depends on input size, operation cost, and available processors; benchmark representative workloads</li>
  *   <li>Sequential processing is more efficient for small datasets and simple operations</li>
- *   <li>Lazy evaluation means intermediate operations are not executed until terminal operations</li>
+ *   <li>Most intermediate operations defer processing until traversal; consult each operation for eager evaluation or buffering</li>
  * </ul>
  *
  * @see StreamBase
@@ -959,7 +959,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
+     * @param init the initial accumulated value; also emitted first when {@code initIncluded} is {@code true}
      * @param initIncluded if {@code true}, the {@code init} value is included as the first element of the returned stream;
      *        if {@code false}, the scan starts from the first stream element combined with {@code init}, and {@code init} itself is not emitted.
      * @param accumulator a {@code ByteBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
@@ -1078,7 +1078,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: {1=Value1, 2=Value2, 3=Value3}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -1087,7 +1087,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param keyMapper a function to produce keys for the map
      * @param valueMapper a function to produce values for the map
      * @return a Map whose keys and values are the result of applying the provided mapping functions to the input elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper} is {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
@@ -1110,7 +1110,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: LinkedHashMap {3=Value3, 1=Value1, 2=Value2} (maintains insertion order)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -1121,7 +1121,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param valueMapper a function to produce values for the map
      * @param mapFactory a function which returns a new, empty Map into which the results will be inserted
      * @return a Map whose keys and values are the result of applying the provided mapping functions to the input elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
@@ -1149,7 +1149,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: {small=3, large=23}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -1188,7 +1188,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: TreeMap {large=23, small=3} (sorted by key)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of the map keys
      * @param <V> the type of the map values
@@ -1343,7 +1343,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: ByteList [1, 2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; memory use is determined by the supplied result container and accumulator.
      *
      * @param <R> The type of the result
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
@@ -1380,7 +1380,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // Result: ByteList [1, 2, 3]
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; memory use is determined by the supplied result container and accumulator.
      *
      * @param <R> The type of the result. It must be  {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
@@ -1549,10 +1549,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * {@code OptionalByte} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
-     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
-     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
-     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.Stream#findFirst()} API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1584,10 +1583,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * {@code OptionalByte} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
-     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
-     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
-     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1618,8 +1616,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * {@code OptionalByte}, or an empty {@code OptionalByte} if no element matches. This is a
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
-     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * <p>When several elements match, the one at the smallest encounter-order index in the current
+     * pipeline wins. Parallel intermediate operations may already have reordered the original source.
+     * If that ordering guarantee is not needed,
      * {@link #findAny(Throwables.BytePredicate)} may find a match faster in parallel.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1810,8 +1809,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p>The sum is accumulated in a {@code long} and then converted to {@code int}. For empty streams, returns 0.
      *
-     * <p><b>Note:</b> if the total sum exceeds {@link Integer#MAX_VALUE} (possible only when summing an
-     * extremely large number of elements), an {@link ArithmeticException} is thrown rather than silently overflowing.
+     * <p><b>Note:</b> if the accumulated long sum is outside the {@code int} range, an
+     * {@link ArithmeticException} is thrown during conversion.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2144,7 +2143,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Lazy creation — stream is only built when consumed
+     * // Lazy creation — stream is built when first traversed or closed
      * ByteStream stream = ByteStream.defer(() -> ByteStream.of((byte)1, (byte)2, (byte)3));
      * stream.toArray();   // [1, 2, 3]
      *
@@ -2376,7 +2375,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * byte[] bytes = stream.toArray();   // [1, 2, 3]
      * }</pre>
      *
-     * <p>Reading is deferred until the returned stream is consumed. Consumption throws {@link UncheckedIOException} if reading from {@code is} fails.</p>
+     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the input beyond the bytes it emits; closing the stream discards unread buffered bytes. Consumption throws {@link UncheckedIOException} if reading from {@code is} fails.</p>
      *
      * @param is the input stream to read from (may be {@code null})
      * @return a new ByteStream over the bytes read from {@code is}, or an empty
@@ -2407,7 +2406,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // sharedStream is still open for other operations
      * }</pre>
      *
-     * <p>Reading is deferred until the returned stream is consumed. Consumption throws {@link UncheckedIOException} if reading from {@code is} fails.</p>
+     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the input beyond the bytes it emits; closing the stream discards unread buffered bytes. Consumption throws {@link UncheckedIOException} if reading from {@code is} fails.</p>
      *
      * @param is the input stream to read from (may be {@code null})
      * @param closeInputStreamWhenStreamIsClosed if {@code true}, the input stream will be closed when the ByteStream is closed;
@@ -2446,7 +2445,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2531,7 +2530,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cnt++ >= count) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2610,7 +2609,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 }
 
                 @Override
-                public byte nextByte() {
+                public byte nextByte() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -2641,7 +2640,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 }
 
                 @Override
-                public byte nextByte() {
+                public byte nextByte() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -2710,7 +2709,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2794,7 +2793,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2879,7 +2878,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -2964,7 +2963,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3048,7 +3047,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3164,7 +3163,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3219,7 +3218,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3296,7 +3295,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3481,7 +3480,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3536,7 +3535,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3582,7 +3581,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3633,7 +3632,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3686,7 +3685,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3732,7 +3731,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 return zipFunction.applyAsByte(iterA.nextByte(), iterB.nextByte());
             }
         });
@@ -3778,7 +3777,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 return zipFunction.applyAsByte(iterA.nextByte(), iterB.nextByte(), iterC.nextByte());
             }
         });
@@ -3922,7 +3921,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3981,7 +3980,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4033,7 +4032,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsByte(iterA.nextByte(), iterB.hasNext() ? iterB.nextByte() : valueForNoneB);
                 } else {
@@ -4086,7 +4085,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsByte(iterA.nextByte(), iterB.hasNext() ? iterB.nextByte() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextByte() : valueForNoneC);
@@ -4245,7 +4244,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cursorA < lenA) {
                     if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                         return a[cursorA++];
@@ -4328,7 +4327,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNextA && iterA.hasNext()) {
                     nextA = iterA.nextByte();
                     hasNextA = true;

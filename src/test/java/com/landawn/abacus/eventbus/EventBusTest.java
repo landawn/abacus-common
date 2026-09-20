@@ -1819,6 +1819,445 @@ public class EventBusTest extends TestBase {
         assertEquals(List.of("same"), subscriber.received);
     }
 
+    @Test
+    public void testOverlappingRejectedSubmissionsRestorePreviousEventInReverseOrder() throws Exception {
+        verifyOverlappingRejectedSubmissions(true);
+    }
+
+    @Test
+    public void testOverlappingRejectedSubmissionsRestorePreviousEventInPostOrder() throws Exception {
+        verifyOverlappingRejectedSubmissions(false);
+    }
+
+    private static void verifyOverlappingRejectedSubmissions(final boolean rejectNewerFirst) throws Exception {
+        final AtomicInteger offered = new AtomicInteger();
+        final CountDownLatch[] entered = { new CountDownLatch(1), new CountDownLatch(1) };
+        final CountDownLatch[] release = { new CountDownLatch(1), new CountDownLatch(1) };
+        final EventBus bus = EventBus.create("overlapping-rejections", task -> {
+            final int index = offered.getAndIncrement() - 1;
+            if (index >= 0 && index < 2) {
+                entered[index].countDown();
+                try {
+                    assertTrue(release[index].await(5, TimeUnit.SECONDS));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError(e);
+                }
+                throw new RejectedExecutionException("expected rejection " + index);
+            }
+            task.run();
+        });
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        bus.register(subscriber);
+        bus.post("accepted");
+
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final Thread[] posting = { new Thread(() -> postAndRecordFailure(bus, "first", failure)),
+                new Thread(() -> postAndRecordFailure(bus, "second", failure)) };
+        try {
+            posting[0].start();
+            assertTrue(entered[0].await(5, TimeUnit.SECONDS));
+            posting[1].start();
+            assertTrue(entered[1].await(5, TimeUnit.SECONDS));
+
+            final int firstRejected = rejectNewerFirst ? 1 : 0;
+            release[firstRejected].countDown();
+            posting[firstRejected].join(5000);
+            assertFalse(posting[firstRejected].isAlive());
+            release[1 - firstRejected].countDown();
+        } finally {
+            release[0].countDown();
+            release[1].countDown();
+            posting[0].join(5000);
+            posting[1].join(5000);
+        }
+
+        assertFalse(posting[0].isAlive());
+        assertFalse(posting[1].isAlive());
+        assertNull(failure.get());
+        bus.post("accepted");
+        assertEquals(3, offered.get(), "both rejected submissions must leave the last accepted event in place");
+        bus.post("first");
+        assertEquals(4, offered.get(), "a rejected event must be eligible for a later retry");
+        assertEquals(List.of("accepted", "first"), subscriber.received);
+    }
+
+    private static void postAndRecordFailure(final EventBus bus, final String event, final AtomicReference<Throwable> failure) {
+        try {
+            bus.post(event);
+        } catch (Throwable e) {
+            failure.compareAndSet(null, e);
+        }
+    }
+
+    @Test
+    public void testNestedRejectedSubmissionsDoNotSuppressRetry() {
+        final AtomicInteger offered = new AtomicInteger();
+        final AtomicReference<EventBus> reference = new AtomicReference<>();
+        final EventBus bus = EventBus.create("nested-rejections", task -> {
+            final int index = offered.incrementAndGet();
+            if (index == 1) {
+                reference.get().post("second");
+            }
+            if (index <= 2) {
+                throw new RejectedExecutionException("expected rejection " + index);
+            }
+            task.run();
+        });
+        reference.set(bus);
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        bus.register(subscriber);
+
+        bus.post("first");
+        bus.post("first");
+
+        assertEquals(3, offered.get());
+        assertEquals(List.of("first"), subscriber.received);
+    }
+
+    @Test
+    public void testRejectedOuterSubmissionPreservesSuccessfulNewerSubmission() {
+        final AtomicInteger offered = new AtomicInteger();
+        final AtomicReference<EventBus> reference = new AtomicReference<>();
+        final EventBus bus = EventBus.create("successful-newer-submission", task -> {
+            if (offered.incrementAndGet() == 1) {
+                reference.get().post("second");
+                throw new RejectedExecutionException("expected outer rejection");
+            }
+            task.run();
+        });
+        reference.set(bus);
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        bus.register(subscriber);
+
+        bus.post("first");
+        bus.post("second");
+        assertEquals(2, offered.get(), "rejecting an older submission must preserve newer successful delivery");
+        bus.post("first");
+        assertEquals(List.of("second", "first"), subscriber.received);
+    }
+
+    @Test
+    public void testRejectedNestedSubmissionPreservesSuccessfulOuterSubmission() {
+        final AtomicInteger offered = new AtomicInteger();
+        final AtomicReference<EventBus> reference = new AtomicReference<>();
+        final EventBus bus = EventBus.create("successful-outer-submission", task -> {
+            final int index = offered.incrementAndGet();
+            if (index == 1) {
+                reference.get().post("second");
+            } else if (index == 2) {
+                throw new RejectedExecutionException("expected nested rejection");
+            }
+            task.run();
+        });
+        reference.set(bus);
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        bus.register(subscriber);
+
+        bus.post("first");
+        bus.post("first");
+        assertEquals(2, offered.get(), "rejecting a newer submission must preserve an older successful delivery");
+        bus.post("second");
+        assertEquals(List.of("first", "second"), subscriber.received);
+    }
+
+    @Test
+    public void testInlineAttemptBeforeExecutorRejectionRemainsDeduplicated() {
+        final AtomicInteger offered = new AtomicInteger();
+        final EventBus bus = EventBus.create("attempted-before-rejection", task -> {
+            offered.incrementAndGet();
+            task.run();
+            throw new RejectedExecutionException("reported after callback attempt");
+        });
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        bus.register(subscriber);
+
+        bus.post("same");
+        bus.post("same");
+
+        assertEquals(1, offered.get(), "an attempted callback still counts when execute subsequently throws");
+        assertEquals(List.of("same"), subscriber.received);
+    }
+
+    @Test
+    public void testRuntimeExecutorFailureReleasesReservationAndPreservesThrowable() throws Exception {
+        verifyExecutorFailureCleanup(new IllegalStateException("executor failed before accepting task"));
+    }
+
+    @Test
+    public void testExecutorErrorReleasesReservationAndPreservesThrowable() throws Exception {
+        verifyExecutorFailureCleanup(new AssertionError("executor failed before accepting task"));
+    }
+
+    @Test
+    public void testSneakyCheckedExecutorFailureReleasesReservationAndPreservesThrowable() throws Exception {
+        verifyExecutorFailureCleanup(new Exception("executor escaped its declared throws contract"));
+    }
+
+    @Test
+    public void testRepeatedExecutorFailuresDoNotRetainReservationHistory() throws Exception {
+        final java.lang.reflect.Field current = EventBus.SubIdentifier.class.getDeclaredField("currentReservation");
+        current.setAccessible(true);
+
+        for (final Throwable expected : new Throwable[] { new RejectedExecutionException("repeated rejection"),
+                new IllegalStateException("repeated executor failure"), new AssertionError("repeated executor error"),
+                new Exception("repeated sneaky checked failure") }) {
+            final AtomicInteger offered = new AtomicInteger();
+            final EventBus bus = EventBus.create("repeated-executor-failures", task -> {
+                offered.incrementAndGet();
+                throwExecutorFailure(expected);
+            });
+            final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+            final EventBus.SubIdentifier identifier = asyncIdentifier(subscriber);
+
+            for (int i = 0; i < 128; i++) {
+                Assertions.assertSame(expected, Assertions.assertThrows(Throwable.class, () -> bus.dispatch(identifier, "retry")));
+                assertNull(current.get(identifier), "failed submissions must release their entire reservation history without a successful retry");
+                assertNull(identifier.previousEvent, "a failed submission must not retain its event");
+            }
+
+            assertEquals(128, offered.get());
+            assertTrue(subscriber.received.isEmpty());
+        }
+    }
+
+    private static void verifyExecutorFailureCleanup(final Throwable expected) throws Exception {
+        final AtomicInteger offered = new AtomicInteger();
+        final EventBus bus = EventBus.create("executor-failure-cleanup", task -> {
+            if (offered.getAndIncrement() == 0) {
+                throwExecutorFailure(expected);
+            }
+            task.run();
+        });
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        final EventBus.SubIdentifier identifier = asyncIdentifier(subscriber);
+
+        Assertions.assertSame(expected, Assertions.assertThrows(Throwable.class, () -> bus.dispatch(identifier, "retry")));
+        bus.dispatch(identifier, "retry");
+
+        assertEquals(2, offered.get(), "an executor failure before acceptance must not deduplicate the retry");
+        assertEquals(List.of("retry"), subscriber.received);
+    }
+
+    @Test
+    public void testAttemptedCallbackRemainsCommittedWhenExecutorThrowsAnyFailure() throws Exception {
+        for (final Throwable expected : new Throwable[] { new IllegalStateException("after attempt"), new AssertionError("after attempt"),
+                new Exception("after attempt") }) {
+            final AtomicInteger offered = new AtomicInteger();
+            final EventBus bus = EventBus.create("attempted-before-executor-failure", task -> {
+                offered.incrementAndGet();
+                task.run();
+                throwExecutorFailure(expected);
+            });
+            final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+            final EventBus.SubIdentifier identifier = asyncIdentifier(subscriber);
+
+            Assertions.assertSame(expected, Assertions.assertThrows(Throwable.class, () -> bus.dispatch(identifier, "same")));
+            bus.dispatch(identifier, "same");
+
+            assertEquals(1, offered.get());
+            assertEquals(List.of("same"), subscriber.received);
+        }
+    }
+
+    @Test
+    public void testFailedExecutorSubmissionCannotUndoNewerAcceptedSubmission() throws Exception {
+        for (final Throwable expected : new Throwable[] { new IllegalStateException("outer failure"), new AssertionError("outer failure") }) {
+            final AtomicInteger offered = new AtomicInteger();
+            final AtomicReference<EventBus> busReference = new AtomicReference<>();
+            final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+            final EventBus.SubIdentifier identifier = asyncIdentifier(subscriber);
+            final EventBus bus = EventBus.create("newer-accepted-before-failure", task -> {
+                if (offered.getAndIncrement() == 0) {
+                    busReference.get().dispatch(identifier, "newer");
+                    throwExecutorFailure(expected);
+                }
+                task.run();
+            });
+            busReference.set(bus);
+
+            Assertions.assertSame(expected, Assertions.assertThrows(Throwable.class, () -> bus.dispatch(identifier, "older")));
+            bus.dispatch(identifier, "newer");
+            assertEquals(2, offered.get());
+            bus.dispatch(identifier, "older");
+            assertEquals(List.of("newer", "older"), subscriber.received);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Throwable> void throwExecutorFailure(final Throwable failure) throws E {
+        throw (E) failure;
+    }
+
+    private static EventBus.SubIdentifier asyncIdentifier(final Object subscriber) throws Exception {
+        final EventBus.SubIdentifier prototype = new EventBus.SubIdentifier(subscriber.getClass().getMethod("onEvent", String.class));
+        return new EventBus.SubIdentifier(prototype, subscriber, null, ThreadMode.THREAD_POOL_EXECUTOR);
+    }
+
+    @Test
+    public void testCommitAndReleaseLeaveSharedReservationConstantsUnchanged() throws Exception {
+        final EventBus.SubIdentifier identifier = asyncIdentifier(new AsyncDedupSubscriber());
+        final Class<?> reservationClass = Class.forName(EventBus.class.getName() + "$Reservation");
+        final Method commit = EventBus.SubIdentifier.class.getDeclaredMethod("commit", reservationClass);
+        final Method release = EventBus.SubIdentifier.class.getDeclaredMethod("release", reservationClass);
+        final java.lang.reflect.Field committed = reservationClass.getDeclaredField("committed");
+        final java.lang.reflect.Field rejected = reservationClass.getDeclaredField("rejected");
+        committed.setAccessible(true);
+        rejected.setAccessible(true);
+
+        for (final String name : List.of("INTERVAL", "DUPLICATE", "UNFILTERED")) {
+            final java.lang.reflect.Field field = reservationClass.getDeclaredField(name);
+            field.setAccessible(true);
+            final Object reservation = field.get(null);
+            final boolean wasCommitted = committed.getBoolean(reservation);
+            final boolean wasRejected = rejected.getBoolean(reservation);
+            try {
+                commit.invoke(identifier, reservation);
+                assertEquals(wasCommitted, committed.getBoolean(reservation), name + " is shared by all subscribers");
+                release.invoke(identifier, reservation);
+                assertEquals(wasRejected, rejected.getBoolean(reservation), name + " is shared by all subscribers");
+            } finally {
+                // Keep a failing baseline run from contaminating other tests through a shared singleton.
+                committed.setBoolean(reservation, wasCommitted);
+                rejected.setBoolean(reservation, wasRejected);
+            }
+        }
+    }
+
+    @Test
+    public void testAcceptedQueuedTasksDiscardHistoryAndDoNotWaitForFilterMonitor() throws Exception {
+        final List<Runnable> queued = new ArrayList<>();
+        final EventBus bus = EventBus.create("accepted-queued-tasks", queued::add);
+        final AsyncDedupSubscriber subscriber = new AsyncDedupSubscriber();
+        final EventBus.SubIdentifier identifier = asyncIdentifier(subscriber);
+        final java.lang.reflect.Field current = EventBus.SubIdentifier.class.getDeclaredField("currentReservation");
+        current.setAccessible(true);
+        final java.lang.reflect.Field previous = current.getType().getDeclaredField("previous");
+        previous.setAccessible(true);
+
+        for (final String event : List.of("first", "second", "third")) {
+            bus.dispatch(identifier, event);
+            assertNull(previous.get(current.get(identifier)), "successful submission must not retain older event history");
+        }
+        bus.dispatch(identifier, "third");
+        assertEquals(3, queued.size(), "successful submission must commit deduplication before task execution");
+        assertTrue(subscriber.received.isEmpty());
+
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final CountDownLatch completed = new CountDownLatch(1);
+        final Thread worker = new Thread(() -> {
+            try {
+                queued.forEach(Runnable::run);
+            } catch (Throwable e) {
+                failure.set(e);
+            } finally {
+                completed.countDown();
+            }
+        }, "committed-eventbus-tasks");
+        worker.setDaemon(true);
+        try {
+            synchronized (identifier) {
+                worker.start();
+                assertTrue(completed.await(5, TimeUnit.SECONDS), "permanently committed tasks must not reacquire the filter monitor");
+            }
+        } finally {
+            worker.join(5000);
+        }
+
+        assertFalse(worker.isAlive());
+        assertNull(failure.get());
+        assertEquals(List.of("first", "second", "third"), subscriber.received);
+    }
+
+    @Test
+    public void testOverlappingIntervalRejectionsRestoreAcceptedTimestampInReverseOrder() throws Exception {
+        verifyOverlappingIntervalRejections(true);
+    }
+
+    @Test
+    public void testOverlappingIntervalRejectionsRestoreAcceptedTimestampInPostOrder() throws Exception {
+        verifyOverlappingIntervalRejections(false);
+    }
+
+    private static void verifyOverlappingIntervalRejections(final boolean rejectNewerFirst) throws Exception {
+        final AtomicInteger offered = new AtomicInteger();
+        final CountDownLatch[] entered = { new CountDownLatch(1), new CountDownLatch(1) };
+        final CountDownLatch[] release = { new CountDownLatch(1), new CountDownLatch(1) };
+        final RejectedExecutionException[] rejections = { new RejectedExecutionException("first rejection"),
+                new RejectedExecutionException("second rejection") };
+        final EventBus bus = EventBus.create("overlapping-interval-rejections", task -> {
+            final int index = offered.getAndIncrement() - 1;
+            if (index >= 0 && index < 2) {
+                entered[index].countDown();
+                try {
+                    assertTrue(release[index].await(5, TimeUnit.SECONDS));
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new AssertionError(e);
+                }
+                throw rejections[index];
+            }
+            task.run();
+        });
+        final AsyncThrottledSubscriber subscriber = new AsyncThrottledSubscriber(2);
+        final EventBus.SubIdentifier identifier = asyncIdentifier(subscriber);
+        bus.dispatch(identifier, "accepted");
+
+        // Use a deterministic past accepted time, avoiding real sleeps between throttled submissions.
+        final long priorAcceptedTime = System.nanoTime() - TimeUnit.SECONDS.toNanos(10);
+        final Method record = EventBus.SubIdentifier.class.getDeclaredMethod("recordReservation", long.class, Object.class);
+        record.setAccessible(true);
+        final Method commit = EventBus.SubIdentifier.class.getDeclaredMethod("commit", record.getReturnType());
+        synchronized (identifier) {
+            commit.invoke(identifier, record.invoke(identifier, priorAcceptedTime, "accepted"));
+        }
+
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+        final Thread[] posting = new Thread[2];
+        for (int i = 0; i < posting.length; i++) {
+            final int index = i;
+            posting[i] = new Thread(() -> {
+                try {
+                    Assertions.assertSame(rejections[index],
+                            Assertions.assertThrows(RejectedExecutionException.class, () -> bus.dispatch(identifier, "rejected-" + index)));
+                } catch (Throwable e) {
+                    failure.compareAndSet(null, e);
+                }
+            }, "interval-rejection-" + index);
+            posting[i].setDaemon(true);
+        }
+        try {
+            posting[0].start();
+            assertTrue(entered[0].await(5, TimeUnit.SECONDS));
+            synchronized (identifier) {
+                identifier.recordPostTime(priorAcceptedTime);
+            }
+            posting[1].start();
+            assertTrue(entered[1].await(5, TimeUnit.SECONDS));
+            final int firstRejected = rejectNewerFirst ? 1 : 0;
+            release[firstRejected].countDown();
+            posting[firstRejected].join(5000);
+            assertFalse(posting[firstRejected].isAlive());
+            release[1 - firstRejected].countDown();
+        } finally {
+            release[0].countDown();
+            release[1].countDown();
+            posting[0].join(5000);
+            posting[1].join(5000);
+        }
+
+        assertFalse(posting[0].isAlive());
+        assertFalse(posting[1].isAlive());
+        assertNull(failure.get());
+        assertEquals(priorAcceptedTime, identifier.lastPostTimeNanos, "both rejections must restore the prior accepted timestamp exactly");
+        assertTrue(identifier.hasPosted, "rejection must not erase the earlier accepted delivery");
+        assertTrue(identifier.isWithinPostInterval(priorAcceptedTime + TimeUnit.MILLISECONDS.toNanos(199)));
+        assertFalse(identifier.isWithinPostInterval(priorAcceptedTime + TimeUnit.MILLISECONDS.toNanos(200)));
+        bus.dispatch(identifier, "retry");
+        assertEquals(4, offered.get(), "the rejected submissions must not throttle a later eligible retry");
+        assertEquals(List.of("accepted", "retry"), subscriber.received);
+    }
+
     // ---- review fixes 2026-09-06 (a12 F-4): documented registration edge cases ----
 
     public static class NamedObjectSubscriber implements Subscriber<Object> {

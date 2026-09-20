@@ -91,10 +91,10 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      * <pre>{@code
      * config.setExclusion(Exclusion.NULL);      // removes null fields
      * config.setExclusion(Exclusion.DEFAULT);   // removes fields with default values
-     * config.setExclusion(Exclusion.NONE);      // keeps all fields
+     * config.setExclusion(Exclusion.NONE);      // disables value-based exclusion; other filters still apply
      * }</pre>
      *
-     * @param exclusion the exclusion strategy to use, or {@code null} for no exclusion
+     * @param exclusion the exclusion strategy to use, or {@code null} to use the bean annotation or the parser default
      * @return this configuration instance for method chaining
      * @see Exclusion
      */

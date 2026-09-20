@@ -1283,8 +1283,7 @@ public class SetMultimapTest extends TestBase {
             final javax.tools.JavaCompiler compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
             final javax.tools.DiagnosticCollector<javax.tools.JavaFileObject> diagnostics = new javax.tools.DiagnosticCollector<>();
 
-            try (javax.tools.StandardJavaFileManager files = compiler.getStandardFileManager(diagnostics, null,
-                    java.nio.charset.StandardCharsets.UTF_8)) {
+            try (javax.tools.StandardJavaFileManager files = compiler.getStandardFileManager(diagnostics, null, java.nio.charset.StandardCharsets.UTF_8)) {
                 final String classpath = System.getProperty("surefire.test.class.path", System.getProperty("java.class.path"));
 
                 return compiler

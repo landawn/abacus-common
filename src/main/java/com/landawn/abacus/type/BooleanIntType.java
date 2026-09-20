@@ -121,8 +121,9 @@ public final class BooleanIntType extends AbstractType<Boolean> {
 
     /**
      * Converts an object to a {@link Boolean} value.
-     * Booleans are returned as-is and numbers map via {@code > 0} (matching {@code get(ResultSet)});
-     * other objects go through their string form using the {@code 1}/{@code 0} convention.
+     * Booleans are returned as-is. Numbers return {@code true} when {@link Number#longValue()}
+     * is positive; fractional values are truncated and wide integer values may overflow during that
+     * conversion. Other objects use their string form with the {@code 1}/{@code 0} convention.
      *
      * @param obj the object to convert; may be {@code null}
      * @return the Boolean value, or {@code false} if {@code obj} is {@code null}
@@ -269,7 +270,7 @@ public final class BooleanIntType extends AbstractType<Boolean> {
      * @implNote
      * This implementation appends {@code stringOf(x)} to {@code appendable}: {@code "1"} for {@code true} and
      * {@code "0"} for {@code false} or {@code null}. The appended text is therefore identical to {@code stringOf(x)}
-     * and round-trips through {@link #valueOf(String)}.
+     * and round-trips non-null values through {@link #valueOf(String)}; a null value decodes as {@code false}.
      */
     @Override
     public void appendTo(final Appendable appendable, final Boolean x) throws NullPointerException, IOException {

@@ -119,7 +119,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * }</pre>
      *
      * @param ch the character to write
-     * @throws IOException if this writer is closed or an I/O error occurs
+     * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
      */
     public void writeCharacter(final char ch) throws IOException {
         if ((ch > lengthOfReplacementsForChars) || (replacementsForChars[ch] == null)) {
@@ -143,10 +143,10 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * }</pre>
      *
      * @param cbuf the character array to write; must not be {@code null}
+     * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IOException if this writer is closed or an I/O error occurs
      */
-    public void writeCharacter(final char[] cbuf) throws NullPointerException, IOException {
+    public void writeCharacter(final char[] cbuf) throws IOException, NullPointerException {
         ensureOpen();
 
         final int len = cbuf.length;
@@ -194,12 +194,13 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * @param cbuf the character array containing data to write; must not be {@code null}
      * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
      * @param len the number of characters to write; must be non-negative and {@code off + len} must not exceed {@code cbuf.length}
+     * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len} exceeds {@code cbuf.length}
-     * @throws IOException if this writer is closed or an I/O error occurs
      */
-    public void writeCharacter(final char[] cbuf, final int off, int len) throws NullPointerException, IndexOutOfBoundsException, IOException {
+    public void writeCharacter(final char[] cbuf, final int off, int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
+        N.requireNonNull(cbuf, cs.cbuf);
 
         if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
@@ -243,11 +244,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * writer.writeCharacter("Hello \"World\"");   // Writes escaped version
-     * writer.writeCharacter(null);                // Writes: null
+     * writer.writeCharacter((String) null);      // Writes: null
      * }</pre>
      *
      * @param str the string to write
-     * @throws IOException if this writer is closed or an I/O error occurs
+     * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
      */
     public void writeCharacter(final String str) throws IOException {
         if (str == null) {
@@ -276,11 +277,11 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *            must be non-negative and not greater than the effective string length
      * @param len the number of characters to write; must be non-negative and {@code off + len} must
      *            not exceed the effective string length
+     * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
      *         exceeds the effective string length
-     * @throws IOException if this writer is closed or an I/O error occurs
      */
-    public void writeCharacter(final String str, final int off, final int len) throws IndexOutOfBoundsException, IOException {
+    public void writeCharacter(final String str, final int off, final int len) throws IOException, IndexOutOfBoundsException {
         if (str == null) {
             write(Strings.NULL_CHAR_ARRAY, off, len);
         } else {

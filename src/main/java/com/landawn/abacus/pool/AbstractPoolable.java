@@ -14,9 +14,6 @@
 
 package com.landawn.abacus.pool;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * Abstract base class for implementing poolable objects.
  * This class provides a convenient base implementation of the {@link Poolable} interface,
@@ -25,11 +22,12 @@ import java.io.Serializable;
  * <p>Subclasses need only implement the {@link #destroy(Poolable.Caller)} method to define
  * their cleanup behavior when removed from a pool.
  *
- * <p>This class is {@link Serializable} so that instances can be written as part of a serialized
- * {@link Pool} (every {@code Pool} is {@code Serializable}). The {@link ActivityPrint} is carried
- * with the object. A subclass is serializable only if all of its own non-transient state is
- * {@code Serializable}; otherwise writing a pool that contains it fails with
- * {@link java.io.NotSerializableException}.
+ * <p>This class is not {@link java.io.Serializable}. It represents a live pooled resource
+ * (connection, stream, handle) whose purpose is borrow/return, not persistence. Every
+ * {@link Pool} remains serializable; serializing a pool that still contains
+ * {@code AbstractPoolable} instances fails with {@link java.io.NotSerializableException}.
+ * If a pool needs a persistable snapshot, expose an explicit DTO and reconstruct live
+ * resources from it.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -61,10 +59,7 @@ import java.io.Serializable;
  * @see ObjectPool
  * @see KeyedObjectPool
  */
-public abstract class AbstractPoolable implements Poolable, Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 6217430519258462071L;
+public abstract class AbstractPoolable implements Poolable {
 
     /**
      * The activity print tracking lifecycle and usage statistics for this poolable object.

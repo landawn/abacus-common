@@ -24,7 +24,9 @@ import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.SK;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.stream.Stream;
 
 /**
@@ -317,22 +319,22 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the JSON string containing the range to deserialize; must not be {@code null}
+     * @param source the JSON string containing the range to deserialize; the base substring implementation requires a non-null source
      * @param fromIndex the beginning index of the range, inclusive
      * @param toIndex the ending index of the range, exclusive
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target type populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
-     * @throws NullPointerException if {@code source} is null and this base implementation performs substring extraction.
+     * @throws IllegalArgumentException if {@code source} is {@code null} and this base implementation performs substring extraction,
+     *         or {@code targetType} is {@code null} and the concrete parser rejects it.
      * @throws IndexOutOfBoundsException if the requested range is outside the source or {@code fromIndex > toIndex}.
-     * @throws IllegalArgumentException if {@code targetType} is null and the concrete parser rejects it.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
      *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Type<? extends T> targetType)
-            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
         return deserialize(source, fromIndex, toIndex, null, targetType);
     }
 
@@ -348,22 +350,22 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target class
-     * @param source the JSON string containing the range to deserialize; must not be {@code null}
+     * @param source the JSON string containing the range to deserialize; the base substring implementation requires a non-null source
      * @param fromIndex the beginning index of the range, inclusive
      * @param toIndex the ending index of the range, exclusive
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
-     * @throws NullPointerException if {@code source} is null and this base implementation performs substring extraction.
+     * @throws IllegalArgumentException if {@code source} is {@code null} and this base implementation performs substring extraction,
+     *         or {@code targetType} is {@code null} and the concrete parser rejects it.
      * @throws IndexOutOfBoundsException if the requested range is outside the source or {@code fromIndex > toIndex}.
-     * @throws IllegalArgumentException if {@code targetType} is null and the concrete parser rejects it.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
      *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final Class<? extends T> targetType)
-            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
         return deserialize(source, fromIndex, toIndex, null, targetType);
     }
 
@@ -382,23 +384,25 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target object
-     * @param source the JSON string containing the range to deserialize; must not be {@code null}
+     * @param source the JSON string containing the range to deserialize; the base substring implementation requires a non-null source
      * @param fromIndex the beginning index of the range, inclusive
      * @param toIndex the ending index of the range, exclusive
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target type populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
-     * @throws NullPointerException if {@code source} is null and this base implementation performs substring extraction.
+     * @throws IllegalArgumentException if {@code source} is {@code null} and this base implementation performs substring extraction,
+     *         or {@code targetType} is {@code null} and the concrete parser rejects it.
      * @throws IndexOutOfBoundsException if the requested range is outside the source or {@code fromIndex > toIndex}.
-     * @throws IllegalArgumentException if {@code targetType} is null and the concrete parser rejects it.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
      *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Type<? extends T> targetType)
-            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+
         return deserialize(source.substring(fromIndex, toIndex), config, targetType);
     }
 
@@ -417,23 +421,25 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * }</pre>
      *
      * @param <T> the type of the target class
-     * @param source the JSON string containing the range to deserialize; must not be {@code null}
+     * @param source the JSON string containing the range to deserialize; the base substring implementation requires a non-null source
      * @param fromIndex the beginning index of the range, inclusive
      * @param toIndex the ending index of the range, exclusive
      * @param config the deserialization configuration to use, or {@code null} to use default configuration
      * @param targetType the class of the target object to deserialize into; must not be {@code null}
      * @return an instance of the target class populated with data from the JSON range; if the range is
      *         empty the target type's default value (or an empty value) is returned
-     * @throws NullPointerException if {@code source} is null and this base implementation performs substring extraction.
+     * @throws IllegalArgumentException if {@code source} is {@code null} and this base implementation performs substring extraction,
+     *         or {@code targetType} is {@code null} and the concrete parser rejects it.
      * @throws IndexOutOfBoundsException if the requested range is outside the source or {@code fromIndex > toIndex}.
-     * @throws IllegalArgumentException if {@code targetType} is null and the concrete parser rejects it.
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
      *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType)
-            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+
         return deserialize(source.substring(fromIndex, toIndex), config, targetType);
     }
 

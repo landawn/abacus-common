@@ -428,37 +428,48 @@ public class StreamBugFixVerificationTest extends TestBase {
     }
 
     // -----------------------------------------------------------------
-    // Bug: first/last/onlyOne/reduce/find* used Optional.of on stream elements,
-    // so a null element NPEd. Collectors already used ofNullable — align terminals.
+    // Optional-returning terminals reject null selected elements and final reduction results.
+    // Empty input still returns Optional.empty(); collectors follow the same strict contract.
     // -----------------------------------------------------------------
 
     @Test
-    public void firstLastOnlyOne_nullElement_noNpe() {
-        assertTrue(Stream.of((String) null).first().isEmpty());
-        assertTrue(Stream.of("a", null).last().isEmpty());
-        assertTrue(Stream.of((String) null).onlyOne().isEmpty());
-        assertTrue(Stream.of((String) null).reduce((a, b) -> a).isEmpty());
-        assertTrue(Stream.of(null, "x").findFirst(java.util.Objects::isNull).isEmpty());
+    public void firstLastOnlyOne_nullElement_throwsNpe() {
+        assertThrows(NullPointerException.class, () -> Stream.of((String) null).first());
+        assertThrows(NullPointerException.class, () -> Stream.of("a", null).last());
+        assertThrows(NullPointerException.class, () -> Stream.of((String) null).onlyOne());
+        assertThrows(NullPointerException.class, () -> Stream.of((String) null).reduce((a, b) -> a));
+        assertThrows(NullPointerException.class, () -> Stream.of(null, "x").findFirst(java.util.Objects::isNull));
+
+        assertTrue(Stream.<String>empty().first().isEmpty());
+        assertTrue(Stream.<String>empty().last().isEmpty());
+        assertTrue(Stream.<String>empty().onlyOne().isEmpty());
+        assertTrue(Stream.<String>empty().reduce((a, b) -> a).isEmpty());
+        assertTrue(Stream.of((String) null).findFirst(value -> false).isEmpty());
 
         // onlyOne must still throw when there are two elements even if the first is null
         assertThrows(com.landawn.abacus.exception.TooManyElementsException.class, () -> Stream.of(null, "x").onlyOne());
 
-        // Parity with Collectors.first()
-        assertEquals(Stream.of((String) null).collect(Collectors.first()), Stream.of((String) null).first());
+        // Both operations reject null; assertEquals cannot compare throwing expressions.
+        assertThrows(NullPointerException.class, () -> Stream.of((String) null).collect(Collectors.first()));
+        assertThrows(NullPointerException.class, () -> Stream.of((String) null).first());
     }
 
     @Test
-    public void arrayStream_nullElement_terminals_noNpe() {
+    public void arrayStream_nullElement_terminals_throwNpe() {
         final String[] withNull = { null };
-        assertTrue(Stream.of(withNull).first().isEmpty());
-        assertTrue(Stream.of(withNull).last().isEmpty());
-        assertTrue(Stream.of(withNull).onlyOne().isEmpty());
-        assertTrue(Stream.of(withNull).elementAt(0).isEmpty());
+        assertThrows(NullPointerException.class, () -> Stream.of(withNull).first());
+        assertThrows(NullPointerException.class, () -> Stream.of(withNull).last());
+        assertThrows(NullPointerException.class, () -> Stream.of(withNull).onlyOne());
+        assertThrows(NullPointerException.class, () -> Stream.of(withNull).elementAt(0));
+        assertTrue(Stream.of(withNull).elementAt(1).isEmpty());
     }
 
     @Test
-    public void parallelReduce_nullElement_noNpe() {
-        assertTrue(Stream.of((Integer) null).parallel(4).reduce((a, b) -> a).isEmpty());
-        assertTrue(Stream.of(null, null).parallel(4).findAny(x -> true).isEmpty());
+    public void parallelReduce_nullElement_throwsNpe() {
+        assertThrows(NullPointerException.class, () -> Stream.of((Integer) null).parallel(4).reduce((a, b) -> a));
+        assertThrows(NullPointerException.class, () -> Stream.<Integer>of(null, null, null, null).parallel(4).reduce((a, b) -> a));
+        assertThrows(NullPointerException.class, () -> Stream.of(null, null).parallel(4).findAny(x -> true));
+        assertTrue(Stream.<Integer>empty().parallel(4).reduce((a, b) -> a).isEmpty());
+        assertTrue(Stream.of(null, null).parallel(4).findAny(x -> false).isEmpty());
     }
 }

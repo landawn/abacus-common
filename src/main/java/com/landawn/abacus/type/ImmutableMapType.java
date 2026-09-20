@@ -54,8 +54,9 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      *
      * @param keyTypeName the name of the key type parameter
      * @param valueTypeName the name of the value type parameter
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    ImmutableMapType(final String keyTypeName, final String valueTypeName) {
+    ImmutableMapType(final String keyTypeName, final String valueTypeName) throws IllegalArgumentException {
         this(ImmutableMap.class, keyTypeName, valueTypeName);
     }
 
@@ -149,9 +150,9 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
     }
 
     /**
-     * Indicates whether values of this type are immutable.
-     * An {@link ImmutableMap} (including its sorted and navigable subtypes) cannot be modified after construction,
-     * so its values are immutable by construction.
+     * Indicates that this handler treats the container structure as immutable.
+     * The container prevents mutation through its own API; contained objects may still be mutable.
+     * A container created by wrapping an existing collection or map may also reflect changes to that backing data.
      *
      * @return {@code true}, always
      */
@@ -182,9 +183,9 @@ public class ImmutableMapType<K, V, T extends ImmutableMap<K, V>> extends Abstra
      * into the original value.</p>
      *
      * <p>A {@code null} key is written as the quoted string {@code "null"} (JSON object keys must be strings). Reading
-     * that text back yields the String key {@code "null"} when the key type is {@code String}, and fails (e.g. with a
-     * {@code NumberFormatException}) for other key types; a {@code null} key therefore does not round-trip. Only an
-     * unquoted {@code null} key in the input text (e.g. {@code {null: 1}}) is parsed back to a {@code null} key.</p>
+     * that text back yields the String key {@code "null"} when the key type is {@code String}, and follows the selected key handler's conversion of {@code "null"} for other key types (which may fail).
+     * A null key therefore is not guaranteed to round-trip. An unquoted {@code null} key in the input
+     * text (e.g. {@code {null: 1}}) is parsed directly as a null key, if the target map permits it.</p>
      *
      * @param x the {@link ImmutableMap} to serialize; may be {@code null}
      * @return the JSON string representation of the map, or {@code null} if {@code x} is {@code null}

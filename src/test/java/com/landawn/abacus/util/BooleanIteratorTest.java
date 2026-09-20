@@ -23,6 +23,59 @@ import com.landawn.abacus.util.stream.Stream;
 public class BooleanIteratorTest extends TestBase {
 
     @Test
+    public void testDeferRejectsReturningItself() {
+        for (int mode = 0; mode < 2; mode++) {
+            final int[] supplierCalls = { 0 };
+            final java.util.concurrent.atomic.AtomicReference<BooleanIterator> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final BooleanIterator iterator = BooleanIterator.defer(() -> {
+                supplierCalls[0]++;
+                return reference.get();
+            });
+            reference.set(iterator);
+
+            final IllegalStateException failure = mode == 0 ? assertThrows(IllegalStateException.class, iterator::hasNext)
+                    : assertThrows(IllegalStateException.class, iterator::nextBoolean);
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::nextBoolean));
+            assertEquals(1, supplierCalls[0]);
+        }
+    }
+
+    @Test
+    public void testDeferCachesRecursiveInitializationFailure() {
+        for (int mode = 0; mode < 4; mode++) {
+            final boolean catchRecursion = (mode & 1) != 0;
+            final int[] supplierCalls = { 0 };
+            final BooleanIterator[] reference = new BooleanIterator[1];
+            final IllegalStateException[] recursiveFailure = new IllegalStateException[1];
+            reference[0] = BooleanIterator.defer(() -> {
+                if (++supplierCalls[0] > 1) {
+                    throw new AssertionError("Supplier must not be reentered");
+                }
+
+                try {
+                    reference[0].hasNext();
+                } catch (final IllegalStateException failure) {
+                    recursiveFailure[0] = failure;
+                    if (!catchRecursion) {
+                        throw failure;
+                    }
+                }
+
+                return BooleanIterator.empty();
+            });
+
+            final BooleanIterator iterator = reference[0];
+            final IllegalStateException failure = mode < 2 ? assertThrows(IllegalStateException.class, iterator::hasNext)
+                    : assertThrows(IllegalStateException.class, iterator::nextBoolean);
+            assertSame(recursiveFailure[0], failure);
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::nextBoolean));
+            assertEquals(1, supplierCalls[0]);
+        }
+    }
+
+    @Test
     public void testShortCircuitStreamLeavesRemainingElements() {
         final BooleanIterator iter = BooleanIterator.of(true, false, true);
 

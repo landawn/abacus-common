@@ -613,7 +613,8 @@ final class ParallelArrayCharStream extends ArrayCharStream {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a {@code Map} from keys to downstream reduction results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null},
+     *         or if {@code keyMapper} returns a {@code null} key.
      * @throws E if the key mapper throws an exception
      */
     @Override

@@ -170,8 +170,11 @@ public class URIType extends AbstractType<URI> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
-     * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
-     * URI homepage = type.get(rs, 1);   // Get URI from first column
+     * try (ResultSet rs = statement.executeQuery("SELECT homepage FROM websites")) {
+     *     if (rs.next()) {
+     *         URI homepage = type.get(rs, 1);   // Get URI from first column
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -196,8 +199,11 @@ public class URIType extends AbstractType<URI> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URI> type = TypeFactory.getType(URI.class);
-     * ResultSet rs = statement.executeQuery("SELECT homepage FROM websites");
-     * URI homepage = type.get(rs, "homepage");   // Get URI by column name
+     * try (ResultSet rs = statement.executeQuery("SELECT homepage FROM websites")) {
+     *     if (rs.next()) {
+     *         URI homepage = type.get(rs, "homepage");   // Get URI by column name
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from

@@ -159,6 +159,7 @@ public class CommonUtilDefaultTest extends CommonUtilTestSupport {
         assertNull(CommonUtil.defaultValueOf(Double.class, false));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultValueOf(null, true));
     }
+
     @Test
     public void testNotNullOrDefault_boxedPrimitiveDefaultIsNotTreatedAsDefault() {
         assertFalse(CommonUtil.notNullOrDefault(null));

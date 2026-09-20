@@ -158,8 +158,9 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * boolean result = set.containsAll(Arrays.asList(s1, s2));   // returns true
      * }</pre>
      *
-     * @param c collection to be checked for containment in this set
-     * @return {@code true} if this set contains all of the elements in the specified collection
+     * @param c collection to be checked for containment in this set; {@code null} is treated as empty
+     * @return {@code true} if this set contains all of the elements in the specified collection;
+     *         {@code true} if {@code c} is {@code null} or empty
      */
     @Override
     public boolean containsAll(final Collection<?> c) {
@@ -182,7 +183,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * boolean changed = set.addAll(list);   // returns true
      * }</pre>
      *
-     * @param c collection containing elements to be added to this set
+     * @param c collection containing elements to be added to this set; {@code null} is treated as empty
      * @return {@code true} if this set changed as a result of the call
      */
     @Override
@@ -216,7 +217,7 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * boolean changed = set.removeAll(Arrays.asList(s1));   // returns true, removes s1
      * }</pre>
      *
-     * @param c collection containing elements to be removed from this set
+     * @param c collection containing elements to be removed from this set; {@code null} is treated as empty
      * @return {@code true} if this set changed as a result of the call
      */
     @Override
@@ -258,7 +259,8 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * boolean changed = set.retainAll(Arrays.asList(s1, s2));   // returns true, keeps only s1 and s2
      * }</pre>
      *
-     * @param c collection containing elements to be retained in this set
+     * @param c collection containing elements to be retained in this set; {@code null} is treated as
+     *          empty, which clears this set
      * @return {@code true} if this set changed as a result of the call
      */
     @Override

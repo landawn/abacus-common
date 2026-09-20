@@ -149,18 +149,24 @@ public class NullValidationRestartNZTest extends TestBase {
         rejects("targetType", () -> mapper.fromXml(new File("missing-null-validation-test.xml"), missingType));
         rejects("targetType", () -> mapper.fromXml(new StringReader(xml), missingType));
         rejects("targetType", () -> mapper.fromXml((DataInput) null, missingType));
-        assertEquals("ok", XmlMappers.fromXml(xml, new TypeReference<Bean>() {}, (DeserializationConfig) null).value);
-        assertEquals("ok", mapper.fromXml(xml, new TypeReference<Bean>() {}).value);
+        assertEquals("ok", XmlMappers.fromXml(xml, new TypeReference<Bean>() {
+        }, (DeserializationConfig) null).value);
+        assertEquals("ok", mapper.fromXml(xml, new TypeReference<Bean>() {
+        }).value);
     }
 
     @Test
     public void dispatcherConstructionRequiresBothCallbacks() {
-        rejects("onError", () -> new Observer.DispatcherBase<Object>(null, () -> {}) {});
-        rejects("onComplete", () -> new Observer.DispatcherBase<Object>(error -> {}, null) {});
+        rejects("onError", () -> new Observer.DispatcherBase<Object>(null, () -> {
+        }) {
+        });
+        rejects("onComplete", () -> new Observer.DispatcherBase<Object>(error -> {
+        }, null) {
+        });
         final AtomicInteger errors = new AtomicInteger();
         final AtomicInteger completions = new AtomicInteger();
-        final Observer.DispatcherBase<Object> dispatcher = new Observer.DispatcherBase<>(error -> errors.incrementAndGet(),
-                completions::incrementAndGet) {};
+        final Observer.DispatcherBase<Object> dispatcher = new Observer.DispatcherBase<>(error -> errors.incrementAndGet(), completions::incrementAndGet) {
+        };
         dispatcher.onNext(null);
         dispatcher.onError(new Exception("test"));
         dispatcher.onComplete();

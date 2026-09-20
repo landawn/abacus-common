@@ -12,10 +12,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.RetryExhaustedException;
 
 @org.junit.jupiter.api.Tag("unit")
-public class RetryAttemptCountTest {
+public class RetryAttemptCountTest extends TestBase {
     @Test
     void maximumPolicyMetadataSurvivesSerializationWithoutExecutingBillionsOfAttempts() throws Exception {
         final long attempts = Integer.MAX_VALUE + 1L;

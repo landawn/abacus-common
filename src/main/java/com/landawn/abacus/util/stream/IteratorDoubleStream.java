@@ -165,7 +165,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                 }
 
                 @Override
-                public double nextDouble() {
+                public double nextDouble() throws NoSuchElementException {
                     return values.nextDouble();
                 }
             };
@@ -210,7 +210,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -259,7 +259,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -315,7 +315,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -350,7 +350,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 return mapper.applyAsDouble(elements.nextDouble());
             }
 
@@ -379,7 +379,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return mapper.applyAsInt(elements.nextDouble());
             }
 
@@ -408,7 +408,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 return mapper.applyAsLong(elements.nextDouble());
             }
 
@@ -437,7 +437,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 return mapper.applyAsFloat(elements.nextDouble());
             }
 
@@ -467,7 +467,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return mapper.apply(elements.nextDouble());
             }
 
@@ -516,7 +516,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -572,7 +572,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -624,7 +624,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -676,7 +676,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -744,7 +744,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -812,7 +812,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -881,7 +881,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -938,7 +938,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -989,7 +989,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                 }
 
                 @Override
-                public double nextDouble() {
+                public double nextDouble() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1031,7 +1031,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cnt >= maxSize) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1112,7 +1112,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 skipElements();
 
                 return elements.nextDouble();
@@ -1152,7 +1152,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
     /**
      * Returns a stream consisting of the top {@code n} elements of this stream
-     * according to natural ordering. The underlying iterator is fully consumed.
+     * according to natural ordering. When {@code n > 0}, traversal of the result first consumes
+     * the underlying iterator to determine the top elements.
      *
      * @param n the number of top elements to include; must be &gt;= 0
      * @return a new {@code DoubleStream} containing the top {@code n} elements
@@ -1168,7 +1169,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
     /**
      * Returns a stream consisting of the top {@code n} elements of this stream according to the given comparator.
-     * The underlying iterator is fully consumed to determine the top elements.
+     * When {@code n > 0}, traversal of the result first consumes the underlying iterator to determine the top elements.
      *
      * @param n the number of top elements to include; must be &gt;= 0
      * @param comparator the comparator used to determine element ordering
@@ -1205,7 +1206,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1330,7 +1331,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 final double next = elements.nextDouble();
                 action.accept(next);
                 return next;
@@ -2063,7 +2064,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 return elements.nextDouble();
             }
         };
@@ -2123,7 +2124,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }
@@ -2164,13 +2165,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                             iter = s == null ? DoubleIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -2207,7 +2202,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }

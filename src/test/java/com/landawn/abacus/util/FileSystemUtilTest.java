@@ -45,8 +45,8 @@ public class FileSystemUtilTest extends TestBase {
 
             final String executable = System.getProperty("java.home") + File.separator + "bin" + File.separator
                     + (System.getProperty("os.name").toLowerCase().contains("windows") ? "java.exe" : "java");
-            final ProcessBuilder builder = new ProcessBuilder(executable, "-cp", System.getProperty("java.class.path"),
-                    InheritedPipeProcess.class.getName(), "child");
+            final ProcessBuilder builder = new ProcessBuilder(executable, "-cp", System.getProperty("java.class.path"), InheritedPipeProcess.class.getName(),
+                    "child");
             builder.redirectOutput(args[0].equals("stdout") ? ProcessBuilder.Redirect.INHERIT : ProcessBuilder.Redirect.DISCARD);
             builder.redirectError(args[0].equals("stderr") ? ProcessBuilder.Redirect.INHERIT : ProcessBuilder.Redirect.DISCARD);
             final Process child = builder.start();

@@ -11,8 +11,10 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class FileSystemLiteralPathTest {
+public class FileSystemLiteralPathTest extends TestBase {
     @TempDir
     Path directory;
 

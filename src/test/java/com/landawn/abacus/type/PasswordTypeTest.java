@@ -195,10 +195,8 @@ public class PasswordTypeTest extends TestBase {
     public void reviewFixes20260906_constructorKnownAlgorithmInstallsThatDigest() throws Exception {
         final PasswordType sha512 = new PasswordType("SHA-512") {
         };
-        final String expected = Base64.getEncoder()
-                .encodeToString(MessageDigest.getInstance("SHA-512").digest("secret".getBytes(StandardCharsets.UTF_8)));
-        final String sha256 = Base64.getEncoder()
-                .encodeToString(MessageDigest.getInstance("SHA-256").digest("secret".getBytes(StandardCharsets.UTF_8)));
+        final String expected = Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-512").digest("secret".getBytes(StandardCharsets.UTF_8)));
+        final String sha256 = Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest("secret".getBytes(StandardCharsets.UTF_8)));
         final PreparedStatement stmt = mock(PreparedStatement.class);
 
         // the constructor really installed SHA-512: set() binds that algorithm's Base64 digest, not the default SHA-256 one

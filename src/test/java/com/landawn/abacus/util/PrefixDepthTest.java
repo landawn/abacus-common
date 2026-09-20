@@ -9,8 +9,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class PrefixDepthTest {
+public class PrefixDepthTest extends TestBase {
     @Test
     void deepBuildAndCopyRetainValuesWithoutRecursiveTraversal() {
         final List<String> key = Collections.nCopies(10000, "\uD83D\uDE00");

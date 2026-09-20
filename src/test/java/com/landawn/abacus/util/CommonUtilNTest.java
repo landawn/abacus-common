@@ -568,12 +568,12 @@ public class CommonUtilNTest extends TestBase {
     }
 
     @Test
-    public void testB6_probeUnmodifiableStillAnswersCorrectlyForEveryArity() {
-        assertTrue(CommonUtil.probeUnmodifiable(List.of("a", "b", "c")));
-        assertTrue(CommonUtil.probeUnmodifiable(Set.of("a", "b", "c")));
-        assertTrue(CommonUtil.probeUnmodifiable(Map.of("k", "v", "k2", "v2")));
-        assertFalse(CommonUtil.probeUnmodifiable(new ArrayList<>(List.of("a"))));
-        assertFalse(CommonUtil.probeUnmodifiable(CommonUtil.newHashMap(Map.of("k", "v"))));
+    public void testB6_mutabilityOfRecognizesEveryFactoryArity() {
+        assertEquals(Mutability.KNOWN_UNMODIFIABLE, CommonUtil.mutabilityOf(List.of("a", "b", "c")));
+        assertEquals(Mutability.KNOWN_UNMODIFIABLE, CommonUtil.mutabilityOf(Set.of("a", "b", "c")));
+        assertEquals(Mutability.KNOWN_UNMODIFIABLE, CommonUtil.mutabilityOf(Map.of("k", "v", "k2", "v2")));
+        assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(new ArrayList<>(List.of("a"))));
+        assertEquals(Mutability.KNOWN_MUTABLE, CommonUtil.mutabilityOf(CommonUtil.newHashMap(Map.of("k", "v"))));
     }
 
     // ---------------------------------------------------------------------------------------------------------
@@ -586,8 +586,7 @@ public class CommonUtilNTest extends TestBase {
 
     @Test
     public void testD2_dynamicClassKeyedCachesAreClassValues() throws Exception {
-        for (final String fieldName : new String[] { "enumListPool", "enumSetPool", "enumMapPool", "PROBED_UNMODIFIABLE_CLASSES",
-                "descendingIteratorMethodPool" }) {
+        for (final String fieldName : new String[] { "enumListPool", "enumSetPool", "enumMapPool", "descendingIteratorMethodPool" }) {
             final Field f = CommonUtil.class.getDeclaredField(fieldName);
 
             assertEquals(ClassValue.class, f.getType(), fieldName + " must be a ClassValue so a cached application class stays collectable");
@@ -617,80 +616,8 @@ public class CommonUtilNTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.enumNameMap(null));
     }
 
-    /**
-     * Neither in {@code KNOWN_MUTABLE_CLASSES} nor in {@code UNMODIFIABLE_CLASSES} nor {@code Immutable}, so
-     * {@code probeUnmodifiable} genuinely has to insert-and-roll-back a sentinel - which is the only path that
-     * reads and then writes the {@code ClassValue}-held answer box. Used by exactly one test, so the per-class
-     * cache cannot make a later assertion vacuous.
-     */
-    private static final class ReallyProbedList<T> extends ArrayList<T> {
-        private static final long serialVersionUID = 1L;
-
-        private static int addCalls = 0;
-
-        ReallyProbedList(final Collection<? extends T> c) {
-            super(c);
-        }
-
-        @Override
-        public boolean add(final T e) {
-            addCalls++;
-            return super.add(e);
-        }
-    }
-
-    /** Same idea for the "unmodifiable" answer: add() refuses, so the probe records true without rolling back. */
-    private static final class ReallyProbedUnmodifiableList<T> extends java.util.AbstractList<T> {
-        private final List<T> backing;
-
-        ReallyProbedUnmodifiableList(final List<T> backing) {
-            this.backing = backing;
-        }
-
-        @Override
-        public T get(final int index) {
-            return backing.get(index);
-        }
-
-        @Override
-        public int size() {
-            return backing.size();
-        }
-    }
-
-    /**
-     * One-shot by construction: the probe answer is cached per class for the life of the JVM, so the
-     * "first call must actually probe" assertion only holds the first time this method runs. Do not make it
-     * {@code @RepeatedTest}, and keep {@link ReallyProbedList} used by this test alone.
-     */
     @Test
-    public void testD2_probeCacheReadsAndWritesThroughTheClassValueBox() {
-        final ReallyProbedList<String> first = new ReallyProbedList<>(List.of("a", "b"));
-
-        ReallyProbedList.addCalls = 0;
-        assertFalse(CommonUtil.probeUnmodifiable(first));
-        assertEquals(1, ReallyProbedList.addCalls, "the first call must actually probe");
-        assertEquals(List.of("a", "b"), first, "the probe must roll its sentinel back exactly");
-
-        // a *different* instance of the same class must be answered from the box the first call filled in
-        ReallyProbedList.addCalls = 0;
-        assertFalse(CommonUtil.probeUnmodifiable(new ReallyProbedList<>(List.of("c"))));
-        assertEquals(0, ReallyProbedList.addCalls, "the second call must come from the cached answer");
-
-        // and the unmodifiable answer round-trips through the same box
-        final List<String> immutable = new ReallyProbedUnmodifiableList<>(new ArrayList<>(List.of("a")));
-        assertTrue(CommonUtil.probeUnmodifiable(immutable));
-        assertTrue(CommonUtil.probeUnmodifiable(new ReallyProbedUnmodifiableList<>(new ArrayList<>(List.of("z")))));
-        assertEquals(List.of("a"), immutable);
-    }
-
-    @Test
-    public void testD2_probeAndDescendingIteratorCachesStillWork() {
-        // ArrayList short-circuits via KNOWN_MUTABLE_CLASSES rather than probing; assert only that much here.
-        final List<String> knownMutable = new ArrayList<>(List.of("a"));
-        assertFalse(CommonUtil.probeUnmodifiable(knownMutable));
-        assertEquals(List.of("a"), knownMutable, "a known-mutable class must never be probe-mutated at all");
-
+    public void testD2_descendingIteratorCachesStillWork() {
         // TreeSet has a public descendingIterator(); the reflective lookup is cached per class.
         final TreeSet<String> sorted = new TreeSet<>(Arrays.asList("a", "b", "c"));
         assertEquals("c", CommonUtil.lastElement(sorted).orElse(null));
@@ -749,38 +676,6 @@ public class CommonUtilNTest extends TestBase {
         assertTrue(CommonUtil.enumListOf(NoConstants.class).isEmpty());
         assertTrue(CommonUtil.enumSetOf(NoConstants.class).isEmpty());
         assertTrue(CommonUtil.enumNameMap(NoConstants.class).isEmpty());
-    }
-
-    /** Not in any registry, so probeUnmodifiable(Map) has to insert-and-roll-back - the ClassValue box path. */
-    private static final class ReallyProbedMap<K, V> extends java.util.HashMap<K, V> {
-        private static final long serialVersionUID = 1L;
-
-        private static int putCalls = 0;
-
-        ReallyProbedMap(final Map<? extends K, ? extends V> m) {
-            super(m);
-        }
-
-        @Override
-        public V put(final K key, final V value) {
-            putCalls++;
-            return super.put(key, value);
-        }
-    }
-
-    /** One-shot for the same reason as {@link #testD2_probeCacheReadsAndWritesThroughTheClassValueBox()}. */
-    @Test
-    public void testD2_probeUnmodifiableMapReadsAndWritesThroughTheClassValueBox() {
-        final ReallyProbedMap<String, String> first = new ReallyProbedMap<>(Map.of("k", "v"));
-
-        ReallyProbedMap.putCalls = 0;
-        assertFalse(CommonUtil.probeUnmodifiable(first));
-        assertEquals(1, ReallyProbedMap.putCalls, "the first call must actually probe");
-        assertEquals(Map.of("k", "v"), first, "the probe must roll its sentinel entry back exactly");
-
-        ReallyProbedMap.putCalls = 0;
-        assertFalse(CommonUtil.probeUnmodifiable(new ReallyProbedMap<>(Map.of("a", "b"))));
-        assertEquals(0, ReallyProbedMap.putCalls, "the second call must come from the cached answer");
     }
 
     // ---------------------------------------------------------------------------------------------------------

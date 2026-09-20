@@ -169,9 +169,9 @@ import com.landawn.abacus.util.function.ToCharFunction;
  * <p><b>Performance Considerations:</b>
  * <ul>
  *   <li>Use CharStream instead of {@code Stream<Character>} to avoid boxing overhead</li>
- *   <li>Parallel processing benefits large text datasets (typically &gt; 10,000 characters)</li>
+ *   <li>The benefit of parallel processing depends on input size, operation cost, and available processors; benchmark representative workloads</li>
  *   <li>Sequential processing is more efficient for small text and simple operations</li>
- *   <li>Most intermediate operations are evaluated lazily when a terminal operation consumes the stream</li>
+ *   <li>Most intermediate operations defer processing until traversal; consult each operation for eager evaluation or buffering</li>
  * </ul>
  *
  * @see StreamBase
@@ -974,7 +974,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .scan((a, b) -> a > b ? a : b)
      *     .toArray();   // ['b', 'b', 'd', 'd']
      *
-     * // Running sum of character code points (as char)
+     * // Running sum of UTF-16 code-unit values (as char)
      * CharStream.of((char)1, (char)2, (char)3, (char)4)
      *     .scan((a, b) -> (char)(a + b))
      *     .toArray();   // [(char)1, (char)3, (char)6, (char)10]
@@ -1000,7 +1000,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * The scan operation takes an initial value and a binary operator (the accumulator) and applies it cumulatively on the stream elements,
      * successively combining each element in order from the start to produce a stream of accumulated results.
      *
-     * <p>For example, given a stream of code-point values [(char)1, (char)2, (char)3, (char)4], an initial value of
+     * <p>For example, given a stream of code-unit values [(char)1, (char)2, (char)3, (char)4], an initial value of
      * {@code (char)10}, and an accumulator that performs addition, the output would be
      * [(char)11, (char)13, (char)16, (char)20].
      *
@@ -1014,7 +1014,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .scan('z', (a, b) -> a > b ? a : b)
      *     .toArray();   // ['z', 'z', 'z', 'z']
      *
-     * // Sum of code-point values with initial offset
+     * // Sum of code-unit values with initial offset
      * CharStream.of((char)1, (char)2, (char)3)
      *     .scan((char)10, (a, b) -> (char)(a + b))
      *     .toArray();   // [(char)11, (char)13, (char)16]
@@ -1058,7 +1058,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param init the initial value. It's only used once by the accumulator to calculate the first element in the returned stream.
+     * @param init the initial accumulated value; also emitted first when {@code initIncluded} is {@code true}
      * @param initIncluded if {@code true}, the {@code init} value is included as the first element of the returned stream;
      *        if {@code false}, the scan starts from the first stream element combined with {@code init}, and {@code init} itself is not emitted.
      * @param accumulator a {@code CharBinaryOperator} that takes two parameters: the current accumulated value and the current stream element, and returns a new accumulated value.
@@ -1193,7 +1193,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toMap(c -> c, c -> Character.toUpperCase(c));   // throws on duplicate key 'a'
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1217,7 +1217,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * Returns a Map whose keys and values are the result of applying the provided
      * mapping functions to the input elements.
      *
-     * <p>If the mapped keys contain duplicates (according to {@link Object#equals(Object)}),
+     * <p>If the mapped keys contain duplicates (according to the result map's key-equivalence rules),
      * an {@code IllegalStateException} is thrown when the collection operation is performed.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1233,7 +1233,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'a'=97, 'b'=98, 'c'=99} in natural order
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1282,7 +1282,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'a'="Last-a", 'b'="Last-b", 'c'="Last-c"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1308,7 +1308,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * Returns a Map whose keys and values are the result of applying the provided
      * mapping functions to the input elements.
      *
-     * <p>If the mapped keys contain duplicates (according to {@link Object#equals(Object)}),
+     * <p>If the mapped keys contain duplicates (according to the result map's key-equivalence rules),
      * the value mapping function is applied to each equal element, and the results are merged
      * using the provided merging function. The Map is created by a provided supplier function.
      *
@@ -1325,7 +1325,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'a'="aa", 'b'="bb", 'c'="c", 'd'="d"} in natural order
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1539,7 +1539,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: {'A', 'B', 'C'}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; memory use is determined by the supplied result container and accumulator.
      *
      * @param <R> the type of the mutable result container
      * @param supplier a function that creates a new mutable result container.
@@ -1591,7 +1591,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Result: ['x', 'y', 'z']
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; memory use is determined by the supplied result container and accumulator.
      *
      * @param <R> the type of the mutable result container. Must be one of:
      *            {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
@@ -1802,10 +1802,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * {@code OptionalChar} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
-     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
-     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
-     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.Stream#findFirst()} API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1837,10 +1836,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * {@code OptionalChar} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
-     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
-     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
-     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1871,8 +1869,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * {@code OptionalChar}, or an empty {@code OptionalChar} if no element matches. This is a
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
-     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * <p>When several elements match, the one at the smallest encounter-order index in the current
+     * pipeline wins. Parallel intermediate operations may already have reordered the original source.
+     * If that ordering guarantee is not needed,
      * {@link #findAny(Throwables.CharPredicate)} may find a match faster in parallel.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2057,7 +2056,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @return an {@code OptionalChar} containing the k-th largest element, or an empty {@code OptionalChar}
      *         if the stream contains fewer than k elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if k is less than 1.
+     * @throws IllegalArgumentException if {@code k} is less than 1.
      */
     @SequentialOnly
     @TerminalOp
@@ -2404,7 +2403,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is a factory method that creates an empty stream, which can be useful
      * as a starting point for stream operations or as a default return value. The returned stream
-     * performs no operations and immediately completes any terminal operation with empty results.
+     * has no source elements. Each terminal operation defines its own empty-stream result and may invoke callbacks such as a collector finisher.
      *
      * <p>Each call to this method returns a new empty stream instance. Like all streams,
      * the returned stream can only be consumed once; call this method again to obtain a fresh empty stream.
@@ -2674,7 +2673,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * process a substring or subsequence without creating intermediate string objects. The stream will
      * contain characters from {@code str.charAt(fromIndex)} up to but not including {@code str.charAt(toIndex)}.
      *
-     * <p>If the {@code CharSequence} is {@code null} or empty, an empty stream is returned.
+     * <p>If the {@code CharSequence} is {@code null} or empty, only the range {@code [0, 0)} is valid and returns an empty stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2734,7 +2733,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cursor >= toIndex) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3113,7 +3112,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .findAny();  // returns OptionalChar.empty()
      * }</pre>
      *
-     * <p>Reading is deferred until the returned stream is consumed. Consumption throws {@link UncheckedIOException} if reading from {@code reader} fails.</p>
+     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the reader beyond the characters it emits; closing the stream discards unread buffered characters. Consumption throws {@link UncheckedIOException} if reading from {@code reader} fails.</p>
      *
      * @param reader the {@code Reader} to read from; may be null
      * @return a new sequential {@code CharStream} containing the characters from the reader,
@@ -3157,11 +3156,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     CharStream.of(reader, false).forEach(System.out::print);
      * } // the caller-owned reader is closed here
      *
-     * // Process consecutive portions from the same reader
+     * // Read a prefix, then close the caller-owned reader
      * try (BufferedReader bufferedReader = new BufferedReader(new FileReader("file.txt"))) {
      *     CharStream.of(bufferedReader, false).limit(100).count();
-     *     // Continue from the reader's current position, then let this stream close it.
-     *     CharStream.of(bufferedReader, true).filter(Character::isDigit).count();
      * }
      *
      * // Read from InputStreamReader with automatic cleanup
@@ -3176,7 +3173,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * }
      * }</pre>
      *
-     * <p>Reading is deferred until the returned stream is consumed. Consumption throws {@link UncheckedIOException} if reading from {@code reader} fails.</p>
+     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the reader beyond the characters it emits; closing the stream discards unread buffered characters. Consumption throws {@link UncheckedIOException} if reading from {@code reader} fails.</p>
      *
      * @param reader the {@code Reader} to read from; may be null
      * @param closeReaderWhenStreamIsClosed if {@code true}, the reader will be automatically closed
@@ -3217,7 +3214,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3392,7 +3389,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cnt++ >= count) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3428,12 +3425,12 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * <ul>
      *   <li>If {@code vertically} is {@code false}: flatten row by row, padding short rows to match
      *       the longest row length</li>
-     *   <li>If {@code vertically} is {@code true}: flatten column by column, padding short columns
-     *       to match the longest column length</li>
+     *   <li>If {@code vertically} is {@code true}: flatten column by column, emitting one value per row
+     *       and using padding where that row has no element at the current column</li>
      * </ul>
      *
-     * <p>The resulting stream will have {@code rows * maxRowLength} elements (or {@code maxColumnLength * columns}
-     * for vertical flattening), where missing positions are filled with {@code valueForAlignment}.
+     * <p>In either order, the resulting stream has {@code rows * maxRowLength} elements, where missing
+     * positions are filled with {@code valueForAlignment}. A null row contributes only padding.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3522,7 +3519,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
                 }
 
                 @Override
-                public char nextChar() {
+                public char nextChar() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3553,7 +3550,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
                 }
 
                 @Override
-                public char nextChar() {
+                public char nextChar() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3708,7 +3705,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3767,7 +3764,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param endExclusive the ending character (exclusive)
      * @param by the incremental step. Must not be zero.
      * @return a CharStream of characters from startInclusive to endExclusive with the specified step
-     * @throws IllegalArgumentException if by is zero.
+     * @throws IllegalArgumentException if {@code by} is zero.
      */
     public static CharStream range(final char startInclusive, final char endExclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
@@ -3789,7 +3786,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3912,7 +3909,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4033,7 +4030,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4109,7 +4106,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param element the character to repeat
      * @param n the number of times to repeat the element
      * @return a CharStream containing n copies of the specified element
-     * @throws IllegalArgumentException if n is negative.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static CharStream repeat(final char element, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -4129,7 +4126,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4232,7 +4229,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param startInclusive the lower bound (inclusive) of the random character range
      * @param endExclusive the upper bound (exclusive) of the random character range
      * @return an infinite CharStream of random characters within the specified range
-     * @throws IllegalArgumentException if startInclusive is greater than or equal to endExclusive.
+     * @throws IllegalArgumentException if {@code startInclusive} is greater than or equal to {@code endExclusive}.
      */
     public static CharStream random(final char startInclusive, final char endExclusive) throws IllegalArgumentException {
         if (startInclusive >= endExclusive) {
@@ -4325,7 +4322,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4386,7 +4383,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4474,7 +4471,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4709,7 +4706,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4768,7 +4765,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4826,7 +4823,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4873,7 +4870,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4922,7 +4919,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4966,7 +4963,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 return zipFunction.applyAsChar(iterA.nextChar(), iterB.nextChar());
             }
         });
@@ -5008,7 +5005,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 return zipFunction.applyAsChar(iterA.nextChar(), iterB.nextChar(), iterC.nextChar());
             }
         });
@@ -5137,7 +5134,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5193,7 +5190,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5243,7 +5240,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsChar(iterA.nextChar(), iterB.hasNext() ? iterB.nextChar() : valueForNoneB);
                 } else {
@@ -5293,7 +5290,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsChar(iterA.nextChar(), iterB.hasNext() ? iterB.nextChar() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextChar() : valueForNoneC);
@@ -5448,7 +5445,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cursorA < lenA) {
                     if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                         return a[cursorA++];
@@ -5533,7 +5530,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (!hasNextA && iterA.hasNext()) {
                     nextA = iterA.nextChar();
                     hasNextA = true;

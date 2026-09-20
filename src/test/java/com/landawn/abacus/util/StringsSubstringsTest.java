@@ -569,7 +569,17 @@ public class StringsSubstringsTest extends StringsTestSupport {
         };
 
         assertEquals(input, shuffle(input, splitPairIfCodeUnitBased));
-        assertEquals(emoji, shuffle(emoji, null));
+        final Random unusedForNoOp = new Random(0) {
+            @Override
+            public int nextInt(final int bound) {
+                throw new AssertionError("A no-op shuffle must not consume randomness");
+            }
+        };
+        // The generator is required even when there is at most one Unicode code point to shuffle.
+        for (final String noOp : new String[] { null, "", "a", emoji }) {
+            assertEquals(noOp, shuffle(noOp, unusedForNoOp));
+            assertThrows(IllegalArgumentException.class, () -> shuffle(noOp, null));
+        }
         assertThrows(IllegalArgumentException.class, () -> shuffle("ab", null));
     }
 
@@ -2526,6 +2536,7 @@ public class StringsSubstringsTest extends StringsTestSupport {
             }
         }
     }
+
     /**
      * Contract pin for the empty-delimiter note on the four String-delimiter {@code ...OrElse} extractors:
      * {@code substringAfterOrElse} and {@code substringBeforeLastOrElse} return {@code str} itself and never the

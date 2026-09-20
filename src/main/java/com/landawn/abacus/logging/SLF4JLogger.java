@@ -106,7 +106,8 @@ class SLF4JLogger extends AbstractLogger {
      * }</pre>
      *
      * @param name the name of the logger
-     * @throws RuntimeException if SLF4J is not properly initialized
+     * @throws RuntimeException if no SLF4J binding is on the classpath, so
+     *         {@code org.slf4j.LoggerFactory.getILoggerFactory()} resolves to a {@code NOPLoggerFactory}
      */
     public SLF4JLogger(final String name) throws RuntimeException {
         super(name);

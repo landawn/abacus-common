@@ -53,12 +53,12 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * System.out.println(set.descendingSet());   // prints [9, 7, 5, 3, 1]
  * }</pre>
  *
- * <p><b>Note:</b> the {@code of(...)} factories accept any element type and throw
- * {@link ClassCastException} at run time if the elements are not mutually comparable, matching
- * {@link #copyOf(Collection)}. They deliberately carry no {@code Comparable} bound, and one must not be
- * added: a bound would make them inapplicable to a non-comparable element, so the call would quietly
- * resolve to the inherited {@link ImmutableSet#of(Object)} and hand back an unsorted set instead of
- * failing.</p>
+ * <p>The natural-order {@code of(...)} factories require {@code E extends Comparable<? super E>}.
+ * {@link #copyOf(Collection)} and {@link #wrap(NavigableSet)} remain unbounded so a {@link java.util.Comparator}
+ * can order elements that are not comparable. Because this class extends {@link ImmutableSortedSet} (and
+ * therefore {@link ImmutableSet}), a call written as {@code ImmutableNavigableSet.of(nonComparableElement)}
+ * whose result is not demanded as an {@code ImmutableNavigableSet} can still resolve to
+ * {@link ImmutableSet#of(Object)} and return an unsorted set.</p>
  *
  * @param <E> the type of elements maintained by this set
  * @see ImmutableSortedSet
@@ -126,14 +126,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.lower(42);   // returns null
      * }</pre>
      *
-     * @param <E> the element type; the element must be Comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the element to be contained in the set
      * @return an ImmutableNavigableSet containing only the specified element
      * @throws NullPointerException if {@code e1} is {@code null}
      * @throws ClassCastException if {@code e1} cannot be compared with itself in natural order
      * @see #of(Object, Object)
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1) throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1) throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Collections.singletonList(e1)), true);
     }
 
@@ -148,14 +148,14 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * System.out.println(set);   // prints [alpha, beta]
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @return an ImmutableNavigableSet containing the specified elements in sorted order
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2) throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2) throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2)), true);
     }
 
@@ -172,7 +172,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.floor(2);   // returns 2
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -180,7 +180,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3) throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3)
+            throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3)), true);
     }
 
@@ -197,7 +198,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.higher(4);    // returns null
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -206,7 +207,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4) throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4)
+            throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4)), true);
     }
 
@@ -223,7 +225,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.lower(1);   // returns null
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -233,7 +235,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5)
+            throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5)), true);
     }
 
@@ -250,7 +253,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.ceiling(7);   // returns null
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -261,7 +264,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6)
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6)
             throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6)), true);
     }
@@ -279,7 +282,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.higher(7);   // returns null
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -291,8 +294,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7)
-            throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
+            final E e7) throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7)), true);
     }
 
@@ -309,7 +312,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.ceiling(9);   // returns null
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -322,8 +325,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8)
-            throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
+            final E e7, final E e8) throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8)), true);
     }
 
@@ -340,7 +343,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.higher(9);   // returns null
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -354,8 +357,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9)
-            throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
+            final E e7, final E e8, final E e9) throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9)), true);
     }
 
@@ -372,7 +375,7 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * set.higher(10);    // returns null
      * }</pre>
      *
-     * @param <E> the element type; the elements must be mutually comparable
+     * @param <E> the element type; must extend {@code Comparable<? super E>}
      * @param e1 the first element
      * @param e2 the second element
      * @param e3 the third element
@@ -387,8 +390,8 @@ public final class ImmutableNavigableSet<E> extends ImmutableSortedSet<E> implem
      * @throws NullPointerException if any element is {@code null}
      * @throws ClassCastException if the elements are not mutually comparable
      */
-    public static <E> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
-            final E e10) throws NullPointerException, ClassCastException {
+    public static <E extends Comparable<? super E>> ImmutableNavigableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6,
+            final E e7, final E e8, final E e9, final E e10) throws NullPointerException, ClassCastException {
         return new ImmutableNavigableSet<>(new TreeSet<>(Arrays.asList(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10)), true);
     }
 

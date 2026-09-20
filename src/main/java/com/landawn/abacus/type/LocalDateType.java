@@ -147,8 +147,7 @@ public class LocalDateType extends AbstractTemporalType<LocalDate> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code LocalDate}</li>
-     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
-     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix) are treated as
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only; no {@code 0x} hex, no {@code L} suffix) are treated as
      *       milliseconds since the epoch, interpreted in the system default zone (shorter numeric strings such as
      *       {@code "1234"} are handed to the ISO parser and rejected)</li>
      *   <li>ISO-8601 formatted strings are parsed directly via {@link LocalDate#parse(CharSequence)}</li>

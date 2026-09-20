@@ -32,11 +32,6 @@ import com.landawn.abacus.util.N;
  *   <li>Temporary pooling of objects that don't need cleanup</li>
  * </ul>
  *
- * <p><b>Serialization:</b> the adapter is {@link java.io.Serializable} (via {@link AbstractPoolable}),
- * but it can only be written when the adapted value is itself {@code Serializable}. Serializing an
- * adapter, or a pool that contains one, around a non-serializable value fails with
- * {@link java.io.NotSerializableException}; a {@code null} value is fine.</p>
- *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * // Wrap with infinite lifetime
@@ -69,8 +64,6 @@ import com.landawn.abacus.util.N;
  * @see KeyedObjectPool
  */
 public final class PoolableAdapter<T> extends AbstractPoolable {
-
-    private static final long serialVersionUID = -2350915980317529040L;
 
     /**
      * The adapted object. This field is final and never modified after construction.

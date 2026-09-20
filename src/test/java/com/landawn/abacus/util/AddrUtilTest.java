@@ -186,11 +186,11 @@ public class AddrUtilTest extends TestBase {
     @Test
     public void reviewFixes20260908_onlyTrulyAmbiguousUnbracketedTokensAreRejected() {
         // The whole token is itself a valid IPv6 literal -> two readings -> rejected as ambiguous.
-        for (final String token : new String[] { "::1", "fe80::1", "2001:db8::8a2e:370:7334", "fe80::1:8080", "::1:1121", "::",
-                "::ffff:127.0.0.1", "::ffff:c000:201", "1:2:3:4:5:6:7:8" }) {
+        for (final String token : new String[] { "::1", "fe80::1", "2001:db8::8a2e:370:7334", "fe80::1:8080", "::1:1121", "::", "::ffff:127.0.0.1",
+                "::ffff:c000:201", "1:2:3:4:5:6:7:8" }) {
             final IllegalArgumentException fromString = assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(token), token);
-            final IllegalArgumentException fromCollection = assertThrows(IllegalArgumentException.class,
-                    () -> AddrUtil.getAddressList(Arrays.asList(token)), token);
+            final IllegalArgumentException fromCollection = assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(Arrays.asList(token)),
+                    token);
             assertTrue(fromString.getMessage().contains("Unbracketed IPv6 address is ambiguous"), token + " -> " + fromString.getMessage());
             assertTrue(fromCollection.getMessage().contains("Unbracketed IPv6 address is ambiguous"), token + " -> " + fromCollection.getMessage());
         }
@@ -198,8 +198,8 @@ public class AddrUtilTest extends TestBase {
         // The token cannot be an address and the host part is not one either -> rejected as an invalid host.
         for (final String token : new String[] { "abc:def:1234", "1:2:3:4:5:6:7:8:9:9999" }) {
             final IllegalArgumentException fromString = assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(token), token);
-            final IllegalArgumentException fromCollection = assertThrows(IllegalArgumentException.class,
-                    () -> AddrUtil.getAddressList(Arrays.asList(token)), token);
+            final IllegalArgumentException fromCollection = assertThrows(IllegalArgumentException.class, () -> AddrUtil.getAddressList(Arrays.asList(token)),
+                    token);
             assertTrue(fromString.getMessage().contains("is not a valid IPv6 address"), token + " -> " + fromString.getMessage());
             assertTrue(fromCollection.getMessage().contains("is not a valid IPv6 address"), token + " -> " + fromCollection.getMessage());
         }

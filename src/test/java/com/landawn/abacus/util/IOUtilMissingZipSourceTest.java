@@ -692,7 +692,7 @@ public class IOUtilMissingZipSourceTest extends TestBase {
         assertEquals(IOUtil.listFiles(dir, true, false), IOUtil.walk(dir, true, false).toList());
 
         // and the documented answers for a null, an absent and a wrong-kind argument are unchanged
-        assertEquals(0, IOUtil.walk((File) null).count());
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.walk((File) null));
         assertEquals(0, IOUtil.walk(new File(tempDir, "absent")).count());
         assertThrows(IllegalArgumentException.class, () -> IOUtil.walk(new File(dir, "one.txt")));
     }

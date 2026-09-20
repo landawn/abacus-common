@@ -47,7 +47,7 @@ public class CollectionsRegressionBTest extends TestBase {
     //      equals/hashCode but distinct under the backing map's own equivalence, leaving one behind.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B1_KeyStagingPreservesBackingMapEquivalence {
+    public class B1_KeyStagingPreservesBackingMapEquivalence extends TestBase {
 
         private Multiset<String> identityMultiset(final String a, final String b) {
             final Multiset<String> ms = new Multiset<>(IdentityHashMap.class);
@@ -213,7 +213,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // B2 / B6 - Collection / Iterable null contracts.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B2_B6_NullArgumentContracts {
+    public class B2_B6_NullArgumentContracts extends TestBase {
 
         @Test
         public void b2_retainAll_nullThrowsNpeAndLeavesTheMultisetIntact() {
@@ -279,7 +279,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // O1 - Collection.toArray() must allocate a new array even when the collection is empty.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class O1_ToArrayAllocatesAFreshArray {
+    public class O1_ToArrayAllocatesAFreshArray extends TestBase {
 
         @Test
         public void o1_emptyMultisetsDoNotShareOneArrayInstance() {
@@ -320,7 +320,7 @@ public class CollectionsRegressionBTest extends TestBase {
     //           delegates to a shared helper. Behaviour and message argument names must be unchanged.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class D1_D2_DelegationIsBehaviourPreserving {
+    public class D1_D2_DelegationIsBehaviourPreserving extends TestBase {
 
         @Test
         public void d1_removeAllOccurrencesIfAndRemoveIfAgree() {
@@ -396,7 +396,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // B3 - a supplier that does not hand out a fresh instance must be rejected, not silently aliased.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B3_SupplierFreshness {
+    public class B3_SupplierFreshness extends TestBase {
 
         @Test
         public void b3_multimap_sharedMapSupplierIsRejectedAtConstruction() {
@@ -509,7 +509,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // B5 - BiMap.copyOf(BiMap) rebuilt the source through plain HashMaps, losing its key equivalence.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B5_CopyOfABiMapPreservesTheSourcesBacking {
+    public class B5_CopyOfABiMapPreservesTheSourcesBacking extends TestBase {
 
         @Test
         public void b5_identityKeyedSourceKeepsBothKeys() {
@@ -600,7 +600,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // D4 - replaceEntry's List branch collapsed to a single pass; behaviour must be identical.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class D4_ReplaceEntryListBranch {
+    public class D4_ReplaceEntryListBranch extends TestBase {
 
         @Test
         public void d4_replacesOnlyTheFirstOccurrenceInARandomAccessList() {
@@ -659,7 +659,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // O2 - wrap() names the offending key instead of dumping the whole map; putAll(null) is an NPE.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class O2_ErrorMessages {
+    public class O2_ErrorMessages extends TestBase {
 
         @Test
         public void o2_listMultimapWrapNamesTheOffendingKey() {
@@ -704,7 +704,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // D6 - BiMap.put dropped two redundant valueMap lookups; every put/forcePut path must be unchanged.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class D6_BiMapPutIsUnchanged {
+    public class D6_BiMapPutIsUnchanged extends TestBase {
 
         @Test
         public void d6_duplicateValueStillRejected() {
@@ -775,7 +775,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // D3 - valueCollections() is a modifiable live view; the documented behaviour is pinned here.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class D3_ValueCollectionsView {
+    public class D3_ValueCollectionsView extends TestBase {
 
         @Test
         public void d3_removeTakesOutOneMappingWithAnEqualCollection() {
@@ -806,7 +806,7 @@ public class CollectionsRegressionBTest extends TestBase {
     // Cross-cutting: the fixes must not have changed ordinary behaviour.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class NoRegressionOnOrdinaryUse {
+    public class NoRegressionOnOrdinaryUse extends TestBase {
 
         @Test
         public void multisetIteratorAndCountsStillBehave() {

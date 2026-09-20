@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.SK;
 
 /**
@@ -41,8 +42,9 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * Constructs a new {@code AbstractArrayType} with the specified type name.
      *
      * @param typeName the name of the array type (e.g., "int[]", "String[]", "Object[]")
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    protected AbstractArrayType(final String typeName) {
+    protected AbstractArrayType(final String typeName) throws IllegalArgumentException {
         super(typeName);
     }
 
@@ -115,10 +117,11 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @param str the array string to split, optionally enclosed in {@code []}; must not be {@code null}
      * @return the array of element substrings; quote characters that delimit an individual element
      *         are preserved in that element
-     * @throws NullPointerException if {@code str} is {@code null}
-     * @throws IllegalArgumentException if a comma-delimited element contains only whitespace
+     * @throws IllegalArgumentException if {@code str} is {@code null} or a comma-delimited element contains only whitespace
      */
-    protected static String[] split(final String str) throws NullPointerException, IllegalArgumentException {
+    protected static String[] split(final String str) throws IllegalArgumentException {
+        N.checkArgNotNull(str, cs.str);
+
         final String input = str.strip();
         final String source;
 

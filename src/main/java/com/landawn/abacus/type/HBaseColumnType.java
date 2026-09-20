@@ -67,8 +67,9 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      *
      * @param typeClass the Class object for HBaseColumn
      * @param parameterTypeName the name of the type for values stored in the HBaseColumn
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    HBaseColumnType(final Class<HBaseColumn<T>> typeClass, final String parameterTypeName) {
+    HBaseColumnType(final Class<HBaseColumn<T>> typeClass, final String parameterTypeName) throws IllegalArgumentException {
         super(getTypeName(typeClass, parameterTypeName, false));
 
         declaringName = getTypeName(typeClass, parameterTypeName, true);
@@ -240,9 +241,11 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @param isDeclaringName {@code true} to generate a simplified name (e.g., {@code "HBaseColumn<String>"}),
      *                        {@code false} for a fully qualified name
      * @return the formatted type name
+     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("unused")
-    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(HBaseColumn.class) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {

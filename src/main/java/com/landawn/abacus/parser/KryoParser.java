@@ -188,8 +188,9 @@ import com.landawn.abacus.util.u.OptionalShort;
  * <p><b>Object graphs:</b> serialization ({@code serialize}, {@link #encode(Object)}) does not track object
  * references, which is Kryo's default and part of the wire format: an object graph that contains a cycle
  * fails with {@code KryoException}, and an object that is referenced from several places is written once per
- * occurrence and comes back as that many separate copies. {@link #deepCopy(Object)} and
- * {@link #shallowCopy(Object)} do track references and preserve both cycles and shared identity.
+ * occurrence and comes back as that many separate copies. {@link #deepCopy(Object)} tracks references
+ * to preserve cycles and shared identity in the copied graph. {@link #shallowCopy(Object)} copies only
+ * the root, retaining its references to the original nested objects.
  * Registering a custom {@code Serializer} does not change this.</p>
  *
  * <p><b>Instantiation:</b> Kryo creates every deserialized or copied object through an accessible no-arg
@@ -274,9 +275,11 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @return the Base64 encoded string representation of the serialized object
+     * @throws UncheckedIOException if a configured serializer reports an I/O cause while encoding the object graph
+     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
     @Override
-    public String serialize(final Object obj, final KryoSerConfig config) {
+    public String serialize(final Object obj, final KryoSerConfig config) throws UncheckedIOException, KryoException {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try {
@@ -306,11 +309,16 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
+     * @throws IllegalArgumentException if {@code output} is null, or {@code output} is a directory
      * @throws UncheckedIOException if creating, opening, writing, flushing or closing {@code output} fails, including an I/O cause
      *         wrapped by Kryo
+     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
     @Override
-    public void serialize(final Object obj, final KryoSerConfig config, final File output) throws UncheckedIOException {
+    public void serialize(final Object obj, final KryoSerConfig config, final File output)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
+        N.checkArgNotNull(output, cs.output);
+
         OutputStream os = null;
 
         try {
@@ -345,10 +353,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
+     * @throws IllegalArgumentException if {@code output} is null
      * @throws UncheckedIOException if writing Kryo bytes to {@code output} or flushing it fails, including an I/O cause wrapped by Kryo
+     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
     @Override
-    public void serialize(final Object obj, final KryoSerConfig config, final OutputStream output) throws UncheckedIOException {
+    public void serialize(final Object obj, final KryoSerConfig config, final OutputStream output)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
         write(obj, config, output);
     }
 
@@ -369,11 +380,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the writer to write to (must not be {@code null})
-     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws IllegalArgumentException if {@code output} is null
      * @throws UncheckedIOException if writing the Base64-encoded Kryo bytes to {@code output} or flushing it fails
+     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
     @Override
-    public void serialize(final Object obj, final KryoSerConfig config, final Writer output) throws IllegalArgumentException, UncheckedIOException {
+    public void serialize(final Object obj, final KryoSerConfig config, final Writer output)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
         N.checkArgNotNull(output, cs.output);
 
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
@@ -409,9 +422,14 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to write (may be {@code null})
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output stream to write to
+     * @throws IllegalArgumentException if {@code output} is null
      * @throws UncheckedIOException if writing to or flushing {@code output} fails
+     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
-    private void write(final Object obj, final KryoSerConfig config, final OutputStream output) throws UncheckedIOException {
+    private void write(final Object obj, final KryoSerConfig config, final OutputStream output)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
+        N.checkArgNotNull(output, cs.output);
+
         final Output kryoOutput = createOutput();
 
         try {
@@ -456,8 +474,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to write (may be {@code null})
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the Kryo output to write to
+     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
-    private void write(final Object obj, final KryoSerConfig config, final Output output) {
+    private void write(final Object obj, final KryoSerConfig config, final Output output) throws KryoException {
         check(config);
 
         final Kryo kryo = createKryo();
@@ -495,10 +514,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or the source text is not valid Base64
+     * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
+     *         by the configured Kryo serializers
      */
     @Override
-    public <T> T deserialize(String source, KryoDeserConfig config, Type<? extends T> targetType) throws IllegalArgumentException {
+    public <T> T deserialize(String source, KryoDeserConfig config, Type<? extends T> targetType) throws IllegalArgumentException, KryoException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return deserialize(source, config, targetType.javaType());
@@ -522,10 +544,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class for object-only data, or {@code null} for class-and-object data (including serialized nulls)
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is {@code null}.
+     * @throws IllegalArgumentException if {@code source} is null, or the source text is not valid Base64
+     * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
+     *         by the configured Kryo serializers
      */
     @Override
-    public <T> T deserialize(final String source, final KryoDeserConfig config, final Class<? extends T> targetClass) throws IllegalArgumentException {
+    public <T> T deserialize(final String source, final KryoDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, KryoException {
         N.checkArgNotNull(source, cs.source);
 
         final Input input = createInput();
@@ -556,12 +581,17 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or {@code source} is a directory
      * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including a missing file or an I/O cause wrapped
      *         by Kryo
+     * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
+     *         by the configured Kryo serializers
      */
     @Override
-    public <T> T deserialize(File source, KryoDeserConfig config, Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
+    public <T> T deserialize(File source, KryoDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return deserialize(source, config, targetType.javaType());
@@ -584,11 +614,18 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class for object-only data, or {@code null} for class-and-object data (including serialized nulls)
      * @return the deserialized object instance
+     * @throws IllegalArgumentException if {@code source} is null, or {@code source} is a directory
      * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including a missing file or an I/O cause wrapped
      *         by Kryo
+     * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
+     *         by the configured Kryo serializers
      */
     @Override
-    public <T> T deserialize(final File source, final KryoDeserConfig config, final Class<? extends T> targetClass) throws UncheckedIOException {
+    public <T> T deserialize(final File source, final KryoDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
+
         InputStream is = null;
 
         try {
@@ -619,11 +656,15 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
-     * @throws UncheckedIOException if reading Kryo bytes from {@code source} fails and Kryo reports an I/O cause
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null
+     * @throws UncheckedIOException if reading the binary Kryo bytes from {@code source} fails
+     * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
+     *         by the configured Kryo serializers
      */
     @Override
-    public <T> T deserialize(InputStream source, KryoDeserConfig config, Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
+    public <T> T deserialize(InputStream source, KryoDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return deserialize(source, config, targetType.javaType());
@@ -648,10 +689,16 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class for object-only data, or {@code null} for class-and-object data (including serialized nulls)
      * @return the deserialized object instance
-     * @throws UncheckedIOException if reading Kryo bytes from {@code source} fails and Kryo reports an I/O cause
+     * @throws IllegalArgumentException if {@code source} is null
+     * @throws UncheckedIOException if reading the binary Kryo bytes from {@code source} fails
+     * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
+     *         by the configured Kryo serializers
      */
     @Override
-    public <T> T deserialize(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass) throws UncheckedIOException {
+    public <T> T deserialize(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
+        N.checkArgNotNull(source, cs.source);
+
         return read(source, config, targetClass);
     }
 
@@ -673,11 +720,15 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or the source text is not valid Base64
      * @throws UncheckedIOException if reading the Base64-encoded Kryo text from {@code source} fails
+     * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
+     *         by the configured Kryo serializers
      */
     @Override
-    public <T> T deserialize(Reader source, KryoDeserConfig config, Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
+    public <T> T deserialize(Reader source, KryoDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return deserialize(source, config, targetType.javaType());
@@ -701,10 +752,16 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class for object-only data, or {@code null} for class-and-object data (including serialized nulls)
      * @return the deserialized object instance
+     * @throws IllegalArgumentException if {@code source} is null, or the source text is not valid Base64
      * @throws UncheckedIOException if reading the Base64-encoded Kryo text from {@code source} fails
+     * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
+     *         by the configured Kryo serializers
      */
     @Override
-    public <T> T deserialize(final Reader source, final KryoDeserConfig config, final Class<? extends T> targetClass) throws UncheckedIOException {
+    public <T> T deserialize(final Reader source, final KryoDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, UncheckedIOException, KryoException {
+        N.checkArgNotNull(source, cs.source);
+
         return deserialize(IOUtil.readAllToString(source), config, targetClass);
     }
 
@@ -853,8 +910,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param <T> the type of the object
      * @param source the object to shallow copy
      * @return a shallow copy of the source object
+     * @throws KryoException if a copied object cannot be instantiated or copied by its registered serializer
      */
-    public <T> T shallowCopy(final T source) {
+    public <T> T shallowCopy(final T source) throws KryoException {
         final Kryo kryo = createKryo();
 
         try {
@@ -866,11 +924,12 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
     /**
      * Creates a deep copy of the source object.
-     * The object and all its referenced objects are copied recursively. Unlike {@code serialize} and
+     * The object and its referenced objects are copied recursively according to their serializers;
+     * immutable values may be reused. Unlike {@code serialize} and
      * {@link #encode(Object)}, copying tracks references: cycles are preserved and an object referenced
      * from several places is copied once and shared in the copy.
      *
-     * <p>Every object in the graph is created through its class's no-arg constructor (or a registered
+     * <p>Objects that require new instances are created through their class's no-arg constructor (or a registered
      * serializer), so a graph that contains a class without one, such as a {@code Collections.unmodifiable*}
      * wrapper, {@code EnumMap} or this library's {@code ImmutableList}/{@code ImmutableSet}/{@code ImmutableMap},
      * fails with {@code KryoException} unless a serializer is registered through
@@ -891,8 +950,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param <T> the type of the object
      * @param source the object to deep copy
      * @return a deep copy of the source object
+     * @throws KryoException if a copied object cannot be instantiated or copied by its registered serializer
      */
-    public <T> T deepCopy(final T source) {
+    public <T> T deepCopy(final T source) throws KryoException {
         final Kryo kryo = createKryo();
 
         try {
@@ -918,8 +978,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * @param source the object to encode (may be {@code null})
      * @return the encoded byte array
+     * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
-    public byte[] encode(final Object source) {
+    public byte[] encode(final Object source) throws KryoException {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
         final Output output = createOutput();
         final Kryo kryo = createKryo();
@@ -952,9 +1013,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param source the byte array to decode (must not be {@code null}); an empty array is not a valid Kryo
      *        payload and fails with {@code KryoException}
      * @return the decoded object
+     * @throws IllegalArgumentException if {@code source} is null
+     * @throws KryoException if the encoded bytes are empty, truncated or cannot be materialized by the configured Kryo serializers
      */
     @SuppressWarnings("unchecked")
-    public <T> T decode(final byte[] source) {
+    public <T> T decode(final byte[] source) throws IllegalArgumentException, KryoException {
+        N.checkArgNotNull(source, cs.source);
+
         final Input input = createInput();
         final Kryo kryo = createKryo();
 

@@ -253,7 +253,8 @@ public class OptionalByteTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -271,12 +272,14 @@ public class OptionalByteTypeTest extends TestBase {
 
         assertEquals("0", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), zero));
         assertEquals("0", reviewFixes20260906_ser(optionalByteType, null, zero));
-        assertEquals("0", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
+        assertEquals("0", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(),
+                com.landawn.abacus.parser.XmlSerConfig.create().setWriteNullNumberAsZero(true)));
         assertEquals("null", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("null", reviewFixes20260906_ser(optionalByteType, null, com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("null", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), null));
         assertEquals("null", reviewFixes20260906_ser(optionalByteType, null, null));
-        assertEquals("null", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
+        assertEquals("null", reviewFixes20260906_ser(optionalByteType, OptionalByte.empty(),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true)));
         assertEquals("7", reviewFixes20260906_ser(optionalByteType, OptionalByte.of((byte) 7), zero));
         assertEquals("7", reviewFixes20260906_ser(optionalByteType, OptionalByte.of((byte) 7), null));
     }

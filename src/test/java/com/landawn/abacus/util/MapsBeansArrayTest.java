@@ -157,7 +157,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B1_EmptyArrayCacheDoesNotRetainClasses {
+    public class B1_EmptyArrayCacheDoesNotRetainClasses extends TestBase {
 
         @Test
         public void newInstance_zeroLength_doesNotCacheAnUncachedComponentType() {
@@ -221,7 +221,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B2_ImmutableBeansRejectInPlaceMutation {
+    public class B2_ImmutableBeansRejectInPlaceMutation extends TestBase {
 
         private final RecBean rec = new RecBean("hi", 3);
         private final ImmutableBean immutable = new ImmutableBean("hi", 3);
@@ -450,7 +450,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B6_ImmutableDetectionSpansTheHierarchy {
+    public class B6_ImmutableDetectionSpansTheHierarchy extends TestBase {
 
         @Test
         public void immutableSubclass_exposesBothItsOwnAndItsInheritedProperties() {
@@ -520,7 +520,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B7_NullPropNameIsRejected {
+    public class B7_NullPropNameIsRejected extends TestBase {
 
         @Test
         public void getPropGetterFieldAndSetterAllRejectANullName() {
@@ -546,7 +546,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B8_RandomBeanCycleDepthIsConsistent {
+    public class B8_RandomBeanCycleDepthIsConsistent extends TestBase {
 
         @Test
         public void newRandomBean_stopsAtTheSelfReference() {
@@ -591,7 +591,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B3_FloatAndDoubleSaturateRatherThanThrow {
+    public class B3_FloatAndDoubleSaturateRatherThanThrow extends TestBase {
 
         private Map<String, Object> map() {
             final Map<String, Object> m = new HashMap<>();
@@ -649,7 +649,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B5_GetAsCharParsing {
+    public class B5_GetAsCharParsing extends TestBase {
 
         private Map<String, Object> m;
 
@@ -740,7 +740,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B10_PathSegmentsEndingInABracket {
+    public class B10_PathSegmentsEndingInABracket extends TestBase {
 
         @Test
         public void anOrdinaryKeyEndingInACloseBracketIsResolvable() {
@@ -779,7 +779,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B9_E1_P3_MapsHousekeeping {
+    public class B9_E1_P3_MapsHousekeeping extends TestBase {
 
         @Test
         public void difference_againstAnEmptyOrNullMapReturnsEveryEntry() {
@@ -858,7 +858,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B4_EmptyPathSegmentsAreNotAddressable {
+    public class B4_EmptyPathSegmentsAreNotAddressable extends TestBase {
 
         @Test
         public void flattenKeepsAnEmptySegmentThatGetByPathDrops() {
@@ -894,7 +894,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class D5_KryoFallback {
+    public class D5_KryoFallback extends TestBase {
 
         @Test
         public void deepCopyAndShallowCopyStillRoundTripAnOrdinaryBean() {
@@ -967,7 +967,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class J5_RepeatFamilyNullInput {
+    public class J5_RepeatFamilyNullInput extends TestBase {
 
         @Test
         public void aNullArrayYieldsAnEmptyArrayRatherThanNull() {
@@ -996,7 +996,7 @@ public class MapsBeansArrayTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class P1_GetterClaimedOnce {
+    public class P1_GetterClaimedOnce extends TestBase {
 
         public static class Base {
             private String shared;

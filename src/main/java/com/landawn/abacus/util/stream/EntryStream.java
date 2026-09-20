@@ -306,9 +306,11 @@ public final class EntryStream<K, V> extends
      * Returns a stream consisting of the keys from the entries in this EntryStream.
      * This is an intermediate operation.
      *
-     * <p>When this stream was created from a {@code Map}, the returned stream is a live view of that
-     * map's {@code keySet()}: it never consumes this {@code EntryStream}, and closing it closes this one.
-     * Later map mutations are visible (and may throw {@code ConcurrentModificationException}).
+     * <p>When this stream was created from a {@code Map}, the returned stream reads that map's
+     * {@code keySet()} directly; it does not consume this {@code EntryStream}, and closing it closes
+     * this one. The iterator follows the map's mutation policy and may throw
+     * {@code ConcurrentModificationException}. If the view is empty when this method is called,
+     * the returned stream stays empty even if mappings are added later.
      * For a non-map source, {@code keys()} maps this stream and shares its one-shot consumption.
      *
      * <p><b>Usage Examples:</b></p>
@@ -349,9 +351,11 @@ public final class EntryStream<K, V> extends
      * Returns a stream consisting of the values from the entries in this EntryStream.
      * This is an intermediate operation.
      *
-     * <p>When this stream was created from a {@code Map}, the returned stream is a live view of that
-     * map's {@code values()} collection: it never consumes this {@code EntryStream}, and closing it closes
-     * this one. Later map mutations are visible (and may throw {@code ConcurrentModificationException}).
+     * <p>When this stream was created from a {@code Map}, the returned stream reads that map's
+     * {@code values()} collection directly; it does not consume this {@code EntryStream}, and closing it
+     * closes this one. The iterator follows the map's mutation policy and may throw
+     * {@code ConcurrentModificationException}. If the view is empty when this method is called,
+     * the returned stream stays empty even if mappings are added later.
      * For a non-map source, {@code values()} maps this stream and shares its one-shot consumption.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1232,7 +1236,7 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"a0"=0, "a1"=1, "b0"=0, "b1"=1, "b2"=2} (entry order may vary)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers the output emitted by each mapper invocation until that invocation returns.
      *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
@@ -2341,7 +2345,7 @@ public final class EntryStream<K, V> extends
      * list or merge them with a {@code BinaryOperator} are {@code @SequentialOnly}, while the key-mapper
      * and {@code Collector} overloads are {@code @ParallelSupported}.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @return a new EntryStream with keys and their associated list of values
      * @throws IllegalStateException if the stream is already closed
@@ -2389,7 +2393,7 @@ public final class EntryStream<K, V> extends
      * between this overload and {@link #groupBy(BinaryOperator)} and reports
      * {@code reference to groupBy is ambiguous}.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated list of values
@@ -2434,7 +2438,7 @@ public final class EntryStream<K, V> extends
      * // Result: {a=[5, 7], b=[6]}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
@@ -2479,7 +2483,7 @@ public final class EntryStream<K, V> extends
      * // TreeMap::new controls the intermediate grouping order; toMap() creates the returned map.
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
@@ -2522,7 +2526,7 @@ public final class EntryStream<K, V> extends
      * // Result: {a=4, b=6}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param <D> the type of the result of the downstream collector
      * @param downstream the collector to use for grouping the entries
@@ -2561,14 +2565,14 @@ public final class EntryStream<K, V> extends
      * // TreeMap::new controls the intermediate grouping order; toMap() creates the returned map.
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param <D> the type of the result of the downstream collector
      * @param downstream the collector to use for grouping the entries
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated collected results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code downstream} or {@code mapFactory} is {@code null}.
      * @see Stream#groupBy(Function, Collector, Supplier)
      */
     @ParallelSupported
@@ -2604,7 +2608,7 @@ public final class EntryStream<K, V> extends
      * // Result: {a=12, b=6}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <D> the type of the result of the downstream collector.
@@ -2612,7 +2616,7 @@ public final class EntryStream<K, V> extends
      * @param downstream the collector to use for grouping the entries
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of the downstream collector.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}.
      * @see Stream#groupBy(Function, Collector)
      */
     @ParallelSupported
@@ -2648,7 +2652,7 @@ public final class EntryStream<K, V> extends
      * // TreeMap::new controls the intermediate grouping order; toMap() creates the returned map.
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <D> the type of the result of the downstream collector.
@@ -2657,7 +2661,7 @@ public final class EntryStream<K, V> extends
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of the downstream collector.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper} or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
      * @see Stream#groupBy(Function, Collector, Supplier)
      */
     @ParallelSupported
@@ -2691,7 +2695,7 @@ public final class EntryStream<K, V> extends
      * // Result: {a=4, b=6}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param mergeFunction the function to merge values associated with the same key
      * @return a new EntryStream with keys and their associated merged values
@@ -2737,7 +2741,7 @@ public final class EntryStream<K, V> extends
      * // TreeMap::new controls the intermediate grouping order; toMap() creates the returned map.
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param mergeFunction the function to merge values associated with the same key
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
@@ -2789,7 +2793,7 @@ public final class EntryStream<K, V> extends
      * // Result: {a=15, b=6}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
@@ -2840,7 +2844,7 @@ public final class EntryStream<K, V> extends
      * // TreeMap::new controls the intermediate grouping order; toMap() creates the returned map.
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
@@ -3108,8 +3112,6 @@ public final class EntryStream<K, V> extends
             throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
-        checkArgNotNull(collectionSupplier, cs.collectionSupplier);
-
         return _stream.split(chunkSize, collectionSupplier);
     }
 
@@ -3178,8 +3180,6 @@ public final class EntryStream<K, V> extends
     public <C extends Collection<Map.Entry<K, V>>> Stream<C> sliding(final int windowSize, final IntFunction<? extends C> collectionSupplier)
             throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
-
-        checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
         return _stream.sliding(windowSize, collectionSupplier);
     }
@@ -3251,8 +3251,6 @@ public final class EntryStream<K, V> extends
     public <C extends Collection<Map.Entry<K, V>>> Stream<C> sliding(final int windowSize, final int increment,
             final IntFunction<? extends C> collectionSupplier) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
-
-        checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
         return _stream.sliding(windowSize, increment, collectionSupplier);
     }
@@ -3977,7 +3975,7 @@ public final class EntryStream<K, V> extends
      *     .toList();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the accumulated result for each distinct key.
      *
      * @param mergeFunction the function to merge duplicate elements
      * @return a new EntryStream with distinct elements
@@ -4019,7 +4017,7 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns entries for ("a", 1), ("b", 2)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; retains the distinct extracted keys seen so far.
      *
      * @return a new EntryStream with distinct elements based on the keys
      * @throws IllegalStateException if the stream is already closed
@@ -4064,7 +4062,7 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns entries for ("a", 1), ("b", 2)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; retains the distinct extracted keys seen so far.
      *
      * @return a new EntryStream with distinct elements based on the values
      * @throws IllegalStateException if the stream is already closed
@@ -4088,10 +4086,9 @@ public final class EntryStream<K, V> extends
 
     /**
      * Returns a stream consisting of the distinct elements of this stream based on the keys extracted by the specified key extractor function.
-     * The order of the elements is preserved.
-     *
-     * <p>When multiple entries produce the same key from the extractor function, only the first
-     * occurrence is kept. This allows for custom definitions of uniqueness.
+     * In a sequential stream, the first occurrence of each extracted key is retained in encounter order.
+     * Parallel execution may retain any occurrence of each key and reorder the results.
+     * Array keys are compared by deep content.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4101,7 +4098,7 @@ public final class EntryStream<K, V> extends
      *       .toList();   // keeps first entry for each unique key length
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; retains the distinct extracted keys seen so far.
      *
      * @param keyMapper the function to extract the key for comparison
      * @return a new EntryStream with distinct elements based on the extracted keys
@@ -4139,7 +4136,7 @@ public final class EntryStream<K, V> extends
      *       .toList();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains the accumulated result for each distinct key.
      *
      * @param keyMapper the function to extract the key for comparison
      * @param mergeFunction the function to merge duplicate elements
@@ -4282,7 +4279,7 @@ public final class EntryStream<K, V> extends
 
     /**
      * Returns a new EntryStream with the elements cycled.
-     * The stream will repeat its elements indefinitely.
+     * A non-empty source repeats indefinitely; an empty source remains empty.
      *
      * <p>This method only runs sequentially, even in parallel streams.
      * All elements are stored in memory after the first iteration.
@@ -4293,7 +4290,7 @@ public final class EntryStream<K, V> extends
      * EntryStream.of(smallMap)
      *     .cycled()
      *     .limit(10)
-     *     .toList();   // returns 10 entries, cycling through the original entries
+     *     .toList();   // returns 10 entries if smallMap is non-empty, cycling through its entries
      * }</pre>
      *
      * @return a new EntryStream with the elements cycled
@@ -4620,7 +4617,8 @@ public final class EntryStream<K, V> extends
      * Executes the specified action if the stream is empty.
      *
      * <p>This method only runs sequentially, even in parallel streams.
-     * The action is executed during terminal operation execution, not when this method is called.
+     * The action runs when traversal first observes an empty source, including manual iterator use.
+     * A downstream operation that never checks the source, such as {@code limit(0)}, can bypass it.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4699,8 +4697,6 @@ public final class EntryStream<K, V> extends
     public EntryStream<K, V> skip(final long n, final Consumer<? super Map.Entry<K, V>> onSkip) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
-        checkArgNotNull(onSkip, cs.onSkip);
-
         return of(_stream.skip(n, onSkip));
     }
 
@@ -4771,7 +4767,7 @@ public final class EntryStream<K, V> extends
      * RateLimiter rateLimiter = RateLimiter.create(2.0);   // 2 permits per second
      * EntryStream.of(map)
      *     .rateLimited(rateLimiter)
-     *     .forEach((k, v) -> processEntry(k, v));   // processes at most 2 entries per second
+     *     .forEach((k, v) -> processEntry(k, v));   // targets an average of 2 entries per second; stored permits can allow bursts
      * }</pre>
      *
      * <p><b>How it compares to the other time-based intermediate operators:</b></p>
@@ -4780,14 +4776,14 @@ public final class EntryStream<K, V> extends
      *   <tr><th>Operator</th><th>Effect</th><th>Emits every entry?</th><th>Drops entries?</th><th>Typical use</th></tr>
      *   <tr>
      *     <td>{@link #delay(Duration)}</td>
-     *     <td>Sleeps a fixed {@code duration} before each entry except the first (constant spacing between entries)</td>
+     *     <td>Sleeps a fixed {@code duration} before each entry except the first; processing and scheduling add to the gap</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Pace a stream with a fixed gap between entries</td>
      *   </tr>
      *   <tr>
      *     <td>{@link #rateLimited(RateLimiter)}</td>
-     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Acquires a permit for each entry at the configured average rate; stored permits can allow bursts</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Cap throughput against a rate-limited resource</td>
@@ -4835,14 +4831,14 @@ public final class EntryStream<K, V> extends
      *   <tr><th>Operator</th><th>Effect</th><th>Emits every entry?</th><th>Drops entries?</th><th>Typical use</th></tr>
      *   <tr>
      *     <td>{@link #delay(Duration)}</td>
-     *     <td>Sleeps a fixed {@code duration} before each entry except the first (constant spacing between entries)</td>
+     *     <td>Sleeps a fixed {@code duration} before each entry except the first; processing and scheduling add to the gap</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Pace a stream with a fixed gap between entries</td>
      *   </tr>
      *   <tr>
      *     <td>{@link #rateLimited(RateLimiter)}</td>
-     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Acquires a permit for each entry at the configured average rate; stored permits can allow bursts</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Cap throughput against a rate-limited resource</td>
@@ -4887,7 +4883,7 @@ public final class EntryStream<K, V> extends
      * last entry is emitted. Because that clock is not monotonic, a system-clock adjustment during traversal
      * can make a gap look shorter or longer than it really was.
      *
-     * <p>This differs from {@link #rateLimited(RateLimiter)}, which spreads permits evenly over time. It is
+     * <p>This differs from {@link #rateLimited(RateLimiter)}, which acquires a permit for each entry. It is
      * also not a scheduler-based debounce: it does not start a background timer, and pending entries are
      * emitted only while downstream iteration pulls from this stream.
      *
@@ -4908,14 +4904,14 @@ public final class EntryStream<K, V> extends
      *   <tr><th>Operator</th><th>Effect</th><th>Emits every entry?</th><th>Drops entries?</th><th>Typical use</th></tr>
      *   <tr>
      *     <td>{@link #delay(Duration)}</td>
-     *     <td>Sleeps a fixed {@code duration} before each entry except the first (constant spacing between entries)</td>
+     *     <td>Sleeps a fixed {@code duration} before each entry except the first; processing and scheduling add to the gap</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Pace a stream with a fixed gap between entries</td>
      *   </tr>
      *   <tr>
      *     <td>{@link #rateLimited(RateLimiter)}</td>
-     *     <td>Blocks until a permit is available so throughput stays at or below a target rate (permits per second)</td>
+     *     <td>Acquires a permit for each entry at the configured average rate; stored permits can allow bursts</td>
      *     <td>Yes</td>
      *     <td>No</td>
      *     <td>Cap throughput against a rate-limited resource</td>
@@ -5218,6 +5214,7 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to compare the entries
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      * @see #minByKey(Comparator)
@@ -5256,6 +5253,7 @@ public final class EntryStream<K, V> extends
      *
      * @param keyComparator the comparator to compare the keys
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyComparator} is {@code null}.
      * @see #min(Comparator)
@@ -5293,6 +5291,7 @@ public final class EntryStream<K, V> extends
      *
      * @param valueComparator the comparator to compare the values
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code valueComparator} is {@code null}.
      * @see #min(Comparator)
@@ -5332,6 +5331,8 @@ public final class EntryStream<K, V> extends
      *
      * @param keyMapper the function to extract the comparable sort key from each entry
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}, or if {@code keyMapper} rejects a {@code null} entry:
+     *         it is applied to every entry, {@code null} ones included, even when that entry is not the minimum
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      * @see #min(Comparator)
@@ -5371,6 +5372,7 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to compare the entries
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      * @see #maxByKey(Comparator)
@@ -5409,6 +5411,7 @@ public final class EntryStream<K, V> extends
      *
      * @param keyComparator the comparator to compare the keys
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyComparator} is {@code null}.
      * @see #max(Comparator)
@@ -5446,6 +5449,7 @@ public final class EntryStream<K, V> extends
      *
      * @param valueComparator the comparator to compare the values
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code valueComparator} is {@code null}.
      * @see #max(Comparator)
@@ -5485,6 +5489,8 @@ public final class EntryStream<K, V> extends
      *
      * @param keyMapper the function to extract the comparable sort key from each entry
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}, or if {@code keyMapper} rejects a {@code null} entry:
+     *         it is applied to every entry, {@code null} ones included, even when that entry is not the maximum
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      * @see #max(Comparator)
@@ -5791,8 +5797,6 @@ public final class EntryStream<K, V> extends
             final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
-        checkArgNotNull(predicate, cs.predicate);
-
         return _stream.hasMatchCountBetween(atLeast, atMost, predicate);
     }
 
@@ -5835,6 +5839,9 @@ public final class EntryStream<K, V> extends
             final Throwables.BiPredicate<? super K, ? super V, E> predicate) throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
+        _stream.checkArgNotNegative(atLeast, cs.atLeast);
+        _stream.checkArgument(atLeast <= atMost, "'atLeast' (%s) must be <= 'atMost' (%s)", atLeast, atMost);
+        _stream.checkArgNotNegative(atMost, cs.atMost);
         checkArgNotNull(predicate, cs.predicate);
 
         return _stream.hasMatchCountBetween(atLeast, atMost, Fn.Entries.ep(predicate));
@@ -5849,9 +5856,8 @@ public final class EntryStream<K, V> extends
      * current pipeline. Parallel intermediate operations may reorder entries, so the result need
      * not be the first entry of the original source and may differ between runs.</p>
      *
-     * <p><b>Null entries:</b> the returned {@code Optional} is created with
-     * {@code Optional.ofNullable}, so a {@code null} first entry yields an <i>empty</i>
-     * {@code Optional} rather than throwing. An entry whose key or value is {@code null} is fine.</p>
+     * <p><b>Null entries:</b> a selected {@code null} entry causes a {@link NullPointerException}.
+     * An entry whose key or value is {@code null} is permitted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5862,6 +5868,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findAny()
@@ -5886,9 +5893,8 @@ public final class EntryStream<K, V> extends
      * current pipeline. Parallel intermediate operations may reorder entries, so the result need
      * not be the first entry of the original source and may differ between runs.</p>
      *
-     * <p><b>Null entries:</b> the returned {@code Optional} is created with
-     * {@code Optional.ofNullable}, so a {@code null} first entry yields an <i>empty</i>
-     * {@code Optional} rather than throwing. An entry whose key or value is {@code null} is fine.</p>
+     * <p><b>Null entries:</b> a selected {@code null} entry causes a {@link NullPointerException}.
+     * An entry whose key or value is {@code null} is permitted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5899,6 +5905,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findFirst()
@@ -5919,16 +5926,15 @@ public final class EntryStream<K, V> extends
      * {@code Optional}, or an empty {@code Optional} if no entry matches. This is a
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>The result is deterministic even for parallel streams: when several entries match, the one at
-     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * <p>When several entries match, the one at the smallest encounter-order index in the current
+     * pipeline wins, including in parallel. Earlier parallel operations may already have reordered
+     * the source. If that ordering guarantee is not needed,
      * {@link #findAny(Throwables.Predicate)} may find a match faster in parallel. The predicate operates
      * on {@code Map.Entry} objects; use {@link #findFirst(Throwables.BiPredicate)} to receive key and
      * value as separate arguments.</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well. The returned
-     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null} entry
-     * yields an <i>empty</i> {@code Optional} rather than throwing. An entry whose key or value is
-     * {@code null} is fine.</p>
+     * <p><b>Null entries:</b> a selected {@code null} entry causes a {@link NullPointerException}.
+     * An entry whose key or value is {@code null} is permitted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5943,6 +5949,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing the first entry that matches the predicate, or an empty {@code Optional} if no entry matches
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -5968,16 +5975,16 @@ public final class EntryStream<K, V> extends
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
      * <p>The bi-predicate receives each entry's key and value as separate arguments, so callers need not
-     * handle {@code Map.Entry} objects. The result is deterministic even for parallel streams: when several
-     * entries match, the one at the smallest encounter-order index wins. If that ordering guarantee is not
+     * handle {@code Map.Entry} objects. When several entries match, the one at the smallest encounter-order
+     * index in the current pipeline wins, including in parallel. Earlier parallel operations may already
+     * have reordered the source. If that ordering guarantee is not
      * needed, {@link #findAny(Throwables.BiPredicate)} may find a match faster in parallel.</p>
      *
-     * <p><b>Null entries:</b> &#9888;&#65039; this {@code BiPredicate} overload throws
-     * {@link NullPointerException} when an entry evaluated by the predicate is {@code null}:
-     * the adapter that splits an entry into {@code (key, value)} dereferences it in order to call
-     * the predicate. The {@code Throwables.Predicate} overload of the same name does <i>not</i> —
-     * it passes the {@code null} entry to your predicate untouched. An entry whose key or value is
-     * {@code null} is fine in both.</p>
+     * <p><b>Null entries:</b> any {@code null} entry evaluated by this overload causes a
+     * {@link NullPointerException} before the bi-predicate is invoked, because the key/value adapter
+     * dereferences the entry. The {@link #findFirst(Throwables.Predicate)} overload passes {@code null}
+     * entries to its predicate and throws if a {@code null} entry is selected. Null keys and values
+     * in a non-null entry are passed through to the bi-predicate.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6025,10 +6032,8 @@ public final class EntryStream<K, V> extends
      * {@code Map.Entry} objects; use {@link #findAny(Throwables.BiPredicate)} to receive key and value
      * as separate arguments.</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well. The returned
-     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null} entry
-     * yields an <i>empty</i> {@code Optional} rather than throwing. An entry whose key or value is
-     * {@code null} is fine.</p>
+     * <p><b>Null entries:</b> a selected {@code null} entry causes a {@link NullPointerException}.
+     * An entry whose key or value is {@code null} is permitted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6043,6 +6048,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing a matching entry, or an empty {@code Optional} if no entry matches
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -6075,12 +6081,11 @@ public final class EntryStream<K, V> extends
      * parallel. (Note the contrast with the no-arg {@link #findAny()}, which is an alias
      * of {@link #first()}.)</p>
      *
-     * <p><b>Null entries:</b> &#9888;&#65039; this {@code BiPredicate} overload throws
-     * {@link NullPointerException} when an entry evaluated by the predicate is {@code null}:
-     * the adapter that splits an entry into {@code (key, value)} dereferences it in order to call
-     * the predicate. The {@code Throwables.Predicate} overload of the same name does <i>not</i> —
-     * it passes the {@code null} entry to your predicate untouched. An entry whose key or value is
-     * {@code null} is fine in both.</p>
+     * <p><b>Null entries:</b> any {@code null} entry evaluated by this overload causes a
+     * {@link NullPointerException} before the bi-predicate is invoked, because the key/value adapter
+     * dereferences the entry. The {@link #findAny(Throwables.Predicate)} overload passes {@code null}
+     * entries to its predicate and throws if a {@code null} entry is selected. Null keys and values
+     * in a non-null entry are passed through to the bi-predicate.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6127,10 +6132,8 @@ public final class EntryStream<K, V> extends
      * {@code Map.Entry} objects; use
      * {@link #findLast(Throwables.BiPredicate)} to receive key and value as separate arguments.</p>
      *
-     * <p><b>Null entries:</b> the predicate is applied to {@code null} entries as well. The returned
-     * {@code Optional} is created with {@code Optional.ofNullable}, so a matching {@code null} entry
-     * yields an <i>empty</i> {@code Optional} rather than throwing. An entry whose key or value is
-     * {@code null} is fine.</p>
+     * <p><b>Null entries:</b> a selected {@code null} entry causes a {@link NullPointerException}.
+     * An entry whose key or value is {@code null} is permitted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6145,6 +6148,7 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing the last entry that matches the predicate, or an empty {@code Optional} if no entry matches
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
@@ -6176,12 +6180,11 @@ public final class EntryStream<K, V> extends
      * When several entries match, the entry at the largest encounter-order index in the current
      * pipeline wins. Parallel intermediate operations may already have reordered the source.</p>
      *
-     * <p><b>Null entries:</b> &#9888;&#65039; this {@code BiPredicate} overload throws
-     * {@link NullPointerException} when an entry evaluated by the predicate is {@code null}:
-     * the adapter that splits an entry into {@code (key, value)} dereferences it in order to call
-     * the predicate. The {@code Throwables.Predicate} overload of the same name does <i>not</i> —
-     * it passes the {@code null} entry to your predicate untouched. An entry whose key or value is
-     * {@code null} is fine in both.</p>
+     * <p><b>Null entries:</b> any {@code null} entry evaluated by this overload causes a
+     * {@link NullPointerException} before the bi-predicate is invoked, because the key/value adapter
+     * dereferences the entry. The {@link #findLast(Throwables.Predicate)} overload passes {@code null}
+     * entries to its predicate and throws if a {@code null} entry is selected. Null keys and values
+     * in a non-null entry are passed through to the bi-predicate.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6226,9 +6229,8 @@ public final class EntryStream<K, V> extends
      * first entry delivered by the current pipeline; parallel intermediate operations may have
      * reordered the original source.</p>
      *
-     * <p><b>Null entries:</b> the returned {@code Optional} is created with
-     * {@code Optional.ofNullable}, so a {@code null} first entry yields an <i>empty</i>
-     * {@code Optional} rather than throwing. An entry whose key or value is {@code null} is fine.</p>
+     * <p><b>Null entries:</b> a selected {@code null} entry causes a {@link NullPointerException}.
+     * An entry whose key or value is {@code null} is permitted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6239,6 +6241,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @see #findFirst()
      * @see #findAny()
@@ -6254,14 +6257,12 @@ public final class EntryStream<K, V> extends
 
     /**
      * Returns the last entry of this stream wrapped in an {@code Optional}, or an empty {@code Optional}
-     * if this stream is empty. This is a terminal operation: unlike {@link #first()}, it cannot
-     * short-circuit — every entry must be processed, because the last entry is only known when the
-     * stream is exhausted; only the latest entry is retained, so memory usage stays constant. The
-     * stream is then closed.
+     * if this stream is empty. This is a terminal operation: iterator-backed streams traverse the
+     * remaining entries and retain only the latest one, while array-backed streams can access the
+     * last entry directly. The stream is then closed.
      *
-     * <p><b>Null entries:</b> the returned {@code Optional} is created with
-     * {@code Optional.ofNullable}, so a {@code null} last entry yields an <i>empty</i>
-     * {@code Optional} rather than throwing. An entry whose key or value is {@code null} is fine.</p>
+     * <p><b>Null entries:</b> a selected {@code null} entry causes a {@link NullPointerException}.
+     * An entry whose key or value is {@code null} is permitted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6273,6 +6274,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the last entry of the stream, or an empty {@code Optional} if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @see #first()
      * @see #findLast(Throwables.Predicate)
@@ -6305,7 +6307,8 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @param position the position of the entry to return (zero-based)
-     * @return an {@code Optional} containing the entry at the specified position if it exists, otherwise an empty {@code Optional}
+     * @return an {@code Optional} containing the entry at the specified position, or empty if that position does not exist
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code position} is negative.
      * @see Stream#elementAt(long)
@@ -6321,7 +6324,8 @@ public final class EntryStream<K, V> extends
      * Returns an {@code Optional} containing the only entry of this EntryStream if it contains exactly one entry.
      * This is a terminal operation.
      *
-     * <p>If the stream is empty, an empty {@code Optional} is returned. If the stream contains more than one entry,
+     * <p>If the stream is empty, an empty {@code Optional} is returned.
+     * If the stream contains more than one entry,
      * a {@link TooManyElementsException} is thrown.
      *
      * <p><b>Usage Examples:</b></p>
@@ -6335,7 +6339,8 @@ public final class EntryStream<K, V> extends
      *     .onlyOne();   // throws if multiple entries have value 100
      * }</pre>
      *
-     * @return an {@code Optional} containing the only entry of this EntryStream if it is not empty, otherwise an empty {@code Optional}
+     * @return an {@code Optional} containing the sole entry, or empty if the stream is empty
+     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws TooManyElementsException if the EntryStream contains more than one entry
      * @see Stream#onlyOne()
@@ -6706,7 +6711,7 @@ public final class EntryStream<K, V> extends
      * // Result: {"a"=1, "b"=2, "c"=3}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @return a {@code Map} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
@@ -6749,7 +6754,7 @@ public final class EntryStream<K, V> extends
      * // Result: {"a"="second"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param mergeFunction a function used to resolve collisions between values associated
      *                      with the same key. A {@code null} result removes the key, as
@@ -6803,7 +6808,7 @@ public final class EntryStream<K, V> extends
      * cannot choose between this overload and {@link #toMap(BinaryOperator)} and reports
      * {@code reference to toMap is ambiguous}.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param <M> the type of the resulting {@code Map}
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
@@ -6852,7 +6857,7 @@ public final class EntryStream<K, V> extends
      * // Result: ConcurrentHashMap {"a"=5, "b"=3}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param <M> the type of the resulting {@code Map}
      * @param mergeFunction a function used to resolve collisions between values associated
@@ -6907,7 +6912,7 @@ public final class EntryStream<K, V> extends
      * // Result: 2
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown by the function
@@ -6953,7 +6958,7 @@ public final class EntryStream<K, V> extends
      *     .toMapThenAccept(external::putAll);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param <E> the type of exception that may be thrown by the consumer
      * @param consumer the consumer to accept the resulting map
@@ -6995,7 +7000,7 @@ public final class EntryStream<K, V> extends
      * // result.put("d", 4);   // Throws exception
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @return an {@code ImmutableMap} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
@@ -7035,7 +7040,7 @@ public final class EntryStream<K, V> extends
      * // Result: ImmutableMap {"a"="first"}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param mergeFunction a function used to resolve collisions between values associated
      *                      with the same key. A {@code null} result removes the key, as
@@ -7081,7 +7086,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
      * processing, so any upstream parallelism is silently lost for this terminal step.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @return a {@code ListMultimap} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed
@@ -7125,7 +7130,7 @@ public final class EntryStream<K, V> extends
      * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
      * processing, so any upstream parallelism is silently lost for this terminal step.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param <C> the type of collection used to store values in the multimap
      * @param <M> the type of the resulting multimap
@@ -7408,7 +7413,8 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
-     * @return an {@code Optional} describing the result of the reduction, or empty if the stream is empty
+     * @return an {@code Optional} describing the result, or empty if the stream is empty
+     * @throws NullPointerException if the final reduction result is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
      * @see Stream#reduce(BinaryOperator)
@@ -7624,7 +7630,7 @@ public final class EntryStream<K, V> extends
      * @param func the function to apply to the result of the collection
      * @return the result of applying the function to the collected data
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code downstream} or {@code func} is {@code null}.
      * @throws E if the function throws an exception
      * @see Stream#collectThenApply(Collector, Throwables.Function)
      * @see #collect(Collector)
@@ -7676,7 +7682,7 @@ public final class EntryStream<K, V> extends
      * @param downstream the {@code Collector} to perform the mutable reduction
      * @param consumer the consumer to accept the result of the collection
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code consumer} is {@code null}.
+     * @throws IllegalArgumentException if {@code downstream} or {@code consumer} is {@code null}.
      * @throws E if the consumer throws an exception
      * @see Stream#collectThenAccept(Collector, Throwables.Consumer)
      * @see #collect(Collector)
@@ -7709,13 +7715,14 @@ public final class EntryStream<K, V> extends
      * @param delimiter the delimiter to be used between each entry
      * @return a string representation of the entries joined by the delimiter
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code delimiter} is {@code null}.
      * @see Stream#join(CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence)
      * @see #join(CharSequence, CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
      */
     @Override
-    public String join(final CharSequence delimiter) throws IllegalStateException {
+    public String join(final CharSequence delimiter) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return join(delimiter, "", "");
@@ -7744,13 +7751,15 @@ public final class EntryStream<K, V> extends
      * @return a string representation of the entries joined by the delimiter and
      *         enclosed with prefix and suffix
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code delimiter}, {@code prefix}, or {@code suffix} is {@code null}.
      * @see Stream#join(CharSequence, CharSequence, CharSequence)
      * @see #join(CharSequence)
      * @see #join(CharSequence, CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
      */
     @Override
-    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return join(delimiter, "=", prefix, suffix);
@@ -7780,13 +7789,14 @@ public final class EntryStream<K, V> extends
      * @param keyValueDelimiter the delimiter to be used between key and value in each entry
      * @return a string representation of the entries
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if {@code delimiter} or {@code keyValueDelimiter} is {@code null}.
      * @see #join(CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
      */
     @SequentialOnly
     @TerminalOp
-    public String join(final CharSequence delimiter, final CharSequence keyValueDelimiter) throws IllegalStateException {
+    public String join(final CharSequence delimiter, final CharSequence keyValueDelimiter) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         return join(delimiter, keyValueDelimiter, "", "");
@@ -7823,6 +7833,7 @@ public final class EntryStream<K, V> extends
      * @param suffix the sequence of characters to be used at the end
      * @return a string representation of the entries with custom formatting
      * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalArgumentException if any of {@code delimiter}, {@code keyValueDelimiter}, {@code prefix}, or {@code suffix} is {@code null}.
      * @see #join(CharSequence)
      * @see #join(CharSequence, CharSequence)
      * @see #join(CharSequence, CharSequence, CharSequence)
@@ -7831,7 +7842,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public String join(final CharSequence delimiter, final CharSequence keyValueDelimiter, final CharSequence prefix, final CharSequence suffix)
-            throws IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         try (final Joiner joiner = Joiner.with(delimiter, keyValueDelimiter, prefix, suffix).reuseBuffer()) {
@@ -7869,7 +7880,7 @@ public final class EntryStream<K, V> extends
      * @param joiner the {@code Joiner} to use for formatting the entries
      * @return the same {@code Joiner} instance after all entries have been appended
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the joiner is null.
+     * @throws IllegalArgumentException if {@code joiner} is {@code null}.
      * @see Stream#joinTo(Joiner)
      * @see #join(CharSequence, CharSequence, CharSequence, CharSequence)
      * @see Joiner
@@ -7901,8 +7912,9 @@ public final class EntryStream<K, V> extends
      * The returned Stream is then wrapped into an EntryStream of this class.
      * This is equivalent to {@link #transformViaStream(Function, boolean)} with {@code deferred = false}.
      *
-     * <p>This method is marked as {@code @Beta} to indicate it's still in experimental phase.
-     * It only runs sequentially, even in parallel streams, as noted by the {@code @SequentialOnly} annotation.
+     * <p>The transfer function receives the underlying stream with its current execution mode.
+     * The resulting EntryStream uses the execution mode of the stream returned by the transfer.
+     * Closing the result also closes the input.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7915,7 +7927,8 @@ public final class EntryStream<K, V> extends
      *     );
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; transfer invocation is immediate unless deferred;
+     * evaluation and buffering depend on the transferred pipeline.
      *
      * @param <KK> the type of the keys in the resulting EntryStream
      * @param <VV> the type of the values in the resulting EntryStream
@@ -7928,7 +7941,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#transformViaJdkStream(Function)
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> transformViaStream(
             final Function<? super Stream<Map.Entry<K, V>>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> transfer)
@@ -7944,14 +7957,16 @@ public final class EntryStream<K, V> extends
      * Transforms the current EntryStream into another EntryStream by applying the provided function.
      * The function takes a Stream as input and returns a new Stream.
      * The returned Stream is then wrapped into an EntryStream of this class.
-     * The transformation can be deferred, which means it will be performed when the stream is consumed.
+     * With {@code deferred = true}, the transfer is invoked on first traversal or closure.
+     * With {@code deferred = false}, it is invoked immediately. Closing the result also closes the input.
      *
-     * <p>This method is marked as {@code @Beta} to indicate it's still in experimental phase.
-     * It only runs sequentially, even in parallel streams, as noted by the {@code @SequentialOnly} annotation.
+     * <p>The transfer function receives the underlying stream with its current execution mode.
+     * Immediate transformation preserves the returned stream's mode. Deferred transformation creates
+     * a sequential wrapper, which can subsequently be configured for parallel execution.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Deferred transformation - executed only when terminal operation is called
+     * // Deferred transformation - invoked on first traversal or closure
      * EntryStream<String, Integer> input = EntryStream.of("a", 5, "bb", 15, "ccc", 8);
      * EntryStream<String, Integer> result = input
      *     .<String, Integer>transformViaStream(s -> s
@@ -7961,12 +7976,13 @@ public final class EntryStream<K, V> extends
      *     );
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation; transfer invocation is immediate unless deferred;
+     * evaluation and buffering depend on the transferred pipeline.
      *
      * @param <KK> the type of the keys in the resulting EntryStream
      * @param <VV> the type of the values in the resulting EntryStream
      * @param transfer the function to be applied on the current stream to produce a new stream.
-     * @param deferred if {@code true}, the transformation is deferred until the EntryStream is consumed.
+     * @param deferred if {@code true}, invokes the transfer on first traversal or closure; otherwise invokes it immediately
      * @return a new EntryStream transformed by the provided function.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code transfer} is {@code null}.
@@ -7975,7 +7991,7 @@ public final class EntryStream<K, V> extends
      * @see Stream#transformViaJdkStream(Function, boolean)
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public <KK, VV> EntryStream<KK, VV> transformViaStream(
             final Function<? super Stream<Map.Entry<K, V>>, ? extends Stream<? extends Map.Entry<? extends KK, ? extends VV>>> transfer, final boolean deferred)
@@ -8619,7 +8635,7 @@ public final class EntryStream<K, V> extends
      *
      * <p>This method creates a stream of all key-value pairs in the map. The order of entries
      * in the stream depends on the map implementation (e.g., HashMap has no guaranteed order,
-     * LinkedHashMap preserves insertion order, TreeMap uses natural ordering).
+     * LinkedHashMap normally preserves insertion order, and TreeMap uses its configured comparator or natural ordering).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9175,12 +9191,12 @@ public final class EntryStream<K, V> extends
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Map<String, Integer>> inventories = Arrays.asList(
-     *     Map.of("apple", 10, "banana", 5),
-     *     Map.of("apple", 15, "orange", 8),
-     *     Map.of("banana", 3, "orange", 12)
+     *     new TreeMap<>(Map.of("apple", 10, "banana", 5)),
+     *     new TreeMap<>(Map.of("apple", 15, "orange", 8)),
+     *     new TreeMap<>(Map.of("banana", 3, "orange", 12))
      * );
      *
-     * // Merge maps prioritizing higher quantities
+     * // Merge by key, prioritizing higher quantities when the keys match
      * EntryStream<String, Integer> merged = EntryStream.merge(inventories,
      *     (e1, e2) -> {
      *         int cmp = e1.getKey().compareTo(e2.getKey());
@@ -9407,8 +9423,9 @@ public final class EntryStream<K, V> extends
      * Each key from the keys iterator is paired with the corresponding value from the values iterator
      * to create an entry. The operation continues until one of the iterators runs out of elements.
      *
-     * <p>This method consumes elements from both iterators. Once consumed, the iterators
-     * cannot be reset or reused.
+     * <p>The iterators advance as the returned stream is traversed. A short-circuiting terminal
+     * operation may leave entries unread, and the longer iterator may retain unused elements.
+     * Closing the returned stream does not drain either iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -52,7 +52,8 @@ public class UtilNullArgumentValidationTest extends TestBase {
     @Test
     public void allPrimitiveListArrayBoundariesAgree() throws Exception {
         final Class<?>[] primitives = { boolean.class, byte.class, char.class, short.class, int.class, long.class, float.class, double.class };
-        final Class<?>[] lists = { BooleanList.class, ByteList.class, CharList.class, ShortList.class, IntList.class, LongList.class, FloatList.class, DoubleList.class };
+        final Class<?>[] lists = { BooleanList.class, ByteList.class, CharList.class, ShortList.class, IntList.class, LongList.class, FloatList.class,
+                DoubleList.class };
         for (int i = 0; i < lists.length; i++) {
             final Class<?> arrayType = java.lang.reflect.Array.newInstance(primitives[i], 0).getClass();
             final Class<?> listType = lists[i];
@@ -61,8 +62,7 @@ public class UtilNullArgumentValidationTest extends TestBase {
             assertInstanceOf(IllegalArgumentException.class,
                     assertThrows(InvocationTargetException.class, () -> listType.getConstructor(arrayType, int.class).newInstance(null, -1)).getCause());
             final Method copy = listType.getMethod("copyOf", arrayType, int.class, int.class);
-            assertInstanceOf(IllegalArgumentException.class,
-                    assertThrows(InvocationTargetException.class, () -> copy.invoke(null, null, 0, 0)).getCause());
+            assertInstanceOf(IllegalArgumentException.class, assertThrows(InvocationTargetException.class, () -> copy.invoke(null, null, 0, 0)).getCause());
         }
     }
 

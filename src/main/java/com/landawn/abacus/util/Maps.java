@@ -66,7 +66,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Optional/Nullable Returns:</b> Value-retrieval methods return {@link Optional}, {@link Nullable},
  *       or primitive-Optional types for null-safe value handling</li>
  *   <li><b>Null-Tolerant Design:</b> {@code null} or empty maps are handled gracefully by the
- *       <em>non-mutating</em> methods; the mutating methods require a non-{@code null} map. Some methods
+ *       <em>non-mutating</em> methods. Insertion helpers require a non-{@code null} map, while removal
+ *       and replacement helpers treat a {@code null} map as empty. Some methods
  *       also validate non-{@code null} arguments such as default values and predicates</li>
  *   <li><b>Functional Programming:</b> Support for filter, invert, and other functional patterns</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
@@ -585,7 +586,8 @@ public final class Maps {
      * Creates a new immutable entry with the provided key and value.
      *
      * <p>This method generates a new immutable entry (key-value pair) using the provided key and value.
-     * The created entry is immutable, meaning that its key and value cannot be changed after creation.
+     * The created entry is shallowly immutable: its key and value references cannot be replaced,
+     * but the referenced objects are not copied or frozen.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1073,7 +1075,7 @@ public final class Maps {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Create a double-nested map: country -> state -> population
+     * // Create a double-nested map: state -> city -> population
      * Map<String, Map<String, Integer>> populationMap = new HashMap<>();
      * Map<String, Integer> california = new HashMap<>();
      * california.put("Los Angeles", 4000000);
@@ -1724,7 +1726,7 @@ public final class Maps {
      * @param key the whole path segment, for example {@code "tags[0][1]"}
      * @param fromIndex the offset of the first {@code '['} in {@code key}
      * @return the parsed indexes, or {@code null} if the suffix does not match the grammar (including an
-     *         index with more digits than an {@code int} can hold)
+     *         index whose numeric value exceeds {@link Integer#MAX_VALUE})
      */
     private static int[] parseIndexes(final String key, final int fromIndex) {
         final int len = key.length();
@@ -2110,7 +2112,7 @@ public final class Maps {
      * otherwise puts a new value obtained from {@code defaultValueSupplier} and returns it.
      *
      * <p>Here, absent means the key is missing from the specified map or maps to {@code null}.
-     * The supplier is invoked only when the key is absent, and exactly once.
+     * The supplier is invoked exactly once per call when the key is absent.
      *
      * <p><b>Note:</b> The supplier must return a non-{@code null} value. If it returns {@code null},
      * an {@link IllegalArgumentException} is thrown and the map is left unchanged - consistent with
@@ -2375,8 +2377,9 @@ public final class Maps {
      * above: {@code 'Y'}, {@code 'y'} and {@code '1'} are {@code true} and every other character is
      * {@code false}.</p>
      *
-     * <p><b>Note:</b> unlike the numeric accessors, this method never throws for an unconvertible value,
-     * and there is no accessor in this class that can tell "present but not a boolean" from
+     * <p><b>Note:</b> unlike the numeric parsers, the default string-to-boolean conversion treats
+     * unrecognized text as {@code false}. Conversion failures from custom converters or unsupported
+     * input structures still propagate. There is no accessor in this class that can tell "present but not a boolean" from
      * "present and false": {@link #getAs(Map, Object, Class)} with {@code Boolean.class} performs the
      * very same conversion and answers {@code Optional.of(false)} for {@code "junk"} just as this method
      * answers {@code OptionalBoolean.of(false)}. To make that distinction, read the raw value with
@@ -2400,9 +2403,12 @@ public final class Maps {
      * @param key the key whose associated value is to be returned.
      * @return an {@code OptionalBoolean} containing the boolean value, or empty if the map is
      *         {@code null}/empty, the key is absent, or the value is {@code null}.
+     * @throws IllegalArgumentException if a non-{@code Boolean} value is rejected by
+     *         {@link N#convert(Object, Class)} - notably a self-referencing container, or a registered
+     *         converter whose result is not a {@code Boolean}.
      */
     // @ai-ignore getAs* type-conversion variants - retrieve map values with automatic type conversion for each primitive type (boolean/char/byte/short/int/long/float/double/String) plus generic typed access. Each pair provides Optional and OrDefaultIfAbsent forms. Do not suggest consolidation.
-    public static <K> OptionalBoolean getAsBoolean(final Map<K, ?> map, final K key) {
+    public static <K> OptionalBoolean getAsBoolean(final Map<K, ?> map, final K key) throws IllegalArgumentException {
         if (N.isEmpty(map)) {
             return OptionalBoolean.empty();
         }
@@ -2444,8 +2450,11 @@ public final class Maps {
      * @param key the key whose associated value is to be returned.
      * @param defaultValue the value to return if the map is {@code null}/empty, the key is absent, or the value is {@code null}
      * @return the mapped boolean value, or {@code defaultValue} if the key is absent or mapped to {@code null}
+     * @throws IllegalArgumentException if a non-{@code Boolean} value is rejected by
+     *         {@link N#convert(Object, Class)} - notably a self-referencing container, or a registered
+     *         converter whose result is not a {@code Boolean}.
      */
-    public static <K> boolean getAsBooleanOrDefaultIfAbsent(final Map<K, ?> map, final K key, final boolean defaultValue) {
+    public static <K> boolean getAsBooleanOrDefaultIfAbsent(final Map<K, ?> map, final K key, final boolean defaultValue) throws IllegalArgumentException {
         if (N.isEmpty(map)) {
             return defaultValue;
         }
@@ -2599,8 +2608,12 @@ public final class Maps {
     /**
      * Parses {@code str} as a {@code char}: empty/{@code null} yields {@code '\0'}; a single-character
      * string yields that character; a longer string is parsed as a numeric UTF-16 code-unit value.
+     *
+     * @throws NumberFormatException if a multi-character {@code str} is not a supported integral numeric spelling
+     * @throws ArithmeticException if its numeric value cannot be represented as a long
+     * @throws IllegalArgumentException if the parsed value is outside the UTF-16 code-unit range 0 through 65535
      */
-    private static char parseChar(final String str) {
+    private static char parseChar(final String str) throws NumberFormatException, ArithmeticException, IllegalArgumentException {
         if (Strings.isEmpty(str)) {
             return 0;
         } else if (str.length() == 1) {
@@ -2628,8 +2641,11 @@ public final class Maps {
      * Converts a {@code Number} to the {@code char} with that UTF-16 code unit, truncating a fractional
      * value toward zero the way {@link Numbers#toInt(Object)} does and rejecting a value outside
      * {@code [0, 65535]}.
+     *
+     * @throws ArithmeticException if {@code num} is {@code NaN} or infinite, or its magnitude is beyond {@code long}
+     * @throws IllegalArgumentException if the truncated value is outside {@code [0, 65535]}
      */
-    private static char toCodeUnit(final Number num) {
+    private static char toCodeUnit(final Number num) throws ArithmeticException, IllegalArgumentException {
         return toCodeUnit(Numbers.toLong(num));
     }
 
@@ -4036,7 +4052,7 @@ public final class Maps {
      * {@code null}).
      *
      * <p>Here, absent means the key is missing from the specified map or maps to {@code null}.
-     * The {@code supplier} is invoked only when the key is absent, and exactly once. This behaves
+     * The {@code supplier} is invoked exactly once per call when the key is absent. This behaves
      * uniformly for every map type (including a {@link java.util.concurrent.ConcurrentMap}): it
      * always returns the <em>previous</em> value, never the newly created one.
      *
@@ -4131,6 +4147,7 @@ public final class Maps {
      * @param <V> the value type.
      * @param targetMap the target map to which entries will be added; must not be {@code null}.
      * @param sourceMap the source map from which entries will be taken.
+     *                  If {@code null} or empty, no action is taken and {@code false} is returned.
      * @param keyFilter a predicate that filters keys to be added to the target map
      * @return {@code true} if any source entry passed the filter and was put into the target map,
      *         {@code false} otherwise. A {@code true} result does not necessarily mean that the
@@ -4185,6 +4202,7 @@ public final class Maps {
      * @param <V> the value type.
      * @param targetMap the target map to which entries will be added; must not be {@code null}.
      * @param sourceMap the source map from which entries will be taken.
+     *                  If {@code null} or empty, no action is taken and {@code false} is returned.
      * @param entryFilter a predicate that filters keys and values to be added to the target map
      * @return {@code true} if any source entry passed the filter and was put into the target map,
      *         {@code false} otherwise. A {@code true} result does not necessarily mean that the
@@ -4458,12 +4476,13 @@ public final class Maps {
      * scan completes. Three consequences follow, all of which differ from delegating to
      * {@code map.entrySet().removeIf(..)}:</p>
      * <ul>
-     *   <li>If {@code filter} throws, the map is left <b>completely unchanged</b> - earlier matches are not
-     *       removed. The view-based idiom removes as it iterates and would leave the map half-modified.</li>
+     *   <li>If {@code filter} throws, this method removes no entries; earlier matches are retained.
+     *       Mutations made by the filter itself are not rolled back. A view-based removal may remove
+     *       earlier matches before the failure.</li>
      *   <li>A map that rejects removal is only rejected when there is something to remove: on an
      *       unmodifiable map a filter that matches nothing returns {@code false} rather than throwing
      *       {@link UnsupportedOperationException}, because {@code Map.remove} is never reached.
-     *       {@code map.entrySet().removeIf(..)} throws unconditionally.</li>
+     *       {@code map.entrySet().removeIf(..)} may throw even when no entry matches, depending on the view implementation.</li>
      *   <li>Removal is by key, so on a concurrent map an entry whose value changed after the scan is still
      *       removed - the decision is the one the filter made, not a re-test at removal time. Removal is
      *       therefore not atomic with the test; coordinate externally if that matters.</li>
@@ -4531,12 +4550,13 @@ public final class Maps {
      * scan completes. Three consequences follow, all of which differ from delegating to
      * {@code map.entrySet().removeIf(..)}:</p>
      * <ul>
-     *   <li>If {@code filter} throws, the map is left <b>completely unchanged</b> - earlier matches are not
-     *       removed. The view-based idiom removes as it iterates and would leave the map half-modified.</li>
+     *   <li>If {@code filter} throws, this method removes no entries; earlier matches are retained.
+     *       Mutations made by the filter itself are not rolled back. A view-based removal may remove
+     *       earlier matches before the failure.</li>
      *   <li>A map that rejects removal is only rejected when there is something to remove: on an
      *       unmodifiable map a filter that matches nothing returns {@code false} rather than throwing
      *       {@link UnsupportedOperationException}, because {@code Map.remove} is never reached.
-     *       {@code map.entrySet().removeIf(..)} throws unconditionally.</li>
+     *       {@code map.entrySet().removeIf(..)} may throw even when no entry matches, depending on the view implementation.</li>
      *   <li>Removal is by key, so on a concurrent map an entry whose value changed after the scan is still
      *       removed - the decision is the one the filter made, not a re-test at removal time. Removal is
      *       therefore not atomic with the test; coordinate externally if that matters.</li>
@@ -4605,12 +4625,13 @@ public final class Maps {
      * scan completes. Three consequences follow, all of which differ from delegating to
      * {@code map.keySet().removeIf(..)}:</p>
      * <ul>
-     *   <li>If {@code filter} throws, the map is left <b>completely unchanged</b> - earlier matches are not
-     *       removed. The view-based idiom removes as it iterates and would leave the map half-modified.</li>
+     *   <li>If {@code filter} throws, this method removes no entries; earlier matches are retained.
+     *       Mutations made by the filter itself are not rolled back. A view-based removal may remove
+     *       earlier matches before the failure.</li>
      *   <li>A map that rejects removal is only rejected when there is something to remove: on an
      *       unmodifiable map a filter that matches nothing returns {@code false} rather than throwing
      *       {@link UnsupportedOperationException}, because {@code Map.remove} is never reached.
-     *       {@code map.keySet().removeIf(..)} throws unconditionally.</li>
+     *       {@code map.keySet().removeIf(..)} may throw even when no entry matches, depending on the view implementation.</li>
      *   <li>Removal is by key, so on a concurrent map an entry whose value changed after the scan is still
      *       removed - the decision is the one the filter made, not a re-test at removal time. Removal is
      *       therefore not atomic with the test; coordinate externally if that matters.</li>
@@ -4679,12 +4700,13 @@ public final class Maps {
      * scan completes. Three consequences follow, all of which differ from delegating to
      * {@code map.values().removeIf(..)}:</p>
      * <ul>
-     *   <li>If {@code filter} throws, the map is left <b>completely unchanged</b> - earlier matches are not
-     *       removed. The view-based idiom removes as it iterates and would leave the map half-modified.</li>
+     *   <li>If {@code filter} throws, this method removes no entries; earlier matches are retained.
+     *       Mutations made by the filter itself are not rolled back. A view-based removal may remove
+     *       earlier matches before the failure.</li>
      *   <li>A map that rejects removal is only rejected when there is something to remove: on an
      *       unmodifiable map a filter that matches nothing returns {@code false} rather than throwing
      *       {@link UnsupportedOperationException}, because {@code Map.remove} is never reached.
-     *       {@code map.values().removeIf(..)} throws unconditionally.</li>
+     *       {@code map.values().removeIf(..)} may throw even when no entry matches, depending on the view implementation.</li>
      *   <li>Removal is by key, so on a concurrent map an entry whose value changed after the scan is still
      *       removed - the decision is the one the filter made, not a re-test at removal time. Removal is
      *       therefore not atomic with the test; coordinate externally if that matters.</li>
@@ -5121,7 +5143,7 @@ public final class Maps {
      * Inverts the given map by swapping its keys with its values.
      * The resulting map's keys are the input map's values and its values are the input map's keys.
      * Note: This method does not check for duplicate values in the input map. If there are duplicate values,
-     * some information may be lost in the inversion process as each value in the resulting map must be unique.
+     * some information may be lost because each key in the resulting map must be unique.
      * Which entry survives is decided by {@code map}'s iteration order (the last one encountered wins), so for
      * an unordered map such as {@link java.util.HashMap} it is unspecified.
      *
@@ -5343,8 +5365,9 @@ public final class Maps {
      * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
      * Note: This method does not modify the original map.
-     * Empty nested maps do not produce an entry. For a reversible flatten/unflatten round trip,
-     * choose a delimiter that does not occur in any input key; delimiters are not escaped.
+     * Empty nested maps do not produce an entry and cannot be restored by unflattening.
+     * For other paths, a single-character delimiter absent from every input key permits a
+     * reversible flatten/unflatten round trip; delimiters are not escaped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5376,8 +5399,9 @@ public final class Maps {
      * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a dot.
      * Note: This method does not modify the original map.
-     * Empty nested maps do not produce an entry. For a reversible flatten/unflatten round trip,
-     * choose a delimiter that does not occur in any input key; delimiters are not escaped.
+     * Empty nested maps do not produce an entry and cannot be restored by unflattening.
+     * For other paths, a single-character delimiter absent from every input key permits a
+     * reversible flatten/unflatten round trip; delimiters are not escaped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5397,9 +5421,9 @@ public final class Maps {
      * @param mapSupplier a function that creates a new Map instance given an expected size. It is invoked
      *        exactly once - the whole result is flat, so no nested maps are created.
      * @return a new map which is the flattened version of the input map.
-     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, or if a key (at any level) is
-     *         {@code null}, a cyclic map structure is encountered, or two input paths produce the same flattened
-     *         key.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, returns {@code null}, or returns the
+     *         input map, or if a key (at any level) is {@code null}, a cyclic map structure is encountered, or two
+     *         input paths produce the same flattened key.
      * @throws ClassCastException if a nested map's key is not a {@code String} (possible only when a raw or
      *         unchecked map has been stored as a value).
      */
@@ -5415,8 +5439,10 @@ public final class Maps {
      * This method takes a map where some values may be other maps and returns a new map where all nested maps are flattened into the top-level map.
      * The keys of the flattened map are the keys of the original map and the keys of any nested maps, concatenated with a provided delimiter.
      * Note: This method does not modify the original map.
-     * Empty nested maps do not produce an entry. For a reversible flatten/unflatten round trip,
-     * {@code delimiter} must not occur in any input key; delimiters are not escaped.
+     * Empty nested maps do not produce an entry and cannot be restored by unflattening.
+     * For other paths, a single-character delimiter absent from every input key permits a
+     * reversible flatten/unflatten round trip. With a multi-character delimiter, also avoid
+     * overlaps across key/delimiter boundaries; delimiters are not escaped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5437,9 +5463,9 @@ public final class Maps {
      * @param mapSupplier a function that creates a new Map instance given an expected size. It is invoked
      *        exactly once - the whole result is flat, so no nested maps are created.
      * @return a new map which is the flattened version of the input map.
-     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, or if {@code delimiter} is
-     *         {@code null} or empty, a key (at any level) is {@code null}, a cyclic map structure is encountered, or
-     *         two input paths produce the same flattened key.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, returns {@code null}, or returns the
+     *         input map, or if {@code delimiter} is {@code null} or empty, a key (at any level) is {@code null}, a
+     *         cyclic map structure is encountered, or two input paths produce the same flattened key.
      * @throws ClassCastException if a nested map's key is not a {@code String} (possible only when a raw or
      *         unchecked map has been stored as a value).
      */
@@ -5569,8 +5595,9 @@ public final class Maps {
      * @param mapSupplier a function that creates a new Map instance given an expected size;
      *        it must return a distinct map on every invocation.
      * @return a new map which is the unflattened version of the input map.
-     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, a key is {@code null}, or flat
-     *         keys conflict (for example, both {@code "a"} and {@code "a.b"} are present).
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, returns {@code null}, or does not
+     *         return a distinct new map on every invocation, or if a key is {@code null}, or flat keys conflict
+     *         (for example, both {@code "a"} and {@code "a.b"} are present).
      */
     public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final IntFunction<? extends M> mapSupplier)
             throws IllegalArgumentException {
@@ -5605,9 +5632,9 @@ public final class Maps {
      *        it must return a distinct map on every invocation.
      * @return a new map which is the unflattened version of the input map. Keys without the delimiter
      *         are copied as-is; no error is raised when the delimiter is absent.
-     * @throws IllegalArgumentException if {@code mapSupplier} returns {@code null}, {@code delimiter} is
-     *         {@code null} or empty, a key is {@code null}, or flat keys conflict (for example, both {@code "a"} and
-     *         {@code "a.b"} are present).
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, returns {@code null}, or does not
+     *         return a distinct new map on every invocation, or if {@code delimiter} is {@code null} or empty, a key
+     *         is {@code null}, or flat keys conflict (for example, both {@code "a"} and {@code "a.b"} are present).
      */
     public static <M extends Map<String, Object>> M unflatten(final Map<String, Object> map, final String delimiter, final IntFunction<? extends M> mapSupplier)
             throws IllegalArgumentException {
@@ -5674,7 +5701,7 @@ public final class Maps {
     }
 
     /**
-     * @throws IllegalArgumentException if the supplier returns null, a nonempty map, an already supplied map, or the input map.
+     * @throws IllegalArgumentException if the supplier returns null, an already supplied map, or the input map.
      */
     private static <M extends Map<String, Object>> M newUnflattenMap(final IntFunction<? extends M> mapSupplier, final int expectedSize,
             final IdentityHashMap<Map<String, Object>, Boolean> suppliedMaps) throws IllegalArgumentException {
@@ -5702,12 +5729,10 @@ public final class Maps {
      * </ol>
      *
      * <p><b>Not atomic, even on a concurrent map.</b> The rekeyed copy is built from a snapshot and then
-     * applied as two separate operations, so on a map shared with other threads a reader can observe the map
-     * empty or only partially refilled in between, and a concurrent write gets one of three unrelated fates
-     * depending purely on when it lands: before the {@code clear()} it is wiped; after it, it survives unless
-     * the {@code putAll()} happens to overwrite the same key; and either way it is absent from the rekeyed
-     * copy, which was snapshotted before any of this began. Rekey a map no other thread is touching, or guard
-     * the call externally.</p>
+     * applied with separate {@code clear()} and {@code putAll()} operations. A concurrent reader can observe
+     * an empty or partially refilled map. Concurrent writes may be included in the initial copy, cleared,
+     * retained or overwritten depending on their timing and the map's iteration semantics. Rekey a map
+     * no other thread is touching, or coordinate the call and all other access externally.</p>
      *
      * <p><b>Notes:</b></p>
      * <ul>
@@ -5729,7 +5754,7 @@ public final class Maps {
      * map.put("age", 2);
      * map.put("city", 3);
      *
-     * Maps.replaceKeys(map, String::toUpperCase);
+     * Maps.replaceKeys(map, Strings::toUpperCase);
      * // map now contains: {NAME=1, AGE=2, CITY=3}
      * // Add prefix to keys
      * Map<String, String> data = new HashMap<>();
@@ -5962,7 +5987,7 @@ public final class Maps {
      *
      * <p>The conversion splits keys on underscore, hyphen, and whitespace delimiters (and on
      * case boundaries, e.g. {@code "fooBar"}), then joins them in camelCase format where the first word
-     * is lowercase and subsequent words start with an uppercase letter.</p>
+     * is lowercased and the first cased character of each subsequent word is titlecased.</p>
      *
      * <p><b>Conversion Examples:</b></p>
      * <ul>
@@ -6003,13 +6028,15 @@ public final class Maps {
      * @param props the map whose keys are to be converted to camelCase; modified in-place.
      *              If {@code null} or empty, no action is taken.
      * @throws IllegalStateException if the converted keys contain duplicates
+     * @throws UnsupportedOperationException if {@code props} does not support {@link Map#clear()} or
+     *         {@link Map#putAll(Map)}, as an immutable or unmodifiable map does
      * @see #replaceKeys(Map, Function)
      * @see Fn#toCamelCase()
      * @see Strings#toCamelCase(String)
      * @see #replaceKeysWithSnakeCase(Map)
      * @see #replaceKeysWithScreamingSnakeCase(Map)
      */
-    public static void replaceKeysWithCamelCase(final Map<String, ?> props) throws IllegalStateException {
+    public static void replaceKeysWithCamelCase(final Map<String, ?> props) throws IllegalStateException, UnsupportedOperationException {
         replaceKeys(props, Fn.toCamelCase());
     }
 
@@ -6018,8 +6045,8 @@ public final class Maps {
      * This method modifies the map in-place by delegating to {@link #replaceKeys(Map, Function)}
      * with {@link Fn#toSnakeCase()}.
      *
-     * <p>The conversion inserts an underscore before each uppercase letter (when preceded by a lowercase
-     * letter or followed by a lowercase letter) and converts the entire string to lowercase.</p>
+     * <p>The conversion splits keys at underscore, hyphen, whitespace, and case boundaries,
+     * then joins the lowercased words with underscores, following {@link Strings#toSnakeCase(String)}.</p>
      *
      * <p><b>Conversion Examples:</b></p>
      * <ul>
@@ -6060,13 +6087,15 @@ public final class Maps {
      * @param props the map whose keys are to be converted to snake_case; modified in-place.
      *              If {@code null} or empty, no action is taken.
      * @throws IllegalStateException if the converted keys contain duplicates
+     * @throws UnsupportedOperationException if {@code props} does not support {@link Map#clear()} or
+     *         {@link Map#putAll(Map)}, as an immutable or unmodifiable map does
      * @see #replaceKeys(Map, Function)
      * @see Fn#toSnakeCase()
      * @see Strings#toSnakeCase(String)
      * @see #replaceKeysWithCamelCase(Map)
      * @see #replaceKeysWithScreamingSnakeCase(Map)
      */
-    public static void replaceKeysWithSnakeCase(final Map<String, ?> props) throws IllegalStateException {
+    public static void replaceKeysWithSnakeCase(final Map<String, ?> props) throws IllegalStateException, UnsupportedOperationException {
         replaceKeys(props, Fn.toSnakeCase());
     }
 
@@ -6075,9 +6104,9 @@ public final class Maps {
      * This method modifies the map in-place by delegating to {@link #replaceKeys(Map, Function)}
      * with {@link Fn#toScreamingSnakeCase()}.
      *
-     * <p>The conversion inserts an underscore before each uppercase letter (when preceded by a lowercase
-     * letter or followed by a lowercase letter) and converts the entire string to uppercase. This naming
-     * convention is commonly used for constants in Java and environment variables.</p>
+     * <p>The conversion splits keys at underscore, hyphen, whitespace, and case boundaries,
+     * then joins the uppercased words with underscores, following {@link Strings#toScreamingSnakeCase(String)}.
+     * This naming convention is commonly used for constants in Java and environment variables.</p>
      *
      * <p><b>Conversion Examples:</b></p>
      * <ul>
@@ -6119,13 +6148,15 @@ public final class Maps {
      * @param props the map whose keys are to be converted to SCREAMING_SNAKE_CASE; modified in-place.
      *              If {@code null} or empty, no action is taken.
      * @throws IllegalStateException if the converted keys contain duplicates
+     * @throws UnsupportedOperationException if {@code props} does not support {@link Map#clear()} or
+     *         {@link Map#putAll(Map)}, as an immutable or unmodifiable map does
      * @see #replaceKeys(Map, Function)
      * @see Fn#toScreamingSnakeCase()
      * @see Strings#toScreamingSnakeCase(String)
      * @see #replaceKeysWithCamelCase(Map)
      * @see #replaceKeysWithSnakeCase(Map)
      */
-    public static void replaceKeysWithScreamingSnakeCase(final Map<String, ?> props) throws IllegalStateException {
+    public static void replaceKeysWithScreamingSnakeCase(final Map<String, ?> props) throws IllegalStateException, UnsupportedOperationException {
         replaceKeys(props, Fn.toScreamingSnakeCase());
     }
 }

@@ -201,7 +201,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -292,7 +292,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextShort();
                 right = left;
 
@@ -336,7 +336,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextShort();
                 right = left;
 
@@ -378,7 +378,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public ShortList next() {
+            public ShortList next() throws NoSuchElementException {
                 final ShortList result = new ShortList(9);
                 result.add(hasNext ? next : (next = iter.nextShort()));
 
@@ -423,7 +423,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 short merged = hasNext ? next : (next = iter.nextShort());
 
                 hasNext = false;
@@ -467,7 +467,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 final short first = hasNext ? next : (next = iter.nextShort());
                 short merged = first;
 
@@ -575,7 +575,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 final short next = iter.nextShort();
                 iter.advance(skip);
                 return next;
@@ -603,7 +603,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (isFirst) {
                     accumulated = iter.nextShort();
                     isFirst = false;
@@ -632,7 +632,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 return (accumulated = accumulator.applyAsShort(accumulated, iter.nextShort()));
             }
         }, false);
@@ -661,7 +661,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (isFirst) {
                     isFirst = false;
                     return init;
@@ -739,7 +739,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -833,7 +833,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -958,7 +958,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1079,7 +1079,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1159,7 +1159,7 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1378,6 +1378,7 @@ abstract class AbstractShortStream extends ShortStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
@@ -1513,7 +1514,8 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         try (final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer()) {
@@ -1550,7 +1552,8 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjShortConsumer<? super R> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public <R> R collect(final Supplier<R> supplier, final ObjShortConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

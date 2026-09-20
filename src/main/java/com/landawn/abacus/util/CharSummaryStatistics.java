@@ -156,10 +156,12 @@ public class CharSummaryStatistics implements CharConsumer {
      * }</pre>
      *
      * @param other another {@code CharSummaryStatistics} to combine with this one; must not be {@code null}
-     * @throws NullPointerException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      * @throws ArithmeticException if the combined count or sum would overflow; this instance is unchanged
      */
-    public void combine(final CharSummaryStatistics other) throws NullPointerException, ArithmeticException {
+    public void combine(final CharSummaryStatistics other) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(other, cs.other);
+
         // Snapshot the totals before assignment, including when other == this.
         final long newCount = Math.addExact(count, other.count);
         final long newSum = Math.addExact(sum, other.sum);

@@ -20,6 +20,60 @@ import org.junit.jupiter.api.Test;
 public class BeansTest extends BeansTestSupport {
 
     @Test
+    public void testMergeIntoSnapshotsSourceBeforeRenamingOnSameBean() {
+        for (int variant = 0; variant < 2; variant++) {
+            final Address bean = new Address();
+            bean.setStreet("original street");
+            bean.setCity("original city");
+            bean.setZipCode("12345");
+            final java.util.function.Function<String, String> swapNames = name -> switch (name) {
+                case "street" -> "city";
+                case "city" -> "street";
+                default -> name;
+            };
+
+            final Address result = variant == 0 ? Beans.mergeInto(bean, bean, swapNames, Fn.selectFirst())
+                    : Beans.mergeInto(bean, bean, (Collection<String>) null, swapNames, Fn.selectFirst());
+
+            org.junit.jupiter.api.Assertions.assertSame(bean, result);
+            assertEquals("original city", bean.getStreet());
+            assertEquals("original street", bean.getCity());
+            assertEquals("12345", bean.getZipCode());
+        }
+    }
+
+    @Test
+    public void testMergeIntoDistinctBeansAppliesValuesInPropertyOrder() {
+        final Address source = new Address();
+        source.setStreet("source street");
+        source.setCity("source city");
+        source.setZipCode("12345");
+        final Address target = new Address();
+        final java.util.concurrent.atomic.AtomicInteger resolved = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger applied = new java.util.concurrent.atomic.AtomicInteger();
+
+        // Distinct beans keep the original read/apply order; only self-merges need the source snapshot.
+        Beans.mergeInto(source, target, (Collection<String>) null, name -> {
+            assertEquals(resolved.getAndIncrement(), applied.get());
+            return switch (name) {
+                case "street" -> "city";
+                case "city" -> "street";
+                default -> name;
+            };
+        }, (sourceValue, targetValue) -> {
+            applied.incrementAndGet();
+            return sourceValue;
+        });
+
+        assertEquals(3, applied.get());
+        assertEquals("source city", target.getStreet());
+        assertEquals("source street", target.getCity());
+        assertEquals("12345", target.getZipCode());
+        assertEquals("source street", source.getStreet());
+        assertEquals("source city", source.getCity());
+    }
+
+    @Test
     public void testComputedGetterDiscoveryForEntityAndRecord() {
         assertEquals(List.of("id"), Beans.getPropNameList(OrdinaryComputedGetter.class));
         assertTrue(Beans.getPropNameList(EntityComputedGetter.class).contains("computed"));
@@ -28,7 +82,7 @@ public class BeansTest extends BeansTestSupport {
         assertEquals("derived", Beans.getPropValue(new RecordComputedGetter(7), "computed"));
         OrdinaryComputedGetter ordinary = new OrdinaryComputedGetter();
         ordinary.setId(7);
-        assertEquals(7, Beans.<Integer>getPropValue(ordinary, "id"));
+        assertEquals(7, Beans.<Integer> getPropValue(ordinary, "id"));
         assertFalse(Beans.getPropValueIfPresent(ordinary, "computed").isPresent());
     }
 

@@ -3,9 +3,11 @@ package com.landawn.abacus.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,9 +19,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.Function;
+import com.landawn.abacus.util.stream.Collectors;
+import com.landawn.abacus.util.stream.LongIteratorEx;
+import com.landawn.abacus.util.stream.LongStream;
+import com.landawn.abacus.util.stream.ObjIteratorEx;
+import com.landawn.abacus.util.stream.Stream;
 
 public class SeqReviewTest extends SeqTestSupport {
     // ===================================================================
@@ -39,8 +49,8 @@ public class SeqReviewTest extends SeqTestSupport {
     @Test
     public void testReview_skipZero_keepsTheKnownSortOrder() throws Exception {
         // The derived no-op must carry `sorted`/`cmp` across, or min(..)/max(..) lose their shortcut.
-        assertEquals(Optional.of(1), Seq.of(3, 1, 2).sorted().skip(0).min(Comparators.<Integer> naturalOrder()));
-        assertEquals(Optional.of(3), Seq.of(3, 1, 2).sorted().skip(0).max(Comparators.<Integer> naturalOrder()));
+        assertEquals(Nullable.of(1), Seq.of(3, 1, 2).sorted().skip(0).min(Comparators.<Integer> naturalOrder()));
+        assertEquals(Nullable.of(3), Seq.of(3, 1, 2).sorted().skip(0).max(Comparators.<Integer> naturalOrder()));
     }
 
     @Test
@@ -334,7 +344,7 @@ public class SeqReviewTest extends SeqTestSupport {
 
     @Test
     public void testReview_kthLargestWithNullAwareComparator() throws Exception {
-        Optional<Integer> kth = Seq.of(3, null, 1, 2).kthLargest(2, Comparator.nullsFirst(Integer::compareTo));
+        Nullable<Integer> kth = Seq.of(3, null, 1, 2).kthLargest(2, Comparator.nullsFirst(Integer::compareTo));
 
         assertTrue(kth.isPresent());
         assertEquals(Integer.valueOf(2), kth.get());
@@ -506,9 +516,9 @@ public class SeqReviewTest extends SeqTestSupport {
         assertEquals("a", Seq.<String, Exception> of("bb", null, "a").minBy(len).get());
         assertEquals("bb", Seq.<String, Exception> of("bb", null, "a").maxBy(len).get());
 
-        // Control - the remaining part of the old clause is still true: all-null throws, empty is empty.
-        assertThrows(NullPointerException.class, () -> Seq.<String, Exception> of((String) null, null).minBy(len));
-        assertThrows(NullPointerException.class, () -> Seq.<String, Exception> of((String) null, null).maxBy(len));
+        // Control - all-null selects a null winner, reported as a PRESENT Nullable holding null; empty is empty.
+        assertTrue(Seq.<String, Exception> of((String) null, null).minBy(len).isNull());
+        assertTrue(Seq.<String, Exception> of((String) null, null).maxBy(len).isNull());
         assertFalse(Seq.<String, Exception> empty().minBy(len).isPresent());
         assertFalse(Seq.<String, Exception> empty().maxBy(len).isPresent());
 
@@ -568,6 +578,7 @@ public class SeqReviewTest extends SeqTestSupport {
         assertEquals(1, closedB.get());
         assertEquals(1, closedC.get());
     }
+
     // Seq.join(delimiter, prefix, suffix) builds a reuse-mode Joiner, which borrows a StringBuilder from
     // Objectory and only returns it on close(). A throwing traversal skipped that close, so every failed
     // join permanently drained one builder from the pool. Stream's join was given try-with-resources in
@@ -602,4 +613,166 @@ public class SeqReviewTest extends SeqTestSupport {
         f.setAccessible(true);
         return ((java.util.Queue<?>) f.get(null)).size();
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    public void testSplitStreamBridgeAdvancesTheFullOverflowingDistance(final boolean collector) throws Exception {
+        final AdvancingLongIterator source = new AdvancingLongIterator(Long.MIN_VALUE, Long.MAX_VALUE);
+        try (Stream<List<Long>> chunks = groupedLongs(source, true, 2, 2, collector).stream()) {
+            assertEquals(List.of(List.of(Long.MIN_VALUE, Long.MIN_VALUE + 1), List.of(Long.MAX_VALUE - 1, Long.MAX_VALUE)),
+                    chunks.step(Long.MAX_VALUE).limit(2).toList());
+        }
+
+        try (Stream<List<Long>> chunks = groupedLongs(new AdvancingLongIterator(Long.MIN_VALUE, Long.MAX_VALUE), true, 2, 2, collector).stream()) {
+            final ObjIteratorEx<List<Long>> iter = (ObjIteratorEx<List<Long>>) chunks.iterator();
+            iter.advance(Long.MAX_VALUE);
+            assertEquals(List.of(Long.MAX_VALUE - 1, Long.MAX_VALUE), iter.next());
+            assertFalse(iter.hasNext());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { false, true })
+    public void testSlidingStreamBridgeAdvancesOverflowingGappedAndBufferedWindows(final boolean collector) throws Exception {
+        for (int windowSize = 1; windowSize <= 4; windowSize++) {
+            final List<Long> first = new ArrayList<>();
+            for (int i = 0; i < windowSize; i++) {
+                first.add(Long.MIN_VALUE + i);
+            }
+            final List<Long> last = windowSize == 1 ? List.of(Long.MAX_VALUE - 1) : List.of(Long.MAX_VALUE - 1, Long.MAX_VALUE);
+            try (Stream<List<Long>> windows = groupedLongs(new AdvancingLongIterator(Long.MIN_VALUE, Long.MAX_VALUE), false, windowSize, 2, collector)
+                    .stream()) {
+                // A size-four trailing window would contain only previously consumed elements.
+                assertEquals(windowSize == 4 ? List.of(first) : List.of(first, last), windows.step(Long.MAX_VALUE).limit(2).toList());
+            }
+
+            for (int prefixMode = 0; prefixMode < 3; prefixMode++) {
+                try (Stream<List<Long>> windows = groupedLongs(new AdvancingLongIterator(Long.MIN_VALUE, Long.MAX_VALUE), false, windowSize, 2, collector)
+                        .stream()) {
+                    final ObjIteratorEx<List<Long>> iter = (ObjIteratorEx<List<Long>>) windows.iterator();
+                    if (prefixMode > 0) {
+                        assertEquals(first, iter.next());
+                    }
+                    if (prefixMode == 2) {
+                        assertTrue(iter.hasNext());
+                    }
+                    iter.advance(Long.MAX_VALUE - (prefixMode == 0 ? 0 : 1));
+                    if (windowSize != 4) {
+                        assertEquals(last, iter.next());
+                    }
+                    assertFalse(iter.hasNext());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testOverflowingGroupedAdvanceStopsAtFiniteSourceExhaustion() throws Exception {
+        for (final boolean split : new boolean[] { false, true }) {
+            for (final boolean collector : new boolean[] { false, true }) {
+                final AdvancingLongIterator source = new AdvancingLongIterator(0, 3);
+                try (Stream<List<Long>> groups = groupedLongs(source, split, Integer.MAX_VALUE, Integer.MAX_VALUE, collector).stream()) {
+                    final ObjIteratorEx<List<Long>> iter = (ObjIteratorEx<List<Long>>) groups.iterator();
+                    iter.advance(0);
+                    iter.advance(-1);
+                    assertEquals(0, source.advanceCalls);
+                    iter.advance(Long.MAX_VALUE);
+                    assertEquals(1, source.advanceCalls);
+                    assertFalse(iter.hasNext());
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testOverflowingGroupedAdvancePreservesCheckedFailuresAndCapability() throws Exception {
+        for (final boolean split : new boolean[] { false, true }) {
+            for (final boolean collector : new boolean[] { false, true }) {
+                for (final boolean failOnHasNext : new boolean[] { false, true }) {
+                    for (final boolean bridge : new boolean[] { false, true }) {
+                        final AdvancingLongIterator source = new AdvancingLongIterator(Long.MIN_VALUE, Long.MAX_VALUE);
+                        source.failOnHasNext = failOnHasNext;
+                        source.failOnAdvance = failOnHasNext ? 0 : 2;
+                        try (Seq<List<Long>, IOException> groups = groupedLongs(source, split, split ? 2 : 3, 2, collector)) {
+                            // One source batch can succeed before a later batch or exhaustion check fails.
+                            assertTrue(source.supportsFailureAtomicAdvance());
+                            assertFalse(groups.iteratorEx().supportsFailureAtomicAdvance());
+                            if (bridge) {
+                                try (Stream<List<Long>> stream = groups.stream()) {
+                                    final ObjIteratorEx<List<Long>> iter = (ObjIteratorEx<List<Long>>) stream.iterator();
+                                    assertSame(source.failure, assertThrows(RuntimeException.class, () -> iter.advance(Long.MAX_VALUE)).getCause());
+                                    assertEquals(split ? List.of(-2L, -1L) : List.of(-2L, -1L, 0L), iter.next());
+                                }
+                            } else {
+                                final Throwables.Iterator<List<Long>, IOException> iter = groups.iteratorEx();
+                                assertSame(source.failure, assertThrows(IOException.class, () -> iter.advance(Long.MAX_VALUE)));
+                                assertEquals(split ? List.of(-2L, -1L) : List.of(-2L, -1L, 0L), iter.next());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static Seq<List<Long>, IOException> groupedLongs(final AdvancingLongIterator source, final boolean split, final int size, final int increment,
+            final boolean collector) {
+        final Seq<Long, IOException> seq = Seq.of(source);
+        if (split) {
+            return collector ? seq.split(size, Collectors.toList()) : seq.split(size, ArrayList::new);
+        }
+        return collector ? seq.sliding(size, increment, Collectors.toList()) : seq.sliding(size, increment, ArrayList::new);
+    }
+
+    private static final class AdvancingLongIterator extends Throwables.Iterator<Long, IOException> {
+        private final LongStream stream;
+        private final LongIteratorEx iterator;
+        private final IOException failure = new IOException("bulk advance failed");
+        private int advanceCalls;
+        private int reads;
+        private int failOnAdvance;
+        private boolean failOnHasNext;
+        private boolean failed;
+
+        private AdvancingLongIterator(final long first, final long last) {
+            stream = LongStream.rangeClosed(first, last);
+            iterator = (LongIteratorEx) stream.iterator();
+        }
+
+        @Override
+        boolean supportsFailureAtomicAdvance() {
+            return true;
+        }
+
+        @Override
+        public boolean hasNext() throws IOException {
+            if (failOnHasNext && advanceCalls > 0 && !failed) {
+                failed = true;
+                throw failure;
+            }
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Long next() {
+            if (++reads > 12) {
+                throw new AssertionError("The virtual source must retain bulk advancement");
+            }
+            return iterator.nextLong();
+        }
+
+        @Override
+        public void advance(final long n) throws IOException {
+            if (++advanceCalls == failOnAdvance) {
+                throw failure;
+            }
+            iterator.advance(n);
+        }
+
+        @Override
+        protected void closeResourceInternal() {
+            stream.close();
+        }
+    }
+
 }

@@ -370,7 +370,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Constructs a ShortList using the specified array as the backing array for this list without copying.
-     * The list will have the same length as the array. Modifications to the list will affect the original array.
+     * The list will have the same length as the array. Changes are shared until growth or trimming replaces the backing array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -379,7 +379,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * list.size();          // returns 3
      * list.set(0, (short) 9);
      * short first = a[0];              // 9 (backing array is shared, not copied)
-     * new ShortList((short[]) null);   // throws NullPointerException
+     * new ShortList((short[]) null);   // throws IllegalArgumentException
      * }</pre>
      *
      * @param a the array to be used as the backing array for this list.
@@ -392,7 +392,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Constructs a ShortList using the specified array as the backing array for this list without copying.
      * Only the first {@code size} elements of the array will be considered part of the list.
-     * Modifications to the list will affect the original array.
+     * Changes are shared until growth or trimming replaces the backing array.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -418,7 +418,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Creates a new ShortList backed by the specified array without copying.
-     * Subsequent modifications to the array will affect the list and vice versa.
+     * Changes to the array and list are shared until growth or trimming replaces the backing array.
      * If the input array is {@code null}, an empty list is returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -440,6 +440,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
 
     /**
      * Creates a new ShortList backed by the first {@code size} elements of the specified array, without copying.
+     * Changes are shared until growth or trimming replaces the backing array.
      * If the input array is {@code null}, it is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
@@ -598,7 +599,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param startInclusive the starting value (inclusive)
      * @param endInclusive the ending value (inclusive)
      * @param by the step value for incrementing. Must not be zero.
-     * @return a new ShortList containing the sequence of values including both endpoints
+     * @return a new ShortList containing the progression; the end value is included only if reached exactly,
+     *         and an inconsistent step direction produces an empty list
      * @throws IllegalArgumentException if by is zero.
      */
     public static ShortList rangeClosed(final short startInclusive, final short endInclusive, final short by) throws IllegalArgumentException {
@@ -637,9 +639,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new ShortList containing len random short values
@@ -660,7 +662,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * This method provides direct access to the internal array for performance-critical operations.
      *
      * <p><b>Warning:</b> The returned array is the actual internal storage of this list.
-     * Modifications to the returned array will directly affect this list's contents.
+     * Modifications to the returned array affect this list while it still uses that array.
+     * Growth or trimming may replace the backing array, after which this array is detached.
      * The array may be larger than the list size; only indices from 0 to size()-1 contain valid elements.</p>
      *
      * <p>This method is marked as {@code @Beta} and should be used with caution.</p>
@@ -742,8 +745,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @param e the element to be appended to this list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final short e) {
+    public void add(final short e) throws OutOfMemoryError {
         ensureCapacity(size + 1);
 
         elementData[size++] = e;
@@ -770,8 +774,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param e the element to be inserted
      * @throws IndexOutOfBoundsException if the index is out of range
      *         ({@code index < 0 || index > size()})
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void add(final int index, final short e) throws IndexOutOfBoundsException {
+    public void add(final int index, final short e) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         ensureCapacity(size + 1);
@@ -794,9 +799,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param c the ShortList containing elements to be added to this list; {@code null} is treated as empty
      * @return {@code true} if this list changed as a result of the call
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final ShortList c) {
+    public boolean addAll(final ShortList c) throws OutOfMemoryError {
         if (N.isEmpty(c)) {
             return false;
         }
@@ -822,9 +828,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param c the ShortList containing elements to be added to this list; {@code null} is treated as empty
      * @return {@code true} if this list changed as a result of the call
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final ShortList c) throws IndexOutOfBoundsException {
+    public boolean addAll(final int index, final ShortList c) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(c)) {
@@ -854,9 +861,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      *
      * @param a the array containing elements to be added to this list; {@code null} is treated as empty
      * @return {@code true} if this list changed as a result of the call; {@code false} if the array is {@code null} or empty
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final short[] a) {
+    public boolean addAll(final short[] a) throws OutOfMemoryError {
         return addAll(size(), a);
     }
 
@@ -870,9 +878,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param a the array containing elements to be added to this list; {@code null} is treated as empty
      * @return {@code true} if this list changed as a result of the call; {@code false} if the array is {@code null} or empty
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; size())
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
     @Override
-    public boolean addAll(final int index, final short[] a) throws IndexOutOfBoundsException {
+    public boolean addAll(final int index, final short[] a) throws IndexOutOfBoundsException, OutOfMemoryError {
         rangeCheckForAdd(index);
 
         if (N.isEmpty(a)) {
@@ -896,7 +905,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return true;
     }
 
-    private void rangeCheckForAdd(final int index) {
+    /**
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the current list size
+     */
+    private void rangeCheckForAdd(final int index) throws IndexOutOfBoundsException {
         if (index > size || index < 0) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
@@ -1879,8 +1891,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns a new ShortList containing elements that are present in either this list or the specified list,
-     * but not in both. This is a multiset symmetric difference: occurrence counts are significant.
+     * Returns a new ShortList containing the multiset symmetric difference of this list and the specified list.
+     * Each value appears as many times as the absolute difference between its two occurrence counts.
      * For elements that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
      *
@@ -1911,8 +1923,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * both contain the same elements.</p>
      *
      * @param b the list to compare with this list for symmetric difference
-     * @return a new ShortList containing elements that are present in either this list or the specified list,
-     *         but not in both, considering the number of occurrences.
+     * @return a new ShortList containing the unmatched occurrences from this list and the specified list.
      *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty
      * @see #symmetricDifference(short[])
      * @see #difference(ShortList)
@@ -1950,8 +1961,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Returns a new ShortList containing elements that are present in either this list or the specified array,
-     * but not in both. This is a multiset symmetric difference: occurrence counts are significant.
+     * Returns a new ShortList containing the multiset symmetric difference of this list and the specified array.
+     * Each value appears as many times as the absolute difference between its two occurrence counts.
      * For elements that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
      *
@@ -1982,8 +1993,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * both contain the same elements.</p>
      *
      * @param b the array to compare with this list for symmetric difference
-     * @return a new ShortList containing elements that are present in either this list or the specified array,
-     *         but not in both, considering the number of occurrences.
+     * @return a new ShortList containing the unmatched occurrences from this list and the specified array.
      *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty
      * @see #symmetricDifference(ShortList)
      * @see #difference(short[])
@@ -2232,7 +2242,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortList list = ShortList.of((short)5, (short)2, (short)8, (short)1, (short)9);
-     * OptionalShort median = list.lowerMedian();  // returns sorted: [1, 2, 5, 8, 9]; median = OptionalShort[5]
+     * OptionalShort median = list.lowerMedian();  // sorted order would be [1, 2, 5, 8, 9]; returns OptionalShort[5] without reordering the list
      * }</pre>
      *
      * @return an OptionalShort containing the median value if the list is non-empty, or an empty OptionalShort if the list is empty
@@ -2292,7 +2302,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * fromIndex and toIndex:</p>
      * <ul>
      *   <li>If {@code fromIndex <= toIndex}: iterates forward from fromIndex (inclusive) to toIndex (exclusive)</li>
-     *   <li>If {@code fromIndex > toIndex}: iterates backward from fromIndex (inclusive) to toIndex (exclusive)</li>
+     *   <li>If {@code fromIndex > toIndex}: iterates backward from fromIndex (inclusive) to toIndex (exclusive);
+     *       {@code fromIndex == size()} starts at the last logical element</li>
      *   <li>If {@code toIndex == -1}: treated as backward iteration from fromIndex to the beginning of the list</li>
      * </ul>
      *
@@ -2307,8 +2318,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive), or -1 for backward iteration to the start
      * @param action the action to be performed for each element
-     * @throws IndexOutOfBoundsException if {@code fromIndex} or {@code toIndex} is out of range,
-     *         considering the supported forward and backward iteration semantics
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or
+     *         {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} permits reverse traversal through index zero
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public void forEach(final int fromIndex, final int toIndex, final ShortConsumer action) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -2639,7 +2650,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     /**
      * Creates and returns a new ShortList containing elements from the specified range sampled
      * at the given step. Elements are selected starting at {@code fromIndex}, then
-     * {@code fromIndex + step}, {@code fromIndex + 2*step}, and so on.
+     * {@code fromIndex + step}, {@code fromIndex + 2*step}, and so on. For reverse traversal,
+     * {@code fromIndex == size()} is clamped to {@code size() - 1} before stepping.
      * A negative step selects elements in descending index order; {@code toIndex == -1}
      * is treated as backward iteration to the beginning of the list (same semantics as
      * {@link #forEach(int, int, ShortConsumer)}).
@@ -2652,7 +2664,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param toIndex the ending index (exclusive) of the range to copy; use {@code -1} for backward iteration to index 0
      * @param step the stride between selected indices; must not be zero
      * @return a new ShortList containing the selected elements
-     * @throws IndexOutOfBoundsException if the effective range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or
+     *         {@code max(fromIndex, toIndex) > size()}
      * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(short[], int, int, int)
      */
@@ -2670,7 +2683,7 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
     }
 
     /**
-     * Splits this list into consecutive subsequences of the specified size.
+     * Splits the specified range of this list into consecutive subsequences of the specified size.
      *
      * <p>Returns a List of ShortList instances, where each inner list (except possibly the last)
      * has the specified size. The last list may have fewer elements if the range size is not
@@ -2834,10 +2847,11 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @return a new collection containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     @Override
     public <C extends Collection<Short>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -2859,7 +2873,8 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * @param supplier a function that creates a new Multiset instance with the specified initial capacity
      * @return a new Multiset containing the boxed elements from the specified range
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or adding
+     *         the selected elements would exceed {@link Integer#MAX_VALUE} occurrences of an element in the supplied multiset
      */
     @Override
     public Multiset<Short> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Short>> supplier)
@@ -3014,8 +3029,9 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @param e the element to add at the beginning of the list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      */
-    public void addFirst(final short e) {
+    public void addFirst(final short e) throws OutOfMemoryError {
         add(0, e);
     }
 
@@ -3032,9 +3048,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
      * }</pre>
      *
      * @param e the element to add at the end of the list
+     * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or the backing array cannot be enlarged
      * @see #addFirst(short)
      */
-    public void addLast(final short e) {
+    public void addLast(final short e) throws OutOfMemoryError {
         add(e);
     }
 
@@ -3129,7 +3146,10 @@ public final class ShortList extends PrimitiveList<Short, short[], ShortList> {
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);
     }
 
-    private void ensureCapacity(final int minCapacity) {
+    /**
+     * @throws OutOfMemoryError if {@code minCapacity} is negative or exceeds the maximum supported array size, or the enlarged array cannot be allocated
+     */
+    private void ensureCapacity(final int minCapacity) throws OutOfMemoryError {
         if (minCapacity < 0 || minCapacity > MAX_ARRAY_SIZE) {
             throw new OutOfMemoryError(
                     "Required capacity is too large: " + (minCapacity < 0 ? "it overflowed the int range" : minCapacity + " > " + MAX_ARRAY_SIZE));

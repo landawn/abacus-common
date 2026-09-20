@@ -10,16 +10,20 @@ import java.io.StringWriter;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.Objectory;
 
-class ResourceTypeOutputExceptionContractTest {
+class ResourceTypeOutputExceptionContractTest extends TestBase {
     @Test
     void inputStreamReadsUseCheckedIoForWriterCopiesAndWrappedIoForOtherDestinations() {
         final IOException failure = new IOException("source failed");
         final InputStream source = new InputStream() {
-            @Override public int read() throws IOException { throw failure; }
+            @Override
+            public int read() throws IOException {
+                throw failure;
+            }
         };
         final InputStreamType type = new InputStreamType();
         assertSame(failure, assertThrowsExactly(IOException.class, () -> type.appendTo(new StringWriter(), source)));
@@ -36,8 +40,14 @@ class ResourceTypeOutputExceptionContractTest {
     void readerCopiesPreserveTheDestinationDependentIoContract() {
         final IOException failure = new IOException("source failed");
         final Reader source = new Reader() {
-            @Override public int read(final char[] buffer, final int offset, final int length) throws IOException { throw failure; }
-            @Override public void close() { }
+            @Override
+            public int read(final char[] buffer, final int offset, final int length) throws IOException {
+                throw failure;
+            }
+
+            @Override
+            public void close() {
+            }
         };
         final ReaderType type = new ReaderType();
         assertSame(failure, assertThrowsExactly(IOException.class, () -> type.appendTo(new StringWriter(), source)));

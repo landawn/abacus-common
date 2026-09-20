@@ -45,8 +45,8 @@ public interface CharToIntFunction {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharToIntFunction toCodePoint = c -> (int) c;
-     * int code = toCodePoint.applyAsInt('Z');   // Returns 90
+     * CharToIntFunction toCodeUnit = c -> (int) c;
+     * int code = toCodeUnit.applyAsInt('Z');   // Returns 90
      *
      * CharToIntFunction digitValue = c -> Character.digit(c, 10);
      * int value = digitValue.applyAsInt('7');   // Returns 7

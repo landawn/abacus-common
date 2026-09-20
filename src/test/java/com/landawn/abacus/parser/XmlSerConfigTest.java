@@ -595,7 +595,6 @@ public class XmlSerConfigTest extends TestBase {
                 axp.serialize(new TagBean(), new XmlSerConfig().setTagByPropertyName(false)));
     }
 
-
     /**
      * A subclass that narrows equality the way {@code AvroSerConfig}/{@code KryoSerConfig} do over
      * {@code SerializationConfig}: {@code instanceof <OwnType> && super.equals(obj)}.

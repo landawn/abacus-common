@@ -24,7 +24,7 @@ public class JoinerRegressionATest extends TestBase {
      * dangling separator behind when it threw. The range is now validated first.
      */
     @Nested
-    public class AppendSubSequenceValidatesBeforeCommittingSeparator {
+    public class AppendSubSequenceValidatesBeforeCommittingSeparator extends TestBase {
 
         @Test
         public void outOfRangeIndices_throwAndLeaveJoinerUntouched() {
@@ -126,7 +126,7 @@ public class JoinerRegressionATest extends TestBase {
      * {@link StringJoiner#merge(StringJoiner)}.
      */
     @Nested
-    public class MergeEmptyElementSemantics {
+    public class MergeEmptyElementSemantics extends TestBase {
 
         @Test
         public void mergingAJoinerHoldingOneEmptyElementAppendsThatElement() {
@@ -182,7 +182,7 @@ public class JoinerRegressionATest extends TestBase {
      * which is not {@code Object.toString()} for arrays and collections.
      */
     @Nested
-    public class ObjectRenderingUsesNToString {
+    public class ObjectRenderingUsesNToString extends TestBase {
 
         @Test
         public void arraysAreRenderedElementWise() {
@@ -207,7 +207,7 @@ public class JoinerRegressionATest extends TestBase {
      * {@link ClassCastException} at run time.
      */
     @Nested
-    public class AppendBeanFilterVariance {
+    public class AppendBeanFilterVariance extends TestBase {
 
         @Test
         public void lambdaFiltersStillWork() {
@@ -247,7 +247,7 @@ public class JoinerRegressionATest extends TestBase {
      * they cannot disagree with the strings the Joiner actually uses even if the caller mutates its argument.
      */
     @Nested
-    public class EmptinessFlagsFollowTheSnapshottedDelimiters {
+    public class EmptinessFlagsFollowTheSnapshottedDelimiters extends TestBase {
 
         @Test
         public void mutatingTheSeparatorArgumentAfterConstructionChangesNothing() {
@@ -278,7 +278,7 @@ public class JoinerRegressionATest extends TestBase {
      * corrected forms; that they compile at all is the assertion.
      */
     @Nested
-    public class PublishedNullExamplesCompile {
+    public class PublishedNullExamplesCompile extends TestBase {
 
         @Test
         public void classJavadocExample() {

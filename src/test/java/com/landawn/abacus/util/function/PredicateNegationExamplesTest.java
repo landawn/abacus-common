@@ -7,21 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-class PredicateNegationExamplesTest {
+class PredicateNegationExamplesTest extends TestBase {
     @ParameterizedTest
-    @CsvSource({
-            "1, 2, true, true",
-            "2, 2, true, true",
-            "3, 2, false, false",
-            "-0.0, 0.0, true, true",
-            "Infinity, Infinity, true, true",
-            "-Infinity, Infinity, true, true",
-            "Infinity, -Infinity, false, false",
-            "NaN, 2, true, false",
-            "2, NaN, true, false",
-            "NaN, NaN, true, false"
-    })
+    @CsvSource({ "1, 2, true, true", "2, 2, true, true", "3, 2, false, false", "-0.0, 0.0, true, true", "Infinity, Infinity, true, true",
+            "-Infinity, Infinity, true, true", "Infinity, -Infinity, false, false", "NaN, 2, true, false", "2, NaN, true, false", "NaN, NaN, true, false" })
     void priceNotAboveIncludesUnorderedComparisons(double price, double threshold, boolean expectedNegation, boolean expectedAtMost) {
         ObjDoublePredicate<Double> isPriceAbove = (value, limit) -> value > limit;
         assertEquals(expectedNegation, isPriceAbove.negate().test(price, threshold));

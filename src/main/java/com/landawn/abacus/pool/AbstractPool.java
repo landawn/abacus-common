@@ -26,6 +26,8 @@ import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.MoreExecutors;
+import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 
 /**
  * Abstract base class for implementing object pools with eviction, balancing, and memory management capabilities.
@@ -207,7 +209,8 @@ public abstract class AbstractPool implements Pool {
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy for determining which objects to evict
+     * @param evictionPolicy the policy for determining which objects to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the finite proportion of objects to remove during balancing, in the range [0, 1]; a value of 0 selects the default factor (0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
@@ -216,10 +219,11 @@ public abstract class AbstractPool implements Pool {
      */
     protected AbstractPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
             final float balanceFactor, final long maxMemorySize) throws IllegalArgumentException {
-        if (capacity < 0 || evictDelayInMillis < 0 || maxMemorySize < 0 || !Float.isFinite(balanceFactor) || balanceFactor < 0 || balanceFactor > 1) {
-            throw new IllegalArgumentException("Capacity(" + capacity + "), evict delay(" + evictDelayInMillis + "), and max memory size(" + maxMemorySize
-                    + ") must be non-negative; balance factor(" + balanceFactor + ") must be finite and between 0 and 1");
-        }
+        N.checkArgNotNegative(capacity, cs.capacity);
+        N.checkArgNotNegative(evictDelayInMillis, cs.evictDelayInMillis);
+        N.checkArgument(Float.isFinite(balanceFactor) && balanceFactor >= 0 && balanceFactor <= 1, "balanceFactor must be finite and between 0 and 1: %s",
+                balanceFactor);
+        N.checkArgNotNegative(maxMemorySize, cs.maxMemorySize);
 
         this.capacity = capacity;
         this.evictDelayInMillis = evictDelayInMillis; // 0 means disabled
@@ -261,8 +265,11 @@ public abstract class AbstractPool implements Pool {
      * Registers the shutdown hook with the JVM. Must be called by concrete subclasses as the
      * last statement of their constructors so that all subclass state is fully initialized
      * before the hook can fire.
+     *
+     * @throws IllegalStateException if JVM shutdown has begun
+     * @throws IllegalArgumentException if this pool's hook was already registered or started
      */
-    protected final void registerShutdownHook() {
+    protected final void registerShutdownHook() throws IllegalStateException, IllegalArgumentException {
         Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
 

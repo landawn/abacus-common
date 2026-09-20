@@ -363,7 +363,8 @@ public class ParserConfigTest extends TestBase {
         assertTrue(map.containsKey(Object.class));
         assertNull(map.get(Object.class));
         assertNull(config.getIgnoredPropNames(Integer.class));
-        assertTrue(config.toString().contains("{class java.lang.Object=null}") || config.getIgnoredPropNames().toString().equals("{class java.lang.Object=null}"));
+        assertTrue(
+                config.toString().contains("{class java.lang.Object=null}") || config.getIgnoredPropNames().toString().equals("{class java.lang.Object=null}"));
 
         config.setIgnoredPropNames((Map<Class<?>, Set<String>>) null);
         assertNull(config.getIgnoredPropNames());

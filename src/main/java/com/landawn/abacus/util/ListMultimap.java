@@ -160,7 +160,8 @@ import com.landawn.abacus.annotation.Internal;
  *
  * <p><b>Memory Considerations:</b>
  * <ul>
- *   <li>Empty keys don't consume memory for value collections</li>
+ *   <li>Absent keys have no allocated value list; clearing a list obtained from {@link #get(Object)}
+ *       leaves its key and empty list in the backing map</li>
  *   <li>ArrayList backing provides good memory locality for small lists</li>
  *   <li>If actual value lists are {@link ArrayList} instances and become large and stable, {@link ArrayList#trimToSize()} can release spare capacity</li>
  *   <li>Consider using primitive collections for numeric values to reduce boxing overhead</li>
@@ -817,7 +818,7 @@ public final class ListMultimap<K, E> extends Multimap<K, E, List<E>> {
      * @param <K> the type of the keys
      * @param <E> the type of the values
      * @param c the collection of maps whose key-value pairs are to be merged; may be {@code null} or empty.
-     *          The first map in the collection is used as the base; subsequent maps are merged into it via {@code putAll}.
+     *          The first map is copied with {@link #fromMap(Map)}; subsequent maps are merged into the new multimap via {@code putAll}.
      * @return a new instance of ListMultimap with the key-value pairs from all maps in the collection,
      *         or an empty ListMultimap if the collection is {@code null} or empty
      * @see #merge(Map, Map)

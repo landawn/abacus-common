@@ -181,9 +181,9 @@ import com.landawn.abacus.util.function.TriFunction;
  * <p><b>Performance Considerations:</b>
  * <ul>
  *   <li>Use DoubleStream instead of {@code Stream<Double>} to avoid boxing overhead</li>
- *   <li>Parallel processing benefits large datasets (typically &gt; 10,000 elements)</li>
+ *   <li>The benefit of parallel processing depends on input size, operation cost, and available processors; benchmark representative workloads</li>
  *   <li>Sequential processing is more efficient for small datasets and simple operations</li>
- *   <li>Most intermediate operations are evaluated lazily when a terminal operation consumes the stream</li>
+ *   <li>Most intermediate operations defer processing until traversal; consult each operation for eager evaluation or buffering</li>
  * </ul>
  *
  * <p><b>abacus {@code DoubleStream} vs. {@link java.util.stream.DoubleStream JDK DoubleStream} &mdash; how they differ:</b>
@@ -233,7 +233,7 @@ import com.landawn.abacus.util.function.TriFunction;
  *       <td><b><i>abacus</i></b>: returns {@code u.OptionalDouble} &middot; &#9888;&#65039; <b><i>JDK</i></b>: returns {@code java.util.OptionalDouble}</td>
  *     </tr>
  *     <tr>
- *       <td><b>null arguments</b> to any operation</td>
+ *       <td><b>null function arguments</b> to stream operations</td>
  *       <td><b><i>abacus</i></b>: throws {@link IllegalArgumentException} (via {@code checkArgNotNull}),
  *           and the stream is <b>closed</b> before the exception propagates &middot; &#9888;&#65039;
  *           <b><i>JDK</i></b>: throws {@link NullPointerException} and leaves the stream open.
@@ -1101,7 +1101,7 @@ public abstract class DoubleStream
      *
      * <p>This is an intermediate operation.
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; buffers the values emitted for one input element before exposing them downstream.
      *
      * @param mapper a non-interfering, stateless function that generates zero or more output values for each input value
      * @return a new DoubleStream consisting of the results of applying the mapper function
@@ -1332,7 +1332,7 @@ public abstract class DoubleStream
      *       .collapse((last, next) -> Math.abs(next - last) < 1.0, Math::max)
      *       .toArray();   // returns [2.0, 5.2, 10.0]
      *
-     * // Calculate average of consecutive groups
+     * // Repeatedly average each accumulated result with the next value (not the group mean)
      * DoubleStream.of(1.0, 2.0, 3.0, 10.0, 11.0)
      *       .collapse((last, next) -> next - last < 2, (a, b) -> (a + b) / 2)
      *       .toArray();   // returns [2.25, 10.5]
@@ -1730,7 +1730,7 @@ public abstract class DoubleStream
      *       .toMap(d -> "Grade-" + (int) d, d -> d);
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of keys
      * @param <V> the type of values
@@ -1754,7 +1754,7 @@ public abstract class DoubleStream
      * Returns a {@code Map} where the keys and values are the results of applying the provided
      * mapping functions to the input elements.
      *
-     * <p>If the mapped keys contain duplicates (according to {@link Object#equals(Object)}),
+     * <p>If the mapped keys contain duplicates (according to the result map's key-equivalence rules),
      * an {@code IllegalStateException} is thrown when the collection operation is performed.
      * If the mapped keys may have duplicates, use {@link #toMap(Throwables.DoubleFunction, Throwables.DoubleFunction, BinaryOperator, Supplier)} instead.
      *
@@ -1779,7 +1779,7 @@ public abstract class DoubleStream
      * {@link #toMap(Throwables.DoubleFunction, Throwables.DoubleFunction, BinaryOperator)} and
      * reports {@code reference to toMap is ambiguous}.
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of keys
      * @param <V> the type of values
@@ -1829,7 +1829,7 @@ public abstract class DoubleStream
      * // Result: {1=1.9, 2=2.3}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of keys
      * @param <V> the type of values
@@ -1855,7 +1855,7 @@ public abstract class DoubleStream
      * Returns a {@code Map} where the keys and values are the results of applying the provided
      * mapping functions to the input elements.
      *
-     * <p>If the mapped keys contain duplicates (according to {@link Object#equals(Object)}),
+     * <p>If the mapped keys contain duplicates (according to the result map's key-equivalence rules),
      * the values are merged using the provided merging function.
      *
      * <p>This is a terminal operation.
@@ -1881,7 +1881,7 @@ public abstract class DoubleStream
      *       .toMap(d -> (int) d, d -> d, Double::sum, Suppliers.ofConcurrentHashMap());
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the type of keys
      * @param <V> the type of values
@@ -2105,7 +2105,7 @@ public abstract class DoubleStream
      * // Result: {1.5, 2.7, 3.2}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; memory use is determined by the supplied result container and accumulator.
      *
      * @param <R> The type of the result
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
@@ -2154,7 +2154,7 @@ public abstract class DoubleStream
      * // Result: "1.0 2.0 3.0 "
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; memory use is determined by the supplied result container and accumulator.
      *
      * @param <R> The type of the result. It must be {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}.
      * @param supplier a function that creates a new result container. For a parallel execution, this function may be called multiple times and must return a fresh value each time.
@@ -2403,10 +2403,9 @@ public abstract class DoubleStream
      * {@code OptionalDouble} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
-     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
-     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
-     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.DoubleStream#findFirst()} API.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2438,10 +2437,9 @@ public abstract class DoubleStream
      * {@code OptionalDouble} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
-     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
-     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
-     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2472,8 +2470,9 @@ public abstract class DoubleStream
      * {@code OptionalDouble}, or an empty {@code OptionalDouble} if no element matches. This is a
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
-     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * <p>When several elements match, the one at the smallest encounter-order index in the current
+     * pipeline wins. Parallel intermediate operations may already have reordered the original source.
+     * If that ordering guarantee is not needed,
      * {@link #findAny(Throwables.DoublePredicate)} may find a match faster in parallel.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -3016,20 +3015,22 @@ public abstract class DoubleStream
      *       .toArray();
      *
      * // Integrate with JDK stream APIs
-     * DoubleSummaryStatistics stats = DoubleStream.of(10.5, 20.3, 30.7)
+     * java.util.DoubleSummaryStatistics stats = DoubleStream.of(10.5, 20.3, 30.7)
      *       .toJdkStream()
      *       .summaryStatistics();
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * <p>If this stream has close handlers, closing the returned JDK stream closes this stream and
      * invokes those handlers exactly once.</p>
      *
+     * <p>The returned JDK stream preserves this stream's parallel or sequential execution mode.</p>
+     *
      * @return a JDK {@code DoubleStream} consisting of the elements of this stream
      * @throws IllegalStateException if the stream is already closed
      */
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public abstract java.util.stream.DoubleStream toJdkStream() throws IllegalStateException;
 
@@ -3044,6 +3045,9 @@ public abstract class DoubleStream
      * that work with JDK streams.
      *
      * <p>This is an intermediate operation with immediate transformation (non-deferred).
+     *
+     * <p>The function receives a JDK stream with this stream's current execution mode. The result adopts
+     * the execution mode of the JDK stream returned by the function. Closing the result also closes this stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3063,7 +3067,7 @@ public abstract class DoubleStream
      * @see #toJdkStream()
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public DoubleStream transformViaJdkStream(final Function<? super java.util.stream.DoubleStream, ? extends java.util.stream.DoubleStream> transfer)
             throws IllegalStateException, IllegalArgumentException {
@@ -3088,8 +3092,12 @@ public abstract class DoubleStream
      * <p><b>Deferred vs Immediate Execution:</b>
      * <ul>
      *   <li>If {@code deferred = false}: The transfer function is applied immediately when this method is called</li>
-     *   <li>If {@code deferred = true}: The transfer function is applied lazily when a terminal operation is invoked</li>
+     *   <li>If {@code deferred = true}: The transfer function is applied when the returned stream is first traversed or closed</li>
      * </ul>
+     *
+     * <p>The function receives a JDK stream with this stream's current execution mode. Without deferral,
+     * the result adopts the returned JDK pipeline's mode; with deferral, the outer stream starts sequential.
+     * Closing the result also closes this stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3113,11 +3121,11 @@ public abstract class DoubleStream
      *     .toArray();   // returns []
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation. The transfer function is invoked on consumption when
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation. The transfer function is invoked on first traversal or closure when
      * {@code deferred} is {@code true}, and immediately otherwise; buffering and traversal behavior depend on the returned JDK pipeline.
      *
      * @param transfer the function to transform the JDK stream.
-     * @param deferred if {@code true}, the transformation is deferred until the stream is consumed;
+     * @param deferred if {@code true}, the transformation is deferred until the returned stream is first traversed or closed;
      *                 if {@code false}, the transformation is applied immediately
      * @return the transformed stream as a DoubleStream
      * @throws IllegalStateException if the stream is already closed
@@ -3127,7 +3135,7 @@ public abstract class DoubleStream
      * @see DoubleStream#defer(Supplier)
      */
     @Beta
-    @SequentialOnly
+    @ParallelSupported
     @IntermediateOp
     public DoubleStream transformViaJdkStream(final Function<? super java.util.stream.DoubleStream, ? extends java.util.stream.DoubleStream> transfer,
             final boolean deferred) throws IllegalStateException, IllegalArgumentException {
@@ -3251,7 +3259,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (exhausted) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3708,7 +3716,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cnt++ >= count) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3801,7 +3809,7 @@ public abstract class DoubleStream
                 }
 
                 @Override
-                public double nextDouble() {
+                public double nextDouble() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3832,7 +3840,7 @@ public abstract class DoubleStream
                 }
 
                 @Override
-                public double nextDouble() {
+                public double nextDouble() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3931,7 +3939,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4075,7 +4083,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4144,7 +4152,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4235,7 +4243,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4515,7 +4523,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4580,7 +4588,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4641,7 +4649,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4690,7 +4698,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4742,7 +4750,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4787,7 +4795,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 return zipFunction.applyAsDouble(iterA.nextDouble(), iterB.nextDouble());
             }
         });
@@ -4832,7 +4840,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 return zipFunction.applyAsDouble(iterA.nextDouble(), iterB.nextDouble(), iterC.nextDouble());
             }
         });
@@ -4978,7 +4986,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5037,7 +5045,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -5089,7 +5097,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsDouble(iterA.nextDouble(), iterB.hasNext() ? iterB.nextDouble() : valueForNoneB);
                 } else {
@@ -5142,7 +5150,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsDouble(iterA.nextDouble(), iterB.hasNext() ? iterB.nextDouble() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextDouble() : valueForNoneC);
@@ -5255,7 +5263,8 @@ public abstract class DoubleStream
      * @param valuesForNone the array of default values to use when streams run out of values
      * @param zipFunction the function to combine values from all the streams; a {@code null} result is unboxed as {@code 0.0}
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalArgumentException if the size of {@code valuesForNone} doesn't match the size of the streams
+     *         collection, or if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Collection, List, Function)
      */
     public static DoubleStream zip(final Collection<? extends DoubleStream> streams, final double[] valuesForNone, final DoubleNFunction<Double> zipFunction)
@@ -5324,7 +5333,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (cursorA < lenA) {
                     if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                         return a[cursorA++];
@@ -5427,7 +5436,7 @@ public abstract class DoubleStream
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if (!hasNextA && iterA.hasNext()) {
                     nextA = iterA.nextDouble();
                     hasNextA = true;

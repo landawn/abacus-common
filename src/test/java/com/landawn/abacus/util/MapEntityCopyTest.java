@@ -9,8 +9,10 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class MapEntityCopyTest {
+public class MapEntityCopyTest extends TestBase {
     @Test
     void copyPreservesLiteralKeysOrderAndShallowValues() {
         final MapEntity original = new MapEntity("User");

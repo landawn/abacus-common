@@ -177,7 +177,8 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * @return the parsed {@code Multiset} object, or {@code null} if the input is {@code null} or blank
      * @throws ParsingException if {@code str} is not a well-formed JSON object text
      * @throws IllegalArgumentException if a count is negative
-     * @throws NumberFormatException if a count is not an integer literal
+     * @throws NumberFormatException if a count cannot be converted to an integer; unquoted fractional numbers
+     *         follow the JSON parser's truncation rules, while quoted fractions are rejected
      * @throws ArithmeticException if a count does not fit in an {@code int}
      * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
@@ -217,12 +218,11 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      * @param parameterTypeName the name of the element type
      * @param isDeclaringName {@code true} to use declaring (simple) names; {@code false} for canonical names
      * @return the formatted type name string
-     * @throws NullPointerException if {@code typeClass} is {@code null}.
-     * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("hiding")
     protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)
-            throws NullPointerException, IllegalArgumentException {
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {

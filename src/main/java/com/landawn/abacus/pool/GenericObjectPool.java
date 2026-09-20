@@ -38,6 +38,7 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.cs;
 
 /**
  * A generic implementation of ObjectPool that stores poolable objects in a LIFO (Last-In-First-Out) structure.
@@ -85,7 +86,7 @@ import com.landawn.abacus.util.Objectory;
  *     try {
  *         // use resource
  *     } finally {
- *         pool.add(resource);   // adds it back to the pool
+ *         pool.add(resource, true);   // return it, or destroy it if rejected
  *     }
  * }
  * }</pre>
@@ -130,9 +131,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy to use for selecting objects to evict
+     * @param evictionPolicy the policy to use for selecting objects to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
+     * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
-    protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy) {
+    protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy)
+            throws IllegalArgumentException, IllegalStateException {
         this(capacity, evictDelayInMillis, evictionPolicy, 0, null);
     }
 
@@ -142,14 +147,16 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy to use for selecting objects to evict
+     * @param evictionPolicy the policy to use for selecting objects to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory size is negative;
-     *         if the balance factor is non-finite or outside [0, 1]; or if a positive memory limit is specified without a memory measure.
+     * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative;
+     *         {@code maxMemorySize} is negative, or positive with a null {@code memoryMeasure}
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
-            final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException {
+            final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException, IllegalStateException {
         this(capacity, evictDelayInMillis, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
@@ -159,12 +166,16 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy to use for selecting objects to evict
+     * @param evictionPolicy the policy to use for selecting objects to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
+     * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative;
+     *         {@code balanceFactor} is non-finite or outside [0, 1]
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
-            final float balanceFactor) {
+            final float balanceFactor) throws IllegalArgumentException, IllegalStateException {
         this(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
@@ -173,15 +184,20 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * @param capacity the maximum number of objects the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy to use for selecting objects to evict
+     * @param evictionPolicy the policy to use for selecting objects to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
      * @param autoBalance whether to automatically remove objects when the pool is full
      * @param balanceFactor the proportion of objects to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate object memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure.
+     * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative;
+     *         {@code balanceFactor} is non-finite or outside [0, 1];
+     *         {@code maxMemorySize} is negative, or positive with a null {@code memoryMeasure}
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     protected GenericObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
-            final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure) throws IllegalArgumentException {
+            final float balanceFactor, final long maxMemorySize, final ObjectPool.MemoryMeasure<E> memoryMeasure)
+            throws IllegalArgumentException, IllegalStateException {
         super(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
         if (maxMemorySize > 0 && memoryMeasure == null) {
@@ -294,9 +310,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     public boolean add(final E element) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        if (element == null) {
-            throw new IllegalArgumentException("Element cannot be null");
-        }
+        N.checkArgNotNull(element, cs.element);
 
         if (element.activityPrint().isExpired()) {
             return false;
@@ -385,11 +399,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param autoDestroyOnFailedToAdd if {@code true}, destroys a rejected non-null element unless
      *        that same instance remains pooled at the cleanup check
      * @return {@code true} if the object was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the element is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the element is null.
      */
     @Override
-    public boolean add(final E element, final boolean autoDestroyOnFailedToAdd) throws IllegalArgumentException, IllegalStateException {
+    public boolean add(final E element, final boolean autoDestroyOnFailedToAdd) throws IllegalStateException, IllegalArgumentException {
         boolean success = false;
 
         try {
@@ -442,13 +456,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     public boolean add(final E element, final long timeout, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException, InterruptedException {
         assertNotClosed();
 
-        if (element == null) {
-            throw new IllegalArgumentException("Element cannot be null");
-        }
+        N.checkArgNotNull(element, cs.element);
 
-        if (unit == null) {
-            throw new IllegalArgumentException("Time unit cannot be null");
-        }
+        N.checkArgNotNull(unit, cs.unit);
 
         if (element.activityPrint().isExpired()) {
             return false;
@@ -566,13 +576,13 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * @param autoDestroyOnFailedToAdd if {@code true}, destroys a rejected non-null element unless
      *        that same instance remains pooled at the cleanup check
      * @return {@code true} if successful, {@code false} if the timeout elapsed or add failed
-     * @throws IllegalArgumentException if the element or unit is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the element or unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
     public boolean add(final E element, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToAdd)
-            throws IllegalArgumentException, IllegalStateException, InterruptedException {
+            throws IllegalStateException, IllegalArgumentException, InterruptedException {
         boolean success = false;
 
         try {
@@ -630,7 +640,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *     try {
      *         // use the object
      *     } finally {
-     *         pool.add(obj);   // adds it back to the pool
+     *         pool.add(obj, true);   // return it, or destroy it if rejected
      *     }
      * } else {
      *     // pool is empty, create new object if needed
@@ -718,9 +728,7 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     public E poll(final long timeout, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException, InterruptedException {
         assertNotClosed();
 
-        if (unit == null) {
-            throw new IllegalArgumentException("Time unit cannot be null");
-        }
+        N.checkArgNotNull(unit, cs.unit);
 
         E element = null;
         List<E> expiredElements = null;
@@ -1011,15 +1019,16 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
     /**
      * Removes (vacates) the specified number of objects from the pool based on the eviction policy.
      * This is the sized counterpart to the public no-arg {@link #evict()} (which removes a
-     * balance-factor fraction); it removes <em>exactly</em> {@code numberToEvict} objects, choosing
+     * balance-factor fraction); it removes up to {@code numberToEvict} objects (none for a nonpositive count), choosing
      * victims via the configured {@link EvictionPolicy}. Destroyed objects use {@link Caller#VACATE}.
      * Victims are detached atomically under the pool lock, but user destruction callbacks run
      * after the lock is released. This sized operation is available to subclasses; public
      * {@link #evict()} performs its balance-factor count and detachment in one critical section.
      *
      * @param numberToEvict the number of objects to remove
+     * @throws IllegalStateException if this pool is closed
      */
-    protected void vacate(final int numberToEvict) {
+    protected void vacate(final int numberToEvict) throws IllegalStateException {
         List<E> removingObjects;
 
         lock.lock();
@@ -1193,9 +1202,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * {@code close}): those account for detached elements under the pool lock and invoke the
      * {@link Poolable#destroy(Caller)} callbacks after the lock is released. It is intended for
      * subclass-initiated destruction of elements that are already detached from the pool. Because it
-     * updates the memory accounting (a non-thread-safe charge map and the total), it must be called
-     * either while holding the pool lock or for elements that are no longer pooled; calling it for an
-     * element still in the pool strips that element's admission charge.</p>
+     * updates shared admission-charge storage and the total, callers must hold the pool lock or otherwise
+     * prevent concurrent pool operations. Calling it for an element still in the pool strips that
+     * element's admission charge. This legacy hook invokes the callback under the caller's synchronization.</p>
      *
      * @param element the object to destroy
      * @param caller the reason for destruction (determines whether eviction count is incremented)
@@ -1286,8 +1295,8 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * <p>Like {@code destroy}, this hook is not invoked by the pool's own eviction, clear or close
      * paths; it is intended for subclass-initiated destruction of elements already detached from the
-     * pool, and must be called while holding the pool lock or for elements no longer pooled because
-     * it updates the memory accounting.</p>
+     * pool. Callers must hold the pool lock or otherwise prevent concurrent pool operations because
+     * this hook updates shared memory accounting.</p>
      *
      * @param collection the collection of objects to destroy
      * @param caller the reason for destruction
@@ -1304,7 +1313,10 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         removeAll(caller, false);
     }
 
-    private void removeAll(final Caller caller, final boolean requireOpen) {
+    /**
+     * @throws IllegalStateException if {@code requireOpen} is {@code true} and this pool is closed
+     */
+    private void removeAll(final Caller caller, final boolean requireOpen) throws IllegalStateException {
         // Snapshot, clear, and account under the lock, then release the lock BEFORE invoking user
         // destroy() callbacks. The pre-fix behavior held the pool lock across N user
         // destroy() calls (which may close DB/TCP connections and block) — for a large pool that

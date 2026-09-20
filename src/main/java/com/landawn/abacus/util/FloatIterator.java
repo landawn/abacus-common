@@ -28,8 +28,8 @@ import com.landawn.abacus.util.stream.FloatStream;
  * This abstract class provides a base implementation for iterating over float values
  * with additional functional operations like filtering, limiting, and skipping.
  *
- * <p>Element removal is not supported ({@link #remove()} always throws
- * {@link UnsupportedOperationException}), but the iterator is stateful and is consumed as values are
+ * <p>Factory-created iterators reject {@link #remove()} with
+ * {@link UnsupportedOperationException}; subclasses may override that method. The iterator is stateful and is consumed as values are
  * read. Transformation methods return wrappers over this same source iterator; consuming a wrapper
  * also advances the source. Primitive-specific methods are provided to avoid autoboxing.</p>
  *
@@ -197,7 +197,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
 
     /**
      * Returns a {@code FloatIterator} whose underlying iterator is created lazily using the provided supplier.
-     * The supplier is invoked at most once, on the first call to any method of the returned iterator.
+     * The supplier is invoked at most once, on the first traversal operation of the returned iterator.
      * This allows for deferred and potentially expensive initialization of the iterator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -209,7 +209,14 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * }
      * }</pre>
      *
-     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     * <p>The returned iterator initializes its source on its first traversal operation. Its access methods
+     * throw {@link IllegalStateException} if the supplier returns {@code null} or recursively accesses this
+     * iterator during initialization. The supplier is invoked at most once. Initialization exceptions and
+     * errors are cached and rethrown on later access, even if the supplier catches a recursive-access failure.</p>
+     *
+     * <p>The supplier must return a valid source distinct from this deferred iterator and must not create
+     * a cycle through other delegating iterators. Returning this iterator directly throws a cached
+     * {@link IllegalStateException}; indirect delegation cycles are not detected.</p>
      *
      * @param iteratorSupplier a supplier that provides the {@code FloatIterator} when first needed
      * @return a {@code FloatIterator} that is initialized on first use
@@ -221,6 +228,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
         return new FloatIterator() {
             private FloatIterator iter = null;
             private volatile boolean isInitialized = false;
+            private boolean isInitializing = false;
             private Throwable initializationFailure = null;
 
             @Override
@@ -238,21 +246,38 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
             }
 
             /**
-             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null} or recursively accesses this iterator
              */
             private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
+                            if (isInitializing) {
+                                if (initializationFailure == null) {
+                                    initializationFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                                }
+
+                                throw (IllegalStateException) initializationFailure;
+                            }
+
+                            isInitializing = true;
+
                             try {
                                 iter = iteratorSupplier.get();
+
+                                if (iter == this) {
+                                    throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
+                                }
 
                                 if (iter == null) {
                                     throw new IllegalStateException("Iterator supplier returned null");
                                 }
                             } catch (RuntimeException | Error e) {
-                                initializationFailure = e;
+                                if (initializationFailure == null) {
+                                    initializationFailure = e;
+                                }
                             } finally {
+                                isInitializing = false;
                                 isInitialized = true;
                             }
                         }

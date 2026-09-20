@@ -50,6 +50,25 @@ public class CodeGenerationUtilTest extends TestBase {
     public interface InheritedHasList extends HasList {
     }
 
+    public interface HasMemberTypes {
+        class String {
+        }
+
+        class List {
+        }
+    }
+
+    public interface InheritedMemberTypes extends HasMemberTypes {
+    }
+
+    public interface TwiceInheritedMemberTypes extends InheritedMemberTypes {
+    }
+
+    public interface ConflictingMemberTypes extends HasMemberTypes {
+        class java {
+        }
+    }
+
     public static class CollidingKeywordProperty extends KeywordProperty {
         private String _default;
 
@@ -222,8 +241,8 @@ public class CodeGenerationUtilTest extends TestBase {
             try (URLClassLoader loader = new URLClassLoader(new java.net.URL[] { compilationDir.toUri().toURL() })) {
                 final Class<?> entity = loader.loadClass("UnnamedEntity");
                 for (final String outputPackage : new String[] { "generated", null, "" }) {
-                    final String code = CodeGenerationUtil.generatePropNameTableClasses(new PropNameTableCodeConfig().setEntityClasses(List.of(entity))
-                            .setClassName("Props").setPackageName(outputPackage));
+                    final String code = CodeGenerationUtil.generatePropNameTableClasses(
+                            new PropNameTableCodeConfig().setEntityClasses(List.of(entity)).setClassName("Props").setPackageName(outputPackage));
                     assertTrue(code.contains("String value = \"value\";"));
                     assertEquals("generated".equals(outputPackage), code.contains("package generated;"));
                     assertCompiles("Props", code);
@@ -308,10 +327,8 @@ public class CodeGenerationUtilTest extends TestBase {
                 () -> CodeGenerationUtil.generatePropNameTableClass(DigitLeadingProperty.class));
         assertEquals("bean property name produced an invalid Java field name: 2Foo", invalidField.getMessage());
 
-        final IllegalArgumentException ownName = assertThrows(IllegalArgumentException.class,
-                () -> CodeGenerationUtil.generatePropNameTableClass(x.class));
-        assertEquals("propNameTableClassName must differ from the simple name of the entity and of each of its enclosing classes: x",
-                ownName.getMessage());
+        final IllegalArgumentException ownName = assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClass(x.class));
+        assertEquals("propNameTableClassName must differ from the simple name of the entity and of each of its enclosing classes: x", ownName.getMessage());
 
         final IllegalArgumentException enclosingName = assertThrows(IllegalArgumentException.class,
                 () -> CodeGenerationUtil.generatePropNameTableClass(x.Nested.class));
@@ -592,8 +609,10 @@ public class CodeGenerationUtilTest extends TestBase {
     @Test
     public void testGeneratePropNameTableClasses_typeAndFieldNameCollisions() throws IOException {
         for (final String outerName : new String[] { "List", "String", "java" }) {
-            final PropNameTableCodeConfig config = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class)).setClassName(outerName)
-                    .setGenerateClassPropNameList(true).setPropNameConverter((cls, property) -> switch (property) {
+            final PropNameTableCodeConfig config = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class))
+                    .setClassName(outerName)
+                    .setGenerateClassPropNameList(true)
+                    .setPropNameConverter((cls, property) -> switch (property) {
                         case "id" -> "List";
                         case "name" -> "java";
                         case "email" -> "of";
@@ -606,7 +625,8 @@ public class CodeGenerationUtilTest extends TestBase {
 
         for (final String nestedName : new String[] { "List", "String" }) {
             for (int variant = 0; variant < 3; variant++) {
-                final PropNameTableCodeConfig config = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class)).setClassName("Props")
+                final PropNameTableCodeConfig config = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class))
+                        .setClassName("Props")
                         .setGenerateClassPropNameList(true);
                 if (variant == 0) {
                     config.setGenerateSnakeCase(true).setClassNameForSnakeCase(nestedName);
@@ -619,8 +639,10 @@ public class CodeGenerationUtilTest extends TestBase {
             }
         }
 
-        final PropNameTableCodeConfig inherited = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class)).setClassName("Props")
-                .setGenerateClassPropNameList(true).setExtendedInterfaces(List.of(HasOf.class));
+        final PropNameTableCodeConfig inherited = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class))
+                .setClassName("Props")
+                .setGenerateClassPropNameList(true)
+                .setExtendedInterfaces(List.of(HasOf.class));
         final String ordinary = CodeGenerationUtil.generatePropNameTableClasses(inherited);
         assertTrue(ordinary.contains(" = List.of("));
         assertFalse(ordinary.contains("import static"));
@@ -633,10 +655,35 @@ public class CodeGenerationUtilTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(inherited));
 
         for (final String conflictingName : new String[] { "List", "String" }) {
-            final PropNameTableCodeConfig impossible = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class)).setClassName("java")
-                    .setGenerateClassPropNameList(true).setGenerateSnakeCase(true).setClassNameForSnakeCase(conflictingName);
+            final PropNameTableCodeConfig impossible = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class))
+                    .setClassName("java")
+                    .setGenerateClassPropNameList(true)
+                    .setGenerateSnakeCase(true)
+                    .setClassNameForSnakeCase(conflictingName);
             assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(impossible));
         }
+    }
+
+    @Test
+    public void testGeneratePropNameTableClasses_inheritedMemberTypes() throws IOException {
+        for (final Class<?> extendedInterface : new Class<?>[] { HasMemberTypes.class, InheritedMemberTypes.class, TwiceInheritedMemberTypes.class }) {
+            for (final boolean generateLists : new boolean[] { false, true }) {
+                final PropNameTableCodeConfig config = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class))
+                        .setClassName("Props")
+                        .setExtendedInterfaces(List.of(extendedInterface))
+                        .setGenerateClassPropNameList(generateLists)
+                        .setGenerateSnakeCase(true)
+                        .setGenerateScreamingSnakeCase(true)
+                        .setGenerateFunctionPropName(true)
+                        .setPropFunctions(Map.of("min", CodeGenerationUtil.MIN_FUNC));
+                assertCompiles("Props", CodeGenerationUtil.generatePropNameTableClasses(config));
+            }
+        }
+
+        final PropNameTableCodeConfig impossible = new PropNameTableCodeConfig().setEntityClasses(List.of(User.class))
+                .setClassName("Props")
+                .setExtendedInterfaces(List.of(ConflictingMemberTypes.class));
+        assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClasses(impossible));
     }
 
     @Test
@@ -804,8 +851,7 @@ public class CodeGenerationUtilTest extends TestBase {
                             PropNameTableCodeConfig.builder().entityClasses(Arrays.asList(User.class)).className(restricted).build()),
                     "className must reject the restricted identifier: " + restricted);
 
-            assertThrows(IllegalArgumentException.class,
-                    () -> CodeGenerationUtil.generatePropNameTableClass(User.class, restricted, null),
+            assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClass(User.class, restricted, null),
                     "propNameTableClassName must reject the restricted identifier: " + restricted);
 
             assertThrows(IllegalArgumentException.class,
@@ -883,12 +929,10 @@ public class CodeGenerationUtilTest extends TestBase {
                     + "}\n";
             Files.writeString(entitySource, original);
 
-            assertThrows(IllegalArgumentException.class,
-                    () -> CodeGenerationUtil.generatePropNameTableClass(User.class, "String", tempDir.getAbsolutePath()));
+            assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClass(User.class, "String", tempDir.getAbsolutePath()));
             assertEquals(original, Files.readString(entitySource));
 
-            assertThrows(IllegalArgumentException.class,
-                    () -> CodeGenerationUtil.generatePropNameTableClass(User.class, "User", tempDir.getAbsolutePath()));
+            assertThrows(IllegalArgumentException.class, () -> CodeGenerationUtil.generatePropNameTableClass(User.class, "User", tempDir.getAbsolutePath()));
             assertEquals(original, Files.readString(entitySource));
 
             assertTrue(CodeGenerationUtil.generatePropNameTableClass(User.class, "Props", tempDir.getAbsolutePath()).contains("public interface Props"));

@@ -92,8 +92,9 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * This constructor is called by the TypeFactory when no explicit representation is specified.
      *
      * @param enumClassName the fully qualified class name of the enum type
+     * @throws IllegalArgumentException if {@code enumClassName} is {@code null}, or the named class cannot be loaded.
      */
-    EnumType(final String enumClassName) {
+    EnumType(final String enumClassName) throws IllegalArgumentException {
         this(enumClassName, com.landawn.abacus.util.EnumType.NAME);
     }
 
@@ -223,10 +224,11 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     }
 
     /**
-     * Indicates whether instances of this enum type are immutable.
-     * Enums are always immutable in Java.
+     * Indicates that this handler treats enum constants as immutable values.
+     * Enum constants are shared singleton instances; this classification does not prevent an enum class
+     * from declaring mutable fields.
      *
-     * @return {@code true}, as enums are immutable
+     * @return {@code true}, because this handler treats enum constants as immutable
      */
     @Override
     public boolean isImmutable() {
@@ -261,11 +263,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * Numeric strings are interpreted as ordinals (or codes when CODE is configured) unless the
      * same string is defined as a JSON/XML name; a numeric string outside the {@code int} range matches
      * no constant.
-     * Empty strings return {@code null}. The literal string {@code "null"} returns {@code null} unless some
+     * Empty strings return {@code null} for name-based enums; annotated value/creator codecs may claim an empty token.
+     * The literal string {@code "null"} returns {@code null} unless some
      * constant claims it - as its name, its JSON/XML name, or its annotated JSON value - in which case that
      * constant is returned instead.
      *
-     * <p>For an enum with a {@code @JsonValue}/{@code @JsonCreator} pair the (non-empty) string is converted to the
+     * <p>For an enum with a {@code @JsonValue}/{@code @JsonCreator} pair the non-null string is converted to the
      * value type and handed to the creator; whatever the creator throws is propagated unwrapped. The literal-null
      * rule is applied before the creator, but only while no constant's annotated value is {@code "null"}; when one
      * is, {@code "null"} reaches the creator like any other value. For an enum with a
@@ -273,14 +276,20 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * matched against the constant names (and JSON/XML names) as a fallback; as in the name-based branch, a constant
      * that claims the value {@code "null"} wins over the literal-null rule.</p>
      *
-     * <p>An <i>empty</i> string always yields {@code null}, in every branch: a constant cannot claim {@code ""}.</p>
+     * <p>A {@code null} input always yields {@code null}; a non-null empty token reaches an annotated codec.</p>
+     *
+     * <p>This empty-token policy belongs to the shared type codec and also applies when JSON, CSV, XML or JDBC
+     * readers delegate to it. An annotated value-only enum with no constant claiming {@code ""} throws
+     * {@code IllegalArgumentException}; an annotated creator may accept the empty token or reject it with its
+     * own exception. Empty text is therefore not an implicit null for annotated enums. A JSON null, SQL NULL
+     * or XML {@code isNull="true"} marker remains distinct from an empty token.</p>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to convert; may be {@code null} or empty
-     * @return the enum value corresponding to the string, or {@code null} if input is null/empty
+     * @return the enum value corresponding to the string, or {@code null} for null input or an empty name-based token
      * @throws IllegalArgumentException if the string matches no constant (name, JSON/XML name, ordinal/code or
      *         annotated value); for an enum with an annotated creator, whatever that creator throws is propagated
      *         unwrapped instead
@@ -289,7 +298,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      */
     @Override
     public T valueOf(final String str) throws IllegalArgumentException {
-        if (Strings.isEmpty(str)) {
+        if (str == null || jsonValueType == null && str.isEmpty()) {
             return null; // NOSONAR
         }
 
@@ -451,6 +460,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * <ul>
      *   <li>ORDINAL or CODE: stores as integer (ordinal or code value); SQL {@code NULL} when {@code x} is {@code null}</li>
      *   <li>NAME: stores as string (enum constant name)</li>
+     *   <li>Annotated value member: takes precedence and binds through the annotated value's type handler</li>
      * </ul>
      *
      * @param stmt        the {@link PreparedStatement} in which to set the parameter
@@ -482,6 +492,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * <ul>
      *   <li>ORDINAL or CODE: stores as integer (ordinal or code value); SQL {@code NULL} when {@code x} is {@code null}</li>
      *   <li>NAME: stores as string (enum constant name)</li>
+     *   <li>Annotated value member: takes precedence and binds through the annotated value's type handler</li>
      * </ul>
      *
      * @param stmt          the {@link CallableStatement} in which to set the parameter
@@ -513,6 +524,7 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * <ul>
      *   <li>ORDINAL or CODE: writes the ordinal or code value as an unquoted integer</li>
      *   <li>NAME: writes the JSON/XML field name, optionally quoted based on {@code config}</li>
+     *   <li>Annotated value member: takes precedence and writes through the annotated value's type handler</li>
      * </ul>
      * A {@code null} value writes the literal {@code null}.
      * <p>
@@ -528,11 +540,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the enum value to write; may be {@code null}
      * @param config the serialization configuration for quotation settings; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the enum name, ordinal, code, annotated value, quotation marks or null literal to {@code writer}
      *         fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -559,8 +572,9 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
     /**
      * Builds the handler name from the RESOLVED enum class: a constant body class ({@code E$1}) must not leak its
      * synthetic binary name into the type name, or two handlers for the same enum compare unequal.
+     * @throws IllegalArgumentException if {@code className} resolves to neither an enum class nor a class enclosed by an enum
      */
-    private static String enumTypeName(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) {
+    private static String enumTypeName(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) throws IllegalArgumentException {
         final Class<?> requested = ClassUtil.forName(className);
         final Class<?> enumClass = getEnumClass(requested);
         final String baseName = enumClass == requested ? className : ClassUtil.getCanonicalClassName(enumClass);
@@ -619,7 +633,10 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
         return enumConstant.name();
     }
 
-    private void registerJsonXmlNames(final T enumConstant, final String jsonXmlName) {
+    /**
+     * @throws IllegalArgumentException if a different enum constant already uses {@code jsonXmlName} or this constant's Java name as a JSON/XML name
+     */
+    private void registerJsonXmlNames(final T enumConstant, final String jsonXmlName) throws IllegalArgumentException {
         enumJsonXmlNameMap.put(enumConstant, jsonXmlName);
         registerJsonXmlName(jsonXmlName, enumConstant);
         registerJsonXmlName(enumConstant.name(), enumConstant);

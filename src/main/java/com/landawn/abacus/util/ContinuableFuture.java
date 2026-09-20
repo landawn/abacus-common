@@ -259,9 +259,14 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <td>{@code thenDelay(delay, unit)}</td>
  *     <td>{@code —} (compare {@link CompletableFuture#delayedExecutor(long, TimeUnit)})</td>
  *     <td>Inserts a shared delay after upstream completion; cancellation is immediately terminal.</td>
- *     <td>No direct counterpart: {@code CompletableFuture} needs {@code delayedExecutor}/{@code orTimeout}.</td>
+ *     <td>No direct counterpart: use {@code delayedExecutor} to schedule a delayed continuation.</td>
  *   </tr>
  * </table>
+ *
+ * <p>Executor-backed methods submit tasks to the configured executor. An executor may run a task
+ * directly on the calling thread, so an {@code Async} name does not itself guarantee an immediate return.
+ * Cancellation or rejection can prevent a submitted continuation from executing, including callbacks
+ * that handle both successful and exceptional upstream results.</p>
  *
  * <p>These are conceptual correspondences rather than signature-identical equivalents:
  * the bi-argument callbacks receive {@link Exception} (not {@link Throwable}), callbacks may throw
@@ -369,7 +374,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *
  * <p><b>Thread Safety and Concurrency:</b>
  * <ul>
- *   <li><b>Immutable Chains:</b> Each composition operation creates a new ContinuableFuture instance</li>
+ *   <li><b>Immutable Chains:</b> Composition does not replace the original future; operations may return a new wrapper or, for a no-op delay, the same instance</li>
  *   <li><b>Safe Publication:</b> Results are safely published through happens-before relationships</li>
  *   <li><b>Concurrent Access:</b> Future state can be queried concurrently; a lazy {@code map()} function can run once per caller and must be thread-safe</li>
  *   <li><b>Executor Isolation:</b> Different stages can run on different thread pools safely</li>
@@ -752,7 +757,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * contract. If the task has already completed, has already been cancelled, or could not be
      * cancelled for some other reason, this attempt will fail.
      *
-     * <p>After this method returns, subsequent calls to {@link #isDone()} will always return {@code true}.
+     * <p>If cancellation succeeds, subsequent calls to {@link #isDone()} will always return {@code true}.
      * Subsequent calls to {@link #isCancelled()} will always return {@code true} if this method returned {@code true}.
      *
      * <p><b>Note:</b> This method only cancels this future, not any upstream futures. To cancel the
@@ -1105,8 +1110,9 @@ public class ContinuableFuture<T> implements Future<T> {
 
     /**
      * Returns the result value if the computation is already complete, otherwise returns
-     * the provided default value without blocking. This method is useful for polling
-     * or providing immediate fallback values.
+     * the provided default value without calling {@code get()}. This method is useful for polling
+     * or providing immediate fallback values. When already done, it calls {@code get()}, which can still
+     * execute a lazy {@link #map(Throwables.Function)} transformation on the calling thread.
      *
      * <p>Note that this method still throws exceptions if the future is done but completed
      * exceptionally. Use {@link #getAsResult()} for exception-safe result retrieval that
@@ -1187,7 +1193,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Waits for the computation to complete within the specified timeout and then applies
      * the provided function to the result. This method blocks until the future completes
-     * or the timeout expires, then synchronously applies the function.
+     * or the timeout expires. It applies the function synchronously only after successful retrieval.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1334,7 +1340,7 @@ public class ContinuableFuture<T> implements Future<T> {
     /**
      * Waits for the computation to complete within the specified timeout and then consumes
      * the result with the provided consumer. This method blocks until the future completes
-     * or the timeout expires, then synchronously executes the consumer.
+     * or the timeout expires. It executes the consumer synchronously only after successful retrieval.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1529,7 +1535,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * Executes the provided action asynchronously after this future completes. The action
      * is executed using the configured executor of this future.
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture<Void>} that
+     * <p>This method returns a new {@code ContinuableFuture<Void>} that
      * completes when the action finishes executing. The action is only executed after
      * this future completes successfully.
      *
@@ -1564,7 +1570,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * the result to the consumer. The consumer is executed using the configured executor
      * of this future.
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture<Void>} that
+     * <p>This method returns a new {@code ContinuableFuture<Void>} that
      * completes when the consumer finishes executing. The consumer receives the result
      * of this future if it completes successfully.
      *
@@ -1598,7 +1604,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * both the result (if successful) and any exception that occurred. The bi-consumer is
      * executed using the configured executor of this future.
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture<Void>} that
+     * <p>This method returns a new {@code ContinuableFuture<Void>} that
      * completes when the bi-consumer finishes executing. The bi-consumer always executes,
      * regardless of whether this future completed normally or exceptionally. This is useful
      * for handling both success and failure cases in the asynchronous chain without breaking
@@ -1641,7 +1647,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * is executed using the configured executor of this future, and its result becomes the
      * result of the returned future.
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * <p>This method returns a new {@code ContinuableFuture} that completes
      * with the result of the callable. The callable is only executed after this future
      * completes successfully.
      *
@@ -1676,7 +1682,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * receives the result of this future. The function's return value becomes the result of
      * the returned future.
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * <p>This method returns a new {@code ContinuableFuture} that completes
      * with the transformed result. This method is similar to {@link #map(Throwables.Function)}
      * but executes asynchronously in the configured executor rather than synchronously when
      * get() is called.
@@ -1711,7 +1717,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * the configured executor of this future and receives both the result (if successful) and
      * any exception that occurred.
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * <p>This method returns a new {@code ContinuableFuture} that completes
      * with the transformed result. The bi-function always executes, regardless of whether this
      * future completed normally or exceptionally. This is useful for recovery scenarios where
      * you want to provide alternative values or transform exceptions into valid results.
@@ -1943,7 +1949,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * Executes the provided callable asynchronously after both this future and the other future complete successfully.
      * The callable is executed asynchronously using the configured executor of this future.
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * <p>This method returns a new {@code ContinuableFuture} that completes
      * with the result of the callable. If either input future fails, the callable is not executed and the
      * returned future completes exceptionally with this future's exception when this future failed (the other
      * future's exception, if any, is attached to it as a suppressed exception); otherwise it completes
@@ -1986,7 +1992,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * passing both results to the bi-function. The bi-function is executed asynchronously using the
      * configured executor of this future.
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * <p>This method returns a new {@code ContinuableFuture} that completes
      * with the result of the bi-function. This enables combining the results of two independent
      * asynchronous computations. If either future fails, the bi-function is not executed and the returned
      * future completes exceptionally with this future's exception when this future failed (the other future's
@@ -2031,7 +2037,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * asynchronously using the configured executor of this future and receives a {@link Tuple4}
      * containing both results and their exceptions (if any).
      *
-     * <p>This method returns immediately with a new {@code ContinuableFuture} that completes
+     * <p>This method returns a new {@code ContinuableFuture} that completes
      * with the result of the function. The function always executes, regardless of whether the
      * futures completed normally or exceptionally. This is useful when you need to handle the
      * results of both futures regardless of their success/failure status. The tuple contains:
@@ -2272,7 +2278,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Connection> backup = ContinuableFuture.call(() -> connectToBackup());
      *
      * ContinuableFuture<Session> session = primary.callAsyncAfterEither(backup, () -> {
-     *     // Create session as soon as any connection is established
+     *     // Runs after either connection attempt completes, even if it fails
      *     return createNewSession();
      * });
      * }</pre>
@@ -2549,7 +2555,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * ContinuableFuture<Config> fallbackConfig = ContinuableFuture.call(() -> loadFallbackConfig());
      *
      * primaryConfig.runAsyncAfterFirstSuccess(fallbackConfig, (config, error) -> {
-     *     if (config != null) {
+     *     if (error == null) {
      *         applyConfig(config);
      *     } else {
      *         logger.error("All config sources failed", error);
@@ -2771,7 +2777,7 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * ContinuableFuture<Quote> quote = vendorPrice.callAsyncAfterFirstSuccess(marketPrice,
      *     (price, error) -> {
-     *         if (price != null) {
+     *         if (error == null) {
      *             return Quote.withPrice(price);
      *         } else {
      *             // Both sources failed, return quote with error status
@@ -2882,6 +2888,9 @@ public class ContinuableFuture<T> implements Future<T> {
         return result;
     }
 
+    /**
+     * @throws InterruptedException if waiting for {@code continuableFuture} is interrupted; other Exceptions are returned in the Result
+     */
     private static <V> Result<V, Exception> awaitResult(final ContinuableFuture<? extends V> continuableFuture) throws InterruptedException {
         try {
             return Result.of(continuableFuture.get(), null);
@@ -2917,6 +2926,9 @@ public class ContinuableFuture<T> implements Future<T> {
         primary.addSuppressed(secondary);
     }
 
+    /**
+     * @throws Exception if either result contains a failure; the first result takes precedence and a distinct secondary failure is suppressed
+     */
     private static void throwIfEitherFailed(final Result<?, Exception> result, final Result<?, Exception> result2) throws Exception {
         final Exception exception = result.getException();
         final Exception exception2 = result2.getException();
@@ -3042,8 +3054,8 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     @Deprecated
     ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) throws IllegalArgumentException {
-        N.checkArgNotNull(executor);
-        N.checkArgNotNull(unit);
+        N.checkArgNotNull(executor, cs.executor);
+        N.checkArgNotNull(unit, cs.unit);
 
         //noinspection Convert2Diamond
         return new ContinuableFuture<>(new Future<T>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
@@ -3187,6 +3199,9 @@ public class ContinuableFuture<T> implements Future<T> {
                 }
             }
 
+            /**
+             * @throws InterruptedException if the calling thread is interrupted while sleeping for the remaining completion delay
+             */
             private void delay(final long maxWaitNanos) throws InterruptedException {
                 if (isDelayed) {
                     return;
@@ -3240,14 +3255,13 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method creates a new CompletableFuture that completes with the same result as this
      * ContinuableFuture. The result retrieval is performed asynchronously, meaning this method
-     * returns immediately without blocking. Any exceptions thrown by this future (including
-     * InterruptedException and ExecutionException) are wrapped in a CompletionException as per
-     * CompletableFuture conventions.
+     * submits retrieval to the configured executor. Exceptions are reported through the returned
+     * CompletableFuture; an ExecutionException from retrieval is unwrapped to its cause.
      *
      * <p><b>Key Characteristics:</b>
      * <ul>
-     *   <li><b>Non-blocking for the caller:</b> this method returns immediately; a worker of the chosen
-     *       executor then blocks in {@code get()} until this future completes</li>
+     *   <li><b>Executor-backed retrieval:</b> the submitted task blocks in {@code get()} until this future
+     *       completes; a direct executor runs that task on the calling thread</li>
      *   <li><b>Executor Reuse:</b> Uses this future's asyncExecutor for the conversion</li>
      *   <li><b>Exception Wrapping:</b> All exceptions are wrapped in CompletionException</li>
      *   <li><b>Independent Lifecycle:</b> Returned CompletableFuture has independent cancellation</li>
@@ -3296,7 +3310,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <ul>
      *   <li>Cancelling the returned CompletableFuture does not cancel this ContinuableFuture</li>
      *   <li>Cancelling this ContinuableFuture will cause the CompletableFuture to complete exceptionally</li>
-     *   <li>The conversion is asynchronous; blocking methods should not be called in the supplier</li>
+     *   <li>The retrieval task calls {@code get()} and may wait for upstream work</li>
      *   <li>Uses this future's asyncExecutor, which may impact thread pool usage</li>
      * </ul>
      *
@@ -3310,18 +3324,19 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p><b>&#9888;&#65039; Starvation warning:</b> this overload uses <i>this future's own executor</i>, which is
      * usually the executor its upstream task is running or queued on. That pool blocks one worker per conversion,
      * and {@link AsyncExecutor}'s pool has an unbounded queue - so it never grows past its core size. Converting
-     * more not-yet-started futures than the pool has core threads therefore leaves every worker waiting on work
-     * that can no longer be scheduled. Pass an unrelated executor to {@link #toCompletableFuture(Executor)} when
+     * pending futures can cause starvation if retrieval tasks occupy every worker while the work needed
+     * to complete those futures is queued behind them. Pass an unrelated executor to {@link #toCompletableFuture(Executor)} when
      * the futures may still be pending.</p>
      *
      * @return a new {@code CompletableFuture} that completes with the same result as this {@code ContinuableFuture},
      *         executed asynchronously using this future's {@code asyncExecutor}.
+     * @throws RejectedExecutionException if the executor rejects the asynchronous result-retrieval task
      * @see CompletableFuture#supplyAsync(java.util.function.Supplier, Executor)
      * @see #toCompletableFuture(Executor)
      * @see CompletionException
      */
     @Beta
-    public CompletableFuture<T> toCompletableFuture() {
+    public CompletableFuture<T> toCompletableFuture() throws RejectedExecutionException {
         return CompletableFuture.supplyAsync(this::getForCompletableFuture, asyncExecutor);
     }
 
@@ -3332,14 +3347,13 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method creates a new CompletableFuture that completes with the same result as this
      * ContinuableFuture. The result retrieval is performed asynchronously using the provided executor,
-     * meaning this method returns immediately without blocking. Any exceptions thrown by this future
-     * (including InterruptedException and ExecutionException) are wrapped in a CompletionException
-     * as per CompletableFuture conventions.
+     * which may run the retrieval task on the calling thread. Exceptions are reported through the
+     * returned CompletableFuture; an ExecutionException from retrieval is unwrapped to its cause.
      *
      * <p><b>Key Characteristics:</b>
      * <ul>
-     *   <li><b>Non-blocking for the caller:</b> this method returns immediately; a worker of the chosen
-     *       executor then blocks in {@code get()} until this future completes</li>
+     *   <li><b>Executor-backed retrieval:</b> the submitted task blocks in {@code get()} until this future
+     *       completes; a direct executor runs that task on the calling thread</li>
      *   <li><b>Custom Executor:</b> Uses the provided executor instead of this future's asyncExecutor</li>
      *   <li><b>Exception Wrapping:</b> All exceptions are wrapped in CompletionException</li>
      *   <li><b>Independent Lifecycle:</b> Returned CompletableFuture has independent cancellation</li>
@@ -3398,7 +3412,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * <ul>
      *   <li>Cancelling the returned CompletableFuture does not cancel this ContinuableFuture</li>
      *   <li>Cancelling this ContinuableFuture will cause the CompletableFuture to complete exceptionally</li>
-     *   <li>The conversion is asynchronous; blocking methods should not be called in the supplier</li>
+     *   <li>The retrieval task calls {@code get()} and may wait for upstream work</li>
      *   <li>The provided executor must be able to accept new tasks</li>
      *   <li>Executor shutdown should be managed externally; this method does not manage lifecycle</li>
      * </ul>
@@ -3422,18 +3436,24 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new {@code CompletableFuture} that completes with the same result as this {@code ContinuableFuture},
      *         executed asynchronously using the provided executor.
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if the executor rejects the asynchronous result-retrieval task
      * @see CompletableFuture#supplyAsync(java.util.function.Supplier, Executor)
      * @see #toCompletableFuture()
      * @see CompletionException
      */
     @Beta
-    public CompletableFuture<T> toCompletableFuture(final Executor executor) throws IllegalArgumentException {
+    public CompletableFuture<T> toCompletableFuture(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return CompletableFuture.supplyAsync(this::getForCompletableFuture, executor);
     }
 
-    private T getForCompletableFuture() {
+    /**
+     * @throws CancellationException if this future has been cancelled
+     * @throws CompletionException if result retrieval is interrupted or fails with ExecutionException; interruption also restores the thread interrupt
+     *         flag
+     */
+    private T getForCompletableFuture() throws CancellationException, CompletionException {
         try {
             return get();
         } catch (final InterruptedException e) {

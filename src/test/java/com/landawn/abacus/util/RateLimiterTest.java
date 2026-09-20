@@ -61,6 +61,18 @@ public class RateLimiterTest extends TestBase {
     }
 
     @Test
+    public void testAcquireWaitsForPriorReservationAndChargesNextRequest() {
+        final FakeSleepingStopwatch stopwatch = new FakeSleepingStopwatch();
+        final RateLimiter limiter = RateLimiter.create(2.0, stopwatch);
+
+        assertEquals(0.0, limiter.acquire(10));
+        assertEquals(5.0, limiter.acquire(1));
+        assertEquals(0.5, limiter.acquire(4));
+        assertEquals(2.0, limiter.acquire(1));
+        assertEquals(7_500_000L, stopwatch.readMicros());
+    }
+
+    @Test
     public void testCreateWithZeroWarmupDoesNotCorruptPermitsAfterIdle() {
         FakeSleepingStopwatch stopwatch = new FakeSleepingStopwatch();
         RateLimiter limiter = RateLimiter.create(1.0, 0, TimeUnit.SECONDS, 3.0, stopwatch);

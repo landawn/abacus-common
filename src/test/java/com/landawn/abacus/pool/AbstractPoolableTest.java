@@ -6,11 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
@@ -287,94 +285,12 @@ public class AbstractPoolableTest extends TestBase {
         return baos.toByteArray();
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
-            return (T) ois.readObject();
-        }
-    }
-
-    /** A user subclass with its own serializable state. */
-    private static class SerializablePoolable extends AbstractPoolable {
-        private final String name;
-        private boolean destroyed;
-
-        SerializablePoolable(final String name, final long liveTime, final long maxIdleTime) {
-            super(liveTime, maxIdleTime);
-            this.name = name;
-        }
-
-        @Override
-        public void destroy(final Caller caller) {
-            destroyed = true;
-        }
-    }
-
-    /** A user subclass whose own state is NOT serializable. */
-    private static class NonSerializableStatePoolable extends AbstractPoolable {
-        @SuppressWarnings("unused")
-        private final Object handle = new Object();
-
-        NonSerializableStatePoolable() {
-            super(10000, 5000);
-        }
-
-        @Override
-        public void destroy(final Caller caller) {
-            // no-op
-        }
-    }
-
     @Test
-    public void testIsSerializable() {
-        // Pool extends Serializable and serializes its elements, so the recommended base class must be
-        // Serializable too; before this, a Serializable subclass could be written but never read back
-        // ("no valid constructor") because AbstractPoolable had no no-arg constructor.
-        assertTrue(new TestPoolable(10000, 5000) instanceof Serializable);
-    }
-
-    @Test
-    public void testSerializationRoundTripPreservesActivityPrintAndSubclassState() throws Exception {
-        final SerializablePoolable original = new SerializablePoolable("resource-ü", 600_000, 60_000);
-        original.activityPrint().updateAccessCount();
-        original.activityPrint().updateAccessCount();
-        original.activityPrint().updateAccessCount();
-        original.activityPrint().updateLastAccessTime();
-        final ActivityPrint before = original.activityPrint();
-
-        final SerializablePoolable copy = deserialize(serialize(original));
-
-        assertNotNull(copy);
-        assertEquals("resource-ü", copy.name);
-        assertFalse(copy.destroyed);
-        assertNotNull(copy.activityPrint());
-        assertEquals(before.getCreatedTime(), copy.activityPrint().getCreatedTime());
-        assertEquals(before.getMaxLiveTime(), copy.activityPrint().getMaxLiveTime());
-        assertEquals(before.getMaxIdleTime(), copy.activityPrint().getMaxIdleTime());
-        assertEquals(before.getLastAccessTime(), copy.activityPrint().getLastAccessTime());
-        assertEquals(3, copy.activityPrint().getAccessCount());
-        assertFalse(copy.activityPrint().isExpired());
-
-        // The copy has its own ActivityPrint instance (independent mutation), still tracked correctly.
-        copy.activityPrint().updateAccessCount();
-        assertEquals(4, copy.activityPrint().getAccessCount());
-        assertEquals(3, original.activityPrint().getAccessCount());
-    }
-
-    @Test
-    public void testSerializationRoundTripPreservesDestroyedState() throws Exception {
-        final SerializablePoolable original = new SerializablePoolable("r", 10000, 5000);
-        original.destroy(Caller.CLOSE);
-
-        final SerializablePoolable copy = deserialize(serialize(original));
-
-        assertTrue(copy.destroyed);
-    }
-
-    @Test
-    public void testSerializationOfSubclassWithNonSerializableStateFails() {
-        // Documented: a subclass is serializable only if all of its own state is.
-        assertThrows(NotSerializableException.class, () -> serialize(new NonSerializableStatePoolable()));
+    public void testIsNotSerializable() {
+        // AbstractPoolable represents a live pooled resource. It must not claim Serializable;
+        // every subclass would inherit that contract whether or not it can honour it.
+        assertFalse(new TestPoolable(10000, 5000) instanceof Serializable);
+        assertThrows(NotSerializableException.class, () -> serialize(new TestPoolable(10000, 5000)));
     }
 
 }

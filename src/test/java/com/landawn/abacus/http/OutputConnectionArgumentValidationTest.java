@@ -11,7 +11,9 @@ import java.net.URI;
 
 import org.junit.jupiter.api.Test;
 
-class OutputConnectionArgumentValidationTest {
+import com.landawn.abacus.TestBase;
+
+class OutputConnectionArgumentValidationTest extends TestBase {
     @Test
     void requiredConnectionIsValidatedForEveryHeaderPath() {
         assertThrowsExactly(IllegalArgumentException.class, () -> HttpUtil.getOutputStream(null, null, null, null));
@@ -24,10 +26,23 @@ class OutputConnectionArgumentValidationTest {
     void optionalFormatAndHeadersPreserveTheConnectionOutput() throws Exception {
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
         final HttpURLConnection connection = new HttpURLConnection(URI.create("http://localhost/").toURL()) {
-            @Override public void connect() { }
-            @Override public void disconnect() { }
-            @Override public boolean usingProxy() { return false; }
-            @Override public OutputStream getOutputStream() { return output; }
+            @Override
+            public void connect() {
+            }
+
+            @Override
+            public void disconnect() {
+            }
+
+            @Override
+            public boolean usingProxy() {
+                return false;
+            }
+
+            @Override
+            public OutputStream getOutputStream() {
+                return output;
+            }
         };
 
         assertSame(output, HttpUtil.getOutputStream(connection, null, null, null));

@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.exception.TooManyElementsException;
 import com.landawn.abacus.util.If.OrElse;
+import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Collectors;
 
@@ -81,16 +82,16 @@ public class SeqRateTest extends SeqTestSupport {
 
     @Test
     public void testMinMax() throws Exception {
-        assertEquals(Optional.of(1), Seq.of(3, 1, 2).min(Comparator.naturalOrder()));
-        assertEquals(Optional.of(3), Seq.of(3, 1, 2).max(Comparator.naturalOrder()));
-        assertEquals(Optional.of(3), Seq.of(3, 1, 2).min(Comparator.reverseOrder()));
-        assertEquals(Optional.of(1), Seq.of(3, 1, 2).max(Comparator.reverseOrder()));
+        assertEquals(Nullable.of(1), Seq.of(3, 1, 2).min(Comparator.naturalOrder()));
+        assertEquals(Nullable.of(3), Seq.of(3, 1, 2).max(Comparator.naturalOrder()));
+        assertEquals(Nullable.of(3), Seq.of(3, 1, 2).min(Comparator.reverseOrder()));
+        assertEquals(Nullable.of(1), Seq.of(3, 1, 2).max(Comparator.reverseOrder()));
         assertTrue(Seq.<Integer, Exception> empty().min(Comparator.naturalOrder()).isEmpty());
         assertTrue(Seq.<Integer, Exception> empty().max(Comparator.naturalOrder()).isEmpty());
-        assertEquals(Optional.of("a"), Seq.of("bb", "a", "ccc").minBy(String::length));
-        assertEquals(Optional.of("ccc"), Seq.of("bb", "a", "ccc").maxBy(String::length));
-        assertEquals(Optional.of(1), Seq.of(3, 1, 2).sorted().min(Comparator.naturalOrder()));
-        assertEquals(Optional.of(3), Seq.of(3, 1, 2).sorted().max(Comparator.naturalOrder()));
+        assertEquals(Nullable.of("a"), Seq.of("bb", "a", "ccc").minBy(String::length));
+        assertEquals(Nullable.of("ccc"), Seq.of("bb", "a", "ccc").maxBy(String::length));
+        assertEquals(Nullable.of(1), Seq.of(3, 1, 2).sorted().min(Comparator.naturalOrder()));
+        assertEquals(Nullable.of(3), Seq.of(3, 1, 2).sorted().max(Comparator.naturalOrder()));
     }
 
     @Test
@@ -99,23 +100,23 @@ public class SeqRateTest extends SeqTestSupport {
         assertFalse(Seq.of(1, 2, 3).anyMatch(x -> x == 9));
         assertTrue(Seq.of(2, 4, 6).allMatch(x -> x % 2 == 0));
         assertTrue(Seq.of(1, 3, 5).noneMatch(x -> x % 2 == 0));
-        assertEquals(Optional.of(2), Seq.of(1, 2, 3).findFirst(x -> x > 1));
-        assertEquals(Optional.of(2), Seq.of(1, 2, 3).findAny(x -> x > 1));
-        assertEquals(Optional.of(3), Seq.of(1, 2, 3).findLast(x -> x > 1));
+        assertEquals(Nullable.of(2), Seq.of(1, 2, 3).findFirst(x -> x > 1));
+        assertEquals(Nullable.of(2), Seq.of(1, 2, 3).findAny(x -> x > 1));
+        assertEquals(Nullable.of(3), Seq.of(1, 2, 3).findLast(x -> x > 1));
         assertTrue(Seq.of(1, 2, 3).findFirst(x -> x > 9).isEmpty());
-        assertEquals(Optional.of(1), Seq.of(1, 2, 3).first());
-        assertEquals(Optional.of(1), Seq.of(1, 2, 3).findFirst());
-        assertEquals(Optional.of(1), Seq.of(1, 2, 3).findAny());
-        assertEquals(Optional.of(2), Seq.of(1, 2, 3).elementAt(1));
+        assertEquals(Nullable.of(1), Seq.of(1, 2, 3).first());
+        assertEquals(Nullable.of(1), Seq.of(1, 2, 3).findFirst());
+        assertEquals(Nullable.of(1), Seq.of(1, 2, 3).findAny());
+        assertEquals(Nullable.of(2), Seq.of(1, 2, 3).elementAt(1));
         assertTrue(Seq.of(1, 2, 3).elementAt(9).isEmpty());
-        assertEquals(Optional.of(1), Seq.of(1).onlyOne());
+        assertEquals(Nullable.of(1), Seq.of(1).onlyOne());
         assertTrue(Seq.<Integer, Exception> empty().onlyOne().isEmpty());
         assertThrows(TooManyElementsException.class, () -> Seq.of(1, 2).onlyOne());
     }
 
     @Test
     public void testKthLargestAndPercentiles() throws Exception {
-        assertEquals(Optional.of(4), Seq.of(1, 5, 3, 4, 2).kthLargest(2, Comparator.naturalOrder()));
+        assertEquals(Nullable.of(4), Seq.of(1, 5, 3, 4, 2).kthLargest(2, Comparator.naturalOrder()));
         assertTrue(Seq.of(1, 2).kthLargest(5, Comparator.naturalOrder()).isEmpty());
         assertTrue(Seq.<Integer, Exception> empty().kthLargest(1, Comparator.naturalOrder()).isEmpty());
         assertTrue(Seq.of(1, 2, 3, 4, 5).percentiles().isPresent());
@@ -133,7 +134,7 @@ public class SeqRateTest extends SeqTestSupport {
         assertEquals(2.0, Seq.of(1, 2, 3).averageLong(Integer::longValue).orElseThrow());
         assertEquals(2.0, Seq.of(1, 2, 3).averageDouble(Integer::doubleValue).orElseThrow());
         assertTrue(Seq.<Integer, Exception> empty().averageInt(Integer::intValue).isEmpty());
-        assertEquals(Optional.of(6), Seq.of(1, 2, 3).reduce(Integer::sum));
+        assertEquals(Nullable.of(6), Seq.of(1, 2, 3).reduce(Integer::sum));
         assertEquals(Integer.valueOf(6), Seq.of(1, 2, 3).reduce(0, Integer::sum));
         assertEquals(Integer.valueOf(42), Seq.<Integer, Exception> empty().reduce(42, Integer::sum));
         assertEquals(Arrays.asList(1, 2, 3), Seq.of(1, 2, 3).collect(ArrayList::new, ArrayList::add));
@@ -735,8 +736,8 @@ public class SeqRateTest extends SeqTestSupport {
         // A genuinely different comparator must still re-sort.
         assertEquals(CommonUtil.asList("a", "b", "c"), Seq.of("c", "a", "b").sorted(Comparator.comparingInt(String::length)).sorted().toList());
         // The no-op keeps the `sorted` flag, so min(..)/max(..) still take their shortcut.
-        assertEquals(Optional.of(1), Seq.of(3, 1, 2).sorted().sorted().min(Comparators.<Integer> naturalOrder()));
-        assertEquals(Optional.of(3), Seq.of(3, 1, 2).sorted().sorted().max(Comparators.<Integer> naturalOrder()));
+        assertEquals(Nullable.of(1), Seq.of(3, 1, 2).sorted().sorted().min(Comparators.<Integer> naturalOrder()));
+        assertEquals(Nullable.of(3), Seq.of(3, 1, 2).sorted().sorted().max(Comparators.<Integer> naturalOrder()));
     }
 
     @Test
@@ -770,8 +771,8 @@ public class SeqRateTest extends SeqTestSupport {
         final TooManyElementsException ex = assertThrows(TooManyElementsException.class, () -> Seq.of("a", "b").onlyOne());
         assertEquals("There are at least two elements: a, b", ex.getMessage());
 
-        assertEquals(Optional.of("a"), Seq.of("a").onlyOne());
-        assertEquals(Optional.empty(), Seq.<String, Exception> empty().onlyOne());
+        assertEquals(Nullable.of("a"), Seq.of("a").onlyOne());
+        assertEquals(Nullable.empty(), Seq.<String, Exception> empty().onlyOne());
     }
 
     @Test
@@ -781,17 +782,18 @@ public class SeqRateTest extends SeqTestSupport {
     }
 
     @Test
-    public void testMinMax_nullExtremeThrowsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> Seq.of((Integer) null, 1, 2).min(Comparators.nullsFirst()));
-        assertThrows(NullPointerException.class, () -> Seq.of((Integer) null, 1, 2).max(Comparators.nullsLast()));
-        assertThrows(NullPointerException.class, () -> Seq.of((Integer) null, (Integer) null).minBy(x -> (Comparable) x));
-        assertThrows(NullPointerException.class, () -> Seq.of((Integer) null, (Integer) null).maxBy(x -> (Comparable) x));
+    public void testMinMax_nullExtremeIsAPresentNull() throws Exception {
+        // A null winner is a PRESENT Nullable holding null; empty is reserved for "no element" (Seq rule, 2026-09-20).
+        assertTrue(Seq.of((Integer) null, 1, 2).min(Comparators.nullsFirst()).isNull());
+        assertTrue(Seq.of((Integer) null, 1, 2).max(Comparators.nullsLast()).isNull());
+        assertTrue(Seq.of((Integer) null, (Integer) null).minBy(x -> (Comparable) x).isNull());
+        assertTrue(Seq.of((Integer) null, (Integer) null).maxBy(x -> (Comparable) x).isNull());
     }
 
     @Test
     public void testMinByMaxBy_nullsAreOrderedOutOfTheWay() throws Exception {
-        assertEquals(Optional.of(1), Seq.of((Integer) null, 1, 2).minBy(x -> (Comparable) x));
-        assertEquals(Optional.of(2), Seq.of((Integer) null, 1, 2).maxBy(x -> (Comparable) x));
+        assertEquals(Nullable.of(1), Seq.of((Integer) null, 1, 2).minBy(x -> (Comparable) x));
+        assertEquals(Nullable.of(2), Seq.of((Integer) null, 1, 2).maxBy(x -> (Comparable) x));
     }
 
     @Test
@@ -853,11 +855,11 @@ public class SeqRateTest extends SeqTestSupport {
     public void testDistinct_staysLazyAndShortCircuits() throws Exception {
         // distinct() only retains the keys seen so far - it must not have to drain the source first.
         final AtomicInteger pulls = new AtomicInteger();
-        assertEquals(Optional.of(1), Seq.<Integer, Exception> of(1, 2, 3, 4, 5).onEach(x -> pulls.incrementAndGet()).distinct().first());
+        assertEquals(Nullable.of(1), Seq.<Integer, Exception> of(1, 2, 3, 4, 5).onEach(x -> pulls.incrementAndGet()).distinct().first());
         assertEquals(1, pulls.get());
 
         pulls.set(0);
-        assertEquals(Optional.of(1), Seq.<Integer, Exception> of(1, 2, 3, 4, 5).onEach(x -> pulls.incrementAndGet()).distinctBy(x -> x).first());
+        assertEquals(Nullable.of(1), Seq.<Integer, Exception> of(1, 2, 3, 4, 5).onEach(x -> pulls.incrementAndGet()).distinctBy(x -> x).first());
         assertEquals(1, pulls.get());
     }
 

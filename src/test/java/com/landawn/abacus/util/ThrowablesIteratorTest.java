@@ -256,6 +256,183 @@ public class ThrowablesIteratorTest extends ThrowablesTestSupport {
     }
 
     @Test
+    public void testDeferClosesResourceWhenSupplierClosesWrapper() throws Exception {
+        for (int operation = 0; operation < 5; operation++) {
+            final AtomicInteger closed = new AtomicInteger();
+            final AtomicInteger accessed = new AtomicInteger();
+            final java.util.concurrent.atomic.AtomicReference<Iterator<String, RuntimeException>> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final Iterator<String, RuntimeException> deferred = Iterator.defer(() -> {
+                reference.get().closeResource();
+                // Explicit types keep supplier inference compatible with the Eclipse compiler.
+                return new Iterator<String, RuntimeException>() {
+                    @Override
+                    public boolean hasNext() {
+                        accessed.incrementAndGet();
+                        return false;
+                    }
+
+                    @Override
+                    public String next() {
+                        accessed.incrementAndGet();
+                        return "unexpected";
+                    }
+
+                    @Override
+                    protected void closeResourceInternal() {
+                        closed.incrementAndGet();
+                    }
+                };
+            });
+            reference.set(deferred);
+            switch (operation) {
+                case 0 -> assertFalse(deferred.hasNext());
+                case 1 -> assertThrows(NoSuchElementException.class, deferred::next);
+                case 2 -> deferred.advance(1);
+                case 3 -> assertEquals(0, deferred.count());
+                case 4 -> assertFalse(deferred.supportsFailureAtomicAdvance());
+                default -> throw new AssertionError();
+            }
+            deferred.closeResource();
+            assertEquals(1, closed.get(), "Newly acquired resource must be closed exactly once");
+            assertEquals(0, accessed.get(), "Closed wrapper must not access the supplied iterator");
+            assertFalse(deferred.hasNext());
+        }
+    }
+
+    @Test
+    public void testDeferRejectsSelfReturnAndCanRetry() {
+        for (int operation = 0; operation < 5; operation++) {
+            final AtomicInteger attempts = new AtomicInteger();
+            final java.util.concurrent.atomic.AtomicReference<Iterator<String, RuntimeException>> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final Iterator<String, RuntimeException> deferred = Iterator
+                    .defer(() -> attempts.incrementAndGet() == 1 ? reference.get() : Iterator.just("recovered"));
+            reference.set(deferred);
+
+            // No-op advances must leave the supplier untouched, including an invalid first result.
+            deferred.advance(0);
+            deferred.advance(-1);
+            assertEquals(0, attempts.get());
+            switch (operation) {
+                case 0 -> assertThrows(IllegalStateException.class, deferred::hasNext);
+                case 1 -> assertThrows(IllegalStateException.class, deferred::next);
+                case 2 -> assertThrows(IllegalStateException.class, () -> deferred.advance(1));
+                case 3 -> assertThrows(IllegalStateException.class, deferred::count);
+                case 4 -> assertThrows(IllegalStateException.class, deferred::supportsFailureAtomicAdvance);
+                default -> throw new AssertionError();
+            }
+            assertEquals(1, attempts.get());
+            assertEquals("recovered", deferred.next());
+            assertEquals(2, attempts.get());
+            assertFalse(deferred.hasNext());
+            deferred.closeResource();
+        }
+    }
+
+    @Test
+    public void testDeferPreservesCleanupFailureAfterSupplierClosesWrapper() {
+        for (int operation = 0; operation < 5; operation++) {
+            final AtomicInteger closed = new AtomicInteger();
+            final AssertionError closeFailure = new AssertionError("Abandoned iterator close failed");
+            final java.util.concurrent.atomic.AtomicReference<Iterator<String, RuntimeException>> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final Iterator<String, RuntimeException> deferred = Iterator.defer(() -> {
+                reference.get().closeResource();
+                return new Iterator<String, RuntimeException>() {
+                    @Override
+                    public boolean hasNext() {
+                        throw new AssertionError("Closed wrapper must not access the supplied iterator");
+                    }
+
+                    @Override
+                    public String next() {
+                        throw new AssertionError("Closed wrapper must not access the supplied iterator");
+                    }
+
+                    @Override
+                    protected void closeResourceInternal() {
+                        closed.incrementAndGet();
+                        throw closeFailure;
+                    }
+                };
+            });
+            reference.set(deferred);
+            final AssertionError failure = switch (operation) {
+                case 0 -> assertThrows(AssertionError.class, deferred::hasNext);
+                case 1 -> assertThrows(AssertionError.class, deferred::next);
+                case 2 -> assertThrows(AssertionError.class, () -> deferred.advance(1));
+                case 3 -> assertThrows(AssertionError.class, deferred::count);
+                case 4 -> assertThrows(AssertionError.class, deferred::supportsFailureAtomicAdvance);
+                default -> throw new AssertionError();
+            };
+            assertSame(closeFailure, failure);
+            deferred.closeResource();
+            assertEquals(1, closed.get());
+            assertFalse(deferred.hasNext());
+            assertThrows(NoSuchElementException.class, deferred::next);
+            deferred.advance(1);
+            assertEquals(0, deferred.count());
+        }
+    }
+
+    @Test
+    public void testDeferRejectsRecursiveInitializationAndCanRetry() {
+        for (int scenario = 0; scenario < 4; scenario++) {
+            final boolean catchRecursiveFailure = scenario != 0;
+            final boolean returnSelf = scenario == 3;
+            final AssertionError closeFailure = scenario == 2 ? new AssertionError("Abandoned iterator close failed") : null;
+            final AtomicInteger attempts = new AtomicInteger();
+            final AtomicInteger closed = new AtomicInteger();
+            final java.util.concurrent.atomic.AtomicReference<Iterator<String, RuntimeException>> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final java.util.concurrent.atomic.AtomicReference<IllegalStateException> recursiveFailure = new java.util.concurrent.atomic.AtomicReference<>();
+            final Iterator<String, RuntimeException> deferred = Iterator.defer(() -> {
+                if (attempts.incrementAndGet() > 1) {
+                    return Iterator.just("recovered");
+                }
+                try {
+                    reference.get().hasNext();
+                    fail("Recursive initialization must throw before reinvoking the supplier");
+                } catch (final IllegalStateException failure) {
+                    recursiveFailure.set(failure);
+                    if (!catchRecursiveFailure) {
+                        throw failure;
+                    }
+                }
+                if (returnSelf) {
+                    return reference.get();
+                }
+                return new Iterator<String, RuntimeException>() {
+                    @Override
+                    public boolean hasNext() {
+                        return false;
+                    }
+
+                    @Override
+                    public String next() {
+                        throw new NoSuchElementException();
+                    }
+
+                    @Override
+                    protected void closeResourceInternal() {
+                        closed.incrementAndGet();
+                        if (closeFailure != null) {
+                            throw closeFailure;
+                        }
+                    }
+                };
+            });
+            reference.set(deferred);
+            final IllegalStateException failure = assertThrows(IllegalStateException.class, deferred::hasNext);
+            assertSame(recursiveFailure.get(), failure);
+            assertEquals(1, attempts.get());
+            assertEquals(catchRecursiveFailure && !returnSelf ? 1 : 0, closed.get());
+            assertArrayEquals(closeFailure == null ? new Throwable[0] : new Throwable[] { closeFailure }, failure.getSuppressed());
+            assertEquals("recovered", deferred.next());
+            assertEquals(2, attempts.get());
+            deferred.closeResource();
+            assertEquals(catchRecursiveFailure && !returnSelf ? 1 : 0, closed.get());
+        }
+    }
+
+    @Test
     public void testConcat() throws Exception {
         @SuppressWarnings("unchecked")
         Iterator<String, Exception> empty = Iterator.concat();

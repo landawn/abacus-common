@@ -216,7 +216,8 @@ public class GuavaMultimapTypeTest extends TestBase {
         // immutable runtime classes are still produced
         assertTrue(TypeFactory.getType("com.google.common.collect.ImmutableListMultimap<String, Integer>").valueOf(json) instanceof ImmutableListMultimap);
         assertTrue(TypeFactory.getType("com.google.common.collect.ImmutableSetMultimap<String, Integer>").valueOf(json) instanceof ImmutableSetMultimap);
-        assertTrue(TypeFactory.getType("com.google.common.collect.ImmutableMultimap<String, Integer>").valueOf(json) instanceof com.google.common.collect.ImmutableMultimap);
+        assertTrue(TypeFactory.getType("com.google.common.collect.ImmutableMultimap<String, Integer>")
+                .valueOf(json) instanceof com.google.common.collect.ImmutableMultimap);
 
         // Set-valued ordered targets keep the array order of the values as well (duplicates collapsed)
         final String values = "{\"k\": [\"z\", \"a\", \"m\", \"b\", \"q\", \"z\"]}";
@@ -242,7 +243,8 @@ public class GuavaMultimapTypeTest extends TestBase {
         assertEquals(HashMultimap.class, TypeFactory.getType("com.google.common.collect.HashMultimap<String, Integer>").valueOf(json).getClass());
         assertEquals(ArrayListMultimap.class, TypeFactory.getType("com.google.common.collect.ArrayListMultimap<String, Integer>").valueOf(json).getClass());
 
-        final Multimap<String, Integer> sorted = TypeFactory.<Multimap<String, Integer>> getType("com.google.common.collect.TreeMultimap<String, Integer>").valueOf(json);
+        final Multimap<String, Integer> sorted = TypeFactory.<Multimap<String, Integer>> getType("com.google.common.collect.TreeMultimap<String, Integer>")
+                .valueOf(json);
         assertEquals(TreeMultimap.class, sorted.getClass());
         assertEquals(java.util.Arrays.asList("a", "m", "z"), new java.util.ArrayList<>(sorted.keySet()));
 

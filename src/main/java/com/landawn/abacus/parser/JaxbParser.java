@@ -53,8 +53,8 @@ import jakarta.xml.bind.Unmarshaller;
  *
  * <p>This class provides XML parsing capabilities using the JAXB framework, which maps Java objects
  * to XML representations and vice versa. It extends {@link AbstractXmlParser} and supports the
- * {@code String}/{@code File}/{@code InputStream}/{@code Reader} serialization and deserialization
- * methods.</p>
+ * {@code String}/{@code File} operations, serialization to {@code OutputStream}/{@code Writer},
+ * and deserialization from {@code InputStream}/{@code Reader}.</p>
  *
  * <p>Key features:</p>
  * <ul>
@@ -137,9 +137,11 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @return the XML string representation of the serialized object, or an empty string if {@code obj} is {@code null}
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB marshalling fails
+     * @throws RuntimeException if the JAXB context or marshaller for a non-null object cannot be created
+     * @throws UncheckedIOException if a JAXB adapter or delegated value writer reports an I/O cause while marshalling the object
      */
     @Override
-    public String serialize(final Object obj, final XmlSerConfig config) throws ParsingException {
+    public String serialize(final Object obj, final XmlSerConfig config) throws ParsingException, RuntimeException, UncheckedIOException {
         checkSerializationConfig(config);
 
         if (obj == null) {
@@ -175,13 +177,16 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
      * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB marshalling fails
+     * @throws IllegalArgumentException if {@code output} is null, or {@code output} is a directory
      * @throws UncheckedIOException if creating, opening, writing or closing {@code output} fails, including an I/O cause reported by the
      *         JAXB marshaller
+     * @throws RuntimeException if the JAXB context or marshaller for a non-null object cannot be created
      */
     @Override
-    public void serialize(final Object obj, final XmlSerConfig config, final File output) throws ParsingException, UncheckedIOException {
-        // Validate before opening the destination: FileOutputStream truncates an existing file.
+    public void serialize(final Object obj, final XmlSerConfig config, final File output)
+            throws ParsingException, IllegalArgumentException, UncheckedIOException, RuntimeException {
         checkSerializationConfig(config);
+        N.checkArgNotNull(output, cs.output);
 
         OutputStream os = null;
 
@@ -216,11 +221,14 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
      * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB marshalling fails
+     * @throws IllegalArgumentException if {@code output} is null
+     * @throws RuntimeException if the JAXB context or marshaller for a non-null object cannot be created
      * @throws UncheckedIOException if writing XML to {@code output} or flushing it fails, including an I/O cause reported by the JAXB
      *         marshaller
      */
     @Override
-    public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output) throws ParsingException, UncheckedIOException {
+    public void serialize(final Object obj, final XmlSerConfig config, final OutputStream output)
+            throws ParsingException, IllegalArgumentException, RuntimeException, UncheckedIOException {
         write(obj, config, output);
     }
 
@@ -243,11 +251,17 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the writer to write to (must not be {@code null})
      * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB marshalling fails
+     * @throws IllegalArgumentException if {@code output} is null
+     * @throws RuntimeException if the JAXB context or marshaller for a non-null object cannot be created
      * @throws UncheckedIOException if writing XML to {@code output} or flushing it fails, including an I/O cause reported by the JAXB
      *         marshaller
      */
     @Override
-    public void serialize(final Object obj, final XmlSerConfig config, final Writer output) throws ParsingException, UncheckedIOException {
+    public void serialize(final Object obj, final XmlSerConfig config, final Writer output)
+            throws ParsingException, IllegalArgumentException, RuntimeException, UncheckedIOException {
+        checkSerializationConfig(config);
+        N.checkArgNotNull(output, cs.output);
+
         final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
         final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output);
 
@@ -275,11 +289,15 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the XML serialization configuration (optional)
      * @param output the writer to write to
      * @throws ParsingException if ignoredPropNames is specified in config or if JAXB marshalling fails
+     * @throws IllegalArgumentException if {@code output} is null
+     * @throws RuntimeException if the JAXB context or marshaller for a non-null object cannot be created
      * @throws UncheckedIOException if writing XML to {@code output} or flushing it fails, including an I/O cause reported by the JAXB
      *         marshaller
      */
-    void write(final Object obj, final XmlSerConfig config, final Writer output) throws ParsingException, UncheckedIOException {
+    void write(final Object obj, final XmlSerConfig config, final Writer output)
+            throws ParsingException, IllegalArgumentException, RuntimeException, UncheckedIOException {
         checkSerializationConfig(config);
+        N.checkArgNotNull(output, cs.output);
 
         if (obj == null) {
             try {
@@ -313,11 +331,15 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the XML serialization configuration (optional)
      * @param output the stream to write to; it is flushed but not closed
      * @throws ParsingException if {@code ignoredPropNames} is specified or JAXB marshalling fails
+     * @throws IllegalArgumentException if {@code output} is null
+     * @throws RuntimeException if the JAXB context or marshaller for a non-null object cannot be created
      * @throws UncheckedIOException if writing to or flushing the stream fails, including a failure JAXB
      *         reports as a {@code MarshalException}
      */
-    void write(final Object obj, final XmlSerConfig config, final OutputStream output) throws ParsingException, UncheckedIOException {
+    void write(final Object obj, final XmlSerConfig config, final OutputStream output)
+            throws ParsingException, IllegalArgumentException, RuntimeException, UncheckedIOException {
         checkSerializationConfig(config);
+        N.checkArgNotNull(output, cs.output);
 
         try {
             if (obj != null) {
@@ -363,12 +385,15 @@ final class JaxbParser extends AbstractXmlParser {
      *        note that {@code ignoredPropNames} is not supported by JAXB
      * @param targetType the {@link Type} descriptor of the object to create
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
-     * @throws ParsingException if JAXB unmarshalling fails
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws IllegalArgumentException if {@code targetType} is null
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
     public <T> T deserialize(final String source, final XmlDeserConfig config, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException {
+            throws ParsingException, IllegalArgumentException, RuntimeException, UncheckedIOException {
+        checkDeserializationConfig(config);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return deserialize(source, config, targetType.javaType());
@@ -384,12 +409,16 @@ final class JaxbParser extends AbstractXmlParser {
      *        note that {@code ignoredPropNames} is not supported by JAXB
      * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
      * @return the deserialized object instance, or the default value for {@code targetClass} if {@code source} is empty
-     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config},
-     *         or if JAXB unmarshalling fails
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws IllegalArgumentException if {@code targetClass} is null
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
-    public <T> T deserialize(final String source, final XmlDeserConfig config, final Class<? extends T> targetClass) throws ParsingException {
+    public <T> T deserialize(final String source, final XmlDeserConfig config, final Class<? extends T> targetClass)
+            throws ParsingException, IllegalArgumentException, RuntimeException, UncheckedIOException {
         checkDeserializationConfig(config);
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         if (Strings.isEmpty(source)) {
             return N.defaultValueOf(targetClass);
@@ -413,13 +442,17 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetType the {@link Type} descriptor of the object to create
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
-     * @throws ParsingException if JAXB unmarshalling fails
-     * @throws UncheckedIOException if the file cannot be read
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or {@code source} is a directory
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including an I/O cause reported by JAXB
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
+        checkDeserializationConfig(config);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return deserialize(source, config, targetType.javaType());
@@ -434,12 +467,19 @@ final class JaxbParser extends AbstractXmlParser {
      *        note that {@code ignoredPropNames} is not supported by JAXB
      * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
      * @return the deserialized object instance
-     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB unmarshalling fails
-     * @throws UncheckedIOException if the file cannot be read
+     * @throws IllegalArgumentException if {@code source} or {@code targetClass} is null, or {@code source} is a directory
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including an I/O cause reported by JAXB
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Class<? extends T> targetClass)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
+        checkDeserializationConfig(config);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         InputStream is = null;
 
         try {
@@ -461,13 +501,16 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetType the {@link Type} descriptor of the object to create
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
-     * @throws ParsingException if JAXB unmarshalling fails
-     * @throws UncheckedIOException if the JAXB/SAX reader cannot read XML from {@code source} and reports an I/O cause
+     * @throws IllegalArgumentException if {@code source} is null, or {@code targetType} is null
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, RuntimeException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+        checkDeserializationConfig(config);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return deserialize(source, config, targetType.javaType());
@@ -483,14 +526,17 @@ final class JaxbParser extends AbstractXmlParser {
      *        note that {@code ignoredPropNames} is not supported by JAXB
      * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is {@code null}.
-     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB unmarshalling fails
-     * @throws UncheckedIOException if the JAXB/SAX reader cannot read XML from {@code source} and reports an I/O cause
+     * @throws IllegalArgumentException if {@code source} is null, or {@code targetClass} is null
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass)
-            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, RuntimeException, UncheckedIOException {
         N.checkArgNotNull(source, cs.source);
+        checkDeserializationConfig(config);
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         return read(source, config, targetClass);
     }
@@ -505,13 +551,16 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param targetType the {@link Type} descriptor of the object to create
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
-     * @throws ParsingException if JAXB unmarshalling fails
-     * @throws UncheckedIOException if the JAXB/SAX reader cannot read XML from {@code source} and reports an I/O cause
+     * @throws IllegalArgumentException if {@code source} is null, or {@code targetType} is null
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, RuntimeException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+        checkDeserializationConfig(config);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return deserialize(source, config, targetType.javaType());
@@ -527,14 +576,17 @@ final class JaxbParser extends AbstractXmlParser {
      *        note that {@code ignoredPropNames} is not supported by JAXB
      * @param targetClass the class of the object to create; must be properly annotated with JAXB annotations
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is {@code null}.
-     * @throws ParsingException if {@code ignoredPropNames} is specified in {@code config}, or if JAXB unmarshalling fails
-     * @throws UncheckedIOException if the JAXB/SAX reader cannot read XML from {@code source} and reports an I/O cause
+     * @throws IllegalArgumentException if {@code source} is null, or {@code targetClass} is null
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass)
-            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, RuntimeException, UncheckedIOException {
         N.checkArgNotNull(source, cs.source);
+        checkDeserializationConfig(config);
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         return read(source, config, targetClass);
     }
@@ -584,11 +636,16 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the XML deserialization configuration (optional)
      * @param targetClass the class of the object to create
      * @return the deserialized object
-     * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
-     * @throws UncheckedIOException if the JAXB/SAX reader cannot read XML from {@code source} and reports an I/O cause
+     * @throws IllegalArgumentException if {@code source} is null, or {@code targetClass} is null
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
-    <T> T read(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass) throws ParsingException, UncheckedIOException {
+    <T> T read(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, ParsingException, RuntimeException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
         checkDeserializationConfig(config);
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 
@@ -615,11 +672,16 @@ final class JaxbParser extends AbstractXmlParser {
      * @param config the XML deserialization configuration (optional)
      * @param targetClass the class of the object to create
      * @return the deserialized object
-     * @throws ParsingException if ignoredPropNames is specified in config or if JAXB unmarshalling fails
-     * @throws UncheckedIOException if the JAXB/SAX reader cannot read XML from {@code source} and reports an I/O cause
+     * @throws IllegalArgumentException if {@code source} is null, or {@code targetClass} is null
+     * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
-    <T> T read(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass) throws ParsingException, UncheckedIOException {
+    <T> T read(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, ParsingException, RuntimeException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
         checkDeserializationConfig(config);
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         final Unmarshaller unmarshaller = XmlUtil.createUnmarshaller(targetClass);
 

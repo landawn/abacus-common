@@ -9,8 +9,10 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class TypeAttrClassTokenTest {
+public class TypeAttrClassTokenTest extends TestBase {
     @TempDir
     Path directory;
 

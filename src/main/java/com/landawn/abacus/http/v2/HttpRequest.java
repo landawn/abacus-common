@@ -31,6 +31,7 @@ import java.net.http.HttpResponse.BodySubscribers;
 import java.net.http.HttpResponse.PushPromiseHandler;
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -63,7 +64,7 @@ import com.landawn.abacus.util.cs;
  * such as headers, query parameters, request bodies, authentication, and timeouts.
  *
  * <p>This implementation uses the modern Java {@link java.net.http.HttpClient} introduced in Java 11,
- * providing better performance and support for HTTP/2 compared to older HTTP clients.</p>
+ * providing support for HTTP/2.</p>
  *
  * <p><b>Thread-safety:</b> Instances of this class are mutable builders and are not thread-safe.
  * Each request should be configured and executed from a single thread; the underlying
@@ -75,7 +76,9 @@ import com.landawn.abacus.util.cs;
  * {@link HttpUtil#MAX_ERROR_BODY_SIZE} decoded body bytes. The reason phrase is {@code null},
  * because the JDK response API does not expose one. Missing or unreadable error bodies produce
  * an empty captured body; a multibyte character split at the byte limit is replaced when decoded.
- * Overloads returning an HTTP response through a body handler retain that handler's behavior.</p>
+ * The built-in String response overloads throw HttpResponseException if an error body cannot be decoded,
+ * retaining its raw byte prefix and decoding failure through {@link HttpResponseException#rawResponseBody()}
+ * and {@link HttpResponseException#responseBodyDecodingFailure()}. Custom body handlers retain their own behavior.</p>
  *
  * <p><b>Streaming responses:</b> close returned InputStream bodies to release their request-owned clients.
  * For Java stream and Flow.Publisher bodies (including {@code BodyHandlers.ofLines()} and
@@ -153,12 +156,13 @@ public final class HttpRequest {
     HttpRequest(final String url, final URI uri, final HttpClient httpClient, final HttpClient.Builder clientBuilder,
             final java.net.http.HttpRequest.Builder requestBuilder) throws IllegalArgumentException {
         N.checkArgument(!(Strings.isEmpty(url) && uri == null), "'uri' or 'url' cannot be null or empty");
+        N.checkArgNotNull(requestBuilder, cs.requestBuilder);
 
         this.url = url;
         this.uri = uri;
         this.httpClient = httpClient;
         this.clientBuilder = clientBuilder;
-        this.requestBuilder = N.checkArgNotNull(requestBuilder);
+        this.requestBuilder = requestBuilder;
     }
 
     /**
@@ -587,7 +591,7 @@ public final class HttpRequest {
     /**
      * Sets the authenticator for this request.
      * The authenticator will be used to provide credentials when the server requests authentication
-     * (e.g., HTTP Basic or Digest authentication). This is useful for scenarios requiring dynamic
+     * (for example, HTTP Basic authentication). This is useful for scenarios requiring dynamic
      * credential retrieval or advanced authentication mechanisms.
      *
      * <p><b>Usage Examples:</b></p>
@@ -1131,6 +1135,9 @@ public final class HttpRequest {
      * HttpResponse<InputStream> response = HttpRequest.url("http://localhost:18080/data")
      *     .jsonBody(requestData)
      *     .post(BodyHandlers.ofInputStream());
+     * try (InputStream body = response.body()) {
+     *     // Consume the response body.
+     * }
      * }</pre>
      *
      * @param <T> the response body type
@@ -1480,6 +1487,7 @@ public final class HttpRequest {
         final T responseBody;
 
         try {
+            checkStringBodyDecoding(response, responseBodyHandler);
             responseBody = response.body();
         } catch (final RuntimeException | Error e) {
             doAfterExecutionPreservingPrimary(httpClientToUse, e);
@@ -2257,7 +2265,10 @@ public final class HttpRequest {
 
         try {
             return observeAsyncExecution(httpClientToUse.sendAsync(requestBuilder.method(httpMethod.name(), checkBodyPublisher()).build(), responseBodyHandler),
-                    response -> prepareResponseForClientCleanup(response, clientCleanup), clientCleanup);
+                    response -> {
+                        checkStringBodyDecoding(response, responseBodyHandler);
+                        return prepareResponseForClientCleanup(response, clientCleanup);
+                    }, clientCleanup);
         } catch (final RuntimeException | Error e) {
             clientCleanup.preservePrimary(e);
             throw e;
@@ -2660,16 +2671,53 @@ public final class HttpRequest {
      *         declared by the response {@code Content-Type}
      */
     private static BodyHandler<String> createStringResponseBodyHandler(final HttpMethod httpMethod) {
-        return responseInfo -> {
-            final String contentType = responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_TYPE).orElse(null);
-            final String contentEncoding = responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_ENCODING).orElse(null);
-            final Charset charset = HttpUtil.getCharset(contentType);
-            final ContentFormat contentFormat = HttpUtil.hasResponseBody(httpMethod == null ? null : httpMethod.name(), responseInfo.statusCode())
-                    ? HttpUtil.getContentFormat(contentType, contentEncoding)
-                    : ContentFormat.NONE;
+        // Decode diagnostics belong to one execution. Never cache this stateful handler across requests.
+        return new StringResponseBodyHandler(httpMethod);
+    }
 
-            return BodySubscribers.mapping(BodySubscribers.ofByteArray(), bytes -> new String(decompress(bytes, contentFormat), charset));
-        };
+    private static final class StringResponseBodyHandler implements BodyHandler<String> {
+        private final HttpMethod method;
+        // Publishing a failure also publishes its raw prefix and charset to synchronous/async response checks.
+        private volatile RuntimeException decodingFailure;
+        private byte[] rawBody;
+        private Charset charset;
+
+        private StringResponseBodyHandler(final HttpMethod method) {
+            this.method = method;
+        }
+
+        @Override
+        public HttpResponse.BodySubscriber<String> apply(final HttpResponse.ResponseInfo responseInfo) {
+            final String contentType = responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_TYPE).orElse(null);
+            final String encoding = responseInfo.headers().firstValue(HttpHeaders.Names.CONTENT_ENCODING).orElse(null);
+            charset = HttpUtil.getCharset(contentType);
+            final ContentFormat format = HttpUtil.hasResponseBody(method == null ? null : method.name(), responseInfo.statusCode())
+                    ? HttpUtil.getContentFormat(contentType, encoding)
+                    : ContentFormat.NONE;
+            final boolean error = !HttpUtil.isSuccessfulResponseCode(responseInfo.statusCode());
+
+            return BodySubscribers.mapping(BodySubscribers.ofByteArray(), bytes -> {
+                try {
+                    return new String(decompress(bytes, format), charset);
+                } catch (final RuntimeException failure) {
+                    if (!error) {
+                        throw failure;
+                    }
+                    rawBody = Arrays.copyOf(bytes, Math.min(bytes.length, HttpUtil.MAX_ERROR_BODY_SIZE));
+                    decodingFailure = failure;
+                    // Complete transport first so the exception can retain the actual response URI and headers.
+                    // This placeholder is never delivered: checkStringBodyDecoding throws before returning a response.
+                    return Strings.EMPTY;
+                }
+            });
+        }
+    }
+
+    private static void checkStringBodyDecoding(final HttpResponse<?> response, final BodyHandler<?> handler) {
+        if (handler instanceof StringResponseBodyHandler stringHandler && stringHandler.decodingFailure != null) {
+            throw new HttpResponseException(response.uri() == null ? null : response.uri().toString(), response.statusCode(), null, response.headers().map(),
+                    new String(stringHandler.rawBody, stringHandler.charset), stringHandler.rawBody, stringHandler.decodingFailure);
+        }
     }
 
     private <T> T getBody(final HttpResponse<?> httpResponse, final Class<T> resultClass) {
@@ -2745,9 +2793,10 @@ public final class HttpRequest {
         }
 
         /**
-         * @throws IOException if the stream was closed before its decoder was initialized
+         * @throws IOException if this stream was closed before its decoder was initialized
+         * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
          */
-        private InputStream decoded() throws IOException {
+        private InputStream decoded() throws IOException, UncheckedIOException {
             if (decoded == null) {
                 if (closed.get()) {
                     throw new IOException("Stream closed");
@@ -2774,23 +2823,39 @@ public final class HttpRequest {
             return decoded;
         }
 
+        /**
+         * @throws IOException if this stream was closed before its decoder was initialized, or if reading decoded response bytes fails
+         * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
+         */
         @Override
-        public int read() throws IOException {
+        public int read() throws IOException, UncheckedIOException {
             return decoded().read();
         }
 
+        /**
+         * @throws IOException if this stream was closed before its decoder was initialized, or if reading decoded response bytes fails
+         * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
+         */
         @Override
-        public int read(final byte[] b, final int off, final int len) throws IOException {
+        public int read(final byte[] b, final int off, final int len) throws IOException, UncheckedIOException {
             return decoded().read(b, off, len);
         }
 
+        /**
+         * @throws IOException if this stream was closed before its decoder was initialized, or if skipping decoded response bytes fails
+         * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
+         */
         @Override
-        public long skip(final long n) throws IOException {
+        public long skip(final long n) throws IOException, UncheckedIOException {
             return decoded().skip(n);
         }
 
+        /**
+         * @throws IOException if this stream was closed before its decoder was initialized, or if querying the decoded response stream fails
+         * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
+         */
         @Override
-        public int available() throws IOException {
+        public int available() throws IOException, UncheckedIOException {
             return decoded().available();
         }
 

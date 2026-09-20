@@ -89,7 +89,7 @@ import com.landawn.abacus.util.stream.LongStream;
  * // Basic operations
  * timestamps.add(System.currentTimeMillis());   // Add current timestamp
  * long firstTime = timestamps.get(0);           // Access by index
- * timestamps.set(1, System.nanoTime());         // Modify with nanosecond precision
+ * timestamps.set(1, System.currentTimeMillis()); // Keep timestamps in epoch milliseconds
  *
  * // Mathematical operations for large numbers
  * OptionalLong min = timestamps.min();         // Find earliest timestamp
@@ -371,7 +371,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * The list will use the provided array as its internal storage, making this constructor O(1).
      *
      * <p>Changes to the provided array after construction will be reflected in this list
-     * and vice versa, as they share the same underlying array.
+     * and vice versa while they share the same underlying array. Growing or trimming this list
+     * may replace that array, ending the sharing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -399,7 +400,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * The size parameter must not exceed the array length.
      *
      * <p>Changes to the provided array after construction will be reflected in this list
-     * and vice versa, as they share the same underlying array.
+     * and vice versa while they share the same underlying array. Growing or trimming this list
+     * may replace that array, ending the sharing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -426,7 +428,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Creates a new LongList containing the specified elements. The specified array is used directly
-     * as the backing array without copying, so subsequent modifications to the array will affect the list.
+     * as the backing array without copying. Changes are shared until growth or trimming replaces the backing array.
      * If the input array is {@code null}, an empty list is returned.
      *
      * <p><b>Usage Examples:</b></p>
@@ -448,7 +450,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
 
     /**
      * Creates a new LongList containing the first {@code size} elements of the specified array.
-     * The array is used directly as the backing array without copying for efficiency.
+     * The array is used directly as the backing array without copying. Changes are shared until growth or trimming replaces it.
      * If the input array is {@code null}, it is treated as an empty array.
      *
      * <p><b>Usage Examples:</b></p>
@@ -552,7 +554,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * Creates a LongList containing a sequence of long values in the specified range with the given step.
      *
      * <p>The sequence starts at startInclusive and increments by the step value until the value
-     * would exceed endExclusive (or fall below it if step is negative).
+     * would reach or exceed endExclusive (or reach or fall below it if the step is negative).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -656,9 +658,9 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param len the number of random elements to generate. Must be non-negative.
      * @return a new LongList containing random long values
@@ -679,7 +681,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * This method provides direct access to the internal array for performance-critical operations.
      *
      * <p><b>Warning:</b> The returned array is the actual internal storage of this list.
-     * Modifications to the returned array will directly affect this list's contents.
+     * Modifications to the returned array affect this list while it still uses that array.
+     * Growth or trimming may replace the backing array, after which this array is detached.
      * The array may be larger than the list size; only indices from 0 to size()-1 contain valid elements.</p>
      *
      * <p>This method is marked as {@code @Beta} and should be used with caution.</p>
@@ -1130,7 +1133,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>This method preserves the order of elements. If the list is already sorted,
      * the operation is optimized to run in O(n) time. Otherwise, it uses a LinkedHashSet
-     * internally to track seen elements, resulting in O(n) time complexity with O(n) space.
+     * internally to track seen elements, resulting in expected O(n) time complexity with O(n) space.
      *
      * @return {@code true} if any duplicates were removed from this list
      */
@@ -1943,8 +1946,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * Returns a new LongList containing elements that are present in either this list or the specified list,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * Returns a new LongList containing the multiset symmetric difference of this list and the specified list.
+     * Each value appears as many times as the absolute difference between its two occurrence counts.
      * For elements that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both lists.
      *
@@ -1975,8 +1978,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * both contain the same elements.</p>
      *
      * @param b the list to compare with this list for symmetric difference
-     * @return a new LongList containing elements that are present in either this list or the specified list,
-     *         but not in both, considering the number of occurrences.
+     * @return a new LongList containing the unmatched occurrences from this list and the specified list.
      *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty.
      * @see #symmetricDifference(long[])
      * @see #difference(LongList)
@@ -2015,8 +2017,8 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
     }
 
     /**
-     * Returns a new LongList containing elements that are present in either this list or the specified array,
-     * but not in both. This is the set-theoretic symmetric difference operation.
+     * Returns a new LongList containing the multiset symmetric difference of this list and the specified array.
+     * Each value appears as many times as the absolute difference between its two occurrence counts.
      * For elements that appear multiple times, the symmetric difference contains occurrences that remain
      * after removing the minimum number of shared occurrences from both sources.
      *
@@ -2047,8 +2049,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      * both contain the same elements.</p>
      *
      * @param b the array to compare with this list for symmetric difference
-     * @return a new LongList containing elements that are present in either this list or the specified array,
-     *         but not in both, considering the number of occurrences.
+     * @return a new LongList containing the unmatched occurrences from this list and the specified array.
      *         Returns a copy of this list if {@code b} is {@code null} or empty, or a copy of {@code b} if this list is empty.
      * @see #symmetricDifference(LongList)
      * @see #difference(long[])
@@ -3106,7 +3107,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>{@link LongStream#sum()} accumulates in a {@code long} and wraps silently on overflow, unlike
      * {@link com.landawn.abacus.util.stream.IntStream#sum()}, which throws. Use
-     * {@link N#sumToBigInteger(long...)} when the total may exceed {@link Long#MAX_VALUE}.</p>
+     * {@link N#sumToBigInteger(long...)} when the total may fall outside the {@code long} range.</p>
      *
      * <p>The stream captures the backing array reference and the range endpoints when it is created,
      * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured
@@ -3139,7 +3140,7 @@ public final class LongList extends PrimitiveList<Long, long[], LongList> {
      *
      * <p>{@link LongStream#sum()} accumulates in a {@code long} and wraps silently on overflow, unlike
      * {@link com.landawn.abacus.util.stream.IntStream#sum()}, which throws. Use
-     * {@link N#sumToBigInteger(long[], int, int)} when the total may exceed {@link Long#MAX_VALUE}.</p>
+     * {@link N#sumToBigInteger(long[], int, int)} when the total may fall outside the {@code long} range.</p>
      *
      * <p>The stream captures the backing array reference and the range endpoints when it is created,
      * but the array contents stay live: a {@code set}, {@code sort} or element shift inside the captured

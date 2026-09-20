@@ -226,4 +226,35 @@ public class BeansMapTest extends BeansTestSupport {
         assertEquals(42, beans.get(0).getAge());
         assertNull(beans.get(0).getActive());
     }
+
+    /**
+     * {@code mapToBean(Map, Collection, Class)} validates every selected name whether or not the map carries
+     * it, so a name the target bean has no setter for is rejected with {@code IllegalArgumentException}. The
+     * bulk {@code mapsToBeans} form returned early on empty input before reaching that check, so the same bad
+     * selection was accepted or rejected depending only on how many maps were supplied - while both overloads
+     * document the identical {@code @throws}.
+     */
+    @Test
+    public void test_mapsToBeans_validatesSelectionOnEmptyInput_regression_20260918() {
+        final List<String> bogus = Arrays.asList("noSuchPropertyOnSimpleBean");
+
+        // Reference behaviour: with one map the bad selection is rejected.
+        final List<Map<String, Object>> oneMap = new ArrayList<>();
+        oneMap.add(new HashMap<>(Collections.singletonMap("name", "x")));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapsToBeans(oneMap, bogus, SimpleBean.class));
+
+        // Before the fix these returned an empty list instead of throwing.
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapsToBeans(Collections.emptyList(), bogus, SimpleBean.class));
+        assertThrows(IllegalArgumentException.class, () -> Beans.mapsToBeans(null, bogus, SimpleBean.class));
+
+        // A valid selection is still accepted on empty input, and still yields an empty list.
+        assertTrue(Beans.mapsToBeans(Collections.emptyList(), Arrays.asList("name"), SimpleBean.class).isEmpty());
+        assertTrue(Beans.mapsToBeans(null, Arrays.asList("name"), SimpleBean.class).isEmpty());
+
+        // A null selection means "all properties" and has nothing to validate.
+        assertTrue(Beans.mapsToBeans(Collections.emptyList(), null, SimpleBean.class).isEmpty());
+
+        // An empty selection has nothing to validate either.
+        assertTrue(Beans.mapsToBeans(Collections.emptyList(), Collections.emptyList(), SimpleBean.class).isEmpty());
+    }
 }

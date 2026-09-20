@@ -342,4 +342,33 @@ public class ByteArrayOutputStreamTest extends TestBase {
         baos.write(" World".getBytes());
         assertEquals("Hello World", baos.toString());
     }
+
+    /**
+     * A null buffer must be rejected before the range check, and reported as
+     * {@code IllegalArgumentException} - this library reports argument validation that way
+     * ({@code N.checkArgNotNull}) even though {@code java.io.OutputStream.write(byte[], int, int)}
+     * specifies {@code NullPointerException}. The range check short-circuits on {@code (off < 0)} before it
+     * ever dereferences {@code b.length}, so without an explicit null check the exception type depended on
+     * the offset: {@code IndexOutOfBoundsException} for a negative offset, {@code NullPointerException}
+     * otherwise.
+     */
+    @Test
+    public void test_write_nullBufferThrowsIllegalArgumentException_regression_20260918() {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        // The offset must not change the outcome: all three report the null argument.
+        assertThrows(IllegalArgumentException.class, () -> baos.write(null, -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> baos.write(null, 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> baos.write(null, 1, 2));
+
+        // A non-null buffer with a bad range must still be IndexOutOfBoundsException.
+        final byte[] buf = new byte[4];
+        assertThrows(IndexOutOfBoundsException.class, () -> baos.write(buf, -1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> baos.write(buf, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> baos.write(buf, 3, 2));
+
+        // A valid write is unaffected.
+        baos.write(buf, 1, 2);
+        assertEquals(2, baos.size());
+    }
 }

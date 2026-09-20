@@ -54,7 +54,7 @@ public class DatasetSheetRegressionBTest extends TestBase {
     }
 
     @Nested
-    public class C035_DivideColumnCollectionOverloadsRejectNullOrEmptyNames {
+    public class C035_DivideColumnCollectionOverloadsRejectNullOrEmptyNames extends TestBase {
 
         private Dataset single() {
             return Dataset.rows(Arrays.asList("v"), new Object[][] { { "a-b" }, { "c-d" } });
@@ -114,7 +114,7 @@ public class DatasetSheetRegressionBTest extends TestBase {
     }
 
     @Nested
-    public class C036_FilterToListRejectsAFilterThatMatchesNothing {
+    public class C036_FilterToListRejectsAFilterThatMatchesNothing extends TestBase {
 
         @Test
         public void allFourOverloadsThrowIllegalArgumentNamingTheFilter() {
@@ -162,7 +162,7 @@ public class DatasetSheetRegressionBTest extends TestBase {
     }
 
     @Nested
-    public class C037_ZeroColumnDatasetConvertsToAnEmptyBeanList {
+    public class C037_ZeroColumnDatasetConvertsToAnEmptyBeanList extends TestBase {
 
         @Test
         public void toListAndToEntitiesReturnEmptyLikeTheOtherRowTypes() {
@@ -192,7 +192,7 @@ public class DatasetSheetRegressionBTest extends TestBase {
     }
 
     @Nested
-    public class C038_GroupByValidatesTheResultColumnNameEagerly {
+    public class C038_GroupByValidatesTheResultColumnNameEagerly extends TestBase {
 
         private final Dataset ds = Dataset.rows(Arrays.asList("k", "k2", "v"), new Object[][] { { "a", 1, 10 }, { "a", 1, 20 }, { "b", 2, 30 } });
 
@@ -243,7 +243,7 @@ public class DatasetSheetRegressionBTest extends TestBase {
 
     /** Pins that the Sheet constructors and factories still deliver working key maps after the redundant rebuilds were removed. */
     @Nested
-    public class C040_SheetFactoriesAndCopiesKeepWorkingKeyMaps {
+    public class C040_SheetFactoriesAndCopiesKeepWorkingKeyMaps extends TestBase {
 
         @Test
         public void everyConstructionPathResolvesKeys() {
@@ -278,7 +278,7 @@ public class DatasetSheetRegressionBTest extends TestBase {
 
     /** Documentation claims added this cycle, executed. All pass on the pre-fix classes too. */
     @Nested
-    public class DocClaims {
+    public class DocClaims extends TestBase {
 
         /** C-039: keys compare with Objects.equals semantics, so null matches null (unlike SQL). */
         @Test

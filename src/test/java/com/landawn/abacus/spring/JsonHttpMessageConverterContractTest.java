@@ -144,10 +144,8 @@ public class JsonHttpMessageConverterContractTest extends TestBase {
     public void serConfigThatCannotProduceJsonIsRejectedByEveryConstructor() {
         for (final JsonSerConfig bad : jsonIncapableSerConfigs()) {
             assertThrows(IllegalArgumentException.class, () -> new JsonHttpMessageConverter(bad, new JsonDeserConfig()));
-            assertThrows(IllegalArgumentException.class,
-                    () -> new JsonHttpMessageConverter(bad, new JsonDeserConfig(), MediaType.APPLICATION_JSON));
-            assertThrows(IllegalArgumentException.class,
-                    () -> new JsonHttpMessageConverter(bad, new JsonDeserConfig(), List.of(MediaType.APPLICATION_JSON)));
+            assertThrows(IllegalArgumentException.class, () -> new JsonHttpMessageConverter(bad, new JsonDeserConfig(), MediaType.APPLICATION_JSON));
+            assertThrows(IllegalArgumentException.class, () -> new JsonHttpMessageConverter(bad, new JsonDeserConfig(), List.of(MediaType.APPLICATION_JSON)));
         }
 
         // the defaults, and settings that do not affect JSON validity, are still accepted
@@ -187,8 +185,7 @@ public class JsonHttpMessageConverterContractTest extends TestBase {
     @SuppressWarnings("deprecation")
     @Test
     public void reviewFixes20260908_bracketRootValueFalseIsRejectedLikeTheQuotationSwitches() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new JsonHttpMessageConverter(new JsonSerConfig().setBracketRootValue(false), new JsonDeserConfig()));
+        assertThrows(IllegalArgumentException.class, () -> new JsonHttpMessageConverter(new JsonSerConfig().setBracketRootValue(false), new JsonDeserConfig()));
 
         final JsonSerConfig good = new JsonSerConfig();
         final JsonHttpMessageConverter converter = new JsonHttpMessageConverter(good, new JsonDeserConfig());

@@ -114,7 +114,7 @@ public class JdkDurationType extends AbstractType<Duration> {
      * @return the parsed Duration instance, or {@code null} if the input is {@code null} or empty
      * @throws NumberFormatException if legacy millisecond text is not a parsable {@code long}
      * @throws ArithmeticException if legacy millisecond text is an integer outside the {@code long} range
-     *@throws DateTimeParseException if ISO-8601 duration text is invalid
+     * @throws DateTimeParseException if ISO-8601 duration text is invalid
      * @see #valueOf(Object)
      * @see #stringOf(Duration)
      */
@@ -227,6 +227,7 @@ public class JdkDurationType extends AbstractType<Duration> {
      *
      * @param appendable the Appendable to write to
      * @param x the Duration to append
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the ISO-8601 duration text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -239,7 +240,7 @@ public class JdkDurationType extends AbstractType<Duration> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Duration x) throws IOException {
+    public void appendTo(final Appendable appendable, final Duration x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {

@@ -1024,20 +1024,21 @@ public class NStringTest extends AbstractParserTest {
     public void test_is() {
         {
             assertFalse(Strings.isAllLowerCase(null));
-            assertFalse(Strings.isAllLowerCase(""));
+            assertTrue(Strings.isAllLowerCase(""));
             assertTrue(Strings.isAllLowerCase("abc"));
             assertFalse(Strings.isAllLowerCase("abc黎"));
             assertFalse(Strings.isAllLowerCase("ABC"));
             assertFalse(Strings.isAllLowerCase("ABC黎"));
 
-            assertFalse(Strings.isAllLowerCase(new StringBuilder("")));
+            assertTrue(Strings.isAllLowerCase(new StringBuilder("")));
             assertTrue(Strings.isAllLowerCase(new StringBuilder("abc")));
             assertFalse(Strings.isAllLowerCase(new StringBuilder("abc黎")));
             assertFalse(Strings.isAllLowerCase(new StringBuilder("ABC")));
             assertFalse(Strings.isAllLowerCase(new StringBuilder("ABC黎")));
 
             assertFalse(Strings.isAllUpperCase(null));
-            assertFalse(Strings.isAllUpperCase(""));
+            assertTrue(Strings.isAllUpperCase(""));
+            assertTrue(Strings.isAllUpperCase(new StringBuilder("")));
             assertFalse(Strings.isAllUpperCase(new StringBuilder("abc")));
             assertFalse(Strings.isAllUpperCase(new StringBuilder("abc黎")));
             assertTrue(Strings.isAllUpperCase(new StringBuilder("ABC")));

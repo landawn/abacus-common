@@ -2,6 +2,7 @@ package com.landawn.abacus.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -22,6 +23,11 @@ import okhttp3.mockwebserver.MockWebServer;
 import okio.BufferedSink;
 
 public class CurlInterceptorTest extends TestBase {
+
+    @Test
+    public void validatesQuoteCharacterBeforeLogHandler() {
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> new CurlInterceptor('x', null)).getMessage().contains("quoteChar"));
+    }
 
     private final Consumer<String> logHandler = s -> {
     };

@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class SeidRenderingTest {
+public class SeidRenderingTest extends TestBase {
     @Test
     void renderingAndCopiesReflectMutableValuesAtEveryMapSize() {
         for (int size = 1; size <= 4; size++) {

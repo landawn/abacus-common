@@ -297,8 +297,7 @@ public class FnnTest extends TestBase {
     // invert() hands back the same ImmutableEntry type entry() does, so setValue is unsupported here too.
     @Test
     public void testInvert_returnsAnImmutableEntry() throws Exception {
-        final Map.Entry<Integer, String> inverted = Fnn.<String, Integer, Exception> invert()
-                .apply(new AbstractMap.SimpleEntry<>("key", 42));
+        final Map.Entry<Integer, String> inverted = Fnn.<String, Integer, Exception> invert().apply(new AbstractMap.SimpleEntry<>("key", 42));
         assertEquals(ImmutableEntry.class, inverted.getClass());
         assertThrows(UnsupportedOperationException.class, () -> inverted.setValue("other"));
         assertEquals("key", inverted.getValue());

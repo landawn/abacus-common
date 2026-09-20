@@ -369,9 +369,11 @@ public final class DataSourceUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Statement stmt = conn.createStatement();
-     * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+     * Statement stmt = null;
+     * ResultSet rs = null;
      * try {
+     *     stmt = conn.createStatement();
+     *     rs = stmt.executeQuery("SELECT * FROM users");
      *     // Process results
      * } finally {
      *     DataSourceUtil.close(rs, stmt);
@@ -418,9 +420,11 @@ public final class DataSourceUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Connection conn = dataSource.getConnection();
-     * Statement stmt = conn.createStatement();
+     * Connection conn = null;
+     * Statement stmt = null;
      * try {
+     *     conn = dataSource.getConnection();
+     *     stmt = conn.createStatement();
      *     stmt.executeUpdate("UPDATE users SET active = true");
      * } finally {
      *     DataSourceUtil.close(stmt, conn);
@@ -468,10 +472,13 @@ public final class DataSourceUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Connection conn = dataSource.getConnection();
-     * Statement stmt = conn.createStatement();
-     * ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+     * Connection conn = null;
+     * Statement stmt = null;
+     * ResultSet rs = null;
      * try {
+     *     conn = dataSource.getConnection();
+     *     stmt = conn.createStatement();
+     *     rs = stmt.executeQuery("SELECT * FROM users");
      *     // Process results
      * } finally {
      *     DataSourceUtil.close(rs, stmt, conn);
@@ -761,9 +768,9 @@ public final class DataSourceUtil {
     }
 
     /**
-     * Executes a batch of commands on a Statement and clears the batch.
-     * This method ensures that the batch is cleared even if the execution fails,
-     * preventing memory leaks from accumulated batch commands.
+     * Executes a batch of commands on a Statement and attempts to clear the batch.
+     * The cleanup is attempted even if execution fails. A {@link SQLException} from
+     * {@link Statement#clearBatch()} is logged and swallowed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

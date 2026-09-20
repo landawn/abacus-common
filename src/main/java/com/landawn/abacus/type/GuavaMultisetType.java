@@ -67,9 +67,10 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      *
      * @param typeClass the concrete or abstract Multiset class to handle
      * @param parameterTypeName the name of the element type parameter
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("unchecked")
-    GuavaMultisetType(final Class<T> typeClass, final String parameterTypeName) {
+    GuavaMultisetType(final Class<T> typeClass, final String parameterTypeName) throws IllegalArgumentException {
         super(getTypeName(typeClass, parameterTypeName, false));
 
         this.typeClass = typeClass;
@@ -214,7 +215,8 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @return the deserialized multiset, or {@code null} if {@code str} is {@code null} or blank
      * @throws ParsingException if {@code str} is not a well-formed JSON object text
      * @throws IllegalArgumentException if a count is negative
-     * @throws NumberFormatException if a count is not an integer literal
+     * @throws NumberFormatException if a count cannot be converted to an integer; unquoted fractional numbers
+     *         follow the JSON parser's truncation rules, while quoted fractions are rejected
      * @throws ArithmeticException if a count does not fit in an {@code int}
      * @see #valueOf(Object)
      * @see #stringOf(Multiset)
@@ -288,8 +290,10 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      *        full name. In both cases the multiset class itself is rendered with its canonical class name.
      * @return the formatted type name
      *         (e.g., {@code "com.google.common.collect.HashMultiset<java.lang.String>"})
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final Class<?> typeClass, final String parameterTypeName, final boolean isDeclaringName)
+            throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getCanonicalClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
         } else {

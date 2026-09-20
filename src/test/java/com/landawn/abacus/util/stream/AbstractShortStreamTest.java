@@ -56,8 +56,7 @@ public class AbstractShortStreamTest extends TestBase {
             return (short) (left + right);
         })) {
             final com.landawn.abacus.util.ShortIterator iter = stream.iterator();
-            org.junit.jupiter.api.Assertions.assertSame(failure,
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextShort));
+            org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextShort));
             org.junit.jupiter.api.Assertions.assertEquals((short) 2, iter.nextShort());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertEquals((short) 5, iter.nextShort());

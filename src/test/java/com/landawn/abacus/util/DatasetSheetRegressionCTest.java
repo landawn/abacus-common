@@ -115,7 +115,7 @@ public class DatasetSheetRegressionCTest extends TestBase {
     }
 
     @Nested
-    public class C043_AllNullNestedRowsNeverBecomePhantomChildren {
+    public class C043_AllNullNestedRowsNeverBecomePhantomChildren extends TestBase {
 
         /** The differential-probe input: three parents without children do not affect nested merging. */
         @Test

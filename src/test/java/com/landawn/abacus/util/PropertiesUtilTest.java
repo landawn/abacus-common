@@ -2386,7 +2386,6 @@ public class PropertiesUtilTest extends TestBase {
         assertEquals("a  b", PropertiesUtil.loadFromXml(new StringReader(inner.toString())).get("k"));
     }
 
-
     /**
      * A generated class name must be a JLS {@code TypeIdentifier}, so the five restricted identifiers
      * ({@code permits}, {@code record}, {@code sealed}, {@code var}, {@code yield}) cannot name it - while a

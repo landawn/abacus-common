@@ -197,9 +197,7 @@ public class StreamSeqFnReviewFixes20260902Test extends TestBase {
         final List<Ev> evs = historicalEvents(10, 1_000);
         final WindowHandler<Ev, List<Integer>> handler = WindowHandler.<Ev, List<Integer>> builder().timeExtractor(Ev::ts).build();
 
-        final List<List<Integer>> windows = Stream.of(evs.iterator())
-                .window(Duration.ofMillis(3_000), 100, () -> evs.get(0).ts(), handler, ids())
-                .toList();
+        final List<List<Integer>> windows = Stream.of(evs.iterator()).window(Duration.ofMillis(3_000), 100, () -> evs.get(0).ts(), handler, ids()).toList();
 
         assertEquals(List.of(List.of(0, 1, 2), List.of(3, 4, 5), List.of(6, 7, 8), List.of(9)), windows);
     }
@@ -223,9 +221,7 @@ public class StreamSeqFnReviewFixes20260902Test extends TestBase {
     @Test
     public void testB1_processingTimeWindow_stillWorks() {
         // No time extractor: elements are stamped as they are pulled, all land in the first (long) window.
-        final List<List<Integer>> windows = Stream.of(1, 2, 3, 4, 5)
-                .window(Duration.ofMillis(60_000), Duration.ofMillis(60_000), Collectors.toList())
-                .toList();
+        final List<List<Integer>> windows = Stream.of(1, 2, 3, 4, 5).window(Duration.ofMillis(60_000), Duration.ofMillis(60_000), Collectors.toList()).toList();
 
         assertEquals(List.of(List.of(1, 2, 3, 4, 5)), windows);
     }
@@ -406,8 +402,8 @@ public class StreamSeqFnReviewFixes20260902Test extends TestBase {
     @Test
     public void testB11_toBiMap_mergedValueBoundToAnotherKey_throws() {
         // "a" merges to "2", but "2" is already the value of "b".
-        assertThrows(IllegalArgumentException.class, () -> Stream.of("a:1", "b:2", "a:2")
-                .collect(Collectors.toBiMap(s -> s.split(":")[0], s -> s.split(":")[1], (v1, v2) -> v2)));
+        assertThrows(IllegalArgumentException.class,
+                () -> Stream.of("a:1", "b:2", "a:2").collect(Collectors.toBiMap(s -> s.split(":")[0], s -> s.split(":")[1], (v1, v2) -> v2)));
 
         // Same key, same value: a no-op.
         final BiMap<String, String> same = Stream.of("a:1", "b:2", "a:1")

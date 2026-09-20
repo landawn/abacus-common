@@ -253,7 +253,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      *
      * @param x the collection to serialize; may be {@code null}
      * @return the JSON array string, or {@code null} if {@code x} is {@code null}
-     * @throws ClassCastException if an element is not compatible with the declared element type (each element is         written by the declared element type's writer, e.g. a {@code String} or a {@code Map} element inside a         {@code List<Integer>}; a {@code Long} or {@code Double} inside a {@code List<Integer>} is narrowed instead)
+     * @throws ClassCastException if an element is not compatible with the declared element type (each element is written by the
+     *         declared element type's writer, e.g. a {@code String} or a {@code Map} element inside a {@code List<Integer>};
+     *         a {@code Long} or {@code Double} inside a {@code List<Integer>} is narrowed instead)
      * @throws UncheckedIOException if the declared element serializer throws an I/O exception while producing the string.
      * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
@@ -361,7 +363,9 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @param x          the collection to append; may be {@code null}
      * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
-     * @throws ClassCastException if an element is not compatible with the declared element type (each element is         written by the declared element type's writer; a declared {@code Object} element type dispatches on the         element's runtime class instead, which by construction matches)
+     * @throws ClassCastException if an element is not compatible with the declared element type (each element is written by the
+     *         declared element type's writer; a declared {@code Object} element type dispatches on the element's runtime class
+     *         instead, which by construction matches)
      * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -466,7 +470,8 @@ public class CollectionType<E, T extends Collection<E>> extends AbstractType<T> 
      * @param config serialization configuration forwarded to each element's writer; may be {@code null}
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
-     * @throws ClassCastException if an element is not compatible with the declared element type (each element is         written by the declared element type's writer)
+     * @throws ClassCastException if an element is not compatible with the declared element type (each element is written by the
+     *         declared element type's writer)
      * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override

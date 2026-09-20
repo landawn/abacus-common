@@ -54,7 +54,7 @@ final class GuavaHashFunction implements HashFunction {
      * @throws NullPointerException if {@code gHashFunction} is {@code null}
      */
     GuavaHashFunction(final com.google.common.hash.HashFunction gHashFunction) throws NullPointerException {
-        N.requireNonNull(gHashFunction, "gHashFunction");
+        N.requireNonNull(gHashFunction, cs.gHashFunction);
         this.gHashFunction = gHashFunction;
     }
 

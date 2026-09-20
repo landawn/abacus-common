@@ -81,8 +81,9 @@ public class ZipWithNullArgumentsTest extends TestBase {
                 }
 
                 final java.util.concurrent.atomic.AtomicInteger closes = new java.util.concurrent.atomic.AtomicInteger();
-                try (var receiver = family.create(iteratorSource, workers, size).onClose(closes::incrementAndGet); var b = family.create(false, 0, 3);
-                        var c = family.create(false, 0, 3)) {
+                try (var receiver = family.create(iteratorSource, workers, size).onClose(closes::incrementAndGet);
+                     var b = family.create(false, 0, 3);
+                     var c = family.create(false, 0, 3)) {
                     final Object[] args = arguments(method, family, b, c);
                     args[nullIndex] = null;
                     assertThrows(IllegalArgumentException.class, () -> {
@@ -127,24 +128,30 @@ public class ZipWithNullArgumentsTest extends TestBase {
     }
 
     static java.util.stream.Stream<Arguments> executionModes() {
-        return java.util.stream.Stream.of(Arguments.of(false, 0), Arguments.of(true, 0), Arguments.of(false, 1), Arguments.of(true, 1),
-                Arguments.of(false, 2), Arguments.of(true, 2));
+        return java.util.stream.Stream.of(Arguments.of(false, 0), Arguments.of(true, 0), Arguments.of(false, 1), Arguments.of(true, 1), Arguments.of(false, 2),
+                Arguments.of(true, 2));
     }
 
     @ParameterizedTest
     @MethodSource("executionModes")
     public void preservesValidZipResults(final boolean iteratorSource, final int workers) {
         // Parallel iterator streams may emit results out of encounter order.
-        try (DoubleStream a = doubles(iteratorSource, workers); DoubleStream b = DoubleStream.of(10, 20)) {
+        try (DoubleStream a = doubles(iteratorSource, workers);
+             DoubleStream b = DoubleStream.of(10, 20)) {
             assertArrayEquals(new double[] { 11, 22 }, a.zipWith(b, (x, y) -> x + y).sorted().toArray());
         }
-        try (DoubleStream a = doubles(iteratorSource, workers); DoubleStream b = DoubleStream.of(10, 20); DoubleStream c = DoubleStream.of(100)) {
+        try (DoubleStream a = doubles(iteratorSource, workers);
+             DoubleStream b = DoubleStream.of(10, 20);
+             DoubleStream c = DoubleStream.of(100)) {
             assertArrayEquals(new double[] { 111 }, a.zipWith(b, c, (x, y, z) -> x + y + z).sorted().toArray());
         }
-        try (DoubleStream a = doubles(iteratorSource, workers); DoubleStream b = DoubleStream.of(10, 20)) {
+        try (DoubleStream a = doubles(iteratorSource, workers);
+             DoubleStream b = DoubleStream.of(10, 20)) {
             assertArrayEquals(new double[] { 3, 11, 22 }, a.zipWith(b, 0, 0, (x, y) -> x + y).sorted().toArray());
         }
-        try (DoubleStream a = doubles(iteratorSource, workers); DoubleStream b = DoubleStream.of(10, 20); DoubleStream c = DoubleStream.of(100)) {
+        try (DoubleStream a = doubles(iteratorSource, workers);
+             DoubleStream b = DoubleStream.of(10, 20);
+             DoubleStream c = DoubleStream.of(100)) {
             assertArrayEquals(new double[] { 3, 22, 111 }, a.zipWith(b, c, 0, 0, 0, (x, y, z) -> x + y + z).sorted().toArray());
         }
     }
@@ -157,10 +164,13 @@ public class ZipWithNullArgumentsTest extends TestBase {
     @ParameterizedTest
     @MethodSource("executionModes")
     public void preservesNullableObjectPaddingAndCollectionInputs(final boolean iteratorSource, final int workers) {
-        try (Stream<Integer> a = objects(iteratorSource, workers); Stream<Integer> b = Stream.of(10)) {
+        try (Stream<Integer> a = objects(iteratorSource, workers);
+             Stream<Integer> b = Stream.of(10)) {
             assertEquals(Arrays.asList("1:10", "2:null"), a.zipWith(b, null, null, (x, y) -> x + ":" + y).sorted().toList());
         }
-        try (Stream<Integer> a = objects(iteratorSource, workers); Stream<Integer> b = Stream.of(10); Stream<Integer> c = Stream.of(100)) {
+        try (Stream<Integer> a = objects(iteratorSource, workers);
+             Stream<Integer> b = Stream.of(10);
+             Stream<Integer> c = Stream.of(100)) {
             assertEquals(Arrays.asList("1:10:100", "2:null:null"), a.zipWith(b, c, null, null, null, (x, y, z) -> x + ":" + y + ":" + z).sorted().toList());
         }
         try (Stream<Integer> a = objects(iteratorSource, workers)) {

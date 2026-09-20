@@ -20,7 +20,6 @@ package com.landawn.abacus.util;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -59,7 +58,7 @@ import com.landawn.abacus.annotation.MayReturnNull;
  *   <li>An {@code InputStream} argument is read to EOF but is <b>never closed</b>; a {@code File} or
  *       {@code Path} argument is opened and closed by the method</li>
  *   <li>Arguments must not be {@code null} unless a method explicitly documents otherwise;
- *       required {@code null} arguments result in a {@link NullPointerException}</li>
+ *       the exception for a required {@code null} argument is documented by each method</li>
  *   <li>Every algorithm-specific method ({@code md2(..)}, {@code sha3_256(..)}, {@code sha512_256Hex(..)}, ...)
  *       obtains its digest through {@link #getDigest(String)} and therefore throws
  *       {@link IllegalArgumentException} if the underlying JVM does not provide that algorithm. The
@@ -162,8 +161,7 @@ public final class DigestUtil {
      * @param data the File to read and digest (must exist and be readable)
      * @return The computed digest as a byte array; length depends on the algorithm used
      * @throws IllegalArgumentException if {@code messageDigest} or {@code data} is {@code null}
-     * @throws FileNotFoundException if the file does not exist or cannot be opened
-     * @throws IOException if opening, reading, or closing the file {@code data} fails
+     * @throws IOException if the file cannot be opened (including when it does not exist) or an I/O failure occurs while reading or closing it
      */
     public static byte[] digest(final MessageDigest messageDigest, final File data) throws IllegalArgumentException, IOException {
         N.checkArgNotNull(messageDigest, cs.messageDigest);
@@ -216,13 +214,15 @@ public final class DigestUtil {
      * @param options optional open options for the file (e.g., {@code StandardOpenOption.READ});
      *                if not specified, default options are used
      * @return The computed digest as a byte array; length depends on the algorithm used
-     * @throws IllegalArgumentException if {@code messageDigest}, {@code data} or {@code options} is {@code null}
+     * @throws IllegalArgumentException if {@code messageDigest}, {@code data} or {@code options} is {@code null},
+     *         or if {@code options} contains an invalid combination of open options
      * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws UnsupportedOperationException if an open option is not supported for an input stream
      * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
     @SafeVarargs
     public static byte[] digest(final MessageDigest messageDigest, final Path data, final OpenOption... options)
-            throws IllegalArgumentException, NullPointerException, IOException {
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException, IOException {
         N.checkArgNotNull(messageDigest, cs.messageDigest);
         N.checkArgNotNull(data, cs.data);
         N.checkArgNotNull(options, cs.options);
@@ -906,12 +906,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return MD5 digest as a 16-byte array
-     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}, or if {@code options}
+     *         contains an invalid combination of open options
      * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws UnsupportedOperationException if an open option is not supported for an input stream
      * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
     @SafeVarargs
-    public static byte[] md5(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+    public static byte[] md5(final Path data, final OpenOption... options)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException, IOException {
         N.checkArgNotNull(data, cs.data);
         N.checkArgNotNull(options, cs.options);
 
@@ -1018,12 +1021,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return MD5 digest as a 32-character lowercase hexadecimal string
-     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}, or if {@code options}
+     *         contains an invalid combination of open options
      * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws UnsupportedOperationException if an open option is not supported for an input stream
      * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
     @SafeVarargs
-    public static String md5Hex(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+    public static String md5Hex(final Path data, final OpenOption... options)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException, IOException {
         N.checkArgNotNull(data, cs.data);
         N.checkArgNotNull(options, cs.options);
 
@@ -1444,12 +1450,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return SHA-256 digest as a 32-byte array
-     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}, or if {@code options}
+     *         contains an invalid combination of open options
      * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws UnsupportedOperationException if an open option is not supported for an input stream
      * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
     @SafeVarargs
-    public static byte[] sha256(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+    public static byte[] sha256(final Path data, final OpenOption... options)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException, IOException {
         N.checkArgNotNull(data, cs.data);
         N.checkArgNotNull(options, cs.options);
 
@@ -1554,12 +1563,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return SHA-256 digest as a 64-character lowercase hexadecimal string
-     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}, or if {@code options}
+     *         contains an invalid combination of open options
      * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws UnsupportedOperationException if an open option is not supported for an input stream
      * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
     @SafeVarargs
-    public static String sha256Hex(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+    public static String sha256Hex(final Path data, final OpenOption... options)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException, IOException {
         N.checkArgNotNull(data, cs.data);
         N.checkArgNotNull(options, cs.options);
 
@@ -2238,12 +2250,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return SHA-512 digest as a 64-byte array
-     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}, or if {@code options}
+     *         contains an invalid combination of open options
      * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws UnsupportedOperationException if an open option is not supported for an input stream
      * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
     @SafeVarargs
-    public static byte[] sha512(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+    public static byte[] sha512(final Path data, final OpenOption... options)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException, IOException {
         N.checkArgNotNull(data, cs.data);
         N.checkArgNotNull(options, cs.options);
 
@@ -2369,7 +2384,7 @@ public final class DigestUtil {
 
     /**
      * Calculates the SHA-512/256 digest of the input data and returns it as a 32-byte array.
-     * This truncated variant offers better 64-bit performance than SHA-256.
+     * The relative performance of this truncated variant and SHA-256 depends on the digest provider and hardware.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2572,12 +2587,15 @@ public final class DigestUtil {
      * @param data The path to the file to digest (must not be {@code null})
      * @param options optional open options for the file; if not specified, default read options are used
      * @return SHA-512 digest as a 128-character lowercase hexadecimal string
-     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}
+     * @throws IllegalArgumentException if {@code data} or {@code options} is {@code null}, or if {@code options}
+     *         contains an invalid combination of open options
      * @throws NullPointerException if an element of {@code options} is {@code null}
+     * @throws UnsupportedOperationException if an open option is not supported for an input stream
      * @throws IOException if opening, reading, or closing the file {@code data} fails
      */
     @SafeVarargs
-    public static String sha512Hex(final Path data, final OpenOption... options) throws IllegalArgumentException, NullPointerException, IOException {
+    public static String sha512Hex(final Path data, final OpenOption... options)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException, IOException {
         N.checkArgNotNull(data, cs.data);
         N.checkArgNotNull(options, cs.options);
 
@@ -2744,7 +2762,7 @@ public final class DigestUtil {
      * @throws IOException if the file channel is closed or reading from it fails
      */
     private static MessageDigest updateDigest(final MessageDigest digest, final FileChannel data) throws NullPointerException, IOException {
-        N.requireNonNull(digest, "digest");
+        N.requireNonNull(digest, cs.digest);
         final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 
         // -1, 0 and positive counts are handled explicitly. ReadableByteChannel.read is specified to

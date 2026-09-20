@@ -162,7 +162,7 @@ class IteratorFloatStream extends AbstractFloatStream {
                 }
 
                 @Override
-                public float nextFloat() {
+                public float nextFloat() throws NoSuchElementException {
                     return values.nextFloat();
                 }
             };
@@ -198,7 +198,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -237,7 +237,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -284,7 +284,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -310,7 +310,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 return mapper.applyAsFloat(elements.nextFloat());
             }
 
@@ -330,7 +330,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return mapper.applyAsInt(elements.nextFloat());
             }
 
@@ -350,7 +350,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 return mapper.applyAsLong(elements.nextFloat());
             }
 
@@ -370,7 +370,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 return mapper.applyAsDouble(elements.nextFloat());
             }
 
@@ -390,7 +390,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return mapper.apply(elements.nextFloat());
             }
 
@@ -430,7 +430,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -477,7 +477,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -520,7 +520,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -563,7 +563,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -622,7 +622,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -681,7 +681,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -740,7 +740,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -787,7 +787,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -829,7 +829,7 @@ class IteratorFloatStream extends AbstractFloatStream {
                 }
 
                 @Override
-                public float nextFloat() {
+                public float nextFloat() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -862,7 +862,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (cnt >= maxSize) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -933,7 +933,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 skipElements();
 
                 return elements.nextFloat();
@@ -972,7 +972,7 @@ class IteratorFloatStream extends AbstractFloatStream {
     }
 
     @Override
-    public FloatStream top(final int n) throws IllegalStateException {
+    public FloatStream top(final int n) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         return top(n, FLOAT_COMPARATOR);
@@ -1007,7 +1007,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1123,7 +1123,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 final float next = elements.nextFloat();
                 action.accept(next);
                 return next;
@@ -1614,7 +1614,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public double nextDouble() {
+            public double nextDouble() throws NoSuchElementException {
                 return elements.nextFloat();
             }
 
@@ -1666,7 +1666,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }
@@ -1707,13 +1707,7 @@ class IteratorFloatStream extends AbstractFloatStream {
                             iter = s == null ? FloatIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -1741,7 +1735,7 @@ class IteratorFloatStream extends AbstractFloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }

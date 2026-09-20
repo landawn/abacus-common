@@ -349,11 +349,14 @@ public class AvroParserTest extends TestBase {
 
     @Test
     public void testToGenericRecord_CollectionFieldsByPosition() throws Exception {
-        Method method = AvroParser.class.getDeclaredMethod("toGenericRecord", Object.class, Schema.class);
+        Method method = AvroParser.class.getDeclaredMethod("toGenericRecord", Object.class, Schema.class, boolean.class);
         method.setAccessible(true);
-        GenericRecord result = (GenericRecord) method.invoke(parser, Arrays.asList("ListUser", 29), testSchema);
-        assertEquals("ListUser", result.get("name").toString());
-        assertEquals(29, result.get("age"));
+        // Projection changes named-field validation, not positional record conversion.
+        for (boolean ignoreUnknownFields : new boolean[] { false, true }) {
+            GenericRecord result = (GenericRecord) method.invoke(parser, Arrays.asList("ListUser", 29), testSchema, ignoreUnknownFields);
+            assertEquals("ListUser", result.get("name").toString());
+            assertEquals(29, result.get("age"));
+        }
     }
 
     @Test
@@ -557,7 +560,8 @@ public class AvroParserTest extends TestBase {
             .parse("{\"type\":\"record\",\"name\":\"FloatRecord\",\"fields\":[{\"name\":\"ratio\",\"type\":\"float\"}]}");
 
     private static final Schema ENUM_SCHEMA = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"Painted\",\"fields\":["
-            + "{\"name\":\"color\",\"type\":{\"type\":\"enum\",\"name\":\"Color\",\"symbols\":[\"RED\",\"GREEN\"]}}," + "{\"name\":\"name\",\"type\":\"string\"}]}");
+            + "{\"name\":\"color\",\"type\":{\"type\":\"enum\",\"name\":\"Color\",\"symbols\":[\"RED\",\"GREEN\"]}},"
+            + "{\"name\":\"name\",\"type\":\"string\"}]}");
 
     private static final Schema NULLABLE_ENUM_SCHEMA = new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PaintedN\",\"fields\":["
             + "{\"name\":\"color\",\"type\":[\"null\",{\"type\":\"enum\",\"name\":\"ColorN\",\"symbols\":[\"RED\",\"GREEN\"]}],\"default\":null},"
@@ -707,28 +711,22 @@ public class AvroParserTest extends TestBase {
 
         unpainted.setColor(Color.RED);
         assertEquals(Color.RED,
-                parser.deserialize(parser.serialize(unpainted, AvroSerConfig.create().setSchema(NULLABLE_ENUM_SCHEMA)), nullableDeser, Painted.class).getColor());
+                parser.deserialize(parser.serialize(unpainted, AvroSerConfig.create().setSchema(NULLABLE_ENUM_SCHEMA)), nullableDeser, Painted.class)
+                        .getColor());
     }
 
     @Test
-    public void reviewFixes20260906_unknownPropertiesAreSkippedOnWrite() {
+    public void reviewFixes20260906_unknownPropertiesRequireExplicitProjection() {
         final ExtraPropertyBean bean = new ExtraPropertyBean();
         bean.setName("x");
         bean.setAge(9);
-
-        final GenericRecord fromBean = writeAndReadRecord(bean, testSchema);
-        assertEquals("x", fromBean.get("name").toString());
-        assertEquals(9, fromBean.get("age"));
-        assertEquals(2, fromBean.getSchema().getFields().size());
-
         final Map<String, Object> map = nameAge(10);
         map.put("zzz", "ignored");
-        map.put("", "ignored-too");
-        final GenericRecord fromMap = writeAndReadRecord(map, testSchema);
-        assertEquals("a", fromMap.get("name").toString());
-        assertEquals(10, fromMap.get("age"));
-
-        // The record still needs its own fields: a missing non-nullable field is rejected by Avro as before.
+        for (Object source : new Object[] { bean, map }) {
+            assertThrows(IllegalArgumentException.class, () -> parser.serialize(source, AvroSerConfig.create().setSchema(testSchema)));
+            final String projected = parser.serialize(source, AvroSerConfig.create().setSchema(testSchema).setIgnoreUnknownFields(true));
+            assertTrue(!projected.isEmpty());
+        }
         assertThrows(RuntimeException.class, () -> parser.serialize(Map.of("name", "only"), AvroSerConfig.create().setSchema(testSchema)));
     }
 

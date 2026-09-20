@@ -23,7 +23,7 @@ import com.landawn.abacus.util.Strings;
  * instances and their JSON string representation.
  *
  * <p>Serialization uses the configured JSON parser. The serialization type is
- * {@link SerializationType#MAP_ENTITY}, and direct byte-level serialization is not supported
+ * {@link SerializationType#MAP_ENTITY}, and direct scalar serialization is not supported
  * ({@link #isSerializable()} returns {@code false}).
  *
  * @see MapEntity
@@ -68,7 +68,7 @@ public class MapEntityType extends AbstractType<MapEntity> {
     }
 
     /**
-     * Indicates whether instances of this type support direct byte-level serialization.
+     * Indicates whether instances of this type support direct scalar serialization.
      * {@link MapEntity} objects are not directly serializable through this type handler;
      * they are converted to/from JSON string form instead.
      *

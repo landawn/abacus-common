@@ -180,7 +180,8 @@ public class uTest extends uTestSupport {
         assertFalse(presentNull.toOptional().isPresent());
         assertEquals("test", Nullable.from(Optional.of("test")).get());
         assertFalse(Nullable.from(Optional.empty()).isPresent());
-        assertFalse(Nullable.from((java.util.Optional<String>) null).isPresent());
+        assertThrows(IllegalArgumentException.class, () -> Nullable.from((Optional<String>) null));
+        assertThrows(IllegalArgumentException.class, () -> Nullable.from((java.util.Optional<String>) null));
         assertTrue(present.filterIfNotNull(s -> s.length() > 1).isPresent());
         assertFalse(presentNull.filterIfNotNull(s -> true).isPresent());
     }
@@ -201,9 +202,9 @@ public class uTest extends uTestSupport {
         assertFalse(OptionalLong.ofNullable(null).isPresent());
         assertFalse(OptionalDouble.ofNullable(null).isPresent());
         assertTrue(OptionalInt.from(java.util.OptionalInt.of(42)).isPresent());
-        assertTrue(OptionalInt.from(null).isEmpty());
-        assertTrue(OptionalLong.from(null).isEmpty());
-        assertTrue(OptionalDouble.from(null).isEmpty());
+        assertThrows(IllegalArgumentException.class, () -> OptionalInt.from(null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalLong.from(null));
+        assertThrows(IllegalArgumentException.class, () -> OptionalDouble.from(null));
         assertEquals(42, OptionalInt.of(42).getAsInt());
         assertEquals(42L, OptionalLong.of(42L).getAsLong());
         assertEquals(42.5, OptionalDouble.of(42.5).getAsDouble());

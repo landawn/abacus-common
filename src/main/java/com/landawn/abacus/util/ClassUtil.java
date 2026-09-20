@@ -343,7 +343,7 @@ import com.landawn.abacus.util.u.OptionalShort;
  *   <li><b>Annotation-Based Discovery:</b> Find classes with specific annotations</li>
  *   <li><b>Interface Implementation:</b> Discover classes implementing specific interfaces</li>
  *   <li><b>Filter Support:</b> Configurable filters for class discovery operations</li>
- *   <li><b>JAR File Processing:</b> Efficient scanning of JAR files and nested archives</li>
+ *   <li><b>JAR File Processing:</b> Scans class entries in top-level JAR files; nested archives are not traversed</li>
  * </ul>
  *
  * <p><b>Type-Name Formatting:</b>
@@ -1192,7 +1192,7 @@ public final class ClassUtil {
      * and the system class loader.</p>
      *
      * <p><b>⚠️ IMPORTANT - JDK Package Limitation:</b>
-     * This method does not work for JDK core packages (e.g., java.lang, java.util, javax.*) as these
+     * This method does not work for JDK core packages (e.g., java.lang, java.util, javax.swing) as these
      * packages are typically loaded from the bootstrap classpath and may not be accessible through
      * standard resource enumeration mechanisms. Use this method only for application-specific packages
      * and third-party library packages available on the standard classpath.</p>
@@ -1290,10 +1290,10 @@ public final class ClassUtil {
      * );
      * }</pre>
      *
-     * <p><b>Discovered classes are loaded but NOT initialized.</b> Their static initializers do not run as a
-     * result of scanning; initialization happens when the caller first uses the returned {@link Class}. Scanning
-     * a package therefore has no side effects of its own, and a class whose {@code <clinit>} would fail (or block)
-     * in this environment is still discoverable.</p>
+     * <p><b>Discovered classes are loaded without requesting initialization.</b> The scan does not itself
+     * invoke their static initializers, so a class whose {@code <clinit>} would fail or block can still be
+     * discovered. Class-loader code and the supplied predicate may have side effects of their own; a predicate
+     * can also trigger initialization by actively using a class.</p>
      *
      * <p><b>Error Handling Strategies:</b>
      * <ul>
@@ -1321,7 +1321,7 @@ public final class ClassUtil {
      *   <li><b>Classpath Size Impact:</b> Scanning time increases with classpath complexity</li>
      *   <li><b>JAR File Overhead:</b> Additional I/O cost for scanning classes within JAR archives</li>
      *   <li><b>Recursive Scanning Cost:</b> Deep package hierarchies increase scanning time</li>
-     *   <li><b>Class Loading Overhead:</b> Each class loading operation has initialization cost</li>
+     *   <li><b>Class Loading Overhead:</b> Loading and linking classes incurs work even without initialization</li>
      *   <li><b>Memory Usage:</b> Large result sets consume significant memory</li>
      * </ul>
      *
@@ -1342,7 +1342,7 @@ public final class ClassUtil {
      * </ul>
      *
      * @param pkgName the fully qualified name of the package to scan for classes (e.g., "com.example.services").
-     *                Must not be {@code null} or empty. JDK packages (java.*, javax.*) are not supported.
+     *                Must not be {@code null} or empty. Packages in the JDK runtime image are not supported.
      * @param isRecursive if {@code true}, recursively scans sub-packages within the specified package hierarchy.
      *                    If {@code false}, scans only the immediate package without descending into sub-packages.
      * @param skipClassLoadingException if {@code true}, continues scanning when individual classes fail to load,
@@ -2460,10 +2460,17 @@ public final class ClassUtil {
     }
 
     /**
-     * @throws NullPointerException if {@code srcPath} is {@code null}.
+     * Ensures the directory for {@code pkgName} exists under {@code srcPath}.
+     *
+     * @param srcPath the source root; must not be {@code null}.
+     * @param pkgName the Java package name, or {@code null} for the default package.
+     * @return the package directory path, always ending with a file separator.
+     * @throws IllegalArgumentException if {@code srcPath} is {@code null}.
      * @throws IllegalStateException if the package directory does not exist and cannot be created.
      */
-    static String makeFolderForPackage(String srcPath, final String pkgName) throws NullPointerException, IllegalStateException {
+    static String makeFolderForPackage(String srcPath, final String pkgName) throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNull(srcPath, cs.srcPath);
+
         srcPath = (srcPath.endsWith("/") || srcPath.endsWith("\\")) ? srcPath : (srcPath + File.separator);
 
         final String classFilePath = (pkgName == null) ? srcPath : (srcPath + pkgName.replace('.', File.separatorChar) + File.separator);

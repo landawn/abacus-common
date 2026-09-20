@@ -330,6 +330,7 @@ public final class ExcelUtil {
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
      * @return a Dataset containing the sheet data with the first row as column names, or an empty Dataset if the sheet is empty.
      * @throws IllegalArgumentException if {@code excelFile} is {@code null},
+     *         or the workbook has no sheet at index 0,
      *         or the header row contains duplicate non-empty column names (whitespace-only names count as non-empty).
      * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
      *         input stream fails with an {@code IOException}
@@ -637,11 +638,12 @@ public final class ExcelUtil {
      *
      * @param excelFile the Excel file to read, must exist and be a valid Excel file.
      * @return a list of rows, where each row is a list of cell values with preserved types.
+     * @throws IllegalArgumentException if {@code excelFile} is {@code null},
+     *         or the workbook has no sheet at index 0.
      * @throws UncheckedException if opening or reading {@code excelFile}, creating its workbook, or closing the workbook or an owned
      *         input stream fails with an {@code IOException}
-     * @throws IllegalArgumentException if {@code excelFile} is {@code null}.
      */
-    public static List<List<Object>> readRowsFromSheet(final File excelFile) throws UncheckedException, IllegalArgumentException {
+    public static List<List<Object>> readRowsFromSheet(final File excelFile) throws IllegalArgumentException, UncheckedException {
         return readRowsFromSheet(excelFile, 0, false, RowMappers.DEFAULT);
     }
 
@@ -978,8 +980,8 @@ public final class ExcelUtil {
      * multi-sheet workbooks where only certain sheets need to be processed.
      *
      * <p><b>Note:</b> The entire workbook is still loaded into memory via {@code WorkbookFactory.create()}.
-     * The Stream API provides convenient iteration and early termination support, but does not
-     * reduce memory usage compared to {@code readDatasetFromSheet()}.</p>
+     * The Stream API provides convenient iteration and early termination support and avoids building
+     * a separate Dataset, but it still retains the entire POI workbook in memory.</p>
      *
      * <p><strong>Important:</strong> The Stream must be closed after use to release file handles
      * and workbook resources. Always use try-with-resources or explicitly call {@code close()}
@@ -1211,11 +1213,10 @@ public final class ExcelUtil {
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final SheetCreateOptions sheetCreateOptions, final File outputExcelFile) throws IllegalArgumentException, UncheckedException {
+        validateSheetName(sheetName);
         N.checkArgNotNull(headers, cs.headers);
         N.checkArgNotNull(rows, cs.rows);
         N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
-
-        validateSheetName(sheetName);
 
         final int columnCount = headers.size();
 
@@ -1307,11 +1308,11 @@ public final class ExcelUtil {
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final File outputExcelFile) throws IllegalArgumentException, UncheckedException {
+        validateSheetName(sheetName);
         N.checkArgNotNull(headers, cs.headers);
         N.checkArgNotNull(rows, cs.rows);
-        N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
-        validateSheetName(sheetName);
+        N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
 
         try {
             writeToFileAtomically(outputExcelFile, os -> writeRowsToSheet(sheetName, headers, rows, sheetSetter, os, formatOf(outputExcelFile)));
@@ -1378,11 +1379,12 @@ public final class ExcelUtil {
     private static void doWriteRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final OutputStream outputStream, final ExcelFormat format, final String dateFormat,
             final String dateTimeFormat) throws IllegalArgumentException, UncheckedException {
+        validateSheetName(sheetName);
         N.checkArgNotNull(headers, cs.headers);
         N.checkArgNotNull(rows, cs.rows);
-        N.checkArgNotNull(outputStream, cs.outputStream);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
-        validateSheetName(sheetName);
+        N.checkArgNotNull(outputStream, cs.outputStream);
+        N.checkArgNotNull(format, cs.format);
 
         try (Workbook workbook = newWorkbookForOutput(format)) {
             final Sheet sheet = workbook.createSheet(sheetName);
@@ -1436,8 +1438,11 @@ public final class ExcelUtil {
      */
     public static void writeRowsToSheet(final String sheetName, final List<?> headers, final List<? extends Collection<?>> rows,
             final Consumer<? super Sheet> sheetSetter, final Path outputExcelPath) throws IllegalArgumentException, UncheckedException {
-        N.checkArgNotNull(outputExcelPath, cs.outputExcelPath);
+        validateSheetName(sheetName);
+        N.checkArgNotNull(headers, cs.headers);
+        N.checkArgNotNull(rows, cs.rows);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
+        N.checkArgNotNull(outputExcelPath, cs.outputExcelPath);
 
         writeRowsToSheet(sheetName, headers, rows, sheetSetter, outputExcelPath.toFile());
     }
@@ -1509,10 +1514,9 @@ public final class ExcelUtil {
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final SheetCreateOptions sheetCreateOptions,
             final File outputExcelFile) throws IllegalArgumentException, UncheckedException {
+        validateSheetName(sheetName);
         N.checkArgNotNull(dataset, cs.dataset);
         N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
-
-        validateSheetName(sheetName);
 
         final int columnCount = dataset.columnCount();
 
@@ -1563,10 +1567,10 @@ public final class ExcelUtil {
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final File outputExcelFile)
             throws IllegalArgumentException, UncheckedException {
-        N.checkArgNotNull(dataset, cs.dataset);
-        N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
-        N.checkArgNotNull(sheetSetter, cs.sheetSetter);
         validateSheetName(sheetName);
+        N.checkArgNotNull(dataset, cs.dataset);
+        N.checkArgNotNull(sheetSetter, cs.sheetSetter);
+        N.checkArgNotNull(outputExcelFile, cs.outputExcelFile);
 
         try {
             writeToFileAtomically(outputExcelFile, os -> writeDatasetToSheet(sheetName, dataset, sheetSetter, os, formatOf(outputExcelFile)));
@@ -1631,10 +1635,11 @@ public final class ExcelUtil {
     private static void doWriteDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter,
             final OutputStream outputStream, final ExcelFormat format, final String dateFormat, final String dateTimeFormat)
             throws IllegalArgumentException, UncheckedException {
-        N.checkArgNotNull(dataset, cs.dataset);
-        N.checkArgNotNull(outputStream, cs.outputStream);
-        N.checkArgNotNull(sheetSetter, cs.sheetSetter);
         validateSheetName(sheetName);
+        N.checkArgNotNull(dataset, cs.dataset);
+        N.checkArgNotNull(sheetSetter, cs.sheetSetter);
+        N.checkArgNotNull(outputStream, cs.outputStream);
+        N.checkArgNotNull(format, cs.format);
 
         try (Workbook workbook = newWorkbookForOutput(format)) {
             final Sheet sheet = workbook.createSheet(sheetName);
@@ -1686,8 +1691,10 @@ public final class ExcelUtil {
      */
     public static void writeDatasetToSheet(final String sheetName, final Dataset dataset, final Consumer<? super Sheet> sheetSetter, final Path outputExcelPath)
             throws IllegalArgumentException, UncheckedException {
-        N.checkArgNotNull(outputExcelPath, cs.outputExcelPath);
+        validateSheetName(sheetName);
+        N.checkArgNotNull(dataset, cs.dataset);
         N.checkArgNotNull(sheetSetter, cs.sheetSetter);
+        N.checkArgNotNull(outputExcelPath, cs.outputExcelPath);
 
         writeDatasetToSheet(sheetName, dataset, sheetSetter, outputExcelPath.toFile());
     }
@@ -2286,8 +2293,8 @@ public final class ExcelUtil {
          * for boolean cells, etc. This is the recommended mapper for general-purpose data extraction
          * when you need to preserve Excel cell types in your Java objects.
          *
-         * <p>The resulting list contains one element per cell in the row, with each element typed
-         * according to the cell's content. This allows for flexible downstream processing while
+         * <p>The resulting list extends through the row's last defined cell index, with missing cells represented
+         * by {@code null} and defined cells typed according to their content. This allows for flexible downstream processing while
          * maintaining data type integrity from the source Excel file.</p>
          *
          * <p><b>Usage Examples:</b></p>
@@ -2371,7 +2378,8 @@ public final class ExcelUtil {
          *
          * <p>The cellMapper function is applied to each {@code non-null} cell, giving you control over
          * formatting numbers, dates, or applying business logic during the conversion process.
-         * Missing cells are emitted as empty fields without invoking the mapper.</p>
+         * Missing cells are emitted as empty fields without invoking the mapper. Values are joined verbatim,
+         * without escaping separators, quotes or line breaks; use {@code exportSheetToCsv} for CSV output.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

@@ -123,7 +123,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B1CanonicalKeys {
+    public class B1CanonicalKeys extends TestBase {
 
         @Test
         public void beanToMap_aliasSelection_emitsCanonicalKey() {
@@ -213,7 +213,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B1BeanMapBuilder {
+    public class B1BeanMapBuilder extends TestBase {
 
         @Test
         public void select_emitsCanonicalKey() {
@@ -306,7 +306,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B2PutIfAbsentSupplier {
+    public class B2PutIfAbsentSupplier extends TestBase {
 
         @Test
         public void acceptsAnExplicitSupplier() {
@@ -372,7 +372,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B4NullIsStored {
+    public class B4NullIsStored extends TestBase {
 
         @Test
         public void valueOverload_storesNull_likeTheJdk() {
@@ -430,7 +430,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B5IndexGrammar {
+    public class B5IndexGrammar extends TestBase {
 
         private Map<String, Object> pathMap() {
             final Map<String, Object> inner = new HashMap<>();
@@ -510,7 +510,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class ConversionRules {
+    public class ConversionRules extends TestBase {
 
         @Test
         public void emptyTextIsAbsentForNumericAccessorsOnly() {
@@ -577,7 +577,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class DocumentedBehaviour {
+    public class DocumentedBehaviour extends TestBase {
 
         @Test
         public void sizeSensitiveMapClassKeepsTypePreservationAtWorkableSizes() {
@@ -617,7 +617,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class DocumentedSizingAndNullTolerance {
+    public class DocumentedSizingAndNullTolerance extends TestBase {
 
         @Test
         public void capacityHintsAreOverEstimatesWhenInputsCollapseOntoOneKey() {
@@ -672,7 +672,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class B3MergeIntoIf {
+    public class B3MergeIntoIf extends TestBase {
 
         @Test
         public void mergeIntoAcceptsABareBinaryOperatorLambda() {
@@ -753,7 +753,7 @@ public class MapsBeansTest extends TestBase {
     // ------------------------------------------------------------------------------------------------
 
     @Nested
-    public class UnselectedPathsUnchanged {
+    public class UnselectedPathsUnchanged extends TestBase {
 
         @Test
         public void unselectedConversionsAreUntouched() {

@@ -143,14 +143,14 @@ public class XMLType<T> extends AbstractType<T> {
      * @param str the XML string to deserialize; may be {@code null}, empty or blank
      * @return an object of type {@code T} deserialized from the XML string, or {@code null} if the string is
      *         {@code null}, empty or blank
-     * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
      * @throws UnsupportedOperationException if no XML parser is available on the classpath and {@code str} is not
      *         blank
+     * @throws RuntimeException if the XML parsing fails or the XML doesn't match the target type
      * @see #valueOf(Object)
      * @see #stringOf(Object)
      */
     @Override
-    public T valueOf(final String str) throws RuntimeException, UnsupportedOperationException {
+    public T valueOf(final String str) throws UnsupportedOperationException, RuntimeException {
         if (Strings.isBlank(str)) {
             return null;
         }

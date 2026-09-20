@@ -70,8 +70,9 @@ import com.google.common.hash.HashCode;
  * hasher3.put("foo", StandardCharsets.UTF_8).put('\0').put("bar", StandardCharsets.UTF_8).hash();
  * }</pre>
  *
- * <p>The chunked/whole equivalence above holds only for stateless encodings such as UTF-8: with
- * UTF-16 every {@link #put(CharSequence, Charset)} call emits its own byte-order mark, so
+ * <p>The chunked/whole equivalence above requires an encoding without per-call state, such as UTF-8,
+ * and chunk boundaries that do not split a surrogate pair. With UTF-16 every non-empty
+ * {@link #put(CharSequence, Charset)} call emits its own byte-order mark, so
  * {@code put("foo", UTF_16).put("bar", UTF_16)} does <i>not</i> equal {@code put("foobar", UTF_16)}.
  *
  * <p><b>Warning:</b> The result of calling any methods after {@link #hash()} is undefined.
@@ -122,7 +123,9 @@ public interface Hasher {
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);
-     * hasher.put(buffer, 0, bytesRead);
+     * if (bytesRead > 0) {
+     *     hasher.put(buffer, 0, bytesRead);
+     * }
      * }</pre>
      *
      * @param bytes the byte array containing data to add to the hash computation
@@ -130,7 +133,7 @@ public interface Hasher {
      * @param len the number of bytes to process from the array
      * @return this hasher instance for method chaining
      * @throws NullPointerException if {@code bytes} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if         {@code off + len > bytes.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if {@code off + len > bytes.length}
      */
     Hasher put(byte[] bytes, int off, int len) throws NullPointerException, IndexOutOfBoundsException;
 
@@ -260,7 +263,7 @@ public interface Hasher {
     /**
      * Adds all characters from the given array to this hasher's internal state.
      * This is equivalent to {@code put(chars, 0, chars.length)} for {@code non-null} arrays.
-     * A {@code null} array is treated as empty, equivalent to {@code put(null, 0, 0)}.
+     * A {@code null} array is treated as empty, equivalent to {@code put((char[]) null, 0, 0)}.
      *
      * <p>Each character is processed in little-endian order (low byte first, then high byte).
      *
@@ -285,7 +288,9 @@ public interface Hasher {
      * <pre>{@code
      * char[] buffer = new char[100];
      * int charsRead = reader.read(buffer);
-     * hasher.put(buffer, 0, charsRead);
+     * if (charsRead > 0) {
+     *     hasher.put(buffer, 0, charsRead);
+     * }
      * }</pre>
      *
      * @param chars the character array containing data to add to the hash computation
@@ -337,8 +342,8 @@ public interface Hasher {
      * replaced by the charset's replacement byte (typically {@code '?'}) before hashing, so such inputs
      * can collide with each other: {@code put("a\uD800", UTF_8)} hashes like {@code put("a?", UTF_8)}.
      * Use {@link #put(CharSequence)} to hash every {@code char} exactly. Chunked calls equal one call
-     * over the concatenation only for stateless encodings such as UTF-8 (not UTF-16, which emits a
-     * byte-order mark per call).
+     * over the concatenation only when the encoding has no per-call state and chunk boundaries
+     * do not split surrogate pairs. UTF-16, for example, emits a byte-order mark per non-empty call.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -557,9 +557,8 @@ public class NoCachingNoUpdatingTest extends NoCachingNoUpdatingTestSupport {
 
         final List<Runnable> nullSupplierCalls = Arrays.asList(() -> objects.<List<Object>> toCollection(null),
                 () -> booleans.<List<Boolean>> toCollection(null), () -> chars.<List<Character>> toCollection(null),
-                () -> bytes.<List<Byte>> toCollection(null), () -> shorts.<List<Short>> toCollection(null),
-                () -> ints.<List<Integer>> toCollection(null), () -> longs.<List<Long>> toCollection(null),
-                () -> floats.<List<Float>> toCollection(null), () -> doubles.<List<Double>> toCollection(null),
+                () -> bytes.<List<Byte>> toCollection(null), () -> shorts.<List<Short>> toCollection(null), () -> ints.<List<Integer>> toCollection(null),
+                () -> longs.<List<Long>> toCollection(null), () -> floats.<List<Float>> toCollection(null), () -> doubles.<List<Double>> toCollection(null),
                 () -> deque.<List<Object>> toCollection(null));
 
         final List<Runnable> nullResultCalls = Arrays.asList(() -> objects.<List<Object>> toCollection(size -> null),

@@ -203,7 +203,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -294,7 +294,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextFloat();
                 right = left;
 
@@ -338,7 +338,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextFloat();
                 right = left;
 
@@ -380,7 +380,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public FloatList next() {
+            public FloatList next() throws NoSuchElementException {
                 final FloatList result = new FloatList(9);
                 result.add(hasNext ? next : (next = iter.nextFloat()));
 
@@ -425,7 +425,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 float res = hasNext ? next : (next = iter.nextFloat());
 
                 hasNext = false;
@@ -469,7 +469,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 final float first = hasNext ? next : (next = iter.nextFloat());
                 float res = first;
 
@@ -577,7 +577,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 final float next = iter.nextFloat();
                 iter.advance(skip);
                 return next;
@@ -605,7 +605,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (isFirst) {
                     res = iter.nextFloat();
                     isFirst = false;
@@ -634,7 +634,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 return (res = accumulator.applyAsFloat(res, iter.nextFloat()));
             }
         }, false);
@@ -663,7 +663,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (isFirst) {
                     isFirst = false;
                     return init;
@@ -741,7 +741,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -835,7 +835,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -960,7 +960,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1081,7 +1081,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1161,7 +1161,7 @@ abstract class AbstractFloatStream extends FloatStream {
             }
 
             @Override
-            public float nextFloat() {
+            public float nextFloat() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1375,6 +1375,7 @@ abstract class AbstractFloatStream extends FloatStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
@@ -1561,7 +1562,8 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         try (final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer()) {
@@ -1598,7 +1600,8 @@ abstract class AbstractFloatStream extends FloatStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjFloatConsumer<? super R> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public <R> R collect(final Supplier<R> supplier, final ObjFloatConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

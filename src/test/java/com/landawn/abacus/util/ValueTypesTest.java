@@ -41,7 +41,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B4: Fraction.floatValue precision")
-    public class B4FloatValue {
+    public class B4FloatValue extends TestBase {
 
         @Test
         public void narrowsOnceInsteadOfRoundingBothTerms() {
@@ -109,7 +109,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B6: Duration.compareTo null contract")
-    public class B6DurationCompareToNull {
+    public class B6DurationCompareToNull extends TestBase {
 
         @Test
         public void throwsNullPointerExceptionNotIllegalArgument() {
@@ -142,7 +142,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("O3: Duration null-argument message convention")
-    public class O3DurationMessages {
+    public class O3DurationMessages extends TestBase {
 
         @Test
         public void allNullChecksUseTheArgNameConvention() {
@@ -167,7 +167,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B8: Fraction.of(String) dispatch")
-    public class B8StringDispatch {
+    public class B8StringDispatch extends TestBase {
 
         @Test
         public void aTokenContainingSlashIsReadAsAFraction() {
@@ -219,7 +219,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("O4: Fraction.reduce sign handling")
-    public class O4ReduceSigns {
+    public class O4ReduceSigns extends TestBase {
 
         @Test
         public void reducesMinValueNumeratorsCorrectly() {
@@ -271,7 +271,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B2: Range empty-range predicate matrix (non-empty controls)")
-    public class B2RangePredicates {
+    public class B2RangePredicates extends TestBase {
 
         @Test
         public void nonEmptyRangesAreUnaffected() {
@@ -312,7 +312,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B5: Range ordering vs. equality")
-    public class B5OrderingVsEquality {
+    public class B5OrderingVsEquality extends TestBase {
 
         private final BigDecimal fiveShort = new BigDecimal("5.0");
         private final BigDecimal fiveLong = new BigDecimal("5.00");
@@ -365,7 +365,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B7: Range floating-point endpoint ordering")
-    public class B7FloatingPointEndpoints {
+    public class B7FloatingPointEndpoints extends TestBase {
 
         @Test
         public void nanSortsAboveEveryFiniteValue() {
@@ -396,7 +396,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B9: Result.orElseThrow with a null-returning factory")
-    public class B9NullReturningFactory {
+    public class B9NullReturningFactory extends TestBase {
 
         @Test
         public void nullFromTheMapperOrSupplierBecomesNullPointerException() {
@@ -428,7 +428,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("J3: Result.hashCode contract")
-    public class J3ResultHashCode {
+    public class J3ResultHashCode extends TestBase {
 
         @Test
         public void equalResultsHashEqually() {
@@ -472,7 +472,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("J4: Fraction zero-operand identity")
-    public class J4ZeroOperandIdentity {
+    public class J4ZeroOperandIdentity extends TestBase {
 
         @Test
         public void multiplyingByZeroYieldsTheSharedConstant() {
@@ -500,7 +500,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D8: RateLimiter sub-microsecond warmup")
-    public class D8SubMicrosecondWarmup {
+    public class D8SubMicrosecondWarmup extends TestBase {
 
         @Test
         public void subMicrosecondWarmupProducesABurstyLimiter() {
@@ -532,7 +532,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("D13: Holder update methods after comment cleanup")
-    public class D13HolderUpdates {
+    public class D13HolderUpdates extends TestBase {
 
         @Test
         public void getAndUpdateReturnsThePreviousValue() {
@@ -578,7 +578,7 @@ public class ValueTypesTest extends TestBase {
     // =======================================================================
     @Nested
     @DisplayName("B1/D2: members referenced by the corrected javadoc")
-    public class DocumentedMembersStillWork {
+    public class DocumentedMembersStillWork extends TestBase {
 
         @Test
         public void tuple1UsesTheInheritedWholeTupleMethods() {

@@ -383,7 +383,6 @@ public class JsonDeserConfigTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class, () -> new JsonDeserConfig().setMapInstanceType(null));
     }
 
-
     /**
      * A subclass that narrows equality the way {@code AvroDeserConfig}/{@code KryoDeserConfig} do over
      * {@code DeserializationConfig}: {@code instanceof <OwnType> && super.equals(obj)}.

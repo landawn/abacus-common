@@ -227,12 +227,13 @@ public class CommonUtilNullTest extends CommonUtilTestSupport {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance(new Class<?>[] { Runnable.class }, null));
         assertThrows(IllegalArgumentException.class, () -> N.splitByChunkCount(1, 1, (com.landawn.abacus.util.function.IntBiFunction<Object>) null));
     }
+
     @Test
-    public void testNewProxyInstance_nullInterfaceThrowsNullPointerException() {
+    public void testNewProxyInstance_nullContainerUsesArgumentValidation() {
         final InvocationHandler h = (p, m, args) -> null;
 
-        assertThrows(NullPointerException.class, () -> CommonUtil.newProxyInstance((Class<Runnable>) null, h));
-        assertThrows(NullPointerException.class, () -> CommonUtil.newProxyInstance((Class<?>[]) null, h));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance((Class<Runnable>) null, h));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance((Class<?>[]) null, h));
         assertThrows(NullPointerException.class, () -> CommonUtil.newProxyInstance(new Class<?>[] { null }, h));
 
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance(Runnable.class, null));

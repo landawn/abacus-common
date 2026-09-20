@@ -89,10 +89,13 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      *
      * @param obj the object to convert
      * @return the OffsetDateTime value, or {@code null} if the input is null
+     * @throws IllegalArgumentException if the input is a non-lenient calendar containing invalid field values.
+     * @throws DateTimeParseException if the text representation is neither a supported millisecond value nor a valid
+     *         ISO-8601 {@code OffsetDateTime} (see {@link #valueOf(String)}).
      */
     @MayReturnNull
     @Override
-    public OffsetDateTime valueOf(final Object obj) {
+    public OffsetDateTime valueOf(final Object obj) throws IllegalArgumentException, DateTimeParseException {
         if (obj == null) {
             return null;
         } else if (obj instanceof OffsetDateTime offsetDateTime) {
@@ -120,8 +123,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * <ul>
      *   <li>{@code null}, empty string, or the literal {@code "null"} (case-insensitive) returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive) returns the current {@code OffsetDateTime}</li>
-     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
-     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix) are treated as
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only; no {@code 0x} hex, no {@code L} suffix) are treated as
      *       milliseconds since the epoch, interpreted in the system default zone (shorter numeric strings such as
      *       {@code "1234"} are handed to the ISO parser and rejected)</li>
      *   <li>ISO-8601 date-time format (20 characters ending with {@code 'Z'})</li>
@@ -192,29 +194,29 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
 
     /**
      * Converts a character array to an {@link OffsetDateTime} object.
-     * This method first checks if the character array represents a long value (epoch milliseconds: digits ending in
-     * a digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted). If so, it creates an
-     * OffsetDateTime from that timestamp. Otherwise, it converts the character array to a string and delegates to
+     * This method first checks for more than four characters consisting of an optional sign followed only by
+     * ASCII decimal digits. If found, it creates an OffsetDateTime from that epoch-millisecond value;
+     * hexadecimal prefixes and type suffixes are not accepted. Otherwise, it converts the character array to a string and delegates to
      * {@link #valueOf(String)}, so both overloads give the same answer for the same text.
      *
      * @param cbuf the character array containing the date-time string
      * @param offset the offset in the array where the date-time string starts
      * @param len the length of the date-time string
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or empty
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws DateTimeParseException if the text is neither a millisecond number nor a valid ISO-8601 representation
      *         (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public OffsetDateTime valueOf(final char[] cbuf, final int offset, final int len) throws DateTimeParseException {
+    public OffsetDateTime valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, DateTimeParseException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // DateTimeParseException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return OffsetDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
@@ -304,6 +306,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      *
      * @param appendable the Appendable to write to
      * @param x the OffsetDateTime value to append
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the formatted date/time text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -316,7 +319,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final OffsetDateTime x) throws IOException {
+    public void appendTo(final Appendable appendable, final OffsetDateTime x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -350,12 +353,14 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * @param writer the CharacterWriter to write to
      * @param x the OffsetDateTime value to write; if {@code null}, writes the literal {@code "null"}
      * @param config the serialization configuration specifying format and quoting; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the selected date/time representation, quotation marks or null literal to {@code writer} fails
      * @throws ArithmeticException if the LONG format is selected and the epoch-millisecond value overflows a long
      */
     @SuppressWarnings("null")
     @Override
-    public void serializeTo(final CharacterWriter writer, final OffsetDateTime x, final JsonXmlSerConfig<?> config) throws IOException, ArithmeticException {
+    public void serializeTo(final CharacterWriter writer, final OffsetDateTime x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, ArithmeticException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

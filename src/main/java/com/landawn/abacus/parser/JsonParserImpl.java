@@ -196,8 +196,8 @@ final class JsonParserImpl extends AbstractJsonParser {
     /**
      * {@inheritDoc}
      *
-     * <p>This implementation uses an internal {@link JsonReader} for efficient parsing
-     * and supports circular reference detection when enabled in the configuration.</p>
+     * <p>This implementation uses an internal {@link JsonReader} for parsing and applies the
+     * configured property matching, type conversion, and null-handling rules.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -313,8 +313,9 @@ final class JsonParserImpl extends AbstractJsonParser {
     @Override
     public void parseInto(final String source, final JsonDeserConfig config, final Object[] output)
             throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
-        final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
+
+        final JsonDeserConfig configToUse = check(config);
 
         // Empty-source guard like the Map overload: an empty source would otherwise reach the
         // EOF readValue path and fabricate a spurious "" element.
@@ -362,8 +363,9 @@ final class JsonParserImpl extends AbstractJsonParser {
     @Override
     public void parseInto(final String source, final JsonDeserConfig config, final Collection<?> output)
             throws IllegalArgumentException, UnsupportedOperationException, ParsingException, UncheckedIOException {
-        final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
+
+        final JsonDeserConfig configToUse = check(config);
 
         // Empty-source guard like the Map overload: an empty source would otherwise reach the
         // EOF readValue path and add a spurious "" element to the output collection.
@@ -411,8 +413,9 @@ final class JsonParserImpl extends AbstractJsonParser {
     @Override
     public void parseInto(final String source, final JsonDeserConfig config, final Map<?, ?> output)
             throws IllegalArgumentException, UnsupportedOperationException, ParsingException, UncheckedIOException {
-        final JsonDeserConfig configToUse = check(config);
         N.checkArgNotNull(output, cs.output);
+
+        final JsonDeserConfig configToUse = check(config);
 
         if (Strings.isEmpty(source)) {
             return;
@@ -553,7 +556,7 @@ final class JsonParserImpl extends AbstractJsonParser {
      *   <li>Circular reference handling: when {@code circularReferenceSupported} is enabled, an object already on
      *       the current serialization path is written as {@code null}; when disabled (default) no identities are
      *       tracked. In both modes a graph nested deeper than 256 structured values fails with a
-     *       {@link ParsingException} (a cyclic graph always exceeds that bound)</li>
+     *       {@link ParsingException} (a cyclic graph exceeds that bound when identity tracking is disabled)</li>
      *   <li>Pretty printing and indentation</li>
      *   <li>Custom property naming policies</li>
      *   <li>Selective property inclusion/exclusion</li>
@@ -634,12 +637,16 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param obj the object to serialize; may be {@code null} (writes empty string to file)
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the file to write the JSON to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws ParsingException if the object type is not supported for serialization
      * @throws UncheckedIOException if creating, opening, writing, flushing or closing {@code output}, or reading a resource-backed value
      *         while producing JSON, fails
      */
     @Override
-    public void serialize(final Object obj, final JsonSerConfig config, final File output) throws ParsingException, UncheckedIOException {
+    public void serialize(final Object obj, final JsonSerConfig config, final File output)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
         final JsonSerConfig configToUse = check(config);
 
         if (obj == null) {
@@ -702,12 +709,16 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param obj the object to serialize; may be {@code null} (writes empty string to stream)
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the output stream to write the JSON to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws ParsingException if the object type is not supported for serialization
      * @throws UncheckedIOException if writing or flushing JSON to {@code output}, or reading a resource-backed value during
      *         serialization, fails
      */
     @Override
-    public void serialize(final Object obj, final JsonSerConfig config, final OutputStream output) throws ParsingException, UncheckedIOException {
+    public void serialize(final Object obj, final JsonSerConfig config, final OutputStream output)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
         final JsonSerConfig configToUse = check(config);
 
         if (obj == null) {
@@ -766,12 +777,16 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param obj the object to serialize; may be {@code null} (writes empty string to writer)
      * @param config the serialization configuration to use; may be {@code null} to use default configuration
      * @param output the writer to write the JSON to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws ParsingException if the object type is not supported for serialization
      * @throws UncheckedIOException if writing or flushing JSON to {@code output}, or reading a resource-backed value during
      *         serialization, fails
      */
     @Override
-    public void serialize(final Object obj, final JsonSerConfig config, final Writer output) throws ParsingException, UncheckedIOException {
+    public void serialize(final Object obj, final JsonSerConfig config, final Writer output)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(output, cs.output);
+
         final JsonSerConfig configToUse = check(config);
 
         if (obj == null) {
@@ -830,7 +845,7 @@ final class JsonParserImpl extends AbstractJsonParser {
     @SuppressWarnings("rawtypes")
     protected void write(final Object obj, final JsonSerConfig config, final boolean isFirstCall, final String indentation,
             final IdentityHashSet<Object> serializedObjects, final BufferedJsonWriter bw) throws ParsingException, IOException {
-        if (hasCircularReference(obj, serializedObjects, config, bw)) {
+        if (serializedObjects != null && hasCircularReference(obj, serializedObjects, config, bw)) {
             // Write a null placeholder: the caller has already emitted the name/comma for this
             // value position, so returning silently would produce malformed JSON ("name": }).
             bw.write(NULL_CHAR_ARRAY);
@@ -852,7 +867,7 @@ final class JsonParserImpl extends AbstractJsonParser {
 
         if (depth != null && ++depth[0] > MAX_SERIALIZATION_DEPTH) {
             // Undo this level's increment: the finally block below is not reached from here, while the
-            // outer levels unwind through theirs and release the thread-local at the root.
+            // outer levels unwind through theirs and restore the counter to zero at the root.
             depth[0]--;
 
             throw new ParsingException("Serialization nesting depth exceeded " + MAX_SERIALIZATION_DEPTH + " while writing "
@@ -916,9 +931,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                     }
             }
         } finally {
-            // Leaving the outermost level: discard the counter so no state lingers on pooled threads.
-            if (depth != null && --depth[0] == 0) {
-                SERIALIZATION_DEPTH.remove();
+            // Reuse the zeroed primitive counter; it retains no serialized objects or configuration.
+            if (depth != null) {
+                --depth[0];
             }
 
             // Path-based cycle detection: remove this object so it's no longer "in progress"
@@ -1353,9 +1368,9 @@ final class JsonParserImpl extends AbstractJsonParser {
      * textual {@code dateTimeFormat} for date/time keys.
      *
      * <p>The default {@link DateTimeFormat#LONG} is deliberately excluded: it renders a temporal as bare
-     * epoch millis, which a key position cannot read back ({@code Type.valueOf} rejects unqualified numeric
-     * date/time text as ambiguous) and which makes distinct temporal keys of the same instant collide into
-     * one duplicate JSON name. Date/time keys therefore keep the type's own text unless the caller changed
+     * epoch millis, which can lose sub-millisecond precision and offset/zone information, making distinct
+     * temporal keys collide into one duplicate JSON name. Some temporal parsers also reject short numeric
+     * strings as ambiguous. Date/time keys therefore keep the type's own text unless the caller changed
      * {@code dateTimeFormat} away from {@link DateTimeFormat#LONG} (including to {@code null}, which asks each
      * temporal type for its own default text).</p>
      *
@@ -1677,7 +1692,7 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     /**
-     * Writes an {@link EntityId} to JSON as an object with one entry per id property.
+     * Writes an {@link EntityId} to JSON with the entity name wrapping an object containing its id properties.
      *
      * @param entityId the entity id to write
      * @param config the serialization configuration
@@ -2527,6 +2542,8 @@ final class JsonParserImpl extends AbstractJsonParser {
     @Override
     public <T> T deserialize(final String source, final JsonDeserConfig config, final Class<? extends T> targetClass)
             throws IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -2555,18 +2572,18 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         the default value, depending on the target type) is returned; if the source is {@code null},
      *         the same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
      *         target type's default value
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or
+     *         {@code toIndex > source.length()} (a null source has length zero)
      * @throws IllegalArgumentException if {@code targetType} is {@code null}
-     * @throws IndexOutOfBoundsException if the indices are out of bounds or fromIndex &gt; toIndex
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
      *         JSON text
      */
     @Override
     public <T> T deserialize(String source, int fromIndex, int toIndex, JsonDeserConfig config, Type<? extends T> targetType)
-            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
-        N.checkArgNotNull(targetType, cs.targetType);
-
+            throws IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(source));
+        N.checkArgNotNull(targetType, cs.targetType);
 
         final JsonDeserConfig configToUse = check(config);
 
@@ -2613,15 +2630,19 @@ final class JsonParserImpl extends AbstractJsonParser {
      *         the default value, depending on the target type) is returned; if the source is {@code null},
      *         the same empty value is returned when {@code readNullToEmpty} is enabled, otherwise the
      *         target type's default value
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or
+     *         {@code toIndex > source.length()} (a null source has length zero)
      * @throws IllegalArgumentException if {@code targetClass} is {@code null}
-     * @throws IndexOutOfBoundsException if the indices are out of bounds or {@code fromIndex > toIndex}
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing values from the
      *         JSON text
      */
     @Override
     public <T> T deserialize(final String source, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetClass)
-            throws IllegalArgumentException, IndexOutOfBoundsException, ParsingException, UncheckedIOException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
+        N.checkFromToIndex(fromIndex, toIndex, N.len(source));
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, fromIndex, toIndex, config, Type.of(targetClass));
     }
 
@@ -2645,13 +2666,15 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code targetType} or {@code source} is {@code null}, or {@code source} is a directory
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or {@code source} is a directory
      * @throws UncheckedIOException if opening {@code source} or reading JSON characters from its file reader fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T deserialize(File source, JsonDeserConfig config, Type<? extends T> targetType)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
         N.checkArgNotNull(targetType, cs.targetType);
 
         Reader reader = null;
@@ -2683,13 +2706,17 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code targetClass} or {@code source} is {@code null}, or {@code source} is a directory
+     * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}, or {@code source} is a directory
      * @throws UncheckedIOException if opening {@code source} or reading JSON characters from its file reader fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T deserialize(final File source, final JsonDeserConfig config, final Class<? extends T> targetClass)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -2713,13 +2740,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code targetType} or {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if reading or UTF-8 decoding JSON bytes from {@code source} fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T deserialize(InputStream source, JsonDeserConfig config, Type<? extends T> targetType)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetType, cs.targetType);
 
         // RFC 8259 mandates UTF-8 for JSON over the wire, so the charset is pinned explicitly here.
@@ -2751,13 +2779,16 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code targetClass} or {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}
      * @throws UncheckedIOException if reading or UTF-8 decoding JSON bytes from {@code source} fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T deserialize(final InputStream source, final JsonDeserConfig config, final Class<? extends T> targetClass)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -2781,13 +2812,14 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetType the type of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code targetType} or {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if reading JSON characters from {@code source} fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target type
      */
     @Override
     public <T> T deserialize(Reader source, JsonDeserConfig config, final Type<? extends T> targetType)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetType, cs.targetType);
 
         return read(source, config, targetType);
@@ -2813,13 +2845,16 @@ final class JsonParserImpl extends AbstractJsonParser {
      * @param config the deserialization configuration to use; may be {@code null} to use default configuration
      * @param targetClass the class of the target object to deserialize into; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code targetClass} or {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} or {@code targetClass} is {@code null}
      * @throws UncheckedIOException if reading JSON characters from {@code source} fails
      * @throws ParsingException if the JSON structure is invalid or doesn't match the target class
      */
     @Override
     public <T> T deserialize(final Reader source, final JsonDeserConfig config, final Class<? extends T> targetClass)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgNotNull(targetClass, cs.targetClass);
+
         return deserialize(source, config, Type.of(targetClass));
     }
 
@@ -4147,7 +4182,8 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     /**
      * Reads a JSON object into a {@link MapEntity}, using the single top-level property name
-     * as the entity name and its value as the entity's property map.
+     * as the entity name and its value as the entity's property map. Exactly one colon must
+     * separate the entity name from its property map, including when the root braces are omitted.
      *
      * @param <T> the type of the target object
      * @param jr the JSON reader positioned at (or before) the opening brace
@@ -4177,12 +4213,15 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         MapEntity mapEntity = null;
+        boolean colonRead = false;
         boolean valueRead = false;
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
                 case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
-
+                    if (mapEntity != null || jr.hasText()) {
+                        throw new ParsingException(getErrorMsg(jr, token), token);
+                    }
                     break;
 
                 case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
@@ -4197,7 +4236,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                     break;
 
                 case COLON:
-
+                    if (colonRead) {
+                        throw new ParsingException(getErrorMsg(jr, token), token);
+                    }
                     if (jr.hasText()) {
                         // unquoted entity name
                         if (mapEntity != null) {
@@ -4209,6 +4250,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParsingException("Bean name cannot be null or empty", token);
                     }
 
+                    colonRead = true;
                     break;
 
                 case START_BRACE:
@@ -4217,7 +4259,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     // same ParsingException already thrown for a missing name in the branch above.
                     if (mapEntity == null) {
                         throw new ParsingException("Bean name cannot be null or empty", token);
-                    } else if (valueRead) {
+                    } else if (!colonRead || valueRead || jr.hasText()) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
@@ -4246,7 +4288,9 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     /**
-     * Reads a JSON object into an {@link EntityId}, mapping each JSON property to an id property.
+     * Reads a JSON object into an {@link EntityId}, using its single top-level property name as
+     * the entity name and the nested object's properties as the identifier values. Exactly one
+     * colon must separate the entity name from that nested object, including for an unwrapped root.
      *
      * @param <T> the type of the target object
      * @param jr the JSON reader positioned at (or before) the opening brace
@@ -4276,12 +4320,15 @@ final class JsonParserImpl extends AbstractJsonParser {
         }
 
         Seid entityId = null;
+        boolean colonRead = false;
         boolean valueRead = false;
 
         for (int token = firstToken == START_BRACE ? jr.nextToken() : firstToken;; token = jr.nextToken()) {
             switch (token) {
                 case START_DOUBLE_QUOTE, START_SINGLE_QUOTE:
-
+                    if (entityId != null || jr.hasText()) {
+                        throw new ParsingException(getErrorMsg(jr, token), token);
+                    }
                     break;
 
                 case END_DOUBLE_QUOTE, END_SINGLE_QUOTE:
@@ -4296,7 +4343,9 @@ final class JsonParserImpl extends AbstractJsonParser {
                     break;
 
                 case COLON:
-
+                    if (colonRead) {
+                        throw new ParsingException(getErrorMsg(jr, token), token);
+                    }
                     if (jr.hasText()) {
                         // unquoted entity name
                         if (entityId != null) {
@@ -4308,6 +4357,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                         throw new ParsingException("Bean name cannot be null or empty", token);
                     }
 
+                    colonRead = true;
                     break;
 
                 case START_BRACE:
@@ -4316,7 +4366,7 @@ final class JsonParserImpl extends AbstractJsonParser {
                     // same ParsingException already thrown for a missing name in the branch above.
                     if (entityId == null) {
                         throw new ParsingException("Bean name cannot be null or empty", token);
-                    } else if (valueRead) {
+                    } else if (!colonRead || valueRead || jr.hasText()) {
                         throw new ParsingException(getErrorMsg(jr, token), token);
                     }
 
@@ -4889,6 +4939,8 @@ final class JsonParserImpl extends AbstractJsonParser {
 
     /**
      * Reads a JSON object into a {@link Sheet}, restoring its row keys, column keys, and cell values.
+     * Array column names are matched by content to successive occurrences in {@code columnKeySet}; the
+     * resulting Sheet retains those parsed key objects and uses identity equality for raw array keys.
      *
      * @param <T> the type of the target object
      * @param jr the JSON reader positioned at (or before) the opening brace
@@ -5163,7 +5215,23 @@ final class JsonParserImpl extends AbstractJsonParser {
                                         throw new ParsingException("Column: " + columnName + " can't be parsed as type: " + columnKeyValueType.name(), e);
                                     }
 
-                                    final int index = N.indexOf(columnKeyList, parsedColumnKey);
+                                    int index = N.INDEX_NOT_FOUND;
+
+                                    if (parsedColumnKey != null && parsedColumnKey.getClass().isArray()) {
+                                        // JSON repeats each column key as a property name. Parsing it creates a different
+                                        // array, so resolve that wire representation by content while retaining the key
+                                        // object from columnKeySet for Sheet's identity-based lookup. Equal-content array
+                                        // keys are distinct columns: consume their occurrences in key-set order.
+                                        // Only a null slot is unconsumed; an empty or all-null column still claims its key.
+                                        for (int i = 0; i < columnKeyList.size(); i++) {
+                                            if ((columnList == null || columnList.get(i) == null) && N.deepEquals(columnKeyList.get(i), parsedColumnKey)) {
+                                                index = i;
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        index = N.indexOf(columnKeyList, parsedColumnKey);
+                                    }
 
                                     if (index == N.INDEX_NOT_FOUND) {
                                         throw new ParsingException("Column: " + columnName + " is not found column list: " + columnKeyList);
@@ -5490,15 +5558,11 @@ final class JsonParserImpl extends AbstractJsonParser {
     }
 
     /**
-     * Decrements the current thread's JSON nesting depth, discarding the thread-local counter once the
-     * outermost level is left so that no state is retained on pooled threads.
+     * Decrements the current thread's JSON nesting depth. The zeroed primitive counter is reused;
+     * it retains no parsed values or configuration.
      */
     private static void exitNesting() {
-        final int[] depth = NESTING_DEPTH.get();
-        if (--depth[0] <= 0) {
-            depth[0] = 0;
-            NESTING_DEPTH.remove();
-        }
+        --NESTING_DEPTH.get()[0];
     }
 
     /**

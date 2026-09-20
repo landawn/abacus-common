@@ -81,11 +81,10 @@ final class ISO8601Util {
      *
      * @param instant the instant to format
      * @return an extended ISO date-time ending in {@code Z}
-     * @throws NullPointerException if {@code instant} is {@code null}
-     * @throws IllegalArgumentException if the instant cannot be represented in the UTC civil-year
-     *         range {@code 0001}-{@code 9999}
+     * @throws IllegalArgumentException if {@code instant} is {@code null}, or the instant cannot be
+     *         represented in the UTC civil-year range {@code 0001}-{@code 9999}
      */
-    static String format(final Instant instant) throws NullPointerException, IllegalArgumentException {
+    static String format(final Instant instant) throws IllegalArgumentException {
         return format(instant, UTC);
     }
 
@@ -97,14 +96,13 @@ final class ISO8601Util {
      * @param instant the instant to format
      * @param zone the zone whose effective offset and civil fields are used
      * @return the formatted extended ISO date-time
-     * @throws NullPointerException if {@code instant} or {@code zone} is {@code null}
-     * @throws IllegalArgumentException if the instant cannot be represented as a civil date-time, the
-     *         civil year is outside {@code 0001}-{@code 9999}, or the effective offset has sub-minute
-     *         precision
+     * @throws IllegalArgumentException if {@code instant} or {@code zone} is {@code null}, the instant
+     *         cannot be represented as a civil date-time, the civil year is outside {@code 0001}-{@code 9999},
+     *         or the effective offset has sub-minute precision
      */
-    static String format(final Instant instant, final ZoneId zone) throws NullPointerException, IllegalArgumentException {
-        Objects.requireNonNull(instant, "instant");
-        Objects.requireNonNull(zone, "zone");
+    static String format(final Instant instant, final ZoneId zone) throws IllegalArgumentException {
+        N.checkArgNotNull(instant, cs.instant);
+        N.checkArgNotNull(zone, cs.zone);
 
         final ZonedDateTime dateTime;
 
@@ -137,11 +135,11 @@ final class ISO8601Util {
      *
      * @param text the text to parse
      * @return the exact parsed instant
-     * @throws NullPointerException if {@code text} is {@code null}
+     * @throws IllegalArgumentException if {@code text} is {@code null}
      * @throws DateTimeParseException if the text is malformed or has trailing characters
      */
-    static Instant parseInstant(final String text) throws NullPointerException, DateTimeParseException {
-        Objects.requireNonNull(text, "text");
+    static Instant parseInstant(final String text) throws IllegalArgumentException, DateTimeParseException {
+        N.checkArgNotNull(text, cs.text);
         return parseComplete(text, UTC_ZONE_SUPPLIER);
     }
 
@@ -151,13 +149,13 @@ final class ISO8601Util {
      * @param text the text to parse
      * @param defaultZone the immutable zone used for zone-less text
      * @return the exact parsed instant
-     * @throws NullPointerException if either argument is {@code null}
+     * @throws IllegalArgumentException if {@code text} or {@code defaultZone} is {@code null}
      * @throws DateTimeParseException if the text is malformed, resolves to a gap or overlap, or has
      *         trailing characters
      */
-    static Instant parseInstant(final String text, final ZoneId defaultZone) throws NullPointerException, DateTimeParseException {
-        Objects.requireNonNull(text, "text");
-        Objects.requireNonNull(defaultZone, "defaultZone");
+    static Instant parseInstant(final String text, final ZoneId defaultZone) throws IllegalArgumentException, DateTimeParseException {
+        N.checkArgNotNull(text, cs.text);
+        N.checkArgNotNull(defaultZone, cs.defaultZone);
         return parseComplete(text, () -> defaultZone);
     }
 
@@ -169,15 +167,15 @@ final class ISO8601Util {
      * @param text the text to parse
      * @param defaultZoneSupplier a lazy fallback-zone supplier
      * @return the exact parsed instant
-     * @throws NullPointerException if either argument is {@code null}, or the supplier returns
-     *         {@code null} when the text needs a fallback zone
+     * @throws IllegalArgumentException if {@code text} or {@code defaultZoneSupplier} is {@code null}
+     * @throws NullPointerException if the supplier returns {@code null} when the text needs a fallback zone
      * @throws DateTimeParseException if the text is malformed, resolves to a gap or overlap, or has
      *         trailing characters
      */
     static Instant parseInstantWithDefaultZone(final String text, final Supplier<? extends ZoneId> defaultZoneSupplier)
-            throws NullPointerException, DateTimeParseException {
-        Objects.requireNonNull(text, "text");
-        Objects.requireNonNull(defaultZoneSupplier, "defaultZoneSupplier");
+            throws IllegalArgumentException, NullPointerException, DateTimeParseException {
+        N.checkArgNotNull(text, cs.text);
+        N.checkArgNotNull(defaultZoneSupplier, cs.defaultZoneSupplier);
         return parseComplete(text, defaultZoneSupplier);
     }
 
@@ -216,10 +214,10 @@ final class ISO8601Util {
      * @param text the text containing an ISO value prefix
      * @param position the starting position and output cursor
      * @return the parsed instant, or {@code null} on malformed input
-     * @throws NullPointerException if either argument is {@code null}
+     * @throws IllegalArgumentException if {@code text} or {@code position} is {@code null}
      * @throws IndexOutOfBoundsException if the initial position is outside the input
      */
-    static Instant parseInstant(final String text, final ParsePosition position) throws NullPointerException, IndexOutOfBoundsException {
+    static Instant parseInstant(final String text, final ParsePosition position) throws IllegalArgumentException, IndexOutOfBoundsException {
         return parseInstant(text, position, UTC_ZONE_SUPPLIER);
     }
 
@@ -230,23 +228,26 @@ final class ISO8601Util {
      * @param position the starting position and output cursor
      * @param defaultZone the immutable zone used for zone-less text
      * @return the parsed instant, or {@code null} on malformed input
-     * @throws NullPointerException if any argument is {@code null}
+     * @throws IllegalArgumentException if {@code text}, {@code position}, or {@code defaultZone} is {@code null}
      * @throws IndexOutOfBoundsException if the initial position is outside the input
      */
     static Instant parseInstant(final String text, final ParsePosition position, final ZoneId defaultZone)
-            throws NullPointerException, IndexOutOfBoundsException {
-        Objects.requireNonNull(defaultZone, "defaultZone");
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(text, cs.text);
+        N.checkArgNotNull(position, cs.position);
+        N.checkArgNotNull(defaultZone, cs.defaultZone);
         return parseInstant(text, position, () -> defaultZone);
     }
 
     /**
-     * @throws NullPointerException if {@code text} or {@code position} is null, or an offset-free input causes the default-zone supplier to return null
+     * @throws IllegalArgumentException if {@code text} or {@code position} is {@code null}
+     * @throws NullPointerException if an offset-free input causes the default-zone supplier to return {@code null}
      * @throws IndexOutOfBoundsException if the initial parse position is negative or greater than the input length
      */
     private static Instant parseInstant(final String text, final ParsePosition position, final Supplier<? extends ZoneId> defaultZoneSupplier)
-            throws NullPointerException, IndexOutOfBoundsException {
-        Objects.requireNonNull(text, "text");
-        Objects.requireNonNull(position, "position");
+            throws IllegalArgumentException, NullPointerException, IndexOutOfBoundsException {
+        N.checkArgNotNull(text, cs.text);
+        N.checkArgNotNull(position, cs.position);
 
         final int start = position.getIndex();
 

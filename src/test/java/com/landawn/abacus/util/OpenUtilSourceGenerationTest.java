@@ -16,14 +16,16 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class OpenUtilSourceGenerationTest {
-    @TempDir Path directory;
+public class OpenUtilSourceGenerationTest extends TestBase {
+    @TempDir
+    Path directory;
 
     @Test
     void insertsOnlyIntoRequestedOwnerAcrossSourceLayouts() throws Exception {
-        final List<String> layouts = List.of(
-                "package sample; public class Foo { public String getValue() { return \"你好🙂\"; } }",
+        final List<String> layouts = List.of("package sample; public class Foo { public String getValue() { return \"你好🙂\"; } }",
                 "package sample;\npublic class Foo {\n public String getValue() { return \"v\"; }\n}\nclass Helper {\n}\n",
                 "package sample;\npublic class Foo {\n public String getValue() { return \"v\"; }\n class Nested {\n }\n} // Foo\n",
                 "package sample;\npublic class Foo {\n public String getValue() {\n return \"v\";\n }\n} // Foo\n",
@@ -33,7 +35,8 @@ public class OpenUtilSourceGenerationTest {
             for (final String newline : List.of("\n", "\r\n")) {
                 final Path root = Files.createDirectories(directory.resolve("case-" + i + "-" + newline.length()));
                 final Path source = Files.createDirectories(root.resolve("sample")).resolve("Foo.java");
-                final String original = layouts.get(i).replace("public class Foo {", "public class Foo { private String value; public void setValue(String value) { this.value = value; }")
+                final String original = layouts.get(i)
+                        .replace("public class Foo {", "public class Foo { private String value; public void setValue(String value) { this.value = value; }")
                         .replace("\n", newline);
                 Files.writeString(source, original);
                 final Path classes = Files.createDirectories(root.resolve("classes"));
@@ -45,8 +48,10 @@ public class OpenUtilSourceGenerationTest {
                     CodeGenerationUtil.generatePropNameTableClass(entity, "Props", root.toString());
                     assertEquals(first, Files.readString(source), "regeneration must be byte-identical");
                     assertTrue(first.contains("String value = \"value\";"));
-                    if (original.contains("class Helper")) assertTrue(first.endsWith("class Helper {" + newline + "}" + newline));
-                    if (original.endsWith("/*" + newline + "}" + newline + "*/" + newline)) assertTrue(first.endsWith("/*" + newline + "}" + newline + "*/" + newline));
+                    if (original.contains("class Helper"))
+                        assertTrue(first.endsWith("class Helper {" + newline + "}" + newline));
+                    if (original.endsWith("/*" + newline + "}" + newline + "*/" + newline))
+                        assertTrue(first.endsWith("/*" + newline + "}" + newline + "*/" + newline));
                     compile(source, classes);
                     try (URLClassLoader check = new URLClassLoader(new URL[] { classes.toUri().toURL() }, getClass().getClassLoader())) {
                         assertEquals("sample.Foo", check.loadClass("sample.Foo$Props").getDeclaringClass().getName());
@@ -83,7 +88,9 @@ public class OpenUtilSourceGenerationTest {
 
     private static void compile(Path source, Path output) {
         final ByteArrayOutputStream diagnostics = new ByteArrayOutputStream();
-        assertEquals(0, ToolProvider.getSystemJavaCompiler().run(null, null, diagnostics, "-encoding", "UTF-8", "-proc:none", "-d", output.toString(), source.toString()),
+        assertEquals(0,
+                ToolProvider.getSystemJavaCompiler()
+                        .run(null, null, diagnostics, "-encoding", "UTF-8", "-proc:none", "-d", output.toString(), source.toString()),
                 diagnostics.toString(StandardCharsets.UTF_8));
     }
 }

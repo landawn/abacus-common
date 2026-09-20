@@ -37,13 +37,12 @@ public class DatesTest extends TestBase {
         try {
             TimeZone.setDefault(utc);
 
-            for (LocalDateTime start : new LocalDateTime[] {LocalDateTime.of(2000, 7, 31, 12, 34, 56),
-                    LocalDateTime.of(2000, 3, 31, 12, 34, 56), LocalDateTime.of(2000, 2, 29, 12, 34, 56),
-                    LocalDateTime.of(-400, 2, 29, 12, 34, 56)}) {
+            for (LocalDateTime start : new LocalDateTime[] { LocalDateTime.of(2000, 7, 31, 12, 34, 56), LocalDateTime.of(2000, 3, 31, 12, 34, 56),
+                    LocalDateTime.of(2000, 2, 29, 12, 34, 56), LocalDateTime.of(-400, 2, 29, 12, 34, 56) }) {
                 java.util.Date date = java.util.Date.from(start.toInstant(ZoneOffset.UTC));
                 Calendar calendar = Dates.createCalendar(date.getTime(), utc);
 
-                for (int months : new int[] {200_000_000, -200_000_000, 199_996_800, -199_996_800, Integer.MAX_VALUE, Integer.MIN_VALUE}) {
+                for (int months : new int[] { 200_000_000, -200_000_000, 199_996_800, -199_996_800, Integer.MAX_VALUE, Integer.MIN_VALUE }) {
                     long expected = start.plusMonths(months).toInstant(ZoneOffset.UTC).toEpochMilli();
                     String context = start + " plus " + months + " months";
 

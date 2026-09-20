@@ -450,13 +450,15 @@ public class ImmutableNavigableSetTest extends TestBase {
     }
 
     @Test
-    public void testOf_neverSilentlyFallsBackToAnUnsortedImmutableSet() {
-        // With a Comparable bound on of(...), a non-Comparable element selected the inherited
-        // ImmutableSet.of(...) instead and produced an UNSORTED set with no error at all.
-        Assertions.assertThrows(ClassCastException.class, () -> ImmutableNavigableSet.of(new NotComparableNS("z")));
-        Assertions.assertThrows(ClassCastException.class, () -> ImmutableNavigableSet.of(new NotComparableNS("z"), new NotComparableNS("a")));
-        Assertions.assertThrows(ClassCastException.class,
-                () -> ImmutableNavigableSet.of(new NotComparableNS("a"), new NotComparableNS("b"), new NotComparableNS("c")));
+    public void testOf_nonComparableElementSelectsInheritedUnsortedFactory() {
+        // of(...) requires E extends Comparable. A non-Comparable element is not applicable to
+        // ImmutableNavigableSet.of, so the call binds to ImmutableSet.of and returns an unsorted set.
+        final ImmutableSet<NotComparableNS> one = ImmutableNavigableSet.of(new NotComparableNS("z"));
+        final ImmutableSet<NotComparableNS> two = ImmutableNavigableSet.of(new NotComparableNS("z"), new NotComparableNS("a"));
+        Assertions.assertFalse(one instanceof SortedSet);
+        Assertions.assertFalse(two instanceof SortedSet);
+        Assertions.assertEquals(1, one.size());
+        Assertions.assertEquals(2, two.size());
     }
 
     @Test

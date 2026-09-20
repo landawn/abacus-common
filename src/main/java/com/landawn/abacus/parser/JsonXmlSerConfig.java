@@ -142,7 +142,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      *
      * @param charQuotation the character to use ({@code '}, {@code "}, or {@code 0})
      * @return this instance for method chaining
-     * @throws IllegalArgumentException if an unsupported character is provided.
+     * @throws IllegalArgumentException if {@code charQuotation} is not {@code '}, {@code "} or {@code 0}.
      */
     public C setCharQuotation(final char charQuotation) throws IllegalArgumentException {
         if (charQuotation == SK.CHAR_ZERO || charQuotation == SK._SINGLE_QUOTE || charQuotation == SK._DOUBLE_QUOTE) {
@@ -184,7 +184,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      *
      * @param stringQuotation the character to use ({@code '}, {@code "}, or {@code 0})
      * @return this instance for method chaining
-     * @throws IllegalArgumentException if an unsupported character is provided.
+     * @throws IllegalArgumentException if {@code stringQuotation} is not {@code '}, {@code "} or {@code 0}.
      */
     public C setStringQuotation(final char stringQuotation) throws IllegalArgumentException {
         if (stringQuotation == SK.CHAR_ZERO || stringQuotation == SK._SINGLE_QUOTE || stringQuotation == SK._DOUBLE_QUOTE) {
@@ -216,7 +216,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
     /**
      * Disables string quotation by setting the quotation character to {@code 0}.
      * Strings will be serialized without surrounding quotes.
-     * Warning: This produces non-standard JSON/XML.
+     * Unquoted strings are non-standard JSON; XML element text normally has no surrounding quotes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -234,7 +234,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
     /**
      * Disables both character and string quotation.
      * All string and character values will be serialized without quotes.
-     * Warning: This produces non-standard JSON/XML.
+     * Unquoted strings and characters are non-standard JSON; XML element text normally has no surrounding quotes.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -770,6 +770,10 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
 
     /**
      * Sets whether to support circular references during serialization.
+     * When enabled, the JSON and XML parsers track objects on the current serialization path and
+     * write a null representation for a repeated reference. This prevents recursion; it does not
+     * encode object identities or reconstruct the original cycle when deserialized. When disabled,
+     * those parsers reject excessive nesting rather than tracking identities.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

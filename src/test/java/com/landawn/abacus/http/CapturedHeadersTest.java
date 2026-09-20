@@ -70,9 +70,8 @@ public class CapturedHeadersTest extends TestBase {
 
     @Test
     public void testCombinationAllowlistAndConditionalWildcards() {
-        for (final String name : new String[] { "Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language",
-                "Access-Control-Request-Headers", "Cache-Control", "Content-Language", "Expect", "Forwarded", "If-Match", "If-None-Match", "Pragma", "TE",
-                "Via", "X-Forwarded-For" }) {
+        for (final String name : new String[] { "Accept", "Accept-Charset", "Accept-Encoding", "Accept-Language", "Access-Control-Request-Headers",
+                "Cache-Control", "Content-Language", "Expect", "Forwarded", "If-Match", "If-None-Match", "Pragma", "TE", "Via", "X-Forwarded-For" }) {
             final String first = name.startsWith("If-") ? "\"one,two\"" : "one,two";
             final String second = name.startsWith("If-") ? "\"three\"" : "three";
             final HttpHeaders headers = HARUtil
@@ -94,8 +93,8 @@ public class CapturedHeadersTest extends TestBase {
         assertTrue(HARUtil.getHeadersByRequestEntry(Map.of()).isEmpty());
         assertTrue(HARUtil.getHeadersByRequestEntry(Map.of("headers", List.of())).isEmpty());
         HARUtil.setThreadLocalHeaderFilter((name, value) -> !"excluded".equals(value));
-        final Map<String, Object> entry = Map.of("headers",
-                Arrays.asList(null, Map.of("value", "missing-name"), header("Content-Type", "text/plain"), header("content-type", "excluded")));
+        // Structural validation comes first; filtering still precedes combination of valid headers.
+        final Map<String, Object> entry = Map.of("headers", List.of(header("Content-Type", "text/plain"), header("content-type", "excluded")));
         assertEquals("text/plain", HARUtil.getHeadersByRequestEntry(entry).getAsString("Content-Type"));
         final Map<String, String> nullHeader = new HashMap<>();
         nullHeader.put("name", "Accept");
@@ -104,6 +103,17 @@ public class CapturedHeadersTest extends TestBase {
                 () -> HARUtil.getHeadersByRequestEntry(Map.of("headers", List.of(nullHeader, header("Accept", "text/plain")))));
         assertThrows(IllegalArgumentException.class,
                 () -> HARUtil.getHeadersByRequestEntry(Map.of("headers", List.of(header("Accept", "text/plain"), nullHeader))));
+    }
+
+    @Test
+    public void testMalformedHeaderEntriesAreRejectedEvenWhenFilteredOut() {
+        HARUtil.setThreadLocalHeaderFilter((name, value) -> false);
+        // Null entries and entries without a name are malformed, even when the filter would discard them.
+        for (final Object malformed : Arrays.asList(null, Map.of("value", "missing-name"))) {
+            final Map<String, Object> entry = Map.of("headers", Arrays.asList(header("Accept", "text/plain"), malformed));
+            final IllegalArgumentException failure = assertThrows(IllegalArgumentException.class, () -> HARUtil.getHeadersByRequestEntry(entry));
+            assertTrue(failure.getMessage().contains("request.headers[1]"), failure.getMessage());
+        }
     }
 
     @Test
@@ -192,8 +202,7 @@ public class CapturedHeadersTest extends TestBase {
         assertEquals("100-continue, 100-continue", headers.getAsString("Expect"));
         assertEquals("x-a, x-b", headers.getAsString("Access-Control-Request-Headers"));
         // one entry per field, under the spelling first encountered
-        assertEquals(List.of("Via", "X-Forwarded-For", "Forwarded", "TE", "Expect", "Access-Control-Request-Headers"),
-                new ArrayList<>(headers.headerNames()));
+        assertEquals(List.of("Via", "X-Forwarded-For", "Forwarded", "TE", "Expect", "Access-Control-Request-Headers"), new ArrayList<>(headers.headerNames()));
 
         // both cURL generators combine them the same way instead of throwing
         final String curl = "curl https://example.test/ -H 'Via: 1.1 edge' -H 'via: 1.1 origin'"

@@ -22,8 +22,8 @@ import com.landawn.abacus.TestBase;
  *
  * <ul>
  *   <li>{@code Array.repeat(element, n, elementClass)} and {@code Array.repeat(a, n, elementClass)} now reject a
- *       {@code null} {@code elementClass} up front, naming the parameter the caller actually passed instead of
- *       leaking the internal {@code componentType} name from {@code Array.newInstance},</li>
+ *       {@code null} {@code elementClass} after validating {@code n} and before allocating the result, naming
+ *       the caller's parameter instead of leaking the internal {@code componentType} name from {@code Array.newInstance},</li>
  *   <li>{@code Array.random(start, end, len)} uses the fast {@code nextInt(bound)} path for a span of exactly
  *       {@code Integer.MAX_VALUE} - the bound is legal, so only a span that genuinely overflows an {@code int}
  *       needs {@code nextLong},</li>
@@ -70,10 +70,16 @@ public class ArrayIterablesIteratorsTest extends TestBase {
     }
 
     @Test
-    public void testRepeatWithElementClass_elementClassCheckedBeforeNegativeCount() {
-        // Both are invalid; elementClass is validated first, so that is the reported failure.
-        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> Array.repeat("x", -1, (Class<String>) null));
-        Assertions.assertTrue(e.getMessage().contains("elementClass"), e.getMessage());
+    public void testRepeatWithElementClass_negativeCountCheckedBeforeElementClass() {
+        // Both are invalid; n precedes elementClass in both overloads and must be validated first.
+        final IllegalArgumentException scalar = Assertions.assertThrows(IllegalArgumentException.class, () -> Array.repeat("x", -1, (Class<String>) null));
+        Assertions.assertTrue(scalar.getMessage().contains("'n'"), scalar.getMessage());
+
+        // Null and empty input arrays still validate the count before an allocation or early return.
+        for (final String[] input : new String[][] { { "x" }, {}, null }) {
+            final IllegalArgumentException array = Assertions.assertThrows(IllegalArgumentException.class, () -> Array.repeat(input, -1, (Class<String>) null));
+            Assertions.assertTrue(array.getMessage().contains("'n'"), array.getMessage());
+        }
     }
 
     @Test
@@ -87,8 +93,11 @@ public class ArrayIterablesIteratorsTest extends TestBase {
         Assertions.assertArrayEquals(new Integer[0], Array.repeat((Integer[]) null, 5, Integer.class));
 
         // The negative-count contract is unchanged for a valid elementClass.
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Array.repeat("x", -1, String.class));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Array.repeat(new String[] { "x" }, -1, String.class));
+        final IllegalArgumentException scalarCount = Assertions.assertThrows(IllegalArgumentException.class, () -> Array.repeat("x", -1, String.class));
+        Assertions.assertTrue(scalarCount.getMessage().contains("'n'"), scalarCount.getMessage());
+        final IllegalArgumentException arrayCount = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Array.repeat(new String[] { "x" }, -1, String.class));
+        Assertions.assertTrue(arrayCount.getMessage().contains("'n'"), arrayCount.getMessage());
 
         // The result's component type comes from elementClass, so a sibling subtype can be stored.
         final Number[] widened = Array.repeat(Integer.valueOf(1), 2, Number.class);

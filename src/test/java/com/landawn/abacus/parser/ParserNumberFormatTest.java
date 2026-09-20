@@ -181,26 +181,86 @@ public class ParserNumberFormatTest extends TestBase {
         private float f;
         @JsonXmlField(numberFormat = "0.00")
         private Number n;
-        public java.math.BigDecimal getPrice() { return price; }
-        public void setPrice(java.math.BigDecimal price) { this.price = price; }
-        public java.math.BigDecimal getTiny() { return tiny; }
-        public void setTiny(java.math.BigDecimal tiny) { this.tiny = tiny; }
-        public java.math.BigInteger getBig() { return big; }
-        public void setBig(java.math.BigInteger big) { this.big = big; }
-        public long getId() { return id; }
-        public void setId(long id) { this.id = id; }
-        public Long getBoxed() { return boxed; }
-        public void setBoxed(Long boxed) { this.boxed = boxed; }
-        public int getI() { return i; }
-        public void setI(int i) { this.i = i; }
-        public short getSh() { return sh; }
-        public void setSh(short sh) { this.sh = sh; }
-        public byte getBt() { return bt; }
-        public void setBt(byte bt) { this.bt = bt; }
-        public float getF() { return f; }
-        public void setF(float f) { this.f = f; }
-        public Number getN() { return n; }
-        public void setN(Number n) { this.n = n; }
+
+        public java.math.BigDecimal getPrice() {
+            return price;
+        }
+
+        public void setPrice(java.math.BigDecimal price) {
+            this.price = price;
+        }
+
+        public java.math.BigDecimal getTiny() {
+            return tiny;
+        }
+
+        public void setTiny(java.math.BigDecimal tiny) {
+            this.tiny = tiny;
+        }
+
+        public java.math.BigInteger getBig() {
+            return big;
+        }
+
+        public void setBig(java.math.BigInteger big) {
+            this.big = big;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        public Long getBoxed() {
+            return boxed;
+        }
+
+        public void setBoxed(Long boxed) {
+            this.boxed = boxed;
+        }
+
+        public int getI() {
+            return i;
+        }
+
+        public void setI(int i) {
+            this.i = i;
+        }
+
+        public short getSh() {
+            return sh;
+        }
+
+        public void setSh(short sh) {
+            this.sh = sh;
+        }
+
+        public byte getBt() {
+            return bt;
+        }
+
+        public void setBt(byte bt) {
+            this.bt = bt;
+        }
+
+        public float getF() {
+            return f;
+        }
+
+        public void setF(float f) {
+            this.f = f;
+        }
+
+        public Number getN() {
+            return n;
+        }
+
+        public void setN(Number n) {
+            this.n = n;
+        }
     }
 
     @Test
@@ -318,8 +378,8 @@ public class ParserNumberFormatTest extends TestBase {
     @Test
     public void fixG08_F107_incompleteNumberFormatParseThrowsParsingException() {
         for (String text : new String[] { "12abc", "abc", "1,234.50x", "-" }) {
-            com.landawn.abacus.exception.ParsingException e = org.junit.jupiter.api.Assertions.assertThrows(
-                    com.landawn.abacus.exception.ParsingException.class, () -> parser.deserialize("{\"amount\":\"" + text + "\"}", Grouped.class), text);
+            com.landawn.abacus.exception.ParsingException e = org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class,
+                    () -> parser.deserialize("{\"amount\":\"" + text + "\"}", Grouped.class), text);
             assertTrue(e.getMessage().startsWith("Failed to parse complete number value: " + text), e.getMessage());
         }
 

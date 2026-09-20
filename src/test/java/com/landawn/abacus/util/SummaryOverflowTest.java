@@ -85,7 +85,7 @@ public class SummaryOverflowTest extends TestBase {
         assertRejectedUnchanged(() -> snapshot(negative), () -> negative.combine(new ByteSummaryStatistics(1, (byte) -1, (byte) -1, -1)));
         full.combine(new ByteSummaryStatistics());
         assertEquals(Long.MAX_VALUE, full.getCount());
-        assertThrows(NullPointerException.class, () -> full.combine(null));
+        assertThrows(IllegalArgumentException.class, () -> full.combine(null));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class SummaryOverflowTest extends TestBase {
         assertRejectedUnchanged(() -> snapshot(negative), () -> negative.combine(new ShortSummaryStatistics(1, (short) -1, (short) -1, -1)));
         full.combine(new ShortSummaryStatistics());
         assertEquals(Long.MAX_VALUE, full.getCount());
-        assertThrows(NullPointerException.class, () -> full.combine(null));
+        assertThrows(IllegalArgumentException.class, () -> full.combine(null));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class SummaryOverflowTest extends TestBase {
         assertEquals(Long.MAX_VALUE, positive.getSum());
         full.combine(new CharSummaryStatistics());
         assertEquals(Long.MAX_VALUE, full.getCount());
-        assertThrows(NullPointerException.class, () -> full.combine(null));
+        assertThrows(IllegalArgumentException.class, () -> full.combine(null));
 
         final CharSummaryStatistics unicode = new CharSummaryStatistics();
         unicode.accept((char) 0xd83d);
@@ -150,7 +150,7 @@ public class SummaryOverflowTest extends TestBase {
         assertEquals(BigInteger.ZERO, stats.getMin());
         assertEquals(BigInteger.ONE, stats.getMax());
         assertThrows(IllegalArgumentException.class, () -> stats.accept(null));
-        assertThrows(NullPointerException.class, () -> stats.combine(null));
+        assertThrows(IllegalArgumentException.class, () -> stats.combine(null));
 
         final BigIntegerSummaryStatistics self = new BigIntegerSummaryStatistics();
         self.accept(BigInteger.TEN);
@@ -172,7 +172,7 @@ public class SummaryOverflowTest extends TestBase {
         assertEquals(BigDecimal.ZERO, stats.getMin());
         assertEquals(BigDecimal.ONE, stats.getMax());
         assertThrows(IllegalArgumentException.class, () -> stats.accept(null));
-        assertThrows(NullPointerException.class, () -> stats.combine(null));
+        assertThrows(IllegalArgumentException.class, () -> stats.combine(null));
 
         final BigDecimal huge = new BigDecimal(BigInteger.ONE, Integer.MIN_VALUE);
         final BigDecimal tiny = new BigDecimal(BigInteger.ONE, Integer.MAX_VALUE);
@@ -197,7 +197,7 @@ public class SummaryOverflowTest extends TestBase {
         assertEquals(Long.MAX_VALUE, full.getCount());
         assertEquals(1f, full.getMin());
         assertEquals(1f, full.getMax());
-        assertThrows(NullPointerException.class, () -> full.combine(null));
+        assertThrows(IllegalArgumentException.class, () -> full.combine(null));
 
         final FloatSummaryStatistics zeros = new FloatSummaryStatistics();
         zeros.accept(-0f);

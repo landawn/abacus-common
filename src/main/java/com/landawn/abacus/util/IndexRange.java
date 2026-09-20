@@ -173,6 +173,7 @@ public record IndexRange(int start, int end) {
     /**
      * Checks whether this range lies entirely after the specified index, i.e. every index
      * in this range is greater than the specified index.
+     * Empty ranges are compared by position: the result is {@code start > index}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -225,6 +226,7 @@ public record IndexRange(int start, int end) {
     /**
      * Checks whether this range lies entirely before the specified index, i.e. every index
      * in this range is less than the specified index.
+     * Empty ranges are compared by position: the result is {@code end <= index}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

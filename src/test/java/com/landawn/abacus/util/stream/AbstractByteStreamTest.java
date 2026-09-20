@@ -76,8 +76,7 @@ public class AbstractByteStreamTest extends TestBase {
             return (byte) (left + right);
         })) {
             final com.landawn.abacus.util.ByteIterator iter = stream.iterator();
-            org.junit.jupiter.api.Assertions.assertSame(failure,
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextByte));
+            org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextByte));
             org.junit.jupiter.api.Assertions.assertEquals((byte) 2, iter.nextByte());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertEquals((byte) 5, iter.nextByte());

@@ -21,6 +21,59 @@ import com.landawn.abacus.util.stream.ShortStream;
 public class ShortIteratorTest extends TestBase {
 
     @Test
+    public void testDeferRejectsReturningItself() {
+        for (int mode = 0; mode < 2; mode++) {
+            final int[] supplierCalls = { 0 };
+            final java.util.concurrent.atomic.AtomicReference<ShortIterator> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final ShortIterator iterator = ShortIterator.defer(() -> {
+                supplierCalls[0]++;
+                return reference.get();
+            });
+            reference.set(iterator);
+
+            final IllegalStateException failure = mode == 0 ? assertThrows(IllegalStateException.class, iterator::hasNext)
+                    : assertThrows(IllegalStateException.class, iterator::nextShort);
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::nextShort));
+            assertEquals(1, supplierCalls[0]);
+        }
+    }
+
+    @Test
+    public void testDeferCachesRecursiveInitializationFailure() {
+        for (int mode = 0; mode < 4; mode++) {
+            final boolean catchRecursion = (mode & 1) != 0;
+            final int[] supplierCalls = { 0 };
+            final ShortIterator[] reference = new ShortIterator[1];
+            final IllegalStateException[] recursiveFailure = new IllegalStateException[1];
+            reference[0] = ShortIterator.defer(() -> {
+                if (++supplierCalls[0] > 1) {
+                    throw new AssertionError("Supplier must not be reentered");
+                }
+
+                try {
+                    reference[0].hasNext();
+                } catch (final IllegalStateException failure) {
+                    recursiveFailure[0] = failure;
+                    if (!catchRecursion) {
+                        throw failure;
+                    }
+                }
+
+                return ShortIterator.empty();
+            });
+
+            final ShortIterator iterator = reference[0];
+            final IllegalStateException failure = mode < 2 ? assertThrows(IllegalStateException.class, iterator::hasNext)
+                    : assertThrows(IllegalStateException.class, iterator::nextShort);
+            assertSame(recursiveFailure[0], failure);
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::nextShort));
+            assertEquals(1, supplierCalls[0]);
+        }
+    }
+
+    @Test
     public void testShortCircuitStreamLeavesRemainingElements() {
         final ShortIterator iter = ShortIterator.of((short) 1, (short) 2, (short) 3);
 

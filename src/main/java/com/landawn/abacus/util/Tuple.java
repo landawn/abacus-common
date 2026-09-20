@@ -178,7 +178,8 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Access Time:</b> O(1) - Direct field access without method call overhead</li>
  *   <li><b>Memory Overhead:</b> Minimal - Only standard object header plus final field references</li>
  *   <li><b>Iteration Cost:</b> O(n) where n is the arity; {@code forEach} simply invokes the consumer once per field (no reflection)</li>
- *   <li><b>Comparison Cost:</b> O(n) for {@code equals()}, compares all elements</li>
+ *   <li><b>Comparison Cost:</b> At most n element comparisons for {@code equals()}, with each comparison
+ *       taking the time required by the corresponding element's {@code equals()} implementation</li>
  * </ul>
  *
  * <p><b>Equality:</b> Tuple elements are compared with {@link N#equals(Object, Object)} and
@@ -1010,7 +1011,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the type of the element in the tuple.
      * @param tp the Tuple1 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the single element; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -1036,7 +1037,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple2 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the two elements, in order; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -1062,7 +1063,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple3 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the three elements, in order; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -1088,7 +1089,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple4 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the four elements, in order; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -1115,7 +1116,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple5 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the five elements, in order; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -1142,7 +1143,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple6 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the six elements, in order; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -1170,7 +1171,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple7 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the seven elements, in order; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -1199,7 +1200,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple8 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the eight elements, in order; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -1228,7 +1229,7 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T> the common type of the elements in the tuple.
      * @param tp the Tuple9 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the nine elements, in order; it is a snapshot, not a view -
-     *         changing it does not affect the tuple
+     *         changing the list structure does not affect the tuple; element objects remain shared
      * @throws IllegalArgumentException if {@code tp} is {@code null}.
      */
     @Beta
@@ -2449,9 +2450,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <A> the component type of the array.
          * @param a the array to fill.
          * @return the filled array.
+         * @throws NullPointerException if the specified array is {@code null}.
+         * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+         *         of the runtime type of every element in this tuple.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 3) {
                 a = N.copyOf(a, 3);
             }
@@ -2776,9 +2780,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <A> the component type of the array.
          * @param a the array to fill.
          * @return the filled array.
+         * @throws NullPointerException if the specified array is {@code null}.
+         * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+         *         of the runtime type of every element in this tuple.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 4) {
                 a = N.copyOf(a, 4);
             }
@@ -2998,9 +3005,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <A> the component type of the array.
          * @param a the array to fill.
          * @return the filled array.
+         * @throws NullPointerException if the specified array is {@code null}.
+         * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+         *         of the runtime type of every element in this tuple.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 5) {
                 a = N.copyOf(a, 5);
             }
@@ -3229,9 +3239,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <A> the component type of the array.
          * @param a the array to fill.
          * @return the filled array.
+         * @throws NullPointerException if the specified array is {@code null}.
+         * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+         *         of the runtime type of every element in this tuple.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 6) {
                 a = N.copyOf(a, 6);
             }
@@ -3469,9 +3482,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <A> the component type of the array.
          * @param a the array to fill.
          * @return the filled array.
+         * @throws NullPointerException if the specified array is {@code null}.
+         * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+         *         of the runtime type of every element in this tuple.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 7) {
                 a = N.copyOf(a, 7);
             }
@@ -3719,9 +3735,12 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * @param <A> the component type of the array.
          * @param a the array to fill.
          * @return the filled array.
+         * @throws NullPointerException if the specified array is {@code null}.
+         * @throws ArrayStoreException if the runtime type of the specified array is not a supertype
+         *         of the runtime type of every element in this tuple.
          */
         @Override
-        public <A> A[] toArray(A[] a) {
+        public <A> A[] toArray(A[] a) throws NullPointerException, ArrayStoreException {
             if (a.length < 8) {
                 a = N.copyOf(a, 8);
             }

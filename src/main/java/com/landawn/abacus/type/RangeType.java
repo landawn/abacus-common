@@ -309,6 +309,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Range to append
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the range text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -321,7 +322,7 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Range<T> x) throws IOException {
+    public void appendTo(final Appendable appendable, final Range<T> x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -346,10 +347,11 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @param writer the CharacterWriter to write to
      * @param x the Range to write
      * @param config the serialization configuration that determines string quotation
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the range text, configured string quotation or null literal to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Range<T> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Range<T> x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

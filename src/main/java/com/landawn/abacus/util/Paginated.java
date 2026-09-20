@@ -175,7 +175,7 @@ public interface Paginated<T> extends Iterable<T> {
      * // Calculate total items (if all pages are full except possibly the last)
      * int totalPages = customers.totalPages();
      * customers.lastPage().ifPresent(lastPage -> {
-     *     int totalItems = (totalPages - 1) * pageSize + lastPage.size();
+     *     long totalItems = (long) (totalPages - 1) * pageSize + lastPage.size();
      *     System.out.println("Total customers: " + totalItems);
      * });
      * }</pre>

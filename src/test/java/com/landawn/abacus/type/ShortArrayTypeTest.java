@@ -79,7 +79,6 @@ public class ShortArrayTypeTest extends TestBase {
         assertNotNull(shortArrayType.name());
     }
 
-
     @Test
     public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
         assertArrayEquals(new Short[] { 32767, null, -32768 }, shortArrayType.valueOf("[32767, null, -32768]"));

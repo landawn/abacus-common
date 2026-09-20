@@ -52,8 +52,7 @@ public class AbstractIntStreamTest extends TestBase {
             return (int) (left + right);
         })) {
             final com.landawn.abacus.util.IntIterator iter = stream.iterator();
-            org.junit.jupiter.api.Assertions.assertSame(failure,
-                    org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextInt));
+            org.junit.jupiter.api.Assertions.assertSame(failure, org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, iter::nextInt));
             org.junit.jupiter.api.Assertions.assertEquals((int) 2, iter.nextInt());
             org.junit.jupiter.api.Assertions.assertEquals(0, accumulatorCalls.get());
             org.junit.jupiter.api.Assertions.assertEquals((int) 5, iter.nextInt());
@@ -818,13 +817,11 @@ public class AbstractIntStreamTest extends TestBase {
     @Test
     public void testPrependAppendOptional_nullIsRejectedAndTheStreamIsClosed() {
         final MutableBoolean closed = MutableBoolean.of(false);
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> IntStream.of(1, 2).onClose(closed::setTrue).prepend((OptionalInt) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntStream.of(1, 2).onClose(closed::setTrue).prepend((OptionalInt) null));
         Assertions.assertTrue(closed.isTrue(), "prepend(null) must close the stream before throwing");
 
         closed.setFalse();
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> IntStream.of(1, 2).onClose(closed::setTrue).append((OptionalInt) null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> IntStream.of(1, 2).onClose(closed::setTrue).append((OptionalInt) null));
         Assertions.assertTrue(closed.isTrue(), "append(null) must close the stream before throwing");
 
         // the ordinary paths are unaffected

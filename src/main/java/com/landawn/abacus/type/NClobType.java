@@ -56,8 +56,9 @@ public class NClobType extends AbstractType<NClob> {
      * implementation remains distinguishable from the standard {@code NClob} interface in type metadata.
      *
      * @param clazz the specific {@link NClob} class or subclass to handle; must not be {@code null}
+     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
      */
-    NClobType(final Class<? extends NClob> clazz) {
+    NClobType(final Class<? extends NClob> clazz) throws IllegalArgumentException {
         super(ClassUtil.getSimpleClassName(clazz));
         this.clazz = (Class<NClob>) clazz;
     }

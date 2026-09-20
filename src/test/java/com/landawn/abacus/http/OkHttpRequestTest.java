@@ -137,6 +137,8 @@ public class OkHttpRequestTest extends TestBase {
     public void testInvalidUrlArguments() {
         assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.create((String) null, new OkHttpClient()));
         assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.create("", new OkHttpClient()));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.create((URL) null, new OkHttpClient()));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.create((HttpUrl) null, new OkHttpClient()));
     }
 
     @Test
@@ -183,6 +185,10 @@ public class OkHttpRequestTest extends TestBase {
     public void testInvalidUrl() {
         assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url(""));
         assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url((String) null));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url((URL) null));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url((HttpUrl) null));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url((URL) null, 1000L, 1000L));
+        assertThrows(IllegalArgumentException.class, () -> OkHttpRequest.url((HttpUrl) null, 1000L, 1000L));
     }
 
     // --- Configuration methods ---

@@ -321,10 +321,12 @@ public final class EmailUtil {
      *         or empty, or {@code props} is {@code null}.
      * @throws NullPointerException if a recipient address or an attachment path is {@code null}
      * @throws MessagingException if an address is invalid or the message cannot be assembled
+     * @throws IllegalStateException if an address carries a display name and this JVM does not support the
+     *         {@code UTF-8} charset, which every conformant JVM is required to provide
      */
     static MimeMessage createMessage(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
             final boolean isHTML, final String userName, final String password, final Properties props)
-            throws IllegalArgumentException, NullPointerException, MessagingException {
+            throws IllegalArgumentException, NullPointerException, MessagingException, IllegalStateException {
         N.checkArgNotEmpty(recipients, cs.recipients);
         N.checkArgNotEmpty(from, cs.from);
         N.checkArgNotNull(props, cs.props);
@@ -386,8 +388,10 @@ public final class EmailUtil {
      * @return the parsed address whose display name, if any, is UTF-8 encoded
      * @throws NullPointerException if {@code address} is {@code null}
      * @throws MessagingException if {@code address} is not a valid RFC 822 address
+     * @throws IllegalStateException if the address carries a display name and this JVM does not support the
+     *         {@code UTF-8} charset, which every conformant JVM is required to provide
      */
-    private static InternetAddress utf8Address(final String address) throws NullPointerException, MessagingException {
+    private static InternetAddress utf8Address(final String address) throws NullPointerException, MessagingException, IllegalStateException {
         final InternetAddress result = new InternetAddress(address);
         final String personal = result.getPersonal();
 

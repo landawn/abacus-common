@@ -186,7 +186,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      *         {@code ""}
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
-     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string included)
      */
     @Override
     public OptionalFloat get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException {
@@ -224,7 +224,7 @@ public class OptionalFloatType extends AbstractOptionalType<OptionalFloat> {
      *         {@code ""}
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
-     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string included)
      */
     @Override
     public OptionalFloat get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException {

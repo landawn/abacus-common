@@ -201,9 +201,12 @@ public final class OkHttpRequest {
      * @param url the URL object for the request
      * @param httpClient the OkHttpClient to use for executing the request
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}, or {@code httpClient} is {@code null}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, the scheme of {@code url} is not {@code http} or
+     *         {@code https}, or {@code httpClient} is {@code null}.
      */
     public static OkHttpRequest create(final URL url, final OkHttpClient httpClient) throws IllegalArgumentException {
+        N.checkArgNotNull(url, cs.url);
+
         return new OkHttpRequest(null, HttpUrl.get(url), httpClient);
     }
 
@@ -262,7 +265,8 @@ public final class OkHttpRequest {
      *
      * @param url the URL object for the request
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, or the scheme of {@code url} is not {@code http} or
+     *         {@code https}.
      */
     public static OkHttpRequest url(final URL url) throws IllegalArgumentException {
         return create(url, DEFAULT_CLIENT);
@@ -351,8 +355,8 @@ public final class OkHttpRequest {
      * @param connectTimeoutInMillis the connection timeout in milliseconds; must be non-negative and fit in an {@code int}
      * @param readTimeoutInMillis the read timeout in milliseconds; must be non-negative and fit in an {@code int}
      * @return a new OkHttpRequest instance
-     * @throws IllegalArgumentException if the scheme of {@code url} is not {@code http} or {@code https}, or
-     *         either timeout is negative or too large for an {@code int}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, the scheme of {@code url} is not {@code http} or
+     *         {@code https}, or either timeout is negative or too large for an {@code int}.
      */
     public static OkHttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
         return create(url, newClient(connectTimeoutInMillis, readTimeoutInMillis));
@@ -411,7 +415,7 @@ public final class OkHttpRequest {
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080")
      *     .connectTimeout(5000) // 5 seconds
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * <p>Following OkHttp's own contract, {@code 0} means <i>no timeout</i> — not "use the default",
@@ -437,7 +441,7 @@ public final class OkHttpRequest {
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080")
      *     .connectTimeout(Duration.ofSeconds(5))
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * <p>The timeout is applied with millisecond precision. A positive duration shorter than one
@@ -497,7 +501,7 @@ public final class OkHttpRequest {
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080")
      *     .readTimeout(10000) // 10 seconds
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * <p>Following OkHttp's own contract, {@code 0} means <i>no timeout</i> — not "use the default",
@@ -523,7 +527,7 @@ public final class OkHttpRequest {
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080")
      *     .readTimeout(Duration.ofSeconds(10))
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * <p>The timeout is applied with millisecond precision. A positive duration shorter than one
@@ -558,7 +562,7 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest.url("http://localhost:18080/data")
      *     .cacheControl(cacheControl)
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * @param cacheControl the cache control directives
@@ -573,33 +577,37 @@ public final class OkHttpRequest {
     }
 
     /**
-     * Attaches {@code tag} to the request. It can be used later to cancel the request. If the tag
-     * is unspecified or {@code null}, the request is canceled by using the request itself as the tag.
+     * Attaches {@code tag} to the request under the {@code Object.class} key. It can be used to
+     * identify calls for cancellation. Passing {@code null} removes the tag.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Object requestTag = "my-request-id";
      * OkHttpClient client = new OkHttpClient();
-     * OkHttpRequest.create("http://localhost:18080/data", client)
-     *     .tag(requestTag)
-     *     .asyncGet();
+     * try {
+     *     ContinuableFuture<Response> future = OkHttpRequest.create("http://localhost:18080/data", client)
+     *         .tag(requestTag)
+     *         .asyncGet();
      *
-     * // Later, cancel the request using the tag
-     * for (okhttp3.Call call : client.dispatcher().queuedCalls()) {
-     *     if (requestTag.equals(call.request().tag())) {
-     *         call.cancel();
+     *     // Later, cancel matching calls that have started executing in OkHttp.
+     *     // Work still waiting in the request executor is not yet visible to the dispatcher.
+     *     for (okhttp3.Call call : client.dispatcher().runningCalls()) {
+     *         if (requestTag.equals(call.request().tag())) {
+     *             call.cancel();
+     *         }
      *     }
-     * }
-     * for (okhttp3.Call call : client.dispatcher().runningCalls()) {
-     *     if (requestTag.equals(call.request().tag())) {
-     *         call.cancel();
+     *     // Observe completion and close any response delivered before cancellation.
+     *     try (Response response = future.get()) {
+     *         // Consume the response if the call succeeded.
      *     }
+     * } finally {
+     *     // Release this example's dedicated client even if the request fails or is cancelled.
+     *     client.dispatcher().executorService().shutdown();
+     *     client.connectionPool().evictAll();
      * }
-     * client.dispatcher().executorService().shutdown();
-     * client.connectionPool().evictAll();
      * }</pre>
      *
-     * @param tag the tag to attach to the request
+     * @param tag the tag to attach to the request, or {@code null} to remove it
      * @return this OkHttpRequest instance for method chaining
      */
     public OkHttpRequest tag(final Object tag) {
@@ -628,7 +636,7 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest.url("http://localhost:18080/data")
      *     .tag(RequestMetadata.class, metadata)
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * @param <T> the type of the tag
@@ -648,7 +656,7 @@ public final class OkHttpRequest {
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080/secure")
      *     .basicAuth("username", "password")
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * <p>Neither argument is validated: a {@code null} username or password is stringified as the
@@ -674,7 +682,7 @@ public final class OkHttpRequest {
      * OkHttpRequest.url("http://localhost:18080/data")
      *     .header("Accept", "application/json")
      *     .header("User-Agent", "MyApp/1.0")
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * @param name the header name
@@ -766,7 +774,7 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest.url("http://localhost:18080/data")
      *     .headers(headers)
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * @param headers A map containing header names and values
@@ -929,7 +937,7 @@ public final class OkHttpRequest {
      * <pre>{@code
      * OkHttpRequest.url("http://localhost:18080/search")
      *     .query("q=java&limit=10")
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * @param query the query string
@@ -954,7 +962,7 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest.url("http://localhost:18080/search")
      *     .query(params)
-     *     .get();
+     *     .get(String.class);
      * }</pre>
      *
      * @param queryParams A map containing query parameter names and values
@@ -974,7 +982,7 @@ public final class OkHttpRequest {
      * String json = "{\"name\":\"John\",\"age\":30}";
      * OkHttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(json)
-     *     .post();
+     *     .post(String.class);
      * }</pre>
      *
      * @param json the JSON string to send as the request body
@@ -994,7 +1002,7 @@ public final class OkHttpRequest {
      * User user = new User("John", 30);
      * OkHttpRequest.url("http://localhost:18080/users")
      *     .jsonBody(user)
-     *     .post();
+     *     .post(String.class);
      * }</pre>
      *
      * @param obj the object to serialize to JSON and send as the request body
@@ -1012,7 +1020,7 @@ public final class OkHttpRequest {
      * String xml = "<user><name>John</name><age>30</age></user>";
      * OkHttpRequest.url("http://localhost:18080/users")
      *     .xmlBody(xml)
-     *     .post();
+     *     .post(String.class);
      * }</pre>
      *
      * @param xml the XML string to send as the request body
@@ -1032,7 +1040,7 @@ public final class OkHttpRequest {
      * User user = new User("John", 30);
      * OkHttpRequest.url("http://localhost:18080/users")
      *     .xmlBody(user)
-     *     .post();
+     *     .post(String.class);
      * }</pre>
      *
      * @param obj the object to serialize to XML and send as the request body
@@ -1055,7 +1063,7 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest.url("http://localhost:18080/login")
      *     .formBody(formData)
-     *     .post();
+     *     .post(String.class);
      * }</pre>
      *
      * @param formBodyByMap A map containing form field names and values
@@ -1096,7 +1104,7 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest.url("http://localhost:18080/login")
      *     .formBody(login)
-     *     .post();
+     *     .post(String.class);
      * }</pre>
      *
      * @param formBodyByBean a bean object whose properties will be used as form fields
@@ -1139,7 +1147,7 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
      *         .body(body);
-     * // req.post();   // returns the response when executed (network)
+     * // String result = req.post(String.class);   // executes the request (network)
      * }</pre>
      *
      * @param body the RequestBody to use
@@ -1158,11 +1166,11 @@ public final class OkHttpRequest {
      * <pre>{@code
      * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
      *         .body("{\"k\":1}", MediaType.get("application/json"));
-     * // req.post();   // returns the response when executed (network)
+     * // String result = req.post(String.class);   // executes the request (network)
      * }</pre>
      *
      * @param content the string content of the request body
-     * @param contentType the media type of the content, or {@code null} to use default
+     * @param contentType the media type of the content, or {@code null} for a body without a declared media type
      * @return this OkHttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code content} is {@code null}.
      * @see RequestBody#create(String, MediaType)
@@ -1184,11 +1192,11 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
      *         .body(content, MediaType.get("application/json"));
-     * // req.post();   // returns the response when executed (network)
+     * // String result = req.post(String.class);   // executes the request (network)
      * }</pre>
      *
      * @param content the byte array content of the request body
-     * @param contentType the media type of the content, or {@code null} to use default
+     * @param contentType the media type of the content, or {@code null} for a body without a declared media type
      * @return this OkHttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code content} is {@code null}.
      * @see RequestBody#create(byte[], MediaType)
@@ -1211,13 +1219,13 @@ public final class OkHttpRequest {
      * // Send only the 7 bytes starting at offset 2, i.e. {"k":1}
      * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/data")
      *         .body(content, 2, 7, MediaType.get("application/json"));
-     * // req.post();   // returns the response when executed (network)
+     * // String result = req.post(String.class);   // executes the request (network)
      * }</pre>
      *
      * @param content the byte array content of the request body
      * @param offset the offset in the byte array to start reading from
      * @param byteCount the number of bytes to read from the array
-     * @param contentType the media type of the content, or {@code null} to use default
+     * @param contentType the media type of the content, or {@code null} for a body without a declared media type
      * @return this OkHttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code content} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code offset} or {@code byteCount} lies outside {@code content}
@@ -1242,11 +1250,11 @@ public final class OkHttpRequest {
      *
      * OkHttpRequest req = OkHttpRequest.url("http://localhost:18080/upload")
      *         .body(file, MediaType.get("application/json"));
-     * // req.post();   // returns the response when executed (network)
+     * // String result = req.post(String.class);   // executes the request (network)
      * }</pre>
      *
      * @param content the file containing the request body content
-     * @param contentType the media type of the content, or {@code null} to use default
+     * @param contentType the media type of the content, or {@code null} for a body without a declared media type
      * @return this OkHttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code content} is {@code null}.
      * @see RequestBody#create(File, MediaType)
@@ -1339,10 +1347,11 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T post(final Class<T> resultClass) throws UncheckedIOException, HttpResponseException {
+    public <T> T post(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.POST, resultClass);
     }
 
@@ -1382,10 +1391,11 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T put(final Class<T> resultClass) throws UncheckedIOException, HttpResponseException {
+    public <T> T put(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.PUT, resultClass);
     }
 
@@ -1425,10 +1435,11 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException, HttpResponseException {
+    public <T> T patch(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.PATCH, resultClass);
     }
 
@@ -1464,10 +1475,11 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
-    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException, HttpResponseException {
+    public <T> T delete(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.DELETE, resultClass);
     }
 
@@ -1744,7 +1756,8 @@ public final class OkHttpRequest {
 
     /**
      * Executes a GET request asynchronously using the specified executor.
-     * The request is executed on the provided executor and returns immediately with a ContinuableFuture.
+     * The provided executor determines where the request runs. A direct executor may run it on
+     * the calling thread before this method returns its ContinuableFuture.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

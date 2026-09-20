@@ -60,7 +60,7 @@ import com.landawn.abacus.util.cs;
  * {@link IllegalStateException} at execution time rather than silently dropping the payload.</p>
  *
  * <p><b>Asynchronous execution:</b> the {@code async*} methods validate their own arguments
- * synchronously ({@code null} method, executor or output) but perform every other check when the
+ * synchronously ({@code null} method or executor) but validate output targets and perform other checks when the
  * task runs, so an unsupported {@link HttpMethod#PATCH} ({@link UnsupportedOperationException}), a
  * payload/method mismatch ({@link IllegalStateException}) and the in-flight limit
  * ({@link java.util.concurrent.RejectedExecutionException}) are reported through the returned
@@ -159,10 +159,11 @@ public final class HttpRequest {
      *
      * @param url The target URL for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or its scheme is not {@code http} or
-     *         {@code https}.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, empty, relative, or has malformed URI syntax, or its
+     *         recognized protocol is neither HTTP nor HTTPS.
+     * @throws UncheckedIOException if converting the URL text to a URL fails, including when its protocol has no installed handler
      */
-    public static HttpRequest url(final String url) throws IllegalArgumentException {
+    public static HttpRequest url(final String url) throws IllegalArgumentException, UncheckedIOException {
         return url(url, HttpClient.DEFAULT_CONNECTION_TIMEOUT, HttpClient.DEFAULT_READ_TIMEOUT);
     }
 
@@ -183,10 +184,12 @@ public final class HttpRequest {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, its scheme is not {@code http} or
-     *         {@code https}, or either timeout is negative.
+     * @throws IllegalArgumentException if {@code url} is {@code null}, empty, relative, or has malformed URI syntax, or its
+     *         recognized protocol is neither HTTP nor HTTPS, or a supplied connection limit or timeout is negative.
+     * @throws UncheckedIOException if converting the URL text to a URL fails, including when its protocol has no installed handler
      */
-    public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
+    public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis)
+            throws IllegalArgumentException, UncheckedIOException {
         return new HttpRequest(HttpClient.create(url, 1, connectTimeoutInMillis, readTimeoutInMillis));
     }
 
@@ -636,7 +639,7 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param sslSocketFactory The SSL socket factory to use; {@code null} clears any previously set
-     *        factory so the platform default is used.
+     *        factory so the client-level factory applies, or the platform default if the client has none.
      * @return This HttpRequest instance for method chaining
      * @see HttpSettings#setSSLSocketFactory(SSLSocketFactory)
      */
@@ -660,8 +663,8 @@ public final class HttpRequest {
      *     .get();
      * }</pre>
      *
-     * @param proxy The proxy to use; {@code null} clears any previously set proxy so the connection
-     *        is made directly.
+     * @param proxy The proxy to use; {@code null} clears the request-level override so the client-level
+     *        proxy or platform proxy selection applies. Use {@link Proxy#NO_PROXY} to request a direct connection.
      * @return This HttpRequest instance for method chaining
      * @see HttpSettings#setProxy(Proxy)
      */
@@ -807,7 +810,7 @@ public final class HttpRequest {
      *     .post();
      * }</pre>
      *
-     * @param obj The object to serialize as XML. Must not be {@code null}.
+     * @param obj The object to serialize as XML through {@link N#toXml(Object)}; may be {@code null}.
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest xmlBody(final Object obj) {
@@ -854,7 +857,7 @@ public final class HttpRequest {
      *     .post();
      * }</pre>
      *
-     * @param formBodyByBean A bean object whose properties will be used as form fields. Must not be {@code null}.
+     * @param formBodyByBean A bean object whose properties will be used as form fields, or {@code null} for no body.
      * @return This HttpRequest instance for method chaining
      */
     public HttpRequest formBody(final Object formBodyByBean) {
@@ -1105,7 +1108,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @return The HttpResponse object containing status code, headers, and response body
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
-     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if the configured query or body is incompatible with {@code httpMethod}; see {@link #execute(HttpMethod, Class)}
      * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
@@ -1130,7 +1133,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
-     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS}
      *         (a body method), or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
      * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
@@ -1161,7 +1164,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}
-     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS}
      *         (a body method), or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
      * @throws UncheckedIOException if sending the HTTP request, reading its response, or opening, writing or closing {@code output}
@@ -1171,6 +1174,7 @@ public final class HttpRequest {
     public void execute(final HttpMethod httpMethod, final File output)
             throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
+        N.checkArgNotNull(output, cs.output);
         checkSupportedMethod(httpMethod);
 
         final Object requestData = requestFor(httpMethod);
@@ -1197,7 +1201,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}.
-     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is
      *         {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS} (a body method), or
      *         {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
@@ -1208,6 +1212,7 @@ public final class HttpRequest {
     public void execute(final HttpMethod httpMethod, final OutputStream output)
             throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
+        N.checkArgNotNull(output, cs.output);
         checkSupportedMethod(httpMethod);
 
         final Object requestData = requestFor(httpMethod);
@@ -1234,7 +1239,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
      * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}.
-     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH}
+     * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is
      *         {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS} (a body method), or
      *         {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
@@ -1245,6 +1250,7 @@ public final class HttpRequest {
     public void execute(final HttpMethod httpMethod, final Writer output)
             throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
+        N.checkArgNotNull(output, cs.output);
         checkSupportedMethod(httpMethod);
 
         final Object requestData = requestFor(httpMethod);
@@ -1312,7 +1318,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous GET request with a custom executor and returns a ContinuableFuture with the HttpResponse.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1352,7 +1358,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous GET request with a custom executor and deserializes the response to the specified type.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1394,7 +1400,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous POST request with a custom executor and returns a ContinuableFuture with the HttpResponse.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1437,7 +1443,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous POST request with a custom executor and deserializes the response to the specified type.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1480,7 +1486,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous PUT request with a custom executor and returns a ContinuableFuture with the HttpResponse.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1523,7 +1529,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous PUT request with a custom executor and deserializes the response to the specified type.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1565,7 +1571,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous DELETE request with a custom executor and returns a ContinuableFuture with the HttpResponse.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1606,7 +1612,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous DELETE request with a custom executor and deserializes the response to the specified type.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1647,7 +1653,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HEAD request with a custom executor and returns a ContinuableFuture with the HttpResponse.
-     * The request is executed on the provided executor's thread pool. HEAD requests retrieve only headers without the body.
+     * The provided executor controls the execution thread; a direct executor runs the request inline. HEAD requests retrieve only headers without the body.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1719,16 +1725,19 @@ public final class HttpRequest {
      * }</pre>
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
-     * @return A ContinuableFuture that will complete with the HttpResponse
+     * @return A ContinuableFuture that will complete with the HttpResponse; an unsupported
+     *         {@link HttpMethod#PATCH} ({@link UnsupportedOperationException}) or a payload/method
+     *         mismatch ({@link IllegalStateException}) fails the future instead of throwing here
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
      */
     @Beta
-    public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod) {
+    public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod) throws IllegalArgumentException {
         return asyncExecute(httpMethod, HttpResponse.class);
     }
 
     /**
      * Executes an asynchronous HTTP request with the specified method and a custom executor.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1741,7 +1750,7 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
-     * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or {@code httpMethod} is {@code null}.
      */
     @Beta
     public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod, final Executor executor) throws IllegalArgumentException {
@@ -1780,7 +1789,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HTTP request with the specified method, custom executor, and deserializes the response to the specified type.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1795,7 +1804,7 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
-     * @throws IllegalArgumentException if {@code executor} is {@code null}, or {@code httpMethod} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code executor} is {@code null}.
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)
@@ -1841,7 +1850,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HTTP request with a custom executor and writes the response body to a file.
-     * The request is executed on the provided executor's thread pool.
+     * The provided executor controls the execution thread; a direct executor runs the request inline.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1856,7 +1865,7 @@ public final class HttpRequest {
      * @param output The file to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the file
-     * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code executor} is {@code null}.
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Executor executor) throws IllegalArgumentException {
@@ -1906,7 +1915,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HTTP request with a custom executor and writes the response body to an output stream.
-     * The request is executed on the provided executor's thread pool. The output stream is not closed by this method.
+     * The provided executor controls the execution thread; a direct executor runs the request inline. The output stream is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1921,7 +1930,7 @@ public final class HttpRequest {
      * @param output The output stream to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the stream
-     * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code executor} is {@code null}.
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output, final Executor executor)
@@ -1972,7 +1981,7 @@ public final class HttpRequest {
 
     /**
      * Executes an asynchronous HTTP request with a custom executor and writes the response body to a writer.
-     * The request is executed on the provided executor's thread pool. The writer is not closed by this method.
+     * The provided executor controls the execution thread; a direct executor runs the request inline. The writer is not closed by this method.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1987,7 +1996,7 @@ public final class HttpRequest {
      * @param output The writer to write the response body to. Must not be {@code null}.
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the writer
-     * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code executor} is {@code null}.
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Executor executor) throws IllegalArgumentException {

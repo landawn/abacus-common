@@ -167,10 +167,11 @@ import com.landawn.abacus.util.stream.Stream;
  *       rather than throwing exceptions.</li>
  *   <li><b>Empty over Null:</b> Methods prefer returning empty String/Array/Collection/Map/Iterator/Iterable
  *       over {@code null} when appropriate.</li>
- *   <li><b>Exception Philosophy:</b> Exceptions are thrown only when the method contract is violated
+ *   <li><b>Exception Philosophy:</b> Invalid arguments are rejected when the method contract is violated
  *       (e.g., {@link #add(Object[], Object) adding to a null Object array}, whose runtime component type cannot
  *       be fabricated). Safe operations on a {@code null} or empty input (e.g., {@link #reverse(Object[])}) are
- *       no-ops or return an empty/defaulted result rather than throwing.</li>
+ *       no-ops or return an empty/defaulted result. Exceptions from callbacks and underlying operations
+ *       may also propagate.</li>
  *   <li><b>Index Conventions:</b> Most methods use {@code fromIndex} and {@code toIndex}
  *       parameters (half-open ranges [fromIndex, toIndex)). The two-container range overloads over arrays
  *       ({@code equals}/{@code deepEquals}/{@code equalsIgnoreCase}/{@code compare}/{@code compareUnsigned}/
@@ -963,9 +964,10 @@ public final class N extends CommonUtil {
      * @param <T> the type of elements in the iterable
      * @param c the iterable to count occurrences from
      * @return the map with elements as keys and occurrence counts as values (empty if iterable is {@code null} or empty)
+     * @throws IllegalArgumentException if an element occurs more than {@code Integer.MAX_VALUE} times in the iterable.
      * @see #frequencyMap(Iterable, Supplier)
      */
-    public static <T> Map<T, Integer> frequencyMap(final Iterable<? extends T> c) {
+    public static <T> Map<T, Integer> frequencyMap(final Iterable<? extends T> c) throws IllegalArgumentException {
         return frequencyMap(c, Suppliers.ofMap());
     }
 
@@ -990,7 +992,8 @@ public final class N extends CommonUtil {
      * @param c the iterable to count occurrences from
      * @param mapSupplier the supplier for the map to use (e.g., TreeMap::new for sorted keys)
      * @return the map with elements as keys and occurrence counts as values
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if an element occurs more than
+     *         {@code Integer.MAX_VALUE} times in the iterable.
      * @see #frequencyMap(Iterator)
      */
     public static <T> Map<T, Integer> frequencyMap(final Iterable<? extends T> c, final Supplier<Map<T, Integer>> mapSupplier) throws IllegalArgumentException {
@@ -1031,9 +1034,10 @@ public final class N extends CommonUtil {
      * @param <T> the type of elements in the iterator
      * @param iter the iterator to count occurrences from
      * @return the map with elements as keys and occurrence counts as values (empty if iterator is {@code null})
+     * @throws IllegalArgumentException if an element occurs more than {@code Integer.MAX_VALUE} times in the iterator.
      * @see #frequencyMap(Iterator, Supplier)
      */
-    public static <T> Map<T, Integer> frequencyMap(final Iterator<? extends T> iter) {
+    public static <T> Map<T, Integer> frequencyMap(final Iterator<? extends T> iter) throws IllegalArgumentException {
         return frequencyMap(iter, Suppliers.ofMap());
     }
 
@@ -1061,7 +1065,8 @@ public final class N extends CommonUtil {
      * @param iter the iterator to count occurrences from
      * @param mapSupplier the supplier for the map to use (e.g., TreeMap::new for sorted keys)
      * @return the map with elements as keys and occurrence counts as values
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}, or if an element occurs more than
+     *         {@code Integer.MAX_VALUE} times in the iterator.
      */
     public static <T> Map<T, Integer> frequencyMap(final Iterator<? extends T> iter, final Supplier<Map<T, Integer>> mapSupplier)
             throws IllegalArgumentException {
@@ -1665,8 +1670,8 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * List<String> fruits = Arrays.asList("apple", "banana", "cherry", "date");
-     * List<String> common = Arrays.asList("apple", "grape");
+     * Iterable<String> fruits = Arrays.asList("apple", "banana", "cherry", "date");
+     * Set<String> common = Set.of("apple", "grape");
      * boolean result = N.containsAny(fruits, common);   // returns true (found "apple")
      * }</pre>
      *
@@ -1928,7 +1933,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(boolean[], int)
      */
@@ -2003,7 +2008,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(char[], int)
      */
@@ -2078,7 +2083,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(byte[], int)
      */
@@ -2153,7 +2158,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(short[], int)
      */
@@ -2228,7 +2233,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(int[], int)
      */
@@ -2303,7 +2308,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(long[], int)
      */
@@ -2378,7 +2383,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(float[], int)
      */
@@ -2453,7 +2458,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(double[], int)
      */
@@ -2530,7 +2535,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of subarrays, or an empty list if the array is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(Object[], int)
      */
@@ -2606,7 +2611,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of sub-collections, or an empty list if the collection is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(Collection, int)
      */
@@ -2788,7 +2793,7 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param chunkSize the size of each chunk
      * @return a list of string chunks, or an empty list if the string is {@code null}/empty or fromIndex equals toIndex
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > N.len(str) || fromIndex > toIndex}
      * @throws IllegalArgumentException if chunkSize is not positive.
      * @see #split(CharSequence, int)
      */
@@ -2836,8 +2841,6 @@ public final class N extends CommonUtil {
      */
     public static <T> List<T> splitByChunkCount(final int totalSize, final int maxChunkCount, final IntBiFunction<? extends T> func)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
-
         return splitByChunkCount(totalSize, maxChunkCount, false, func);
     }
 
@@ -3880,11 +3883,12 @@ public final class N extends CommonUtil {
      * @param a the first iterable
      * @param b the second iterable
      * @return a new list containing elements from both iterables
+     * @throws ArithmeticException if the estimated combined size (the sum of the sizes of the {@code Collection} arguments) exceeds {@link Integer#MAX_VALUE}
      * @see #concat(Iterable[])
      * @see #merge(Iterable, Iterable, BiFunction)
      * @see Iterators#concat(Iterator...)
      */
-    public static <T> List<T> concat(final Iterable<? extends T> a, final Iterable<? extends T> b) {
+    public static <T> List<T> concat(final Iterable<? extends T> a, final Iterable<? extends T> b) throws ArithmeticException {
         return concat(Arrays.asList(a, b));
     }
 
@@ -3904,12 +3908,13 @@ public final class N extends CommonUtil {
      * @param <T> the type of elements
      * @param a the iterables to concatenate
      * @return a new list containing all elements from all iterables
+     * @throws ArithmeticException if the estimated combined size (the sum of the sizes of the {@code Collection} elements) exceeds {@link Integer#MAX_VALUE}
      * @see #concat(Collection)
      * @see #merge(Collection, BiFunction)
      * @see Iterators#concat(Iterator...)
      */
     @SafeVarargs
-    public static <T> List<T> concat(final Iterable<? extends T>... a) {
+    public static <T> List<T> concat(final Iterable<? extends T>... a) throws ArithmeticException {
         if (isEmpty(a)) {
             return new ArrayList<>();
         }
@@ -4524,8 +4529,9 @@ public final class N extends CommonUtil {
      * @param c the two-dimensional {@code Iterable} to be flattened.
      * @return a one-dimensional List containing all elements in the input {@code Iterable}.
      *         Returns an empty List if the input {@code Iterable} is {@code null} or empty.
+     * @throws ArithmeticException if the estimated flattened size exceeds {@link Integer#MAX_VALUE}
      */
-    public static <T> List<T> flatten(final Iterable<? extends Iterable<? extends T>> c) {
+    public static <T> List<T> flatten(final Iterable<? extends Iterable<? extends T>> c) throws ArithmeticException {
         return flatten(c, IntFunctions.ofList());
     }
 
@@ -5203,9 +5209,9 @@ public final class N extends CommonUtil {
      * @param b the second Dataset to find common rows with.
      * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
      * @return a new Dataset containing rows present in both Datasets, with duplicates handled by minimum occurrences.
-     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if
-     *         {@code requiresSameColumns} is {@code true} and the Datasets do not have the same columns, or if the
-     *         two Datasets have no common columns when {@code requiresSameColumns} is {@code false}.
+     * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if the two Datasets have
+     *         no common columns, or if {@code requiresSameColumns} is {@code true} and the Datasets do not have the
+     *         same columns.
      * @see #intersection(Dataset, Dataset)
      * @see #intersection(Dataset, Dataset, Collection)
      * @see #intersection(Dataset, Dataset, Collection, boolean)
@@ -6027,8 +6033,8 @@ public final class N extends CommonUtil {
      * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
      * @return a new Dataset containing rows present in {@code a} but not in {@code b}, considering occurrences.
      * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if
-     *         {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if
-     *         {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
+     *         the two Datasets have no common columns, or if {@code requiresSameColumns} is {@code true} and the two
+     *         Datasets don't have the same columns.
      * @see #difference(Dataset, Dataset)
      * @see #difference(Dataset, Dataset, Collection)
      * @see #difference(Dataset, Dataset, Collection, boolean)
@@ -6123,7 +6129,6 @@ public final class N extends CommonUtil {
      * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if
      *         {@code keyColumnNames} is {@code null} or empty, or if any specified key column doesn't exist in either
      *         Dataset, or if {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same
-     *         columns, or if {@code requiresSameColumns} is {@code false} and the two Datasets don't have common
      *         columns.
      * @see #difference(Dataset, Dataset)
      * @see #difference(Dataset, Dataset, boolean)
@@ -6579,8 +6584,8 @@ public final class N extends CommonUtil {
      * @param requiresSameColumns a boolean that indicates whether both Datasets should have the same columns.
      * @return a new Dataset containing rows that are present in either the first Dataset or the second Dataset, but not in both, considering the number of occurrences.
      * @throws IllegalArgumentException if any of the specified Datasets is {@code null}, or if
-     *         {@code requiresSameColumns} is {@code true} and the two Datasets don't have the same columns, or if
-     *         {@code requiresSameColumns} is {@code false} and the two Datasets don't have common columns.
+     *         the two Datasets have no common columns, or if {@code requiresSameColumns} is {@code true} and the two
+     *         Datasets don't have the same columns.
      * @see #symmetricDifference(Dataset, Dataset)
      * @see #symmetricDifference(Dataset, Dataset, Collection)
      * @see #symmetricDifference(Dataset, Dataset, Collection, boolean)
@@ -7499,9 +7504,12 @@ public final class N extends CommonUtil {
      * @param newValue the value to replace matching elements with
      * @return the number of replacements made.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
+     * @throws UnsupportedOperationException if a matching element is found and {@code list} does not support the
+     *         {@code set} operation
      * @see #replaceAll(List, Object, Object)
      */
-    public static <T> int replaceIf(final List<T> list, final Predicate<? super T> predicate, final T newValue) throws IllegalArgumentException {
+    public static <T> int replaceIf(final List<T> list, final Predicate<? super T> predicate, final T newValue)
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (isEmpty(list)) {
@@ -7935,11 +7943,13 @@ public final class N extends CommonUtil {
      * @param oldVal the value to be replaced
      * @param newVal the value to replace with
      * @return the number of elements that were replaced
+     * @throws UnsupportedOperationException if a matching element is found and {@code list} does not support the
+     *         {@code set} operation
      * @see #replaceAll(List, UnaryOperator)
      * @see #replaceIf(List, Predicate, Object)
      * @see #equals(Object, Object)
      */
-    public static <T> int replaceAll(final List<T> list, final Object oldVal, final T newVal) {
+    public static <T> int replaceAll(final List<T> list, final Object oldVal, final T newVal) throws UnsupportedOperationException {
         if (isEmpty(list)) {
             return 0;
         }
@@ -8327,11 +8337,12 @@ public final class N extends CommonUtil {
      * @param list the list to modify
      * @param operator the function to apply to each element
      * @throws IllegalArgumentException if {@code operator} is {@code null}.
+     * @throws UnsupportedOperationException if {@code list} is non-empty and does not support the {@code set} operation
      * @see #replaceAll(List, Object, Object)
      * @see #setAll(List, IntFunction)
      * @see #setAll(List, Throwables.IntObjFunction)
      */
-    public static <T> void replaceAll(final List<T> list, final UnaryOperator<T> operator) throws IllegalArgumentException {
+    public static <T> void replaceAll(final List<T> list, final UnaryOperator<T> operator) throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(operator, cs.operator);
 
         if (isEmpty(list)) {
@@ -8411,13 +8422,14 @@ public final class N extends CommonUtil {
      * @param operator the UnaryOperator to apply to each element. The operator takes a value of type <i>T</i> and returns a value of type <i>T</i>.
      * @throws IllegalArgumentException if {@code operator} is {@code null}.
      * @throws E if the operation throws an exception.
+     * @throws UnsupportedOperationException if {@code list} is non-empty and does not support the {@code set} operation
      * @see #replaceAll(List, UnaryOperator)
      * @see #setAll(List, IntFunction)
      * @see #setAll(List, Throwables.IntObjFunction)
      */
     @Beta
     public static <T, E extends Exception> void updateAll(final List<T> list, final Throwables.UnaryOperator<T, E> operator)
-            throws IllegalArgumentException, E {
+            throws IllegalArgumentException, E, UnsupportedOperationException {
         N.checkArgNotNull(operator, cs.operator);
 
         if (isEmpty(list)) {
@@ -8762,10 +8774,11 @@ public final class N extends CommonUtil {
      * @param list the list to be modified
      * @param generator the function used to generate new values for the list elements
      * @throws IllegalArgumentException if {@code generator} is {@code null}.
+     * @throws UnsupportedOperationException if {@code list} is non-empty and does not support the {@code set} operation
      * @see #replaceAll(List, UnaryOperator)
      * @see #setAll(List, Throwables.IntObjFunction)
      */
-    public static <T> void setAll(final List<T> list, final IntFunction<? extends T> generator) throws IllegalArgumentException {
+    public static <T> void setAll(final List<T> list, final IntFunction<? extends T> generator) throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(generator, cs.generator);
 
         if (isEmpty(list)) {
@@ -8840,13 +8853,14 @@ public final class N extends CommonUtil {
      * @param converter the function used to generate new values for the list elements with the index of the element as the first parameter and the original element as the second parameter
      * @throws IllegalArgumentException if {@code converter} is {@code null}.
      * @throws E if the converter function throws an exception
+     * @throws UnsupportedOperationException if {@code list} is non-empty and does not support the {@code set} operation
      * @see #replaceAll(List, UnaryOperator)
      * @see #setAll(List, IntFunction)
      * @see Arrays#setAll(Object[], IntFunction)
      */
     @Beta
     public static <T, E extends Exception> void setAll(final List<T> list, final Throwables.IntObjFunction<? super T, ? extends T, E> converter)
-            throws IllegalArgumentException, E {
+            throws IllegalArgumentException, E, UnsupportedOperationException {
         N.checkArgNotNull(converter, cs.converter);
 
         if (isEmpty(list)) {
@@ -9377,10 +9391,12 @@ public final class N extends CommonUtil {
      * @param elementToAdd the element to add at the end
      * @return a new array containing the original elements and the added element
      * @throws IllegalArgumentException if the original array is {@code null}.
+     * @throws ArrayStoreException if {@code elementToAdd} is not assignable to {@code a}'s runtime component type,
+     *         which determines the result array type
      * @see #addAll(Object[], Object...)
      * @see #insert(Object[], int, Object)
      */
-    public static <T> T[] add(@NotNull final T[] a, final T elementToAdd) throws IllegalArgumentException {
+    public static <T> T[] add(@NotNull final T[] a, final T elementToAdd) throws IllegalArgumentException, ArrayStoreException {
         checkArgNotNull(a, cs.a);
 
         final int len = a.length;
@@ -9755,12 +9771,12 @@ public final class N extends CommonUtil {
      * @return a new array containing the original elements and the added elements. Its runtime component type is
      *         always {@code a}'s, whatever {@code a}'s length.
      * @throws IllegalArgumentException if the original array <i>a</i> is {@code null}.
+     * @throws ArithmeticException if the combined array length would exceed {@link Integer#MAX_VALUE}
      * @throws ArrayStoreException if an element of {@code elementsToAdd} is not assignable to {@code a}'s runtime
      *         component type, which determines the result array type
-     * @throws ArithmeticException if the combined array length would exceed {@link Integer#MAX_VALUE}
      */
     @SafeVarargs
-    public static <T> T[] addAll(@NotNull final T[] a, final T... elementsToAdd) throws IllegalArgumentException, ArrayStoreException, ArithmeticException {
+    public static <T> T[] addAll(@NotNull final T[] a, final T... elementsToAdd) throws IllegalArgumentException, ArithmeticException, ArrayStoreException {
         checkArgNotNull(a, cs.a);
 
         if (isEmpty(a)) {
@@ -9800,9 +9816,11 @@ public final class N extends CommonUtil {
      * @param elementsToAdd the elements to be added to the collection.
      * @return a boolean indicating if the collection changed as a result of the call.
      * @throws IllegalArgumentException if the original collection is {@code null}.
+     * @throws UnsupportedOperationException if {@code elementsToAdd} is non-empty and {@code c} does not support the
+     *         {@code addAll} operation
      */
     @SafeVarargs
-    public static <T> boolean addAll(@NotNull final Collection<T> c, final T... elementsToAdd) throws IllegalArgumentException {
+    public static <T> boolean addAll(@NotNull final Collection<T> c, final T... elementsToAdd) throws IllegalArgumentException, UnsupportedOperationException {
         checkArgNotNull(c, cs.c);
 
         if (isEmpty(elementsToAdd)) {
@@ -9830,8 +9848,11 @@ public final class N extends CommonUtil {
      *        before {@code c} is modified, so it may safely be {@code c} itself or a view backed by {@code c}.
      * @return a boolean indicating if the original collection changed as a result of the call.
      * @throws IllegalArgumentException if the original collection is {@code null}.
+     * @throws UnsupportedOperationException if {@code elementsToAdd} is non-{@code null} and {@code c} does not support the
+     *         {@code addAll} operation
      */
-    public static <T> boolean addAll(@NotNull final Collection<T> c, final Iterable<? extends T> elementsToAdd) throws IllegalArgumentException {
+    public static <T> boolean addAll(@NotNull final Collection<T> c, final Iterable<? extends T> elementsToAdd)
+            throws IllegalArgumentException, UnsupportedOperationException {
         checkArgNotNull(c, cs.c);
 
         if (elementsToAdd == null) {
@@ -9866,8 +9887,11 @@ public final class N extends CommonUtil {
      *        {@code c} is modified, so it may safely be an iterator obtained from {@code c} itself.
      * @return a boolean indicating if the original collection changed as a result of the call.
      * @throws IllegalArgumentException if the original collection is {@code null}.
+     * @throws UnsupportedOperationException if {@code elementsToAdd} is non-{@code null} and {@code c} does not support the
+     *         {@code addAll} operation
      */
-    public static <T> boolean addAll(@NotNull final Collection<T> c, final Iterator<? extends T> elementsToAdd) throws IllegalArgumentException {
+    public static <T> boolean addAll(@NotNull final Collection<T> c, final Iterator<? extends T> elementsToAdd)
+            throws IllegalArgumentException, UnsupportedOperationException {
         checkArgNotNull(c, cs.c);
 
         if (elementsToAdd == null) {
@@ -9903,7 +9927,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the boolean value to be inserted into the array
      * @return a new boolean array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(boolean[], boolean)
      * @see #insertAll(boolean[], int, boolean...)
      */
@@ -9949,7 +9974,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the char value to be inserted into the array
      * @return a new char array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(char[], char)
      * @see #insertAll(char[], int, char...)
      */
@@ -9995,7 +10021,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the byte value to be inserted into the array
      * @return a new byte array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(byte[], byte)
      * @see #insertAll(byte[], int, byte...)
      */
@@ -10041,7 +10068,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the short value to be inserted into the array
      * @return a new short array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(short[], short)
      * @see #insertAll(short[], int, short...)
      */
@@ -10087,7 +10115,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the int value to be inserted into the array
      * @return a new int array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(int[], int)
      * @see #insertAll(int[], int, int...)
      */
@@ -10133,7 +10162,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the long value to be inserted into the array
      * @return a new long array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(long[], long)
      * @see #insertAll(long[], int, long...)
      */
@@ -10179,7 +10209,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the float value to be inserted into the array
      * @return a new float array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(float[], float)
      * @see #insertAll(float[], int, float...)
      */
@@ -10225,7 +10256,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the double value to be inserted into the array
      * @return a new double array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(double[], double)
      * @see #insertAll(double[], int, double...)
      */
@@ -10271,7 +10303,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new element should be inserted
      * @param elementToInsert the String value to be inserted into the array
      * @return a new String array with the original elements and the inserted element
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @see #add(String[], String)
      * @see #insertAll(String[], int, String...)
      */
@@ -10304,9 +10337,9 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] names = {"Alice", "Bob", "David"};
-     * String[] result = N.insert(names, 2, "Charlie");
-     * // returns: ["Alice", "Bob", "Charlie", "David"]
+     * Integer[] numbers = {1, 2, 4};
+     * Integer[] result = N.insert(numbers, 2, 3);
+     * // returns: [1, 2, 3, 4]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -10316,9 +10349,12 @@ public final class N extends CommonUtil {
      * @param elementToInsert the element to be inserted into the array
      * @return a new array with the original elements and the inserted element
      * @throws IllegalArgumentException if the original array is {@code null}.
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than {@code a.length}
+     * @throws ArrayStoreException if {@code elementToInsert} is not assignable to {@code a}'s runtime component type,
+     *         which determines the result array type
      */
-    public static <T> T[] insert(@NotNull final T[] a, final int index, final T elementToInsert) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static <T> T[] insert(@NotNull final T[] a, final int index, final T elementToInsert)
+            throws IllegalArgumentException, IndexOutOfBoundsException, ArrayStoreException {
         checkArgNotNull(a, cs.a);
         checkPositionIndex(index, len(a));
 
@@ -10398,7 +10434,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static boolean[] insertAll(final boolean[] a, final int index, final boolean... elementsToInsert)
@@ -10446,7 +10483,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if {@code index} is negative or greater than the length of {@code a}
+     *         (a {@code null} {@code a} has length {@code 0})
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static char[] insertAll(final char[] a, final int index, final char... elementsToInsert) throws IndexOutOfBoundsException, ArithmeticException {
@@ -10493,7 +10531,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index > a.length},
+     *         where a {@code null} array has length 0)
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static byte[] insertAll(final byte[] a, final int index, final byte... elementsToInsert) throws IndexOutOfBoundsException, ArithmeticException {
@@ -10540,7 +10579,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index > a.length},
+     *         where a {@code null} array has length 0)
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static short[] insertAll(final short[] a, final int index, final short... elementsToInsert) throws IndexOutOfBoundsException, ArithmeticException {
@@ -10587,7 +10627,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index > a.length},
+     *         where a {@code null} array has length 0)
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static int[] insertAll(final int[] a, final int index, final int... elementsToInsert) throws IndexOutOfBoundsException, ArithmeticException {
@@ -10634,7 +10675,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index > a.length},
+     *         where a {@code null} array has length 0)
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static long[] insertAll(final long[] a, final int index, final long... elementsToInsert) throws IndexOutOfBoundsException, ArithmeticException {
@@ -10681,7 +10723,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index > a.length},
+     *         where a {@code null} array has length 0)
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static float[] insertAll(final float[] a, final int index, final float... elementsToInsert) throws IndexOutOfBoundsException, ArithmeticException {
@@ -10728,7 +10771,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index > a.length},
+     *         where a {@code null} array has length 0)
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static double[] insertAll(final double[] a, final int index, final double... elementsToInsert)
@@ -10776,7 +10820,8 @@ public final class N extends CommonUtil {
      * @param index the position in the array where the new elements should be inserted
      * @param elementsToInsert the elements to be inserted into the array
      * @return a new array with the original elements and the inserted elements
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index > a.length},
+     *         where a {@code null} array has length 0)
      * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     public static String[] insertAll(final String[] a, final int index, final String... elementsToInsert)
@@ -10811,9 +10856,9 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] names = {"Alice", "David", "Eve"};
-     * String[] result = N.insertAll(names, 1, "Bob", "Charlie");
-     * // returns: ["Alice", "Bob", "Charlie", "David", "Eve"]
+     * Integer[] numbers = {1, 4, 5};
+     * Integer[] result = N.insertAll(numbers, 1, 2, 3);
+     * // returns: [1, 2, 3, 4, 5]
      * }</pre>
      *
      * @param <T> the type of the elements in the array
@@ -10824,14 +10869,14 @@ public final class N extends CommonUtil {
      * @return a new array with the original elements and the inserted elements. Its runtime component type is always
      *         {@code a}'s, whatever {@code a}'s length.
      * @throws IllegalArgumentException if the original array {@code a} is {@code null}.
-     * @throws IndexOutOfBoundsException if the specified index is out of range
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index > a.length})
+     * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      * @throws ArrayStoreException if an element of {@code elementsToInsert} is not assignable to {@code a}'s runtime
      *         component type, which determines the result array type
-     * @throws ArithmeticException if the combined array length exceeds {@link Integer#MAX_VALUE}
      */
     @SafeVarargs
     public static <T> T[] insertAll(@NotNull final T[] a, final int index, final T... elementsToInsert)
-            throws IllegalArgumentException, IndexOutOfBoundsException, ArrayStoreException, ArithmeticException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, ArithmeticException, ArrayStoreException {
         checkArgNotNull(a, cs.a);
         checkPositionIndex(index, len(a));
 
@@ -10874,10 +10919,12 @@ public final class N extends CommonUtil {
      * @return {@code true} if the list changed as a result of the call
      * @throws IllegalArgumentException if the list is {@code null}.
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; list.size())
+     * @throws UnsupportedOperationException if {@code elementsToInsert} is non-empty and {@code list} does not support the
+     *         {@code addAll} operation
      */
     @SafeVarargs
     public static <T> boolean insertAll(@NotNull final List<T> list, final int index, final T... elementsToInsert)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedOperationException {
         checkArgNotNull(list, cs.list);
         checkPositionIndex(index, size(list));
 
@@ -10910,9 +10957,11 @@ public final class N extends CommonUtil {
      * @return {@code true} if the list changed as a result of the call
      * @throws IllegalArgumentException if the list is {@code null}.
      * @throws IndexOutOfBoundsException if the index is out of range (index &lt; 0 || index &gt; list.size())
+     * @throws UnsupportedOperationException if {@code elementsToInsert} is non-empty and {@code list} does not support the
+     *         {@code addAll} operation
      */
     public static <T> boolean insertAll(@NotNull final List<T> list, final int index, final Collection<? extends T> elementsToInsert)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedOperationException {
         checkArgNotNull(list, cs.list);
         checkPositionIndex(index, size(list));
 
@@ -11274,11 +11323,10 @@ public final class N extends CommonUtil {
      * @param index the position of the element to be removed
      * @return a new array containing the existing elements except the element at the specified index
      * @throws IllegalArgumentException if the specified array is {@code null}. Note the
-     *         {@link #removeAt(String[], int...)} varargs overload instead returns an empty array for a {@code null}
-     *         array, because a {@code String[]} component type is known and can be fabricated; this generic overload
-     *         cannot.
-     * @throws IndexOutOfBoundsException if the specified index is out of range (a non-{@code null} empty array always throws
-     *         this exception as it contains no valid index)
+     *         {@link #removeAt(String[], int...)} varargs overload can return an empty array for a {@code null}
+     *         array when no indices are supplied, because its {@code String[]} component type is known.
+     * @throws IndexOutOfBoundsException if the specified index is out of range ({@code index < 0 || index >= a.length});
+     *         a non-{@code null} empty array always throws this exception as it contains no valid index
      */
     public static <T> T[] removeAt(@NotNull final T[] a, final int index) throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArgNotNull(a, cs.a);
@@ -11920,9 +11968,9 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] arr = {"A", "B", "C", "D", "E"};
-     * String[] result = N.removeAt(arr, 1, 3);
-     * // returns: ["A", "C", "E"] - removed elements at indices 1 and 3
+     * Integer[] arr = {1, 2, 3, 4, 5};
+     * Integer[] result = N.removeAt(arr, 1, 3);
+     * // returns: [1, 3, 5] - removed elements at indices 1 and 3
      * }</pre>
      *
      * @param <T> the type of elements in the input array
@@ -11931,8 +11979,8 @@ public final class N extends CommonUtil {
      * @return a new array containing the remaining elements after removal. If {@code indices} is empty, a copy of the
      *         specified array is returned
      * @throws IllegalArgumentException if the specified array is {@code null}. Note the
-     *         {@link #removeAt(String[], int...)} overload instead returns an empty array for a {@code null} array,
-     *         because a {@code String[]} component type is known and can be fabricated; this generic overload cannot.
+     *         {@link #removeAt(String[], int...)} overload can return an empty array for a {@code null} array
+     *         when no indices are supplied, because its {@code String[]} component type is known.
      * @throws IndexOutOfBoundsException if any index is out of the array's range
      */
     public static <T> T[] removeAt(@NotNull final T[] a, final int... indices) throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -12012,8 +12060,11 @@ public final class N extends CommonUtil {
      * @return {@code true} if the list was modified as a result of the operation, {@code false} otherwise.
      * @throws IllegalArgumentException if the input list is {@code null}.
      * @throws IndexOutOfBoundsException if any index is out of the range of the list.
+     * @throws UnsupportedOperationException if {@code indices} is non-empty and {@code list} does not support element
+     *         removal (or, when it is re-populated, the {@code clear}/{@code addAll} operations)
      */
-    public static boolean removeAt(@NotNull final List<?> list, final int... indices) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static boolean removeAt(@NotNull final List<?> list, final int... indices)
+            throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedOperationException {
         checkArgNotNull(list, cs.list);
 
         if (isEmpty(indices)) {
@@ -12369,9 +12420,10 @@ public final class N extends CommonUtil {
      * @param c the collection from which to remove the value
      * @param valueToRemove the value to remove
      * @return {@code true} if the collection changed, {@code false} otherwise
+     * @throws UnsupportedOperationException if {@code c} is non-empty and does not support the {@code remove} operation
      * @see Collection#remove(Object)
      */
-    public static <T> boolean remove(final Collection<T> c, final T valueToRemove) {
+    public static <T> boolean remove(final Collection<T> c, final T valueToRemove) throws UnsupportedOperationException {
         if (isEmpty(c)) {
             return false;
         }
@@ -12762,9 +12814,11 @@ public final class N extends CommonUtil {
      * @param c the collection from which the values should be removed.
      * @param valuesToRemove the values to be removed from the collection.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
+     * @throws UnsupportedOperationException if {@code c} and {@code valuesToRemove} are both non-empty and {@code c} does
+     *         not support element removal
      */
     @SafeVarargs
-    public static <T> boolean removeAll(final Collection<T> c, final T... valuesToRemove) {
+    public static <T> boolean removeAll(final Collection<T> c, final T... valuesToRemove) throws UnsupportedOperationException {
         if (isEmpty(c) || isEmpty(valuesToRemove)) {
             return false;
         } else {
@@ -12802,20 +12856,21 @@ public final class N extends CommonUtil {
      * permits and {@link #retainAll(Collection, Collection)} has always done. Wrap the values in a
      * {@code new HashSet<>(..)} to have them matched by {@code equals}/{@code hashCode} and absorbed instead.</p>
      *
-     * <p>The receiver must support removal. A call that has nothing to remove because {@code valuesToRemove} is
-     * {@code null} or empty returns {@code false} without touching {@code c}; any other call attempts the removal
-     * and therefore propagates {@link UnsupportedOperationException} from an unmodifiable receiver even when
-     * nothing matches, exactly as {@link Collection#removeAll(Collection)} and
-     * {@link #retainAll(Collection, Collection)} do.</p>
+     * <p>A {@code null} or empty receiver, or {@code null} or empty {@code valuesToRemove}, returns {@code false}
+     * without attempting removal. Other calls invoke the receiver's removal operations and propagate any
+     * {@link UnsupportedOperationException}; depending on the receiver, that exception may be thrown even when
+     * nothing matches.</p>
      *
      * @param c the collection from which the values should be removed.
      * @param valuesToRemove the iterable of values to be removed from the collection. Nothing is removed before the
      *        values have been read, so it may safely be {@code c} itself or a view backed by {@code c}.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
+     * @throws UnsupportedOperationException if {@code c} and {@code valuesToRemove} are both non-empty and {@code c} does
+     *         not support element removal
      * @see #excludeAll(Collection, Collection)
      * @see #retainAll(Collection, Collection)
      */
-    public static boolean removeAll(final Collection<?> c, final Iterable<?> valuesToRemove) {
+    public static boolean removeAll(final Collection<?> c, final Iterable<?> valuesToRemove) throws UnsupportedOperationException {
         if (isEmpty(c) || valuesToRemove == null) {
             return false;
         }
@@ -12902,8 +12957,8 @@ public final class N extends CommonUtil {
             }
         }
 
-        // Not short-circuited on an empty `doomed`: `removeIf` is attempted either way, so an unmodifiable
-        // receiver reports UnsupportedOperationException here exactly as it does in the two branches above.
+        // Not short-circuited on an empty `doomed`: `removeIf` is attempted either way, preserving the receiver's
+        // behavior when removal is unsupported, including implementations that reject a no-match call.
         return c.removeIf(doomed::contains);
     }
 
@@ -12926,8 +12981,10 @@ public final class N extends CommonUtil {
      * @param valuesToRemove the iterator of values to be removed from the collection. It is consumed before {@code c}
      *        is modified, so it may safely be an iterator obtained from {@code c} itself.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
+     * @throws UnsupportedOperationException if {@code c} is non-empty, {@code valuesToRemove} is non-{@code null} and
+     *         {@code c} does not support element removal
      */
-    public static boolean removeAll(final Collection<?> c, final Iterator<?> valuesToRemove) {
+    public static boolean removeAll(final Collection<?> c, final Iterator<?> valuesToRemove) throws UnsupportedOperationException {
         if (isEmpty(c) || valuesToRemove == null) {
             return false;
         }
@@ -13325,8 +13382,9 @@ public final class N extends CommonUtil {
      * @param c the collection from which the value should be removed.
      * @param valueToRemove the value to be removed from the collection.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
+     * @throws UnsupportedOperationException if {@code c} is non-empty and does not support element removal
      */
-    public static <T> boolean removeAllOccurrences(final Collection<T> c, final T valueToRemove) {
+    public static <T> boolean removeAllOccurrences(final Collection<T> c, final T valueToRemove) throws UnsupportedOperationException {
         if (isEmpty(c)) {
             return false;
         }
@@ -14501,10 +14559,12 @@ public final class N extends CommonUtil {
      *
      * @param c the collection from which duplicates should be removed.
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
+     * @throws UnsupportedOperationException if {@code c} holds duplicates and does not support element removal (or, when
+     *         it is re-populated, the {@code clear}/{@code addAll} operations)
      * @see #distinct(Iterable)
      * @see #distinctBy(Iterable, Function)
      */
-    public static boolean removeDuplicates(final Collection<?> c) {
+    public static boolean removeDuplicates(final Collection<?> c) throws UnsupportedOperationException {
         return removeDuplicates(c, false);
     }
 
@@ -14532,10 +14592,12 @@ public final class N extends CommonUtil {
      * @param c the collection from which duplicates should be removed.
      * @param isSorted a boolean flag indicating whether the input collection is sorted. If {@code true}, the algorithm will be faster
      * @return {@code true} if the collection changed as a result of this call, {@code false} otherwise.
+     * @throws UnsupportedOperationException if {@code c} holds duplicates and does not support element removal (or, when
+     *         it is re-populated, the {@code clear}/{@code addAll} operations)
      * @see #distinct(Iterable)
      * @see #distinctBy(Iterable, Function)
      */
-    public static boolean removeDuplicates(final Collection<?> c, final boolean isSorted) {
+    public static boolean removeDuplicates(final Collection<?> c, final boolean isSorted) throws UnsupportedOperationException {
         if (isEmpty(c) || c.size() == 1 || c instanceof Set) {
             return false;
         } else if (c.size() == 2) {
@@ -14958,9 +15020,9 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] arr = {"A", "B", "C", "D", "E"};
-     * String[] result = N.removeRange(arr, 1, 3);
-     * // returns: ["A", "D", "E"] - removed indices 1 and 2
+     * Integer[] arr = {1, 2, 3, 4, 5};
+     * Integer[] result = N.removeRange(arr, 1, 3);
+     * // returns: [1, 4, 5] - removed indices 1 and 2
      * }</pre>
      *
      * <p><b>Naming:</b> for arrays {@code removeRange} and {@link #skipRange(Object[], int, int) skipRange} are exact
@@ -14975,9 +15037,8 @@ public final class N extends CommonUtil {
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return a new array with the specified range of elements removed
      * @throws IllegalArgumentException if the specified array is {@code null}. Note the
-     *         {@link #removeRange(String[], int, int)} overload instead returns an empty array for a {@code null}
-     *         array, because a {@code String[]} component type is known and can be fabricated; this generic overload
-     *         cannot.
+     *         {@link #removeRange(String[], int, int)} overload can return an empty array for a {@code null}
+     *         array when the range is {@code [0, 0)}, because its {@code String[]} component type is known.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
      * @see #removeRange(String[], int, int)
      * @see #removeRange(List, int, int)
@@ -15026,8 +15087,11 @@ public final class N extends CommonUtil {
      * @param toIndex the final index of the range to be deleted, exclusive
      * @return {@code true} if the list is updated; {@code false} otherwise
      * @throws IndexOutOfBoundsException if the range is out of the list bounds
+     * @throws UnsupportedOperationException if the range is non-empty and {@code c} does not support element removal (or,
+     *         when it is re-populated, the {@code clear}/{@code addAll} operations)
      */
-    public static <T> boolean removeRange(final List<T> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
+    public static <T> boolean removeRange(final List<T> c, final int fromIndex, final int toIndex)
+            throws IndexOutOfBoundsException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex, size(c));
 
         if (fromIndex == toIndex) {
@@ -15560,10 +15624,10 @@ public final class N extends CommonUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String[] words = {"apple", "banana", "cherry", "date", "elderberry"};
-     * String[] replacement = {"kiwi", "lemon"};
-     * String[] result = N.replaceRange(words, 1, 3, replacement);
-     * // result = {"apple", "kiwi", "lemon", "date", "elderberry"}
+     * Integer[] numbers = {1, 2, 3, 4, 5};
+     * Integer[] replacement = {8, 9};
+     * Integer[] result = N.replaceRange(numbers, 1, 3, replacement);
+     * // result = {1, 8, 9, 4, 5}
      * }</pre>
      *
      * <p><b>Result component type:</b> the returned array's runtime component type is always {@code a}'s,
@@ -15581,12 +15645,12 @@ public final class N extends CommonUtil {
      *         {@code null} or empty.
      * @throws IllegalArgumentException if the specified array is {@code null}.
      * @throws IndexOutOfBoundsException if the range is out of the array bounds
+     * @throws ArithmeticException if the resulting array length would exceed {@link Integer#MAX_VALUE}
      * @throws ArrayStoreException if an element of {@code replacement} is not assignable to {@code a}'s runtime
      *         component type, which determines the result array type
-     * @throws ArithmeticException if the resulting array length would exceed {@link Integer#MAX_VALUE}
      */
     public static <T> T[] replaceRange(@NotNull final T[] a, final int fromIndex, final int toIndex, final T[] replacement)
-            throws IllegalArgumentException, IndexOutOfBoundsException, ArrayStoreException, ArithmeticException {
+            throws IllegalArgumentException, IndexOutOfBoundsException, ArithmeticException, ArrayStoreException {
         checkArgNotNull(a, cs.a);
 
         final int len = len(a);
@@ -15650,7 +15714,7 @@ public final class N extends CommonUtil {
      */
     public static <T> boolean replaceRange(@NotNull final List<T> c, final int fromIndex, final int toIndex, final Collection<? extends T> replacement)
             throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedOperationException {
-        checkArgNotNull(c, cs.list);
+        checkArgNotNull(c, cs.c);
 
         final int size = size(c);
 
@@ -16126,9 +16190,11 @@ public final class N extends CommonUtil {
      * @return {@code true} if the list was modified (elements were moved), {@code false} otherwise
      * @throws IndexOutOfBoundsException if any index is out of bounds or if
      *         newPositionAfterMove would cause elements to be moved outside the list
+     * @throws UnsupportedOperationException if the range is non-empty and actually moved and {@code c} does not support the
+     *         {@code set} operation
      */
     public static <T> boolean moveRange(final List<T> c, final int fromIndex, final int toIndex, final int newPositionAfterMove)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, UnsupportedOperationException {
         final int size = size(c);
         checkIndexAndStartPositionForMoveRange(fromIndex, toIndex, newPositionAfterMove, size);
 
@@ -16210,8 +16276,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to be moved
      * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move
      * @param len the length/size of the sequence the range belongs to
-     * @throws IndexOutOfBoundsException if the range is out of bounds, or if {@code newPositionAfterMove} would push part
-     *         of the range outside the sequence
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > len}, or if
+     *         {@code newPositionAfterMove < 0} or {@code newPositionAfterMove > len - (toIndex - fromIndex)}
      */
     static void checkIndexAndStartPositionForMoveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove, final int len)
             throws IndexOutOfBoundsException {
@@ -16319,17 +16385,17 @@ public final class N extends CommonUtil {
      * @param endExclusive the final index of the range to be skipped, exclusive
      * @param supplier a function that creates a new instance of the desired collection type
      * @return a new collection with the specified range skipped.
+     * @throws IndexOutOfBoundsException if {@code startInclusive < 0}, {@code endExclusive > N.size(c)}, or {@code startInclusive > endExclusive}
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is out of the collection bounds
      * @see #skipRange(Collection, int, int)
      */
     public static <T, C extends Collection<T>> C skipRange(final Collection<? extends T> c, final int startInclusive, final int endExclusive,
-            final IntFunction<? extends C> supplier) throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(supplier, cs.supplier);
+            final IntFunction<? extends C> supplier) throws IndexOutOfBoundsException, IllegalArgumentException {
 
         final int size = size(c);
 
         checkFromToIndex(startInclusive, endExclusive, size);
+        N.checkArgNotNull(supplier, cs.supplier);
 
         final C result = supplier.apply(size - (endExclusive - startInclusive));
 
@@ -16403,7 +16469,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the start index (inclusive) of the range to be checked
      * @param toIndex the end index (exclusive) of the range to be checked
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static boolean containsDuplicates(final boolean[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16468,7 +16535,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive) of the range to be checked
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static boolean containsDuplicates(final char[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16550,7 +16618,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive) of the range to be checked
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static boolean containsDuplicates(final byte[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16632,7 +16701,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive) of the range to be checked
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static boolean containsDuplicates(final short[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16714,7 +16784,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive) of the range to be checked
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static boolean containsDuplicates(final int[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16796,7 +16867,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive) of the range to be checked
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static boolean containsDuplicates(final long[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16878,7 +16950,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive) of the range to be checked
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static boolean containsDuplicates(final float[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -16960,7 +17033,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive) of the range to be checked
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static boolean containsDuplicates(final double[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17061,7 +17135,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive) of the range to be checked
      * @param isSorted a boolean that indicates if the array is sorted. If {@code true}, the algorithm will be faster.
      * @return {@code true} if the array has duplicates within the specified range, {@code false} otherwise
-     * @throws IndexOutOfBoundsException if the range is out of bounds for the given array
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      */
     static <T> boolean containsDuplicates(final T[] a, final int fromIndex, final int toIndex, final boolean isSorted) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex, len(a)); // NOSONAR
@@ -17190,18 +17265,23 @@ public final class N extends CommonUtil {
      * (a {@code Comparator}-based {@code TreeSet}, an identity set, ...) decides what is kept. Any other
      * {@code Collection} is copied into a {@code HashSet} first <i>once one of the two collections holds more than
      * nine elements</i> - which is equivalent for elements with a well-behaved {@code equals}/{@code hashCode} pair,
-     * and turns an O(n*m) scan into O(n+m). Below that size the argument is probed as-is, so {@code equals} alone
+     * and turns an O(n*m) scan into O(n+m). Below that size a list snapshot is probed, so {@code equals} alone
      * decides: a type whose {@code hashCode} disagrees with its {@code equals} can therefore be kept at one size
      * and dropped at another. {@link #removeAll(Collection, Iterable)} hashes at every size and has no such seam.</p>
+     * <p>Non-set arguments are snapshotted before modifying {@code c}, so a list or sublist backed by {@code c}
+     * retains the elements that were present in the argument when this method was called. Set arguments are
+     * not snapshotted; a Set view whose membership changes as {@code c} is modified retains its live-view behavior.</p>
      *
      * @param <T> the type of elements in the input collections
      * @param c the collection to be modified.
      * @param objsToKeep the collection containing elements to be retained in the first collection.
      * @return {@code true} if the first collection changed as a result of the call
+     * @throws UnsupportedOperationException if {@code c} is non-empty and does not support the {@code clear} operation
+     *         (when {@code objsToKeep} is {@code null} or empty) or the {@code retainAll} operation
      * @see Collection#retainAll(Collection)
      * @see #removeAll(Collection, Iterable)
      */
-    public static <T> boolean retainAll(final Collection<T> c, final Collection<? extends T> objsToKeep) {
+    public static <T> boolean retainAll(final Collection<T> c, final Collection<? extends T> objsToKeep) throws UnsupportedOperationException {
         if (isEmpty(c)) {
             return false;
         } else if (isEmpty(objsToKeep)) {
@@ -17215,11 +17295,12 @@ public final class N extends CommonUtil {
         // scanning the whole argument per element.
         // A Set argument is left alone: converting it would replace its own membership rule with equals/hashCode -
         // the same rule removeAll(Collection, Iterable) applies to a non-Set receiver.
-        if (!(objsToKeep instanceof Set) && (c.size() > 9 || objsToKeep.size() > 9)) {
-            return c.retainAll(newHashSet(objsToKeep));
-        } else {
+        if (objsToKeep instanceof Set) {
             return c.retainAll(objsToKeep);
         }
+
+        // Snapshot even small lists: removing from c can otherwise change a live sublist's membership mid-scan.
+        return c.retainAll(c.size() > 9 || objsToKeep.size() > 9 ? newHashSet(objsToKeep) : new ArrayList<>(objsToKeep));
     }
 
     /**
@@ -17295,7 +17376,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range, or 0 if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws ArithmeticException if the final sum is outside the {@code int} range
      * @see #sum(char...)
      * @see #average(char[], int, int)
@@ -17361,7 +17443,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range, or 0 if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws ArithmeticException if the final sum is outside the {@code int} range
      * @see #sum(byte...)
      * @see #average(byte[], int, int)
@@ -17427,7 +17510,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range, or 0 if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws ArithmeticException if the final sum is outside the {@code int} range
      * @see #sum(short...)
      * @see #average(short[], int, int)
@@ -17492,7 +17576,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range, or 0 if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see #sum(int...)
      * @see #sumToLong(int[], int, int)
@@ -17541,7 +17626,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range as a long, or 0 if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #sumToLong(int...)
      * @see #sum(int[], int, int)
      */
@@ -17608,7 +17694,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range, or 0 if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #sum(long...)
      * @see #sumToBigInteger(long[], int, int)
      * @see #average(long[], int, int)
@@ -17664,7 +17751,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range as a {@code BigInteger}
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #sumToBigInteger(long...)
      * @see #sum(long[], int, int)
      */
@@ -17726,7 +17814,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range, or 0.0f if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #sum(float...)
      * @see #sumToDouble(float[], int, int)
      * @see #average(float[], int, int)
@@ -17784,7 +17873,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the input array as a double. If the array is {@code null} or empty, {@code 0} is returned.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given array.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #sumToDouble(float...)
      * @see #sum(float[], int, int)
      */
@@ -17845,7 +17935,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the sum of elements within the specified range, or 0.0d if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #sum(double...)
      * @see #average(double[], int, int)
      */
@@ -17868,7 +17959,7 @@ public final class N extends CommonUtil {
     /**
      * Returns the average of all elements in the specified char array or varargs.
      * Returns 0.0d if the array is {@code null} or empty.
-     * The char values are converted to their numeric Unicode values for calculation.
+     * The char values are treated as unsigned UTF-16 code units for calculation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17894,7 +17985,7 @@ public final class N extends CommonUtil {
     /**
      * Returns the average of elements within the specified range of the char array.
      * Returns 0.0d if the array is {@code null} or empty.
-     * The char values are converted to their numeric Unicode values for calculation.
+     * The char values are treated as unsigned UTF-16 code units for calculation.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -17906,7 +17997,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the average of elements within the specified range, or 0.0d if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #average(char...)
      * @see #sum(char[], int, int)
      */
@@ -17965,7 +18057,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the average of elements within the specified range, or 0.0d if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #average(byte...)
      * @see #sum(byte[], int, int)
      */
@@ -18024,7 +18117,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the average of elements within the specified range, or 0.0d if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #average(short...)
      * @see #sum(short[], int, int)
      */
@@ -18087,7 +18181,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the average of elements within the specified range, or 0.0d if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #average(int...)
      * @see #sum(int[], int, int)
      */
@@ -18111,7 +18206,7 @@ public final class N extends CommonUtil {
      * Returns the average of all elements in the specified long array or varargs.
      * Returns 0.0d if the array is {@code null} or empty.
      * The sum is accumulated exactly in a {@code long}. If that total overflows, a quotient/remainder decomposition
-     * computes the same mathematical average without allocating arbitrary-precision numbers.
+     * avoids integer overflow without allocating arbitrary-precision numbers; the double result is subject to floating-point rounding.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18142,7 +18237,7 @@ public final class N extends CommonUtil {
      * Returns the average of elements within the specified range of the long array.
      * Returns 0.0d if the array is {@code null} or empty.
      * The sum is accumulated exactly in a {@code long}. If that total overflows, a quotient/remainder decomposition
-     * computes the same mathematical average without allocating arbitrary-precision numbers.
+     * avoids integer overflow without allocating arbitrary-precision numbers; the double result is subject to floating-point rounding.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18154,7 +18249,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the average of elements within the specified range, or 0.0d if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #average(long...)
      * @see #sum(long[], int, int)
      */
@@ -18178,7 +18274,7 @@ public final class N extends CommonUtil {
         return ((double) sum) / (toIndex - fromIndex);
     }
 
-    /** Computes an exact integral average without constructing a {@link BigInteger}. */
+    /** Computes the average of integral values without integer overflow or constructing a {@link BigInteger}; the double result may be rounded. */
     private static double averageWithoutOverflow(final long[] a, final int fromIndex, final int toIndex) {
         final long count = toIndex - fromIndex;
         long quotientSum = 0;
@@ -18235,7 +18331,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the average of elements within the specified range, or 0.0d if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #average(float...)
      * @see #sum(float[], int, int)
      */
@@ -18305,7 +18402,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the average of elements within the specified range, or 0.0d if the array is {@code null} or empty
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see #average(double...)
      * @see #sum(double[], int, int)
      */
@@ -18331,8 +18429,10 @@ public final class N extends CommonUtil {
      * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
      * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
      * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
-     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
-     * different overflow behavior in the two APIs.</p>
+     * directly, with ordinary wrapping on long overflow. This method additionally checks whether the accumulated
+     * value fits in an int.</p>
+     *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18361,8 +18461,10 @@ public final class N extends CommonUtil {
      * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
      * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
      * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
-     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
-     * different overflow behavior in the two APIs.</p>
+     * directly, with ordinary wrapping on long overflow. This method additionally checks whether the accumulated
+     * value fits in an int.</p>
+     *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18375,7 +18477,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the array as an integer.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given array.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
      * @see Stream#sumInt(ToIntFunction)
@@ -18391,8 +18494,8 @@ public final class N extends CommonUtil {
      * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
      * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
      * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
-     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
-     * different overflow behavior in the two APIs.</p>
+     * directly, with ordinary wrapping on long overflow. This method additionally checks whether the accumulated
+     * value fits in an int.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18427,8 +18530,8 @@ public final class N extends CommonUtil {
      * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
      * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
      * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
-     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
-     * different overflow behavior in the two APIs.</p>
+     * directly, with ordinary wrapping on long overflow. This method additionally checks whether the accumulated
+     * value fits in an int.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18443,7 +18546,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @param func the function to convert each element to an integer.
      * @return the sum of all elements within the specified range of the array as an integer.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
@@ -18474,8 +18578,10 @@ public final class N extends CommonUtil {
      * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
      * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
      * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
-     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
-     * different overflow behavior in the two APIs.</p>
+     * directly, with ordinary wrapping on long overflow. This method additionally checks whether the accumulated
+     * value fits in an int.</p>
+     *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18487,7 +18593,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the collection as an integer.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given collection.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable)
      * @see Stream#sumInt(ToIntFunction)
@@ -18504,8 +18611,8 @@ public final class N extends CommonUtil {
      * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
      * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
      * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
-     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
-     * different overflow behavior in the two APIs.</p>
+     * directly, with ordinary wrapping on long overflow. This method additionally checks whether the accumulated
+     * value fits in an int.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18520,7 +18627,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @param func the function to convert each element to an integer.
      * @return the sum of all elements within the specified range of the collection as an integer.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws ArithmeticException if the result overflows an {@code int}
      * @see Iterables#sumInt(Iterable, ToIntFunction)
@@ -18570,8 +18678,10 @@ public final class N extends CommonUtil {
      * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
      * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
      * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
-     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
-     * different overflow behavior in the two APIs.</p>
+     * directly, with ordinary wrapping on long overflow. This method additionally checks whether the accumulated
+     * value fits in an int.</p>
+     *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18596,8 +18706,8 @@ public final class N extends CommonUtil {
      * <p><b>Note:</b> this method accumulates into a {@code long} internally but returns an {@code int}, throwing
      * {@link ArithmeticException} if the total does not fit in an {@code int}. The stream forms
      * {@link Stream#sumInt(ToIntFunction)} and {@link Seq#sumInt(Throwables.ToIntFunction)} return the {@code long}
-     * directly, so they do not overflow at any practically attainable element count &mdash; the same method name has
-     * different overflow behavior in the two APIs.</p>
+     * directly, with ordinary wrapping on long overflow. This method additionally checks whether the accumulated
+     * value fits in an int.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18624,6 +18734,8 @@ public final class N extends CommonUtil {
 
     /**
      * Sums all elements in the given iterable of numbers and returns the result as a long.
+     *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18676,6 +18788,8 @@ public final class N extends CommonUtil {
      * Sums all elements in the given array of numbers and returns the result as a long.
      * Addition uses Java {@code long} arithmetic, so overflow wraps around silently.
      *
+     * <p>Non-null elements are converted with {@link Number#longValue()}, so fractional and out-of-range values may lose information. Null elements contribute zero.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.sumLong(new Long[] {10L, 20L, 30L});   // returns 60L
@@ -18696,6 +18810,8 @@ public final class N extends CommonUtil {
      * Sums all elements within the specified range in the input array of numbers and returns the result as a long.
      * Addition uses Java {@code long} arithmetic, so overflow wraps around silently.
      *
+     * <p>Non-null elements are converted with {@link Number#longValue()}, so fractional and out-of-range values may lose information. Null elements contribute zero.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long[] a = {10L, 20L, 30L, 40L};
@@ -18709,7 +18825,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the array as a long.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given array.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see Iterables#sumLong(Iterable)
      */
     public static <T extends Number> long sumLong(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -18762,7 +18879,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @param func the function to convert each element to a long.
      * @return the sum of all elements within the specified range of the array as a long.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#sumLong(Iterable, ToLongFunction)
      */
@@ -18788,6 +18906,8 @@ public final class N extends CommonUtil {
      * Sums all elements within the specified range in the input collection of numbers and returns the result as a long.
      * Addition uses Java {@code long} arithmetic, so overflow wraps around silently.
      *
+     * <p>Non-null elements are converted with {@link Number#longValue()}, so fractional and out-of-range values may lose information. Null elements contribute zero.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Long> c = Arrays.asList(10L, 20L, 30L, 40L);
@@ -18799,7 +18919,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the collection as a long.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given collection.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @see Iterables#sumLong(Iterable)
      */
     public static long sumLong(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -18823,7 +18944,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @param func the function to convert each element to a long.
      * @return the sum of all elements within the specified range of the collection as a long.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#sumLong(Iterable, ToLongFunction)
      */
@@ -18867,6 +18989,8 @@ public final class N extends CommonUtil {
     /**
      * Sums all elements in the given iterable of numbers and returns the result as a long.
      * Addition uses Java {@code long} arithmetic, so overflow wraps around silently.
+     *
+     * <p>Non-null elements are converted with {@link Number#longValue()}, so fractional and out-of-range values may lose information. Null elements contribute zero.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -18919,6 +19043,8 @@ public final class N extends CommonUtil {
      * Sums all elements in the given array of numbers and returns the result as a double.
      * Values are accumulated with Kahan compensation to reduce floating-point rounding error.
      *
+     * <p>Non-null elements are converted with {@link Numbers#toDouble(Object)}; Float values use their canonical decimal spelling, while other Number values use {@link Number#doubleValue()}. Null elements contribute zero.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.sumDouble(new Double[] {1.5, 2.5, 3.0});   // returns 7.0
@@ -18939,6 +19065,8 @@ public final class N extends CommonUtil {
      * Sums all elements within the specified range in the input array of numbers and returns the result as a double.
      * Values are accumulated with Kahan compensation to reduce floating-point rounding error.
      *
+     * <p>Non-null elements are converted with {@link Numbers#toDouble(Object)}; Float values use their canonical decimal spelling, while other Number values use {@link Number#doubleValue()}. Null elements contribute zero.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Double[] a = {1.5, 2.5, 3.0, 4.0};
@@ -18951,7 +19079,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the array as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given array.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see Iterables#sumDouble(Iterable)
      */
     public static <T extends Number> double sumDouble(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -19003,7 +19132,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @param func the function to convert each element to a double.
      * @return the sum of all elements within the specified range of the array as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#sumDouble(Iterable, ToDoubleFunction)
      */
@@ -19029,6 +19159,8 @@ public final class N extends CommonUtil {
      * Sums all elements within the specified range in the input collection of numbers and returns the result as a double.
      * Values are accumulated with Kahan compensation to reduce floating-point rounding error.
      *
+     * <p>Non-null elements are converted with {@link Numbers#toDouble(Object)}; Float values use their canonical decimal spelling, while other Number values use {@link Number#doubleValue()}. Null elements contribute zero.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Double> c = Arrays.asList(1.5, 2.5, 3.0, 4.0);
@@ -19040,7 +19172,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to be summed.
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @return the sum of all elements within the specified range in the collection as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds for the given collection.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @see Iterables#sumDouble(Iterable)
      */
     public static double sumDouble(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -19064,7 +19197,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to be summed.
      * @param func the function to convert each element to a double.
      * @return the sum of all elements within the specified range of the collection as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#sumDouble(Iterable, ToDoubleFunction)
      */
@@ -19109,6 +19243,8 @@ public final class N extends CommonUtil {
      * Sums all elements in the given iterable of numbers and returns the result as a double.
      * Values are accumulated with Kahan compensation to reduce floating-point rounding error.
      *
+     * <p>Non-null elements are converted with {@link Numbers#toDouble(Object)}; Float values use their canonical decimal spelling, while other Number values use {@link Number#doubleValue()}. Null elements contribute zero.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.sumDouble(Arrays.asList(1.5, 2.5, 3.0));   // returns 7.0
@@ -19117,9 +19253,10 @@ public final class N extends CommonUtil {
      *
      * @param c the iterable of numbers to be summed.
      * @return the sum of all elements in the iterable as a double.
+     * @throws ArithmeticException if more than {@link Long#MAX_VALUE} values are accumulated.
      * @see Iterables#sumDouble(Iterable)
      */
-    public static double sumDouble(final Iterable<? extends Number> c) {
+    public static double sumDouble(final Iterable<? extends Number> c) throws ArithmeticException {
         return sumDouble(c, Fn.numToDouble());
     }
 
@@ -19138,9 +19275,11 @@ public final class N extends CommonUtil {
      * @param func the function to convert each element to a double.
      * @return the sum of all elements in the iterable as a double.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws ArithmeticException if more than {@link Long#MAX_VALUE} values are accumulated.
      * @see Iterables#sumDouble(Iterable, ToDoubleFunction)
      */
-    public static <T> double sumDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) throws IllegalArgumentException {
+    public static <T> double sumDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func)
+            throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(func, cs.func);
 
         if (isEmptyCollection(c)) {
@@ -19288,6 +19427,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given array of numbers.
      *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.averageInt(new Integer[] {10, 20, 30});   // returns 20.0
@@ -19312,6 +19453,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given array of numbers within the specified range.
      *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer[] a = {10, 20, 30, 40};
@@ -19324,7 +19467,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see Iterables#averageInt(Number[], int, int)
      */
     public static <T extends Number> double averageInt(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -19374,7 +19518,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range.
      * @param func the function to convert each element to an integer.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#averageInt(Object[], int, int, ToIntFunction)
      */
@@ -19399,6 +19544,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input collection of numbers.
      *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Integer> c = Arrays.asList(10, 20, 30, 40);
@@ -19410,7 +19557,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @see Iterables#averageInt(Collection, int, int)
      */
     public static double averageInt(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -19433,7 +19581,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range.
      * @param func the function to convert each element to an integer.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#averageInt(Collection, int, int, ToIntFunction)
      */
@@ -19476,6 +19625,8 @@ public final class N extends CommonUtil {
 
     /**
      * Calculates the average of the elements in the given iterable of numbers.
+     *
+     * <p>Non-null elements are converted with {@link Number#intValue()}, so fractional values and wider integer values may lose information. Null elements contribute zero and are included in the divisor.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19526,6 +19677,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given array of numbers.
      *
+     * <p>Non-null elements are converted with {@link Number#longValue()}, so fractional and out-of-range values may lose information. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.averageLong(new Long[] {10L, 20L, 30L});   // returns 20.0
@@ -19550,6 +19703,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input array of numbers.
      *
+     * <p>Non-null elements are converted with {@link Number#longValue()}, so fractional and out-of-range values may lose information. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long[] a = {10L, 20L, 30L, 40L};
@@ -19562,7 +19717,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see Iterables#averageLong(Number[], int, int)
      */
     public static <T extends Number> double averageLong(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -19612,7 +19768,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range.
      * @param func the function to convert each element to a long.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#averageLong(Object[], int, int, ToLongFunction)
      */
@@ -19637,6 +19794,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input collection of numbers.
      *
+     * <p>Non-null elements are converted with {@link Number#longValue()}, so fractional and out-of-range values may lose information. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Long> c = Arrays.asList(10L, 20L, 30L, 40L);
@@ -19648,7 +19807,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @see Iterables#averageLong(Collection, int, int)
      */
     public static double averageLong(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -19671,7 +19831,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range.
      * @param func the function to convert each element to a long.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#averageLong(Collection, int, int, ToLongFunction)
      */
@@ -19714,6 +19875,8 @@ public final class N extends CommonUtil {
 
     /**
      * Calculates the average of the elements in the given iterable of numbers.
+     *
+     * <p>Non-null elements are converted with {@link Number#longValue()}, so fractional and out-of-range values may lose information. Null elements contribute zero and are included in the divisor.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -19827,6 +19990,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given array of numbers.
      *
+     * <p>Non-null elements are converted with {@link Numbers#toDouble(Object)}; Float values use their canonical decimal spelling, while other Number values use {@link Number#doubleValue()}. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.averageDouble(new Double[] {1.0, 2.0, 3.0});   // returns 2.0
@@ -19854,6 +20019,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input array of numbers.
      *
+     * <p>Non-null elements are converted with {@link Numbers#toDouble(Object)}; Float values use their canonical decimal spelling, while other Number values use {@link Number#doubleValue()}. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Double[] a = {1.0, 2.0, 3.0, 4.0};
@@ -19866,7 +20033,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @see Iterables#averageDouble(Number[], int, int)
      */
     public static <T extends Number> double averageDouble(final T[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -19917,7 +20085,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range.
      * @param func the function to convert each element to a double.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#averageDouble(Object[], int, int, ToDoubleFunction)
      */
@@ -19936,6 +20105,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements within the specified range in the input collection of numbers.
      *
+     * <p>Non-null elements are converted with {@link Numbers#toDouble(Object)}; Float values use their canonical decimal spelling, while other Number values use {@link Number#doubleValue()}. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Double> c = Arrays.asList(1.0, 2.0, 3.0, 4.0);
@@ -19947,7 +20118,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range.
      * @param toIndex the ending index (exclusive) of the range.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @see Iterables#averageDouble(Collection, int, int)
      */
     public static double averageDouble(final Collection<? extends Number> c, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
@@ -19970,7 +20142,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range.
      * @param func the function to convert each element to a double.
      * @return the average of the elements within the specified range as a double.
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @see Iterables#averageDouble(Collection, int, int, ToDoubleFunction)
      */
@@ -19989,6 +20162,8 @@ public final class N extends CommonUtil {
     /**
      * Calculates the average of the elements in the given iterable of numbers.
      *
+     * <p>Non-null elements are converted with {@link Numbers#toDouble(Object)}; Float values use their canonical decimal spelling, while other Number values use {@link Number#doubleValue()}. Null elements contribute zero and are included in the divisor.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * N.averageDouble(Arrays.asList(1.0, 2.0, 3.0));   // returns 2.0
@@ -19997,9 +20172,10 @@ public final class N extends CommonUtil {
      *
      * @param c the iterable of numbers to calculate the average.
      * @return the average of the elements in the iterable as a double.
+     * @throws ArithmeticException if more than {@link Long#MAX_VALUE} values are accumulated.
      * @see Iterables#averageDouble(Iterable)
      */
-    public static double averageDouble(final Iterable<? extends Number> c) {
+    public static double averageDouble(final Iterable<? extends Number> c) throws ArithmeticException {
         return averageDouble(c, Fn.numToDouble());
     }
 
@@ -20018,9 +20194,11 @@ public final class N extends CommonUtil {
      * @param func the function to convert each element to a double.
      * @return the average of the elements in the iterable as a double.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws ArithmeticException if more than {@link Long#MAX_VALUE} values are accumulated.
      * @see Iterables#averageDouble(Iterable, ToDoubleFunction)
      */
-    public static <T> double averageDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func) throws IllegalArgumentException {
+    public static <T> double averageDouble(final Iterable<? extends T> c, final ToDoubleFunction<? super T> func)
+            throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(func, cs.func);
 
         if (isEmptyCollection(c)) {
@@ -20035,6 +20213,8 @@ public final class N extends CommonUtil {
      * <br />
      * Note: {@code null} elements are silently skipped and are not counted in the divisor; if all elements are
      * {@code null}, {@code BigDecimal.ZERO} is returned.
+     *
+     * <p>The sum is accumulated exactly; the final division uses {@link MathContext#DECIMAL128}, with 34 significant digits and half-even rounding.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20059,6 +20239,8 @@ public final class N extends CommonUtil {
      * <br />
      * Note: {@code null} values returned by {@code func} are silently skipped and are not counted in the divisor; if all
      * extracted values are {@code null}, {@code BigDecimal.ZERO} is returned.
+     *
+     * <p>The sum is accumulated exactly; the final division uses {@link MathContext#DECIMAL128}, with 34 significant digits and half-even rounding.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -20104,6 +20286,8 @@ public final class N extends CommonUtil {
      * Note: {@code null} elements are silently skipped and are not counted in the divisor; if all elements are
      * {@code null}, {@code BigDecimal.ZERO} is returned.
      *
+     * <p>The sum is accumulated exactly; the final division uses {@link MathContext#DECIMAL128}, with 34 significant digits and half-even rounding.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<BigDecimal> prices = Arrays.asList(
@@ -20127,6 +20311,8 @@ public final class N extends CommonUtil {
      * <br />
      * Note: {@code null} values returned by {@code func} are silently skipped and are not counted in the divisor; if all
      * extracted values are {@code null}, {@code BigDecimal.ZERO} is returned.
+     *
+     * <p>The sum is accumulated exactly; the final division uses {@link MathContext#DECIMAL128}, with 34 significant digits and half-even rounding.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -21127,8 +21313,9 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest value within the specified range based on natural ordering; {@code null} if every element in the range is {@code null}
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds; the range check runs first, so a {@code null}
-     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero; the range check runs first, so a {@code null} array with a range
+     *         other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #min(Comparable[])
      * @see #min(Object[], int, int, Comparator)
@@ -21191,8 +21378,9 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the comparator used for ordering; must not be {@code null}
      * @return the smallest value within the specified range according to the comparator; may be {@code null} if the smallest value is itself {@code null} (for example, when every element in the range is {@code null})
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds; the range check runs first, so a {@code null}
-     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero; the range check runs first, so a {@code null} array with a range
+     *         other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty, or if {@code cmp} is
      *         {@code null}.
      * @see #min(Object[], Comparator)
@@ -21248,9 +21436,9 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the smallest value within the specified range based on natural ordering; {@code null} if every element in the range is {@code null}
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds; the range check runs first, so a
-     *         {@code null} collection with a range other than {@code [0, 0)} throws this exception rather than
-     *         {@code IllegalArgumentException}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero; the range check runs first, so a {@code null} collection with a
+     *         range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty.
      * @see #min(Collection, int, int, Comparator)
      * @see #max(Collection, int, int)
@@ -21280,9 +21468,9 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the comparator used for ordering; must not be {@code null}
      * @return the smallest value within the specified range according to the comparator; may be {@code null} if the smallest value is itself {@code null} (for example, when every element in the range is {@code null})
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds; the range check runs first, so a
-     *         {@code null} collection with a range other than {@code [0, 0)} throws this exception rather than
-     *         {@code IllegalArgumentException}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero; the range check runs first, so a {@code null} collection with a
+     *         range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty, or if {@code cmp} is
      *         {@code null}.
      * @see #min(Collection, int, int)
@@ -23508,8 +23696,9 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest element within the specified range based on natural ordering; {@code null} if every element in the range is {@code null}
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds; the range check runs first, so a {@code null}
-     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero; the range check runs first, so a {@code null} array with a range
+     *         other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #max(Comparable[])
      * @see #max(Object[], int, int, Comparator)
@@ -23572,8 +23761,9 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the comparator used for ordering; must not be {@code null}
      * @return the largest element within the specified range according to the comparator; may be {@code null} if the largest value is itself {@code null} (for example, when every element in the range is {@code null})
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds; the range check runs first, so a {@code null}
-     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero; the range check runs first, so a {@code null} array with a range
+     *         other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty, or if {@code cmp} is
      *         {@code null}.
      * @see #max(Object[], Comparator)
@@ -23629,9 +23819,9 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the largest element within the specified range based on natural ordering; {@code null} if every element in the range is {@code null}
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds; the range check runs first, so a
-     *         {@code null} collection with a range other than {@code [0, 0)} throws this exception rather than
-     *         {@code IllegalArgumentException}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero; the range check runs first, so a {@code null} collection with a
+     *         range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty.
      * @see #max(Collection, int, int, Comparator)
      * @see #min(Collection, int, int)
@@ -23661,9 +23851,9 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param cmp the comparator used for ordering; must not be {@code null}
      * @return the largest element within the specified range according to the comparator; may be {@code null} if the largest value is itself {@code null} (for example, when every element in the range is {@code null})
-     * @throws IndexOutOfBoundsException if the specified range is out of bounds; the range check runs first, so a
-     *         {@code null} collection with a range other than {@code [0, 0)} throws this exception rather than
-     *         {@code IllegalArgumentException}
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the collection size,
+     *         treating a {@code null} collection as size zero; the range check runs first, so a {@code null} collection with a
+     *         range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the collection is {@code null} or the range is empty, or if {@code cmp} is
      *         {@code null}.
      * @see #max(Collection, int, int)
@@ -25000,7 +25190,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the statistical median as a {@code double}
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #median(byte...)
      * @see #lowerMedian(byte[], int, int)
@@ -25074,7 +25265,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the statistical median as a {@code double}
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #median(short...)
      * @see #lowerMedian(short[], int, int)
@@ -25151,7 +25343,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the statistical median as a {@code double}
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #median(int...)
      * @see #lowerMedian(int[], int, int)
@@ -25227,7 +25420,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the statistical median as a {@code double}
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #median(long...)
      * @see #lowerMedian(long[], int, int)
@@ -25272,7 +25466,7 @@ public final class N extends CommonUtil {
      * <br />
      * Note: NaN values are compared using total ordering (as by {@code Float.compare}), in which NaN is greater than
      * any other value - NaN elements therefore sort last and are counted like any other element when the middle
-     * position is chosen. The result is NaN only when one of the one or two middle values is itself NaN; unlike
+     * position is chosen. A NaN middle value produces NaN, as does averaging negative and positive infinity. Unlike
      * {@link #max(float...)}, which propagates NaN, a NaN further out does not make the result NaN.
      *
      * <p><b>Usage Examples:</b></p>
@@ -25304,7 +25498,7 @@ public final class N extends CommonUtil {
      * <br />
      * Note: NaN values are compared using total ordering (as by {@code Float.compare}), in which NaN is greater than
      * any other value - NaN elements therefore sort last and are counted like any other element when the middle
-     * position is chosen. The result is NaN only when one of the one or two middle values is itself NaN; unlike
+     * position is chosen. A NaN middle value produces NaN, as does averaging negative and positive infinity. Unlike
      * {@link #max(float[], int, int)}, which propagates NaN, a NaN further out does not make the result NaN.
      *
      * <p><b>Usage Examples:</b></p>
@@ -25317,7 +25511,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the statistical median as a {@code double}
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #median(float...)
      * @see #lowerMedian(float[], int, int)
@@ -25356,7 +25551,7 @@ public final class N extends CommonUtil {
      * <br />
      * Note: NaN values are compared using total ordering (as by {@code Double.compare}), in which NaN is greater than
      * any other value - NaN elements therefore sort last and are counted like any other element when the middle
-     * position is chosen. The result is NaN only when one of the one or two middle values is itself NaN; unlike
+     * position is chosen. A NaN middle value produces NaN, as does averaging negative and positive infinity. Unlike
      * {@link #max(double...)}, which propagates NaN, a NaN further out does not make the result NaN.
      *
      * <p><b>Usage Examples:</b></p>
@@ -25388,7 +25583,7 @@ public final class N extends CommonUtil {
      * <br />
      * Note: NaN values are compared using total ordering (as by {@code Double.compare}), in which NaN is greater than
      * any other value - NaN elements therefore sort last and are counted like any other element when the middle
-     * position is chosen. The result is NaN only when one of the one or two middle values is itself NaN; unlike
+     * position is chosen. A NaN middle value produces NaN, as does averaging negative and positive infinity. Unlike
      * {@link #max(double[], int, int)}, which propagates NaN, a NaN further out does not make the result NaN.
      *
      * <p><b>Usage Examples:</b></p>
@@ -25401,7 +25596,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the statistical median as a {@code double}
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty
      * @see #median(double...)
      * @see #lowerMedian(double[], int, int)
@@ -25481,7 +25677,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the median value within the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #lowerMedian(char...)
      * @see Median#of(char[], int, int)
@@ -25546,7 +25743,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the median value within the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #lowerMedian(byte...)
      * @see Median#of(byte[], int, int)
@@ -25611,7 +25809,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the median value within the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #lowerMedian(short...)
      * @see Median#of(short[], int, int)
@@ -25676,7 +25875,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the median value within the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #lowerMedian(int...)
      * @see Median#of(int[], int, int)
@@ -25741,7 +25941,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the median value within the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #lowerMedian(long...)
      * @see Median#of(long[], int, int)
@@ -25812,7 +26013,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the median value within the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #lowerMedian(float...)
      * @see Median#of(float[], int, int)
@@ -25883,7 +26085,8 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range
      * @param toIndex the ending index (exclusive) of the range
      * @return the median value within the specified range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if the range is out of the array bounds; the range check runs first, so a {@code null}
+     *         array with a range other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
      * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #lowerMedian(double...)
      * @see Median#of(double[], int, int)
@@ -25956,8 +26159,10 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input array; {@code null} if the median element is itself {@code null}
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds
-     * @throws IllegalArgumentException if the specified array or range is {@code null} or empty.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero; the range check runs first, so a {@code null} array with a range
+     *         other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty.
      * @see #lowerMedian(int[])
      * @see Median#of(Comparable[], int, int)
      */
@@ -26039,8 +26244,10 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
      * @return the median within the specified range in the input array; {@code null} if the median element is itself {@code null}
-     * @throws IndexOutOfBoundsException if the range is out of the array bounds
-     * @throws IllegalArgumentException if the specified array or range is {@code null} or empty, or if {@code cmp} is
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex} exceeds the array length,
+     *         treating a {@code null} array as length zero; the range check runs first, so a {@code null} array with a range
+     *         other than {@code [0, 0)} throws this exception rather than {@code IllegalArgumentException}
+     * @throws IllegalArgumentException if the array is {@code null} or the range is empty, or if {@code cmp} is
      *         {@code null}.
      * @see #lowerMedian(int[])
      * @see Median#of(Comparable[])
@@ -26123,8 +26330,10 @@ public final class N extends CommonUtil {
      * @param fromIndex the starting index (inclusive) of the range to calculate median for
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @return the median within the specified range in the input collection; {@code null} if the median element is itself {@code null}
-     * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty.
-     * @throws IndexOutOfBoundsException if the range is out of the collection bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if the range
+     *         {@code [fromIndex, toIndex)} is empty.
      * @see #lowerMedian(int[])
      * @see Median#of(Collection)
      * @see Median#of(Collection, int, int)
@@ -26133,7 +26342,7 @@ public final class N extends CommonUtil {
      */
     @MayReturnNull
     public static <T extends Comparable<? super T>> T lowerMedian(final Collection<? extends T> c, final int fromIndex, final int toIndex)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return (T) lowerMedian(c, fromIndex, toIndex, NATURAL_COMPARATOR);
     }
 
@@ -26203,9 +26412,10 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range to calculate median for
      * @param cmp the comparator to determine the order of the values
      * @return the median within the specified range in the input collection; {@code null} if the median element is itself {@code null}
-     * @throws IndexOutOfBoundsException if the range is out of the collection bounds
-     * @throws IllegalArgumentException if the specified collection or range is {@code null} or empty, or if
-     *         {@code cmp} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, if the range
+     *         {@code [fromIndex, toIndex)} is empty, or if {@code cmp} is {@code null}.
      * @see #lowerMedian(int[])
      * @see Iterables#lowerMedian(Collection, Comparator)
      * @see Median#of(Collection)
@@ -26217,11 +26427,12 @@ public final class N extends CommonUtil {
     public static <T> T lowerMedian(final Collection<? extends T> c, final int fromIndex, final int toIndex, Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(c) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException(THE_SPECIFIED_COLLECTION_OR_RANGE_CANNOT_BE_EMPTY); //NOSONAR
         }
+
+        N.checkArgNotNull(cmp, cs.cmp);
 
         final int len = toIndex - fromIndex;
 
@@ -26273,8 +26484,10 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null} or empty or k is out of range [1, range length].
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null} or empty, if the range is empty, or if {@code k} is out of
+     *         range [1, range length].
      * @see #kthLargest(char[], int)
      */
     public static char kthLargest(final char[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -26367,8 +26580,10 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null} or empty or k is out of range [1, range length].
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null} or empty, if the range is empty, or if {@code k} is out of
+     *         range [1, range length].
      * @see #kthLargest(byte[], int)
      */
     public static byte kthLargest(final byte[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -26461,8 +26676,10 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null} or empty or k is out of range [1, range length].
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null} or empty, if the range is empty, or if {@code k} is out of
+     *         range [1, range length].
      * @see #kthLargest(short[], int)
      */
     public static short kthLargest(final short[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -26555,8 +26772,10 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null} or empty or k is out of range [1, range length].
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null} or empty, if the range is empty, or if {@code k} is out of
+     *         range [1, range length].
      * @see #kthLargest(int[], int)
      */
     public static int kthLargest(final int[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -26649,8 +26868,10 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null} or empty or k is out of range [1, range length].
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null} or empty, if the range is empty, or if {@code k} is out of
+     *         range [1, range length].
      * @see #kthLargest(long[], int)
      */
     public static long kthLargest(final long[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -26751,8 +26972,10 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null} or empty or k is out of range [1, range length].
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null} or empty, if the range is empty, or if {@code k} is out of
+     *         range [1, range length].
      * @see #kthLargest(float[], int)
      */
     public static float kthLargest(final float[] a, final int fromIndex, final int toIndex, int k) throws IndexOutOfBoundsException, IllegalArgumentException {
@@ -26861,8 +27084,10 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null}/empty or k is out of range [1, range length].
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null}/empty, if the range is empty, or if {@code k} is out of
+     *         range [1, range length].
      * @see #kthLargest(double[], int)
      */
     public static double kthLargest(final double[] a, final int fromIndex, final int toIndex, int k)
@@ -26967,8 +27192,10 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range; {@code null} if that element is itself {@code null}
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null}/empty or k is out of range [1, range length].
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null}/empty, if the range is empty, or if {@code k} is out of
+     *         range [1, range length].
      * @see #kthLargest(Comparable[], int)
      */
     @MayReturnNull
@@ -27005,7 +27232,6 @@ public final class N extends CommonUtil {
     @MayReturnNull
     public static <T> T kthLargest(final T[] a, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(a, THE_SPECIFIED_ARRAY_CANNOT_BE_NULL_OR_EMPTY);
-        N.checkArgNotNull(cmp, cs.cmp);
 
         return kthLargest(a, 0, a.length, k, cmp);
     }
@@ -27027,21 +27253,22 @@ public final class N extends CommonUtil {
      * @param k the position (1-based) of the largest element to find
      * @param cmp the comparator to determine ordering
      * @return the k-th largest element within the range; {@code null} if that element is itself {@code null}
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the array is {@code null}/empty or k is out of range [1, range length], or
-     *         if {@code cmp} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if the array is {@code null}/empty, if the range is empty, if {@code k} is out of
+     *         range [1, range length], or if {@code cmp} is {@code null}.
      * @see #kthLargest(Object[], int, Comparator)
      */
     @MayReturnNull
     public static <T> T kthLargest(final T[] a, final int fromIndex, final int toIndex, int k, final Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, len(a));
-        N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(a) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException(THE_SPECIFIED_ARRAY_OR_RANGE_CANNOT_BE_EMPTY);
         }
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         return kthLargest(Arrays.asList(a), fromIndex, toIndex, k, cmp);
     }
@@ -27087,14 +27314,15 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param k the position (1-based) of the largest element to find
      * @return the k-th largest element within the range; {@code null} if that element is itself {@code null}
-     * @throws IllegalArgumentException if the collection is {@code null}/empty or k is out of range [1, range
-     *         length].
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
+     * @throws IllegalArgumentException if the collection is {@code null}/empty, if the range is empty, or if {@code k} is out
+     *         of range [1, range length].
      * @see #kthLargest(Collection, int)
      */
     @MayReturnNull
     public static <T extends Comparable<? super T>> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return kthLargest(c, fromIndex, toIndex, k, (Comparator<T>) NULL_MIN_COMPARATOR);
     }
 
@@ -27120,7 +27348,6 @@ public final class N extends CommonUtil {
     @MayReturnNull
     public static <T> T kthLargest(final Collection<? extends T> c, final int k, final Comparator<? super T> cmp) throws IllegalArgumentException {
         checkArgNotEmpty(c, THE_SPECIFIED_COLLECTION_CANNOT_BE_NULL_OR_EMPTY);
-        N.checkArgNotNull(cmp, cs.cmp);
 
         return kthLargest(c, 0, c.size(), k, cmp);
     }
@@ -27142,22 +27369,23 @@ public final class N extends CommonUtil {
      * @param k the position (1-based) of the largest element to find
      * @param cmp the comparator to determine ordering
      * @return the k-th largest element within the range; {@code null} if that element is itself {@code null}
-     * @throws IndexOutOfBoundsException if the range is invalid
-     * @throws IllegalArgumentException if the collection is {@code null}/empty or k is out of range [1, range
-     *         length], or if {@code cmp} is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
+     * @throws IllegalArgumentException if the collection is {@code null}/empty, if the range is empty, if {@code k} is out of
+     *         range [1, range length], or if {@code cmp} is {@code null}.
      * @see #kthLargest(Collection, int, Comparator)
      */
     @MayReturnNull
     public static <T> T kthLargest(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int k, final Comparator<? super T> cmp)
             throws IndexOutOfBoundsException, IllegalArgumentException {
         checkFromToIndex(fromIndex, toIndex, size(c));
-        N.checkArgNotNull(cmp, cs.cmp);
 
         if (isEmpty(c) || toIndex - fromIndex < 1) {
             throw new IllegalArgumentException(THE_SPECIFIED_COLLECTION_OR_RANGE_CANNOT_BE_EMPTY);
         }
 
         checkArgument(k > 0 && k <= toIndex - fromIndex, "'k' (%s) is out of range [1, %s]", k, toIndex - fromIndex);
+        N.checkArgNotNull(cmp, cs.cmp);
 
         final Comparator<? super T> comparator = cmp;
         final int len = toIndex - fromIndex;
@@ -27277,8 +27505,6 @@ public final class N extends CommonUtil {
      * @see #top(short[], int, int, int, Comparator)
      */
     public static short[] top(final short[] a, final int n, final Comparator<? super Short> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(a, 0, len(a), n, cmp);
     }
 
@@ -27297,11 +27523,11 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param n the number of top elements to return
      * @return an array containing the top n largest elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(short[], int, int, int, Comparator)
      */
-    public static short[] top(final short[] a, final int fromIndex, final int toIndex, final int n) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static short[] top(final short[] a, final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
@@ -27321,7 +27547,8 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param cmp the comparator to determine ordering; must not be {@code null}
      * @return an array containing the top n elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(short[], int, Comparator)
      */
@@ -27400,8 +27627,6 @@ public final class N extends CommonUtil {
      * @see #top(int[], int, int, int, Comparator)
      */
     public static int[] top(final int[] a, final int n, final Comparator<? super Integer> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(a, 0, len(a), n, cmp);
     }
 
@@ -27420,11 +27645,11 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param n the number of top elements to return
      * @return an array containing the top n largest elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(int[], int, int, int, Comparator)
      */
-    public static int[] top(final int[] a, final int fromIndex, final int toIndex, final int n) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static int[] top(final int[] a, final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
@@ -27444,7 +27669,8 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param cmp the comparator to determine ordering; must not be {@code null}
      * @return an array containing the top n elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(int[], int, Comparator)
      */
@@ -27523,8 +27749,6 @@ public final class N extends CommonUtil {
      * @see #top(long[], int, int, int, Comparator)
      */
     public static long[] top(final long[] a, final int n, final Comparator<? super Long> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(a, 0, len(a), n, cmp);
     }
 
@@ -27543,11 +27767,11 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param n the number of top elements to return
      * @return an array containing the top n largest elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(long[], int, int, int, Comparator)
      */
-    public static long[] top(final long[] a, final int fromIndex, final int toIndex, final int n) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static long[] top(final long[] a, final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
@@ -27567,7 +27791,8 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param cmp the comparator to determine ordering; must not be {@code null}
      * @return an array containing the top n elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(long[], int, Comparator)
      */
@@ -27653,8 +27878,6 @@ public final class N extends CommonUtil {
      * @see #top(float[], int, int, int, Comparator)
      */
     public static float[] top(final float[] a, final int n, final Comparator<? super Float> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(a, 0, len(a), n, cmp);
     }
 
@@ -27676,11 +27899,11 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param n the number of top elements to return
      * @return an array containing the top n largest elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(float[], int, int, int, Comparator)
      */
-    public static float[] top(final float[] a, final int fromIndex, final int toIndex, final int n) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static float[] top(final float[] a, final int fromIndex, final int toIndex, final int n) throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
@@ -27704,7 +27927,8 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param cmp the comparator to determine ordering; must not be {@code null}
      * @return an array containing the top n elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(float[], int, Comparator)
      */
@@ -27790,8 +28014,6 @@ public final class N extends CommonUtil {
      * @see #top(double[], int, int, int, Comparator)
      */
     public static double[] top(final double[] a, final int n, final Comparator<? super Double> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(a, 0, len(a), n, cmp);
     }
 
@@ -27813,12 +28035,12 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param n the number of top elements to return
      * @return an array containing the top n largest elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(double[], int, int, int, Comparator)
      */
     public static double[] top(final double[] a, final int fromIndex, final int toIndex, final int n)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
@@ -27842,7 +28064,8 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param cmp the comparator to determine ordering; must not be {@code null}
      * @return an array containing the top n elements from the range (empty if array is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(double[], int, Comparator)
      */
@@ -27886,9 +28109,8 @@ public final class N extends CommonUtil {
     /**
      * Returns the top n largest elements from the array (order not guaranteed, {@code null} values treated as smallest).
      *
-     * <p>The survivors are returned in raw heap order, not sorted. If you need them sorted, sort the returned list, use a
-     * {@code keepEncounterOrder} overload to preserve input order, or build a {@code Stream.of(a).top(n)...sorted()}
-     * pipeline (see {@code com.landawn.abacus.util.stream.Stream}).</p>
+     * <p>The survivors are returned in unspecified order. For sorted results, sort the returned list or use
+     * {@code Stream.of(a).top(n).sorted().toList()}. A {@code keepEncounterOrder} overload preserves input order.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -27927,8 +28149,6 @@ public final class N extends CommonUtil {
      * @see #top(Object[], int, int, int, Comparator)
      */
     public static <T> List<T> top(final T[] a, final int n, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(a, 0, len(a), n, cmp);
     }
 
@@ -27948,12 +28168,12 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param n the number of top elements to return
      * @return a list containing the top n elements from the range (empty list if array is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(Comparable[], int)
      */
     public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
@@ -27974,7 +28194,8 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param cmp the comparator to determine ordering
      * @return a list containing the top n elements from the range (empty list if array is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(Object[], int, Comparator)
      */
@@ -28033,8 +28254,6 @@ public final class N extends CommonUtil {
      * @see #top(Collection, int, int, int, Comparator)
      */
     public static <T> List<T> top(final Collection<? extends T> c, final int n, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(c, 0, size(c), n, cmp);
     }
 
@@ -28054,12 +28273,12 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param n the number of top elements to return
      * @return a list containing the top n elements from the range (empty list if collection is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (c == null ? 0 : c.size()) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(Collection, int)
      */
     public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(c, fromIndex, toIndex, n, NULL_MIN_COMPARATOR);
     }
 
@@ -28080,7 +28299,8 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param cmp the comparator to determine ordering
      * @return a list containing the top n elements from the range (empty list if collection is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(Collection, int, Comparator)
      */
@@ -28213,8 +28433,6 @@ public final class N extends CommonUtil {
      * @see #top(Object[], int, int, int, Comparator, boolean)
      */
     public static <T> List<T> top(final T[] a, final int n, final Comparator<? super T> cmp, final boolean keepEncounterOrder) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(a, 0, len(a), n, cmp, keepEncounterOrder);
     }
 
@@ -28235,12 +28453,12 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param keepEncounterOrder if {@code true}, preserves encounter order; otherwise order not guaranteed
      * @return a list containing the top n elements from the range (empty list if array is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (a == null ? 0 : a.length) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(Comparable[], int, boolean)
      */
     public static <T extends Comparable<? super T>> List<T> top(final T[] a, final int fromIndex, final int toIndex, final int n,
-            final boolean keepEncounterOrder) throws IllegalArgumentException, IndexOutOfBoundsException {
+            final boolean keepEncounterOrder) throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(a, fromIndex, toIndex, n, NULL_MIN_COMPARATOR, keepEncounterOrder);
     }
 
@@ -28262,7 +28480,8 @@ public final class N extends CommonUtil {
      * @param cmp the comparator to determine ordering
      * @param keepEncounterOrder if {@code true}, preserves encounter order; otherwise order not guaranteed
      * @return a list containing the top n elements from the range (empty list if array is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(Object[], int, Comparator, boolean)
      */
@@ -28368,8 +28587,6 @@ public final class N extends CommonUtil {
      */
     public static <T> List<T> top(final Collection<? extends T> c, final int n, final Comparator<? super T> cmp, final boolean keepEncounterOrder)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
-
         return top(c, 0, size(c), n, cmp, keepEncounterOrder);
     }
 
@@ -28390,12 +28607,12 @@ public final class N extends CommonUtil {
      * @param n the number of top elements to return
      * @param keepEncounterOrder if {@code true}, preserves encounter order; otherwise order not guaranteed
      * @return a list containing the top n elements from the range (empty list if collection is {@code null}/empty or n is 0)
-     * @throws IllegalArgumentException if n is negative.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > (c == null ? 0 : c.size()) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see #top(Collection, int, boolean)
      */
     public static <T extends Comparable<? super T>> List<T> top(final Collection<? extends T> c, final int fromIndex, final int toIndex, final int n,
-            final boolean keepEncounterOrder) throws IllegalArgumentException, IndexOutOfBoundsException {
+            final boolean keepEncounterOrder) throws IndexOutOfBoundsException, IllegalArgumentException {
         return top(c, fromIndex, toIndex, n, NULL_MIN_COMPARATOR, keepEncounterOrder);
     }
 
@@ -28417,7 +28634,8 @@ public final class N extends CommonUtil {
      * @param cmp the comparator to determine ordering
      * @param keepEncounterOrder if {@code true}, preserves encounter order; otherwise order not guaranteed
      * @return a list containing the top n elements from the range (empty list if collection is {@code null}/empty or n is 0)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if n is negative, or if {@code cmp} is {@code null}.
      * @see #top(Collection, int, Comparator, boolean)
      */
@@ -28747,8 +28965,8 @@ public final class N extends CommonUtil {
      * <p><b>Important:</b> The input array must be sorted in ascending order for accurate results.
      * Use {@link java.util.Arrays#sort(float[])} if needed.</p>
      *
-     * <p><b>Note:</b> For NaN and special float values, ensure proper sorting beforehand.
-     * NaN values will affect percentile calculations as they follow IEEE 754 comparison rules.</p>
+     * <p>Sort with {@code Float.compare} ordering: negative zero precedes positive zero, and NaN follows all other values.
+     * A percentile is NaN exactly when its selected array element is NaN.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -28797,8 +29015,8 @@ public final class N extends CommonUtil {
      * <p><b>Important:</b> The input array must be sorted in ascending order for accurate results.
      * Use {@link java.util.Arrays#sort(double[])} if needed.</p>
      *
-     * <p><b>Note:</b> For NaN and special double values, ensure proper sorting beforehand.
-     * NaN values will affect percentile calculations as they follow IEEE 754 comparison rules.</p>
+     * <p>Sort with {@code Double.compare} ordering: negative zero precedes positive zero, and NaN follows all other values.
+     * A percentile is NaN exactly when its selected array element is NaN.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -29001,7 +29219,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param filter the predicate to test each element
      * @return a new array containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #filter(boolean[], BooleanPredicate)
      */
@@ -29073,7 +29292,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param filter the predicate to test each element
      * @return a new array containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #filter(char[], CharPredicate)
      */
@@ -29145,7 +29365,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param filter the predicate to test each element
      * @return a new array containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #filter(byte[], BytePredicate)
      */
@@ -29217,7 +29438,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param filter the predicate to test each element
      * @return a new array containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #filter(short[], ShortPredicate)
      */
@@ -29289,7 +29511,8 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param filter the predicate to test each element
      * @return a new array containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #filter(int[], IntPredicate)
      */
@@ -29361,7 +29584,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param filter the predicate to test each element
      * @return a new array containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #filter(long[], LongPredicate)
      */
@@ -29433,7 +29657,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param filter the predicate to test each element
      * @return a new array containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #filter(float[], FloatPredicate)
      */
@@ -29505,7 +29730,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param filter the predicate to test each element
      * @return a new array containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @see #filter(double[], DoublePredicate)
      */
@@ -29612,14 +29838,13 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param filter the predicate to test each element
      * @return a new list containing matching elements from the range (empty if range is empty)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is out of bounds
      * @see #filter(Object[], Predicate)
      */
     public static <T> List<T> filter(final T[] a, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(filter, cs.filter);
-
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return filter(a, fromIndex, toIndex, filter, IntFunctions.ofList());
     }
 
@@ -29641,7 +29866,8 @@ public final class N extends CommonUtil {
      * @param filter the predicate to test each element
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if any of {@code filter}, {@code supplier} is {@code null}.
      * @see #filter(Object[], Predicate, IntFunction)
      */
@@ -29682,14 +29908,13 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param filter the predicate to test each element
      * @return a new list containing matching elements from the range (empty if range is empty)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is out of bounds
      * @see #filter(Collection, int, int, Predicate, IntFunction)
      */
     public static <T> List<T> filter(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Predicate<? super T> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(filter, cs.filter);
-
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return filter(c, fromIndex, toIndex, filter, IntFunctions.ofList());
     }
 
@@ -29711,7 +29936,8 @@ public final class N extends CommonUtil {
      * @param filter the predicate to test each element
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing matching elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if any of {@code filter}, {@code supplier} is {@code null}.
      * @see #filter(Collection, int, int, Predicate)
      */
@@ -29939,7 +30165,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a boolean value
      * @return a new boolean array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToBoolean(Object[], ToBooleanFunction)
      */
@@ -30008,7 +30235,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a boolean value
      * @return a new boolean array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToBoolean(Collection, ToBooleanFunction)
      */
@@ -30096,7 +30324,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a char value
      * @return a new char array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToChar(Object[], ToCharFunction)
      */
@@ -30165,7 +30394,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a char value
      * @return a new char array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToChar(Collection, ToCharFunction)
      */
@@ -30253,7 +30483,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a byte value
      * @return a new byte array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToByte(Object[], ToByteFunction)
      */
@@ -30322,7 +30553,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a byte value
      * @return a new byte array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToByte(Collection, ToByteFunction)
      */
@@ -30410,7 +30642,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a short value
      * @return a new short array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToShort(Object[], ToShortFunction)
      */
@@ -30479,7 +30712,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a short value
      * @return a new short array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToShort(Collection, ToShortFunction)
      */
@@ -30567,7 +30801,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to an int value
      * @return a new int array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToInt(Object[], ToIntFunction)
      */
@@ -30636,7 +30871,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to an int value
      * @return a new int array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToInt(Collection, ToIntFunction)
      */
@@ -30794,7 +31030,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a long value
      * @return a new long array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToLong(Object[], ToLongFunction)
      */
@@ -30863,7 +31100,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a long value
      * @return a new long array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToLong(Collection, ToLongFunction)
      */
@@ -31021,7 +31259,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a float value
      * @return a new float array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToFloat(Object[], ToFloatFunction)
      */
@@ -31090,7 +31329,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a float value
      * @return a new float array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToFloat(Collection, ToFloatFunction)
      */
@@ -31178,7 +31418,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a double value
      * @return a new double array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToDouble(Object[], ToDoubleFunction)
      */
@@ -31247,7 +31488,8 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive) of the range
      * @param mapper the function to transform each element to a double value
      * @return a new double array containing the transformed values from the range
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #mapToDouble(Collection, ToDoubleFunction)
      */
@@ -31443,14 +31685,13 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param mapper the function to transform each element
      * @return a new list containing the transformed elements from the range (empty if range is empty)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is out of bounds
      * @see #map(Object[], Function)
      */
     public static <T, R> List<R> map(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ? extends R> mapper)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(mapper, cs.mapper);
-
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return map(a, fromIndex, toIndex, mapper, IntFunctions.ofList());
     }
 
@@ -31475,7 +31716,8 @@ public final class N extends CommonUtil {
      * @param mapper the function to transform each element
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing the transformed elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if any of {@code mapper}, {@code supplier} is {@code null}.
      * @see #map(Object[], Function, IntFunction)
      */
@@ -31517,14 +31759,13 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param mapper the function to transform each element
      * @return a new list containing the transformed elements from the range (empty if range is empty)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is out of bounds
      * @see #map(Collection, int, int, Function, IntFunction)
      */
     public static <T, R> List<R> map(final Collection<? extends T> c, final int fromIndex, final int toIndex, final Function<? super T, ? extends R> mapper)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(mapper, cs.mapper);
-
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return map(c, fromIndex, toIndex, mapper, IntFunctions.ofList());
     }
 
@@ -31549,7 +31790,8 @@ public final class N extends CommonUtil {
      * @param mapper the function to transform each element
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing the transformed elements from the range (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if any of {@code mapper}, {@code supplier} is {@code null}.
      * @see #map(Collection, int, int, Function)
      */
@@ -31811,14 +32053,13 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param mapper the function to transform each element to a collection
      * @return a new list containing all elements from all mapped collections (empty if range is empty)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is out of bounds
      * @see #flatMap(Object[], Function)
      */
     public static <T, R> List<R> flatMap(final T[] a, final int fromIndex, final int toIndex,
-            final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(mapper, cs.mapper);
-
+            final Function<? super T, ? extends Collection<? extends R>> mapper) throws IndexOutOfBoundsException, IllegalArgumentException {
         return flatMap(a, fromIndex, toIndex, mapper, IntFunctions.ofList());
     }
 
@@ -31845,7 +32086,8 @@ public final class N extends CommonUtil {
      * @param mapper the function to transform each element to a collection
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing all elements from all mapped collections (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if any of {@code mapper}, {@code supplier} is {@code null}.
      * @see #flatMap(Object[], Function, IntFunction)
      */
@@ -31893,14 +32135,13 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param mapper the function to transform each element to a collection
      * @return a new list containing all elements from all mapped collections (empty if range is empty)
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is out of bounds
      * @see #flatMap(Collection, int, int, Function, IntFunction)
      */
     public static <T, R> List<R> flatMap(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(mapper, cs.mapper);
-
+            final Function<? super T, ? extends Collection<? extends R>> mapper) throws IndexOutOfBoundsException, IllegalArgumentException {
         return flatMap(c, fromIndex, toIndex, mapper, IntFunctions.ofList());
     }
 
@@ -31927,7 +32168,8 @@ public final class N extends CommonUtil {
      * @param mapper the function to transform each element to a collection
      * @param supplier the supplier function to create the result collection
      * @return a new collection containing all elements from all mapped collections (empty if range is empty)
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
+     *         (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if any of {@code mapper}, {@code supplier} is {@code null}.
      * @see #flatMap(Collection, int, int, Function)
      */
@@ -34015,7 +34257,7 @@ public final class N extends CommonUtil {
      * @param <C> the type of the collection to return
      * @param c the iterable
      * @param keyExtractor the function to extract the comparison key from each element
-     * @param supplier the function that creates the result collection (it is passed the source size as a sizing hint)
+     * @param supplier the function that creates the result collection (it is passed the collection size, or zero for other iterables, as a sizing hint)
      * @return a new collection containing elements with unique keys (empty if iterable is {@code null}/empty)
      * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code supplier} is {@code null}.
      * @see #distinctBy(Iterable, Function)
@@ -35586,6 +35828,8 @@ public final class N extends CommonUtil {
      * Merges multiple iterables into a list in which the order of the elements is determined by the given selector function.
      * The returned collection is created by the specified {@code supplier}.
      *
+     * <p>The supplied collection determines result order and may coalesce merged elements under its own membership rules.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<List<Integer>> c = Arrays.asList(Arrays.asList(1, 4), Arrays.asList(2, 5), Arrays.asList(3, 6));
@@ -36520,13 +36764,17 @@ public final class N extends CommonUtil {
      * @param unzip a function that takes an element from the input iterable and a pair, and populates the pair with the unzipped values
      * @param supplier a function that provides new instances of the output collections
      * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
-     * @throws IllegalArgumentException if any of {@code unzip}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code unzip} or {@code supplier} is {@code null}, a supplier result is {@code null},
+     *         or the supplier returns the same collection for more than one output.
+     * @throws UnsupportedOperationException if an input element is consumed and a supplied output collection
+     *         does not support adding its component.
      * @see #unzip(Iterable, BiConsumer, IntFunction, IntFunction)
      */
     // @ai-ignore single-supplier unzip/unzip3 overloads - one IntFunction cast independently to each output collection type is unsound (assignment context can infer types the supplier never creates -> ClassCastException on read). Kept deliberately; the javadoc points callers at the independently-typed overloads. Do not suggest removing or re-typing.
     @SuppressWarnings("unchecked")
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> c,
-            final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier) throws IllegalArgumentException {
+            final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier)
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(unzip, cs.unzip);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -36549,13 +36797,17 @@ public final class N extends CommonUtil {
      * @param unzip a function that takes an element from the input iterator and a pair, and populates the pair with the unzipped values
      * @param supplier a function that provides new instances of the output collections
      * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
-     * @throws IllegalArgumentException if any of {@code unzip}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code unzip} or {@code supplier} is {@code null}, a supplier result is {@code null},
+     *         or the supplier returns the same collection for more than one output.
+     * @throws UnsupportedOperationException if an input element is consumed and a supplied output collection
+     *         does not support adding its component.
      * @see #unzip(Iterator, BiConsumer, IntFunction, IntFunction)
      */
     // @ai-ignore single-supplier unzip/unzip3 overloads - one IntFunction cast independently to each output collection type is unsound (assignment context can infer types the supplier never creates -> ClassCastException on read). Kept deliberately; the javadoc points callers at the independently-typed overloads. Do not suggest removing or re-typing.
     @SuppressWarnings("unchecked")
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterator<? extends T> iter,
-            final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier) throws IllegalArgumentException {
+            final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends Collection<?>> supplier)
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(unzip, cs.unzip);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -36585,13 +36837,15 @@ public final class N extends CommonUtil {
      * @param leftSupplier a function that provides the first output collection
      * @param rightSupplier a function that provides the second output collection
      * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
-     * @throws IllegalArgumentException if any of {@code unzip}, {@code leftSupplier}, {@code rightSupplier} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if {@code unzip} or any output supplier is {@code null}, a supplier result is {@code null},
+     *         or two suppliers return the same output collection.
+     * @throws UnsupportedOperationException if an input element is consumed and a supplied output collection
+     *         does not support adding its component.
      * @see BiIterator#unzip(Iterable, BiConsumer, IntFunction, IntFunction)
      */
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> c,
             final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(unzip, cs.unzip);
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(rightSupplier, cs.rightSupplier);
@@ -36612,13 +36866,15 @@ public final class N extends CommonUtil {
      * @param leftSupplier a function that provides the first output collection
      * @param rightSupplier a function that provides the second output collection
      * @return a pair of collections, where the first collection contains the first elements and the second collection contains the second elements
-     * @throws IllegalArgumentException if any of {@code unzip}, {@code leftSupplier}, {@code rightSupplier} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if {@code unzip} or any output supplier is {@code null}, a supplier result is {@code null},
+     *         or two suppliers return the same output collection.
+     * @throws UnsupportedOperationException if an input element is consumed and a supplied output collection
+     *         does not support adding its component.
      * @see BiIterator#unzip(Iterator, BiConsumer, IntFunction, IntFunction)
      */
     public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterator<? extends T> iter,
             final BiConsumer<? super T, Pair<A, B>> unzip, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(unzip, cs.unzip);
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(rightSupplier, cs.rightSupplier);
@@ -36710,7 +36966,10 @@ public final class N extends CommonUtil {
      * @param unzip a function that takes an element from the input iterable and a triple, and populates the triple with the unzipped values
      * @param supplier a function that provides new instances of the output collections
      * @return a triple of collections, where the first collection contains the first elements, the second collection contains the second elements and the third collection contains the third elements
-     * @throws IllegalArgumentException if any of {@code unzip}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code unzip} or {@code supplier} is {@code null}, a supplier result is {@code null},
+     *         or the supplier returns the same collection for more than one output.
+     * @throws UnsupportedOperationException if an input element is consumed and a supplied output collection
+     *         does not support adding its component.
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#unzip(Iterable, BiConsumer, IntFunction, IntFunction, IntFunction)
      * @see TriIterator#unzipToLists(Supplier)
@@ -36722,7 +36981,7 @@ public final class N extends CommonUtil {
     @SuppressWarnings("unchecked")
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
             final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends Collection<?>> supplier)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(unzip, cs.unzip);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -36748,7 +37007,10 @@ public final class N extends CommonUtil {
      * @param unzip a function that takes an element from the input iterator and a triple, and populates the triple with the unzipped values
      * @param supplier a function that provides new instances of the output collections
      * @return a triple of collections, where the first collection contains the first elements, the second collection contains the second elements and the third collection contains the third elements
-     * @throws IllegalArgumentException if any of {@code unzip}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code unzip} or {@code supplier} is {@code null}, a supplier result is {@code null},
+     *         or the supplier returns the same collection for more than one output.
+     * @throws UnsupportedOperationException if an input element is consumed and a supplied output collection
+     *         does not support adding its component.
      * @see TriIterator#unzip(Iterator, BiConsumer, IntFunction, IntFunction, IntFunction)
      * @see #unzip3(Iterator, BiConsumer, IntFunction, IntFunction, IntFunction)
      */
@@ -36757,7 +37019,7 @@ public final class N extends CommonUtil {
     @SuppressWarnings("unchecked")
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
             final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends Collection<?>> supplier)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(unzip, cs.unzip);
         N.checkArgNotNull(supplier, cs.supplier);
 
@@ -36789,8 +37051,10 @@ public final class N extends CommonUtil {
      * @param middleSupplier a function that provides the second output collection
      * @param rightSupplier a function that provides the third output collection
      * @return a triple of collections, where the first collection contains the first elements, the second collection contains the second elements and the third collection contains the third elements
-     * @throws IllegalArgumentException if any of {@code unzip}, {@code leftSupplier}, {@code middleSupplier},
-     *         {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code unzip} or any output supplier is {@code null}, a supplier result is {@code null},
+     *         or two suppliers return the same output collection.
+     * @throws UnsupportedOperationException if an input element is consumed and a supplied output collection
+     *         does not support adding its component.
      * @see TriIterator#unzip(Iterable, BiConsumer)
      * @see TriIterator#unzip(Iterable, BiConsumer, IntFunction, IntFunction, IntFunction)
      * @see TriIterator#unzipToLists(Supplier)
@@ -36799,7 +37063,8 @@ public final class N extends CommonUtil {
     @Beta
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
             final Iterable<? extends T> c, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends LC> leftSupplier,
-            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier) throws IllegalArgumentException {
+            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier)
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(unzip, cs.unzip);
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(middleSupplier, cs.middleSupplier);
@@ -36824,14 +37089,17 @@ public final class N extends CommonUtil {
      * @param middleSupplier a function that provides the second output collection
      * @param rightSupplier a function that provides the third output collection
      * @return a triple of collections, where the first collection contains the first elements, the second collection contains the second elements and the third collection contains the third elements
-     * @throws IllegalArgumentException if any of {@code unzip}, {@code leftSupplier}, {@code middleSupplier},
-     *         {@code rightSupplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code unzip} or any output supplier is {@code null}, a supplier result is {@code null},
+     *         or two suppliers return the same output collection.
+     * @throws UnsupportedOperationException if an input element is consumed and a supplied output collection
+     *         does not support adding its component.
      * @see TriIterator#unzip(Iterator, BiConsumer, IntFunction, IntFunction, IntFunction)
      */
     @Beta
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip3(
             final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip, final IntFunction<? extends LC> leftSupplier,
-            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier) throws IllegalArgumentException {
+            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier)
+            throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(unzip, cs.unzip);
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(middleSupplier, cs.middleSupplier);
@@ -36917,15 +37185,14 @@ public final class N extends CommonUtil {
      * @param toIndex the end index (exclusive)
      * @param keyExtractor the function to extract grouping keys
      * @return a map with keys and lists of elements sharing each key (empty if array is {@code null}/empty or range is empty)
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #groupBy(Object[], int, int, Function, Supplier)
      */
     @Beta
     public static <T, K> Map<K, List<T>> groupBy(final T[] a, final int fromIndex, final int toIndex, final Function<? super T, ? extends K> keyExtractor)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
-
+            throws IndexOutOfBoundsException, IllegalArgumentException {
         return groupBy(a, fromIndex, toIndex, keyExtractor, Suppliers.ofMap());
     }
 
@@ -36948,19 +37215,20 @@ public final class N extends CommonUtil {
      * @param keyExtractor the function to extract grouping keys
      * @param mapSupplier the supplier to create the result map
      * @return a map with keys and lists of elements sharing each key (empty if array is {@code null}/empty or range is empty)
-     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code mapSupplier} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > a.length || fromIndex > toIndex}
+     *         (a {@code null} array is treated as length {@code 0})
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code mapSupplier} is {@code null}.
      * @see #groupBy(Object[], int, int, Function)
      */
     @Beta
     public static <T, K, M extends Map<K, List<T>>> M groupBy(final T[] a, final int fromIndex, final int toIndex,
-            final Function<? super T, ? extends K> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
-        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+            final Function<? super T, ? extends K> keyExtractor, final Supplier<M> mapSupplier) throws IndexOutOfBoundsException, IllegalArgumentException {
 
         final int length = len(a);
 
         checkFromToIndex(fromIndex, toIndex, length);
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final M ret = mapSupplier.get();
         K key = null;
@@ -36994,16 +37262,14 @@ public final class N extends CommonUtil {
      * @param keyExtractor the function to extract grouping keys
      * @return a map with keys and lists of elements sharing each key (empty if the range is empty).
      *         A {@code null} collection is treated as size {@code 0}; a non-empty range then throws {@code IndexOutOfBoundsException}.
-     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
      *         (a {@code null} collection has size {@code 0})
+     * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #groupBy(Collection, int, int, Function, Supplier)
      */
     @Beta
     public static <T, K> Map<K, List<T>> groupBy(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Function<? super T, ? extends K> keyExtractor) throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
-
+            final Function<? super T, ? extends K> keyExtractor) throws IndexOutOfBoundsException, IllegalArgumentException {
         return groupBy(c, fromIndex, toIndex, keyExtractor, Suppliers.ofMap());
     }
 
@@ -37027,21 +37293,21 @@ public final class N extends CommonUtil {
      * @param mapSupplier the supplier to create the result map
      * @return a map with keys and lists of elements sharing each key (empty if the range is empty).
      *         A {@code null} collection is treated as size {@code 0}; a non-empty range then throws {@code IndexOutOfBoundsException}.
-     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code mapSupplier} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > size(c) || fromIndex > toIndex}
      *         (a {@code null} collection has size {@code 0})
+     * @throws IllegalArgumentException if any of {@code keyExtractor}, {@code mapSupplier} is {@code null}.
      * @see #groupBy(Collection, int, int, Function)
      */
     @Beta
     public static <T, K, M extends Map<K, List<T>>> M groupBy(final Collection<? extends T> c, final int fromIndex, final int toIndex,
-            final Function<? super T, ? extends K> keyExtractor, final Supplier<M> mapSupplier) throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
-        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
+            final Function<? super T, ? extends K> keyExtractor, final Supplier<M> mapSupplier) throws IndexOutOfBoundsException, IllegalArgumentException {
 
         final int length = size(c);
 
         checkFromToIndex(fromIndex, toIndex, length);
 
+        N.checkArgNotNull(keyExtractor, cs.keyExtractor);
+        N.checkArgNotNull(mapSupplier, cs.mapSupplier);
         final M ret = mapSupplier.get();
         K key = null;
         List<T> val = null;
@@ -37973,11 +38239,12 @@ public final class N extends CommonUtil {
      * @param obj the object to serialize
      * @return the JSON string representation (an empty string if the object is {@code null})
      * @throws ParsingException if serialization rejects unsupported or cyclic content or invalid JSON structure
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while generating its JSON representation
      * @see #toJson(Object, boolean)
      * @see #toJson(Object, JsonSerConfig)
      * @see #fromJson(String, Class)
      */
-    public static String toJson(final Object obj) throws ParsingException {
+    public static String toJson(final Object obj) throws ParsingException, UncheckedIOException {
         return Utils.jsonParser.serialize(obj, Utils.jsc);
     }
 
@@ -37997,10 +38264,11 @@ public final class N extends CommonUtil {
      * @param prettyFormat {@code true} for formatted output with indentation
      * @return the JSON string representation (an empty string if the object is {@code null})
      * @throws ParsingException if serialization rejects unsupported or cyclic content or invalid JSON structure
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while generating its JSON representation
      * @see #toJson(Object)
      * @see #toJson(Object, JsonSerConfig)
      */
-    public static String toJson(final Object obj, final boolean prettyFormat) throws ParsingException {
+    public static String toJson(final Object obj, final boolean prettyFormat) throws ParsingException, UncheckedIOException {
         return Utils.jsonParser.serialize(obj, prettyFormat ? Utils.jscPrettyFormat : Utils.jsc);
     }
 
@@ -38019,10 +38287,11 @@ public final class N extends CommonUtil {
      * @param config the serialization configuration
      * @return the JSON string representation (an empty string if the object is {@code null})
      * @throws ParsingException if serialization rejects unsupported or cyclic content or invalid JSON structure
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while generating its JSON representation
      * @see #toJson(Object)
      * @see #toJson(Object, boolean)
      */
-    public static String toJson(final Object obj, final JsonSerConfig config) throws ParsingException {
+    public static String toJson(final Object obj, final JsonSerConfig config) throws ParsingException, UncheckedIOException {
         return Utils.jsonParser.serialize(obj, config);
     }
 
@@ -38204,12 +38473,15 @@ public final class N extends CommonUtil {
      * @param json the JSON string to deserialize
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if the input represents null)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, Type)
      * @see #toJson(Object)
      */
-    public static <T> T fromJson(final String json, final Class<? extends T> targetType) throws IllegalArgumentException, ParsingException {
+    public static <T> T fromJson(final String json, final Class<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.jsonParser.deserialize(json, targetType);
     }
 
@@ -38227,12 +38499,15 @@ public final class N extends CommonUtil {
      * @param json the JSON string to deserialize
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if the input represents null)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, Class)
      * @see TypeReference
      */
-    public static <T> T fromJson(final String json, final Type<? extends T> targetType) throws IllegalArgumentException, ParsingException {
+    public static <T> T fromJson(final String json, final Type<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return fromJson(json, (JsonDeserConfig) null, targetType);
     }
 
@@ -38257,13 +38532,15 @@ public final class N extends CommonUtil {
      * @param defaultIfNull the value to return if deserialization produces {@code null}
      * @param targetType the target class type
      * @return the deserialized object, or {@code defaultIfNull} if deserialization produces {@code null} (which itself may be {@code null} if a {@code null} default was supplied)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, Object, Type)
      * @see #fromJson(String, Class)
      */
     public static <T> T fromJson(final String json, final T defaultIfNull, final Class<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final T ret = fromJson(json, targetType);
 
         return ret == null ? defaultIfNull : ret;
@@ -38290,13 +38567,15 @@ public final class N extends CommonUtil {
      * @param defaultIfNull the value to return if deserialization produces {@code null}
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object, or {@code defaultIfNull} if deserialization produces {@code null} (which itself may be {@code null} if a {@code null} default was supplied)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, Object, Class)
      * @see #fromJson(String, Type)
      */
     public static <T> T fromJson(final String json, final T defaultIfNull, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final T ret = fromJson(json, targetType);
 
         return ret == null ? defaultIfNull : ret;
@@ -38324,13 +38603,15 @@ public final class N extends CommonUtil {
      * @param config the deserialization configuration
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if the input represents null)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, JsonDeserConfig, Type)
      * @see #fromJson(String, Class)
      */
     public static <T> T fromJson(final String json, final JsonDeserConfig config, final Class<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.jsonParser.deserialize(json, config, targetType);
     }
 
@@ -38356,13 +38637,15 @@ public final class N extends CommonUtil {
      * @param config the deserialization configuration
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if the input represents null)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, JsonDeserConfig, Class)
      * @see #fromJson(String, Type)
      */
     public static <T> T fromJson(final String json, final JsonDeserConfig config, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.jsonParser.deserialize(json, setConfig(targetType, config, true), targetType);
     }
 
@@ -38716,14 +38999,16 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if deserialization yields {@code null})
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > N.len(json) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, int, int, Type)
      * @see #fromJson(String, Class)
      */
     public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final Class<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, targetType);
     }
 
@@ -38743,14 +39028,16 @@ public final class N extends CommonUtil {
      * @param toIndex the ending index (exclusive)
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if deserialization yields {@code null})
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > N.len(json) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, int, int, Class)
      * @see #fromJson(String, Type)
      */
     public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         return fromJson(json, fromIndex, toIndex, null, targetType);
     }
 
@@ -38772,14 +39059,16 @@ public final class N extends CommonUtil {
      * @param config the deserialization configuration
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if deserialization yields {@code null})
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > N.len(json) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, int, int, JsonDeserConfig, Type)
      * @see #fromJson(String, int, int, Class)
      */
     public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Class<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, config, targetType);
     }
 
@@ -38801,14 +39090,16 @@ public final class N extends CommonUtil {
      * @param config the deserialization configuration
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object ({@code null} if deserialization yields {@code null})
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > N.len(json) || fromIndex > toIndex}
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws ParsingException if the parser rejects the JSON syntax or structure for the requested type
-     * @throws IndexOutOfBoundsException if {@code fromIndex < 0 || toIndex > json.length() || fromIndex > toIndex}
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while materializing
+     *         values from the JSON text
      * @see #fromJson(String, int, int, JsonDeserConfig, Class)
      * @see #fromJson(String, int, int, Type)
      */
     public static <T> T fromJson(final String json, final int fromIndex, final int toIndex, final JsonDeserConfig config, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.jsonParser.deserialize(json, fromIndex, toIndex, setConfig(targetType, config, true), targetType);
     }
 
@@ -39162,6 +39453,8 @@ public final class N extends CommonUtil {
     /**
      * Returns the JSON string formatted with indentation and line breaks.
      *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String json = "{\"name\":\"Alice\",\"age\":25}";
@@ -39172,15 +39465,19 @@ public final class N extends CommonUtil {
      * @param json the JSON string to format
      * @return the formatted JSON string (an empty string if input is {@code null})
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
+     *         or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatJson(String, JsonSerConfig)
      * @see #toJson(Object, boolean)
      */
-    public static String formatJson(final String json) throws ParsingException {
+    public static String formatJson(final String json) throws ParsingException, UncheckedIOException {
         return formatJson(json, Utils.jscPrettyFormat, Object.class);
     }
 
     /**
      * Returns the JSON string formatted with indentation and line breaks, using type information for proper parsing.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39194,15 +39491,19 @@ public final class N extends CommonUtil {
      * @return the formatted JSON string (an empty string if input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
+     *         or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatJson(String, Type)
      * @see #formatJson(String)
      */
-    public static String formatJson(final String json, final Class<?> transferType) throws IllegalArgumentException, ParsingException {
+    public static String formatJson(final String json, final Class<?> transferType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return toJson(fromJson(json, transferType), Utils.jscPrettyFormat);
     }
 
     /**
      * Returns the JSON string formatted with indentation and line breaks, using Type information for proper parsing.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39216,15 +39517,19 @@ public final class N extends CommonUtil {
      * @return the formatted JSON string (an empty string if input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
+     *         or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatJson(String, Class)
      * @see TypeReference
      */
-    public static String formatJson(final String json, final Type<?> transferType) throws IllegalArgumentException, ParsingException {
+    public static String formatJson(final String json, final Type<?> transferType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return toJson(fromJson(json, transferType), Utils.jscPrettyFormat);
     }
 
     /**
      * Returns the JSON string formatted using the specified configuration.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39235,18 +39540,22 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param json the JSON string to format
-     * @param config the serialization configuration (pretty formatting enabled automatically if not set)
+     * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @return the formatted JSON string (an empty string if input is {@code null})
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
+     *         or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatJson(String, JsonSerConfig, Class)
      * @see #formatJson(String)
      */
-    public static String formatJson(final String json, final JsonSerConfig config) throws ParsingException {
+    public static String formatJson(final String json, final JsonSerConfig config) throws ParsingException, UncheckedIOException {
         return formatJson(json, config, Object.class);
     }
 
     /**
      * Returns the JSON string formatted using the specified configuration, with Type information for proper parsing.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39257,16 +39566,18 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param json the JSON string to format
-     * @param config the serialization configuration (pretty formatting enabled automatically if not set)
+     * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @param transferType the Type for deserialization (supports generics like {@code List<String>})
      * @return the formatted JSON string (an empty string if input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
+     *         or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatJson(String, JsonSerConfig, Class)
      * @see TypeReference
      */
     public static String formatJson(final String json, final JsonSerConfig config, final Type<?> transferType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final JsonSerConfig configToUse = config == null ? Utils.jscPrettyFormat : (!config.isPrettyFormat() ? config.copy().setPrettyFormat(true) : config);
 
         return toJson(fromJson(json, transferType), configToUse);
@@ -39274,6 +39585,8 @@ public final class N extends CommonUtil {
 
     /**
      * Returns the JSON string formatted using the specified configuration, with type information for proper parsing.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -39284,16 +39597,18 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param json the JSON string to format
-     * @param config the serialization configuration (pretty formatting enabled automatically if not set)
+     * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @param transferType the type for deserialization
      * @return the formatted JSON string (an empty string if input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the input,
+     *         or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatJson(String, JsonSerConfig, Type)
      * @see #formatJson(String, Class)
      */
     public static String formatJson(final String json, final JsonSerConfig config, final Class<?> transferType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final JsonSerConfig configToUse = config == null ? Utils.jscPrettyFormat : (!config.isPrettyFormat() ? config.copy().setPrettyFormat(true) : config);
 
         return toJson(fromJson(json, transferType), configToUse);
@@ -39312,11 +39627,12 @@ public final class N extends CommonUtil {
      * @param obj the object to serialize
      * @return the XML string representation (an empty string if object is {@code null})
      * @throws ParsingException if serialization rejects unsupported or cyclic content or invalid XML structure
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while generating its XML representation
      * @see #toXml(Object, boolean)
      * @see #toXml(Object, XmlSerConfig)
      * @see #fromXml(String, Class)
      */
-    public static String toXml(final Object obj) throws ParsingException {
+    public static String toXml(final Object obj) throws ParsingException, UncheckedIOException {
         return Utils.xmlParser.serialize(obj);
     }
 
@@ -39334,10 +39650,11 @@ public final class N extends CommonUtil {
      * @param prettyFormat {@code true} to format with indentation and line breaks
      * @return the XML string representation (an empty string if object is {@code null})
      * @throws ParsingException if serialization rejects unsupported or cyclic content or invalid XML structure
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while generating its XML representation
      * @see #toXml(Object)
      * @see #toXml(Object, XmlSerConfig)
      */
-    public static String toXml(final Object obj, final boolean prettyFormat) throws ParsingException {
+    public static String toXml(final Object obj, final boolean prettyFormat) throws ParsingException, UncheckedIOException {
         return Utils.xmlParser.serialize(obj, prettyFormat ? Utils.xscPrettyFormat : Utils.xsc);
     }
 
@@ -39356,10 +39673,11 @@ public final class N extends CommonUtil {
      * @param config the XML serialization configuration
      * @return the XML string representation (an empty string if object is {@code null})
      * @throws ParsingException if serialization rejects unsupported or cyclic content or invalid XML structure
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while generating its XML representation
      * @see #toXml(Object, boolean)
      * @see #fromXml(String, XmlDeserConfig, Class)
      */
-    public static String toXml(final Object obj, final XmlSerConfig config) throws ParsingException {
+    public static String toXml(final Object obj, final XmlSerConfig config) throws ParsingException, UncheckedIOException {
         return Utils.xmlParser.serialize(obj, config);
     }
 
@@ -39538,12 +39856,14 @@ public final class N extends CommonUtil {
      * @param xml the XML string to deserialize
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if the input represents null)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
+     *         the XML text
      * @see #fromXml(String, Type)
      * @see #toXml(Object)
      */
-    public static <T> T fromXml(final String xml, final Class<? extends T> targetType) throws IllegalArgumentException, ParsingException {
+    public static <T> T fromXml(final String xml, final Class<? extends T> targetType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.xmlParser.deserialize(xml, targetType);
     }
 
@@ -39561,12 +39881,14 @@ public final class N extends CommonUtil {
      * @param xml the XML string to deserialize
      * @param targetType the target Type with generic information
      * @return the deserialized object ({@code null} if the input represents null)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
+     *         the XML text
      * @see #fromXml(String, Class)
      * @see TypeReference
      */
-    public static <T> T fromXml(final String xml, final Type<? extends T> targetType) throws IllegalArgumentException, ParsingException {
+    public static <T> T fromXml(final String xml, final Type<? extends T> targetType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return fromXml(xml, (XmlDeserConfig) null, targetType);
     }
 
@@ -39591,13 +39913,15 @@ public final class N extends CommonUtil {
      * @param defaultIfNull the value to return if deserialization produces {@code null}
      * @param targetType the target class type
      * @return the deserialized object or the default value
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
+     *         the XML text
      * @see #fromXml(String, Object, Type)
      * @see #fromXml(String, Class)
      */
     public static <T> T fromXml(final String xml, final T defaultIfNull, final Class<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final T ret = fromXml(xml, targetType);
 
         return ret == null ? defaultIfNull : ret;
@@ -39624,12 +39948,15 @@ public final class N extends CommonUtil {
      * @param defaultIfNull the value to return if deserialization produces {@code null}
      * @param targetType the target Type (supports generics like {@code List<String>})
      * @return the deserialized object or the default value
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
+     *         the XML text
      * @see #fromXml(String, Object, Class)
      * @see #fromXml(String, Type)
      */
-    public static <T> T fromXml(final String xml, final T defaultIfNull, final Type<? extends T> targetType) throws IllegalArgumentException, ParsingException {
+    public static <T> T fromXml(final String xml, final T defaultIfNull, final Type<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final T ret = fromXml(xml, targetType);
 
         return ret == null ? defaultIfNull : ret;
@@ -39651,13 +39978,15 @@ public final class N extends CommonUtil {
      * @param config the XML deserialization configuration
      * @param targetType the target class type
      * @return the deserialized object ({@code null} if the input represents null)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
+     *         the XML text
      * @see #fromXml(String, Class)
      * @see #toXml(Object, XmlSerConfig)
      */
     public static <T> T fromXml(final String xml, final XmlDeserConfig config, final Class<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.xmlParser.deserialize(xml, config, targetType);
     }
 
@@ -39677,13 +40006,15 @@ public final class N extends CommonUtil {
      * @param config the XML deserialization configuration
      * @param targetType the target Type with generic information
      * @return the deserialized object ({@code null} if the input represents null)
-     * @throws IllegalArgumentException if targetType is {@code null}.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}.
      * @throws ParsingException if the parser rejects the XML syntax or structure for the requested type
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while consuming
+     *         the XML text
      * @see #fromXml(String, Type)
      * @see TypeReference
      */
     public static <T> T fromXml(final String xml, final XmlDeserConfig config, final Type<? extends T> targetType)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.xmlParser.deserialize(xml, setConfig(targetType, config, false), targetType);
     }
 
@@ -40022,6 +40353,8 @@ public final class N extends CommonUtil {
     /**
      * Returns the XML string formatted with indentation and line breaks.
      *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String xml = "<Person><name>Alice</name><age>25</age></Person>";
@@ -40032,15 +40365,19 @@ public final class N extends CommonUtil {
      * @param xml the XML string to format
      * @return the formatted XML string (an empty string if the input is {@code null})
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
+     *         the input, or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatXml(String, Class)
      * @see #toXml(Object, boolean)
      */
-    public static String formatXml(final String xml) throws ParsingException {
+    public static String formatXml(final String xml) throws ParsingException, UncheckedIOException {
         return formatXml(xml, MapEntity.class);
     }
 
     /**
      * Returns the XML string formatted with indentation and line breaks, using type information for proper parsing.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40054,15 +40391,19 @@ public final class N extends CommonUtil {
      * @return the formatted XML string (an empty string if the input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
+     *         the input, or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatXml(String, Type)
      * @see #formatXml(String)
      */
-    public static String formatXml(final String xml, final Class<?> transferType) throws IllegalArgumentException, ParsingException {
+    public static String formatXml(final String xml, final Class<?> transferType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return toXml(fromXml(xml, transferType), Utils.xscPrettyFormat);
     }
 
     /**
      * Returns the XML string formatted with indentation and line breaks, with generic type support.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40076,15 +40417,19 @@ public final class N extends CommonUtil {
      * @return the formatted XML string (an empty string if the input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
+     *         the input, or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatXml(String, Class)
      * @see TypeReference
      */
-    public static String formatXml(final String xml, final Type<?> transferType) throws IllegalArgumentException, ParsingException {
+    public static String formatXml(final String xml, final Type<?> transferType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return toXml(fromXml(xml, transferType), Utils.xscPrettyFormat);
     }
 
     /**
      * Returns the XML string formatted using the specified configuration.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40095,18 +40440,22 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param xml the XML string to format
-     * @param config the serialization configuration (pretty formatting enabled automatically if not set)
+     * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @return the formatted XML string (an empty string if the input is {@code null})
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
+     *         the input, or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatXml(String, XmlSerConfig, Class)
      * @see #formatXml(String)
      */
-    public static String formatXml(final String xml, final XmlSerConfig config) throws ParsingException {
+    public static String formatXml(final String xml, final XmlSerConfig config) throws ParsingException, UncheckedIOException {
         return formatXml(xml, config, MapEntity.class);
     }
 
     /**
      * Returns the XML string formatted using the specified configuration, with type information for proper parsing.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40117,15 +40466,18 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param xml the XML string to format
-     * @param config the serialization configuration (pretty formatting enabled automatically if not set)
+     * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @param transferType the type for deserialization during formatting
      * @return the formatted XML string (an empty string if the input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
+     *         the input, or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatXml(String, XmlSerConfig, Type)
      * @see #formatXml(String, Class)
      */
-    public static String formatXml(final String xml, final XmlSerConfig config, final Class<?> transferType) throws IllegalArgumentException, ParsingException {
+    public static String formatXml(final String xml, final XmlSerConfig config, final Class<?> transferType)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final XmlSerConfig configToUse = config == null ? Utils.xscPrettyFormat : (!config.isPrettyFormat() ? config.copy().setPrettyFormat(true) : config);
 
         return toXml(fromXml(xml, transferType), configToUse);
@@ -40133,6 +40485,8 @@ public final class N extends CommonUtil {
 
     /**
      * Returns the XML string formatted using the specified configuration with generic type support.
+     *
+     * <p>Formatting deserializes and then serializes the value. Original member order, numeric spelling, and other textual details are not guaranteed to be preserved.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -40143,15 +40497,18 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param xml the XML string to format
-     * @param config the serialization configuration (pretty formatting enabled automatically if not set)
+     * @param config the serialization configuration (pretty formatting is always enabled; a supplied configuration with it disabled is copied)
      * @param transferType the Type for deserialization during formatting with generic information
      * @return the formatted XML string (an empty string if the input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
+     *         the input, or a value serializer cannot read an underlying stream or reader while re-rendering it
      * @see #formatXml(String, XmlSerConfig, Class)
      * @see TypeReference
      */
-    public static String formatXml(final String xml, final XmlSerConfig config, final Type<?> transferType) throws IllegalArgumentException, ParsingException {
+    public static String formatXml(final String xml, final XmlSerConfig config, final Type<?> transferType)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final XmlSerConfig configToUse = config == null ? Utils.xscPrettyFormat : (!config.isPrettyFormat() ? config.copy().setPrettyFormat(true) : config);
 
         return toXml(fromXml(xml, transferType), configToUse);
@@ -40170,10 +40527,12 @@ public final class N extends CommonUtil {
      * @param xml the XML string to convert
      * @return the JSON string representation (an empty string if the input is {@code null})
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
+     *         the XML, or a value serializer cannot read an underlying stream or reader while generating the JSON
      * @see #xmlToJson(String, Class)
      * @see #jsonToXml(String)
      */
-    public static String xmlToJson(final String xml) throws ParsingException {
+    public static String xmlToJson(final String xml) throws ParsingException, UncheckedIOException {
         return xmlToJson(xml, Map.class);
     }
 
@@ -40192,10 +40551,12 @@ public final class N extends CommonUtil {
      * @return the JSON string representation (an empty string if the input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if the DOM backend or a delegated value reader reports an {@code IOException} while parsing
+     *         the XML, or a value serializer cannot read an underlying stream or reader while generating the JSON
      * @see #xmlToJson(String)
      * @see #jsonToXml(String, Class)
      */
-    public static String xmlToJson(final String xml, final Class<?> transferType) throws IllegalArgumentException, ParsingException {
+    public static String xmlToJson(final String xml, final Class<?> transferType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.jsonParser.serialize(Utils.xmlParser.deserialize(xml, transferType), Utils.jsc);
     }
 
@@ -40212,10 +40573,12 @@ public final class N extends CommonUtil {
      * @param json the JSON string to convert
      * @return the XML string representation (an empty string if the input is {@code null})
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the JSON,
+     *         or a value serializer cannot read an underlying stream or reader while generating the XML
      * @see #jsonToXml(String, Class)
      * @see #xmlToJson(String)
      */
-    public static String jsonToXml(final String json) throws ParsingException {
+    public static String jsonToXml(final String json) throws ParsingException, UncheckedIOException {
         return jsonToXml(json, Map.class);
     }
 
@@ -40234,10 +40597,12 @@ public final class N extends CommonUtil {
      * @return the XML string representation (an empty string if the input is {@code null})
      * @throws IllegalArgumentException if {@code transferType} is {@code null}
      * @throws ParsingException if parsing or serialization rejects the input or its requested representation
+     * @throws UncheckedIOException if a delegated value reader or converter reports an I/O failure while parsing the JSON,
+     *         or a value serializer cannot read an underlying stream or reader while generating the XML
      * @see #jsonToXml(String)
      * @see #xmlToJson(String, Class)
      */
-    public static String jsonToXml(final String json, final Class<?> transferType) throws IllegalArgumentException, ParsingException {
+    public static String jsonToXml(final String json, final Class<?> transferType) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return Utils.xmlParser.serialize(Utils.jsonParser.deserialize(json, transferType));
     }
 
@@ -40474,7 +40839,9 @@ public final class N extends CommonUtil {
      *        reverse iteration starts at the last element. In reverse mode
      *        {@code toIndex} may be {@code -1}; passing {@code -1} is the only way to include element 0 in a reverse iteration
      * @param action the action to execute for each element
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException in forward mode ({@code fromIndex <= toIndex}) if
+     *         {@code fromIndex < 0} or {@code toIndex > a.length}; in reverse mode if {@code toIndex < -1} or
+     *         {@code fromIndex > a.length} (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws E if the action throws an exception
      * @see #forEach(Object[], Throwables.Consumer)
@@ -40583,7 +40950,9 @@ public final class N extends CommonUtil {
      *        reverse iteration starts at the last element. In reverse mode
      *        {@code toIndex} may be {@code -1}; passing {@code -1} is the only way to include element 0 in a reverse iteration
      * @param action the action to execute for each element
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException in forward mode ({@code fromIndex <= toIndex}) if
+     *         {@code fromIndex < 0} or {@code toIndex > c.size()}; in reverse mode if {@code toIndex < -1} or
+     *         {@code fromIndex > c.size()} (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws E if the action throws an exception
      * @see #forEach(Iterable, Throwables.Consumer)
@@ -42069,7 +42438,9 @@ public final class N extends CommonUtil {
      *        reverse iteration starts at the last element. In reverse mode
      *        {@code toIndex} may be {@code -1}; passing {@code -1} is the only way to include element 0 in a reverse iteration
      * @param action the action to execute, receiving index and element
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException in forward mode ({@code fromIndex <= toIndex}) if
+     *         {@code fromIndex < 0} or {@code toIndex > a.length}; in reverse mode if {@code toIndex < -1} or
+     *         {@code fromIndex > a.length} (a {@code null} array is treated as length {@code 0})
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws E if the action throws an exception
      * @see #forEachIndexed(Object[], Throwables.IntObjConsumer)
@@ -42121,7 +42492,9 @@ public final class N extends CommonUtil {
      *        reverse iteration starts at the last element. In reverse mode
      *        {@code toIndex} may be {@code -1}; passing {@code -1} is the only way to include element 0 in a reverse iteration
      * @param action the action to execute, receiving index and element
-     * @throws IndexOutOfBoundsException if the range is out of bounds
+     * @throws IndexOutOfBoundsException in forward mode ({@code fromIndex <= toIndex}) if
+     *         {@code fromIndex < 0} or {@code toIndex > c.size()}; in reverse mode if {@code toIndex < -1} or
+     *         {@code fromIndex > c.size()} (a {@code null} collection is treated as size {@code 0})
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      * @throws E if the action throws an exception
      * @see #forEachIndexed(Object[], int, int, Throwables.IntObjConsumer)
@@ -42550,10 +42923,10 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachPair(final Iterator<? extends T> iter, final int increment,
             final Throwables.BiConsumer<? super T, ? super T, E> action) throws IllegalArgumentException, E {
+        checkArgPositive(increment, cs.increment);
         N.checkArgNotNull(action, cs.action);
 
         final int windowSize = 2;
-        checkArgPositive(increment, cs.increment);
 
         if (iter == null) {
             return;
@@ -42766,10 +43139,10 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachTriple(final Iterator<? extends T> iter, final int increment,
             final Throwables.TriConsumer<? super T, ? super T, ? super T, E> action) throws IllegalArgumentException, E {
+        checkArgPositive(increment, cs.increment);
         N.checkArgNotNull(action, cs.action);
 
         final int windowSize = 3;
-        checkArgPositive(increment, cs.increment);
 
         if (iter == null) {
             return;
@@ -42823,6 +43196,8 @@ public final class N extends CommonUtil {
      * @param processThreadNum the number of threads for parallel processing
      * @throws IllegalArgumentException if {@code processThreadNum} is not positive, or if {@code elementConsumer} is
      *         {@code null}.
+     * @throws IllegalStateException if the shared executor has already been shut down, even when {@code c} is
+     *         {@code null} or empty
      * @throws RuntimeException if submitting a worker, advancing the input, or invoking {@code elementConsumer}
      *         fails with an exception, or the waiting thread is interrupted; checked exceptions are wrapped
      * @throws Error if inspecting or traversing the input, submitting a worker, or invoking {@code elementConsumer}
@@ -42832,7 +43207,7 @@ public final class N extends CommonUtil {
      * @see #forEachInParallel(Iterator, Throwables.Consumer, int)
      */
     public static <T, E extends Exception> void forEachInParallel(final Iterable<? extends T> c, final Throwables.Consumer<? super T, E> elementConsumer,
-            final int processThreadNum) throws IllegalArgumentException, RuntimeException, Error {
+            final int processThreadNum) throws IllegalArgumentException, IllegalStateException, RuntimeException, Error {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEachInParallel(c, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
@@ -42898,6 +43273,8 @@ public final class N extends CommonUtil {
      * @param processThreadNum the number of threads for parallel processing
      * @throws IllegalArgumentException if {@code processThreadNum} is not positive, or if {@code elementConsumer} is
      *         {@code null}.
+     * @throws IllegalStateException if the shared executor has already been shut down, even when {@code iter} is
+     *         {@code null} or empty
      * @throws RuntimeException if submitting a worker, advancing the input, or invoking {@code elementConsumer}
      *         fails with an exception, or the waiting thread is interrupted; checked exceptions are wrapped
      * @throws Error if inspecting or traversing the input, submitting a worker, or invoking {@code elementConsumer}
@@ -42907,7 +43284,7 @@ public final class N extends CommonUtil {
      * @see Iterators#forEach(Iterator, Iterators.IterateOptions, Throwables.Consumer)
      */
     public static <T, E extends Exception> void forEachInParallel(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer,
-            final int processThreadNum) throws IllegalArgumentException, RuntimeException, Error {
+            final int processThreadNum) throws IllegalArgumentException, IllegalStateException, RuntimeException, Error {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEachInParallel(iter, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
@@ -43052,6 +43429,8 @@ public final class N extends CommonUtil {
      * @param processThreadNum the number of threads for parallel processing (must be positive)
      * @throws IllegalArgumentException if {@code processThreadNum} is not positive, or if {@code elementConsumer} is
      *         {@code null}.
+     * @throws IllegalStateException if the shared executor has already been shut down, even when {@code c} is
+     *         {@code null} or empty
      * @throws RuntimeException if submitting a worker, advancing the input, or invoking {@code elementConsumer}
      *         fails with an exception, or the waiting thread is interrupted; checked exceptions are wrapped
      * @throws Error if inspecting or traversing the input, submitting a worker, or invoking {@code elementConsumer}
@@ -43063,7 +43442,7 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachIndexedInParallel(final Iterable<? extends T> c,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final int processThreadNum)
-            throws IllegalArgumentException, RuntimeException, Error {
+            throws IllegalArgumentException, IllegalStateException, RuntimeException, Error {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEachIndexedInParallel(c, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
@@ -43131,6 +43510,8 @@ public final class N extends CommonUtil {
      * @param processThreadNum the number of threads for parallel processing (must be positive)
      * @throws IllegalArgumentException if {@code processThreadNum} is not positive, or if {@code elementConsumer} is
      *         {@code null}.
+     * @throws IllegalStateException if the shared executor has already been shut down, even when {@code iter} is
+     *         {@code null} or empty
      * @throws RuntimeException if submitting a worker, advancing the input, or invoking {@code elementConsumer}
      *         fails with an exception, or the waiting thread is interrupted; checked exceptions are wrapped
      * @throws Error if inspecting or traversing the input, submitting a worker, or invoking {@code elementConsumer}
@@ -43141,7 +43522,7 @@ public final class N extends CommonUtil {
      */
     public static <T, E extends Exception> void forEachIndexedInParallel(final Iterator<? extends T> iter,
             final Throwables.IntObjConsumer<? super T, E> elementConsumer, final int processThreadNum)
-            throws IllegalArgumentException, RuntimeException, Error {
+            throws IllegalArgumentException, IllegalStateException, RuntimeException, Error {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
         forEachIndexedInParallel(iter, elementConsumer, processThreadNum, N.ASYNC_EXECUTOR.getExecutor());
@@ -44157,8 +44538,10 @@ public final class N extends CommonUtil {
      * @param retryTimes the number of retry attempts if execution fails
      * @param retryIntervalInMillis the interval in milliseconds between retries
      * @param retryCondition the condition checked after failure to decide whether to retry
-     * @throws IllegalArgumentException if any of {@code cmd}, {@code retryCondition} is {@code null}.
-     * @throws RuntimeException if execution fails and no more retries are allowed
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}, if {@code retryTimes} or {@code retryIntervalInMillis}
+     *         is negative, or if {@code retryCondition} is {@code null}.
+     * @throws RuntimeException if {@code cmd} fails and the failure is not retried or the retries are exhausted (a checked
+     *         exception is wrapped), or if {@code retryCondition} itself throws
      * @see #callWithRetry(Callable, int, long, BiPredicate)
      * @see #asyncExecute(Throwables.Runnable, int, long, Predicate)
      * @see Retry#withFixedDelay(int, long, Predicate)
@@ -44166,6 +44549,8 @@ public final class N extends CommonUtil {
     public static void runWithRetry(final Throwables.Runnable<? extends Exception> cmd, final int retryTimes, final long retryIntervalInMillis,
             final Predicate<? super Exception> retryCondition) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(cmd, cs.cmd);
+        checkArgNotNegative(retryTimes, cs.retryTimes);
+        checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
         N.checkArgNotNull(retryCondition, cs.retryCondition);
 
         try {
@@ -44195,8 +44580,11 @@ public final class N extends CommonUtil {
      * @param retryIntervalInMillis the interval in milliseconds between retries
      * @param retryCondition the condition checked after each attempt to decide whether to retry
      * @return the result returned by the callable task on the last (successful) attempt, which may be {@code null} if the task returns {@code null}
-     * @throws IllegalArgumentException if any of {@code cmd}, {@code retryCondition} is {@code null}.
-     * @throws RuntimeException if execution fails and no more retries are allowed
+     * @throws IllegalArgumentException if {@code cmd} is {@code null}, if {@code retryTimes} or {@code retryIntervalInMillis}
+     *         is negative, or if {@code retryCondition} is {@code null}.
+     * @throws RuntimeException if {@code cmd} fails and the failure is not retried or the retries are exhausted (a checked
+     *         exception is wrapped), if the last result still satisfies {@code retryCondition} after the retries are
+     *         exhausted, if {@code retryCondition} itself throws, or if the wait between attempts is interrupted
      * @see #runWithRetry(Throwables.Runnable, int, long, Predicate)
      * @see #asyncExecute(Callable, int, long, BiPredicate)
      * @see Retry#withFixedDelay(int, long, BiPredicate)
@@ -44205,6 +44593,8 @@ public final class N extends CommonUtil {
     public static <R> R callWithRetry(final Callable<? extends R> cmd, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(cmd, cs.cmd);
+        checkArgNotNegative(retryTimes, cs.retryTimes);
+        checkArgNotNegative(retryIntervalInMillis, cs.retryIntervalInMillis);
         N.checkArgNotNull(retryCondition, cs.retryCondition);
 
         try {
@@ -44223,8 +44613,8 @@ public final class N extends CommonUtil {
      * Blocks until both commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44239,12 +44629,17 @@ public final class N extends CommonUtil {
      * @param command the first command to execute in the current thread
      * @param command2 the second command to execute in another thread
      * @throws IllegalArgumentException if any of {@code command}, {@code command2} is {@code null}.
+     * @throws IllegalStateException if submitting a command requires the shared executor after it has been shut down
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; a command already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #runInParallel(Throwables.Runnable, Throwables.Runnable, Throwables.Runnable)
      * @see #runInParallel(Collection)
      * @see #asyncExecute(List)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(command2, cs.command2);
 
@@ -44273,8 +44668,8 @@ public final class N extends CommonUtil {
      * Blocks until all commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44292,11 +44687,17 @@ public final class N extends CommonUtil {
      * @param command3 the third command to execute in another thread
      * @throws IllegalArgumentException if any of {@code command}, {@code command2}, {@code command3} is
      *         {@code null}.
+     * @throws IllegalStateException if submitting a command requires the shared executor after it has been shut down
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; a command already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #runInParallel(Throwables.Runnable, Throwables.Runnable)
      * @see #runInParallel(Collection)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2,
-            final Throwables.Runnable<? extends Exception> command3) throws IllegalArgumentException {
+            final Throwables.Runnable<? extends Exception> command3)
+            throws IllegalArgumentException, IllegalStateException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(command2, cs.command2);
         N.checkArgNotNull(command3, cs.command3);
@@ -44334,8 +44735,8 @@ public final class N extends CommonUtil {
      * Blocks until all commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44355,11 +44756,17 @@ public final class N extends CommonUtil {
      * @param command4 the fourth command to execute in another thread
      * @throws IllegalArgumentException if any of {@code command}, {@code command2}, {@code command3},
      *         {@code command4} is {@code null}.
+     * @throws IllegalStateException if submitting a command requires the shared executor after it has been shut down
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; a command already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #runInParallel(Throwables.Runnable, Throwables.Runnable, Throwables.Runnable)
      * @see #runInParallel(Collection)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2,
-            final Throwables.Runnable<? extends Exception> command3, final Throwables.Runnable<? extends Exception> command4) throws IllegalArgumentException {
+            final Throwables.Runnable<? extends Exception> command3, final Throwables.Runnable<? extends Exception> command4)
+            throws IllegalArgumentException, IllegalStateException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(command2, cs.command2);
         N.checkArgNotNull(command3, cs.command3);
@@ -44404,8 +44811,8 @@ public final class N extends CommonUtil {
      * Blocks until all commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44427,12 +44834,18 @@ public final class N extends CommonUtil {
      * @param command5 the fifth command to execute in another thread
      * @throws IllegalArgumentException if any of {@code command}, {@code command2}, {@code command3},
      *         {@code command4}, {@code command5} is {@code null}.
+     * @throws IllegalStateException if submitting a command requires the shared executor after it has been shut down
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; a command already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #runInParallel(Throwables.Runnable, Throwables.Runnable, Throwables.Runnable, Throwables.Runnable)
      * @see #runInParallel(Collection)
      */
     public static void runInParallel(final Throwables.Runnable<? extends Exception> command, final Throwables.Runnable<? extends Exception> command2,
             final Throwables.Runnable<? extends Exception> command3, final Throwables.Runnable<? extends Exception> command4,
-            final Throwables.Runnable<? extends Exception> command5) throws IllegalArgumentException {
+            final Throwables.Runnable<? extends Exception> command5)
+            throws IllegalArgumentException, IllegalStateException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(command2, cs.command2);
         N.checkArgNotNull(command3, cs.command3);
@@ -44484,8 +44897,8 @@ public final class N extends CommonUtil {
      * Blocks until all commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44500,10 +44913,17 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param commands the collection of commands to execute in parallel
+     * @throws IllegalStateException if the shared executor has already been shut down, even when {@code commands} is null or empty
+     * @throws IllegalArgumentException if any command in {@code commands} is {@code null}
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; commands already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #runInParallel(Collection, Executor)
      * @see #runInParallel(Throwables.Runnable, Throwables.Runnable)
      */
-    public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands) {
+    public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands)
+            throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, RuntimeException {
         runInParallel(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
@@ -44516,9 +44936,11 @@ public final class N extends CommonUtil {
      * Does nothing if the collection is {@code null} or empty.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
+     *
+     * <p>The executor controls where submitted commands run. A direct executor can run them synchronously on the calling thread.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -44534,12 +44956,17 @@ public final class N extends CommonUtil {
      *
      * @param commands the collection of commands to execute in parallel
      * @param executor the executor to use for parallel execution
-     * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or any command in {@code commands} is
+     *         {@code null}
+     * @throws RejectedExecutionException if {@code executor} refuses to accept a command; commands already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #runInParallel(Collection)
      * @see #asyncExecute(List, Executor)
      */
     public static void runInParallel(final Collection<? extends Throwables.Runnable<? extends Exception>> commands, final Executor executor)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(executor, cs.executor);
 
         if (isEmpty(commands)) {
@@ -44553,6 +44980,11 @@ public final class N extends CommonUtil {
         try {
             final Iterator<? extends Throwables.Runnable<? extends Exception>> iter = commands.iterator();
             final Throwables.Runnable<? extends Exception> firstCommand = iter.next();
+
+            // Checked before anything is submitted, and with the same IllegalArgumentException the remaining
+            // commands get from asyncExecute: running the first command last used to report a null one as a raw
+            // NullPointerException, and only after commands 2..n had already been submitted and started.
+            N.checkArgNotNull(firstCommand, "The first command in 'commands' cannot be null");
 
             while (iter.hasNext()) {
                 futures.add(asyncExecute(iter.next(), executor));
@@ -44586,8 +45018,8 @@ public final class N extends CommonUtil {
      * Blocks until both commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44608,11 +45040,16 @@ public final class N extends CommonUtil {
      * @param command2 the second command to execute in another thread
      * @return a tuple containing the results of both commands in the same order
      * @throws IllegalArgumentException if any of {@code command}, {@code command2} is {@code null}.
+     * @throws IllegalStateException if submitting a command requires the shared executor after it has been shut down
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; a command already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #callInParallel(Callable, Callable, Callable)
      * @see #runInParallel(Throwables.Runnable, Throwables.Runnable)
      */
     public static <R, R2> Tuple2<R, R2> callInParallel(final Callable<? extends R> command, final Callable<? extends R2> command2)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(command2, cs.command2);
 
@@ -44643,8 +45080,8 @@ public final class N extends CommonUtil {
      * Blocks until all commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44670,11 +45107,16 @@ public final class N extends CommonUtil {
      * @return a tuple containing the results of all three commands in the same order
      * @throws IllegalArgumentException if any of {@code command}, {@code command2}, {@code command3} is
      *         {@code null}.
+     * @throws IllegalStateException if submitting a command requires the shared executor after it has been shut down
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; a command already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #callInParallel(Callable, Callable)
      * @see #callInParallel(Callable, Callable, Callable, Callable)
      */
     public static <R, R2, R3> Tuple3<R, R2, R3> callInParallel(final Callable<? extends R> command, final Callable<? extends R2> command2,
-            final Callable<? extends R3> command3) throws IllegalArgumentException {
+            final Callable<? extends R3> command3) throws IllegalArgumentException, IllegalStateException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(command2, cs.command2);
         N.checkArgNotNull(command3, cs.command3);
@@ -44714,8 +45156,8 @@ public final class N extends CommonUtil {
      * Blocks until all commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44745,11 +45187,17 @@ public final class N extends CommonUtil {
      * @return a tuple containing the results of all four commands in the same order
      * @throws IllegalArgumentException if any of {@code command}, {@code command2}, {@code command3},
      *         {@code command4} is {@code null}.
+     * @throws IllegalStateException if submitting a command requires the shared executor after it has been shut down
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; a command already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #callInParallel(Callable, Callable, Callable)
      * @see #callInParallel(Callable, Callable, Callable, Callable, Callable)
      */
     public static <R, R2, R3, R4> Tuple4<R, R2, R3, R4> callInParallel(final Callable<? extends R> command, final Callable<? extends R2> command2,
-            final Callable<? extends R3> command3, final Callable<? extends R4> command4) throws IllegalArgumentException {
+            final Callable<? extends R3> command3, final Callable<? extends R4> command4)
+            throws IllegalArgumentException, IllegalStateException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(command2, cs.command2);
         N.checkArgNotNull(command3, cs.command3);
@@ -44796,8 +45244,8 @@ public final class N extends CommonUtil {
      * Blocks until all commands complete or an error occurs.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44827,12 +45275,17 @@ public final class N extends CommonUtil {
      * @return a tuple containing the results of all five commands in the same order
      * @throws IllegalArgumentException if any of {@code command}, {@code command2}, {@code command3},
      *         {@code command4}, {@code command5} is {@code null}.
+     * @throws IllegalStateException if submitting a command requires the shared executor after it has been shut down
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; a command already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #callInParallel(Callable, Callable, Callable, Callable)
      * @see #callInParallel(Collection)
      */
     public static <R, R2, R3, R4, R5> Tuple5<R, R2, R3, R4, R5> callInParallel(final Callable<? extends R> command, final Callable<? extends R2> command2,
             final Callable<? extends R3> command3, final Callable<? extends R4> command4, final Callable<? extends R5> command5)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(command2, cs.command2);
         N.checkArgNotNull(command3, cs.command3);
@@ -44887,8 +45340,8 @@ public final class N extends CommonUtil {
      * Returns an empty list if the collection is {@code null} or empty.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -44905,10 +45358,17 @@ public final class N extends CommonUtil {
      * @param <R> the type of result returned by each command
      * @param commands the collection of commands to execute in parallel
      * @return a list containing the results of all commands in the same order
+     * @throws IllegalStateException if the shared executor has already been shut down, even when {@code commands} is null or empty
+     * @throws IllegalArgumentException if any command in {@code commands} is {@code null}
+     * @throws RejectedExecutionException if the shared executor refuses to accept a command; commands already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #callInParallel(Collection, Executor)
      * @see #callInParallel(Callable, Callable)
      */
-    public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands) {
+    public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands)
+            throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, RuntimeException {
         return callInParallel(commands, ASYNC_EXECUTOR.getExecutor());
     }
 
@@ -44921,9 +45381,11 @@ public final class N extends CommonUtil {
      * Returns an empty list if the collection is {@code null} or empty.
      *
      * <p><b>On failure the sibling commands are not actually stopped.</b> If this method throws, the futures it
-     * created are cancelled with {@code cancel(false)}, which only marks a task that has not started yet; a
-     * command already running keeps running to completion on the executor. Give the commands their own
+     * created are cancelled with {@code cancel(false)}. This prevents tasks that have not started from running,
+     * but does not interrupt a command already running on the executor. Give the commands their own
      * cancellation check if you need them to stop early.</p>
+     *
+     * <p>The executor controls where submitted commands run. A direct executor can run them synchronously on the calling thread.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -44941,12 +45403,17 @@ public final class N extends CommonUtil {
      * @param commands the collection of commands to execute in parallel
      * @param executor the executor to use for parallel execution
      * @return a list containing the results of all commands in the same order
-     * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws IllegalArgumentException if {@code executor} is {@code null}, or any command in {@code commands} is
+     *         {@code null}
+     * @throws RejectedExecutionException if {@code executor} refuses to accept a command; commands already
+     *         submitted may still run to completion
+     * @throws RuntimeException if a command fails (a checked exception is wrapped), or if the current thread is interrupted
+     *         while waiting for a command to complete; the interrupt status is restored
      * @see #callInParallel(Collection)
      * @see #runInParallel(Collection, Executor)
      */
     public static <R> List<R> callInParallel(final Collection<? extends Callable<? extends R>> commands, final Executor executor)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException, RuntimeException {
         N.checkArgNotNull(executor, cs.executor);
 
         if (isEmpty(commands)) {
@@ -44960,6 +45427,11 @@ public final class N extends CommonUtil {
         try {
             final Iterator<? extends Callable<? extends R>> iter = commands.iterator();
             final Callable<? extends R> firstCommand = iter.next();
+
+            // Checked before anything is submitted, and with the same IllegalArgumentException the remaining
+            // commands get from asyncExecute: calling the first command last used to report a null one as a raw
+            // NullPointerException, and only after commands 2..n had already been submitted and started.
+            N.checkArgNotNull(firstCommand, "The first command in 'commands' cannot be null");
 
             while (iter.hasNext()) {
                 futures.add(asyncExecute(iter.next(), executor));
@@ -45586,7 +46058,7 @@ public final class N extends CommonUtil {
 
     /**
      * Invokes the command until it returns normally, retrying it from the beginning whenever it throws {@link InterruptedException}.
-     * If one or more invocations are interrupted, the interrupted status is restored after a later invocation succeeds.
+     * If one or more invocations are interrupted, the interrupted status is restored when this method returns or throws.
      * Because the command may be invoked more than once, it should be safe to retry; this wrapper neither resumes an
      * interrupted invocation nor makes arbitrary command work atomic.
      *
@@ -45631,7 +46103,7 @@ public final class N extends CommonUtil {
      * Invokes a timed command until it returns normally, retrying it from the beginning whenever it throws {@link InterruptedException}.
      * The command receives the remaining timeout budget in milliseconds on each attempt; after the budget has elapsed,
      * that value may be zero or negative. This wrapper communicates the budget but does not enforce it, so the command
-     * must honor the supplied value. If interrupted, the interrupted status is restored after a later invocation succeeds.
+     * must honor the supplied value. If interrupted, the interrupted status is restored when this method returns or throws.
      * Remaining time is derived from the monotonic {@link System#nanoTime()} clock, so wall-clock adjustments do not change the timeout budget.
      * Because the command may be invoked more than once, it should be safe to retry.
      *
@@ -45649,7 +46121,7 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param cmd the command to execute with remaining time in milliseconds
-     * @param timeoutInMillis the maximum time to wait in milliseconds
+     * @param timeoutInMillis the timeout budget in milliseconds passed to the command; not enforced by this wrapper
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see #runUninterruptibly(Throwables.BiConsumer, long, TimeUnit)
      * @see #runUninterruptibly(Throwables.Runnable)
@@ -45684,7 +46156,7 @@ public final class N extends CommonUtil {
      * An initially negative timeout stays negative on every retry after conversion to nanoseconds.
      * The command receives the remaining timeout budget in nanoseconds on each attempt; after the budget has elapsed,
      * that value may be zero or negative. This wrapper communicates the budget but does not enforce it, so the command
-     * must honor the supplied value. If interrupted, the interrupted status is restored after a later invocation succeeds.
+     * must honor the supplied value. If interrupted, the interrupted status is restored when this method returns or throws.
      * Because the command may be invoked more than once, it should be safe to retry.
      *
      * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
@@ -45702,7 +46174,7 @@ public final class N extends CommonUtil {
      * }</pre>
      *
      * @param cmd the command to execute with remaining time and unit (nanoseconds)
-     * @param timeout the maximum time to wait
+     * @param timeout the timeout budget passed to the command; not enforced by this wrapper
      * @param unit the time unit of the timeout argument. Must not be null
      * @throws IllegalArgumentException if {@code cmd} or {@code unit} is {@code null}.
      * @see #runUninterruptibly(Throwables.LongConsumer, long)
@@ -45738,7 +46210,7 @@ public final class N extends CommonUtil {
 
     /**
      * Invokes the command until it returns a result, retrying it from the beginning whenever it throws {@link InterruptedException}.
-     * If one or more invocations are interrupted, the interrupted status is restored after a later invocation succeeds.
+     * If one or more invocations are interrupted, the interrupted status is restored when this method returns or throws.
      * Because the command may be invoked more than once, it should be safe to retry; this wrapper neither resumes an
      * interrupted invocation nor makes arbitrary command work atomic.
      *
@@ -45784,7 +46256,7 @@ public final class N extends CommonUtil {
      * Invokes a timed command until it returns a result, retrying it from the beginning whenever it throws {@link InterruptedException}.
      * The command receives the remaining timeout budget in milliseconds on each attempt; after the budget has elapsed,
      * that value may be zero or negative. This wrapper communicates the budget but does not enforce it, so the command
-     * must honor the supplied value. If interrupted, the interrupted status is restored after a later invocation succeeds.
+     * must honor the supplied value. If interrupted, the interrupted status is restored when this method returns or throws.
      * Remaining time is derived from the monotonic {@link System#nanoTime()} clock, so wall-clock adjustments do not change the timeout budget.
      * Because the command may be invoked more than once, it should be safe to retry.
      *
@@ -45802,7 +46274,7 @@ public final class N extends CommonUtil {
      *
      * @param <T> the type of result returned by the command
      * @param cmd the command to call with remaining time in milliseconds
-     * @param timeoutInMillis the maximum time to wait in milliseconds
+     * @param timeoutInMillis the timeout budget in milliseconds passed to the command; not enforced by this wrapper
      * @return the result of the command, which may be {@code null} if the command returns {@code null}
      * @throws IllegalArgumentException if {@code cmd} is {@code null}.
      * @see #callUninterruptibly(Throwables.BiFunction, long, TimeUnit)
@@ -45839,7 +46311,7 @@ public final class N extends CommonUtil {
      * An initially negative timeout stays negative on every retry after conversion to nanoseconds.
      * The command receives the remaining timeout budget in nanoseconds on each attempt; after the budget has elapsed,
      * that value may be zero or negative. This wrapper communicates the budget but does not enforce it, so the command
-     * must honor the supplied value. If interrupted, the interrupted status is restored after a later invocation succeeds.
+     * must honor the supplied value. If interrupted, the interrupted status is restored when this method returns or throws.
      * Because the command may be invoked more than once, it should be safe to retry.
      *
      * <p>Note: Copied from Google Guava under Apache License 2.0 and may be modified.</p>
@@ -45856,7 +46328,7 @@ public final class N extends CommonUtil {
      *
      * @param <T> the type of result returned by the command
      * @param cmd the command to call with remaining time and unit (nanoseconds)
-     * @param timeout the maximum time to wait
+     * @param timeout the timeout budget passed to the command; not enforced by this wrapper
      * @param unit the time unit of the timeout argument. Must not be null
      * @return the result of the command, which may be {@code null} if the command returns {@code null}
      * @throws IllegalArgumentException if {@code cmd} or {@code unit} is {@code null}.
@@ -46513,7 +46985,7 @@ public final class N extends CommonUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Sleep for 5 milliseconds regardless of interruptions
-     * // Micro-sleep for precise timing
+     * // Sleep durations remain subject to timer and scheduler precision
      * // Rate limiting with different time units
      * N.sleepUninterruptibly(5, TimeUnit.MILLISECONDS);     // no exception thrown if interrupted
      * N.sleepUninterruptibly(500, TimeUnit.MICROSECONDS);   // no exception thrown if interrupted
@@ -46674,6 +47146,7 @@ public final class N extends CommonUtil {
      *
      * @param e the exception to be converted to a runtime exception.
      * @return a RuntimeException that represents the provided exception.
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see ExceptionUtil#toRuntimeException(Exception)
      * @see ExceptionUtil#toRuntimeException(Exception, boolean)
      * @see ExceptionUtil#toRuntimeException(Throwable)
@@ -46682,7 +47155,7 @@ public final class N extends CommonUtil {
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      */
     @Beta
-    public static RuntimeException toRuntimeException(final Exception e) {
+    public static RuntimeException toRuntimeException(final Exception e) throws IllegalArgumentException {
         return ExceptionUtil.toRuntimeException(e);
     }
 
@@ -46703,6 +47176,7 @@ public final class N extends CommonUtil {
      * @param e the exception to be converted to a runtime exception.
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the exception is an InterruptedException
      * @return a RuntimeException that represents the provided exception.
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see ExceptionUtil#toRuntimeException(Exception)
      * @see ExceptionUtil#toRuntimeException(Exception, boolean)
      * @see ExceptionUtil#toRuntimeException(Throwable)
@@ -46711,7 +47185,7 @@ public final class N extends CommonUtil {
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      */
     @Beta
-    public static RuntimeException toRuntimeException(final Exception e, final boolean callInterrupt) {
+    public static RuntimeException toRuntimeException(final Exception e, final boolean callInterrupt) throws IllegalArgumentException {
         return ExceptionUtil.toRuntimeException(e, callInterrupt);
     }
 
@@ -46748,13 +47222,14 @@ public final class N extends CommonUtil {
      *
      * @param e the throwable to be converted to a runtime exception.
      * @return a RuntimeException that represents the provided throwable.
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see ExceptionUtil#toRuntimeException(Throwable)
      * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
      * @see ExceptionUtil#toRuntimeException(Throwable, boolean, boolean)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      */
     @Beta
-    public static RuntimeException toRuntimeException(final Throwable e) {
+    public static RuntimeException toRuntimeException(final Throwable e) throws IllegalArgumentException {
         return ExceptionUtil.toRuntimeException(e);
     }
 
@@ -46779,13 +47254,14 @@ public final class N extends CommonUtil {
      * @param e the throwable to be converted to a runtime exception.
      * @param callInterrupt whether to call {@code Thread.currentThread().interrupt()} if the throwable is an InterruptedException
      * @return a RuntimeException that represents the provided throwable.
+     * @throws IllegalArgumentException if {@code e} is {@code null}
      * @see #toRuntimeException(Throwable)
      * @see #toRuntimeException(Exception, boolean)
      * @see ExceptionUtil#toRuntimeException(Throwable, boolean)
      * @see ExceptionUtil#registerRuntimeExceptionMapper(Class, Function)
      */
     @Beta
-    public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt) {
+    public static RuntimeException toRuntimeException(final Throwable e, final boolean callInterrupt) throws IllegalArgumentException {
         return ExceptionUtil.toRuntimeException(e, callInterrupt);
     }
 
@@ -46897,11 +47373,11 @@ public final class N extends CommonUtil {
      * internally, which is efficient for formatted output but may be slower than simple string concatenation
      * for very frequent debugging calls.</p>
      *
-     * @param format the format string as described in {@link java.util.Formatter}. Must not be null
+     * @param format the format string as described in {@link java.util.Formatter}. Must not be {@code null}
      * @param args the arguments referenced by the format specifiers in the format string.
      *             If there are more arguments than format specifiers, the extra arguments are ignored.
      *             The number of arguments is variable and may be zero
-     * @throws NullPointerException if {@code format} is {@code null}
+     * @throws IllegalArgumentException if {@code format} is {@code null}
      * @throws IllegalFormatException if the format string is invalid, an argument has an incompatible type,
      *         or a format specifier refers to a missing argument
      * @see #println(Object)
@@ -46910,7 +47386,9 @@ public final class N extends CommonUtil {
      * @see String#format(String, Object...)
      * @see java.util.Formatter
      */
-    public static void fprintln(final String format, final Object... args) throws NullPointerException, IllegalFormatException {
+    public static void fprintln(final String format, final Object... args) throws IllegalArgumentException, IllegalFormatException {
+        N.checkArgNotNull(format, cs.format);
+
         System.out.printf(format, args); //NOSONAR
         System.out.println(); //NOSONAR
     }

@@ -49,8 +49,10 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * A predefined {@code ToFloatFunction} that converts any {@link Number} to a primitive {@code float}.
      * Returns {@code 0.0f} if the input is {@code null}; otherwise converts via {@link Numbers#toFloat(Object)}.
      *
-     * <p>Note: This conversion may result in loss of precision, and values whose magnitude exceeds
-     * the float range are converted to {@code Float.POSITIVE_INFINITY} or {@code Float.NEGATIVE_INFINITY}.
+     * <p>Note: This conversion may lose precision. For standard numeric types, overflow after rounding
+     * yields {@code Float.POSITIVE_INFINITY} or {@code Float.NEGATIVE_INFINITY}; values just beyond the
+     * largest finite float can still round to that finite value. Custom {@code Number} implementations
+     * determine their own conversion behavior through {@link Number#floatValue()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

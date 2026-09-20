@@ -181,7 +181,7 @@ public final class BufferedXmlWriter extends CharacterWriter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * try (FileWriter fw = new FileWriter("output.xml")) {
+     * try (FileWriter fw = new FileWriter("output.xml", IOUtil.DEFAULT_CHARSET)) {
      *     BufferedXmlWriter writer = Objectory.createBufferedXmlWriter(fw);
      *     try {
      *         writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

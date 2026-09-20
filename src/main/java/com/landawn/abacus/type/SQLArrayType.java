@@ -154,8 +154,11 @@ public class SQLArrayType extends AbstractType<Array> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
-     * ResultSet rs = statement.executeQuery("SELECT tags FROM products");
-     * Array tags = type.get(rs, 1);   // Get array from first column
+     * try (ResultSet rs = statement.executeQuery("SELECT tags FROM products")) {
+     *     if (rs.next()) {
+     *         Array tags = type.get(rs, 1);   // Get array from first column
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -176,8 +179,11 @@ public class SQLArrayType extends AbstractType<Array> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<Array> type = TypeFactory.getType(Array.class);
-     * ResultSet rs = statement.executeQuery("SELECT tags FROM products");
-     * Array tags = type.get(rs, "tags");   // Get array by column name
+     * try (ResultSet rs = statement.executeQuery("SELECT tags FROM products")) {
+     *     if (rs.next()) {
+     *         Array tags = type.get(rs, "tags");   // Get array by column name
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -216,7 +222,8 @@ public class SQLArrayType extends AbstractType<Array> {
     /**
      * Sets an Array parameter in a CallableStatement.
      * The Array represents a SQL ARRAY value.
-     * Note: This method uses setObject instead of setArray as CallableStatement may not support setArray with parameter names.
+     * This method uses {@link CallableStatement#setObject(String, Object)} because JDBC provides
+     * {@code setArray} only for positional parameters, not parameter names.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

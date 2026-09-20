@@ -127,8 +127,7 @@ public class CommonUtilTest extends CommonUtilTestSupport {
 
     @Test
     public void testNumericArrayNarrowingDependsOnNumberType() {
-        List<Number> values = Arrays.asList(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN,
-                new java.math.BigDecimal("1E+400"));
+        List<Number> values = Arrays.asList(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NaN, new java.math.BigDecimal("1E+400"));
         assertArrayEquals(new byte[] { -1, 0, 0, 0 }, N.toByteArray(values));
         assertArrayEquals(new short[] { -1, 0, 0, 0 }, N.toShortArray(values));
         assertArrayEquals(new int[] { Integer.MAX_VALUE, Integer.MIN_VALUE, 0, 0 }, N.toIntArray(values));
@@ -138,10 +137,10 @@ public class CommonUtilTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void testKnownMutableProbesPreserveExistingIterators() {
+    public void testMutabilityClassificationPreservesExistingIterators() {
         List<String> list = new ArrayList<>(Arrays.asList("value"));
         Iterator<String> listIterator = list.iterator();
-        assertFalse(N.probeUnmodifiable(list));
+        assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(list));
         assertEquals("value", listIterator.next());
         assertFalse(listIterator.hasNext());
         assertEquals(Arrays.asList("value"), list);
@@ -149,7 +148,7 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         Map<String, Integer> map = new HashMap<>();
         map.put("key", 1);
         Iterator<String> keyIterator = map.keySet().iterator();
-        assertFalse(N.probeUnmodifiable(map));
+        assertEquals(Mutability.KNOWN_MUTABLE, N.mutabilityOf(map));
         assertEquals("key", keyIterator.next());
         assertFalse(keyIterator.hasNext());
         assertEquals(Collections.singletonMap("key", 1), map);
@@ -519,12 +518,12 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertSame(alreadySortedMap, CommonUtil.unmodifiableSortedMap(alreadySortedMap));
         NavigableMap<String, Integer> alreadyNavMap = Collections.unmodifiableNavigableMap(nav);
         assertSame(alreadyNavMap, CommonUtil.unmodifiableNavigableMap(alreadyNavMap));
-        assertTrue(CommonUtil.probeUnmodifiable(Arrays.asList("a", "b")));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(Arrays.asList("a", "b")));
         final List<String> view = CommonUtil.unmodifiableList(Arrays.asList("x", "y"));
         assertThrows(UnsupportedOperationException.class, () -> view.set(0, "z"));
         final Map<String, Integer> backing = new HashMap<>();
         backing.put("k", 1);
-        assertTrue(CommonUtil.probeUnmodifiable(backing.keySet()));
+        assertEquals(Mutability.UNKNOWN, CommonUtil.mutabilityOf(backing.keySet()));
         final Collection<String> keys = CommonUtil.unmodifiableCollection(backing.keySet());
         assertThrows(UnsupportedOperationException.class, () -> keys.remove("k"));
         assertEquals(1, backing.size());
@@ -817,7 +816,8 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertEquals("v", CommonUtil.requireNonNull("v"));
         assertArrayEquals(new Class<?>[] { NullPointerException.class }, N.class.getMethod("requireNonNull", Object.class).getExceptionTypes());
         assertArrayEquals(new Class<?>[] { NullPointerException.class }, N.class.getMethod("requireNonNull", Object.class, String.class).getExceptionTypes());
-        assertEquals(2, N.class.getMethod("requireNonNull", Object.class, java.util.function.Supplier.class).getExceptionTypes().length);
+        assertArrayEquals(new Class<?>[] { NullPointerException.class },
+                N.class.getMethod("requireNonNull", Object.class, java.util.function.Supplier.class).getExceptionTypes());
     }
 
     @Test
@@ -890,18 +890,18 @@ public class CommonUtilTest extends CommonUtilTestSupport {
     }
 
     @Test
-    public void reviewFixes20260906_stepTakingCopyOfRangeThrowsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((boolean[]) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((char[]) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((byte[]) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((short[]) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((int[]) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((long[]) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((float[]) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((double[]) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((Object[]) null, 0, 0, 2, String[].class));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((List<String>) null, 0, 0, 2));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copyOfRange((int[]) null, 0, 0, 0));
+    public void reviewFixes20260906_stepTakingCopyOfRangeRejectsNullArguments() {
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((boolean[]) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((char[]) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((byte[]) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((short[]) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((int[]) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((long[]) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((float[]) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((double[]) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((Object[]) null, 0, 0, 2, String[].class));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((List<String>) null, 0, 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange((int[]) null, 0, 0, 0));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange(new int[] { 1, 2 }, 0, 2, 0));
         assertEquals("", CommonUtil.copyOfRange((String) null, 0, 0, 2));
         assertArrayEquals(new int[] { 1, 3 }, CommonUtil.copyOfRange(new int[] { 1, 2, 3, 4 }, 0, 4, 2));
@@ -920,6 +920,7 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertEquals(0, CommonUtil.lastIndexOfSubList(Arrays.asList(1, 2, 1, 2), Arrays.asList(1, 2), 1));
         assertEquals(-1, CommonUtil.lastIndexOfSubList(src, Arrays.asList(4), 2));
     }
+
     @Test
     public void testSwap_outOfRangeNullAndUnmodifiable() {
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.swap(new int[] { 1, 2 }, 0, 5));
@@ -927,8 +928,8 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.swap(new boolean[] { true, false }, 0, 2));
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.swap(new Object[] { "a", "b" }, 0, 2));
 
-        assertThrows(NullPointerException.class, () -> CommonUtil.swap((int[]) null, 0, 1));
-        assertThrows(NullPointerException.class, () -> CommonUtil.swap((List<?>) null, 0, 1));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.swap((int[]) null, 0, 1));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.swap((List<?>) null, 0, 1));
 
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.swap(new ArrayList<>(Arrays.asList("a", "b")), 0, 5));
         assertThrows(UnsupportedOperationException.class, () -> CommonUtil.swap(List.of("a", "b"), 0, 1));

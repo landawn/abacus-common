@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.exception.UncheckedInterruptedException;
+import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.function.BiPredicate;
 import com.landawn.abacus.util.function.Predicate;
@@ -99,7 +100,7 @@ public class SeqFnFnnThrowablesTest extends TestBase {
         assertTrue(full.isClosed());
 
         final TrackingReader partial = new TrackingReader("a\nb\n");
-        assertEquals(Optional.of("a"), Seq.ofLines(partial, true).first());
+        assertEquals(Nullable.of("a"), Seq.ofLines(partial, true).first());
         assertTrue(partial.isClosed());
     }
 
@@ -268,9 +269,9 @@ public class SeqFnFnnThrowablesTest extends TestBase {
         final AtomicInteger pulls = new AtomicInteger();
         final Comparator<Integer> nat = Comparators.naturalOrder();
 
-        final Optional<Integer> min = op.apply(Seq.<Integer, Exception> of(1, 2, 3).sorted().onEach(x -> pulls.incrementAndGet())).min(nat);
+        final Nullable<Integer> min = op.apply(Seq.<Integer, Exception> of(1, 2, 3).sorted().onEach(x -> pulls.incrementAndGet())).min(nat);
 
-        assertEquals(Optional.of(1), min);
+        assertEquals(Nullable.of(1), min);
         return pulls.get();
     }
 
@@ -564,17 +565,16 @@ public class SeqFnFnnThrowablesTest extends TestBase {
     }
 
     @Test
-    public void test_O6_nullUnitWinsOverANonPositiveDuration() {
-        // Both arguments are invalid. The null `unit` must be reported as such rather than formatted into the
-        // duration message as the literal "null" (which is what the old check order produced).
+    public void test_O6_nonPositiveDurationWinsOverNullUnit() {
+        // Both arguments are invalid. Validate duration first because it precedes unit in the signature.
         final IllegalArgumentException fn = assertThrows(IllegalArgumentException.class, () -> Fn.memoizeWithExpiration(() -> "x", -1L, null));
-        assertTrue(fn.getMessage() != null && fn.getMessage().contains("unit"), "message was: " + fn.getMessage());
-        assertFalse(fn.getMessage().contains("-1 null"), "the unit must be validated before it is formatted: " + fn.getMessage());
+        assertTrue(fn.getMessage() != null && fn.getMessage().contains("duration"), "message was: " + fn.getMessage());
+        assertFalse(fn.getMessage().contains("-1 null"), "duration validation does not format an unvalidated unit: " + fn.getMessage());
 
         final IllegalArgumentException fnn = assertThrows(IllegalArgumentException.class,
                 () -> Fnn.memoizeWithExpiration((Throwables.Supplier<String, Exception>) () -> "x", -1L, null));
-        assertTrue(fnn.getMessage() != null && fnn.getMessage().contains("unit"), "message was: " + fnn.getMessage());
-        assertFalse(fnn.getMessage().contains("-1 null"), "the unit must be validated before it is formatted: " + fnn.getMessage());
+        assertTrue(fnn.getMessage() != null && fnn.getMessage().contains("duration"), "message was: " + fnn.getMessage());
+        assertFalse(fnn.getMessage().contains("-1 null"), "duration validation does not format an unvalidated unit: " + fnn.getMessage());
     }
 
     @Test
@@ -591,12 +591,10 @@ public class SeqFnFnnThrowablesTest extends TestBase {
 
     @Test
     public void test_B11_zeroAndNegativeDurationsRejected() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Fnn.memoizeWithExpiration((Throwables.Supplier<String, Exception>) () -> "x", Duration.ZERO));
+        assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration((Throwables.Supplier<String, Exception>) () -> "x", Duration.ZERO));
         assertThrows(IllegalArgumentException.class,
                 () -> Fnn.memoizeWithExpiration((Throwables.Supplier<String, Exception>) () -> "x", Duration.ofMillis(-1)));
-        assertThrows(IllegalArgumentException.class,
-                () -> Fnn.memoizeWithExpiration((Throwables.Supplier<String, Exception>) () -> "x", (Duration) null));
+        assertThrows(IllegalArgumentException.class, () -> Fnn.memoizeWithExpiration((Throwables.Supplier<String, Exception>) () -> "x", (Duration) null));
     }
 
     @Test

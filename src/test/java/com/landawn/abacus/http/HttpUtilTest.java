@@ -1275,17 +1275,15 @@ public class HttpUtilTest extends TestBase {
 
         assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; x=" + dottedI + "; charset=ISO-8859-1", Charsets.UTF_8));
         assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; x=" + dottedI.repeat(8) + "; charset=ISO-8859-1", Charsets.UTF_8));
-        assertEquals(Charset.forName("ISO-8859-1"),
-                HttpUtil.getCharset("text/plain; x=" + dottedI.repeat(20) + "; charset=ISO-8859-1; y=1", Charsets.UTF_8));
+        assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; x=" + dottedI.repeat(20) + "; charset=ISO-8859-1; y=1", Charsets.UTF_8));
 
         // ... including inside a quoted value, which the scan skips over
-        assertEquals(Charset.forName("ISO-8859-1"), HttpUtil
-                .getCharset("application/json; note=\"" + dottedI.repeat(12) + "; charset=UTF-16\"; charset=ISO-8859-1", Charsets.UTF_8));
+        assertEquals(Charset.forName("ISO-8859-1"),
+                HttpUtil.getCharset("application/json; note=\"" + dottedI.repeat(12) + "; charset=UTF-16\"; charset=ISO-8859-1", Charsets.UTF_8));
 
         // the parameter name is still matched case-insensitively, and a quoted value is still unquoted
         assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; CHARSET=ISO-8859-1", Charsets.UTF_8));
-        assertEquals(Charset.forName("ISO-8859-1"),
-                HttpUtil.getCharset("text/plain; " + dottedI.repeat(9) + "=1; ChArSeT=\"ISO-8859-1\"", Charsets.UTF_8));
+        assertEquals(Charset.forName("ISO-8859-1"), HttpUtil.getCharset("text/plain; " + dottedI.repeat(9) + "=1; ChArSeT=\"ISO-8859-1\"", Charsets.UTF_8));
 
         // and a token that merely ends in "charset" is still not the charset parameter
         assertEquals(Charsets.UTF_8, HttpUtil.getCharset("text/plain; x-" + dottedI + "-charset=UTF-16", Charsets.UTF_8));

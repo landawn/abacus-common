@@ -33,6 +33,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -301,6 +302,8 @@ public final class XmlUtil {
      * @param factory the factory whose setting could not be applied
      * @param name the feature/property/attribute name
      * @param e the failure
+     *
+     * @throws ExceptionInInitializerError if {@code name} identifies a required XML security setting
      */
     private static void logFactoryFailure(final String factory, final String name, final Exception e) {
         // For critical XXE flags, fail-open is dangerous: abort class initialization instead of
@@ -313,6 +316,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if {@code featureName} is a required security setting and the provider rejects or ignores it
+     */
     private static void setSaxParserFactoryFeature(final String featureName, final boolean value) {
         try {
             saxParserFactory.setFeature(featureName, value);
@@ -325,6 +333,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if the XInclude setting is a required security setting and the provider rejects or ignores it
+     */
     private static void setSaxParserFactoryXIncludeAware(final boolean value) {
         try {
             saxParserFactory.setXIncludeAware(value);
@@ -337,6 +350,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if {@code featureName} is a required security setting and the provider rejects or ignores it
+     */
     private static void setDocumentBuilderFactoryFeature(final String featureName, final boolean value) {
         try {
             docBuilderFactory.setFeature(featureName, value);
@@ -349,6 +367,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if the XInclude setting is a required security setting and the provider rejects or ignores it
+     */
     private static void setDocumentBuilderFactoryXIncludeAware(final boolean value) {
         try {
             docBuilderFactory.setXIncludeAware(value);
@@ -361,6 +384,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if the entity-expansion setting is a required security setting and the provider rejects or ignores it
+     */
     private static void setDocumentBuilderFactoryExpandEntityReferences(final boolean value) {
         try {
             docBuilderFactory.setExpandEntityReferences(value);
@@ -373,6 +401,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if {@code attributeName} is a required security setting and the provider rejects or ignores it
+     */
     private static void setDocumentBuilderFactoryAttribute(final String attributeName, final String value) {
         try {
             docBuilderFactory.setAttribute(attributeName, value);
@@ -385,6 +418,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if {@code propertyName} is a required security setting and the provider rejects or ignores it
+     */
     private static void setXmlInputFactoryProperty(final String propertyName, final Object value) {
         try {
             xmlInputFactory.setProperty(propertyName, value);
@@ -397,6 +435,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if the external-entity resolver is a required security setting and the provider rejects or ignores it
+     */
     private static void setXmlInputFactoryResolver() {
         try {
             xmlInputFactory.setXMLResolver((publicID, systemID, baseURI, namespace) -> {
@@ -411,6 +454,11 @@ public final class XmlUtil {
         }
     }
 
+    /**
+     * Applies an XML factory setting and verifies that the provider honors it.
+     *
+     * @throws ExceptionInInitializerError if {@code attributeName} is a required security setting and the provider rejects or ignores it
+     */
     private static void setTransformerFactoryAttribute(final String attributeName, final String value) {
         try {
             transformerFactory.setAttribute(attributeName, value);
@@ -451,10 +499,11 @@ public final class XmlUtil {
      * @return The XML string representation of the JAXB bean, decoded as UTF-8
      * @throws IllegalArgumentException if {@code jaxbBean} is {@code null}
      * @throws RuntimeException if marshalling fails (e.g. a {@code JAXBException} is raised)
+     * @throws UncheckedIOException if flushing the marshalling buffer fails
      * @see JAXBContext#newInstance(Class...)
      * @see Marshaller#marshal(Object, java.io.OutputStream)
      */
-    public static String marshal(final Object jaxbBean) throws IllegalArgumentException, RuntimeException {
+    public static String marshal(final Object jaxbBean) throws IllegalArgumentException, RuntimeException, UncheckedIOException {
         N.checkArgNotNull(jaxbBean, cs.jaxbBean);
 
         final Class<?> cls = jaxbBean.getClass();
@@ -1121,6 +1170,7 @@ public final class XmlUtil {
      *     xmlWriter.writeCharacters("Hello XML");
      *     xmlWriter.writeEndElement();
      *     xmlWriter.writeEndDocument();
+     *     xmlWriter.flush();
      * } finally {
      *     xmlWriter.close();
      * }
@@ -1155,6 +1205,7 @@ public final class XmlUtil {
      *     try {
      *         xmlWriter.writeStartElement("root");
      *         xmlWriter.writeEndElement();
+     *         xmlWriter.flush();
      *     } finally {
      *         xmlWriter.close();
      *     }
@@ -1193,6 +1244,7 @@ public final class XmlUtil {
      *         xmlWriter.writeCharacters("value");
      *         xmlWriter.writeEndElement();
      *         xmlWriter.writeEndDocument();
+     *         xmlWriter.flush();
      *     } finally {
      *         xmlWriter.close();
      *     }
@@ -1309,6 +1361,7 @@ public final class XmlUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = XmlUtil.createDOMParser().newDocument();
+     * doc.appendChild(doc.createElement("root"));
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
      * XmlUtil.transform(doc, baos);
      * String xmlString = baos.toString("UTF-8");
@@ -1343,6 +1396,7 @@ public final class XmlUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Document doc = XmlUtil.createDOMParser().newDocument();
+     * doc.appendChild(doc.createElement("root"));
      * StringWriter writer = new StringWriter();
      * XmlUtil.transform(doc, writer);
      * String xmlString = writer.toString();
@@ -1458,16 +1512,19 @@ public final class XmlUtil {
      * @param xml The XML string to be decoded
      * @return The decoded object
      * @throws UnsupportedOperationException if {@code abacus.xml.allowXmlEncoderDecoder} is not set to {@code true}
+     * @throws IllegalArgumentException if XML decoding is enabled and {@code xml} is {@code null}
      * @see XMLDecoder#readObject()
      * @deprecated unsafe deserialization primitive; disabled by default. Use JAXB or {@code XmlMappers}.
      */
     @Deprecated
-    public static <T> T xmlDecode(final String xml) throws UnsupportedOperationException {
+    public static <T> T xmlDecode(final String xml) throws UnsupportedOperationException, IllegalArgumentException {
         if (!ALLOW_XML_ENCODER_DECODER) {
             throw new UnsupportedOperationException("xmlEncode/xmlDecode are disabled by default because "
                     + "java.beans.XMLDecoder is an unsafe-deserialization primitive (CVE-2017-3506 etc). "
                     + "Set -Dabacus.xml.allowXmlEncoderDecoder=true to opt in for trusted round-trips, or migrate to JAXB / abacus XmlParser.");
         }
+        N.checkArgNotNull(xml, cs.xml);
+
         // The InputStream wraps a byte array, so closing it has no effect; we still close
         // the XMLDecoder which drains references.
         try (XMLDecoder xmlDecoder = new XMLDecoder(new ByteArrayInputStream(xml.getBytes(Charsets.UTF_8)))) {
@@ -1927,8 +1984,10 @@ public final class XmlUtil {
      * @param output The StringBuilder to which the escaped characters will be written
      * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws UncheckedIOException if writing the escaped characters fails
      */
-    public static void writeCharacters(final char[] cbuf, final StringBuilder output) throws NullPointerException, IllegalArgumentException {
+    public static void writeCharacters(final char[] cbuf, final StringBuilder output)
+            throws NullPointerException, IllegalArgumentException, UncheckedIOException {
         writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
@@ -1948,12 +2007,15 @@ public final class XmlUtil {
      * @param off The start offset in the character array
      * @param len The number of characters to write
      * @param output The StringBuilder to which the escaped characters will be written
-     * @throws IllegalArgumentException if {@code output} is {@code null}
-     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code off} and {@code len} are non-negative
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws UncheckedIOException if writing the escaped characters fails
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final StringBuilder output)
-            throws IllegalArgumentException, NullPointerException, IndexOutOfBoundsException {
+            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException {
+        Objects.checkFromIndexSize(off, len, cbuf.length);
+
         // A StringBuilder-backed writer cannot fail; the checked exception is unreachable here.
         try {
             writeCharacters(cbuf, off, len, IOUtil.newStringWriter(output));
@@ -1977,8 +2039,9 @@ public final class XmlUtil {
      * @param str The string containing the characters to be written
      * @param output The StringBuilder to which the escaped characters will be written
      * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws UncheckedIOException if writing the escaped characters fails
      */
-    public static void writeCharacters(String str, final StringBuilder output) throws IllegalArgumentException {
+    public static void writeCharacters(String str, final StringBuilder output) throws IllegalArgumentException, UncheckedIOException {
         str = (str == null) ? Strings.NULL : str;
         writeCharacters(str, 0, str.length(), output);
     }
@@ -2000,12 +2063,15 @@ public final class XmlUtil {
      * @param off The start offset in the string
      * @param len The number of characters to write
      * @param output The StringBuilder to which the escaped characters will be written
-     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
      *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
+     * @throws IllegalArgumentException if {@code output} is {@code null}
+     * @throws UncheckedIOException if writing the escaped characters fails
      */
     public static void writeCharacters(final String str, final int off, final int len, final StringBuilder output)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException {
+        Objects.checkFromIndexSize(off, len, str == null ? Strings.NULL.length() : str.length());
+
         // A StringBuilder-backed writer cannot fail; the checked exception is unreachable here.
         try {
             writeCharacters(str, off, len, IOUtil.newStringWriter(output));
@@ -2057,13 +2123,15 @@ public final class XmlUtil {
      * @param off The start offset in the character array
      * @param len The number of characters to write
      * @param output The OutputStream to receive UTF-8 encoded escaped characters; flushed but not closed
-     * @throws IllegalArgumentException if {@code output} is {@code null}
-     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code off} and {@code len} are non-negative
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if writing the escaped characters to {@code output} or flushing {@code output} fails
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final OutputStream output)
-            throws IllegalArgumentException, NullPointerException, IndexOutOfBoundsException, IOException {
+            throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, IOException {
+        Objects.checkFromIndexSize(off, len, cbuf.length);
+
         final BufferedXmlWriter bufWriter = Objectory.createBufferedXmlWriter(output); //NOSONAR
 
         bufWriter.writeCharacter(cbuf, off, len);
@@ -2119,13 +2187,15 @@ public final class XmlUtil {
      * @param off The start offset in the string
      * @param len The number of characters to write
      * @param output The OutputStream to receive UTF-8 encoded escaped characters; flushed but not closed
-     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
      *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if writing the escaped characters to {@code output} or flushing {@code output} fails
      */
     public static void writeCharacters(final String str, final int off, final int len, final OutputStream output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, IOException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, IOException {
+        Objects.checkFromIndexSize(off, len, str == null ? Strings.NULL.length() : str.length());
+
         final BufferedXmlWriter bufWriter = Objectory.createBufferedXmlWriter(output); //NOSONAR
 
         bufWriter.writeCharacter(str, off, len);
@@ -2149,11 +2219,15 @@ public final class XmlUtil {
      *
      * @param cbuf The character array containing the characters to be written
      * @param output The Writer to receive escaped characters; flushed but not closed
+     * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IllegalArgumentException if {@code output} is {@code null}
-     * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
      */
-    public static void writeCharacters(final char[] cbuf, final Writer output) throws NullPointerException, IllegalArgumentException, IOException {
+    public static void writeCharacters(final char[] cbuf, final Writer output) throws IOException, NullPointerException, IllegalArgumentException {
+        if (output instanceof BufferedXmlWriter) {
+            ((BufferedXmlWriter) output).ensureOpen();
+        }
+
         writeCharacters(cbuf, 0, cbuf.length, output);
     }
 
@@ -2177,13 +2251,19 @@ public final class XmlUtil {
      * @param off The start offset in the character array
      * @param len The number of characters to write
      * @param output The Writer to receive escaped characters; flushed but not closed
-     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
-     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code off} and {@code len} are non-negative
+     * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      */
     public static void writeCharacters(final char[] cbuf, final int off, final int len, final Writer output)
-            throws IllegalArgumentException, IOException, NullPointerException, IndexOutOfBoundsException {
+            throws IOException, NullPointerException, IndexOutOfBoundsException, IllegalArgumentException {
+        if (output instanceof BufferedXmlWriter) {
+            ((BufferedXmlWriter) output).ensureOpen();
+        }
+
+        Objects.checkFromIndexSize(off, len, cbuf.length);
+
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output); //NOSONAR
 
@@ -2211,10 +2291,14 @@ public final class XmlUtil {
      *
      * @param str The string containing the characters to be written
      * @param output The Writer to receive escaped characters; flushed but not closed
-     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      */
-    public static void writeCharacters(String str, final Writer output) throws IllegalArgumentException, IOException {
+    public static void writeCharacters(String str, final Writer output) throws IOException, IllegalArgumentException {
+        if (output instanceof BufferedXmlWriter) {
+            ((BufferedXmlWriter) output).ensureOpen();
+        }
+
         str = (str == null) ? Strings.NULL : str;
         writeCharacters(str, 0, str.length(), output);
     }
@@ -2239,13 +2323,19 @@ public final class XmlUtil {
      * @param off The start offset in the string
      * @param len The number of characters to write
      * @param output The Writer to receive escaped characters; flushed but not closed
-     * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
      * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
      *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
+     * @throws IllegalArgumentException if {@code output} is {@code null}
      */
     public static void writeCharacters(final String str, final int off, final int len, final Writer output)
-            throws IllegalArgumentException, IOException, IndexOutOfBoundsException {
+            throws IOException, IndexOutOfBoundsException, IllegalArgumentException {
+        if (output instanceof BufferedXmlWriter) {
+            ((BufferedXmlWriter) output).ensureOpen();
+        }
+
+        Objects.checkFromIndexSize(off, len, str == null ? Strings.NULL.length() : str.length());
+
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output); //NOSONAR
 
@@ -2412,13 +2502,14 @@ public final class XmlUtil {
      */
     /**
      * Returns the most concrete class to use when deserializing a value.
-     * If {@code typeClass} is {@code null} or is not assignable to {@code targetClass},
+     * If {@code targetClass} is {@code null}, returns {@code typeClass}. Otherwise,
+     * if {@code typeClass} is {@code null} or is not assignable to {@code targetClass},
      * {@code targetClass} is returned unchanged. Otherwise {@code typeClass} (the more
      * specific, XML-declared type) is returned.
      *
      * @param targetClass the declared or expected class from the caller; may be {@code null}
      * @param typeClass the class resolved from an XML {@code type} attribute; may be {@code null}
-     * @return {@code typeClass} when it is a valid sub-type of {@code targetClass}, otherwise {@code targetClass}
+     * @return {@code typeClass} when {@code targetClass} is {@code null} or accepts that type, otherwise {@code targetClass}
      */
     static Class<?> getConcreteClass(final Class<?> targetClass, final Class<?> typeClass) {
         if ((typeClass == null) || ((targetClass != null) && !targetClass.isAssignableFrom(typeClass))) {

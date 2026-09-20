@@ -101,7 +101,7 @@ public final class NameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String cached = NameUtil.getCachedName("firstName");
-     * // All subsequent calls with "firstName" will return the same reference
+     * // If the name is cached, subsequent calls return that cached reference.
      * }</pre>
      *
      * @param str the string to retrieve from cache or add to cache; may be {@code null}
@@ -132,7 +132,7 @@ public final class NameUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String cached = NameUtil.cacheName("com.example.Person", false);
-     * // The string is now interned and cached
+     * // Interns and caches the name if the pool has room; otherwise returns it unchanged.
      * }</pre>
      *
      * @param name the name string to cache; may be {@code null}

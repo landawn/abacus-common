@@ -488,7 +488,8 @@ public class UtilCoverageTest extends TestBase {
         assertTrue(IntFunctions.<String> ofCollection(LinkedList.class).apply(2) instanceof LinkedList);
         assertTrue(IntFunctions.<String> ofCollection(LinkedHashSet.class).apply(2) instanceof LinkedHashSet);
         assertTrue(IntFunctions.<String> ofCollection(java.util.TreeSet.class).apply(2) instanceof java.util.TreeSet);
-        assertTrue(IntFunctions.<String> ofCollection(java.util.concurrent.ConcurrentSkipListSet.class).apply(2) instanceof java.util.concurrent.ConcurrentSkipListSet);
+        assertTrue(IntFunctions.<String> ofCollection(java.util.concurrent.ConcurrentSkipListSet.class)
+                .apply(2) instanceof java.util.concurrent.ConcurrentSkipListSet);
         assertTrue(IntFunctions.<String> ofCollection(java.util.PriorityQueue.class).apply(2) instanceof java.util.PriorityQueue);
         assertThrows(IllegalArgumentException.class, () -> IntFunctions.ofCollection(java.util.AbstractSequentialList.class));
     }

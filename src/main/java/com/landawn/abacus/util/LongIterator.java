@@ -27,8 +27,8 @@ import com.landawn.abacus.util.stream.LongStream;
  * A specialized iterator for primitive long values. This class provides an efficient way to iterate over
  * long values without the overhead of boxing/unboxing that comes with using Iterator&lt;Long&gt;.
  *
- * <p>This abstract class does not support element removal: the {@code remove()} operation
- * is not supported. The traversal position itself is mutable and is consumed as values are read, so
+ * <p>Factory-created iterators reject {@link #remove()} with {@link UnsupportedOperationException};
+ * subclasses may override that method. The traversal position itself is mutable and is consumed as values are read, so
  * instances are neither reusable nor safe for concurrent consumption. Transformation methods such as
  * {@code skip()}, {@code limit()} and {@code filter()} return wrappers over this same source iterator;
  * consuming a wrapper also advances the source.</p>
@@ -202,7 +202,14 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * // The supplier is not invoked until iter.hasNext() or iter.nextLong() is called
      * }</pre>
      *
-     * <p>The returned iterator initializes its source on its first traversal operation. If the supplier returns null, initialization throws IllegalStateException; a RuntimeException or Error from initialization is cached and rethrown by subsequent traversal operations.</p>
+     * <p>The returned iterator initializes its source on its first traversal operation. Its access methods
+     * throw {@link IllegalStateException} if the supplier returns {@code null} or recursively accesses this
+     * iterator during initialization. The supplier is invoked at most once. Initialization exceptions and
+     * errors are cached and rethrown on later access, even if the supplier catches a recursive-access failure.</p>
+     *
+     * <p>The supplier must return a valid source distinct from this deferred iterator and must not create
+     * a cycle through other delegating iterators. Returning this iterator directly throws a cached
+     * {@link IllegalStateException}; indirect delegation cycles are not detected.</p>
      *
      * @param iteratorSupplier a {@link Supplier} that provides the {@code LongIterator} when needed
      * @return a lazily initialized {@code LongIterator} that delegates to the iterator provided by the supplier
@@ -214,6 +221,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
         return new LongIterator() {
             private LongIterator iter = null;
             private volatile boolean isInitialized = false;
+            private boolean isInitializing = false;
             private Throwable initializationFailure = null;
 
             @Override
@@ -231,21 +239,38 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
             }
 
             /**
-             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null}
+             * @throws IllegalStateException if initialization of the deferred iterator returns {@code null} or recursively accesses this iterator
              */
             private void init() throws IllegalStateException {
                 if (!isInitialized) {
                     synchronized (this) {
                         if (!isInitialized) {
+                            if (isInitializing) {
+                                if (initializationFailure == null) {
+                                    initializationFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                                }
+
+                                throw (IllegalStateException) initializationFailure;
+                            }
+
+                            isInitializing = true;
+
                             try {
                                 iter = iteratorSupplier.get();
+
+                                if (iter == this) {
+                                    throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
+                                }
 
                                 if (iter == null) {
                                     throw new IllegalStateException("Iterator supplier returned null");
                                 }
                             } catch (RuntimeException | Error e) {
-                                initializationFailure = e;
+                                if (initializationFailure == null) {
+                                    initializationFailure = e;
+                                }
                             } finally {
+                                isInitializing = false;
                                 isInitialized = true;
                             }
                         }

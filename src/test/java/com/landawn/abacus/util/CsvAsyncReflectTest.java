@@ -493,6 +493,8 @@ public class CsvAsyncReflectTest extends TestBase {
 
         assertEquals(first, second);
         assertTrue(new File(first).isDirectory());
+
+        assertThrows(IllegalArgumentException.class, () -> ClassUtil.makeFolderForPackage(null, "com.example.demo"));
     }
 
     // ------------------------------------------------------------------------------------------------

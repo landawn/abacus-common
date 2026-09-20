@@ -493,6 +493,7 @@ public class StringsToTest extends StringsTestSupport {
         assertNull(Strings.toKebabCase(null, '.'));
         assertEquals("", Strings.toKebabCase("", '.'));
     }
+
     /**
      * Contract pin for the {@code toCamelCase(String)} javadoc: the "2beta" -> "2Beta" titlecase rule applies to a
      * capitalized WORD, never to the first word of a camelCase result, so on a whole string {@code toCamelCase} and

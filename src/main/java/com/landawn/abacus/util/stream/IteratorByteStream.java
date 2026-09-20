@@ -155,7 +155,7 @@ class IteratorByteStream extends AbstractByteStream {
                 }
 
                 @Override
-                public byte nextByte() {
+                public byte nextByte() throws NoSuchElementException {
                     return values.nextByte();
                 }
             };
@@ -200,7 +200,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -249,7 +249,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -306,7 +306,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -341,7 +341,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 return mapper.applyAsByte(elements.nextByte());
             }
 
@@ -370,7 +370,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return mapper.applyAsInt(elements.nextByte());
             }
 
@@ -400,7 +400,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return mapper.apply(elements.nextByte());
             }
 
@@ -450,7 +450,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -506,7 +506,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -559,7 +559,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -612,7 +612,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -682,7 +682,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -740,7 +740,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -790,7 +790,7 @@ class IteratorByteStream extends AbstractByteStream {
                 }
 
                 @Override
-                public byte nextByte() {
+                public byte nextByte() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -833,7 +833,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (cnt >= maxSize) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -914,7 +914,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 skipElements();
 
                 return elements.nextByte();
@@ -975,7 +975,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 final byte next = elements.nextByte();
 
                 action.accept(next);
@@ -1769,7 +1769,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return elements.nextByte();
             }
 
@@ -1835,7 +1835,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }
@@ -1876,13 +1876,7 @@ class IteratorByteStream extends AbstractByteStream {
                             iter = s == null ? ByteIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -1920,7 +1914,7 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             @Override
-            public byte nextByte() {
+            public byte nextByte() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }

@@ -10,7 +10,7 @@ import com.landawn.abacus.TestBase;
 
 public class TestTest extends TestBase {
     @com.landawn.abacus.annotation.Test
-    public static class TestClass {
+    public static class TestClass extends TestBase {
         @com.landawn.abacus.annotation.Test
         private String field;
 

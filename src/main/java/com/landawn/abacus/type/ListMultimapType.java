@@ -53,8 +53,9 @@ public class ListMultimapType<K, E> extends MultimapType<K, E, List<E>, ListMult
      * @param typeClass the Class object for ListMultimap
      * @param keyTypeName the name of the key type
      * @param valueElementTypeName the name of the value element type
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied type name is {@code null}, blank, or structurally invalid.
      */
-    ListMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) {
+    ListMultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName) throws IllegalArgumentException {
         super(typeClass, keyTypeName, valueElementTypeName, null);
     }
 

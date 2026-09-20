@@ -350,8 +350,8 @@ public class IntFunctionsTest extends TestBase {
         poolField.setAccessible(true);
         final ClassValue<?> pool = (ClassValue<?>) poolField.get(null);
 
-        final Class[] targetTypes = { Queue.class, Deque.class, AbstractQueue.class, BlockingQueue.class, LinkedBlockingQueue.class,
-                ArrayBlockingQueue.class, BlockingDeque.class, LinkedBlockingDeque.class, ConcurrentLinkedQueue.class, PriorityQueue.class };
+        final Class[] targetTypes = { Queue.class, Deque.class, AbstractQueue.class, BlockingQueue.class, LinkedBlockingQueue.class, ArrayBlockingQueue.class,
+                BlockingDeque.class, LinkedBlockingDeque.class, ConcurrentLinkedQueue.class, PriorityQueue.class };
 
         for (final Class targetType : targetTypes) {
             final IntFunction<?> creator = IntFunctions.ofCollection(targetType);
@@ -384,7 +384,7 @@ public class IntFunctionsTest extends TestBase {
             for (int i = 0; i < threadCount; i++) {
                 threads[i] = new Thread(() -> {
                     try {
-                        allReady.await();   // release every thread onto the very first call together
+                        allReady.await(); // release every thread onto the very first call together
                         seen.add(IntFunctions.ofCollection(targetType));
                     } catch (final Throwable e) {
                         failures.add(e);
@@ -419,8 +419,7 @@ public class IntFunctionsTest extends TestBase {
     @Test
     public void testOfCollection_documentedTypeSubstitutions() {
         // Pins the documented caveat: the creator is NOT always an instance of the requested target type.
-        final Class[] substituted = { AbstractQueue.class, ImmutableList.class, ImmutableSet.class, ImmutableSortedSet.class,
-                ImmutableNavigableSet.class };
+        final Class[] substituted = { AbstractQueue.class, ImmutableList.class, ImmutableSet.class, ImmutableSortedSet.class, ImmutableNavigableSet.class };
 
         for (final Class targetType : substituted) {
             final Object created = IntFunctions.ofCollection(targetType).apply(4);

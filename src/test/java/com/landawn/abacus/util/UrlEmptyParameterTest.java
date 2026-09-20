@@ -9,8 +9,10 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class UrlEmptyParameterTest {
+public class UrlEmptyParameterTest extends TestBase {
     @Test
     void ambiguousMapAndPairEntriesAreRejectedBeforeAppendingTheirSeparator() {
         final Map<String, Object> map = new LinkedHashMap<>();

@@ -150,7 +150,9 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * <pre>{@code
      * byte[] buffer = new byte[1024];
      * int bytesRead = inputStream.read(buffer);
-     * lz4Out.write(buffer, 0, bytesRead);
+     * if (bytesRead > 0) {
+     *     lz4Out.write(buffer, 0, bytesRead);
+     * }
      * }</pre>
      *
      * @param b the byte array containing the data to write
@@ -215,7 +217,6 @@ public final class LZ4BlockOutputStream extends OutputStream {
      * lz4Out.finish();   // Ensure all data is compressed
      * // The underlying stream is still open for other uses
      * }</pre>
-     *
      *
      * @throws IllegalStateException if this stream has already been finished or closed
      * @throws IOException if writing the final compressed block or end marker, or flushing the underlying stream fails

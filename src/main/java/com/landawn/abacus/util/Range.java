@@ -254,7 +254,7 @@ import com.landawn.abacus.util.u.Optional;
  *   <li><b>Query Arguments:</b> Methods such as {@link #contains}, {@link #isStartedBy}, and {@link #isAfter} accept {@code null} query arguments and return {@code false} rather than throwing</li>
  *   <li><b>Deliberate Divergence:</b> {@link #elementCompareTo} rejects a {@code null} element with
  *       {@code IllegalArgumentException} and {@link #span(Range)} rejects a {@code null} range with
- *       {@code NullPointerException}, because for those two operations there is no sensible
+ *       {@code IllegalArgumentException}, because for those two operations there is no sensible
  *       "not found" answer to return</li>
  *   <li><b>Range Arguments:</b> Methods such as {@link #containsRange} and {@link #overlaps} accept a {@code null} range argument and return {@code false}</li>
  * </ul>
@@ -262,7 +262,7 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Error Handling:</b>
  * <ul>
  *   <li><b>IllegalArgumentException:</b> Thrown when an endpoint is {@code null} or {@code min > max} during construction, or when {@code elementCompareTo} receives a {@code null} element</li>
- *   <li><b>NullPointerException:</b> Thrown by {@link #span(Range)} if {@code other} is {@code null}</li>
+ *   <li><b>IllegalArgumentException:</b> Also thrown by {@link #span(Range)} if {@code other} is {@code null}</li>
  *   <li><b>ClassCastException:</b> Thrown when elements are not properly comparable</li>
  *   <li><b>Validation:</b> Comprehensive validation of range parameters during construction</li>
  * </ul>
@@ -784,7 +784,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
 
     /**
      * Checks whether this range starts with the specified element. Returns {@code true} only if
-     * the lower endpoint is closed (inclusive) and equals the specified element.
+     * the lower endpoint is closed (inclusive) and compares equal to the specified element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -796,7 +796,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * }</pre>
      *
      * @param element the element to check against the lower endpoint, {@code null} returns false
-     * @return {@code true} if this range has a closed lower endpoint that equals the specified element
+     * @return {@code true} if this range has a closed lower endpoint that compares equal to the specified element
      * @see #isEndedBy(Comparable)
      * @see #lowerEndpoint()
      */
@@ -810,7 +810,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
 
     /**
      * Checks whether this range ends with the specified element. Returns {@code true} only if
-     * the upper endpoint is closed (inclusive) and equals the specified element.
+     * the upper endpoint is closed (inclusive) and compares equal to the specified element.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -822,7 +822,7 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * }</pre>
      *
      * @param element the element to check against the upper endpoint, {@code null} returns false
-     * @return {@code true} if this range has a closed upper endpoint that equals the specified element
+     * @return {@code true} if this range has a closed upper endpoint that compares equal to the specified element
      * @see #isStartedBy(Comparable)
      * @see #upperEndpoint()
      */
@@ -1100,9 +1100,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Checks whether this range is completely after the specified range, meaning every value
      * in this range is greater than every value in the other range with no shared elements.
      *
-     * <p>The check accounts for bound types: if the other range's upper endpoint is closed
-     * (inclusive), this range must start strictly above that value; if it is open (exclusive),
-     * this range may start at the same value.</p>
+     * <p>This range must start above the other range's upper endpoint, or at the same value
+     * with at least one of the two meeting bounds open.</p>
      *
      * <p><b>Degenerate ranges are ordered by their endpoints, not treated as absent.</b> This method
      * and {@link #isBeforeRange(Range)} compare endpoints and never consult {@link #isEmpty()}, so a
@@ -1147,9 +1146,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
      * Checks whether this range is completely before the specified range, meaning every value
      * in this range is less than every value in the other range with no shared elements.
      *
-     * <p>The check accounts for bound types: if the other range's lower endpoint is closed
-     * (inclusive), this range must end strictly below that value; if it is open (exclusive),
-     * this range may end at the same value.</p>
+     * <p>This range must end below the other range's lower endpoint, or at the same value
+     * with at least one of the two meeting bounds open.</p>
      *
      * <p><b>Degenerate ranges are ordered by their endpoints, not treated as absent</b> &mdash; see
      * {@link #isAfterRange(Range)} for the full rule and examples. In particular a
@@ -1189,7 +1187,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
 
     /**
      * Checks whether this range overlaps with the specified range.
-     * Two ranges overlap if there is at least one element that is contained in both ranges.
+     * The endpoint-delimited intervals overlap according to {@link #overlaps(Range)}; this does
+     * not guarantee a shared value exists in a discrete domain.
      * Ranges that touch at a single point are considered overlapping only if that point
      * is included in both ranges.
      *
@@ -1654,8 +1653,8 @@ public final class Range<T extends Comparable<? super T>> implements Serializabl
          * <pre>{@code
          * Range<Integer> range = Range.closed(1, 5);
          * // The lower endpoint value is 1, upper endpoint value is 5
-         * // LowerEndpoint.compareTo(1) returns 0 (equal), compareTo(0) returns positive (endpoint value is greater than the argument)
-         * // UpperEndpoint.compareTo(5) returns 0 (equal), compareTo(3) returns positive (endpoint value is greater than the argument)
+         * // LowerEndpoint.compareToValue(1) returns 0 (equal), compareToValue(0) returns positive
+         * // UpperEndpoint.compareToValue(5) returns 0 (equal), compareToValue(3) returns positive
          *
          * // Used internally: N.compare(endpoint.value, value)
          * }</pre>

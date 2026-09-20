@@ -827,12 +827,17 @@ public class ImmutableSortedMapTest extends TestBase {
     }
 
     @Test
-    public void testOf_neverSilentlyFallsBackToAnUnsortedImmutableMap() {
-        // With a Comparable bound on of(...), a non-Comparable key selected the inherited
-        // ImmutableMap.of(...) instead and produced an UNSORTED map with no error at all.
-        assertThrows(ClassCastException.class, () -> ImmutableSortedMap.of(new NotComparable("z"), 1, new NotComparable("a"), 2));
-        assertThrows(ClassCastException.class, () -> ImmutableSortedMap.of(new NotComparable("z"), 1));
-        assertThrows(ClassCastException.class, () -> ImmutableSortedMap.of(new NotComparable("a"), 1, new NotComparable("b"), 2, new NotComparable("c"), 3));
+    public void testOf_nonComparableKeySelectsInheritedUnsortedFactory() {
+        // of(...) requires K extends Comparable. A non-Comparable key is not applicable to
+        // ImmutableSortedMap.of, so the call binds to ImmutableMap.of and returns an unsorted map.
+        // The hierarchy is unchanged, so this fallback remains; a result demanded as
+        // ImmutableSortedMap<NotComparable, Integer> would not compile.
+        final ImmutableMap<NotComparable, Integer> one = ImmutableSortedMap.of(new NotComparable("z"), 1);
+        final ImmutableMap<NotComparable, Integer> two = ImmutableSortedMap.of(new NotComparable("z"), 1, new NotComparable("a"), 2);
+        assertFalse(one instanceof SortedMap);
+        assertFalse(two instanceof SortedMap);
+        assertEquals(1, one.size());
+        assertEquals(2, two.size());
     }
 
     @Test

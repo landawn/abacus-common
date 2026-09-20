@@ -25,8 +25,8 @@ public enum EnumType {
      * Persists an enumerated type property or field as a string using its constant name.
      *
      * <p>This is the recommended approach as it's readable, maintainable, and resilient
-     * to enum reordering. The only concern is renaming enum constants, which would
-     * require data migration.</p>
+     * to enum reordering. Renaming or removing a constant referenced by persisted data
+     * requires a migration or an explicit compatibility mapping.</p>
      *
      * <p><b>Usage Examples:</b> For enum {@code Status { PENDING, ACTIVE, CLOSED }},
      * values are stored as "PENDING", "ACTIVE", "CLOSED". You can safely reorder
@@ -46,12 +46,14 @@ public enum EnumType {
      * Persists an enumerated type property or field as an integer using its ordinal position.
      *
      * <p><b>Warning:</b> This representation is fragile as it depends on the declaration order
-     * of enum constants. Adding, removing, or reordering enum values will break
-     * compatibility with existing persisted data.</p>
+     * of enum constants. Inserting or removing constants before existing constants,
+     * or reordering them, changes their ordinals and can break compatibility with
+     * persisted data. Appending constants preserves existing ordinals.</p>
      *
      * <p><b>Usage Examples:</b> For enum {@code Status { PENDING, ACTIVE, CLOSED }},
      * values are stored as 0, 1, 2 respectively. If you later change it to
-     * {@code Status { ACTIVE, PENDING, CLOSED }}, all existing data will be incorrect.</p>
+     * {@code Status { ACTIVE, PENDING, CLOSED }}, persisted 0 and 1 values change meaning;
+     * persisted 2 values still refer to {@code CLOSED}.</p>
      *
      * <p><b>Use when:</b></p>
      * <ul>

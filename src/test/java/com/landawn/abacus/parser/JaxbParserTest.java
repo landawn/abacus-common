@@ -729,7 +729,6 @@ public class JaxbParserTest extends TestBase {
         assertEquals("Ines", parser.deserialize(new StringReader(PERSON_XML), null, Person.class).getName());
     }
 
-
     // R03: mapping every IOException in the JAXB cause chain to UncheckedIOException also caught the one that
     // is not an I/O failure at all - Xerces reports undecodable bytes with MalformedByteSequenceException, a
     // CharConversionException. Nothing failed to arrive; the document cannot be decoded, which is what r9503

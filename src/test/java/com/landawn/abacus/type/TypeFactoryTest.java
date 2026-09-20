@@ -1520,7 +1520,8 @@ public class TypeFactoryTest extends TestBase {
         final String name = "ReviewFixesOverride_" + cls.getSimpleName().replace("[]", "Array") + "_" + System.nanoTime();
         final Type<Object> custom = reviewFixesCustomType((Class<Object>) (Class) cls, name, s -> null, x -> null);
 
-        final IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType((Class<Object>) (Class) cls, custom));
+        final IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> TypeFactory.registerType((Class<Object>) (Class) cls, custom));
         assertTrue(error.getMessage().contains("already registered with class"), error.getMessage());
         // Refused before anything was published: neither the name nor the class slot changed.
         assertNull(TypeFactory.getTypeIfPresent(name));
@@ -1537,8 +1538,8 @@ public class TypeFactoryTest extends TestBase {
             reviewFixesAssertBuiltInCannotBeOverridden(cls);
         }
         // Enum.class itself cannot even be looked up (EnumType rejects it), so only the refusal is asserted.
-        assertThrows(IllegalArgumentException.class,
-                () -> TypeFactory.registerType(Enum.class, reviewFixesCustomType(Enum.class, "ReviewFixesOverride_Enum_" + System.nanoTime(), s -> null, x -> null)));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType(Enum.class,
+                reviewFixesCustomType(Enum.class, "ReviewFixesOverride_Enum_" + System.nanoTime(), s -> null, x -> null)));
 
         // The built-in handlers still answer, by class and by name, and the parser still uses them.
         final Type<java.util.Map<Object, Object>> mapType = TypeFactory.getType(java.util.Map.class);
@@ -1562,9 +1563,9 @@ public class TypeFactoryTest extends TestBase {
 
         // The documented named overload (class-level javadoc: "ISODateTime", LocalDateTime.class) keeps working.
         final String isoName = "ReviewFixesISODateTime_" + System.nanoTime();
-        assertDoesNotThrow(() -> TypeFactory.registerType(isoName, java.time.LocalDateTime.class,
-                dt -> dt.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                str -> java.time.LocalDateTime.parse(str, java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
+        assertDoesNotThrow(
+                () -> TypeFactory.registerType(isoName, java.time.LocalDateTime.class, dt -> dt.format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                        str -> java.time.LocalDateTime.parse(str, java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
         final Type<java.time.LocalDateTime> isoType = TypeFactory.getType(isoName);
         assertEquals(java.time.LocalDateTime.class, isoType.javaType());
         assertEquals(java.time.LocalDateTime.of(2020, 1, 2, 3, 4, 5), isoType.valueOf("2020-01-02T03:04:05"));
@@ -1604,10 +1605,11 @@ public class TypeFactoryTest extends TestBase {
     @Test
     public void reviewFixes20260906_priorLookupBlocksRegistrationByClass() {
         // T1-07: nothing was registered, but the lookup cached a default type for the class.
-        assertTrue(TypeFactory.getType(ReviewFixesLookedUpByClassFirst.class).isBean() || TypeFactory.getType(ReviewFixesLookedUpByClassFirst.class).isObject());
+        assertTrue(
+                TypeFactory.getType(ReviewFixesLookedUpByClassFirst.class).isBean() || TypeFactory.getType(ReviewFixesLookedUpByClassFirst.class).isObject());
 
-        final IllegalArgumentException byClass = assertThrows(IllegalArgumentException.class,
-                () -> TypeFactory.registerType(ReviewFixesLookedUpByClassFirst.class, x -> "x", ReviewFixesLookedUpByClassFirst -> new ReviewFixesLookedUpByClassFirst()));
+        final IllegalArgumentException byClass = assertThrows(IllegalArgumentException.class, () -> TypeFactory
+                .registerType(ReviewFixesLookedUpByClassFirst.class, x -> "x", ReviewFixesLookedUpByClassFirst -> new ReviewFixesLookedUpByClassFirst()));
         assertTrue(byClass.getMessage().contains("already registered"), byClass.getMessage());
 
         final String customName = "ReviewFixesLookedUpByClassFirst_" + System.nanoTime();
@@ -1741,8 +1743,8 @@ public class TypeFactoryTest extends TestBase {
         assertTrue(fabricated.isBean() || fabricated.isObject());
 
         // A registration that fails on its intrinsic name publishes nothing and leaves the fallback in place.
-        assertThrows(IllegalArgumentException.class,
-                () -> TypeFactory.registerType(ReviewFixesRollbackTarget.class, reviewFixesCustomType(ReviewFixesRollbackTarget.class, "String", s -> null, x -> null)));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType(ReviewFixesRollbackTarget.class,
+                reviewFixesCustomType(ReviewFixesRollbackTarget.class, "String", s -> null, x -> null)));
         assertSame(fabricated, TypeFactory.getType(canonical));
 
         final String customName = "ReviewFixesRollbackTarget_" + System.nanoTime();
@@ -1786,9 +1788,10 @@ public class TypeFactoryTest extends TestBase {
         })));
 
         // Set, Map value, array of the wildcard list, Optional, whitespace, nested bound, BigDecimal precision.
-        assertEquals(ReviewFixesPerson.class, ((java.util.Set<?>) TypeFactory.getType("Set<? extends " + person + ">").valueOf("[{\"name\": \"s\"}]")).iterator().next().getClass());
-        final java.util.Map<String, ReviewFixesPerson> byKey = TypeFactory.<java.util.Map<String, ReviewFixesPerson>> getType("Map<String, ? extends " + person + ">")
-                .valueOf("{\"k\": {\"name\": \"m\", \"age\": 2}}");
+        assertEquals(ReviewFixesPerson.class,
+                ((java.util.Set<?>) TypeFactory.getType("Set<? extends " + person + ">").valueOf("[{\"name\": \"s\"}]")).iterator().next().getClass());
+        final java.util.Map<String, ReviewFixesPerson> byKey = TypeFactory.<java.util.Map<String, ReviewFixesPerson>> getType(
+                "Map<String, ? extends " + person + ">").valueOf("{\"k\": {\"name\": \"m\", \"age\": 2}}");
         assertEquals("m", byKey.get("k").getName());
         assertEquals(ReviewFixesPerson.class, TypeFactory.getType("List<? extends " + person + ">[]").elementType().elementType().javaType());
         assertEquals(ReviewFixesPerson.class, TypeFactory.getType("List< ? extends " + person + " >").elementType().javaType());
@@ -1950,7 +1953,6 @@ public class TypeFactoryTest extends TestBase {
         assertSame(type, TypeFactory.getType(intrinsic));
     }
 
-
     // ---------------------------------------------------------------------------------------------------------
     // Fix pass 2026-09-08 (G01)
     // ---------------------------------------------------------------------------------------------------------
@@ -1983,8 +1985,8 @@ public class TypeFactoryTest extends TestBase {
     public void fixG01_namedOverloadDoesNotStealAClassAnotherTypeAlreadyAnswersFor() {
         // Publish a handler under the class's CANONICAL name; nothing has looked the class up yet.
         final Class<FixG01ClaimedByName> claimedClass = FixG01ClaimedByName.class;
-        final Type<FixG01ClaimedByName> claimed = reviewFixesCustomType(claimedClass, "FixG01Claimed_" + System.nanoTime(),
-                s -> new FixG01ClaimedByName(), x -> "c");
+        final Type<FixG01ClaimedByName> claimed = reviewFixesCustomType(claimedClass, "FixG01Claimed_" + System.nanoTime(), s -> new FixG01ClaimedByName(),
+                x -> "c");
         TypeFactory.registerType(claimedClass.getCanonicalName(), claimed);
 
         final String claimedAlias = "FixG01ClaimedAlias_" + System.nanoTime();
@@ -2073,8 +2075,7 @@ public class TypeFactoryTest extends TestBase {
         // a name that is only whitespace is still refused by both overloads, and publishes nothing
         assertThrows(IllegalArgumentException.class,
                 () -> TypeFactory.registerType("   ", FixG03BlankTarget.class, (x, p) -> "x", (s, p) -> new FixG03BlankTarget()));
-        assertThrows(IllegalArgumentException.class,
-                () -> TypeFactory.registerType(" \t ", FixG03BlankTarget.class, x -> "x", s -> new FixG03BlankTarget()));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType(" \t ", FixG03BlankTarget.class, x -> "x", s -> new FixG03BlankTarget()));
         assertNull(TypeFactory.getTypeIfPresent("   "));
         assertNull(TypeFactory.getTypeIfPresent(" \t "));
     }
@@ -2096,8 +2097,7 @@ public class TypeFactoryTest extends TestBase {
         final String name = "R04Dup_" + System.nanoTime();
         TypeFactory.registerType(name, R04DuplicateTarget.class, x -> "d", s -> new R04DuplicateTarget());
 
-        assertThrows(IllegalArgumentException.class,
-                () -> TypeFactory.registerType(name, R04RejectedTarget.class, x -> "m", s -> new R04RejectedTarget()));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.registerType(name, R04RejectedTarget.class, x -> "m", s -> new R04RejectedTarget()));
         assertThrows(IllegalArgumentException.class,
                 () -> TypeFactory.registerType(name, R04RejectedTarget.class, (x, p) -> "m", (s, p) -> new R04RejectedTarget()));
         // the first registration is untouched, by name and by class

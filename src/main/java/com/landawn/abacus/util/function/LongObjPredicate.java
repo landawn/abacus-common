@@ -46,9 +46,9 @@ public interface LongObjPredicate<T> extends Throwables.LongObjPredicate<T, Runt
      * LongObjPredicate<String> isLongGreaterThanLength = (l, s) -> l > s.length();
      * boolean result = isLongGreaterThanLength.test(10L, "hello");  // Returns true (10 > 5)
      *
-     * LongObjPredicate<List<Integer>> containsLongValue = (l, list) ->
-     *     list.contains((int)l);
-     * boolean found = containsLongValue.test(3L, Arrays.asList(1, 2, 3));  // Returns true
+     * LongObjPredicate<List<Long>> containsLongValue = (l, list) ->
+     *     list.contains(l);
+     * boolean found = containsLongValue.test(3L, Arrays.asList(1L, 2L, 3L));  // Returns true
      * }</pre>
      *
      * @param t the {@code long}-valued first argument

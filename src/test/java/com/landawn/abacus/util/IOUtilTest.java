@@ -2584,21 +2584,19 @@ public class IOUtilTest extends IOUtilTestSupport {
     }
 
     /**
-     * C-032: {@code write(char[], offset, count, [Charset,] File)} judged the slice before looking at the
-     * destination, so a call that was wrong twice over answered {@code IndexOutOfBoundsException} where its
-     * {@code byte[]} twin and its {@code append} mirror answered {@code IllegalArgumentException}.
+     * Array writes and appends validate their slice before the destination argument.
      */
     @Test
-    public void testWrite_CharArrayValidatesTheDestinationFirst() {
+    public void testWrite_CharArrayValidatesTheRangeBeforeTheDestination() {
         for (final org.junit.jupiter.api.function.Executable call : new org.junit.jupiter.api.function.Executable[] {
                 () -> IOUtil.write(new char[] { 'a' }, 0, 5, (File) null), //
                 () -> IOUtil.write(new char[] { 'a' }, 0, 5, StandardCharsets.UTF_8, (File) null), //
-                () -> IOUtil.write(new char[] { 'a' }, -1, 1, (File) null), //
                 () -> IOUtil.write(new byte[] { 1 }, 0, 5, (File) null), //
                 () -> IOUtil.append(new char[] { 'a' }, 0, 5, (File) null) }) {
-            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
-            assertTrue(e.getMessage().contains("output") || e.getMessage().contains("targetFile"), e.getMessage());
+            assertThrows(IndexOutOfBoundsException.class, call);
         }
+
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> IOUtil.write(new char[] { 'a' }, -1, 1, (File) null)).getMessage().contains("offset"));
 
         // a bad slice with a valid destination is still an IndexOutOfBoundsException
         assertThrows(IndexOutOfBoundsException.class, () -> IOUtil.write(new char[] { 'a' }, 0, 5, tempFolder.resolve("c032.txt").toFile()));

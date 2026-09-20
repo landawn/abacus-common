@@ -22,7 +22,7 @@
  *
  * <h2>Nullability</h2>
  * <ul>
- *   <li>{@link NotNull} &mdash; the annotated parameter, return value, or field must not be {@code null}.</li>
+ *   <li>{@link NotNull} &mdash; the annotated parameter or method result must not be {@code null}; constructors can also declare a non-null contract.</li>
  *   <li>{@link MayReturnNull} &mdash; the annotated method may return {@code null}.</li>
  *   <li>{@link NullSafe} &mdash; the annotated method accepts {@code null} input without throwing.</li>
  * </ul>

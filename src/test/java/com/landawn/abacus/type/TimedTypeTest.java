@@ -178,7 +178,8 @@ public class TimedTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -197,7 +198,8 @@ public class TimedTypeTest extends TestBase {
         assertEquals("[\"5\", \"v\"]", reviewFixes20260906_ser(timedType, Timed.of("v", 5L), las));
         assertEquals("[5, \"v\"]", reviewFixes20260906_ser(timedType, Timed.of("v", 5L), com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("[5, v]", reviewFixes20260906_ser(timedType, Timed.of("v", 5L), null));
-        assertEquals("[5, v]", reviewFixes20260906_ser(timedType, Timed.of("v", 5L), com.landawn.abacus.parser.XmlSerConfig.create().setWriteLongAsString(true)));
+        assertEquals("[5, v]",
+                reviewFixes20260906_ser(timedType, Timed.of("v", 5L), com.landawn.abacus.parser.XmlSerConfig.create().setWriteLongAsString(true)));
         assertEquals("[\"-9223372036854775808\", \"v\"]", reviewFixes20260906_ser(timedType, Timed.of("v", Long.MIN_VALUE), las));
         assertEquals("[\"9223372036854775807\", \"v\"]", reviewFixes20260906_ser(timedType, Timed.of("v", Long.MAX_VALUE), las));
         assertEquals("[\"7\", \"5\"]", reviewFixes20260906_ser(Type.of("Timed<Long>"), Timed.of(5L, 7L), las));

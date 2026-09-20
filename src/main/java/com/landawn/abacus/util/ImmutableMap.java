@@ -46,8 +46,9 @@ import com.landawn.abacus.annotation.Beta;
  * supplied for each key (last-value-wins).</p>
  *
  * <p><b>Note:</b> also unlike {@link Map#of(Object, Object)}, {@code null} keys and {@code null} values are
- * permitted throughout - by the {@code of(...)} factories, by {@link #copyOf(Map)} and by the
- * {@link Builder}. {@link #get(Object)} returning {@code null} is therefore not proof that a key is absent;
+ * permitted by the {@code of(...)} factories, by {@link #copyOf(Map)} and by the default
+ * {@link #builder()}. A builder created by {@link #builder(Map)} retains that map's restrictions.
+ * {@link #get(Object)} returning {@code null} is therefore not proof that a key is absent;
  * use {@link #containsKey(Object)} to tell the two apart. (The sorted and bidirectional subtypes are
  * stricter: {@link ImmutableSortedMap} rejects a {@code null} key under natural ordering, and
  * {@link ImmutableBiMap} rejects {@code null} keys and values outright.)</p>
@@ -732,7 +733,8 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
         /**
          * Associates the specified value with the specified key in the map being built.
          * If the map previously contained a mapping for the key, the old value is replaced.
-         * Null keys and values are permitted.
+         * The default builder permits null keys and values. A builder created by
+         * {@link ImmutableMap#builder(Map)} retains the supplied map's restrictions.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code

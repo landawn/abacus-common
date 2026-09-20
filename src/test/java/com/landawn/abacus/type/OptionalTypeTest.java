@@ -418,9 +418,9 @@ public class OptionalTypeTest extends TestBase {
         type.serializeTo(writer, Optional.of(value), null);
     }
 
-
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -437,7 +437,9 @@ public class OptionalTypeTest extends TestBase {
         final com.landawn.abacus.parser.JsonSerConfig zero = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true);
         final com.landawn.abacus.parser.JsonSerConfig falseCfg = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullBooleanAsFalse(true);
         final com.landawn.abacus.parser.JsonSerConfig emptyStr = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullStringAsEmpty(true);
-        final com.landawn.abacus.parser.JsonSerConfig zeroAndFalse = com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteNullBooleanAsFalse(true);
+        final com.landawn.abacus.parser.JsonSerConfig zeroAndFalse = com.landawn.abacus.parser.JsonSerConfig.create()
+                .setWriteNullNumberAsZero(true)
+                .setWriteNullBooleanAsFalse(true);
         final Type<?> intType = Type.of("Optional<Integer>");
         final Type<?> boolType = Type.of("Optional<Boolean>");
         final Type<?> strType = Type.of("Optional<String>");
@@ -449,7 +451,8 @@ public class OptionalTypeTest extends TestBase {
         assertEquals("false", reviewFixes20260906_ser(boolType, null, zeroAndFalse));
         assertEquals("null", reviewFixes20260906_ser(strType, Optional.empty(), zeroAndFalse));
         assertEquals("\"\"", reviewFixes20260906_ser(strType, Optional.empty(), emptyStr));
-        assertEquals("\"0\"", reviewFixes20260906_ser(Type.of("Optional<Long>"), Optional.empty(), com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true)));
+        assertEquals("\"0\"", reviewFixes20260906_ser(Type.of("Optional<Long>"), Optional.empty(),
+                com.landawn.abacus.parser.JsonSerConfig.create().setWriteNullNumberAsZero(true).setWriteLongAsString(true)));
         assertEquals("null", reviewFixes20260906_ser(Type.of("Optional<List<Integer>>"), Optional.empty(), zeroAndFalse));
         assertEquals("null", reviewFixes20260906_ser(Type.of("Optional<" + ReviewFixesBean.class.getName() + ">"), Optional.empty(), zeroAndFalse));
         // no flag / no config: unchanged
@@ -481,7 +484,8 @@ public class OptionalTypeTest extends TestBase {
         assertEquals("3", reviewFixes20260906_ser(type, Optional.of(Optional.of(3)), jsc));
         assertEquals("[1, \"a\"]", reviewFixes20260906_ser(type, Optional.of(com.landawn.abacus.util.Tuple.of(1, "a")), jsc));
         assertEquals("[1, 2]", reviewFixes20260906_ser(type, Optional.of(com.landawn.abacus.util.Pair.of(1, 2)), jsc));
-        assertEquals("[[1, \"a\"]]", reviewFixes20260906_ser(type, Optional.of(com.landawn.abacus.util.N.asList(com.landawn.abacus.util.N.asList(1, "a"))), jsc));
+        assertEquals("[[1, \"a\"]]",
+                reviewFixes20260906_ser(type, Optional.of(com.landawn.abacus.util.N.asList(com.landawn.abacus.util.N.asList(1, "a"))), jsc));
         assertEquals("null", reviewFixes20260906_ser(type, Optional.empty(), jsc));
         // an unregistered plain object keeps the quoted toString() form and does not throw
         final Object plain = new Object();
@@ -491,7 +495,8 @@ public class OptionalTypeTest extends TestBase {
         assertEquals("q\\\"x", reviewFixes20260906_ser(type, Optional.of("q\"x"), null));
         assertEquals("[1]", reviewFixes20260906_ser(type, Optional.of(com.landawn.abacus.util.N.asList(1)), null));
         // serializeTo now agrees with stringOf for every shape
-        for (final Object v : new Object[] { 1, true, "s", com.landawn.abacus.util.N.asList(1), com.landawn.abacus.util.N.asMap("k", 1), new ReviewFixesBean(), Optional.of(3) }) {
+        for (final Object v : new Object[] { 1, true, "s", com.landawn.abacus.util.N.asList(1), com.landawn.abacus.util.N.asMap("k", 1), new ReviewFixesBean(),
+                Optional.of(3) }) {
             final String expected = v instanceof String ? "\"" + v + "\"" : type.stringOf(Optional.of(v));
             assertEquals(expected, reviewFixes20260906_ser(type, Optional.of(v), jsc), "value " + v);
         }
@@ -516,9 +521,11 @@ public class OptionalTypeTest extends TestBase {
         assertEquals("{\"x\": [8]}", com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap("x", Optional.of(com.landawn.abacus.util.N.asList(8)))));
         assertEquals("[1]", com.landawn.abacus.util.N.toJson(new Object[] { Optional.of(1) }));
 
-        final java.util.Map<String, Object> back = com.landawn.abacus.util.N.fromJson(com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap("x", Optional.of(com.landawn.abacus.util.N.asList(8)))), java.util.Map.class);
+        final java.util.Map<String, Object> back = com.landawn.abacus.util.N.fromJson(
+                com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap("x", Optional.of(com.landawn.abacus.util.N.asList(8)))), java.util.Map.class);
         assertTrue(back.get("x") instanceof List, "a List must come back, not the String \"[8]\"");
-        final List<Object> lo = com.landawn.abacus.util.N.fromJson(com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Optional.of(5))), List.class);
+        final List<Object> lo = com.landawn.abacus.util.N.fromJson(com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asList(Optional.of(5))),
+                List.class);
         assertEquals(5, lo.get(0));
 
         // fully DECLARED shapes: Optional<Map>, Optional<Bean>, Tuple2<Bean,Integer>, List<Object> field

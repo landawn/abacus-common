@@ -83,7 +83,8 @@ import com.landawn.abacus.util.stream.Stream;
  * require explicit, existing column names: a {@code null} or empty selection throws
  * {@link IllegalArgumentException}, and so does a selection that names the same column twice
  * ({@code removeColumns} is the one exception: removing a column twice is the same as removing it once;
- * {@link #getColumnIndexes(Collection)} is a plain lookup and resolves a repeated name repeatedly).
+ * {@link #getColumnIndexes(Collection)} is a plain lookup that accepts a {@code null} or empty collection
+ * and resolves a repeated name repeatedly).
  * (The edge cases: on a Dataset that has no columns, an empty
  * non-{@code null} selection is accepted as the full, empty column set — this is what lets the no-argument
  * overloads work on an empty Dataset; the {@code toJson}/{@code toXml}/{@code toCsv} export overloads
@@ -133,7 +134,10 @@ import com.landawn.abacus.util.stream.Stream;
  * and {@code pivot} are compared with {@code Objects.equals} semantics, deeply for arrays. A {@code null} key
  * therefore matches a {@code null} key - unlike SQL, where {@code NULL} never equals {@code NULL} - so rows
  * whose join column is {@code null} on both sides do join, and every row with a {@code null} key lands in the
- * same group.
+ * same group. A pivot result retains the first original key for each row/column group. Its returned
+ * {@link Sheet} uses standard Java key equality, so access an array-keyed result with those retained
+ * key objects (available from its key views), or use {@link Wrapper#of(Object)} keys in the input
+ * Dataset when content-based lookup is required on the resulting Sheet.
  *
  * <p><b>Cursor-relative access:</b> all one-coordinate cell methods operate on the row selected by
  * {@link #moveToRow(int)} and reported by {@link #currentRowIndex()}. This family includes
@@ -167,11 +171,11 @@ import com.landawn.abacus.util.stream.Stream;
  *     <td><b>Positional views</b></td>
  *     <td>{@link #getRow(int)}, {@link #row(int)}, {@link #slice(int, int)} and the other {@code slice}
  *         overloads, {@link #paginate(int)}</td>
- *     <td>Attached to a row <i>position</i>, so they read whatever currently occupies it. Adding, removing or
- *         reordering rows changes what {@code getRow}/{@code row} refer to (and can put them out of range);
- *         for {@code slice} and {@code paginate} it invalidates them outright
- *         ({@link java.util.ConcurrentModificationException}). Adding, removing or moving a column likewise
- *         changes the length of {@code getRow}/{@code row} and what their indexes mean.</td>
+ *     <td>Attached to a row <i>position</i>. Adding, removing or reordering rows changes what {@code getRow}
+ *         refers to (and can put it out of range); it invalidates {@code row} accessors, {@code slice} and
+ *         {@code paginate} views ({@link java.util.ConcurrentModificationException}). Cell edits and cursor
+ *         movement do not invalidate {@code row} accessors. Structural column changes (including renaming)
+ *         also invalidate {@code row} accessors. They change the length/index meanings of {@code getRow}.</td>
  *   </tr>
  *   <tr>
  *     <td><b>Snapshots</b></td>
@@ -363,7 +367,7 @@ public sealed interface Dataset permits RowDataset {
      * The Dataset is a data structure that stores data in a tabular format, similar to a table in a database.
      * Each item in the {@code columnNames} collection represents a column in the Dataset.
      * The {@code columns} parameter is a two-dimensional array where each subarray represents a column in the Dataset.
-     * The order of elements in each column should correspond to the order of column names.
+     * The order of the subarrays should correspond to the order of column names.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -659,12 +663,12 @@ public sealed interface Dataset permits RowDataset {
      * Dataset unchanged.</p>
      *
      * @param oldNewNames a map where the key is the current name of the column and the value is the new name for the column.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code oldNewNames} is {@code null}, if any of the specified old column names
      *         does not exist in the Dataset, if any new column name is {@code null} or empty, if the new column names
      *         contain duplicates, or if the resulting column-name list would contain duplicates.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      */
-    void renameColumns(Map<String, String> oldNewNames) throws IllegalArgumentException, IllegalStateException;
+    void renameColumns(Map<String, String> oldNewNames) throws IllegalStateException, IllegalArgumentException;
 
     //    /**
     //     *
@@ -690,13 +694,13 @@ public sealed interface Dataset permits RowDataset {
      *            (an empty selection is accepted only on a Dataset that has no columns).
      * @param func a function that takes the current column name as input and returns the new column name; must not
      *            be {@code null}.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if func or columnNames is null, the selection is empty while the Dataset has columns, a selected name is
      *         missing or repeated, or a generated name is null, empty, or creates a duplicate
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code func} throws while mapping a selected column name
      */
     void renameColumns(Collection<String> columnNames, Function<? super String, String> func)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Renames all columns in the Dataset using a function to determine the new names.
@@ -714,14 +718,14 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param func a function that takes the current column name as input and returns the new column name; must
      *        not be {@code null}.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code func} is {@code null}, if any name it returns is {@code null} or empty, or if the resulting
      *         column-name list would contain duplicates.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code func} throws while mapping a selected column name
      * @see #renameColumns(Map)
      * @see #renameColumns(Collection, Function)
      */
-    void renameColumns(Function<? super String, String> func) throws IllegalArgumentException, IllegalStateException, RuntimeException;
+    void renameColumns(Function<? super String, String> func) throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Repositions a single column within the {@code Dataset} to a specified index.
@@ -756,13 +760,13 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames the list of column names to move; their order in this list is maintained. Must not be
      *            {@code null} or contain duplicates; an empty list moves nothing and does not validate {@code newPosition}.
      * @param newPosition the zero-based index at which the first specified column will be placed.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code columnNames} is {@code null}, contains duplicates, or any column name in it does not exist in the
      *         dataset.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if a nonempty selection is supplied and {@code newPosition} is less than zero or greater than {@code
      *         columnCount() - columnNames.size()}.
      */
-    void moveColumns(List<String> columnNames, int newPosition) throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException;
+    void moveColumns(List<String> columnNames, int newPosition) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException;
 
     /**
      * Swaps the positions of two columns in the Dataset.
@@ -1491,12 +1495,12 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnName the name of the column.
      * @param value the new value to be set at the specified column.
-     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset.
      * @throws IndexOutOfBoundsException if this Dataset has no rows (there is no current row).
      * @see #set(int, Object)
      */
-    void set(String columnName, Object value) throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException;
+    void set(String columnName, Object value) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException;
 
     /**
      * Retrieves the values of the specified column index in the Dataset as an ImmutableList.
@@ -1652,11 +1656,11 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be added. Must not be {@code null} or empty and must not be a name that already exists in the Dataset.
      * @param fromColumnName the name of the existing column to be used as input for the function.
      * @param func the function to generate the values for the new column. It takes the value of the existing column for each row and returns the value for the new column for that row.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnName does not exist
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnName does not exist
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
-    void addColumn(String newColumnName, String fromColumnName, Function<?, ?> func) throws IllegalArgumentException, IllegalStateException, RuntimeException;
+    void addColumn(String newColumnName, String fromColumnName, Function<?, ?> func) throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Adds a new column to the Dataset at the specified position.
@@ -1675,13 +1679,13 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be added. Must not be {@code null} or empty and must not be a name that already exists in the Dataset.
      * @param fromColumnName the name of the existing column to be used as input for the function.
      * @param func the function to generate the values for the new column. It takes the value of the existing column for each row and returns the value for the new column for that row.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnName does not exist
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnName does not exist
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void addColumn(int newColumnPosition, String newColumnName, String fromColumnName, Function<?, ?> func)
-            throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException, RuntimeException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Adds a new column to the Dataset.
@@ -1700,13 +1704,13 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be added. Must not be {@code null} or empty and must not be a name that already exists in the Dataset.
      * @param fromColumnNames the names of the existing columns to be used as input for the function.
      * @param func the function to generate the values for the new column. It takes the values of the existing columns for each row and returns the value for the new column for that row. The input to the function is a DisposableObjArray containing the values of the existing columns for a particular row.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing, the selection repeats a name or is empty while the Dataset has columns
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void addColumn(String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Adds a new column to the Dataset at the specified position.
@@ -1726,14 +1730,14 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be added. Must not be {@code null} or empty and must not be a name that already exists in the Dataset.
      * @param fromColumnNames the names of the existing columns to be used as input for the function.
      * @param func the function to generate the values for the new column. It takes the values of the existing columns for each row and returns the value for the new column for that row. The input to the function is a DisposableObjArray containing the values of the existing columns for a particular row.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
-     *         missing, the selection repeats a name or is empty while the Dataset has columns
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     *         missing, the selection repeats a name or is empty while the Dataset has columns
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void addColumn(int newColumnPosition, String newColumnName, Collection<String> fromColumnNames, Function<? super DisposableObjArray, ?> func)
-            throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException, RuntimeException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Adds a new column to the Dataset.
@@ -1752,13 +1756,13 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be added. Must not be {@code null} or empty and must not be a name that already exists in the Dataset.
      * @param fromColumnNames a Tuple2 containing the names of the two existing columns to be used as input for the BiFunction.
      * @param func the BiFunction to generate the values for the new column. It takes the values of the two existing columns for each row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void addColumn(String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Adds a new column to the Dataset at the specified position.
@@ -1778,14 +1782,14 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be added. Must not be {@code null} or empty and must not be a name that already exists in the Dataset.
      * @param fromColumnNames a Tuple2 containing the names of the two existing columns to be used as input for the BiFunction.
      * @param func the BiFunction to generate the values for the new column. It takes the values of the two existing columns for each row and returns the value for the new column for that row.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
-     *         missing
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     *         missing
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void addColumn(int newColumnPosition, String newColumnName, Tuple2<String, String> fromColumnNames, BiFunction<?, ?, ?> func)
-            throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException, RuntimeException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Adds a new column to the Dataset.
@@ -1804,13 +1808,13 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be added. Must not be {@code null} or empty and must not be a name that already exists in the Dataset.
      * @param fromColumnNames a Tuple3 containing the names of the three existing columns to be used as input for the TriFunction.
      * @param func the TriFunction to generate the values for the new column. It takes the values of the three existing columns for each row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
      *         missing
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void addColumn(String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Adds a new column to the Dataset at the specified position.
@@ -1830,14 +1834,14 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnName the name of the new column to be added. Must not be {@code null} or empty and must not be a name that already exists in the Dataset.
      * @param fromColumnNames a Tuple3 containing the names of the three existing columns to be used as input for the TriFunction.
      * @param func the TriFunction to generate the values for the new column. It takes the values of the three existing columns for each row and returns the value for the new column for that row.
-     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
-     *         missing
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if {@code newColumnPosition < 0} or {@code newColumnPosition > columnCount()}.
+     * @throws IllegalArgumentException if func is null, newColumnName is null, empty, or already present, fromColumnNames is null, a selected name is
+     *         missing
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void addColumn(int newColumnPosition, String newColumnName, Tuple3<String, String, String> fromColumnNames, TriFunction<?, ?, ?, ?> func)
-            throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException, RuntimeException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Adds multiple columns to the Dataset.
@@ -1860,15 +1864,15 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnNames a list containing the names of the new columns to be added. These should not be names that already exist in the Dataset.
      * @param newColumns a list of collections, where each collection represents a column. Each collection should have a size that matches the number of rows in the Dataset;
      *        a {@code null} or empty collection adds that column filled with {@code null}s.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code newColumnNames} or {@code newColumns} is {@code null}, if any new
      *         column name is {@code null} or empty, if {@code newColumnNames} contains duplicates, if any of the new
      *         column names already exist in the Dataset, if size of
      *         {@code newColumnNames} does not match the size of {@code newColumns}, or if any collection in
      *         {@code newColumns} is not empty and its size does not match the number of rows in the Dataset
      *         (unless the Dataset has no columns, in which case the collections set the row count).
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      */
-    void addColumns(List<String> newColumnNames, List<? extends Collection<?>> newColumns) throws IllegalArgumentException, IllegalStateException;
+    void addColumns(List<String> newColumnNames, List<? extends Collection<?>> newColumns) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Adds multiple columns to the Dataset at the specified position.
@@ -1890,16 +1894,16 @@ public sealed interface Dataset permits RowDataset {
      * @param newColumnNames a list containing the names of the new columns to be added. These should not be names that already exist in the Dataset.
      * @param newColumns a list of collections, where each collection represents a column. Each collection should have a size that matches the number of rows in the Dataset;
      *        a {@code null} or empty collection adds that column filled with {@code null}s.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IndexOutOfBoundsException if the specified {@code newColumnPosition} is less than zero or greater than the column count.
      * @throws IllegalArgumentException if {@code newColumnNames} or {@code newColumns} is {@code null}, if any new column name is {@code null} or
      *         empty, if {@code newColumnNames} contains duplicates, if any of the new column names already exist in the Dataset, or if size of {@code
      *         newColumnNames} does not match the size of {@code newColumns}, or if any collection in {@code newColumns} is not empty and its size
      *         does not match the number of rows in the Dataset (unless the Dataset has no columns, in which case the first non-empty collection
      *         establishes the row count and the rest are checked against it, exactly as in {@link #addColumns(List, List)}).
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
-     * @throws IndexOutOfBoundsException if the specified {@code newColumnPosition} is less than zero or greater than the column count.
      */
     void addColumns(int newColumnPosition, List<String> newColumnNames, List<? extends Collection<?>> newColumns)
-            throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException;
+            throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Removes a column from the Dataset.
@@ -1946,11 +1950,11 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a collection containing the names of the columns to be removed. These should be names that exist in the Dataset.
      *            Must not be {@code null}; an empty collection removes nothing, and a name listed more than once is
      *            removed once.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code columnNames} is {@code null} or any of the specified column names
      *         does not exist in the Dataset, or all columns would be removed while rows remain.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      */
-    void removeColumns(Collection<String> columnNames) throws IllegalArgumentException, IllegalStateException;
+    void removeColumns(Collection<String> columnNames) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Removes multiple columns from the Dataset.
@@ -1967,11 +1971,11 @@ public sealed interface Dataset permits RowDataset {
      * <p>Removing every column while rows remain throws IllegalArgumentException. Remove the rows first to discard the entire table.</p>
      *
      * @param filter a Predicate function to determine which columns should be removed. It should return {@code true} for column names that should be removed, and {@code false} for those that should be kept.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}, or if all columns would be removed while rows remain.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if {@code filter} is {@code null}, or if all columns would be removed while rows remain.
      * @throws RuntimeException if {@code filter} throws while testing a column name
      */
-    void removeColumns(Predicate<? super String> filter) throws IllegalArgumentException, IllegalStateException, RuntimeException;
+    void removeColumns(Predicate<? super String> filter) throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Updates the values in a specified column of the Dataset.
@@ -1986,11 +1990,11 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnName the name of the column to be updated. It should be a name that exists in the Dataset.
      * @param func the function to be applied to each value in the column. It takes the current value and returns the new value.
-     * @throws IllegalArgumentException if {@code func} is {@code null}, or if the specified column name does not exist in the Dataset.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if {@code func} is {@code null}, or if the specified column name does not exist in the Dataset.
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
-    void updateColumn(String columnName, Function<?, ?> func) throws IllegalArgumentException, IllegalStateException, RuntimeException;
+    void updateColumn(String columnName, Function<?, ?> func) throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Updates the values in multiple specified columns of the Dataset.
@@ -2006,13 +2010,13 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a collection containing the names of the columns to be updated. These should be names that exist in the Dataset.
      *            Must not be {@code null}; an empty collection updates nothing.
      * @param func the function to be applied to each value in the columns. It takes the row index, column name, and current value, and returns the new value.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code columnNames} or {@code func} is {@code null}, or any of the specified column names does not exist in
      *         the Dataset, or a column name is listed more than once.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void updateColumns(Collection<String> columnNames, IntBiObjFunction<String, ?, ?> func)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Converts the values in a specified column of the Dataset to a specified target type.
@@ -2066,14 +2070,14 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnTargetTypes a map where the key is the column name and the value is the Class object representing the target type to which the column values should be converted. The column names should exist in the Dataset.
      *            Must not be {@code null}; an empty map converts nothing.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if columnTargetTypes is null, a selected name does not exist, or conversion of an existing cell rejects its
      *         target type or value
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws ArithmeticException if a numeric value is outside the target range or is non-finite for an integral target.
      * @throws RuntimeException if a converter, type handler, reflective bean operation, or resource read or cleanup fails while converting a cell
      * @see N#convert(Object, Class)
      */
-    void convertColumns(Map<String, Class<?>> columnTargetTypes) throws IllegalArgumentException, IllegalStateException, ArithmeticException, RuntimeException;
+    void convertColumns(Map<String, Class<?>> columnTargetTypes) throws IllegalStateException, IllegalArgumentException, ArithmeticException, RuntimeException;
 
     /**
      * Combines multiple columns into a new column in the Dataset using a default combining strategy.
@@ -2126,7 +2130,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a selected value's type or comparison requirements
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if destination construction, bean conversion or a reflective operation fails while creating the combined column
      * @see #combineColumns(Collection, String, Function)
      * @see #addColumn(String, Collection, Function)
@@ -2158,15 +2163,15 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a collection containing the names of the columns to be combined. These should be names that exist in the Dataset and will be removed after combination.
      * @param newColumnName the name of the new column to be created. It should not be a name that already exists in the Dataset.
      * @param combineFunc the function to generate the values for the new column. It takes a DisposableObjArray of the values in the existing columns for a particular row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if combineFunc or columnNames is null, the selection is empty, repeats a name, or selects a missing column, or
      *         newColumnName is null, empty, or already present
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code combineFunc} throws while processing selected cell values
      * @see #combineColumns(Collection, String, Class)
      * @see #addColumn(String, Collection, Function)
      */
     void combineColumns(Collection<String> columnNames, String newColumnName, Function<? super DisposableObjArray, ?> combineFunc)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Combines two columns into a new column in the Dataset using a custom BiFunction.
@@ -2190,16 +2195,16 @@ public sealed interface Dataset permits RowDataset {
      *        names that exist in the Dataset, and both are removed after combination.
      * @param newColumnName the name of the new column to be created. It should not be a name that already exists in the Dataset.
      * @param combineFunc the BiFunction to generate the values for the new column. It takes the values of the two existing columns for a particular row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code columnNames} or {@code combineFunc} is {@code null}, if either selected column does not exist in the
      *         Dataset, if the two selected names are equal, or if the new column name is {@code null}, empty, or already exists in the Dataset.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code combineFunc} throws while processing selected cell values
      * @see #combineColumns(Collection, String, Function)
      * @see #combineColumns(Tuple3, String, TriFunction)
      * @see #addColumn(String, Tuple2, BiFunction)
      */
     void combineColumns(Tuple2<String, String> columnNames, String newColumnName, BiFunction<?, ?, ?> combineFunc)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Combines three columns into a new column in the Dataset using a custom TriFunction.
@@ -2224,17 +2229,17 @@ public sealed interface Dataset permits RowDataset {
      *        names that exist in the Dataset, and all three are removed after combination.
      * @param newColumnName the name of the new column to be created. It should not be a name that already exists in the Dataset.
      * @param combineFunc the TriFunction to generate the values for the new column. It takes the values of the three existing columns for a particular row and returns the value for the new column for that row.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if {@code columnNames} or {@code combineFunc} is {@code null}, if any selected column does not exist in the
      *         Dataset, if two of the three selected names are equal, or if the new column name is {@code null}, empty, or already exists in the
      *         Dataset.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code combineFunc} throws while processing selected cell values
      * @see #combineColumns(Collection, String, Function)
      * @see #combineColumns(Tuple2, String, BiFunction)
      * @see #addColumn(String, Tuple3, TriFunction)
      */
     void combineColumns(Tuple3<String, String, String> columnNames, String newColumnName, TriFunction<?, ?, ?, ?> combineFunc)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Divides a column into multiple new columns in the Dataset.
@@ -2271,14 +2276,14 @@ public sealed interface Dataset permits RowDataset {
      * @param columnName the name of the column to be divided. It should be a name that exists in the Dataset and will be removed after division.
      * @param newColumnNames a collection containing the names of the new columns to be created. These should not be names that already exist in the Dataset. The size of this collection should match the size of the Lists returned by the divideFunc.
      * @param divideFunc the function to be applied to each value in the column. It takes the current value and returns a List of new values. The size of this List should match the size of the newColumnNames collection.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, if {@code newColumnNames} is {@code null} or empty
      *         or contains duplicates, or if any of the new column names is {@code null} or empty or already exists in the Dataset, if {@code
      *         divideFunc} is null, or if it returns null or a list whose size differs from the number of replacement names.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code divideFunc} throws while processing selected cell values
      */
     void divideColumn(String columnName, Collection<String> newColumnNames, Function<?, ? extends List<?>> divideFunc)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Divides a column into multiple new columns in the Dataset using a BiConsumer.
@@ -2310,16 +2315,16 @@ public sealed interface Dataset permits RowDataset {
      * @param columnName the name of the column to be divided. It should be a name that exists in the Dataset and will be removed after division.
      * @param newColumnNames a collection containing the names of the new columns to be created. These should not be names that already exist in the Dataset. The size of this collection determines the size of the Object array passed to the BiConsumer.
      * @param output the BiConsumer to be applied to each value in the column. It takes the current value and an Object array, and it should populate the array with the new values for the new columns. The array size matches the copied names. It is reused and cleared to null before each row; do not retain it. Unwritten slots remain null.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, if {@code newColumnNames} is {@code null} or empty
      *         or contains duplicates, or if any of the new column names is {@code null} or empty or already exists in the Dataset, or if {@code
      *         output} is null.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code output} throws while processing selected cell values
      * @see #divideColumn(String, Collection, Function)
      * @see #combineColumns(Collection, String, Function)
      */
     void divideColumn(String columnName, Collection<String> newColumnNames, BiConsumer<?, Object[]> output)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Divides a column into two new columns in the Dataset using a BiConsumer.
@@ -2349,17 +2354,17 @@ public sealed interface Dataset permits RowDataset {
      *        object, and it should populate the Pair with the new values for the new columns. One Pair serves the
      *        whole column: it is reused and cleared to {@code null} before each row, so do not retain it, and a
      *        component the consumer leaves unset stays {@code null} rather than keeping the previous row's value.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, if {@code newColumnNames} or {@code output} is
      *         {@code null}, if either new column name is {@code null} or empty, if the two new column names are equal, or if either already exists in
      *         the Dataset.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code output} throws while processing selected cell values
      * @see #divideColumn(String, Collection, Function)
      * @see #divideColumn(String, Collection, BiConsumer)
      * @see #combineColumns(Tuple2, String, BiFunction)
      */
     void divideColumn(String columnName, Tuple2<String, String> newColumnNames, BiConsumer<?, Pair<Object, Object>> output)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Divides a column into three new columns in the Dataset using a BiConsumer.
@@ -2390,10 +2395,10 @@ public sealed interface Dataset permits RowDataset {
      *        object, and it should populate the Triple with the new values for the new columns. One Triple serves the
      *        whole column: it is reused and cleared to {@code null} before each row, so do not retain it, and a
      *        component the consumer leaves unset stays {@code null} rather than keeping the previous row's value.
+     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, if {@code newColumnNames} or {@code output} is
      *         {@code null}, if any new column name is {@code null} or empty, if two of the three new column names are equal, or if any already exists
      *         in the Dataset.
-     * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws RuntimeException if {@code output} throws while processing selected cell values
      * @see #divideColumn(String, Collection, Function)
      * @see #divideColumn(String, Collection, BiConsumer)
@@ -2401,7 +2406,7 @@ public sealed interface Dataset permits RowDataset {
      * @see #combineColumns(Tuple3, String, TriFunction)
      */
     void divideColumn(String columnName, Tuple3<String, String, String> newColumnNames, BiConsumer<?, Triple<Object, Object, Object>> output)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Retrieves the data of the Dataset as a Stream of ImmutableList.
@@ -2592,13 +2597,13 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param rowIndexesToRemove an array of indices of the rows to be removed; must not be {@code null}. An empty array removes nothing.
-     * @throws IllegalArgumentException if {@code rowIndexesToRemove} is {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if {@code rowIndexesToRemove} is {@code null}.
      * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      * @see #removeRow(int)
      * @see #removeRows(int, int)
      */
-    void removeRowsAt(int... rowIndexesToRemove) throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException;
+    void removeRowsAt(int... rowIndexesToRemove) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException;
 
     /**
      * Removes a range of rows from the Dataset.
@@ -2677,14 +2682,14 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param keyColumnName the name of the column to use for identifying duplicates. It should be a name that exists in the Dataset.
      * @param keyExtractor the function to extract the key from the column value. It takes the column value as input and returns the key used for comparison.
-     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, or if {@code keyExtractor} is {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if the specified column name does not exist in the Dataset, or if {@code keyExtractor} is {@code null}.
      * @throws RuntimeException if {@code keyExtractor} throws while extracting a key from a selected row
      * @see #removeDuplicateRowsBy(String)
      * @see #removeDuplicateRowsBy(Collection)
      * @see #distinctBy(String, Function)
      */
-    void removeDuplicateRowsBy(String keyColumnName, Function<?, ?> keyExtractor) throws IllegalArgumentException, IllegalStateException, RuntimeException;
+    void removeDuplicateRowsBy(String keyColumnName, Function<?, ?> keyExtractor) throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Removes duplicate rows from the Dataset based on values in the specified key columns.
@@ -2742,15 +2747,15 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param keyColumnNames a collection containing the names of the columns to use for identifying duplicates. These should be names that exist in the Dataset.
      * @param keyExtractor the function to extract the key from a DisposableObjArray of column values. It takes a DisposableObjArray representing the values in the specified columns for a particular row and returns the key used for comparison.
-     * @throws IllegalArgumentException if keyColumnNames is null or empty, contains duplicate or missing names, or keyExtractor is null
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if keyColumnNames is null or empty, contains duplicate or missing names, or keyExtractor is null
      * @throws RuntimeException if {@code keyExtractor} throws while extracting a key from a selected row
      * @see #removeDuplicateRowsBy(Collection)
      * @see #removeDuplicateRowsBy(String)
      * @see #distinctBy(Collection, Function)
      */
     void removeDuplicateRowsBy(Collection<String> keyColumnNames, Function<? super DisposableObjArray, ?> keyExtractor)
-            throws IllegalArgumentException, IllegalStateException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Updates a specific row in the Dataset.
@@ -2765,12 +2770,12 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param rowIndex the index of the row to be updated. It should be a valid index within the current row range.
      * @param func the function to be applied to each value in the row. It takes the current value and returns the new value; must not be {@code null}
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
      * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
-    void updateRow(int rowIndex, Function<?, ?> func) throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException, RuntimeException;
+    void updateRow(int rowIndex, Function<?, ?> func) throws IllegalStateException, IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Updates the values in the specified rows of the Dataset.
@@ -2788,13 +2793,13 @@ public sealed interface Dataset permits RowDataset {
      *            valid index within the current row range. A repeated index applies {@code func} to that row once per occurrence, feeding each application
      *            the value the previous one produced.
      * @param func the function to be applied to each value in the specified rows. It takes the row index, column name, and current value, and returns the new value; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rowIndexesToUpdate} or {@code func} is {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if {@code rowIndexesToUpdate} or {@code func} is {@code null}.
      * @throws IndexOutOfBoundsException if any of the specified indices is out of bounds.
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
     void updateRows(int[] rowIndexesToUpdate, IntBiObjFunction<String, ?, ?> func)
-            throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
 
     // TODO should the method name be "replaceAll"? If change the method name to replaceAll, what about updateColumn/updateRow?
 
@@ -2811,11 +2816,11 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param func the function to be applied to each value in the Dataset. It takes the current value and returns the new value.
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
-    void updateAll(Function<?, ?> func) throws IllegalArgumentException, IllegalStateException, RuntimeException;
+    void updateAll(Function<?, ?> func) throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Updates all the values in the Dataset.
@@ -2834,11 +2839,11 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param func the function to be applied to each value in the Dataset. It takes the row index, column name, and current value, and returns the new value.
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if {@code func} is {@code null}.
      * @throws RuntimeException if {@code func} throws while processing selected cell values
      */
-    void updateAll(IntBiObjFunction<String, ?, ?> func) throws IllegalArgumentException, IllegalStateException, RuntimeException;
+    void updateAll(IntBiObjFunction<String, ?, ?> func) throws IllegalStateException, IllegalArgumentException, RuntimeException;
 
     /**
      * Replaces values in the Dataset that satisfy a specified condition with a new value.
@@ -2854,10 +2859,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param predicate the predicate to test each value in the Dataset. It takes a value from the Dataset as input and returns a boolean indicating whether the value should be replaced.
      * @param newValue the new value to replace the values that satisfy the condition.
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    void replaceIf(Predicate<?> predicate, Object newValue) throws IllegalArgumentException, IllegalStateException;
+    void replaceIf(Predicate<?> predicate, Object newValue) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Replaces values in the Dataset that satisfy a specified condition with a new value.
@@ -2872,10 +2877,10 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param predicate the predicate to test each value in the Dataset. It takes the row index, column name, and a value from the Dataset as input, and returns a boolean indicating whether the value should be replaced.
      * @param newValue the new value to replace the values that satisfy the condition.
-     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws IllegalStateException if the Dataset is frozen (read-only).
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    void replaceIf(IntBiObjPredicate<String, ?> predicate, Object newValue) throws IllegalArgumentException, IllegalStateException;
+    void replaceIf(IntBiObjPredicate<String, ?> predicate, Object newValue) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Prepends the provided Dataset to the current Dataset.
@@ -3019,8 +3024,8 @@ public sealed interface Dataset permits RowDataset {
      * <p>The source may be this Dataset or one of its slices; source rows are snapshotted before the destination changes.</p>
      *
      * @param other the Dataset to merge with this Dataset.
-     * @param requiresSameColumns a boolean value that determines whether the merge operation requires both Datasets to have the same columns.
-     *                           If {@code true}, both Datasets must have identical column structures. If {@code false}, columns from both Datasets are combined.
+     * @param requiresSameColumns whether both Datasets must have the same column-name set. Column order may differ because values are aligned by name.
+     *                           If {@code false}, columns from both Datasets are combined.
      * @throws IllegalStateException if this Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the other Dataset is {@code null}, or if {@code requiresSameColumns} is {@code true} and the Datasets do
      *         not have the same columns.
@@ -3064,16 +3069,16 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param other the Dataset to merge selected columns from.
      * @param selectColumnNamesFromOtherToMerge the collection of column names to select from the other Dataset for merging. Must not be {@code null} or empty.
+     * @throws IllegalStateException if this Dataset is frozen (read-only).
      * @throws IllegalArgumentException if the other Dataset is {@code null}, or if
      *         {@code selectColumnNamesFromOtherToMerge} is {@code null} or empty, or if any of the specified column
      *         names doesn't exist in the other Dataset.
-     * @throws IllegalStateException if this Dataset is frozen (read-only).
      * @see #merge(Dataset)
      * @see #merge(Dataset, boolean)
      * @see #append(Dataset)
      */
     @Beta
-    void merge(Dataset other, Collection<String> selectColumnNamesFromOtherToMerge) throws IllegalArgumentException, IllegalStateException;
+    void merge(Dataset other, Collection<String> selectColumnNamesFromOtherToMerge) throws IllegalStateException, IllegalArgumentException;
 
     /**
      * Merges selected columns from a specified row range of another Dataset into this Dataset.
@@ -3173,10 +3178,11 @@ public sealed interface Dataset permits RowDataset {
      * Dataset without interfering with each other.
      *
      * <p>The returned {@link Row} is an <i>indexed</i> view (see <a href="#view-semantics">View semantics</a>):
-     * it holds the row index, not a copy of the row, so adding, removing or reordering rows changes what it
-     * refers to - and puts it out of range once the Dataset has fewer rows than that index. Keep one only for
-     * as long as the Dataset's shape is stable; use {@link #getRow(int)} or {@link #getRow(int, Class)} when a
-     * value is wanted instead of an accessor.</p>
+     * it holds the row index, not a copy of the row. Adding, removing or reordering rows invalidates the
+     * accessor; subsequent access throws {@link java.util.ConcurrentModificationException}. Reacquire it
+     * after a structural row or column change (including column renaming). Cell edits and cursor movement remain visible without invalidating it.
+     * An invalidated accessor's {@code toString()} returns a diagnostic marker instead of reading its cells.
+     * Use {@link #getRow(int, Class)} when an independent snapshot is wanted.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3205,9 +3211,12 @@ public sealed interface Dataset permits RowDataset {
      * A cursor-free accessor for a single row of a {@link Dataset}, obtained from {@link Dataset#row(int)}.
      *
      * <p>A {@code Row} is a live view bound to a row <i>index</i>, not a snapshot of that row's values: reads
-     * see the Dataset's current contents and writes go straight through to it. Because it is bound to a
-     * position, adding or removing rows in the underlying Dataset changes - or invalidates - what it refers
-     * to. It is not thread-safe, and it holds a reference to its Dataset.</p>
+     * see the Dataset's current contents and writes go straight through to it. Adding, removing or reordering
+     * rows invalidates existing accessors: subsequent access throws {@link java.util.ConcurrentModificationException}.
+     * Structural column changes, including renaming, also invalidate the accessor. Reacquire the view with
+     * {@link Dataset#row(int)} after such a change. Cell edits and cursor movement do not invalidate it.
+     * An invalidated view's {@code toString()} returns a diagnostic marker. It is not thread-safe,
+     * and it holds a reference to its Dataset.</p>
      *
      * <p>Value conversion follows {@link Dataset}'s: {@code getBoolean} expects a {@link Boolean},
      * {@code getChar} a {@link Character}, and the remaining primitive getters a {@link Number}, each
@@ -3222,6 +3231,7 @@ public sealed interface Dataset permits RowDataset {
          * Returns the zero-based index of the row this accessor is bound to.
          *
          * @return the bound row index
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         int rowIndex();
 
@@ -3229,6 +3239,7 @@ public sealed interface Dataset permits RowDataset {
          * Returns the number of columns in the underlying Dataset.
          *
          * @return the current column count
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         int columnCount();
 
@@ -3238,6 +3249,7 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the zero-based index of that column
          * @throws IllegalArgumentException if the column does not exist in the underlying Dataset
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         int columnIndex(String columnName) throws IllegalArgumentException;
 
@@ -3247,8 +3259,8 @@ public sealed interface Dataset permits RowDataset {
          * @param <T> the expected value type; no conversion is performed
          * @param columnIndex the zero-based column index
          * @return the value, possibly {@code null}
-         * @throws IndexOutOfBoundsException if {@code columnIndex} is out of bounds, or if this accessor's own row
-         *         index is no longer in range because rows were removed from the Dataset after it was obtained
+         * @throws IndexOutOfBoundsException if {@code columnIndex} is out of bounds
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         @MayReturnNull
         <T> T get(int columnIndex) throws IndexOutOfBoundsException;
@@ -3259,8 +3271,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnIndex the zero-based column index
          * @param value the new value, which may be {@code null}
          * @throws IllegalStateException if the underlying Dataset is frozen
-         * @throws IndexOutOfBoundsException if {@code columnIndex} is out of bounds, or if this accessor's own row index is no longer in range
-         *         because rows were removed from the Dataset after it was obtained
+         * @throws IndexOutOfBoundsException if {@code columnIndex} is out of bounds
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         void set(int columnIndex, Object value) throws IllegalStateException, IndexOutOfBoundsException;
 
@@ -3271,8 +3283,7 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the value, possibly {@code null}
          * @throws IllegalArgumentException if the column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is no longer in range because rows were
-         *         removed from the Dataset after it was obtained
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         @MayReturnNull
         default <T> T get(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException {
@@ -3286,8 +3297,7 @@ public sealed interface Dataset permits RowDataset {
          * @param value the new value, which may be {@code null}
          * @throws IllegalArgumentException if the column does not exist
          * @throws IllegalStateException if the underlying Dataset is frozen
-         * @throws IndexOutOfBoundsException if this accessor's row index is no longer in range because rows were removed from the Dataset after it
-         *         was obtained
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default void set(final String columnName, final Object value) throws IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException {
             set(columnIndex(columnName), value);
@@ -3298,7 +3308,8 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return whether the cell is {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default boolean isNull(final int columnIndex) throws IndexOutOfBoundsException {
             return get(columnIndex) == null;
@@ -3310,7 +3321,7 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return whether the cell is {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default boolean isNull(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException {
             return get(columnName) == null;
@@ -3321,8 +3332,9 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return the cell's {@code boolean} value, or {@code false} for {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Boolean}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default boolean getBoolean(final int columnIndex) throws IndexOutOfBoundsException, ClassCastException {
             final Boolean value = get(columnIndex);
@@ -3336,8 +3348,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the cell's {@code boolean} value, or {@code false} for {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Boolean}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default boolean getBoolean(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
             return getBoolean(columnIndex(columnName));
@@ -3348,8 +3360,9 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return the cell's {@code char} value, or {@code 0} for {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Character}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default char getChar(final int columnIndex) throws IndexOutOfBoundsException, ClassCastException {
             final Character value = get(columnIndex);
@@ -3363,8 +3376,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the cell's {@code char} value, or {@code 0} for {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Character}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default char getChar(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
             return getChar(columnIndex(columnName));
@@ -3375,8 +3388,9 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return the cell's {@code byte} value, or {@code 0} for {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default byte getByte(final int columnIndex) throws IndexOutOfBoundsException, ClassCastException {
             final Number value = get(columnIndex);
@@ -3390,8 +3404,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the cell's {@code byte} value, or {@code 0} for {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default byte getByte(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
             return getByte(columnIndex(columnName));
@@ -3402,8 +3416,9 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return the cell's {@code short} value, or {@code 0} for {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default short getShort(final int columnIndex) throws IndexOutOfBoundsException, ClassCastException {
             final Number value = get(columnIndex);
@@ -3417,8 +3432,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the cell's {@code short} value, or {@code 0} for {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default short getShort(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
             return getShort(columnIndex(columnName));
@@ -3429,8 +3444,9 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return the cell's {@code int} value, or {@code 0} for {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default int getInt(final int columnIndex) throws IndexOutOfBoundsException, ClassCastException {
             final Number value = get(columnIndex);
@@ -3444,8 +3460,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the cell's {@code int} value, or {@code 0} for {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default int getInt(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
             return getInt(columnIndex(columnName));
@@ -3456,8 +3472,9 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return the cell's {@code long} value, or {@code 0} for {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default long getLong(final int columnIndex) throws IndexOutOfBoundsException, ClassCastException {
             final Number value = get(columnIndex);
@@ -3471,8 +3488,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the cell's {@code long} value, or {@code 0} for {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default long getLong(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
             return getLong(columnIndex(columnName));
@@ -3483,8 +3500,9 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return the cell's {@code float} value, or {@code 0} for {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default float getFloat(final int columnIndex) throws IndexOutOfBoundsException, ClassCastException {
             final Number value = get(columnIndex);
@@ -3498,8 +3516,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the cell's {@code float} value, or {@code 0} for {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default float getFloat(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
             return getFloat(columnIndex(columnName));
@@ -3510,8 +3528,9 @@ public sealed interface Dataset permits RowDataset {
          *
          * @param columnIndex the zero-based column index
          * @return the cell's {@code double} value, or {@code 0} for {@code null}
-         * @throws IndexOutOfBoundsException if the row or column index is out of bounds
+         * @throws IndexOutOfBoundsException if the column index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default double getDouble(final int columnIndex) throws IndexOutOfBoundsException, ClassCastException {
             final Number value = get(columnIndex);
@@ -3525,8 +3544,8 @@ public sealed interface Dataset permits RowDataset {
          * @param columnName the column name (case-sensitive)
          * @return the cell's {@code double} value, or {@code 0} for {@code null}
          * @throws IllegalArgumentException if the named column does not exist
-         * @throws IndexOutOfBoundsException if this accessor's row index is out of bounds
          * @throws ClassCastException if a non-null cell is not a {@link Number}
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default double getDouble(final String columnName) throws IllegalArgumentException, IndexOutOfBoundsException, ClassCastException {
             return getDouble(columnIndex(columnName));
@@ -3537,7 +3556,7 @@ public sealed interface Dataset permits RowDataset {
          * the Dataset are not reflected in it.
          *
          * @return a new {@code Object[]} holding this row's current values
-         * @throws IndexOutOfBoundsException if at least one column is copied and this accessor's row index is no longer in range
+         * @throws java.util.ConcurrentModificationException if a structural row or column change invalidated this accessor
          */
         default Object[] toArray() throws IndexOutOfBoundsException {
             final int columnCount = columnCount();
@@ -3601,7 +3620,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if destination construction, bean property conversion, or a reflective bean operation fails while materializing a row
      */
     <T> T getRow(int rowIndex, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException, ArrayStoreException,
@@ -3637,7 +3657,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if destination construction, bean property conversion, or a reflective bean operation fails while materializing a row
      */
     <T> T getRow(int rowIndex, Collection<String> columnNames, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException,
@@ -3663,17 +3684,18 @@ public sealed interface Dataset permits RowDataset {
      * @param rowIndex the index of the row to retrieve. The first row is 0, the second is 1, and so on.
      * @param rowSupplier the IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
      * @return an instance of the specified type representing the data in the specified row.
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      * @throws IllegalArgumentException if rowSupplier is null, or its result is null, unsupported, or an array shorter than the selected column
      *         count, or a required bean property is missing or rejects a converted value
-     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, destination construction, bean property conversion, or a reflective bean operation fails while
      *         materializing a row
      */
-    <T> T getRow(int rowIndex, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException, IndexOutOfBoundsException, ArrayStoreException,
+    <T> T getRow(int rowIndex, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException, ArrayStoreException,
             NullPointerException, ClassCastException, UnsupportedOperationException, RuntimeException;
 
     /**
@@ -3700,18 +3722,19 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames the collection of column names to be included in the returned row.
      * @param rowSupplier the IntFunction that generates an instance of the target type. It takes an integer as input, which is the number of columns in the row, and returns an instance of the target type.
      * @return an instance of the specified type representing the data in the specified row.
+     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      * @throws IllegalArgumentException if columnNames is null, repeats or contains missing names, or is empty while the Dataset has columns;
      *         rowSupplier is null, or its result is null, unsupported, or an array shorter than the selected column count, or a required bean
      *         property is missing or rejects a converted value
-     * @throws IndexOutOfBoundsException if the specified {@code rowIndex} is out of bounds.
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, destination construction, bean property conversion, or a reflective bean operation fails while
      *         materializing a row
      */
-    <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException, IndexOutOfBoundsException,
+    <T> T getRow(int rowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException,
             ArrayStoreException, NullPointerException, ClassCastException, UnsupportedOperationException, RuntimeException;
 
     /**
@@ -3760,7 +3783,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if destination construction, bean property conversion, or a reflective bean operation fails while materializing a row
      */
     <T> Optional<T> firstRow(Class<? extends T> rowType)
@@ -3796,7 +3820,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if destination construction, bean property conversion, or a reflective bean operation fails while materializing a row
      */
     <T> Optional<T> firstRow(Collection<String> columnNames, Class<? extends T> rowType)
@@ -3828,7 +3853,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, destination construction, bean property conversion, or a reflective bean operation fails while
      *         materializing a row
      */
@@ -3865,7 +3891,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, destination construction, bean property conversion, or a reflective bean operation fails while
      *         materializing a row
      */
@@ -3922,7 +3949,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if destination construction, bean property conversion, or a reflective bean operation fails while materializing a row
      */
     <T> Optional<T> lastRow(Class<? extends T> rowType)
@@ -3955,7 +3983,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if destination construction, bean property conversion, or a reflective bean operation fails while materializing a row
      */
     <T> Optional<T> lastRow(Collection<String> columnNames, Class<? extends T> rowType)
@@ -3988,7 +4017,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, destination construction, bean property conversion, or a reflective bean operation fails while
      *         materializing a row
      */
@@ -4023,7 +4053,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects the type of a selected value
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, destination construction, bean property conversion, or a reflective bean operation fails while
      *         materializing a row
      */
@@ -4104,12 +4135,12 @@ public sealed interface Dataset permits RowDataset {
      * @param fromRowIndex the starting index of the range of rows to be processed. The first row is 0, the second is 1, and so on.
      * @param toRowIndex the ending index of the range of rows to be processed. This index is exclusive, meaning the row at this index will not be processed.
      * @param action the action to be performed on each row. It takes a DisposableObjArray as input, which represents a row in the Dataset. The action should not cache or update the input DisposableObjArray or its values(Array).
-     * @throws IllegalArgumentException if action is null
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
+     * @throws IllegalArgumentException if action is null
      * @throws E if action throws while processing a selected row
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Throwables.Consumer<? super DisposableObjArray, E> action)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E;
+            throws IndexOutOfBoundsException, IllegalArgumentException, E;
 
     /**
      * Performs the given action for each row of the Dataset within the specified range.
@@ -4135,13 +4166,13 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the range of rows to be processed. This index is exclusive, meaning the row at this index will not be processed.
      * @param columnNames the collection of column names to be included in the DisposableObjArray.
      * @param action the action to be performed on each row. It takes a DisposableObjArray as input, which represents a row in the Dataset. The action should not cache or update the input DisposableObjArray or its values(Array).
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if action or columnNames is null, or a selected column does not exist, the selection repeats a name, or is
      *         empty while the Dataset has columns
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws E if action throws while processing a selected row
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Collection<String> columnNames,
-            Throwables.Consumer<? super DisposableObjArray, E> action) throws IllegalArgumentException, IndexOutOfBoundsException, E;
+            Throwables.Consumer<? super DisposableObjArray, E> action) throws IndexOutOfBoundsException, IllegalArgumentException, E;
 
     /**
      * Performs the given action for each row of the Dataset.
@@ -4162,7 +4193,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param <E> the type of the exception that the action can throw.
      * @param columnNames a Tuple2 representing the names of the two columns to be included in the action.
-     * @param action the action to be performed on each row. It takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}. The action should not cache or update the input values.
+     * @param action the action to be performed on each row. It takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}. The inputs are the stored cell references; retaining them is allowed, and mutating a mutable cell object affects the Dataset.
      * @throws IllegalArgumentException if action or columnNames is null, or a selected column does not exist
      * @throws E if action throws while processing a selected row
      */
@@ -4191,13 +4222,13 @@ public sealed interface Dataset permits RowDataset {
      * @param fromRowIndex the starting index of the range of rows to be processed. The first row is 0, the second is 1, and so on.
      * @param toRowIndex the ending index of the range of rows to be processed. This index is exclusive, meaning the row at this index will not be processed.
      * @param columnNames a Tuple2 representing the names of the two columns to be included in the action.
-     * @param action the action to be performed on each row. It takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}. The action should not cache or update the input values.
-     * @throws IllegalArgumentException if action or columnNames is null, or a selected column does not exist
+     * @param action the action to be performed on each row. It takes two inputs, which represent the values of the two columns specified in the Tuple {@code columnNames}. The inputs are the stored cell references; retaining them is allowed, and mutating a mutable cell object affects the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
+     * @throws IllegalArgumentException if action or columnNames is null, or a selected column does not exist
      * @throws E if action throws while processing a selected row
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, Throwables.BiConsumer<?, ?, E> action)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E;
+            throws IndexOutOfBoundsException, IllegalArgumentException, E;
 
     /**
      * Performs the given action for each row of the Dataset.
@@ -4219,7 +4250,7 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param <E> the type of the exception that the action can throw.
      * @param columnNames a Tuple3 representing the names of the three columns to be included in the action.
-     * @param action the action to be performed on each row. It takes three inputs, which represent the values of the three columns specified in the Tuple {@code columnNames}. The action should not cache or update the input values.
+     * @param action the action to be performed on each row. It takes three inputs, which represent the values of the three columns specified in the Tuple {@code columnNames}. The inputs are the stored cell references; retaining them is allowed, and mutating a mutable cell object affects the Dataset.
      * @throws IllegalArgumentException if action or columnNames is null, or a selected column does not exist
      * @throws E if action throws while processing a selected row
      */
@@ -4249,13 +4280,13 @@ public sealed interface Dataset permits RowDataset {
      * @param fromRowIndex the starting index of the range of rows to be processed. The first row is 0, the second is 1, and so on.
      * @param toRowIndex the ending index of the range of rows to be processed. This index is exclusive, meaning the row at this index will not be processed.
      * @param columnNames a Tuple3 representing the names of the three columns to be included in the action.
-     * @param action the action to be performed on each row. It takes three inputs, which represent the values of the three columns specified in the Tuple {@code columnNames}. The action should not cache or update the input values.
-     * @throws IllegalArgumentException if action or columnNames is null, or a selected column does not exist
+     * @param action the action to be performed on each row. It takes three inputs, which represent the values of the three columns specified in the Tuple {@code columnNames}. The inputs are the stored cell references; retaining them is allowed, and mutating a mutable cell object affects the Dataset.
      * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
+     * @throws IllegalArgumentException if action or columnNames is null, or a selected column does not exist
      * @throws E if action throws while processing a selected row
      */
     <E extends Exception> void forEach(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, Throwables.TriConsumer<?, ?, ?, E> action)
-            throws IllegalArgumentException, IndexOutOfBoundsException, E;
+            throws IndexOutOfBoundsException, IllegalArgumentException, E;
 
     /**
      * Converts the entire Dataset into a list of Object arrays.
@@ -4320,7 +4351,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the runtime component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type or its comparison requirements
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean property conversion, or a reflective operation fails
      */
     <T> List<T> toList(Class<? extends T> rowType)
@@ -4352,7 +4384,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the runtime component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type or its comparison requirements
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean property conversion, or a reflective operation fails
      */
     <T> List<T> toList(int fromRowIndex, int toRowIndex, Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException,
@@ -4385,7 +4418,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the runtime component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type or its comparison requirements
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean property conversion, or a reflective operation fails
      */
     <T> List<T> toList(Collection<String> columnNames, Class<? extends T> rowType)
@@ -4420,7 +4454,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the runtime component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type or its comparison requirements
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean property conversion, or a reflective operation fails
      */
     <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Class<? extends T> rowType) throws IndexOutOfBoundsException,
@@ -4450,7 +4485,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type, or successive supplied rows have incompatible
      *         representations
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, row construction, bean property conversion, or a reflective operation fails
      */
     <T> List<T> toList(IntFunction<? extends T> rowSupplier)
@@ -4476,17 +4512,18 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the range of rows to be converted. This index is exclusive, meaning the row at this index will not be converted.
      * @param rowSupplier the function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the Dataset.
      * @return a List of instances of the specified type representing the data in the specified range of the Dataset. Each instance is a row in the Dataset.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if rowSupplier is null, returns null or an unsupported row type, or supplies an array shorter than the
      *         selected column count when a row is materialized; or a bean property mapping or value conversion is invalid
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws ArrayStoreException if a selected cell is incompatible with the runtime component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type, or successive supplied rows have incompatible
      *         representations
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, row construction, bean property conversion, or a reflective operation fails
      */
-    <T> List<T> toList(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException, IndexOutOfBoundsException,
+    <T> List<T> toList(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException,
             ArrayStoreException, NullPointerException, ClassCastException, UnsupportedOperationException, RuntimeException;
 
     /**
@@ -4516,7 +4553,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type, or successive supplied rows have incompatible
      *         representations
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, row construction, bean property conversion, or a reflective operation fails
      */
     <T> List<T> toList(Collection<String> columnNames, IntFunction<? extends T> rowSupplier)
@@ -4544,19 +4582,20 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames the collection of column names to be included in the instance.
      * @param rowSupplier the function to create a new instance of the target type. It takes an integer as input, which represents the number of columns in the Dataset.
      * @return a List of instances of the specified type representing the data in the specified range of the Dataset. Each instance is a row in the Dataset.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if columnNames is null, repeats or contains missing names, or is empty while the Dataset has columns;
      *         rowSupplier is null, returns null or an unsupported row type, or supplies an array shorter than the selected column count when a row is
      *         materialized; or a bean property mapping or value conversion is invalid
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws ArrayStoreException if a selected cell is incompatible with the runtime component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type, or successive supplied rows have incompatible
      *         representations
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, row construction, bean property conversion, or a reflective operation fails
      */
-    <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IllegalArgumentException,
-            IndexOutOfBoundsException, ArrayStoreException, NullPointerException, ClassCastException, UnsupportedOperationException, RuntimeException;
+    <T> List<T> toList(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException,
+            IllegalArgumentException, ArrayStoreException, NullPointerException, ClassCastException, UnsupportedOperationException, RuntimeException;
 
     /**
      * Converts the entire Dataset into a list of instances of the specified type - Object[], Collection, Map, or Bean class, including only the columns that pass the specified filter.
@@ -4583,7 +4622,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the runtime component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type or its comparison requirements
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if columnNameFilter or columnNameConverter throws, or row construction, bean property conversion, or a reflective
      *         operation fails
      */
@@ -4618,7 +4658,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the runtime component type of a destination object array
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type or its comparison requirements
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if columnNameFilter or columnNameConverter throws, or row construction, bean property conversion, or a reflective
      *         operation fails
      */
@@ -4652,7 +4693,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type, or successive supplied rows have incompatible
      *         representations
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if columnNameFilter or columnNameConverter throws, or rowSupplier, row construction, bean property conversion, or a
      *         reflective operation fails
      */
@@ -4688,7 +4730,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination collection or map rejects a null cell value
      * @throws ClassCastException if a destination collection or map rejects a cell type, or successive supplied rows have incompatible
      *         representations
-     * @throws UnsupportedOperationException if a destination does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if columnNameFilter or columnNameConverter throws, or rowSupplier, row construction, bean property conversion, or a
      *         reflective operation fails
      */
@@ -4737,8 +4780,8 @@ public sealed interface Dataset permits RowDataset {
      * @return a List of instances of the specified type representing the data in the Dataset. Each instance is a row in the Dataset.
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, a selected property cannot be resolved under the
      *         missing-property policy and prefix mapping, or a cell cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      */
     <T> List<T> toEntities(Map<String, String> prefixAndFieldNameMap, Class<? extends T> beanClass)
@@ -4758,16 +4801,16 @@ public sealed interface Dataset permits RowDataset {
      * @param prefixAndFieldNameMap the map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
      * @param beanClass the Class object representing the target type of the row. It must be a Bean class.
      * @return a List of instances of the specified type representing the data in the specified range of the Dataset. Each instance is a row in the Dataset.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, a selected property cannot be resolved under the
      *         missing-property policy and prefix mapping, or a cell cannot be converted to its property type
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toEntities(Map, Class)
      */
     <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> beanClass)
-            throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedOperationException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException, RuntimeException;
 
     /**
      * Converts the entire Dataset into a list of instances of the specified type - Bean class, mapping column names to field names based on the provided map.
@@ -4785,8 +4828,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, the selected names are null, duplicated, missing from the
      *         Dataset, or empty while the Dataset has columns, a selected property cannot be resolved under the missing-property policy and prefix
      *         mapping, or a cell cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toEntities(Map, Class)
      */
@@ -4820,17 +4863,17 @@ public sealed interface Dataset permits RowDataset {
      * @param prefixAndFieldNameMap the map that defines the mapping between column names and field names. The key is the column name prefix, and the value is the corresponding field name.
      * @param beanClass the Class object representing the target type of the row. It must be a Bean class.
      * @return a List of instances of the specified type representing the data in the specified range of the Dataset. Each instance is a row in the Dataset.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, the selected names are null, duplicated, missing from the
      *         Dataset, or empty while the Dataset has columns, a selected property cannot be resolved under the missing-property policy and prefix
      *         mapping, or a cell cannot be converted to its property type
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toEntities(Map, Class)
      */
     <T> List<T> toEntities(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap,
-            Class<? extends T> beanClass) throws IllegalArgumentException, IndexOutOfBoundsException, UnsupportedOperationException, RuntimeException;
+            Class<? extends T> beanClass) throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException, RuntimeException;
 
     /**
      * Converts the entire Dataset into a list of instances of the specified type - Bean class, merging rows with the same ID into a single instance.
@@ -4881,8 +4924,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, the explicit or inferred ID selection is null, empty,
      *         duplicated, or cannot be resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and
      *         prefix mapping, or a cell cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      */
     <T> List<T> toMergedEntities(Class<? extends T> beanClass) throws IllegalArgumentException, UnsupportedOperationException, RuntimeException;
@@ -4912,8 +4955,8 @@ public sealed interface Dataset permits RowDataset {
      *         Dataset, or empty while the Dataset has columns, the explicit or inferred ID selection is null, empty, duplicated, or cannot be
      *         resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and prefix mapping, or a cell
      *         cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
@@ -4971,8 +5014,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, the explicit or inferred ID selection is null, empty,
      *         duplicated, or cannot be resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and
      *         prefix mapping, or a cell cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      */
     <T> List<T> toMergedEntities(Map<String, String> prefixAndFieldNameMap, Class<? extends T> beanClass)
@@ -5028,8 +5071,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, the explicit or inferred ID selection is null, empty,
      *         duplicated, or cannot be resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and
      *         prefix mapping, or a cell cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
@@ -5063,8 +5106,8 @@ public sealed interface Dataset permits RowDataset {
      *         Dataset, or empty while the Dataset has columns, the explicit or inferred ID selection is null, empty, duplicated, or cannot be
      *         resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and prefix mapping, or a cell
      *         cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
@@ -5097,8 +5140,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, the explicit or inferred ID selection is null, empty,
      *         duplicated, or cannot be resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and
      *         prefix mapping, or a cell cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
@@ -5132,8 +5175,8 @@ public sealed interface Dataset permits RowDataset {
      *         Dataset, or empty while the Dataset has columns, the explicit or inferred ID selection is null, empty, duplicated, or cannot be
      *         resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and prefix mapping, or a cell
      *         cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
@@ -5167,8 +5210,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws IllegalArgumentException if beanClass is null or not a supported bean type, the explicit or inferred ID selection is null, empty,
      *         duplicated, or cannot be resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and
      *         prefix mapping, or a cell cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
@@ -5227,8 +5270,8 @@ public sealed interface Dataset permits RowDataset {
      *         Dataset, or empty while the Dataset has columns, the explicit or inferred ID selection is null, empty, duplicated, or cannot be
      *         resolved to Dataset columns, a selected property cannot be resolved under the missing-property policy and prefix mapping, or a cell
      *         cannot be converted to its property type
-     * @throws UnsupportedOperationException if a selected nested property is not a bean type or its collection does not support adding the
-     *         materialized value
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if bean construction, property reading, value conversion, or reflective property assignment fails
      * @see #toMergedEntities(Class)
      * @see #toMergedEntities(Map, Class)
@@ -5407,7 +5450,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination container rejects a null key or cell value, or a registered row factory returns null and its
      *         result is used
      * @throws ClassCastException if a destination rejects a key or value type
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean conversion, or destination insertion fails
      */
     <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType)
@@ -5448,7 +5492,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination container rejects a null key or cell value, or a registered row factory returns null and its
      *         result is used
      * @throws ClassCastException if a destination rejects a key or value type
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if supplier, row construction, bean conversion, or destination insertion fails
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType,
@@ -5490,7 +5535,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination container rejects a null key or cell value, or a registered row factory returns null and its
      *         result is used
      * @throws ClassCastException if a destination rejects a key or value type
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean conversion, or destination insertion fails
      */
     <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType)
@@ -5535,7 +5581,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination container rejects a null key or cell value, or a registered row factory returns null and its
      *         result is used
      * @throws ClassCastException if a destination rejects a key or value type
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if supplier, row construction, bean conversion, or destination insertion fails
      */
     <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, Class<? extends V> rowType,
@@ -5573,7 +5620,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination container rejects a null key or cell value
      * @throws ClassCastException if a destination rejects a key or value type, or successive supplied rows have incompatible representations
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, row construction, bean conversion, or destination insertion fails
      */
     <K, V> Map<K, V> toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier)
@@ -5614,7 +5662,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination container rejects a null key or cell value
      * @throws ClassCastException if a destination rejects a key or value type, or successive supplied rows have incompatible representations
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, supplier, row construction, bean conversion, or destination insertion fails
      */
     <K, V, M extends Map<K, V>> M toMap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier,
@@ -5648,18 +5697,19 @@ public sealed interface Dataset permits RowDataset {
      * @param valueColumnNames the collection of names of the columns in the Dataset that will be used as the values in the resulting map. Each value in the map is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
      * @param rowSupplier a function that generates a new row. The function takes an integer argument, which is the initial row capacity.
      * @return a Map where each key-value pair corresponds to a row in the Dataset. The key of each pair is the value of the specified key column in the row. The value of each pair is an instance of the specified row type, where each property in the instance corresponds to a column in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if a named column does not exist, valueColumnNames is null, repeats a name, or is empty while the Dataset has
      *         columns, rowSupplier is null or returns null, an unsupported representation, or an array shorter than the selected column count, or a
      *         required bean property or value conversion is invalid
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination container rejects a null key or cell value
      * @throws ClassCastException if a destination rejects a key or value type, or successive supplied rows have incompatible representations
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, row construction, bean conversion, or destination insertion fails
      */
     <K, V> Map<K, V> toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends V> rowSupplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, ArrayStoreException, NullPointerException, ClassCastException,
+            throws IndexOutOfBoundsException, IllegalArgumentException, ArrayStoreException, NullPointerException, ClassCastException,
             UnsupportedOperationException, RuntimeException;
 
     /**
@@ -5700,7 +5750,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination container rejects a null key or cell value
      * @throws ClassCastException if a destination rejects a key or value type, or successive supplied rows have incompatible representations
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, supplier, row construction, bean conversion, or destination insertion fails
      */
     <K, V, M extends Map<K, V>> M toMap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
@@ -5713,7 +5764,7 @@ public sealed interface Dataset permits RowDataset {
      * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export data in the Dataset to a ListMultimap, where each key-value pair in the map corresponds to a row in the Dataset.
-     * The resulting ListMultimap preserves the encounter order of the rows (it is backed by a {@code LinkedHashMap}).
+     * The resulting ListMultimap preserves first encounter order of keys and encounter order of values within each key (it is backed by a {@code LinkedHashMap}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5769,7 +5820,7 @@ public sealed interface Dataset permits RowDataset {
      * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value column in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the Dataset to a ListMultimap, where each key-value pair in the map corresponds to a row in the Dataset.
-     * The resulting ListMultimap preserves the encounter order of the rows (it is backed by a {@code LinkedHashMap}).
+     * The resulting ListMultimap preserves first encounter order of keys and encounter order of values within each key (it is backed by a {@code LinkedHashMap}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5833,7 +5884,7 @@ public sealed interface Dataset permits RowDataset {
      * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export data in the Dataset to a ListMultimap, where each key-value pair in the map corresponds to a row in the Dataset.
-     * The resulting ListMultimap preserves the encounter order of the rows (it is backed by a {@code LinkedHashMap}).
+     * The resulting ListMultimap preserves first encounter order of keys and encounter order of values within each key (it is backed by a {@code LinkedHashMap}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5854,7 +5905,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination container rejects a null key or cell value, or a registered row factory returns null and its
      *         result is used
      * @throws ClassCastException if a destination rejects a key or value type
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean conversion, or destination insertion fails
      */
     <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, Collection<String> valueColumnNames, Class<? extends T> rowType)
@@ -5893,7 +5945,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination container rejects a null key or cell value, or a registered row factory returns null and its
      *         result is used
      * @throws ClassCastException if a destination rejects a key or value type
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if supplier, row construction, bean conversion, or destination insertion fails
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
@@ -5906,7 +5959,7 @@ public sealed interface Dataset permits RowDataset {
      * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the Dataset to a ListMultimap, where each key-value pair in the map corresponds to a row in the Dataset.
-     * The resulting ListMultimap preserves the encounter order of the rows (it is backed by a {@code LinkedHashMap}).
+     * The resulting ListMultimap preserves first encounter order of keys and encounter order of values within each key (it is backed by a {@code LinkedHashMap}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5930,7 +5983,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination container rejects a null key or cell value, or a registered row factory returns null and its
      *         result is used
      * @throws ClassCastException if a destination rejects a key or value type
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean conversion, or destination insertion fails
      */
     <K, T> ListMultimap<K, T> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
@@ -5972,7 +6026,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws NullPointerException if a destination container rejects a null key or cell value, or a registered row factory returns null and its
      *         result is used
      * @throws ClassCastException if a destination rejects a key or value type
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if supplier, row construction, bean conversion, or destination insertion fails
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
@@ -5985,7 +6040,7 @@ public sealed interface Dataset permits RowDataset {
      * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export data in the Dataset to a ListMultimap, where each key-value pair in the map corresponds to a row in the Dataset.
-     * The resulting ListMultimap preserves the encounter order of the rows (it is backed by a {@code LinkedHashMap}).
+     * The resulting ListMultimap preserves first encounter order of keys and encounter order of values within each key (it is backed by a {@code LinkedHashMap}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6007,7 +6062,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination container rejects a null key or cell value
      * @throws ClassCastException if a destination rejects a key or value type, or successive supplied rows have incompatible representations
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, row construction, bean conversion, or destination insertion fails
      */
     <K, T> ListMultimap<K, T> toMultimap(String keyColumnName, Collection<String> valueColumnNames, IntFunction<? extends T> rowSupplier)
@@ -6047,7 +6103,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination container rejects a null key or cell value
      * @throws ClassCastException if a destination rejects a key or value type, or successive supplied rows have incompatible representations
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, supplier, row construction, bean conversion, or destination insertion fails
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(String keyColumnName, Collection<String> valueColumnNames,
@@ -6060,7 +6117,7 @@ public sealed interface Dataset permits RowDataset {
      * The key of each entry is the value of the specified key column in the row. The values of each entry are the values of the specified value columns in the row.
      * <br />
      * This method is typically used when you need to export a range of data in the Dataset to a ListMultimap, where each key-value pair in the map corresponds to a row in the Dataset.
-     * The resulting ListMultimap preserves the encounter order of the rows (it is backed by a {@code LinkedHashMap}).
+     * The resulting ListMultimap preserves first encounter order of keys and encounter order of values within each key (it is backed by a {@code LinkedHashMap}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6077,18 +6134,19 @@ public sealed interface Dataset permits RowDataset {
      * @param valueColumnNames the names of the columns in the Dataset that will be used as the values in the resulting map.
      * @param rowSupplier a function that generates a new row. The function takes an integer argument, which is the initial row capacity. The return value created by specified {@code rowSupplier} must be an Object[], Collection, Map, or Bean class.
      * @return a ListMultimap where each key-value pair corresponds to a row in the Dataset. The key of each pair is the value of the specified key column in the row. The value of each pair is the value of the specified value columns in the row.
+     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws IllegalArgumentException if a named column does not exist, valueColumnNames is null, repeats a name, or is empty while the Dataset has
      *         columns, rowSupplier is null or returns null, an unsupported representation, or an array shorter than the selected column count, or a
      *         required bean property or value conversion is invalid
-     * @throws IndexOutOfBoundsException if the specified {@code fromRowIndex} or {@code toRowIndex} is out of the range of the Dataset
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination container rejects a null key or cell value
      * @throws ClassCastException if a destination rejects a key or value type, or successive supplied rows have incompatible representations
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, row construction, bean conversion, or destination insertion fails
      */
     <K, T> ListMultimap<K, T> toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName, Collection<String> valueColumnNames,
-            IntFunction<? extends T> rowSupplier) throws IllegalArgumentException, IndexOutOfBoundsException, ArrayStoreException, NullPointerException,
+            IntFunction<? extends T> rowSupplier) throws IndexOutOfBoundsException, IllegalArgumentException, ArrayStoreException, NullPointerException,
             ClassCastException, UnsupportedOperationException, RuntimeException;
 
     /**
@@ -6127,7 +6185,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected cell is incompatible with the component type of a destination object array
      * @throws NullPointerException if a destination container rejects a null key or cell value
      * @throws ClassCastException if a destination rejects a key or value type, or successive supplied rows have incompatible representations
-     * @throws UnsupportedOperationException if a destination container does not support insertion, or a selected nested property is not a bean type
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if rowSupplier, supplier, row construction, bean conversion, or destination insertion fails
      */
     <K, T, V extends Collection<T>, M extends Multimap<K, T, V>> M toMultimap(int fromRowIndex, int toRowIndex, String keyColumnName,
@@ -6329,14 +6388,14 @@ public sealed interface Dataset permits RowDataset {
      * @param fromRowIndex the starting index of the row range (inclusive)
      * @param toRowIndex the ending index of the row range (exclusive)
      * @param output the OutputStream where the JSON string will be written
-     * @throws IllegalArgumentException if {@code output} is {@code null}; a serialized value contains a non-finite JSON number.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code output} is {@code null}; a serialized value contains a non-finite JSON number.
      * @throws UncheckedIOException if writing or flushing the output fails, or a value serializer reports an I/O failure.
      * @throws RuntimeException if a value type or its string conversion fails during serialization.
      * @see #toJson(int, int, Collection, OutputStream)
      */
     void toJson(int fromRowIndex, int toRowIndex, OutputStream output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, UncheckedIOException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Converts a range of rows in the Dataset into a JSON string, including only the specified columns, and writes it to the provided OutputStream.
@@ -6358,14 +6417,14 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the names of the columns in the Dataset to be included in the JSON string. If {@code null} or empty, an empty JSON array ({@code []}) is written.
      * @param output the OutputStream where the JSON string will be written.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code output} is {@code null}; a nonempty column selection contains a null, unknown, or duplicate column
      *         name; a serialized value contains a non-finite JSON number.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws UncheckedIOException if writing or flushing the output fails, or a value serializer reports an I/O failure.
      * @throws RuntimeException if a value type or its string conversion fails during serialization.
      */
     void toJson(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, UncheckedIOException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Converts the entire Dataset into a JSON string and writes it to the provided Writer.
@@ -6492,7 +6551,7 @@ public sealed interface Dataset permits RowDataset {
      * The order of the rows in the XML string is the same as the order of the rows in the Dataset.
      * The order of the elements in each XML row element (representing a row) is the same as the order of the columns in the Dataset.
      * <br />
-     * Note: The method uses the default settings for XML serialization. If you need more control over the XML output (e.g., custom element names, namespaces, etc.), consider using the overloaded method with more parameters.
+     * Use {@link #toXml(int, int, Collection, String)} to select columns and specify the row element name.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6535,15 +6594,15 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @return a String containing the XML representation of the specified range of rows in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code rowElementName} is null, empty, or not a valid XML element name; a selected column name is not a
      *         valid XML element name or a serialized value contains an illegal XML character or character reference.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the XML document builder cannot be created, or a value type or its string conversion fails during serialization.
      * @throws UncheckedIOException if a value serializer reports an I/O failure while generating the text.
      * @see #toXml(int, int, Collection, String)
      */
     String toXml(int fromRowIndex, int toRowIndex, String rowElementName)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException, UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException, UncheckedIOException;
 
     /**
      * Converts a range of rows in the Dataset into an XML string, with each row represented as an XML element named {@code row}, and returns it as a String.
@@ -6598,15 +6657,15 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames the names of the columns in the Dataset to be included in the XML string. If {@code null} or empty, an empty {@code <dataset>} element is returned.
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @return a String containing the XML representation of the specified range of rows and columns in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if a nonempty column selection contains a null, unknown, or duplicate column name; {@code rowElementName} is
      *         null, empty, or not a valid XML element name; a selected column name is not a valid XML element name or a serialized value contains an
      *         illegal XML character or character reference.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the XML document builder cannot be created, or a value type or its string conversion fails during serialization.
      * @throws UncheckedIOException if a value serializer reports an I/O failure while generating the text.
      */
     String toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException, UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException, UncheckedIOException;
 
     /**
      * Writes the entire Dataset as an XML string to the specified File.
@@ -6727,10 +6786,10 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the File where the XML string will be written.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code output} is {@code null}; the output pathname cannot be converted to a valid file-system path; {@code
      *         rowElementName} is null, empty, or not a valid XML element name; a selected column name is not a valid XML element name or a serialized
      *         value contains an illegal XML character or character reference.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the XML document builder cannot be created, or a value type or its string conversion fails during serialization.
      * @throws NullPointerException if the output resolves to a file-system root and has no parent directory.
      * @throws UncheckedIOException if creating the destination directory or temporary file, serializing to it, closing it, or atomically replacing
@@ -6738,7 +6797,7 @@ public sealed interface Dataset permits RowDataset {
      * @see #toXml(int, int, Collection, String, File)
      */
     void toXml(int fromRowIndex, int toRowIndex, String rowElementName, File output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException, NullPointerException, UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException, NullPointerException, UncheckedIOException;
 
     /**
      * Converts a range of rows in the Dataset into an XML string, including only the specified columns, and writes it to the specified File.
@@ -6882,15 +6941,15 @@ public sealed interface Dataset permits RowDataset {
      * @param fromRowIndex the starting index of the row range (inclusive).
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param output the OutputStream where the XML string will be written.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code output} is {@code null}; a selected column name is not a valid XML element name or a serialized
      *         value contains an illegal XML character or character reference.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the XML document builder cannot be created, or a value type or its string conversion fails during serialization.
      * @throws UncheckedIOException if writing or flushing the output fails, or a value serializer reports an I/O failure.
      * @see #toXml(int, int, Collection, String, OutputStream)
      */
     void toXml(int fromRowIndex, int toRowIndex, OutputStream output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException, UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException, UncheckedIOException;
 
     /**
      * Converts a range of rows in the Dataset into an XML string, using the specified row element name, and writes it to the specified OutputStream.
@@ -6914,15 +6973,15 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the OutputStream where the XML string will be written.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code output} is {@code null}; {@code rowElementName} is null, empty, or not a valid XML element name; a
      *         selected column name is not a valid XML element name or a serialized value contains an illegal XML character or character reference.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the XML document builder cannot be created, or a value type or its string conversion fails during serialization.
      * @throws UncheckedIOException if writing or flushing the output fails, or a value serializer reports an I/O failure.
      * @see #toXml(int, int, Collection, String, OutputStream)
      */
     void toXml(int fromRowIndex, int toRowIndex, String rowElementName, OutputStream output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException, UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException, UncheckedIOException;
 
     /**
      * Converts a range of rows in the Dataset into an XML string, including only the specified columns, and writes it to the specified OutputStream.
@@ -6946,16 +7005,16 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be included in the XML string. If {@code null} or empty, an empty {@code <dataset>} element is written.
      * @param output the OutputStream where the XML string will be written.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code output} is {@code null}; a nonempty column selection contains a null, unknown, or duplicate column
      *         name; a selected column name is not a valid XML element name or a serialized value contains an illegal XML character or character
      *         reference.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the XML document builder cannot be created, or a value type or its string conversion fails during serialization.
      * @throws UncheckedIOException if writing or flushing the output fails, or a value serializer reports an I/O failure.
      * @see #toXml(int, int, Collection, String, OutputStream)
      */
     void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException, UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException, UncheckedIOException;
 
     /**
      * Converts a range of rows in the Dataset into an XML string, including only the specified columns, and writes it to the specified OutputStream.
@@ -6980,15 +7039,15 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames the names of the columns in the Dataset to be included in the XML string. If {@code null} or empty, an empty {@code <dataset>} element is written.
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the OutputStream where the XML string will be written.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code output} is {@code null}; a nonempty column selection contains a null, unknown, or duplicate column
      *         name; {@code rowElementName} is null, empty, or not a valid XML element name; a selected column name is not a valid XML element name or
      *         a serialized value contains an illegal XML character or character reference.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the XML document builder cannot be created, or a value type or its string conversion fails during serialization.
      * @throws UncheckedIOException if writing or flushing the output fails, or a value serializer reports an I/O failure.
      */
     void toXml(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String rowElementName, OutputStream output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException, UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException, UncheckedIOException;
 
     /**
      * Writes the entire Dataset as an XML string to the specified Writer.
@@ -7098,15 +7157,15 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowElementName the name of the XML element that represents a row in the Dataset.
      * @param output the Writer where the XML string will be written.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code output} is {@code null}; {@code rowElementName} is null, empty, or not a valid XML element name; a
      *         selected column name is not a valid XML element name or a serialized value contains an illegal XML character or character reference.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the XML document builder cannot be created, or a value type or its string conversion fails during serialization.
      * @throws UncheckedIOException if writing or flushing the output fails, or a value serializer reports an I/O failure.
      * @see #toXml(int, int, Collection, String, Writer)
      */
     void toXml(int fromRowIndex, int toRowIndex, String rowElementName, Writer output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException, UncheckedIOException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException, UncheckedIOException;
 
     /**
      * Converts a range of rows in the Dataset into an XML string, including only the specified columns, and writes it to the specified Writer.
@@ -7397,9 +7456,9 @@ public sealed interface Dataset permits RowDataset {
      *      {@code Writer}/{@code OutputStream} receives nothing. (Only an <i>invalid</i> argument leaves an existing
      *      destination file untouched; an empty selection is a valid one.)
      * @param output the OutputStream where the CSV string will be written.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code output} is {@code null}; a nonempty column selection contains a null, unknown, or duplicate column
      *         name.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws UncheckedIOException if writing or flushing the output fails, or a value serializer reports an I/O failure.
      * @throws RuntimeException if a value type or its string conversion fails during serialization.
      * @see #toCsv(OutputStream)
@@ -7408,7 +7467,7 @@ public sealed interface Dataset permits RowDataset {
      * @see CsvUtil#writeField(BufferedCsvWriter, com.landawn.abacus.type.Type, Object)
      */
     void toCsv(int fromRowIndex, int toRowIndex, Collection<String> columnNames, OutputStream output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, UncheckedIOException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Converts the entire Dataset into a CSV string and writes it to a Writer.
@@ -7579,8 +7638,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected value is not assignable to the component type of a requested object-array row.
      * @throws NullPointerException if a constructed destination collection or map rejects a null cell value.
      * @throws ClassCastException if a constructed destination rejects the cell type or a registered row factory returns the wrong representation.
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property does not identify a
-     *         supported bean.
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean conversion, or reflective property access fails.
      * @see #groupBy(String, String, String, Collector)
      * @see #groupBy(String, Function, Collection, String, Function, Collector)
@@ -7710,8 +7769,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected value is not assignable to the component type of a requested object-array row.
      * @throws NullPointerException if a constructed destination collection or map rejects a null cell value.
      * @throws ClassCastException if a constructed destination rejects the cell type or a registered row factory returns the wrong representation.
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property does not identify a
-     *         supported bean.
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean conversion, or reflective property access fails, or key extraction fails while grouping a
      *         row.
      * @see #groupBy(String, String, String, Collector)
@@ -7928,7 +7987,7 @@ public sealed interface Dataset permits RowDataset {
      * @param keyColumnNames the names of the columns to group by.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null} or empty. It must be different from all the key column names.
-     * @param rowType the class type of the new column that will store the result of the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @param rowType the class of each aggregated row collected into the list stored in the new column. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a new Dataset with the grouped and aggregated data - list of type {@code rowType}.
      * @throws IllegalArgumentException if {@code keyColumnNames} is null or empty; a specified column name is null or unknown; a column selection
      *         contains duplicate names; {@code aggregateOnColumnNames} is null or empty; {@code aggregateResultColumnName} is null, empty, or
@@ -7937,8 +7996,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected value is not assignable to the component type of a requested object-array row.
      * @throws NullPointerException if a constructed destination collection or map rejects a null cell value.
      * @throws ClassCastException if a constructed destination rejects the cell type or a registered row factory returns the wrong representation.
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property does not identify a
-     *         supported bean.
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean conversion, or reflective property access fails.
      * @see #groupBy(Collection)
      * @see #groupBy(Collection, Function, Collection, String, Function, Collector)
@@ -8024,7 +8083,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns to group by.
-     * @param keyExtractor the function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor the function to generate the key for grouping. It takes a DisposableObjArray containing the selected key-column values and returns a key object.
      * @return a new Dataset with the grouped data.
      * @throws IllegalArgumentException if {@code keyColumnNames} is null or empty; a specified column name is null or unknown; a column selection
      *         contains duplicate names; {@code keyExtractor} is null.
@@ -8050,7 +8109,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns to group by.
-     * @param keyExtractor the function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor the function to generate the key for grouping. It takes a DisposableObjArray containing the selected key-column values and returns a key object.
      * @param aggregateOnColumnName the name of the column on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null} or empty. It must be different from all the key column names.
      * @param collector the collector that defines the aggregate operation.
@@ -8082,7 +8141,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns to group by.
-     * @param keyExtractor the function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor the function to generate the key for grouping. It takes a DisposableObjArray containing the selected key-column values and returns a key object.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null} or empty. It must be different from all the key column names.
      * @param rowType the class of the row type. It must be one of the supported types - Object[], Collection, Map, or Bean class.
@@ -8094,8 +8153,8 @@ public sealed interface Dataset permits RowDataset {
      * @throws ArrayStoreException if a selected value is not assignable to the component type of a requested object-array row.
      * @throws NullPointerException if a constructed destination collection or map rejects a null cell value.
      * @throws ClassCastException if a constructed destination rejects the cell type or a registered row factory returns the wrong representation.
-     * @throws UnsupportedOperationException if a destination collection or map does not support insertion, or a nested property does not identify a
-     *         supported bean.
+     * @throws UnsupportedOperationException if a row bean has no usable builder or constructor, a selected read-only property cannot accept its value,
+     *         a selected nested property has a non-bean parent, or a destination collection or map does not support insertion
      * @throws RuntimeException if row construction, bean conversion, or reflective property access fails, or key extraction fails while grouping a
      *         row.
      * @see #groupBy(Collection)
@@ -8121,7 +8180,7 @@ public sealed interface Dataset permits RowDataset {
      * }</pre>
      *
      * @param keyColumnNames the names of the columns to group by.
-     * @param keyExtractor the function to generate the key for grouping. It takes an array of objects (the row) and returns a key object.
+     * @param keyExtractor the function to generate the key for grouping. It takes a DisposableObjArray containing the selected key-column values and returns a key object.
      * @param aggregateOnColumnNames the names of the columns on which the aggregate operation is to be performed.
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate operation. Must not be {@code null} or empty. It must be different from all the key column names.
      * @param collector the collector that defines the aggregate operation.
@@ -9009,7 +9068,7 @@ public sealed interface Dataset permits RowDataset {
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate
      *        operation. Must not be {@code null} or empty, and must not be one of {@code keyColumnNames} - like every
      *        other argument here, that is checked when this method is called, not when the Stream is consumed.
-     * @param rowType the class of the row type that defines the aggregate operation. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @param rowType the class of each aggregated row collected into the list stored in the new column. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of Datasets, each representing a level of the rollup operation, from most detailed to grand total. Arguments are validated when this method is called, before the Stream is returned.
      * @throws IllegalArgumentException if {@code keyColumnNames} is null or empty; a specified column name is null or unknown; a column selection
      *         contains duplicate names; {@code aggregateOnColumnNames} is null or empty; {@code aggregateResultColumnName} is null, empty, or
@@ -9395,7 +9454,7 @@ public sealed interface Dataset permits RowDataset {
      * <br />
      * This method returns a Stream of Datasets, where each Dataset represents a level of the cube operation.
      * The results of the aggregation are stored in a new column in each of these Datasets.
-     * The type of the new column is defined by the provided Class.
+     * Each cell in the new column holds a list of aggregated rows of the provided row type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9422,7 +9481,7 @@ public sealed interface Dataset permits RowDataset {
      * @param aggregateResultColumnName the name of the new column that will store the result of the aggregate
      *        operation. Must not be {@code null} or empty, and must not be one of {@code keyColumnNames} - like every
      *        other argument here, that is checked when this method is called, not when the Stream is consumed.
-     * @param rowType the Class defining the type of the new column. It must be one of the supported types - Object[], Collection, Map, or Bean class.
+     * @param rowType the class of each aggregated row collected into the list stored in the new column. It must be one of the supported types - Object[], Collection, Map, or Bean class.
      * @return a Stream of Datasets, each representing a level of the cube operation. Arguments are validated when this method is called, before the Stream is returned.
      * @throws IllegalArgumentException if {@code keyColumnNames} is null or empty; a specified column name is null or unknown; a column selection
      *         contains duplicate names; {@code aggregateOnColumnNames} is null or empty; {@code aggregateResultColumnName} is null, empty, or
@@ -9847,6 +9906,11 @@ public sealed interface Dataset permits RowDataset {
      * providing a multidimensional analysis.
      * <br />
      * This method returns a Sheet, where each cell represents an aggregation result.
+     * Grouping compares array keys by content and retains the first original key of each group. The returned
+     * Sheet uses standard Java key equality, so raw array keys match by identity. Obtain those retained keys
+     * from {@link Sheet#rowKeySet()} and {@link Sheet#columnKeySet()}, or supply {@link Wrapper#of(Object)}
+     * keys in this Dataset when content-based lookup is required on the result.
+     * <br />
      * The keyColumnName is used as the row identifier in the resulting Sheet.
      * The pivotColumnName is used as the column identifier in the resulting Sheet.
      * The aggregateOnColumnName is the name of the column on which the aggregate operation is to be performed.
@@ -9913,6 +9977,11 @@ public sealed interface Dataset permits RowDataset {
      * providing a multidimensional analysis.
      * <br />
      * This method returns a Sheet, where each cell represents an aggregation result.
+     * Grouping compares array keys by content and retains the first original key of each group. The returned
+     * Sheet uses standard Java key equality, so raw array keys match by identity. Obtain those retained keys
+     * from {@link Sheet#rowKeySet()} and {@link Sheet#columnKeySet()}, or supply {@link Wrapper#of(Object)}
+     * keys in this Dataset when content-based lookup is required on the result.
+     * <br />
      * The keyColumnName is used as the row identifier in the resulting Sheet.
      * The pivotColumnName is used as the column identifier in the resulting Sheet.
      * The aggregateOnColumnNames are the columns on which the aggregate operation is to be performed.
@@ -9981,6 +10050,11 @@ public sealed interface Dataset permits RowDataset {
      * providing a multidimensional analysis.
      * <br />
      * This method returns a Sheet, where each cell represents an aggregation result.
+     * Grouping compares array keys by content and retains the first original key of each group. The returned
+     * Sheet uses standard Java key equality, so raw array keys match by identity. Obtain those retained keys
+     * from {@link Sheet#rowKeySet()} and {@link Sheet#columnKeySet()}, or supply {@link Wrapper#of(Object)}
+     * keys in this Dataset when content-based lookup is required on the result.
+     * <br />
      * The keyColumnName is used as the row identifier in the resulting Sheet.
      * The pivotColumnName is used as the column identifier in the resulting Sheet.
      * The aggregateOnColumnNames are the columns on which the aggregate operation is to be performed.
@@ -10087,15 +10161,15 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnName the name of the column to be used for sorting.
      * @param cmp the Comparator to determine the order of the elements.
+     * @throws IllegalStateException if the dataset is frozen.
      * @throws IllegalArgumentException if a specified column name is null or unknown; {@code cmp} is null; the sorting algorithm detects an ordering
      *         that violates the comparator contract.
-     * @throws IllegalStateException if the dataset is frozen.
      * @throws ClassCastException if compared non-null cell values or extracted keys are not mutually comparable under the selected ordering.
      * @throws NullPointerException if a comparison is reached with a null value and the supplied comparator does not support it.
      * @throws RuntimeException if the supplied comparator throws when invoked to determine row order.
      */
     void sortBy(String columnName, Comparator<?> cmp)
-            throws IllegalArgumentException, IllegalStateException, ClassCastException, NullPointerException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, ClassCastException, NullPointerException, RuntimeException;
 
     /**
      * Sorts the Dataset based on the specified collection of column names.
@@ -10138,16 +10212,16 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnNames the collection of column names to be used for sorting.
      * @param cmp the Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @throws IllegalStateException if the dataset is frozen.
      * @throws IllegalArgumentException if a specified column name is null or unknown; {@code columnNames} is null, contains duplicate names, or is
      *         empty while the dataset has columns; {@code cmp} is null; the sorting algorithm detects an ordering that violates the comparator
      *         contract.
-     * @throws IllegalStateException if the dataset is frozen.
      * @throws ClassCastException if compared non-null cell values or extracted keys are not mutually comparable under the selected ordering.
      * @throws NullPointerException if a comparison is reached with a null value and the supplied comparator does not support it.
      * @throws RuntimeException if the supplied comparator throws when invoked to determine row order.
      */
     void sortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp)
-            throws IllegalArgumentException, IllegalStateException, ClassCastException, NullPointerException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, ClassCastException, NullPointerException, RuntimeException;
 
     /**
      * Sorts the Dataset based on the specified column names and a key mapper function.
@@ -10174,16 +10248,16 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnNames the names of the columns to be used for sorting. The order of the column names determines the order of the elements in the DisposableObjArray passed to the key mapper function.
      * @param keyExtractor a function that takes a DisposableObjArray representing a row of the Dataset and returns a Comparable object that is used for sorting.
+     * @throws IllegalStateException if the dataset is frozen.
      * @throws IllegalArgumentException if a specified column name is null or unknown; {@code columnNames} is null, contains duplicate names, or is
      *         empty while the dataset has columns; {@code keyExtractor} is null; the sorting algorithm detects an ordering that violates the
      *         comparator contract.
-     * @throws IllegalStateException if the dataset is frozen.
      * @throws ClassCastException if compared non-null cell values or extracted keys are not mutually comparable under the selected ordering.
      * @throws RuntimeException if the supplied key extractor throws when invoked to determine row order.
      */
     @SuppressWarnings("rawtypes")
     void sortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyExtractor)
-            throws IllegalArgumentException, IllegalStateException, ClassCastException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, ClassCastException, RuntimeException;
 
     /**
      * Sorts the Dataset with multi-threads based on the specified column name.
@@ -10223,15 +10297,15 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnName the name of the column to be used for sorting.
      * @param cmp the Comparator to determine the order of the elements.
+     * @throws IllegalStateException if the dataset is frozen.
      * @throws IllegalArgumentException if a specified column name is null or unknown; {@code cmp} is null; the sorting algorithm detects an ordering
      *         that violates the comparator contract.
-     * @throws IllegalStateException if the dataset is frozen.
      * @throws ClassCastException if compared non-null cell values or extracted keys are not mutually comparable under the selected ordering.
      * @throws NullPointerException if a comparison is reached with a null value and the supplied comparator does not support it.
      * @throws RuntimeException if the supplied comparator throws when invoked to determine row order.
      */
     void parallelSortBy(String columnName, Comparator<?> cmp)
-            throws IllegalArgumentException, IllegalStateException, ClassCastException, NullPointerException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, ClassCastException, NullPointerException, RuntimeException;
 
     /**
      * Sorts the Dataset with multi-threads based on the specified collection of column names.
@@ -10273,16 +10347,16 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnNames the collection of column names to be used for sorting.
      * @param cmp the Comparator to determine the order of the elements. It compares Object arrays, each representing a row.
+     * @throws IllegalStateException if the dataset is frozen.
      * @throws IllegalArgumentException if a specified column name is null or unknown; {@code columnNames} is null, contains duplicate names, or is
      *         empty while the dataset has columns; {@code cmp} is null; the sorting algorithm detects an ordering that violates the comparator
      *         contract.
-     * @throws IllegalStateException if the dataset is frozen.
      * @throws ClassCastException if compared non-null cell values or extracted keys are not mutually comparable under the selected ordering.
      * @throws NullPointerException if a comparison is reached with a null value and the supplied comparator does not support it.
      * @throws RuntimeException if the supplied comparator throws when invoked to determine row order.
      */
     void parallelSortBy(Collection<String> columnNames, Comparator<? super Object[]> cmp)
-            throws IllegalArgumentException, IllegalStateException, ClassCastException, NullPointerException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, ClassCastException, NullPointerException, RuntimeException;
 
     /**
      * Sorts the Dataset with multi-threads based on the specified column names and a key mapper function.
@@ -10306,16 +10380,16 @@ public sealed interface Dataset permits RowDataset {
      *
      * @param columnNames the names of the columns to be used for sorting. The order of the column names determines the order of the elements in the DisposableObjArray passed to the key mapper function.
      * @param keyExtractor a function that takes a DisposableObjArray representing a row of the Dataset and returns a Comparable object that is used for sorting.
+     * @throws IllegalStateException if the dataset is frozen.
      * @throws IllegalArgumentException if a specified column name is null or unknown; {@code columnNames} is null, contains duplicate names, or is
      *         empty while the dataset has columns; {@code keyExtractor} is null; the sorting algorithm detects an ordering that violates the
      *         comparator contract.
-     * @throws IllegalStateException if the dataset is frozen.
      * @throws ClassCastException if compared non-null cell values or extracted keys are not mutually comparable under the selected ordering.
      * @throws RuntimeException if the supplied key extractor throws when invoked to determine row order.
      */
     @SuppressWarnings("rawtypes")
     void parallelSortBy(Collection<String> columnNames, Function<? super DisposableObjArray, ? extends Comparable> keyExtractor)
-            throws IllegalArgumentException, IllegalStateException, ClassCastException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, ClassCastException, RuntimeException;
 
     /**
      * Returns the top <i>n</i> rows from the Dataset based on the values in the specified column.
@@ -10644,12 +10718,12 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param filter the predicate to apply to each row within the specified range. It takes an instance of DisposableObjArray, which represents a row in the Dataset.
      * @return a new Dataset containing only the rows within the specified range that satisfy the provided predicate.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on the provided predicate, within the specified row index range, and limits the number of results.
@@ -10669,12 +10743,12 @@ public sealed interface Dataset permits RowDataset {
      * @param filter the predicate to apply to each row within the specified range. It takes an instance of DisposableObjArray, which represents a row in the Dataset.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows within the specified range that satisfy the provided predicate, up to the specified maximum limit.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}, or {@code max < 0}.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}, or {@code max < 0}.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Predicate<? super DisposableObjArray> filter, int max)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on the provided BiPredicate and the specified column names.
@@ -10737,12 +10811,12 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a Tuple2 containing the names of the two columns to be used in the BiPredicate.
      * @param filter the BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @return a new Dataset containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns, within the specified row index range.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}, {@code columnNames} is {@code null}, or a selected column does not exist.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}, {@code columnNames} is {@code null}, or a selected column does not exist.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on the provided BiPredicate and the specified column names, within the given row index range and limits the number of results.
@@ -10763,13 +10837,13 @@ public sealed interface Dataset permits RowDataset {
      * @param filter the BiPredicate to apply to each pair of values from the specified columns. It takes two instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows where the provided BiPredicate returns {@code true} for the pair of values from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code filter} is {@code null}, {@code columnNames} is {@code null}, or a selected column does not exist,
      *         or {@code max < 0}.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Tuple2<String, String> columnNames, BiPredicate<?, ?> filter, int max)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on a provided TriPredicate and the specified column names.
@@ -10832,12 +10906,12 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a Tuple3 containing the names of the three columns to be used in the TriPredicate.
      * @param filter the TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @return a new Dataset containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns, within the specified row index range.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}, {@code columnNames} is {@code null}, or a selected column does not exist.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}, {@code columnNames} is {@code null}, or a selected column does not exist.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on a provided TriPredicate and the specified column names, within a specified row index range and a maximum limit.
@@ -10858,13 +10932,13 @@ public sealed interface Dataset permits RowDataset {
      * @param filter the TriPredicate to apply to each triplet of values from the specified columns. It takes three instances of Objects, which represent the values in the Dataset's row for the specified columns.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows where the provided TriPredicate returns {@code true} for the triplet of values from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code filter} is {@code null}, {@code columnNames} is {@code null}, or a selected column does not exist,
      *         or {@code max < 0}.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Tuple3<String, String, String> columnNames, TriPredicate<?, ?, ?> filter, int max)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on a provided Predicate and the specified column name.
@@ -10922,12 +10996,12 @@ public sealed interface Dataset permits RowDataset {
      * @param columnName the name of the column to be used in the Predicate.
      * @param filter the Predicate to apply to each value from the specified column. It takes an instance of Object, which represents the value in the Dataset's row for the specified column.
      * @return a new Dataset containing only the rows within the specified range where the provided Predicate returns {@code true} for the value from the specified column.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}, or {@code columnName} does not exist.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}, or {@code columnName} does not exist.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on a provided predicate function.
@@ -10948,12 +11022,12 @@ public sealed interface Dataset permits RowDataset {
      * @param filter the predicate function to apply to each row of the specified column. It takes an instance of the column's value type and returns a boolean.
      * @param max the maximum number of rows to include in the resulting Dataset.
      * @return a new Dataset containing only the rows that satisfy the predicate, up to the specified maximum limit.
-     * @throws IllegalArgumentException if {@code filter} is {@code null}, or {@code columnName} does not exist, or {@code max < 0}.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code filter} is {@code null}, or {@code columnName} does not exist, or {@code max < 0}.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, String columnName, Predicate<?> filter, int max)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on a provided predicate function.
@@ -11020,13 +11094,13 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames a collection of column names whose values will be used as input for the predicate function.
      * @param filter the predicate function to apply to each row of the specified columns. It takes an instance of DisposableObjArray (which represents the values of the specified columns in a row) and returns a boolean.
      * @return a new Dataset containing only the rows that satisfy the predicate.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code filter} is {@code null}, or {@code columnNames} is {@code null}, is empty while this Dataset has
      *         columns, contains an unknown column name, or selects the same column more than once.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Filters the rows of the Dataset based on the provided Predicate and the specified column names, within the given row index range and limits the number of results.
@@ -11047,13 +11121,13 @@ public sealed interface Dataset permits RowDataset {
      * @param filter the Predicate to apply to each DisposableObjArray from the specified columns. It takes an instance of DisposableObjArray, which represents the values in the Dataset's row for the specified columns.
      * @param max the maximum number of rows to include in the returned Dataset.
      * @return a new Dataset containing only the rows where the provided Predicate returns {@code true} for the DisposableObjArray from the specified columns, within the specified row index range and up to the specified maximum limit.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code filter} is {@code null}, or {@code columnNames} is {@code null}, is empty while this Dataset has
      *         columns, contains an unknown column name, or selects the same column more than once, or {@code max < 0}.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if {@code filter} throws an unchecked exception while evaluating a row.
      */
     Dataset filter(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Predicate<? super DisposableObjArray> filter, int max)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Transforms the Dataset by applying a mapping function to the specified column and creating a new column with the results.
@@ -11416,7 +11490,7 @@ public sealed interface Dataset permits RowDataset {
      * @param right the Dataset to join with.
      * @param onColumnNames a map where the key is the column name in this Dataset and the value is the column name in the right Dataset to join on. Must not be {@code null} or empty.
      * @param newColumnName the name of the new column to be added to the resulting Dataset.
-     * @param newColumnType the type of the new column. It must be Object[], Collection, Map, or Bean class.
+     * @param newColumnType the type of each right-hand row stored in the new column's collection. It must be Object[], Collection, Map, or Bean class.
      * @param collSupplier a function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
      * @return a new Dataset that is the result of the inner join operation.
      * @throws IllegalArgumentException if {@code right} is {@code null} or a join column is absent from its corresponding Dataset, or {@code
@@ -11525,7 +11599,7 @@ public sealed interface Dataset permits RowDataset {
      * @param right the other Dataset to join with.
      * @param onColumnNames a map where the key is the column name in this Dataset to join on, and the value is the column name in the other Dataset to join on. Must not be {@code null} or empty.
      * @param newColumnName the name of the new column to be added to the resulting Dataset.
-     * @param newColumnType the type of the new column to be added to the resulting Dataset. It must be Object[], Collection, Map, or Bean class.
+     * @param newColumnType the type of each right-hand row stored in the new column's collection. It must be Object[], Collection, Map, or Bean class.
      * @param collSupplier a function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
      * @return a new Dataset that is the result of the left join operation.
      * @throws IllegalArgumentException if {@code right} is {@code null} or a join column is absent from its corresponding Dataset, or {@code
@@ -11637,7 +11711,7 @@ public sealed interface Dataset permits RowDataset {
      * @param right the other Dataset to join with.
      * @param onColumnNames a map where the key is the column name in this Dataset to join on, and the value is the column name in the other Dataset to join on. Must not be {@code null} or empty.
      * @param newColumnName the name of the new column to be added to the resulting Dataset.
-     * @param newColumnType the type of the new column to be added to the resulting Dataset. It must be Object[], Collection, Map, or Bean class.
+     * @param newColumnType the type of each right-hand row stored in the new column's collection. It must be Object[], Collection, Map, or Bean class.
      * @param collSupplier a function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
      * @return a new Dataset that is the result of the right join operation, with the additional column.
      * @throws IllegalArgumentException if {@code right} is {@code null} or a join column is absent from its corresponding Dataset, or {@code
@@ -11743,7 +11817,7 @@ public sealed interface Dataset permits RowDataset {
      * @param right the other Dataset to join with.
      * @param onColumnNames a map where the key is the column name in this Dataset to join on, and the value is the column name in the other Dataset to join on. Must not be {@code null} or empty.
      * @param newColumnName the name of the new column to be added to the resulting Dataset.
-     * @param newColumnType the type of the new column to be added to the resulting Dataset. It must be Object[], Collection, Map, or Bean class.
+     * @param newColumnType the type of each right-hand row stored in the new column's collection. It must be Object[], Collection, Map, or Bean class.
      * @param collSupplier a function that generates a collection to hold the joined rows for the new column for one-many or many-many mapping.
      * @return a new Dataset that is the result of the full join operation.
      * @throws IllegalArgumentException if {@code right} is {@code null} or a join column is absent from its corresponding Dataset, or {@code
@@ -12363,6 +12437,7 @@ public sealed interface Dataset permits RowDataset {
      * Creates a new Dataset that is a copy of the current Dataset.
      * <br />
      * The rows and columns in the resulting Dataset will be in the same order as in the original Dataset.
+     * The copy has independent table storage but shallowly shares cell values and property values with the original.
      * The frozen status of the copy will always be {@code false}, even if the original {@code Dataset} is frozen.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12379,6 +12454,7 @@ public sealed interface Dataset permits RowDataset {
      * Creates a new Dataset that is a copy of the current Dataset from the specified <i>fromRowIndex</i> to <i>toRowIndex</i>.
      * <br />
      * The rows and columns in the resulting Dataset will be in the same order as in the original Dataset.
+     * The copy has independent table storage but shallowly shares cell values and property values with the original.
      * The frozen status of the copy will always be {@code false}, even if the original {@code Dataset} is frozen.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12398,6 +12474,7 @@ public sealed interface Dataset permits RowDataset {
      * Creates a new Dataset that is a copy of the current Dataset with only the columns specified in the <i>columnNames</i> collection.
      * <br />
      * The rows in the resulting Dataset will be in the same order as in the original Dataset.
+     * The copy has independent table storage but shallowly shares cell values and property values with the original.
      * The frozen status of the copy will always be {@code false}, even if the original {@code Dataset} is frozen.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12417,6 +12494,7 @@ public sealed interface Dataset permits RowDataset {
      * Creates a new Dataset that is a copy of the current Dataset from the specified <i>fromRowIndex</i> to <i>toRowIndex</i> with only the columns specified in the <i>columnNames</i> collection.
      * <br />
      * The rows in the resulting Dataset will be in the same order as in the original Dataset.
+     * The copy has independent table storage but shallowly shares cell values and property values with the original.
      * The frozen status of the copy will always be {@code false}, even if the original {@code Dataset} is frozen.
      *
      * <p><b>Usage Examples:</b></p>
@@ -12429,11 +12507,11 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the copy, exclusive.
      * @param columnNames the collection of column names to be included in the copy.
      * @return a new Dataset that is a copy of the current Dataset from <i>fromRowIndex</i> to <i>toRowIndex</i> with only the columns specified in the <i>columnNames</i> collection.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code columnNames} is {@code null}, is empty while this Dataset has columns, contains an unknown column
      *         name, or selects the same column more than once.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      */
-    Dataset copy(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IllegalArgumentException, IndexOutOfBoundsException;
+    Dataset copy(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Creates a deep copy of the current Dataset using Kryo serialization.
@@ -12831,13 +12909,13 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param rowSupplier a function that creates a new instance of {@code T} for each row in the Dataset.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code rowSupplier} is null, its initial invocation returns null, or its initial result is an object array
      *         shorter than the selected column count.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the initial invocation of {@code rowSupplier}, performed while creating the stream, throws an unchecked exception.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntFunction<? extends T> rowSupplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Creates a Stream of objects of type {@code T} from the Dataset.
@@ -12894,14 +12972,14 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames the collection of column names to be included in the instances created by rowSupplier.
      * @param rowSupplier a function that creates a new instance of {@code T} for each row in the Dataset.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code rowSupplier} is null, its initial invocation returns null, or its initial result is an object array
      *         shorter than the selected column count, or {@code columnNames} is {@code null}, is empty while this Dataset has columns, contains an
      *         unknown column name, or selects the same column more than once.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws RuntimeException if the initial invocation of {@code rowSupplier}, performed while creating the stream, throws an unchecked exception.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, IntFunction<? extends T> rowSupplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Creates a Stream of objects of type {@code T} from the Dataset.
@@ -12938,11 +13016,11 @@ public sealed interface Dataset permits RowDataset {
      * @param prefixAndFieldNameMap the map of prefixes and field names to be used for mapping Dataset's columns to the fields of the {@code rowType}.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Bean class.
      * @return a Stream of objects of type T, created from the subset of rows in the Dataset.
-     * @throws IllegalArgumentException if {@code rowType} is null or is not a bean class.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code rowType} is null or is not a bean class.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Map<String, String> prefixAndFieldNameMap, Class<? extends T> rowType)
-            throws IllegalArgumentException, IndexOutOfBoundsException;
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Creates a Stream of objects of type {@code T} converted from rows in the Dataset.
@@ -12984,12 +13062,12 @@ public sealed interface Dataset permits RowDataset {
      * @param prefixAndFieldNameMap the map of prefixes and field names to be used for mapping Dataset's columns to the fields of the {@code rowType}.
      * @param rowType the class of the objects in the resulting Stream. It must be one of the supported types - Bean class.
      * @return a Stream of objects of type T.
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if {@code rowType} is null or is not a bean class, or {@code columnNames} is {@code null}, is empty while this
      *         Dataset has columns, contains an unknown column name, or selects the same column more than once.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Map<String, String> prefixAndFieldNameMap,
-            Class<? extends T> rowType) throws IllegalArgumentException, IndexOutOfBoundsException;
+            Class<? extends T> rowType) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Creates a Stream of objects of type {@code T} by applying the provided rowMapper function to each row in the Dataset.
@@ -13042,11 +13120,11 @@ public sealed interface Dataset permits RowDataset {
      * @param rowMapper a function that takes an integer and a DisposableObjArray as input and produces an object of type T.
      *                  The integer represents the index of the row in the Dataset, and the DisposableObjArray represents the row itself.
      * @return a Stream of objects of type T, created by applying the rowMapper function to each row in the Dataset.
-     * @throws IllegalArgumentException if {@code rowMapper} is null.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if {@code rowMapper} is null.
      */
     <T> Stream<T> stream(int fromRowIndex, int toRowIndex, IntObjFunction<? super DisposableObjArray, ? extends T> rowMapper)
-            throws IllegalArgumentException, IndexOutOfBoundsException;
+            throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Creates a Stream of objects of type {@code T} by applying the provided rowMapper function to each row in the Dataset.
@@ -13259,6 +13337,7 @@ public sealed interface Dataset permits RowDataset {
      * @param func the function to apply to the Dataset. This function should take a Dataset as input and return a result of type R.
      * @return an Optional containing the result of applying the provided function to the Dataset, or an empty Optional if the Dataset is empty.
      * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws NullPointerException if the function returns {@code null}
      * @throws E if {@code func} throws an exception when invoked for this nonempty Dataset.
      */
     <R, E extends Exception> Optional<R> applyIfNotEmpty(Throwables.Function<? super Dataset, ? extends R, E> func) throws IllegalArgumentException, E;
@@ -13563,13 +13642,13 @@ public sealed interface Dataset permits RowDataset {
      * @param fromRowIndex the starting index of the row range (inclusive).
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be printed; if {@code null} or empty, no columns are printed
-     * @throws IllegalArgumentException if a nonempty {@code columnNames} selection contains an unknown or duplicate column name.
      * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
+     * @throws IllegalArgumentException if a nonempty {@code columnNames} selection contains an unknown or duplicate column name.
      * @throws RuntimeException if converting a selected cell to text fails.
      * @see #println()
      * @see #println(String)
      */
-    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+    void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames) throws IndexOutOfBoundsException, IllegalArgumentException, RuntimeException;
 
     /**
      * Prints the Dataset to the provided Appendable.
@@ -13607,16 +13686,16 @@ public sealed interface Dataset permits RowDataset {
      * @param toRowIndex the ending index of the row range (exclusive).
      * @param columnNames the collection of column names to be printed; if {@code null} or empty, no columns are printed
      * @param output the appendable where the Dataset will be printed
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if a nonempty {@code columnNames} selection contains an unknown or duplicate column name, or {@code output} is
      *         {@code null}.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws UncheckedIOException if appending the formatted table to {@code output}, or flushing a writer, throws an {@link java.io.IOException}.
      * @throws RuntimeException if converting a selected cell to text fails, or the supplied output throws an unchecked exception while appending.
      * @see #println()
      * @see #println(String)
      */
     void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, Appendable output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, UncheckedIOException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Prints a portion of the Dataset to the provided Appendable with a custom prefix.
@@ -13635,16 +13714,16 @@ public sealed interface Dataset permits RowDataset {
      * @param columnNames the collection of column names to be printed; if {@code null} or empty, no columns are printed
      * @param prefix the prefix string to be printed before each line of the Dataset output
      * @param output the appendable where the Dataset will be printed
+     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws IllegalArgumentException if a nonempty {@code columnNames} selection contains an unknown or duplicate column name, or {@code output} is
      *         {@code null}.
-     * @throws IndexOutOfBoundsException if {@code fromRowIndex < 0}, {@code fromRowIndex > toRowIndex}, or {@code toRowIndex > size()}.
      * @throws UncheckedIOException if appending the formatted table to {@code output}, or flushing a writer, throws an {@link java.io.IOException}.
      * @throws RuntimeException if converting a selected cell to text fails, or the supplied output throws an unchecked exception while appending.
      * @see #println()
      * @see #println(String)
      */
     void println(int fromRowIndex, int toRowIndex, Collection<String> columnNames, String prefix, Appendable output)
-            throws IllegalArgumentException, IndexOutOfBoundsException, UncheckedIOException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /** Policy for selected columns that do not map to a bean property. */
     enum MissingPropertyPolicy {

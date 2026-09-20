@@ -657,14 +657,14 @@ public final class HttpHeaders {
      * @throws IllegalArgumentException if {@code headers} is {@code null}.
      */
     public static HttpHeaders wrap(final Map<String, ?> headers) throws IllegalArgumentException {
-        N.checkArgNotNull(headers);
+        N.checkArgNotNull(headers, cs.headers);
 
         return new HttpHeaders(headers);
     }
 
     /**
      * Creates a new {@code HttpHeaders} instance with a copy of the provided headers map.
-     * The headers are copied into a new mutable map.
+     * The headers are copied into a new mutable map; the value objects themselves are shared.
      * Unlike {@link #wrap(Map)}, this method creates a copy rather than using the original map.
      *
      * <p><b>Usage Examples:</b></p>
@@ -681,7 +681,7 @@ public final class HttpHeaders {
      * @throws IllegalArgumentException if {@code headers} is null or contains a null header name.
      */
     public static HttpHeaders copyOf(final Map<String, ?> headers) throws IllegalArgumentException {
-        N.checkArgNotNull(headers);
+        N.checkArgNotNull(headers, cs.headers);
 
         final Map<String, Object> copyMap = newMutableCopyMap(headers);
 
@@ -744,7 +744,8 @@ public final class HttpHeaders {
      * <p>{@code Cookie} is the field whose grammar differs: RFC 6265 &sect;5.4 puts all cookie-pairs of a
      * request on a single {@code Cookie} line separated by {@code "; "}, so a comma-joined value would be a
      * malformed cookie string. All other multiply-valued fields handled here use the {@code ", "} of the
-     * comma-separated list grammar (RFC 9110 &sect;5.6.1).</p>
+     * comma-separated list grammar (RFC 9110 &sect;5.6.1). This method does not validate whether an
+     * arbitrary field permits a list; callers must supply values appropriate for that field.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1082,7 +1083,7 @@ public final class HttpHeaders {
      * <pre>{@code
      * headers.setAcceptEncoding("gzip, br");
      * headers.setAcceptEncoding("gzip");
-     * headers.setAcceptEncoding("*");
+     * // Avoid "*" when relying on this library to decode the response.
      * }</pre>
      *
      * @param acceptEncoding The acceptable encodings (e.g., "gzip, br", "br")
@@ -1433,7 +1434,8 @@ public final class HttpHeaders {
     /**
      * Returns a new map containing all headers.
      * The returned map is a snapshot: later changes to it do not affect this {@code HttpHeaders},
-     * and vice versa. If the backing map is a {@link LinkedHashMap} or a {@link SortedMap}, its
+     * and vice versa. Values are shared references, so mutating a stored value remains visible in both.
+     * If the backing map is a {@link LinkedHashMap} or a {@link SortedMap}, its
      * current iteration order is preserved in the returned {@code LinkedHashMap} (which is not
      * itself sorted, so later insertions are appended); for other backing map types a
      * {@link HashMap} with no order guarantee is returned.

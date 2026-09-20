@@ -21,7 +21,7 @@ import com.landawn.abacus.type.Type;
 
 public class NullValidationRestartParserTest extends TestBase {
     @Test
-    public void typeDescriptorsAreRejectedBeforeSourcesAreOpenedOrRead() {
+    public void requiredInputsAreValidatedBeforeSourcesAreOpenedOrRead() {
         for (final Parser<?, ?> parser : new Parser<?, ?>[] { ParserFactory.createJaxbParser(), ParserFactory.createKryoParser(),
                 ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser(), new XmlParserImpl(XmlParserType.DOM) }) {
             final InputStream unreadableStream = new InputStream() {
@@ -43,11 +43,12 @@ public class NullValidationRestartParserTest extends TestBase {
             };
 
             assertArgument("targetType", () -> parser.deserialize("unused", null, (Type<String>) null));
-            assertArgument("targetType", () -> parser.deserialize((File) null, null, (Type<String>) null));
+            assertArgument("source", () -> parser.deserialize((File) null, null, (Type<String>) null));
+            assertArgument("targetType", () -> parser.deserialize(new File("must-not-open-null-target.xml"), null, (Type<String>) null));
             assertArgument("targetType", () -> parser.deserialize(unreadableStream, null, (Type<String>) null));
             assertArgument("targetType", () -> parser.deserialize(unreadableReader, null, (Type<String>) null));
             assertArgument("targetType", () -> parser.deserialize("unused", (Type<String>) null));
-            assertArgument("targetType", () -> parser.deserialize((File) null, (Type<String>) null));
+            assertArgument("source", () -> parser.deserialize((File) null, (Type<String>) null));
             assertArgument("targetType", () -> parser.deserialize(unreadableStream, (Type<String>) null));
             assertArgument("targetType", () -> parser.deserialize(unreadableReader, (Type<String>) null));
         }
@@ -69,10 +70,14 @@ public class NullValidationRestartParserTest extends TestBase {
     public void avroRequiredTypesAndSourcesUseArgumentValidation() {
         final AvroParser parser = ParserFactory.createAvroParser();
         final InputStream unreadable = new InputStream() {
-            @Override public int read() { throw new AssertionError("Invalid target must be rejected before reading"); }
+            @Override
+            public int read() {
+                throw new AssertionError("Invalid target must be rejected before reading");
+            }
         };
         assertArgument("targetType", () -> parser.deserialize("", (Type<String>) null));
-        assertArgument("targetType", () -> parser.deserialize((File) null, (Type<String>) null));
+        assertArgument("source", () -> parser.deserialize((File) null, (Type<String>) null));
+        assertArgument("targetType", () -> parser.deserialize(new File("must-not-open-null-target.avro"), (Type<String>) null));
         assertArgument("targetType", () -> parser.deserialize(unreadable, (Type<String>) null));
         assertArgument("source", () -> parser.deserialize((InputStream) null, Type.of(String.class)));
         assertNull(parser.deserialize("", Type.of(String.class)));

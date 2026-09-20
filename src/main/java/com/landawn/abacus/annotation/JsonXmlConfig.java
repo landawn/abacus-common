@@ -94,7 +94,9 @@ public @interface JsonXmlConfig {
 
     /**
      * Specifies the date format pattern to use when serializing and deserializing supported
-     * date/time fields. If empty, each field's default ISO-8601 representation is used.
+     * date/time fields. An empty value leaves the field-level format and the type handler's
+     * serialization configuration in effect; it does not force ISO-8601 text. For example,
+     * the default JSON/XML serialization configuration writes legacy date values as epoch milliseconds.
      *
      * <p>Legacy {@link java.util.Date}, {@link java.util.Calendar}, and {@code java.sql} date/time
      * fields use {@link java.text.SimpleDateFormat} pattern syntax. {@code java.time.LocalDateTime},
@@ -113,7 +115,7 @@ public @interface JsonXmlConfig {
      *   <li>{@code "yyyy-MM-dd'T'HH:mm:ss.SSSZ"} for ISO-8601 with milliseconds</li>
      * </ul>
      *
-     * @return the date format pattern, or an empty string for the default ISO-8601 format
+     * @return the date format pattern, or an empty string for no class-level pattern override
      * @see java.text.SimpleDateFormat
      * @see java.time.format.DateTimeFormatter
      */

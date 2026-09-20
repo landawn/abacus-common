@@ -72,8 +72,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Column-selection convention:</b> a {@code null} {@code selectColumnNames}/{@code selectCsvHeaders} means &quot;not specified&quot; and selects ALL columns; an empty collection is an explicit selection of NO columns (a zero-column result). See the library null/empty selection convention.</p>
  *
  * <p><b>Byte-order mark:</b> a UTF-8 BOM at the start of the input is stripped from the header line before it is
- * parsed, so the first column is named {@code "id"} rather than {@code "<U+FEFF>id"}. Files produced by Excel
- * carry such a BOM by default; without this, selecting that column by name failed. Data rows are not scanned for a
+ * parsed, so the first column is named {@code "id"} rather than {@code "<U+FEFF>id"}. A UTF-8 CSV file
+ * may begin with this BOM; without stripping it, selecting that column by name fails. Data rows are not scanned for a
  * BOM, since one can only legitimately appear at the very start of a stream.</p>
  *
  * <p><b>{@code null} fields:</b> CSV has no null token.
@@ -86,9 +86,10 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>File destinations are replaced, never truncated in place.</b> Every {@code File} sink of
  * {@code csvToJson}/{@code jsonToCsv} (including the {@code CsvConverter} builder) writes to a sibling
- * temporary file and moves it onto the destination only after the conversion succeeds, so a failure - a
- * mistyped column name, malformed input, a full disk - leaves the previous file intact instead of empty or
- * half-written. This needs write access to the destination's directory and transiently uses space for both
+ * temporary file and moves it onto the destination only after writing and closing the new content succeeds.
+ * Failures before replacement leave the previous file intact. Atomic replacement is attempted first;
+ * if unsupported, replacement uses a non-atomic move whose failure may affect the destination.
+ * This needs write access to the destination's directory and transiently uses space for both
  * copies; and because the destination is replaced rather than rewritten, an existing destination's
  * permissions, hard links and (on POSIX) ownership are not carried over, and a destination that is a
  * symbolic link is replaced by a regular file. The {@code Writer} overloads are unaffected: they write
@@ -678,8 +679,9 @@ public final class CsvUtil {
      * records, so a failure on a large source leaves a truncated fragment on disk rather than an empty file -
      * and a truncated CSV still parses, which makes the loss silent.</p>
      *
-     * <p>Writing out of place and moving on success means the destination holds either the previous content or
-     * the complete new content, never a mix. The cost is that the destination is <i>replaced</i> rather than
+     * <p>Writing out of place preserves the previous destination until replacement begins. Atomic replacement
+     * is attempted first; if unsupported, a non-atomic replacement is used, and a failure during that move may
+     * affect the destination. The cost is that the destination is <i>replaced</i> rather than
      * rewritten: its permissions, hard links and (on POSIX) ownership are not carried over, and a destination
      * that is a symbolic link is replaced by a regular file instead of being written through.</p>
      *
@@ -865,6 +867,8 @@ public final class CsvUtil {
      */
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter) throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
 
         try (Reader reader = IOUtil.newFileReader(source)) {
@@ -1016,6 +1020,7 @@ public final class CsvUtil {
     @SuppressFBWarnings("RV_DONT_JUST_NULL_CHECK_READLINE")
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter) throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter); //NOSONAR
 
@@ -1267,7 +1272,10 @@ public final class CsvUtil {
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
+        N.checkArgNotNull(beanClassForColumnType, cs.beanClassForColumnType);
 
         try (Reader reader = IOUtil.newFileReader(source)) {
             return load(reader, selectColumnNames, offset, count, rowFilter, beanClassForColumnType);
@@ -1445,6 +1453,7 @@ public final class CsvUtil {
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Class<?> beanClassForColumnType)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
         N.checkArgNotNull(beanClassForColumnType, cs.beanClassForColumnType);
@@ -1661,7 +1670,12 @@ public final class CsvUtil {
     public static Dataset load(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Map<String, ? extends Type<?>> columnTypeMap)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
+        if (N.isEmpty(columnTypeMap)) {
+            throw new IllegalArgumentException("columnTypeMap cannot be null or empty");
+        }
 
         try (Reader reader = IOUtil.newFileReader(source)) {
             return load(reader, selectColumnNames, offset, count, rowFilter, columnTypeMap);
@@ -1802,6 +1816,7 @@ public final class CsvUtil {
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames, long offset, long count,
             final Predicate<? super String[]> rowFilter, final Map<String, ? extends Type<?>> columnTypeMap)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
 
@@ -2064,6 +2079,8 @@ public final class CsvUtil {
             final Predicate<? super String[]> rowFilter,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
 
@@ -2271,6 +2288,7 @@ public final class CsvUtil {
             final Predicate<? super String[]> rowFilter,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
         N.checkArgNotNull(rowExtractor, cs.rowExtractor);
@@ -2394,7 +2412,6 @@ public final class CsvUtil {
      * }
      * }</pre>
      *
-     *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
      *         Unsupported target/column combinations, unmatched explicitly selected bean properties, and value-conversion failures are reported during
@@ -2433,7 +2450,6 @@ public final class CsvUtil {
      *                                 .collect(Collectors.toList());
      * }
      * }</pre>
-     *
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
@@ -2482,7 +2498,6 @@ public final class CsvUtil {
      * }
      * }</pre>
      *
-     *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
      *         Unsupported target/column combinations, unmatched explicitly selected bean properties, and value-conversion failures are reported during
@@ -2504,7 +2519,10 @@ public final class CsvUtil {
      */
     public static <T> Stream<T> stream(final File source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
+        N.checkArgNotNull(targetType, cs.targetType);
 
         FileReader reader = null;
 
@@ -2540,7 +2558,6 @@ public final class CsvUtil {
      *     stream.forEach(System.out::println);
      * }
      * }</pre>
-     *
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
@@ -2584,7 +2601,6 @@ public final class CsvUtil {
      *     stream.limit(10).forEach(System.out::println);
      * }
      * }</pre>
-     *
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
@@ -2641,7 +2657,6 @@ public final class CsvUtil {
      * <p>The header and line parsers active in the calling thread are captured when this method is
      * invoked. Source opening and row reading remain lazy.</p>
      *
-     *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
      *         A null source reader is also rejected during consumption. Unsupported target/column combinations, unmatched explicitly selected bean
@@ -2665,6 +2680,7 @@ public final class CsvUtil {
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames, final long offset, final long count,
             final Predicate<? super String[]> rowFilter, final Class<? extends T> targetType, final boolean closeReaderWhenStreamIsClosed)
             throws IllegalArgumentException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
         N.checkArgNotNull(targetType, cs.targetType);
@@ -2882,7 +2898,6 @@ public final class CsvUtil {
      * }
      * }</pre>
      *
-     *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
      *         Row-filter and row-mapper exceptions propagate during consumption. Closing an owned reader can also raise {@code UncheckedIOException}.</p>
@@ -2933,7 +2948,6 @@ public final class CsvUtil {
      *     stream.forEach(System.out::println);
      * }
      * }</pre>
-     *
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
@@ -2987,7 +3001,6 @@ public final class CsvUtil {
      * }
      * }</pre>
      *
-     *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
      *         Row-filter and row-mapper exceptions propagate during consumption. Closing an owned reader can also raise {@code UncheckedIOException}.</p>
@@ -3011,6 +3024,8 @@ public final class CsvUtil {
             final Predicate<? super String[]> rowFilter,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper)
             throws IllegalArgumentException, UncheckedIOException {
+        N.checkArgNotNull(source, cs.source);
+        N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
 
@@ -3054,7 +3069,6 @@ public final class CsvUtil {
      *     stream.forEach(System.out::println);
      * }
      * }</pre>
-     *
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
@@ -3104,7 +3118,6 @@ public final class CsvUtil {
      *     stream.forEach(System.out::println);
      * }
      * }</pre>
-     *
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
@@ -3170,7 +3183,6 @@ public final class CsvUtil {
      * <p>The header and line parsers active in the calling thread are captured when this method is
      * invoked. Source opening and row reading remain lazy.</p>
      *
-     *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
      *         A null source reader is also rejected during consumption. Row-filter and row-mapper exceptions propagate during consumption. Closing an
@@ -3195,6 +3207,7 @@ public final class CsvUtil {
             final Predicate<? super String[]> rowFilter,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
             final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
+        N.checkArgNotNull(source, cs.source);
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
         N.checkArgNotNull(rowFilter, cs.rowFilter);
         N.checkArgNotNull(rowMapper, cs.rowMapper);
@@ -3808,8 +3821,8 @@ public final class CsvUtil {
      */
     public static long jsonToCsv(final File jsonFile, final Collection<String> selectCsvHeaders, final File csvFile)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException, NullPointerException, RuntimeException {
-        N.checkArgNotNull(csvFile, cs.csvFile);
         N.checkArgNotNull(jsonFile, cs.jsonFile);
+        N.checkArgNotNull(csvFile, cs.csvFile);
 
         try (Reader jsonReader = IOUtil.newFileReader(jsonFile)) {
             return writeToFileAtomically(csvFile, csvWriter -> jsonToCsv(jsonReader, selectCsvHeaders, csvWriter));
@@ -4738,7 +4751,7 @@ public final class CsvUtil {
          * // Custom extraction with column selection and offset
          * Dataset ds2 = CsvUtil.loader()
          *     .source(new File("large.csv"))
-         *     .selectColumns(Arrays.asList("name", "age"))
+         *     .selectColumns(Arrays.asList("name", "age", "active"))
          *     .offset(500)
          *     .count(100)
          *     .load(extractor);
@@ -4953,7 +4966,7 @@ public final class CsvUtil {
          *     .csvToJson(new File("partial.json"));
          *
          * // Null output file throws IllegalArgumentException
-         * // CsvUtil.converter().source(file).csvToJson(null);
+         * // CsvUtil.converter().source(file).csvToJson((File) null);
          * }</pre>
          *
          * @param outputJsonFile the file to write JSON output to; an existing file is replaced only after the
@@ -5024,7 +5037,7 @@ public final class CsvUtil {
          * }
          *
          * // Null Writer throws IllegalArgumentException
-         * // CsvUtil.converter().source(file).csvToJson(null);
+         * // CsvUtil.converter().source(file).csvToJson((Writer) null);
          *
          * // Missing source throws IllegalArgumentException
          * // CsvUtil.converter().csvToJson(new StringWriter());
@@ -5093,7 +5106,7 @@ public final class CsvUtil {
          * }
          *
          * // Null file throws IllegalArgumentException
-         * // CsvUtil.converter().source(file).jsonToCsv(null);
+         * // CsvUtil.converter().source(file).jsonToCsv((File) null);
          * }</pre>
          *
          * @param outputCsvFile the file to write CSV output to; an existing file is replaced only after the
@@ -5163,7 +5176,7 @@ public final class CsvUtil {
          * }
          *
          * // Null Writer throws IllegalArgumentException
-         * // CsvUtil.converter().source(file).jsonToCsv(null);
+         * // CsvUtil.converter().source(file).jsonToCsv((Writer) null);
          *
          * // Missing source throws IllegalArgumentException
          * // CsvUtil.converter().jsonToCsv(new StringWriter());

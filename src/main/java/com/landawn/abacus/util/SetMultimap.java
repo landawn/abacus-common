@@ -922,7 +922,8 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * are not retained. Other sets use the original set supplier, which must preserve their contents.
      * The original suppliers are retained for future new keys.</p>
      *
-     * <p>Modifications to the returned multimap will not affect the original and vice versa.
+     * <p>Structural modifications to the returned multimap will not affect the original and vice versa.
+     * Keys and individual values are shared references, so changes to those objects remain visible through both multimaps.
      *
      * <p>Every key of this SetMultimap appears in the copy, including a key whose value set is empty
      * (which normal mutators never leave behind, but a caller can create by emptying a set obtained from
@@ -943,11 +944,12 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return a new SetMultimap containing all the key-value pairs of this SetMultimap
      * @throws IllegalArgumentException if a backing value set is null, a factory returns aliased or
      *         nonempty storage, or copying loses distinct source elements
+     * @throws UnsupportedOperationException if a supplied map or set does not support the mutations needed to copy entries
      * @see #putValues(Multimap)
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public SetMultimap<K, E> copy() throws IllegalArgumentException {
+    public SetMultimap<K, E> copy() throws IllegalArgumentException, UnsupportedOperationException {
         final SetMultimap<K, E> copy = new SetMultimap<>(mapSupplier, valueSupplier);
 
         if (copy.backingMap == backingMap) {
@@ -996,7 +998,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * preserves a sorted map's comparator), falling back to {@link HashMap} when necessary. It
      * converts each value set to an {@link ImmutableSet} and wraps the result in an {@link ImmutableMap}.
      *
-     * <p>The returned map and its value sets are completely immutable and cannot be modified.
+     * <p>The returned map and its value sets reject structural changes. Keys and individual values are not deep-copied.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1031,7 +1033,7 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * <p>The provided map supplier allows you to control the type of the underlying map in the returned ImmutableMap
      * (e.g., use a TreeMap for sorted keys, or a LinkedHashMap for insertion-order).
      *
-     * <p>The returned map and its value sets are completely immutable and cannot be modified.
+     * <p>The returned map and its value sets reject structural changes. Keys and individual values are not deep-copied.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1049,9 +1051,13 @@ public final class SetMultimap<K, E> extends Multimap<K, E, Set<E>> {
      * @return an {@link ImmutableMap} where each key from this multimap is associated with an
      *         {@link ImmutableSet} containing all values that were associated with that key
      * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null}.
+     * @throws NullPointerException if a stored key is {@code null} and the supplied map rejects null-key insertion
+     * @throws ClassCastException if a stored key cannot be compared or inserted into the supplied map
+     * @throws UnsupportedOperationException if entries are copied and the supplied map does not support insertion
      * @see #toImmutableMap()
      */
-    public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier) throws IllegalArgumentException {
+    public ImmutableMap<K, ImmutableSet<E>> toImmutableMap(final IntFunction<? extends Map<K, ImmutableSet<E>>> mapSupplier)
+            throws IllegalArgumentException, NullPointerException, ClassCastException, UnsupportedOperationException {
         N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
         final Map<K, ImmutableSet<E>> map = N.checkArgNotNull(mapSupplier.apply(backingMap.size()), "mapSupplier returned null");

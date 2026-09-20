@@ -2760,7 +2760,8 @@ public class ParserUtilTest extends AbstractTest {
         assertTrue(selfJson.contains("fullName"), selfJson);
 
         String[] jsonDocs = { selfJson, "{\"first\": \"Ada\", \"fullName\": \"x\", \"last\": \"Lovelace\"}",
-                "{\"first\": \"Ada\", \"fullName\": null, \"last\": \"Lovelace\"}", "{\"fullName\": {\"nested\": [1, 2]}, \"first\": \"Ada\", \"last\": \"Lovelace\"}",
+                "{\"first\": \"Ada\", \"fullName\": null, \"last\": \"Lovelace\"}",
+                "{\"fullName\": {\"nested\": [1, 2]}, \"first\": \"Ada\", \"last\": \"Lovelace\"}",
                 "{\"first\": \"Ada\", \"last\": \"Lovelace\", \"fullName\": \"\"}" };
 
         for (boolean ignoreUnmatched : new boolean[] { true, false }) {
@@ -2798,7 +2799,6 @@ public class ParserUtilTest extends AbstractTest {
             }
         }
     }
-
 
     public static class EscapedXmlNameBean {
         @JsonXmlField(name = "a&b\"c<d\ne")

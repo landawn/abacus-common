@@ -967,7 +967,6 @@ public class ParallelArrayByteStreamTest extends TestBase {
         assertEquals(2, closedCount.get());
     }
 
-
     @Test
     public void testGroupToRejectsNullDownstreamBeforeMapFactory() {
         final java.util.concurrent.atomic.AtomicBoolean mapCreated = new java.util.concurrent.atomic.AtomicBoolean();

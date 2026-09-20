@@ -42,7 +42,9 @@ import com.landawn.abacus.util.cs;
  *   <li>a public static method taking a single numeric argument that returns the type;</li>
  *   <li>a public single-argument constructor accepting either a {@code String} or a numeric value.</li>
  * </ol>
- * If none of those is found, {@link #valueOf(String)} throws
+ * Copy factories and constructors whose parameter is the handled class itself are excluded: they
+ * require an existing instance and cannot construct one from text. If none of the supported creators
+ * is found, {@link #valueOf(String)} throws
  * {@link UnsupportedOperationException} when called with a non-empty input.
  *
  * @param <T> the specific {@code Number} subclass this type handler manages
@@ -128,6 +130,7 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
                         && Modifier.isStatic(it.getModifiers()) //
                         && typeClass.isAssignableFrom(it.getReturnType()) //
                         && it.getParameterCount() == 1 //
+                        && it.getParameterTypes()[0] != typeClass //
                         && ClassUtil.wrap(valueType).isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0]))).orElse(null);
             } catch (final Exception e) {
                 // ignore
@@ -152,9 +155,11 @@ public class NumberType<T extends Number> extends AbstractPrimaryType<T> {
 
                     constructor = N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                             && it.getParameterCount() == 1 //
+                            && it.getParameterTypes()[0] != typeClass //
                             && (valueType.isAssignableFrom(it.getParameterTypes()[0])))
                             .or(() -> N.findFirst(constructors, it -> Modifier.isPublic(it.getModifiers()) //
                                     && it.getParameterCount() == 1 //
+                                    && it.getParameterTypes()[0] != typeClass //
                                     && (Number.class.isAssignableFrom(ClassUtil.wrap(it.getParameterTypes()[0])))))
                             .orElse(null);
                 } catch (final Exception e) {

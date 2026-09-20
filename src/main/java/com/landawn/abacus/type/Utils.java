@@ -512,11 +512,17 @@ final class Utils {
 
     @FunctionalInterface
     private interface CloseAction {
+        /**
+         * @throws IOException if closing the stream or reader obtained from the JDBC large object fails
+         */
         void close() throws IOException;
     }
 
     @FunctionalInterface
     private interface FreeAction {
+        /**
+         * @throws SQLException if the JDBC driver cannot release the large object's locator resources
+         */
         void free() throws SQLException;
     }
 

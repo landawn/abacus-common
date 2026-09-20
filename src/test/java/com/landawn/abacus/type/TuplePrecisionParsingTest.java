@@ -159,7 +159,7 @@ public class TuplePrecisionParsingTest extends TestBase {
         for (final String name : List.of("Indexed", "Timed")) {
             final Type<?> type = TypeFactory.getType(name + "<BigDecimal>");
             final Type<?> listType = TypeFactory.getType("List<" + name + "<BigDecimal>>");
-            for (final Function<String, Object> parse : List.<Function<String, Object>>of(type::valueOf,
+            for (final Function<String, Object> parse : List.<Function<String, Object>> of(type::valueOf,
                     json -> ((List<?>) parser.deserialize("[" + json + "]", listType)).get(0),
                     json -> ((List<?>) parser.deserialize(new StringReader("[" + json + "]"), listType)).get(0))) {
                 // Metadata uses original integer text in every route; payload decimal scale stays intact.
@@ -171,8 +171,8 @@ public class TuplePrecisionParsingTest extends TestBase {
                     assertThrows(ArithmeticException.class, () -> parse.apply("[" + token + ",1.2300]"));
                     assertThrows(ArithmeticException.class, () -> parse.apply("[\"" + token + "\",1.2300]"));
                 }
-                for (final Map.Entry<String, Long> entry : Map.of("null", 0L, "0", 0L, "\"5\"", 5L, "\"\\u0035\"", 5L,
-                        "9223372036854775807", Long.MAX_VALUE).entrySet()) {
+                for (final Map.Entry<String, Long> entry : Map.of("null", 0L, "0", 0L, "\"5\"", 5L, "\"\\u0035\"", 5L, "9223372036854775807", Long.MAX_VALUE)
+                        .entrySet()) {
                     final Object result = parse.apply("[" + entry.getKey() + ",1.2300]");
                     assertEquals(entry.getValue().longValue(), result instanceof Indexed<?> indexed ? indexed.longIndex() : ((Timed<?>) result).timestamp());
                     assertEquals(new BigDecimal("1.2300"), result instanceof Indexed<?> indexed ? indexed.value() : ((Timed<?>) result).value());

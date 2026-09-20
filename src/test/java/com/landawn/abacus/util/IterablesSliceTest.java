@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -109,6 +110,14 @@ public class IterablesSliceTest extends IterablesTestSupport {
         assertEquals("a", arr[0]);
         assertEquals("b", arr[1]);
         assertEquals("c", arr[2]);
+        assertThrows(NullPointerException.class, () -> slice.toArray((String[]) null));
+        assertThrows(NullPointerException.class, () -> slice.containsAll(null));
+    }
+
+    @Test
+    public void testSlice_NullListIsIllegalArgument() {
+        assertThrows(IllegalArgumentException.class, () -> new Iterables.Slice<>((List<String>) null, 0, 0));
+        assertEquals(0, new Iterables.Slice<>((Collection<String>) null, 0, 0).size());
     }
 
     @Test

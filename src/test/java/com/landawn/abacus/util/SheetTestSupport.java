@@ -1,9 +1,13 @@
 package com.landawn.abacus.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +42,18 @@ public abstract class SheetTestSupport extends AbstractTest {
         intSheet = Sheet.rows(upperRowKeys, colKeys, new Integer[][] { { 11, 12, 13 }, { 21, 22, 23 }, { 31, 32, 33 } });
         sortSheet = Sheet.rows(Arrays.asList("B", "C", "A"), Arrays.asList("Y", "Z", "X"), new Integer[][] { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } });
         stringWriter = new StringWriter();
+    }
+
+    protected static void assertArrayKeyDiagnostic(final String message, final String context, final String... keyDescriptions) {
+        // Keep one exact message per diagnostic family; other overloads protect the information, not the surrounding wording.
+        assertTrue(message.toLowerCase(Locale.ROOT).contains(context.toLowerCase(Locale.ROOT)), message);
+        for (final String keyDescription : keyDescriptions) {
+            assertTrue(message.contains(keyDescription), message);
+        }
+
+        final String identityNote = "array keys match by identity";
+        assertTrue(message.contains(identityNote), message);
+        assertEquals(message.indexOf(identityNote), message.lastIndexOf(identityNote), message);
     }
 
     // L4390: Stream.empty() in columnMajorCells(fromColumnIndex, toColumnIndex) when rowCount == 0

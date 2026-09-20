@@ -153,8 +153,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
-     * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
-     * SQLXML xml = type.get(rs, 1);   // Get XML from first column
+     * try (ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings")) {
+     *     if (rs.next()) {
+     *         SQLXML xml = type.get(rs, 1);   // Get XML from first column
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -175,8 +178,11 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<SQLXML> type = TypeFactory.getType(SQLXML.class);
-     * ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings");
-     * SQLXML xml = type.get(rs, "config_xml");   // Get XML by column name
+     * try (ResultSet rs = statement.executeQuery("SELECT config_xml FROM settings")) {
+     *     if (rs.next()) {
+     *         SQLXML xml = type.get(rs, "config_xml");   // Get XML by column name
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from

@@ -1983,8 +1983,7 @@ public class JsonParserImplTest extends TestBase {
                             });
                             assertTrue(failure.getMessage().contains("nesting depth exceeded 256"));
                         } else {
-                            Object value = useReader ? parser.deserialize(new StringReader(json), null, rootClass)
-                                    : parser.deserialize(json, null, rootClass);
+                            Object value = useReader ? parser.deserialize(new StringReader(json), null, rootClass) : parser.deserialize(json, null, rootClass);
                             // Inspect iteratively: recursive equality would itself depend on the test thread's stack.
                             for (int level = 0; level < depth; level++) {
                                 value = value instanceof Map<?, ?> map ? map.get("a") : ((List<?>) value).get(0);
@@ -2016,8 +2015,7 @@ public class JsonParserImplTest extends TestBase {
                         parser.deserialize(rejected, null, type);
                     }
                 });
-                final List<?> values = useReader ? parser.deserialize(new StringReader(accepted), null, type)
-                        : parser.deserialize(accepted, null, type);
+                final List<?> values = useReader ? parser.deserialize(new StringReader(accepted), null, type) : parser.deserialize(accepted, null, type);
                 assertEquals(1, values.size());
                 Object value = values.get(0);
                 if (value instanceof com.landawn.abacus.util.u.Optional<?> optional) {
@@ -2610,11 +2608,13 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("{\"num\": 0, \"lng\": 0, \"dbl\": 0.0, \"bd\": 0, \"str\": \"\", \"flag\": false, \"date\": null, \"list\": null, \"chars\": null}",
                 parser.serialize(bean, all));
 
-        assertEquals("{\"num\": null, \"lng\": null, \"dbl\": null, \"bd\": null, \"str\": \"\", \"flag\": null, \"date\": null, \"list\": null, \"chars\": null}",
+        assertEquals(
+                "{\"num\": null, \"lng\": null, \"dbl\": null, \"bd\": null, \"str\": \"\", \"flag\": null, \"date\": null, \"list\": null, \"chars\": null}",
                 parser.serialize(bean, JsonSerConfig.create().setExclusion(Exclusion.NONE).setWriteNullStringAsEmpty(true)));
         assertEquals("{\"num\": 0, \"lng\": 0, \"dbl\": 0.0, \"bd\": 0, \"str\": null, \"flag\": null, \"date\": null, \"list\": null, \"chars\": null}",
                 parser.serialize(bean, JsonSerConfig.create().setExclusion(Exclusion.NONE).setWriteNullNumberAsZero(true)));
-        assertEquals("{\"num\": null, \"lng\": null, \"dbl\": null, \"bd\": null, \"str\": null, \"flag\": false, \"date\": null, \"list\": null, \"chars\": null}",
+        assertEquals(
+                "{\"num\": null, \"lng\": null, \"dbl\": null, \"bd\": null, \"str\": null, \"flag\": false, \"date\": null, \"list\": null, \"chars\": null}",
                 parser.serialize(bean, JsonSerConfig.create().setExclusion(Exclusion.NONE).setWriteNullBooleanAsFalse(true)));
 
         // writeNullToEmpty keeps precedence for the types that have an empty form; the others still take the flags
@@ -2707,8 +2707,10 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("{\"1E+3\": 1E+3}", parser.serialize(decimals));
 
         // unaffected key types keep the old rendering
-        assertEquals("{\"a\": 1, \"2\": 2, \"true\": 3}", parser.serialize(reviewFixes20260906_lhm("a", 1, 2, 2, true, 3), JsonSerConfig.create().setWriteLongAsString(true)));
-        assertEquals("{\"a\": 1, 2: 2, true: 3}", parser.serialize(reviewFixes20260906_lhm("a", 1, 2, 2, true, 3), JsonSerConfig.create().setQuoteMapKey(false)));
+        assertEquals("{\"a\": 1, \"2\": 2, \"true\": 3}",
+                parser.serialize(reviewFixes20260906_lhm("a", 1, 2, 2, true, 3), JsonSerConfig.create().setWriteLongAsString(true)));
+        assertEquals("{\"a\": 1, 2: 2, true: 3}",
+                parser.serialize(reviewFixes20260906_lhm("a", 1, 2, 2, true, 3), JsonSerConfig.create().setQuoteMapKey(false)));
     }
 
     @Test
@@ -2892,7 +2894,6 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[1]abc", List.class));
     }
 
-
     // ------------------------------------------------------------------ self-review 2026-09-07 (R1): the
     // deserialization-side findings P2-01..P2-16 / T2-09 landed in r9486 with no test of their own.
 
@@ -2933,8 +2934,8 @@ public class JsonParserImplTest extends TestBase {
         final Type<Object> mapType = Type.of(Map.class);
         final Type<List<Object>> listOfMap = Type.of("List<Map<String, Object>>");
 
-        for (final String json : new String[] { "[null]", "[null,null]", "[{\"a\":1},null]", "[null,{\"a\":1}]",
-                "[{\"a\":1},null,{\"b\":2}]", "[ null ]", "[{\"a\":1},null,null]", "[]", "[{\"a\":1}]" }) {
+        for (final String json : new String[] { "[null]", "[null,null]", "[{\"a\":1},null]", "[null,{\"a\":1}]", "[{\"a\":1},null,{\"b\":2}]", "[ null ]",
+                "[{\"a\":1},null,null]", "[]", "[{\"a\":1}]" }) {
             final List<Object> expected = parser.deserialize(json, listOfMap);
             assertEquals(expected, parser.stream(json, mapType).toList(), json);
             assertEquals(expected, parser.stream(new StringReader(json), true, mapType).toList(), json);
@@ -3016,18 +3017,15 @@ public class JsonParserImplTest extends TestBase {
                 reviewFixes20260907_ds(parser.deserialize("{\"columnNames\":[\"a\"],\"columns\":{\"a\":[1,2]},\"isFrozen\":true}", Dataset.class)));
         assertEquals("[a]|[1]|frozen=false",
                 reviewFixes20260907_ds(parser.deserialize("{\"columnNames\":[\"a\"],\"columns\":{\"a\":[1]},\"isFrozen\":false}", Dataset.class)));
-        assertEquals("v", parser.deserialize("{\"columnNames\":[\"a\"],\"columns\":{\"a\":[1]},\"properties\":{\"k\":\"v\"}}", Dataset.class)
-                .getProperties()
-                .get("k"));
-        assertEquals("[]||frozen=true",
-                reviewFixes20260907_ds(parser.deserialize("{\"columnNames\":[],\"columns\":{},\"isFrozen\":true}", Dataset.class)));
+        assertEquals("v",
+                parser.deserialize("{\"columnNames\":[\"a\"],\"columns\":{\"a\":[1]},\"properties\":{\"k\":\"v\"}}", Dataset.class).getProperties().get("k"));
+        assertEquals("[]||frozen=true", reviewFixes20260907_ds(parser.deserialize("{\"columnNames\":[],\"columns\":{},\"isFrozen\":true}", Dataset.class)));
         // nested in a map value, "columns" not last
         final Map<String, Dataset> nested = parser.deserialize("{\"d\":{\"columnNames\":[\"a\"],\"columns\":{\"a\":[1]},\"isFrozen\":true}}",
                 Type.of("Map<String, Dataset>"));
         assertEquals("[a]|[1]|frozen=true", reviewFixes20260907_ds(nested.get("d")));
         // an unknown member is still rejected, wherever it sits
-        Assertions.assertThrows(ParsingException.class,
-                () -> parser.deserialize("{\"columnNames\":[\"a\"],\"columns\":{\"a\":[1]},\"zz\":1}", Dataset.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"columnNames\":[\"a\"],\"columns\":{\"a\":[1]},\"zz\":1}", Dataset.class));
         // R1: columnNames/columnTypes are consumed while "columns" is read, so a later one could only be
         // ignored -- it is rejected instead of silently producing the wrong column type
         assertEquals(Integer.valueOf(1),
@@ -3036,8 +3034,7 @@ public class JsonParserImplTest extends TestBase {
         final ParsingException lateTypes = Assertions.assertThrows(ParsingException.class,
                 () -> parser.deserialize("{\"columnNames\":[\"a\"],\"columns\":{\"a\":[\"1\"]},\"columnTypes\":[\"Integer\"]}", Dataset.class));
         assertTrue(lateTypes.getMessage().contains("'columnTypes' must appear before 'columns'"), lateTypes.getMessage());
-        Assertions.assertThrows(ParsingException.class,
-                () -> parser.deserialize("{\"columns\":{\"a\":[1]},\"columnNames\":[\"a\"]}", Dataset.class));
+        Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("{\"columns\":{\"a\":[1]},\"columnNames\":[\"a\"]}", Dataset.class));
 
         final Type<Sheet<String, String, Integer>> sheetType = Type.of("Sheet<String, String, Integer>");
         final Sheet<String, String, Integer> sheet = parser
@@ -3045,8 +3042,7 @@ public class JsonParserImplTest extends TestBase {
         assertTrue(sheet.isFrozen());
         assertEquals(Integer.valueOf(7), sheet.get("r", "c"));
         final Sheet<Integer, String, Integer> intKeyed = parser.deserialize(
-                "{\"rowKeyType\":\"Integer\",\"rowKeySet\":[1],\"columnKeySet\":[\"c\"],\"columns\":{\"c\":[7]}}",
-                Type.of("Sheet<Integer, String, Integer>"));
+                "{\"rowKeyType\":\"Integer\",\"rowKeySet\":[1],\"columnKeySet\":[\"c\"],\"columns\":{\"c\":[7]}}", Type.of("Sheet<Integer, String, Integer>"));
         assertEquals(Integer.valueOf(1), intKeyed.rowKeySet().iterator().next());
         final ParsingException lateRowKeyType = Assertions.assertThrows(ParsingException.class,
                 () -> parser.deserialize("{\"rowKeySet\":[1],\"rowKeyType\":\"Integer\",\"columnKeySet\":[\"c\"],\"columns\":{\"c\":[7]}}",
@@ -3110,8 +3106,7 @@ public class JsonParserImplTest extends TestBase {
 
         // the row-oriented reader back-fills, so its own columns are always consistent and the same guard
         // around the RowDataset constructor is defensive only
-        assertEquals("[a, b]|[1, null][3, 4]|frozen=false",
-                reviewFixes20260907_ds(parser.deserialize("[{\"a\":1},{\"a\":2,\"a\":3,\"b\":4}]", Dataset.class)));
+        assertEquals("[a, b]|[1, null][3, 4]|frozen=false", reviewFixes20260907_ds(parser.deserialize("[{\"a\":1},{\"a\":2,\"a\":3,\"b\":4}]", Dataset.class)));
     }
 
     // P2-07: an unquoted scalar root returned an EMPTY map and discarded the text; the empty/blank source must
@@ -3226,8 +3221,7 @@ public class JsonParserImplTest extends TestBase {
 
         // the Map<Color,Integer> sibling is unchanged (a plain HashMap)
         assertEquals(HashMap.class,
-                parser.deserialize("{\"RED\":1}",
-                        Type.of("Map<com.landawn.abacus.parser.JsonParserImplTest$ReviewFixes20260907_Color, Integer>")).getClass());
+                parser.deserialize("{\"RED\":1}", Type.of("Map<com.landawn.abacus.parser.JsonParserImplTest$ReviewFixes20260907_Color, Integer>")).getClass());
     }
 
     // P2-14 / T2-09: MapEntity and EntityId accepted a scalar after the entity name, and could not read back the
@@ -3261,6 +3255,36 @@ public class JsonParserImplTest extends TestBase {
         assertNull(parser.deserialize("{}", com.landawn.abacus.util.EntityId.class));
     }
 
+    @Test
+    public void entityNamesRequireExactlyOneColonBeforeTheirPropertyMap() {
+        for (final Class<?> target : new Class<?>[] { MapEntity.class, com.landawn.abacus.util.EntityId.class, Seid.class }) {
+            final Type<?> listType = Type.of("List<" + target.getName() + ">");
+            for (final String json : new String[] { "{\"E\" {\"id\":1}}", "{\"E\"::{\"id\":1}}", "{\"E\":{\"id\":1}:}", "{\"E\":ignored{\"id\":1}}",
+                    "{ignored\"E\":{\"id\":1}}", "\"E\" {\"id\":1}", "E::{id:1}" }) {
+                Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(json, target), target + ": " + json);
+                Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader(json), target), target + ": " + json);
+                Assertions.assertThrows(ParsingException.class, () -> parser.parse(json, null, target), target + ": " + json);
+                if (json.startsWith("{")) {
+                    // Nested entities enter the readers after their opening brace has already been consumed.
+                    final String nested = "[" + json + "]";
+                    Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(nested, listType), target + ": " + nested);
+                    Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(new StringReader(nested), listType), target + ": " + nested);
+                }
+            }
+
+            for (final String json : new String[] { "{\"E\":{\"id\":1}}", "{'E':{'id':1}}", "{E:{id:1}}", "E:{id:1}" }) {
+                final Object expected = target == MapEntity.class ? new MapEntity("E").set("id", 1) : Seid.of("E").set("id", 1);
+                assertEquals(expected, parser.deserialize(json, target), json);
+                assertEquals(expected, parser.deserialize(new StringReader(json), target), json);
+                assertEquals(expected, parser.parse(json, null, target), json);
+                if (json.startsWith("{")) {
+                    assertEquals(List.of(expected), parser.deserialize("[" + json + "]", listType), json);
+                    assertEquals(List.of(expected), parser.deserialize(new StringReader("[" + json + "]"), listType), json);
+                }
+            }
+        }
+    }
+
     // P2-15: the Type overloads answered NullPointerException where the Class siblings answer IllegalArgumentException.
     @Test
     public void reviewFixes20260907_R1_P2_15_nullTargetTypeIsIllegalArgument() {
@@ -3271,8 +3295,8 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> parser.deserialize(new ByteArrayInputStream("1".getBytes(java.nio.charset.StandardCharsets.UTF_8)), null, nullType));
         Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize(new File("no-such-file.json"), null, nullType));
-        // the index check must not run first and report the wrong argument
-        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.deserialize("1", 5, 1, null, nullType));
+        // The range parameters precede targetType and are validated first when both are invalid.
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> parser.deserialize("1", 5, 1, null, nullType));
     }
 
     // G08-54: parse(String, JsonDeserConfig, Type) dereferenced a null targetType (NPE in emptyOrDefault for an
@@ -3283,8 +3307,8 @@ public class JsonParserImplTest extends TestBase {
         final Type<Object> nullType = null;
 
         for (final String source : new String[] { "{\"a\":1}", "", "   ", "[]", null }) {
-            final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
-                    () -> parser.parse(source, null, nullType), String.valueOf(source));
+            final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(source, null, nullType),
+                    String.valueOf(source));
             assertTrue(e.getMessage().contains("targetType"), e.getMessage());
         }
 
@@ -3299,7 +3323,8 @@ public class JsonParserImplTest extends TestBase {
     public void fixG08_F53_longCarryingMapKeysFollowWriteLongAsString() {
         final JsonSerConfig config = JsonSerConfig.create().setWriteLongAsString(true).setQuoteMapKey(false);
 
-        assertEquals("{\"1\": \"1\"}", parser.serialize(N.asMap(com.landawn.abacus.util.MutableLong.of(1L), com.landawn.abacus.util.MutableLong.of(1L)), config));
+        assertEquals("{\"1\": \"1\"}",
+                parser.serialize(N.asMap(com.landawn.abacus.util.MutableLong.of(1L), com.landawn.abacus.util.MutableLong.of(1L)), config));
         assertEquals("{\"1\": \"1\"}",
                 parser.serialize(N.asMap(new java.util.concurrent.atomic.AtomicLong(1L), new java.util.concurrent.atomic.AtomicLong(1L)), config));
         assertEquals("{\"1\": \"1\"}", parser.serialize(N.asMap(1L, 1L), config));
@@ -3357,7 +3382,6 @@ public class JsonParserImplTest extends TestBase {
         assertEquals("[\"]\", \"[\"]", parser.deserialize("{\"raw\":[\"]\",\"[\"]}", RawJsonBean.class).getRaw());
     }
 
-
     @Data
     public static class ReviewFixes20260908_IntegralSlots {
         private byte b;
@@ -3394,8 +3418,8 @@ public class JsonParserImplTest extends TestBase {
         assertArrayEquals(new int[] { 1 }, parser.deserialize("[1.50]", int[].class));
         assertArrayEquals(new Integer[] { 1 }, parser.deserialize("[1.50]", Integer[].class));
 
-        final ReviewFixes20260908_IntegralSlots bean = parser
-                .deserialize("{\"b\":1.9,\"s\":2.9,\"i\":3.9,\"l\":4.9,\"bi\":5.9,\"boxed\":6.9}", ReviewFixes20260908_IntegralSlots.class);
+        final ReviewFixes20260908_IntegralSlots bean = parser.deserialize("{\"b\":1.9,\"s\":2.9,\"i\":3.9,\"l\":4.9,\"bi\":5.9,\"boxed\":6.9}",
+                ReviewFixes20260908_IntegralSlots.class);
         assertEquals((byte) 1, bean.getB());
         assertEquals((short) 2, bean.getS());
         assertEquals(3, bean.getI());
@@ -3406,8 +3430,7 @@ public class JsonParserImplTest extends TestBase {
         // a QUOTED decimal is handed to the target type's own valueOf(String) and is still rejected
         Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[\"1.50\"]", Type.of("List<Integer>")));
         Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[\"1.50\"]", int[].class));
-        Assertions.assertThrows(NumberFormatException.class,
-                () -> parser.deserialize("{\"i\":\"1.50\"}", ReviewFixes20260908_IntegralSlots.class));
+        Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("{\"i\":\"1.50\"}", ReviewFixes20260908_IntegralSlots.class));
 
         // a value the target cannot hold is still rejected - truncation is not saturation
         Assertions.assertThrows(ArithmeticException.class, () -> parser.deserialize("[3000000000.5]", Type.of("List<Integer>")));

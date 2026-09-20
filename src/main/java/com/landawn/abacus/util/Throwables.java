@@ -120,7 +120,7 @@ import com.landawn.abacus.util.u.Nullable;
  *   <li><b>Generic Exception Types:</b> All interfaces are parameterized with exception type {@code <E extends Throwable>}</li>
  *   <li><b>Compile-Time Safety:</b> Exception types are checked at compilation time</li>
  *   <li><b>Documentation:</b> Exception types serve as documentation of possible failure modes</li>
- *   <li><b>Multiple Exceptions:</b> Use union types or common superclass for multiple exception types</li>
+ *   <li><b>Multiple Exceptions:</b> Use a common superclass as the exception type, or the {@link EE}/{@link EEE} interfaces for separate exception types</li>
  * </ul>
  *
  * <p><b>Primitive Type Support:</b>
@@ -705,8 +705,12 @@ public final class Throwables {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         * @throws NoSuchElementException if this iterator has no remaining element
+         */
         @Override
-        public Object next() {
+        public Object next() throws NoSuchElementException {
             throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
         }
     };
@@ -800,8 +804,12 @@ public final class Throwables {
                     return !done;
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if this iterator has no remaining element
+                 */
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (done) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -878,8 +886,12 @@ public final class Throwables {
                     return cursor < toIndex;
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if this iterator has no remaining element
+                 */
                 @Override
-                public T next() {
+                public T next() throws NoSuchElementException {
                     if (cursor >= toIndex) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -987,9 +999,13 @@ public final class Throwables {
          * <p>The iterator is initialized on the first call to {@code hasNext()}, {@code next()}, a positive
          * {@code advance(long)}, or {@code count()}. A non-positive advance remains a no-op and does not initialize it.
          * The underlying iterator is only closed if it has been initialized when {@code closeResource()} is called.
-         * If creation fails with an unchecked exception, that exception is propagated and creation is retried on the next access.
+         * If creation fails with an unchecked exception, that exception is propagated and creation is retried on the next access
+         * while the wrapper remains open.
+         * Recursive initialization throws {@link IllegalStateException} and also leaves creation retryable.
+         * If the supplier closes the wrapper during creation, its returned iterator is immediately closed
+         * and the wrapper remains exhausted.
          * The returned iterator throws {@link IllegalStateException} on access if {@code iteratorSupplier}
-         * returns {@code null}; this factory does not invoke the supplier.
+         * returns {@code null} or the wrapper itself; this factory does not invoke the supplier.
          * Closing before initialization releases the supplier without invoking it, so a closed wrapper can never
          * acquire a resource. After {@code closeResource()} the wrapper reports itself exhausted, exactly as
          * {@link #concat(Collection)}, {@link #filter(Throwables.Predicate)} and {@link #map(Throwables.Function)}
@@ -1027,59 +1043,45 @@ public final class Throwables {
                 private java.util.function.Supplier<Throwables.Iterator<T, E>> supplier = iteratorSupplier;
                 private boolean isInitialized = false;
                 private boolean isClosed = false;
+                private boolean isInitializing = false;
+                private IllegalStateException recursiveFailure;
 
                 @Override
                 boolean supportsFailureAtomicAdvance() throws E {
-                    if (isClosed) {
-                        return false;
-                    }
-
-                    init();
-                    return iter.supportsFailureAtomicAdvance();
+                    return init() && iter.supportsFailureAtomicAdvance();
                 }
 
                 @Override
                 public boolean hasNext() throws E {
-                    if (isClosed) {
-                        return false;
-                    }
-
-                    init();
-
-                    return iter.hasNext();
+                    return init() && iter.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if this iterator is closed or has no remaining element
+                 * @throws E if creating or advancing the source iterator throws an exception
+                 */
                 @Override
-                public T next() throws E {
-                    if (isClosed) {
+                public T next() throws NoSuchElementException, E {
+                    if (!init()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
-
-                    init();
 
                     return iter.next();
                 }
 
                 @Override
                 public void advance(final long n) throws E {
-                    if (n <= 0 || isClosed) {
+                    if (n <= 0 || !init()) {
                         return;
                     }
-
-                    init();
 
                     iter.advance(n);
                 }
 
                 @Override
                 public long count() throws E {
-                    if (isClosed) {
-                        return 0;
-                    }
-
-                    init();
-
-                    return iter.count();
+                    return init() ? iter.count() : 0;
                 }
 
                 @Override
@@ -1096,25 +1098,55 @@ public final class Throwables {
                     }
                 }
 
-                private void init() {
+                private boolean init() {
                     if (isClosed) {
-                        // Every caller short-circuits on isClosed before reaching here; this is a safety net
-                        // guaranteeing that a closed wrapper never invokes the supplier and so can never
-                        // acquire a resource that nothing would close.
-                        return;
+                        return false;
                     }
 
                     if (!isInitialized) {
-                        final Throwables.Iterator<T, E> supplied = supplier.get();
-
-                        if (supplied == null) {
-                            throw new IllegalStateException("Iterator supplier returned null");
+                        if (isInitializing) {
+                            if (recursiveFailure == null) {
+                                recursiveFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                            }
+                            throw recursiveFailure;
                         }
 
-                        iter = supplied;
-                        supplier = null;
-                        isInitialized = true;
+                        isInitializing = true;
+                        try {
+                            final Throwables.Iterator<T, E> supplied = supplier.get();
+                            if (supplied == null) {
+                                throw new IllegalStateException("Iterator supplier returned null");
+                            }
+                            // A self-return does not reenter initialization, but would recurse forever during delegation.
+                            if (supplied == this) {
+                                throw recursiveFailure == null ? new IllegalStateException("Iterator supplier returned the deferred iterator itself")
+                                        : recursiveFailure;
+                            }
+                            if (recursiveFailure != null) {
+                                // Even if the supplier swallowed the recursive failure, its abandoned resource must be closed.
+                                try {
+                                    supplied.closeResource();
+                                } catch (final Throwable failure) {
+                                    if (failure != recursiveFailure) {
+                                        recursiveFailure.addSuppressed(failure);
+                                    }
+                                }
+                                throw recursiveFailure;
+                            }
+                            if (isClosed) {
+                                // The supplier can close the wrapper before returning a newly acquired resource.
+                                supplied.closeResource();
+                                return false;
+                            }
+                            iter = supplied;
+                            supplier = null;
+                            isInitialized = true;
+                        } finally {
+                            isInitializing = false;
+                            recursiveFailure = null;
+                        }
                     }
+                    return true;
                 }
             };
         }
@@ -1194,8 +1226,13 @@ public final class Throwables {
                     return cur != null && cur.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+                 * @throws NoSuchElementException if this iterator has no remaining element
+                 */
                 @Override
-                public T next() throws E {
+                public T next() throws E, NoSuchElementException {
                     if ((cur == null || !cur.hasNext()) && !hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1258,7 +1295,9 @@ public final class Throwables {
          *     try {
          *         lines.closeResource();
          *     } catch (Throwable closeFailure) {
-         *         primary.addSuppressed(closeFailure);
+         *         if (closeFailure != primary) {
+         *             primary.addSuppressed(closeFailure);
+         *         }
          *     }
          *
          *     throw primary;
@@ -1299,8 +1338,13 @@ public final class Throwables {
                     }
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws IOException if reading the next line from the supplied reader fails
+                 * @throws NoSuchElementException if this iterator has no remaining element
+                 */
                 @Override
-                public String next() throws IOException {
+                public String next() throws IOException, NoSuchElementException {
                     if (!hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1501,8 +1545,13 @@ public final class Throwables {
                     return nextReady;
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+                 * @throws NoSuchElementException if this iterator has no remaining element
+                 */
                 @Override
-                public T next() throws E {
+                public T next() throws E, NoSuchElementException {
                     if (!hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -1561,8 +1610,13 @@ public final class Throwables {
                     return !closed && iter.hasNext();
                 }
 
+                /**
+                 * {@inheritDoc}
+                 * @throws NoSuchElementException if this iterator is closed or has no remaining element
+                 * @throws E if advancing the source iterator or applying the mapper throws an exception
+                 */
                 @Override
-                public U next() throws E {
+                public U next() throws NoSuchElementException, E {
                     if (closed) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -6997,7 +7051,7 @@ public final class Throwables {
         /**
          * A private monitor rather than {@code this}: this object is what the caller receives from
          * {@code Fnn.memoize(Throwables.Supplier)} and {@code N.lazyInitChecked(Throwables.Supplier)}, and a caller
-         * doing {@code synchronized (lazy) { ... }} must not be able to block or interleave with an initialization.
+         * doing {@code synchronized (lazy) { ... }} does not acquire the initialization monitor.
          */
         private final Object lock = new Object();
 
@@ -7064,8 +7118,8 @@ public final class Throwables {
          * Gets the lazily initialized value. On first access, the value is computed using the supplier
          * and cached for subsequent calls. After successful initialization, the supplier reference is
          * released so objects captured only for construction can be reclaimed. This method is thread-safe:
-         * initialization is serialized on a private monitor, not on this object, so caller code that
-         * synchronizes on this initializer can neither block nor interleave with an initialization.
+         * initialization is serialized on a private monitor, not on this object. Synchronizing on this
+         * initializer does not prevent another thread from initializing it or accessing its cached value.
          *
          * @return the lazily initialized value
          * @throws IllegalStateException if the value is accessed recursively from within its own initialization

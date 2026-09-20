@@ -203,7 +203,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -335,7 +335,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextLong();
                 right = left;
 
@@ -379,7 +379,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 left = hasNext ? next : iter.nextLong();
                 right = left;
 
@@ -421,7 +421,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public LongList next() {
+            public LongList next() throws NoSuchElementException {
                 final LongList result = new LongList(9);
                 result.add(hasNext ? next : (next = iter.nextLong()));
 
@@ -466,7 +466,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 long res = hasNext ? next : (next = iter.nextLong());
 
                 hasNext = false;
@@ -510,7 +510,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 final long first = hasNext ? next : (next = iter.nextLong());
                 long res = first;
 
@@ -618,7 +618,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 final long next = iter.nextLong();
                 iter.advance(skip);
                 return next;
@@ -646,7 +646,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (isFirst) {
                     res = iter.nextLong();
                     isFirst = false;
@@ -675,7 +675,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 return (res = accumulator.applyAsLong(res, iter.nextLong()));
             }
         }, false);
@@ -704,7 +704,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (isFirst) {
                     isFirst = false;
                     return init;
@@ -781,7 +781,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -875,7 +875,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1000,7 +1000,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!initialized) {
                     init();
                 }
@@ -1121,7 +1121,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1201,7 +1201,7 @@ abstract class AbstractLongStream extends LongStream {
             }
 
             @Override
-            public long nextLong() {
+            public long nextLong() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -1415,6 +1415,7 @@ abstract class AbstractLongStream extends LongStream {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
+        checkArgNotNull(downstream, cs.downstream);
 
         return groupTo(keyMapper, downstream, Suppliers.ofMap());
     }
@@ -1541,7 +1542,8 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
-    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix) throws IllegalStateException {
+    public String join(final CharSequence delimiter, final CharSequence prefix, final CharSequence suffix)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         try (final Joiner joiner = Joiner.with(delimiter, prefix, suffix).reuseBuffer()) {
@@ -1578,7 +1580,8 @@ abstract class AbstractLongStream extends LongStream {
     }
 
     @Override
-    public <R> R collect(final Supplier<R> supplier, final ObjLongConsumer<? super R> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public <R> R collect(final Supplier<R> supplier, final ObjLongConsumer<? super R> accumulator)
+            throws IllegalStateException, IllegalArgumentException, RuntimeException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

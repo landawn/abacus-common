@@ -167,7 +167,7 @@ import com.landawn.abacus.util.function.TriFunction;
  *   <li>Use ShortStream instead of {@code Stream<Short>} to avoid boxing overhead</li>
  *   <li>Whether parallel processing helps depends on data size, operation cost, and runtime environment</li>
  *   <li>Sequential processing is more efficient for small datasets and simple operations</li>
- *   <li>Lazy evaluation means intermediate operations are not executed until terminal operations</li>
+ *   <li>Most intermediate operations defer processing until traversal; consult each operation for eager evaluation or buffering</li>
  * </ul>
  *
  * @see StreamBase
@@ -693,7 +693,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
     /**
      * Returns a stream consisting of the results of applying the given function to the elements of this stream.
-     * The function returns an {@code OptionalShort} for each element, and only elements that have a value present are included in the returned stream.
+     * The function returns an {@code OptionalShort} for each element, and only values from present optional results are included in the returned stream.
      *
      * <p>Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License 2.0 and may be modified.
      *
@@ -1232,7 +1232,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * }
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1254,7 +1254,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
-     * If the mapped keys contain duplicates (according to {@link Object#equals(Object)}), an {@code IllegalStateException} is thrown when the collection operation is performed.
+     * If the mapped keys contain duplicates (according to the result map's key-equivalence rules), an {@code IllegalStateException} is thrown when the collection operation is performed.
      *
      * <p>This is a terminal operation.
      *
@@ -1281,7 +1281,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {1=1, 2=4, 3=9}
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1335,7 +1335,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {0=3, 2=8}  (max of values with same key)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1359,7 +1359,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
 
     /**
      * Returns a {@code Map} whose keys and values are the result of applying the provided mapping functions to the input elements.
-     * If the mapped keys contain duplicates (according to {@link Object#equals(Object)}), the value mapping function is applied to each equal element,
+     * If the mapped keys contain duplicates (according to the result map's key-equivalence rules), the value mapping function is applied to each equal element,
      * and the results are merged using the provided merging function.
      *
      * <p>This is a terminal operation.
@@ -1394,7 +1394,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * // Result: {odd=20, even=30} (5+15=20, 10+20=30)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; buffers all elements in memory.
+     * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
      *
      * @param <K> the output type of the key mapping function
      * @param <V> the output type of the value mapping function
@@ -1892,10 +1892,9 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * {@code OptionalShort} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it
-     * deterministically returns the first element in encounter order. In a <b>parallel</b> stream the
-     * first element to reach the terminal operation wins, so the result is <b>not</b> guaranteed to be
-     * first in encounter order and may differ between runs. The {@code findFirst} name is kept to align with
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findFirst} name is kept to align with
      * the standard {@link java.util.stream.Stream#findFirst()} API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -1927,10 +1926,9 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * {@code OptionalShort} if this stream is empty. This is a short-circuiting terminal operation:
      * it stops at the first element without processing the rest of the stream, which is then closed.
      *
-     * <p>This method is an alias of {@link #first()}. In a <b>sequential</b> stream it returns the first element in encounter order.
-     * In a <b>parallel</b> stream, exactly as for {@code findFirst}, the first element to reach the
-     * terminal operation wins, so the result is <b>not</b> guaranteed to be first in encounter
-     * order and may differ between runs. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
+     * <p>This method is an alias of {@link #first()} even in parallel: it reads the first element
+     * from the current pipeline iterator. Sequential streams preserve encounter order; parallel
+     * intermediate operations may already have reordered the original source. The {@code findAny} name is kept to align with the standard Stream API naming conventions.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1961,8 +1959,9 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * {@code OptionalShort}, or an empty {@code OptionalShort} if no element matches. This is a
      * short-circuiting terminal operation: it stops at the first match, and the stream is then closed.
      *
-     * <p>The result is deterministic even for parallel streams: when several elements match, the one at
-     * the smallest encounter-order index wins. If that ordering guarantee is not needed,
+     * <p>When several elements match, the one at the smallest encounter-order index in the current
+     * pipeline wins. Parallel intermediate operations may already have reordered the original source.
+     * If that ordering guarantee is not needed,
      * {@link #findAny(Throwables.ShortPredicate)} may find a match faster in parallel.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2158,7 +2157,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * <p>This is a terminal operation.
      *
      * <p>Each {@code short} element is widened and accumulated in a {@code long} before the
-     * total is returned as an {@code int}, avoiding overflow during accumulation. Note that the
+     * total is returned as an {@code int}. The long accumulator can itself overflow for sufficiently large streams. Note that the
      * individual {@code short} values are in the range {@code [-32768, 32767]}, so only very
      * large streams can overflow the {@code int} result; if the accumulated total is outside the
      * {@code int} range, an {@code ArithmeticException} is thrown. Returns {@code 0} if the stream is empty.
@@ -2504,11 +2503,10 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      *
      * <p>This is a static factory method that creates a stream with zero elements. The returned stream
      * is useful as a base case in stream operations, conditional stream creation, or when no data is available.
-     * All terminal operations on an empty stream will return empty results or default values (e.g., count returns 0, sum returns 0).
+     * Each terminal operation defines its empty-stream result (for example, count and sum return 0).
      *
-     * <p>The empty stream has no performance overhead and can be safely used as a placeholder or default return value.
-     * It supports all stream operations, but intermediate operations will simply return another empty stream,
-     * and terminal operations will produce empty or default results.
+     * <p>The empty stream can be used as a placeholder or default return value. Operations such as
+     * filtering and mapping preserve emptiness; operations such as {@code appendIfEmpty} can add elements.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2935,7 +2933,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cnt++ >= count) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3026,7 +3024,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 }
 
                 @Override
-                public short nextShort() {
+                public short nextShort() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3057,7 +3055,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
                 }
 
                 @Override
-                public short nextShort() {
+                public short nextShort() throws NoSuchElementException {
                     if (cnt++ >= count) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -3147,7 +3145,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3240,7 +3238,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3336,7 +3334,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3432,7 +3430,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3532,7 +3530,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cnt <= 0) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3662,7 +3660,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3724,7 +3722,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -3811,7 +3809,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNextVal && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4059,7 +4057,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || cursor >= cur.length) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4126,7 +4124,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((iter == null || !iter.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4180,7 +4178,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4227,7 +4225,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4276,7 +4274,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4319,7 +4317,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 return zipFunction.applyAsShort(iterA.nextShort(), iterB.nextShort());
             }
         });
@@ -4362,7 +4360,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 return zipFunction.applyAsShort(iterA.nextShort(), iterB.nextShort(), iterC.nextShort());
             }
         });
@@ -4496,7 +4494,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4553,7 +4551,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursor >= len) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -4603,7 +4601,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsShort(iterA.nextShort(), iterB.hasNext() ? iterB.nextShort() : valueForNoneB);
                 } else {
@@ -4654,7 +4652,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (iterA.hasNext()) {
                     return zipFunction.applyAsShort(iterA.nextShort(), iterB.hasNext() ? iterB.nextShort() : valueForNoneB,
                             iterC.hasNext() ? iterC.nextShort() : valueForNoneC);
@@ -4755,7 +4753,8 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
      * @param valuesForNone the array of default values to use for streams that run out of values. Must be non-null
      * @param zipFunction the function to combine elements from all the streams.
      * @return a stream of combined values
-     * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalArgumentException if the size of {@code valuesForNone} doesn't match the size of the streams
+     *         collection, or if {@code zipFunction} is {@code null}.
      * @see Stream#zip(Collection, List, Function)
      */
     public static ShortStream zip(final Collection<? extends ShortStream> streams, final short[] valuesForNone, final ShortNFunction<Short> zipFunction)
@@ -4814,7 +4813,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (cursorA < lenA) {
                     if ((cursorB >= lenB) || (nextSelector.apply(a[cursorA], b[cursorB]) == MergeResult.TAKE_FIRST)) {
                         return a[cursorA++];
@@ -4900,7 +4899,7 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
             }
 
             @Override
-            public short nextShort() {
+            public short nextShort() throws NoSuchElementException {
                 if (!hasNextA && iterA.hasNext()) {
                     nextA = iterA.nextShort();
                     hasNextA = true;
@@ -5077,10 +5076,10 @@ public abstract class ShortStream extends StreamBase<Short, short[], ShortPredic
     }
 
     /**
-     * An abstract extension class for ShortStream that allows for custom implementations
-     * and extensions of the base ShortStream functionality.
+     * An abstract extension class for internal ShortStream implementations.
      *
-     * <p>This class serves as a base for creating specialized short stream implementations
+     * <p>Its private constructor prevents subclassing outside {@code ShortStream}. Internal subclasses
+     * provide specialized short stream implementations
      * while maintaining the core stream behavior and characteristics such as sorting state
      * and close handlers.
      */

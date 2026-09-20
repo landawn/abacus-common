@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -435,7 +436,10 @@ public abstract class Observer<T> {
         return (Observer<T>) pipelineOwner;
     }
 
-    private void checkCurrentStage() {
+    /**
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
+     */
+    private void checkCurrentStage() throws IllegalStateException {
         N.checkState(pipelineOwner.currentStage == this, "This Observer stage was replaced by a type-changing operator");
         N.checkState(!pipelineOwner.subscribed, "This Observer has already been subscribed");
     }
@@ -456,7 +460,8 @@ public abstract class Observer<T> {
 
         @SuppressWarnings("rawtypes")
         @Override
-        public void observe(final Consumer<? super R> action, final Consumer<? super Exception> onError, final Runnable onComplete) {
+        public void observe(final Consumer<? super R> action, final Consumer<? super Exception> onError, final Runnable onComplete)
+                throws IllegalStateException, IllegalArgumentException {
             final Observer<?> self = this;
             self.checkCurrentStage();
             N.checkArgNotNull(action, cs.action);
@@ -497,12 +502,16 @@ public abstract class Observer<T> {
      * @param onComplete the action to invoke when observation completes
      * @throws IllegalStateException if this observer has already been subscribed or this source is
      *         a stale stage being subscribed without current-stage forwarding authorization
+     * @throws IllegalArgumentException if {@code action}, {@code onError}, or {@code onComplete} is {@code null}
      */
     @SuppressWarnings("unused")
     protected final synchronized void beginSubscription(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
-            throws IllegalStateException {
+            throws IllegalStateException, IllegalArgumentException {
         N.checkState(currentStage == this || (currentStage != null && subscriptionDelegate.get() == currentStage), "This Observer stage was replaced");
         N.checkState(!subscribed, "This Observer has already been subscribed");
+        N.checkArgNotNull(action, cs.action);
+        N.checkArgNotNull(onError, cs.onError);
+        N.checkArgNotNull(onComplete, cs.onComplete);
         subscribed = true;
     }
 
@@ -523,9 +532,15 @@ public abstract class Observer<T> {
         addSubscriptionActionInternal(action);
     }
 
-    private synchronized void addSubscriptionActionInternal(final Runnable action) {
+    /**
+     * @throws IllegalStateException if the pipeline has already been subscribed
+     * @throws IllegalArgumentException if {@code action} is {@code null}
+     */
+    private synchronized void addSubscriptionActionInternal(final Runnable action) throws IllegalStateException, IllegalArgumentException {
         N.checkState(!subscribed, "This Observer has already been subscribed");
-        subscriptionActions.add(N.checkArgNotNull(action, cs.action));
+        N.checkArgNotNull(action, cs.action);
+
+        subscriptionActions.add(action);
     }
 
     /** Starts deferred intermediate work after the terminal dispatcher has been appended. */
@@ -813,11 +828,12 @@ public abstract class Observer<T> {
      * @param intervalDurationInMillis the debounce interval in milliseconds; if zero, this
      *        Observer is returned unchanged with no debounce applied
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative.
      * @see #debounce(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
-    public Observer<T> debounce(final long intervalDurationInMillis) throws IllegalArgumentException {
+    public Observer<T> debounce(final long intervalDurationInMillis) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().debounceInternal(intervalDurationInMillis);
         return this;
@@ -844,10 +860,11 @@ public abstract class Observer<T> {
      *        unchanged with no debounce applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#debounce(long,%20java.util.concurrent.TimeUnit,%20io.reactivex.Scheduler)">RxJava#debounce</a>
      */
-    public Observer<T> debounce(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
+    public Observer<T> debounce(final long intervalDuration, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().debounceInternal(intervalDuration, unit);
         return this;
@@ -1006,6 +1023,14 @@ public abstract class Observer<T> {
      * subsequent items until the specified duration has elapsed. Each accepted item starts the
      * next suppression window.
      *
+     * <p>Accepted items and terminal signals are delivered in reservation order by one drain, outside the
+     * throttle state monitor. Reentrant or concurrent signals are queued behind the current callback; under
+     * contention, a queued item runs on the active drain's thread rather than necessarily its producer's
+     * thread, and its producer may return before delivery. A {@code RuntimeException} from a nonterminal
+     * downstream callback discards queued signals and is sent to {@code onError}. An {@code Error}, or an
+     * exception from a terminal callback, propagates on the drain thread. These rules apply when throttling
+     * is enabled; a zero interval leaves the pipeline unchanged.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * buttonClickObserver
@@ -1016,11 +1041,12 @@ public abstract class Observer<T> {
      * @param intervalDurationInMillis the throttle window duration in milliseconds; if zero,
      *        this Observer is returned unchanged with no throttling applied
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative.
      * @see #throttleFirst(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
-    public Observer<T> throttleFirst(final long intervalDurationInMillis) throws IllegalArgumentException {
+    public Observer<T> throttleFirst(final long intervalDurationInMillis) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().throttleFirstInternal(intervalDurationInMillis);
         return this;
@@ -1035,6 +1061,11 @@ public abstract class Observer<T> {
      * subsequent items until the specified duration has elapsed. Each accepted item starts the
      * next suppression window. The duration can be specified with custom time units.
      *
+     * <p>Delivery follows the same ordered-drain, callback-thread and failure rules as
+     * {@link #throttleFirst(long)}: callbacks run outside the throttle state monitor, queued signals may
+     * run on another producer's active drain thread, and nonterminal callback {@code RuntimeException}s
+     * are routed to {@code onError}. Terminal callback failures and {@code Error}s propagate on that thread.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * apiCallObserver
@@ -1046,10 +1077,11 @@ public abstract class Observer<T> {
      *        unchanged with no throttling applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleFirst(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleFirst</a>
      */
-    public Observer<T> throttleFirst(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
+    public Observer<T> throttleFirst(final long intervalDuration, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().throttleFirstInternal(intervalDuration, unit);
         return this;
@@ -1066,9 +1098,12 @@ public abstract class Observer<T> {
         final long intervalDurationInNanos = unit.toNanos(intervalDuration);
 
         dispatcher.append(new Dispatcher<>() {
-            private long lastEmissionTime = 0;
-            private boolean hasEmitted = false;
-            private boolean terminated = false;
+            private long lastEmissionTime;
+            private boolean hasEmitted;
+            private boolean terminated;
+            private boolean draining;
+            private final ArrayDeque<Runnable> signals = new ArrayDeque<>();
+            private Runnable terminalSignal;
 
             @Override
             public void onNext(final Object param) {
@@ -1076,44 +1111,76 @@ public abstract class Observer<T> {
                     if (terminated) {
                         return;
                     }
-
                     final long now = System.nanoTime();
-
-                    if (!hasEmitted || now - lastEmissionTime >= intervalDurationInNanos) {
-                        hasEmitted = true;
-                        lastEmissionTime = now;
-
-                        if (downDispatcher != null) {
-                            // Delivery stays inside the state lock so a concurrent terminal signal
-                            // cannot overtake the accepted first item.
-                            downDispatcher.onNext(param);
-                        }
+                    if (hasEmitted && now - lastEmissionTime < intervalDurationInNanos) {
+                        return;
                     }
+                    hasEmitted = true;
+                    lastEmissionTime = now;
+                    signals.add(() -> super.onNext(param));
+                    if (draining) {
+                        return;
+                    }
+                    draining = true;
                 }
+                drain();
             }
 
             @Override
             public void onError(final Exception error) {
-                if (terminate()) {
-                    super.onError(error);
-                }
+                terminate(() -> super.onError(error));
             }
 
             @Override
             public void onComplete() {
-                if (terminate()) {
-                    super.onComplete();
-                }
+                terminate(() -> super.onComplete());
             }
 
-            private boolean terminate() {
+            private void terminate(final Runnable terminal) {
                 synchronized (holder) {
                     if (terminated) {
-                        return false;
+                        return;
                     }
-
                     terminated = true;
-                    return true;
+                    terminalSignal = terminal;
+                    signals.add(terminal);
+                    if (draining) {
+                        return;
+                    }
+                    draining = true;
+                }
+                drain();
+            }
+
+            // A single drain preserves reservation order, including reentrant and concurrent terminal signals.
+            // No downstream callback holds the state monitor, and a producer never waits for a running callback.
+            private void drain() {
+                while (true) {
+                    final Runnable signal;
+                    synchronized (holder) {
+                        signal = signals.poll();
+                        if (signal == null) {
+                            draining = false;
+                            return;
+                        }
+                    }
+                    try {
+                        signal.run();
+                    } catch (final RuntimeException | Error failure) {
+                        synchronized (holder) {
+                            // Fail the current drain permanently before notifying downstream. Accepted items
+                            // and a queued terminal signal must not follow a failed onNext callback.
+                            signals.clear();
+                            draining = false;
+                            terminated = true;
+                        }
+                        // A terminal callback's own failure must propagate, never trigger a second onError.
+                        if (failure instanceof RuntimeException exception && signal != terminalSignal) {
+                            super.onError(exception);
+                            return;
+                        }
+                        throw failure;
+                    }
                 }
             }
         });
@@ -1136,11 +1203,12 @@ public abstract class Observer<T> {
      * @param intervalDurationInMillis the sampling window duration in milliseconds; if zero,
      *        this Observer is returned unchanged with no throttling applied
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative.
      * @see #throttleLast(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
-    public Observer<T> throttleLast(final long intervalDurationInMillis) throws IllegalArgumentException {
+    public Observer<T> throttleLast(final long intervalDurationInMillis) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().throttleLastInternal(intervalDurationInMillis);
         return this;
@@ -1166,10 +1234,11 @@ public abstract class Observer<T> {
      *        unchanged with no throttling applied
      * @param unit the time unit of the interval
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#throttleLast(long,%20java.util.concurrent.TimeUnit)">RxJava#throttleLast</a>
      */
-    public Observer<T> throttleLast(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
+    public Observer<T> throttleLast(final long intervalDuration, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().throttleLastInternal(intervalDuration, unit);
         return this;
@@ -1301,11 +1370,12 @@ public abstract class Observer<T> {
      * @param delayInMillis the delay duration in milliseconds; if zero, this Observer is
      *        returned unchanged with no delay applied
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code delayInMillis} is negative.
      * @see #delay(long, TimeUnit)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
-    public Observer<T> delay(final long delayInMillis) throws IllegalArgumentException {
+    public Observer<T> delay(final long delayInMillis) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().delayInternal(delayInMillis);
         return this;
@@ -1331,10 +1401,11 @@ public abstract class Observer<T> {
      *        delay applied
      * @param unit the time unit of the delay
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code delay} is negative or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#delay(long,%20java.util.concurrent.TimeUnit)">RxJava#delay</a>
      */
-    public Observer<T> delay(final long delay, final TimeUnit unit) throws IllegalArgumentException {
+    public Observer<T> delay(final long delay, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().delayInternal(delay, unit);
         return this;
@@ -1392,11 +1463,12 @@ public abstract class Observer<T> {
      * @return a new current typed stage, invalidating prior handles, emitting {@code Timed<T>} objects whose
      *         timestamp field holds the elapsed interval in milliseconds since the previous
      *         emission
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @see Timed
      * @see #timestamp()
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timeInterval()">RxJava#timeInterval</a>
      */
-    public Observer<Timed<T>> timeInterval() {
+    public Observer<Timed<T>> timeInterval() throws IllegalStateException {
         checkCurrentStage();
         return nextStage(() -> ownerForStage().timeIntervalInternal());
     }
@@ -1434,11 +1506,12 @@ public abstract class Observer<T> {
      *
      * @return a new current typed stage, invalidating prior handles, emitting {@code Timed<T>} objects whose
      *         timestamp field holds the emission time in milliseconds since the epoch
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @see Timed
      * @see #timeInterval()
      * @see <a href="http://reactivex.io/RxJava/javadoc/io/reactivex/Observable.html#timestamp()">RxJava#timestamp</a>
      */
-    public Observer<Timed<T>> timestamp() {
+    public Observer<Timed<T>> timestamp() throws IllegalStateException {
         checkCurrentStage();
         return nextStage(() -> ownerForStage().timestampInternal());
     }
@@ -1466,12 +1539,16 @@ public abstract class Observer<T> {
      *     .observe(System.out::println);   // prints 3, 4, 5
      * }</pre>
      *
+     * <p>After the requested number of items has been skipped, all subsequent items
+     * are forwarded, including when {@code n} is {@link Long#MAX_VALUE}.</p>
+     *
      * @param n the number of items to skip; if zero, no items are skipped (a negative
      *        value is rejected as described below)
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code n} is negative.
      */
-    public Observer<T> skip(final long n) throws IllegalArgumentException {
+    public Observer<T> skip(final long n) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().skipInternal(n);
         return this;
@@ -1489,7 +1566,7 @@ public abstract class Observer<T> {
 
                 @Override
                 public void onNext(final Object param) {
-                    if (downDispatcher != null && counter.incrementAndGet() > n) {
+                    if (downDispatcher != null && counter.getAndUpdate(count -> count < n ? count + 1 : count) >= n) {
                         downDispatcher.onNext(param);
                     }
                 }
@@ -1513,9 +1590,10 @@ public abstract class Observer<T> {
      * @param maxSize the maximum number of items to emit; once this count is reached the
      *        upstream source is signaled to stop producing further items
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code maxSize} is negative.
      */
-    public Observer<T> limit(final long maxSize) throws IllegalArgumentException {
+    public Observer<T> limit(final long maxSize) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().limitInternal(maxSize);
         return this;
@@ -1576,9 +1654,10 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @see #distinctBy(Function)
      */
-    public Observer<T> distinct() {
+    public Observer<T> distinct() throws IllegalStateException {
         checkCurrentStage();
         ownerForStage().distinctInternal();
         return this;
@@ -1613,10 +1692,11 @@ public abstract class Observer<T> {
      * @param keyExtractor function to extract the key used to determine uniqueness; key
      *        equality is based on {@code hashCode()} and {@code equals()}
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      * @see #distinct()
      */
-    public Observer<T> distinctBy(final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
+    public Observer<T> distinctBy(final Function<? super T, ?> keyExtractor) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().distinctByInternal(keyExtractor);
         return this;
@@ -1655,9 +1735,10 @@ public abstract class Observer<T> {
      * @param filter the predicate used to test each item; items for which the predicate returns
      *               {@code true} are forwarded downstream
      * @return this Observer instance for method chaining
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
-    public Observer<T> filter(final Predicate<? super T> filter) throws IllegalArgumentException {
+    public Observer<T> filter(final Predicate<? super T> filter) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         ownerForStage().filterInternal(filter);
         return this;
@@ -1695,10 +1776,11 @@ public abstract class Observer<T> {
      * @param mapper the function to transform each item
      * @return a new current {@code Observer<R>} stage, invalidating prior handles, emitting the
      *         transformed items
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #flatMap(Function)
      */
-    public <R> Observer<R> map(final Function<? super T, R> mapper) throws IllegalArgumentException {
+    public <R> Observer<R> map(final Function<? super T, R> mapper) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         N.checkArgNotNull(mapper, cs.mapper);
         return nextStage(() -> ownerForStage().mapInternal(mapper));
@@ -1742,10 +1824,11 @@ public abstract class Observer<T> {
      *        {@code null} or an empty collection, no items are emitted for that input
      * @return a new current {@code Observer<R>} stage, invalidating prior handles, emitting the
      *         flattened items
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #map(Function)
      */
-    public <R> Observer<R> flatMap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalArgumentException {
+    public <R> Observer<R> flatMap(final Function<? super T, ? extends Collection<? extends R>> mapper) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         N.checkArgNotNull(mapper, cs.mapper);
         return nextStage(() -> ownerForStage().flatMapInternal(mapper));
@@ -1796,11 +1879,12 @@ public abstract class Observer<T> {
      * @param timespan the time window duration
      * @param unit the time unit of the timespan
      * @return a new current typed stage, invalidating prior handles, emitting {@code List<T>} buffers of items
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code timespan} is zero or negative or {@code unit} is {@code null}.
      * @see #buffer(long, TimeUnit, int)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, java.util.concurrent.TimeUnit)</a>
      */
-    public Observer<List<T>> buffer(final long timespan, final TimeUnit unit) throws IllegalArgumentException {
+    public Observer<List<T>> buffer(final long timespan, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
@@ -1831,11 +1915,12 @@ public abstract class Observer<T> {
      * @param unit the time unit of the timespan
      * @param count the maximum number of items per buffer
      * @return a new current typed stage, invalidating prior handles, emitting {@code List<T>} buffers of items
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code timespan} or {@code count} is zero or negative, or {@code unit} is
      *         {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20java.util.concurrent.TimeUnit,%20int)">RxJava#buffer(long, java.util.concurrent.TimeUnit, int)</a>
      */
-    public Observer<List<T>> buffer(final long timespan, final TimeUnit unit, final int count) throws IllegalArgumentException {
+    public Observer<List<T>> buffer(final long timespan, final TimeUnit unit, final int count) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
@@ -1992,16 +2077,17 @@ public abstract class Observer<T> {
      * @param timeskip the interval between starting new buffers
      * @param unit the time unit for both timespan and timeskip
      * @return a new current typed stage, invalidating prior handles, emitting {@code List<T>} buffers of items
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code timespan} or {@code timeskip} is zero or negative, or {@code unit}
      *         is {@code null}.
      * @see #buffer(long, long, TimeUnit, int)
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, long, java.util.concurrent.TimeUnit)</a>
      */
-    public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit) throws IllegalArgumentException {
+    public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
-        N.checkArgNotNull(unit, "Time unit cannot be null");
         N.checkArgument(timeskip > 0, "timeskip cannot be 0 or negative");
+        N.checkArgNotNull(unit, "Time unit cannot be null");
         return nextStage(() -> ownerForStage().bufferInternal(timespan, timeskip, unit));
     }
 
@@ -2031,15 +2117,17 @@ public abstract class Observer<T> {
      * @param unit the time unit for both timespan and timeskip
      * @param count the maximum number of items per buffer
      * @return a new current typed stage, invalidating prior handles, emitting {@code List<T>} buffers of items
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code timespan}, {@code timeskip}, or {@code count} is zero or negative,
      *         or {@code unit} is {@code null}.
      * @see <a href="http://reactivex.io/RxJava/2.x/javadoc/io/reactivex/Observable.html#buffer(long,%20long,%20java.util.concurrent.TimeUnit)">RxJava#buffer(long, long, java.util.concurrent.TimeUnit)</a>
      */
-    public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit, final int count) throws IllegalArgumentException {
+    public Observer<List<T>> buffer(final long timespan, final long timeskip, final TimeUnit unit, final int count)
+            throws IllegalStateException, IllegalArgumentException {
         checkCurrentStage();
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
-        N.checkArgNotNull(unit, "Time unit cannot be null");
         N.checkArgument(timeskip > 0, "timeskip cannot be 0 or negative");
+        N.checkArgNotNull(unit, "Time unit cannot be null");
         N.checkArgument(count > 0, "count cannot be 0 or negative");
         return nextStage(() -> ownerForStage().bufferInternal(timespan, timeskip, unit, count));
     }
@@ -2261,12 +2349,14 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param action the action to perform on each item
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code action} is {@code null}.
-     * @throws IllegalStateException if this stage has been replaced or this Observer has already been subscribed
+    
      * @see #observe(Consumer, Consumer)
      * @see #observe(Consumer, Consumer, Runnable)
      */
-    public void observe(final Consumer<? super T> action) throws IllegalArgumentException, IllegalStateException {
+    public void observe(final Consumer<? super T> action) throws IllegalStateException, IllegalArgumentException {
+        checkCurrentStage();
         N.checkArgNotNull(action, cs.action);
 
         observe(action, ON_ERROR_MISSING);
@@ -2287,11 +2377,13 @@ public abstract class Observer<T> {
      *
      * @param action the action to perform on each item
      * @param onError the action to perform on error
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if any of {@code action}, {@code onError} is {@code null}.
-     * @throws IllegalStateException if this stage has been replaced or this Observer has already been subscribed
+    
      * @see #observe(Consumer, Consumer, Runnable)
      */
-    public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) throws IllegalArgumentException, IllegalStateException {
+    public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) throws IllegalStateException, IllegalArgumentException {
+        checkCurrentStage();
         N.checkArgNotNull(action, cs.action);
         N.checkArgNotNull(onError, cs.onError);
 
@@ -2316,11 +2408,11 @@ public abstract class Observer<T> {
      * @param action the action to perform on each item
      * @param onError the action to perform on error
      * @param onComplete the action to perform on completion
+     * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if any callback is {@code null}.
-     * @throws IllegalStateException if this stage has been replaced or this Observer has already been subscribed
      */
     public abstract void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
-            throws IllegalArgumentException, IllegalStateException;
+            throws IllegalStateException, IllegalArgumentException;
 
     /** Cancels and forgets all periodic intermediate-operation tasks associated with this Observer. */
     void cancelScheduledFutures() {
@@ -2488,16 +2580,13 @@ public abstract class Observer<T> {
          * @param action the action to perform on each item
          * @param onError the consumer invoked if an exception occurs during emission
          * @param onComplete the runnable invoked when the queue signals completion
+         * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
          * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is
          *         {@code null}.
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
-                throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
-            N.checkArgNotNull(onError, cs.onError);
-            N.checkArgNotNull(onComplete, cs.onComplete);
-
+                throws IllegalStateException, IllegalArgumentException {
             beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(e -> ((Observer<?>) this).deliverError(onError, e), () -> ((Observer<?>) this).deliverComplete(onComplete)) {
@@ -2554,16 +2643,13 @@ public abstract class Observer<T> {
          * @param action the action to perform on each item
          * @param onError the consumer invoked if an exception occurs during emission
          * @param onComplete the runnable invoked when the iterator is exhausted
+         * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
          * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is
          *         {@code null}.
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
-                throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
-            N.checkArgNotNull(onError, cs.onError);
-            N.checkArgNotNull(onComplete, cs.onComplete);
-
+                throws IllegalStateException, IllegalArgumentException {
             beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(e -> ((Observer<?>) this).deliverError(onError, e), () -> ((Observer<?>) this).deliverComplete(onComplete)) {
@@ -2624,16 +2710,13 @@ public abstract class Observer<T> {
          * @param action the action to perform when the timer fires
          * @param onError the consumer invoked if an exception occurs during the scheduled emission
          * @param onComplete the runnable invoked immediately after the single emission
+         * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
          * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is
          *         {@code null}.
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
-                throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
-            N.checkArgNotNull(onError, cs.onError);
-            N.checkArgNotNull(onComplete, cs.onComplete);
-
+                throws IllegalStateException, IllegalArgumentException {
             beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(e -> ((Observer<?>) this).deliverError(onError, e), () -> ((Observer<?>) this).deliverComplete(onComplete)) {
@@ -2693,16 +2776,13 @@ public abstract class Observer<T> {
          * @param action the action to perform on each emission
          * @param onError the consumer invoked if an exception occurs during an emission
          * @param onComplete the runnable invoked when the interval is cancelled
+         * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
          * @throws IllegalArgumentException if any of {@code action}, {@code onError}, or {@code onComplete} is
          *         {@code null}.
          */
         @Override
         public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError, final Runnable onComplete)
-                throws IllegalArgumentException {
-            N.checkArgNotNull(action, cs.action);
-            N.checkArgNotNull(onError, cs.onError);
-            N.checkArgNotNull(onComplete, cs.onComplete);
-
+                throws IllegalStateException, IllegalArgumentException {
             beginSubscription(action, onError, onComplete);
 
             dispatcher.append(new DispatcherBase<>(e -> ((Observer<?>) this).deliverError(onError, e), () -> ((Observer<?>) this).deliverComplete(onComplete)) {

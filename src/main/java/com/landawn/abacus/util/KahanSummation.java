@@ -61,7 +61,7 @@ public final class KahanSummation { // NOSONAR
      * KahanSummation sum = new KahanSummation();
      * sum.add(0.1);
      * sum.add(0.2);
-     * double result = sum.sum();   // more accurate than naive addition
+     * double result = sum.sum();   // 0.30000000000000004; compensation does not make every sum exact
      * }</pre>
      *
      */

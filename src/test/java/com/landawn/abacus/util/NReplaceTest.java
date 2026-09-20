@@ -306,8 +306,7 @@ public class NReplaceTest extends NTestSupport {
 
     @Test
     public void testReplaceRange_oversizedResultReportsArithmeticException() {
-        org.junit.jupiter.api.Assumptions.assumeTrue(Runtime.getRuntime().maxMemory() > 3L * 1024 * 1024 * 1024,
-                "needs a heap large enough for a 2GB byte[]");
+        org.junit.jupiter.api.Assumptions.assumeTrue(Runtime.getRuntime().maxMemory() > 3L * 1024 * 1024 * 1024, "needs a heap large enough for a 2GB byte[]");
 
         final byte[] huge = new byte[Integer.MAX_VALUE - 2];
         assertThrows(ArithmeticException.class, () -> N.replaceRange(huge, 0, 0, new byte[10]));

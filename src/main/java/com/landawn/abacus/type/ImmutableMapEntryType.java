@@ -70,8 +70,10 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      *
      * @param keyTypeName the name of the key type parameter
      * @param valueTypeName the name of the value type parameter
+     * @throws IllegalArgumentException if {@code keyTypeName} or {@code valueTypeName} is {@code null}, blank, or
+     *         structurally invalid.
      */
-    ImmutableMapEntryType(final String keyTypeName, final String valueTypeName) {
+    ImmutableMapEntryType(final String keyTypeName, final String valueTypeName) throws IllegalArgumentException {
         super(getTypeName(keyTypeName, valueTypeName, false));
 
         declaringName = getTypeName(keyTypeName, valueTypeName, true);
@@ -217,6 +219,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      *
      * @param appendable the {@link Appendable} to write to
      * @param x the immutable map entry to append; may be {@code null}
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the entry delimiters, key, value or null literal fails, or flushing the temporary writer fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -229,7 +232,7 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final AbstractMap.SimpleImmutableEntry<K, V> x) throws IOException {
+    public void appendTo(final Appendable appendable, final AbstractMap.SimpleImmutableEntry<K, V> x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -296,10 +299,12 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @param writer the {@link CharacterWriter} to write to
      * @param x the immutable map entry to write; may be {@code null}
      * @param config the serialization configuration to use; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the entry delimiters, key, value or null literal to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final AbstractMap.SimpleImmutableEntry<K, V> x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final AbstractMap.SimpleImmutableEntry<K, V> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -351,8 +356,10 @@ public class ImmutableMapEntryType<K, V> extends AbstractType<AbstractMap.Simple
      * @param valueTypeName the name of the value type
      * @param isDeclaringName {@code true} to generate a declaring name with simple type names, {@code false} for fully qualified names
      * @return the formatted type name (e.g., "Map.ImmutableEntry&lt;String, Integer&gt;")
+     * @throws IllegalArgumentException if {@code keyTypeName} or {@code valueTypeName} is {@code null}, blank, or
+     *         structurally invalid.
      */
-    protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) {
+    protected static String getTypeName(final String keyTypeName, final String valueTypeName, final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return MAP_IMMUTABLE_ENTRY + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName() + SK.COMMA_SPACE
                     + TypeFactory.getType(valueTypeName).declaringName() + SK.GREATER_THAN;

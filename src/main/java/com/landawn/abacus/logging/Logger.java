@@ -56,9 +56,9 @@ import java.util.function.Supplier;
  * {@code "90%sure"} is consumed), and there is no escape sequence ({@code \{}} and {@code %%} are not
  * special). To emit a literal {@code {}} or {@code %s}, pass it as an argument: substituted arguments are
  * never re-scanned for placeholders. Arguments are rendered with {@code N.toString(Object)}; an argument
- * whose {@code toString()} throws (or overflows the stack, as a self-referential collection does) never
- * aborts the log call and is rendered as a {@code [FAILED toString() of <class>@<hash>: <error>]} marker
- * instead. Concrete formatting is performed by {@link AbstractLogger}.</p>
+ * whose {@code toString()} throws is rendered as a {@code [FAILED toString() of <class>@<hash>: <error>]}
+ * marker, including stack overflow from a self-referential collection. Other {@link VirtualMachineError}s
+ * propagate. Concrete formatting is performed by {@link AbstractLogger}.</p>
  *
  * <p><b>Overload capture of {@code xxx(String, Throwable)}:</b> a call such as
  * {@code logger.error("Failed {}", ex)} whose single argument is a {@code Throwable} binds to the more
@@ -374,7 +374,8 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void trace(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -384,7 +385,8 @@ public interface Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #trace(Throwable, Supplier)} for consistent exception-first parameter order
      */
@@ -396,7 +398,8 @@ public interface Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void trace(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -628,7 +631,8 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void debug(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -638,7 +642,8 @@ public interface Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #debug(Throwable, Supplier)} for consistent exception-first parameter order
      */
@@ -650,7 +655,8 @@ public interface Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void debug(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -883,7 +889,8 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void info(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -893,7 +900,8 @@ public interface Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #info(Throwable, Supplier)} for consistent exception-first parameter order
      */
@@ -905,7 +913,8 @@ public interface Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void info(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -1138,7 +1147,8 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void warn(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -1148,7 +1158,8 @@ public interface Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #warn(Throwable, Supplier)} for consistent exception-first parameter order
      */
@@ -1160,7 +1171,8 @@ public interface Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void warn(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -1402,7 +1414,8 @@ public interface Logger {
      * }</pre>
      *
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void error(Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;
@@ -1412,7 +1425,8 @@ public interface Logger {
      *
      * @param supplier the supplier that provides the message
      * @param t the exception or error to log
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      * @deprecated Use {@link #error(Throwable, Supplier)} for consistent exception-first parameter order
      */
@@ -1424,7 +1438,8 @@ public interface Logger {
      *
      * @param t the exception or error to log
      * @param supplier the supplier that provides the message
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level         test, so it is thrown even when the level is disabled
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the check runs before the level test, so it is
+     *         thrown even when the level is disabled
      * @throws RuntimeException if this logging level is enabled and the message supplier throws a runtime exception.
      */
     void error(Throwable t, Supplier<String> supplier) throws IllegalArgumentException, RuntimeException;

@@ -36,23 +36,19 @@ class NullValidationRestartExcelTest extends TestBase {
     void allSourceOverloadsRejectNull() {
         assertArgument("excelFile", () -> ExcelUtil.readDatasetFromSheet((File) null),
                 () -> ExcelUtil.readDatasetFromSheet((File) null, 0, RowExtractors.DEFAULT),
-                () -> ExcelUtil.readDatasetFromSheet((File) null, "Data", RowExtractors.DEFAULT),
-                () -> ExcelUtil.readRowsFromSheet((File) null),
+                () -> ExcelUtil.readDatasetFromSheet((File) null, "Data", RowExtractors.DEFAULT), () -> ExcelUtil.readRowsFromSheet((File) null),
                 () -> ExcelUtil.readRowsFromSheet((File) null, 0, false, RowMappers.DEFAULT),
-                () -> ExcelUtil.readRowsFromSheet((File) null, "Data", false, RowMappers.DEFAULT),
-                () -> ExcelUtil.streamRowsFromSheet((File) null, 0, false),
+                () -> ExcelUtil.readRowsFromSheet((File) null, "Data", false, RowMappers.DEFAULT), () -> ExcelUtil.streamRowsFromSheet((File) null, 0, false),
                 () -> ExcelUtil.streamRowsFromSheet((File) null, "Data", false));
         assertArgument("excelInputStream", () -> ExcelUtil.readDatasetFromSheet((InputStream) null, 0, RowExtractors.DEFAULT),
                 () -> ExcelUtil.readDatasetFromSheet((InputStream) null, "Data", RowExtractors.DEFAULT),
                 () -> ExcelUtil.readRowsFromSheet((InputStream) null, 0, false, RowMappers.DEFAULT),
                 () -> ExcelUtil.readRowsFromSheet((InputStream) null, "Data", false, RowMappers.DEFAULT),
-                () -> ExcelUtil.streamRowsFromSheet((InputStream) null, 0, false),
-                () -> ExcelUtil.streamRowsFromSheet((InputStream) null, "Data", false));
+                () -> ExcelUtil.streamRowsFromSheet((InputStream) null, 0, false), () -> ExcelUtil.streamRowsFromSheet((InputStream) null, "Data", false));
         assertArgument("excelPath", () -> ExcelUtil.readDatasetFromSheet((Path) null, 0, RowExtractors.DEFAULT),
                 () -> ExcelUtil.readDatasetFromSheet((Path) null, "Data", RowExtractors.DEFAULT),
                 () -> ExcelUtil.readRowsFromSheet((Path) null, 0, false, RowMappers.DEFAULT),
-                () -> ExcelUtil.readRowsFromSheet((Path) null, "Data", false, RowMappers.DEFAULT),
-                () -> ExcelUtil.streamRowsFromSheet((Path) null, 0, false),
+                () -> ExcelUtil.readRowsFromSheet((Path) null, "Data", false, RowMappers.DEFAULT), () -> ExcelUtil.streamRowsFromSheet((Path) null, 0, false),
                 () -> ExcelUtil.streamRowsFromSheet((Path) null, "Data", false));
     }
 
@@ -60,7 +56,9 @@ class NullValidationRestartExcelTest extends TestBase {
     void rowWritersRejectNullBeforeCallbacksOrFileReplacement() throws Exception {
         final File destination = tempDir.resolve("rows.xlsx").toFile();
         Files.writeString(destination.toPath(), "keep");
-        final Consumer<Sheet> setter = sheet -> { throw new AssertionError("Unexpected sheet callback"); };
+        final Consumer<Sheet> setter = sheet -> {
+            throw new AssertionError("Unexpected sheet callback");
+        };
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
         assertArgument("headers", () -> ExcelUtil.writeRowsToSheet("Data", null, List.of(), destination),
                 () -> ExcelUtil.writeRowsToSheet("Data", null, List.of(), setter, destination),
@@ -83,7 +81,9 @@ class NullValidationRestartExcelTest extends TestBase {
     void datasetWritersRejectNullBeforeCallbacksOrFileReplacement() throws Exception {
         final File destination = tempDir.resolve("dataset.xlsx").toFile();
         Files.writeString(destination.toPath(), "keep");
-        final Consumer<Sheet> setter = sheet -> { throw new AssertionError("Unexpected sheet callback"); };
+        final Consumer<Sheet> setter = sheet -> {
+            throw new AssertionError("Unexpected sheet callback");
+        };
         final ByteArrayOutputStream output = new ByteArrayOutputStream();
         assertArgument("dataset", () -> ExcelUtil.writeDatasetToSheet("Data", null, destination),
                 () -> ExcelUtil.writeDatasetToSheet("Data", null, setter, destination),
@@ -102,10 +102,8 @@ class NullValidationRestartExcelTest extends TestBase {
         Files.writeString(destination.toPath(), "keep");
         final File missingSource = tempDir.resolve("missing.xlsx").toFile();
         final StringWriter writer = new StringWriter();
-        assertArgument("excelFile", () -> ExcelUtil.exportSheetToCsv(null, 0, destination),
-                () -> ExcelUtil.exportSheetToCsv(null, "Data", destination),
-                () -> ExcelUtil.exportSheetToCsv(null, 0, null, writer),
-                () -> ExcelUtil.exportSheetToCsv(null, "Data", null, writer));
+        assertArgument("excelFile", () -> ExcelUtil.exportSheetToCsv(null, 0, destination), () -> ExcelUtil.exportSheetToCsv(null, "Data", destination),
+                () -> ExcelUtil.exportSheetToCsv(null, 0, null, writer), () -> ExcelUtil.exportSheetToCsv(null, "Data", null, writer));
         assertArgument("outputCsvFile", () -> ExcelUtil.exportSheetToCsv(missingSource, 0, (File) null),
                 () -> ExcelUtil.exportSheetToCsv(missingSource, "Data", (File) null));
         assertArgument("outputWriter", () -> ExcelUtil.exportSheetToCsv(missingSource, 0, null, (Writer) null),

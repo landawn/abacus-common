@@ -57,8 +57,8 @@ import java.lang.annotation.Target;
  * public class DataProcessor {
  *     @LazyEvaluation
  *     public Stream<String> processLargeFile(Path filePath) throws IOException {
- *         // Returns stream without reading file yet
- *         // File is read only when terminal operation is called
+ *         // Opens the file now; lines are consumed and mapped during traversal.
+ *         // The caller must close the returned stream, for example with try-with-resources.
  *         return Files.lines(filePath).map(String::trim);
  *     }
  *

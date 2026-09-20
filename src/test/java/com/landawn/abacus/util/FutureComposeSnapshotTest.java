@@ -19,8 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class FutureComposeSnapshotTest {
+public class FutureComposeSnapshotTest extends TestBase {
     @Test
     void sourceAndCallbackMutationsCannotChangeCapturedMembership() throws Exception {
         CompletableFuture<Integer> first = CompletableFuture.completedFuture(7);

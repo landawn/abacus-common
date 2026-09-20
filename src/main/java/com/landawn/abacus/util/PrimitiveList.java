@@ -1043,8 +1043,10 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * Checks whether the elements in this list are sorted in ascending order.
      * An empty list or a list with a single element is considered sorted.
      *
-     * <p>For numeric types, ascending order means each element is less than or equal to
-     * the next element. Equal consecutive values are allowed in a sorted list.</p>
+     * <p>Each element must compare less than or equal to the next element. Floating-point lists
+     * use the total order of {@link Float#compare(float, float)} or {@link Double#compare(double, double)},
+     * which places NaN after all other values and negative zero before positive zero.
+     * Equal consecutive values are allowed in a sorted list.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1287,8 +1289,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy.
-     *                  For forward stepping, must be &lt; toIndex.
-     *                  For reverse stepping, must be &gt; toIndex (or toIndex can be -1 to copy through the first element).
+     *                  A value equal to toIndex selects no elements.
+     *                  For reverse stepping, it is &gt; toIndex (and toIndex can be -1 to copy through the first element).
      * @param toIndex the ending index (exclusive) of the range to copy.
      *                Can be -1 when using negative step to indicate copying to the start.
      * @param step the interval between selected elements. Must not be zero.
@@ -1633,7 +1635,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
      * @param supplier a function that creates a new Collection instance of the desired type with the given initial capacity
-     * @return a Collection containing elements from the specified range in the same order
+     * @return a Collection populated with elements from the specified range in encounter order;
+     *         its iteration order and duplicate handling depend on the supplied collection
      * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
      * @throws RuntimeException if the supplier throws an exception during Collection creation
@@ -1794,13 +1797,13 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param size the logical number of elements in the array
      * @param indices the logical indices to remove
      * @return the new logical size
-     * @throws NullPointerException if {@code elementData} or {@code indices} is {@code null}
+     * @throws IllegalArgumentException if {@code elementData} or {@code indices} is {@code null}
      * @throws IndexOutOfBoundsException if any index is outside {@code [0, size)}
      */
     protected static int compactAfterRemovingIndices(final Object elementData, final int size, final int[] indices)
-            throws NullPointerException, IndexOutOfBoundsException {
-        N.requireNonNull(elementData, "elementData");
-        N.requireNonNull(indices, "indices");
+            throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkArgNotNull(elementData, cs.elementData);
+        N.checkArgNotNull(indices, cs.indices);
 
         if (indices.length == 0) {
             return size;

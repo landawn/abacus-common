@@ -10,8 +10,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class ComparatorBoundsTest {
+public class ComparatorBoundsTest extends TestBase {
     @TempDir
     Path directory;
 

@@ -25,8 +25,9 @@ import com.landawn.abacus.util.function.Consumer;
  * for a collection of BigInteger values.
  *
  * <p>This class is designed to work with Java 8 streams and can be used as a
- * reduction target for a stream of BigInteger values. It maintains arbitrary
- * precision for all calculations by using BigInteger for sum, min, and max values.</p>
+ * reduction target for a stream of BigInteger values. It uses BigInteger for exact
+ * sum, min, and max values; the average is rounded using
+ * {@link java.math.MathContext#DECIMAL128}.</p>
  *
  * <p>This implementation is not thread-safe. External synchronization is required
  * if instances are accessed from multiple threads.</p>
@@ -177,11 +178,13 @@ public class BigIntegerSummaryStatistics implements Consumer<BigInteger> {
      * }</pre>
      *
      * @param other another {@code BigIntegerSummaryStatistics} to be combined with this one; must not be {@code null}
-     * @throws NullPointerException if {@code other} is {@code null}
+     * @throws IllegalArgumentException if {@code other} is {@code null}
      * @throws ArithmeticException if the combined observation count would overflow or the sum cannot be
      *         represented by {@code BigInteger}; this instance is unchanged
      */
-    public void combine(final BigIntegerSummaryStatistics other) throws NullPointerException, ArithmeticException {
+    public void combine(final BigIntegerSummaryStatistics other) throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(other, cs.other);
+
         // Read both source totals before assignment so self-combination is also safe.
         final long newCount = Math.addExact(count, other.count);
         final BigInteger newSum = sum.add(other.sum);

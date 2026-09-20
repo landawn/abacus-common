@@ -615,10 +615,9 @@ public class NoCachingNoUpdatingDisposableArrayTest extends NoCachingNoUpdatingT
      */
     @Test
     public void testCreate_PrimitiveComponentTypeIsRejected() {
-        for (final Class<?> primitive : new Class<?>[] { int.class, long.class, double.class, char.class, boolean.class,
-                byte.class, short.class, float.class }) {
-            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                    () -> DisposableArray.create(primitive, 3));
+        for (final Class<?> primitive : new Class<?>[] { int.class, long.class, double.class, char.class, boolean.class, byte.class, short.class,
+                float.class }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> DisposableArray.create(primitive, 3));
             assertTrue(e.getMessage().contains("primitive"), "message should name the problem: " + e.getMessage());
         }
 

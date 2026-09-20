@@ -19,8 +19,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class DigestUnicodeTest {
+public class DigestUnicodeTest extends TestBase {
     private static List<Method> stringDigests() {
         return Arrays.stream(DigestUtil.class.getMethods())
                 .filter(m -> m.getParameterCount() == 1 && m.getParameterTypes()[0] == String.class)
@@ -37,7 +39,8 @@ public class DigestUnicodeTest {
                 final var failure = assertThrows(InvocationTargetException.class, () -> method.invoke(null, malformed));
                 assertInstanceOf(IllegalArgumentException.class, failure.getCause(), method.getName());
             }
-            assertInstanceOf(IllegalArgumentException.class, assertThrows(InvocationTargetException.class, () -> method.invoke(null, (Object) null)).getCause());
+            assertInstanceOf(IllegalArgumentException.class,
+                    assertThrows(InvocationTargetException.class, () -> method.invoke(null, (Object) null)).getCause());
             final Method binary = DigestUtil.class.getMethod(method.getName(), byte[].class);
             for (final String valid : List.of("", "ASCII?", "\u03B1", "\uD83D\uDE00", "\uDBFF\uDFFF", "e\u0301")) {
                 final Object expected = binary.invoke(null, valid.getBytes(StandardCharsets.UTF_8));

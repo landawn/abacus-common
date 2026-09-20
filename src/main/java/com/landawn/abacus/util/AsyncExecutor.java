@@ -55,7 +55,7 @@ import com.landawn.abacus.logging.LoggerFactory;
  *
  * <p>The worker threads of that internal pool are <b>daemon</b> threads named
  * {@code abacus-async-<poolIndex>-<threadIndex>}, so an application that never calls {@link #shutdown()} can
- * still exit normally. In-flight and queued work is not abandoned: the shutdown hook runs
+ * still exit normally. To allow in-flight and queued work to finish, the shutdown hook runs
  * {@link #shutdownAndAwait(long, TimeUnit)} and waits up to 120 seconds (by default) for the pool to drain.
  * That wait can be changed with the {@code abacus.asyncExecutor.shutdownHookTimeoutMillis} system property,
  * which is read once when this class is initialized; {@code 0} makes the hook return without waiting. An
@@ -64,8 +64,9 @@ import com.landawn.abacus.logging.LoggerFactory;
  * <p><b>Executor ownership:</b> an instance created by one of the sizing constructors owns the pool it
  * creates lazily and shuts it down on {@link #shutdown()}. An instance created by
  * {@link #AsyncExecutor(Executor)} only <i>borrows</i> the supplied executor: {@code shutdown()} stops
- * this instance from accepting new work and waits for the tasks it submitted, but never shuts the
+ * this instance from accepting new work, but never shuts the
  * borrowed executor down - it may be shared with the rest of the application.</p>
+ * Use {@link #shutdownAndAwait(long, TimeUnit)} to wait for tasks submitted through this instance.
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -174,6 +175,9 @@ public class AsyncExecutor {
      *   <li>Keep-alive time: 180 seconds</li>
      * </ul>
      *
+     * <p>The internal unbounded queue holds tasks beyond the core pool's capacity; the larger maximum
+     * pool size does not cause additional workers to be created during normal operation.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * AsyncExecutor executor = new AsyncExecutor();
@@ -188,17 +192,21 @@ public class AsyncExecutor {
     /**
      * Constructs an AsyncExecutor with specified thread pool configuration.
      *
+     * <p>The internal pool uses an unbounded queue. With a positive core size, it grows up to that size
+     * and queues further tasks. With a core size of zero, queued work starts one worker, which can time
+     * out according to {@code keepAliveTime}. See {@link #getExecutor()} for pool-growth details.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create executor with 10 core threads, 20 max threads, 60 second keep-alive
      * AsyncExecutor executor = new AsyncExecutor(10, 20, 60L, TimeUnit.SECONDS);
      * }</pre>
      *
-     * @param coreThreadPoolSize the number of threads to keep in the pool, even if they are idle
+     * @param coreThreadPoolSize the number of core workers, created as tasks arrive and retained when idle; may be zero
      * @param maxThreadPoolSize the maximum number of threads to allow in the pool; if less than {@code coreThreadPoolSize}, it is raised to {@code coreThreadPoolSize}.
-     *        Note that this bound is effectively unreachable with the unbounded queue this class uses - see
-     *        {@link #getExecutor()} - so the pool runs at {@code coreThreadPoolSize} and queues the remainder
-     * @param keepAliveTime when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating
+     *        With the unbounded queue, normal worker concurrency is limited to a positive core size, or one worker when the core size is zero;
+     *        see {@link #getExecutor()}
+     * @param keepAliveTime the idle timeout for workers above the core size, including the single worker used when the core size is zero
      * @param unit the time unit for the keepAliveTime argument
      * @throws IllegalArgumentException if {@code coreThreadPoolSize} is negative, if {@code maxThreadPoolSize} is
      *         negative, if {@code coreThreadPoolSize} and {@code maxThreadPoolSize} are both zero, if
@@ -216,12 +224,12 @@ public class AsyncExecutor {
             throws IllegalArgumentException {
         N.checkArgNotNegative(coreThreadPoolSize, cs.coreThreadPoolSize);
         N.checkArgNotNegative(maxThreadPoolSize, cs.maxThreadPoolSize);
+        N.checkArgNotNegative(keepAliveTime, cs.keepAliveTime);
+        N.checkArgNotNull(unit, cs.unit);
 
         if (coreThreadPoolSize == 0 && maxThreadPoolSize == 0) {
             throw new IllegalArgumentException("coreThreadPoolSize and maxThreadPoolSize cannot both be zero");
         }
-        N.checkArgNotNegative(keepAliveTime, cs.keepAliveTime);
-        N.checkArgNotNull(unit, cs.unit);
 
         this.coreThreadPoolSize = coreThreadPoolSize;
         this.maxThreadPoolSize = Math.max(coreThreadPoolSize, maxThreadPoolSize);
@@ -237,8 +245,8 @@ public class AsyncExecutor {
      * parameters are extracted and used. Otherwise, default values are used.</p>
      *
      * <p><b>This instance does not own {@code executor}.</b> {@link #shutdown()} and
-     * {@link #shutdownAndAwait(long, TimeUnit)} stop this wrapper from accepting new work and wait for
-     * the tasks <i>this wrapper</i> submitted, but they never call {@code shutdown()} on the supplied
+     * {@link #shutdownAndAwait(long, TimeUnit)} stop this wrapper from accepting new work; only the latter waits for
+     * the tasks <i>this wrapper</i> submitted. Neither calls {@code shutdown()} on the supplied
      * executor - it may be shared with the rest of the application. No JVM shutdown hook is registered
      * for it either, and it keeps whatever threads its own factory creates. Shutting it down is the
      * caller's responsibility.</p>
@@ -325,7 +333,7 @@ public class AsyncExecutor {
     /**
      * Executes the provided command asynchronously and ensures a final action is performed after execution.
      *
-     * <p>The final action is guaranteed to execute regardless of whether the command
+     * <p>Once the command starts, the final action is guaranteed to execute regardless of whether it
      * completes successfully or throws an exception, similar to a try-finally block.
      * This is useful for cleanup operations such as releasing resources or updating state.</p>
      * If both actions fail, the command's failure remains primary and the final-action failure is
@@ -460,7 +468,7 @@ public class AsyncExecutor {
     /**
      * Executes the provided Callable command asynchronously and ensures a final action is performed after execution.
      *
-     * <p>The final action is guaranteed to execute regardless of whether the command
+     * <p>Once the command starts, the final action is guaranteed to execute regardless of whether it
      * completes successfully or throws an exception, similar to a try-finally block.
      * This is useful for cleanup operations such as releasing resources or logging completion.</p>
      * If both actions fail, the command's failure remains primary and the final-action failure is
@@ -566,7 +574,7 @@ public class AsyncExecutor {
      * <p>The command will be retried up to the specified number of times if it fails and the
      * retry condition evaluates to {@code true}. A delay is introduced between retry attempts.</p>
      *
-     * <p>The total number of execution attempts is retryTimes + 1 (initial attempt plus retries).</p>
+     * <p>The maximum number of execution attempts is retryTimes + 1 (initial attempt plus retries).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -615,7 +623,7 @@ public class AsyncExecutor {
      * evaluates to {@code true}. The retry condition can check both the result value and any exception thrown.
      * A delay is introduced between retry attempts.</p>
      *
-     * <p>The total number of execution attempts is retryTimes + 1 (initial attempt plus retries).</p>
+     * <p>The maximum number of execution attempts is retryTimes + 1 (initial attempt plus retries).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -799,11 +807,11 @@ public class AsyncExecutor {
      * graceful termination when the JVM exits; if the JVM is already shutting down no hook can be registered
      * and the pool is used without one, with a warning logged.</p>
      *
-     * <p><b>The configured maximum pool size is effectively unreachable.</b> A
-     * {@link java.util.concurrent.ThreadPoolExecutor} only creates threads beyond its core size once its queue is
-     * full, and the queue here is unbounded, so it never fills. The pool therefore grows to the core size and queues
-     * everything after that; the maximum only takes effect if the queue is ever replaced with a bounded one. Size the
-     * core pool for the concurrency you actually want, or supply your own {@link Executor}.</p>
+     * <p><b>The unbounded queue limits normal pool growth.</b> With a positive core size, the internally
+     * created {@link ThreadPoolExecutor} grows to that size and queues further tasks instead of creating
+     * additional workers up to the maximum. A core size of zero still starts one worker when work is queued,
+     * so tasks can execute; that worker is subject to the configured keep-alive timeout. Size the core pool
+     * for the concurrency you want, or supply your own {@link Executor}.</p>
      *
      * <p>The lazy initialization happens under this instance's lifecycle lock, so the pool is created at
      * most once no matter how many threads call this method.</p>
@@ -852,9 +860,8 @@ public class AsyncExecutor {
                 }
             }, "abacus-async-" + poolIndex + "-shutdown-hook");
 
-            // Register the hook before publishing the pool: addShutdownHook throws once JVM shutdown has begun,
-            // and a pool published first would stay installed without a hook, so the submit that failed would
-            // silently succeed when retried. Nothing between the registration and the publication can throw.
+            // Try to register the hook before publishing the pool. If JVM shutdown has already begun,
+            // the daemon pool remains usable without a hook, as documented above.
             try {
                 Runtime.getRuntime().addShutdownHook(hook);
                 shutdownHook = hook;

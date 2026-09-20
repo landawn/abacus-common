@@ -758,13 +758,17 @@ public class ImmutableSortedSetTest extends TestBase {
     }
 
     @Test
-    public void testOf_neverSilentlyFallsBackToAnUnsortedImmutableSet() {
-        // With a Comparable bound on of(...), a non-Comparable element selected the inherited
-        // ImmutableSet.of(...) instead and produced an UNSORTED set with no error at all.
-        Assertions.assertThrows(ClassCastException.class, () -> ImmutableSortedSet.of(new NotComparableSS("z")));
-        Assertions.assertThrows(ClassCastException.class, () -> ImmutableSortedSet.of(new NotComparableSS("z"), new NotComparableSS("a")));
-        Assertions.assertThrows(ClassCastException.class,
-                () -> ImmutableSortedSet.of(new NotComparableSS("a"), new NotComparableSS("b"), new NotComparableSS("c")));
+    public void testOf_nonComparableElementSelectsInheritedUnsortedFactory() {
+        // of(...) requires E extends Comparable. A non-Comparable element is not applicable to
+        // ImmutableSortedSet.of, so the call binds to ImmutableSet.of and returns an unsorted set.
+        // The hierarchy is unchanged, so this fallback remains; a result demanded as
+        // ImmutableSortedSet<NotComparableSS> would not compile.
+        final ImmutableSet<NotComparableSS> one = ImmutableSortedSet.of(new NotComparableSS("z"));
+        final ImmutableSet<NotComparableSS> two = ImmutableSortedSet.of(new NotComparableSS("z"), new NotComparableSS("a"));
+        assertFalse(one instanceof SortedSet);
+        assertFalse(two instanceof SortedSet);
+        assertEquals(1, one.size());
+        assertEquals(2, two.size());
     }
 
     @Test

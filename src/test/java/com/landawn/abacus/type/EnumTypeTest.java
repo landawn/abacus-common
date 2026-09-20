@@ -505,7 +505,7 @@ public class EnumTypeTest extends TestBase {
         assertEquals(JacksonValueOnly.B, type.valueOf("b2"));
         // Constant name is accepted as a fallback (documented; Jackson itself rejects it).
         assertEquals(JacksonValueOnly.B, type.valueOf("B"));
-        assertNull(type.valueOf(""));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(""));
         assertNull(type.valueOf((String) null));
         assertNull(type.valueOf("null"));
         assertEquals(JacksonValueOnly.A, type.valueOf((Object) JacksonValueOnly.A));
@@ -582,14 +582,14 @@ public class EnumTypeTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> type.valueOf("B"));
     }
 
-    // ---- T2-04: creator exceptions unwrapped, empty/"null" hoisted above the creator ----
+    // ---- T2-04: creator exceptions unwrapped, including rejected empty tokens ----
 
     @Test
-    public void reviewFixes20260906_creatorEnumEmptyIsNullAndCreatorExceptionIsUnwrapped() {
+    public void reviewFixes20260906_creatorEnumEmptyTokenReachesCreatorAndExceptionIsUnwrapped() {
         final Type<JacksonBoth> type = Type.of(JacksonBoth.class);
 
         // Before the fix: RuntimeException(InvocationTargetException) for all three.
-        assertNull(type.valueOf(""));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(""));
         assertNull(type.valueOf("null"));
 
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> type.valueOf("zzz"));
@@ -649,8 +649,8 @@ public class EnumTypeTest extends TestBase {
         assertEquals(JacksonBothNullValued.NONE, type.valueOf("null".toCharArray(), 0, 4));
         assertEquals("null", type.stringOf(type.valueOf(type.stringOf(JacksonBothNullValued.NONE))));
 
-        // An empty string is still null everywhere, and a null string too.
-        assertNull(type.valueOf(""));
+        // An empty token reaches the creator; a null container value stays null.
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf(""));
         assertNull(type.valueOf((String) null));
 
         // A pair enum whose constants do not claim it keeps the literal-null rule (the creator never sees it).

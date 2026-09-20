@@ -178,6 +178,14 @@ public final class BrotliInputStream extends InputStream {
      */
     @Override
     public int read(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IllegalStateException, IOException {
+        // Checked before the range: InputStream.read(byte[], int, int) (and this method's own Javadoc)
+        // require NullPointerException to win over IndexOutOfBoundsException, but the range check below
+        // dereferences b.length last, so a null buffer combined with a negative off/len reported the
+        // wrong exception type.
+        if (b == null) {
+            throw new NullPointerException("b");
+        }
+
         // Enforce InputStream.read(byte[], int, int) contract: bad offset/length must throw
         // IndexOutOfBoundsException. The underlying org.brotli.dec.BrotliInputStream throws
         // IllegalArgumentException, so we validate first to surface the correct exception type.

@@ -279,8 +279,12 @@ class JsonStreamReader extends JsonStringReader {
         return nextEvent;
     }
 
+    /**
+     * @throws UncheckedIOException if reading more input while scanning the number fails
+     * @throws ParsingException if token text has an invalid escape or unexpected whitespace, or its character buffer cannot grow
+     */
     @Override
-    protected void readNumber(final int firstChar, final Type<?> nextTokenValueType) {
+    protected void readNumber(final int firstChar, final Type<?> nextTokenValueType) throws UncheckedIOException, ParsingException {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -399,8 +403,12 @@ class JsonStreamReader extends JsonStringReader {
         //    }
     }
 
+    /**
+     * @throws UncheckedIOException if reading more input while resolving an escape fails
+     * @throws ParsingException if an escape is malformed, non-whitespace follows whitespace within an unquoted value, or the token buffer cannot grow
+     */
     @Override
-    protected int saveChar(final int ch) {
+    protected int saveChar(final int ch) throws UncheckedIOException, ParsingException {
         if (ch < 0) {
             return ch;
         }
@@ -414,9 +422,12 @@ class JsonStreamReader extends JsonStringReader {
      * <p>Tops the read buffer up first, so a literal split across two reads is still matched (the already
      * consumed prefix is copied into {@code cbuf} by {@link #refill()}). {@code nextChar()} cannot be used
      * here because it consumes the character before it can be classified.</p>
+     * @throws UncheckedIOException if reading more input to match the literal or resolve an escape fails
+     * @throws ParsingException if the consumed character starts an invalid escape, follows whitespace within an unquoted value, or requires a token
+     *         buffer that cannot grow
      */
     @Override
-    protected boolean matchLiteralChar(final char expected) {
+    protected boolean matchLiteralChar(final char expected) throws UncheckedIOException, ParsingException {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }

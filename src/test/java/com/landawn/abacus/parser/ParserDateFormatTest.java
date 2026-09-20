@@ -1,6 +1,7 @@
 package com.landawn.abacus.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -202,8 +203,12 @@ public class ParserDateFormatTest extends TestBase {
 
         NullMarkers template = realValues();
         for (XmlParser xmlParser : java.util.List.of(ParserFactory.createXmlParser(), ParserFactory.createAbacusXmlParser())) {
-            String xml = xmlParser.serialize(template).replace("2024-01-02 03:04 UTC", "null").replace("2024-01-02 03:04", "null").replace("2024-01-02", "null")
-                    .replace("03:04", "NULL").replace(">1704164640000<", ">null<");
+            String xml = xmlParser.serialize(template)
+                    .replace("2024-01-02 03:04 UTC", "null")
+                    .replace("2024-01-02 03:04", "null")
+                    .replace("2024-01-02", "null")
+                    .replace("03:04", "NULL")
+                    .replace(">1704164640000<", ">null<");
             assertTrue(xml.contains("<dateTime>null</dateTime>"), xml);
             NullMarkers fromXml = xmlParser.deserialize(xml, NullMarkers.class);
             assertNull(fromXml.dateTime, xml);
@@ -290,6 +295,37 @@ public class ParserDateFormatTest extends TestBase {
 
         // malformed text is still rejected rather than being swallowed as a null marker
         assertThrows(NumberFormatException.class, () -> parser.deserialize("{\"boxed\":\"abc\"}", EpochLongs.class));
+    }
+
+    /**
+     * A property carrying a {@code dateFormat} writes its formatted text through the format path rather than
+     * the normal type serializer. That path escaped only for JSON ({@code config instanceof JsonSerConfig}),
+     * so for XML the text went out raw - and since {@code propFuncMap} has an entry for {@code String.class},
+     * a class-level or field-level {@code dateFormat} on a String property emitted unescaped markup,
+     * producing XML this library's own parser then refused to read back.
+     */
+    @Test
+    public void xmlEscapesFormattedPropertyText_regression_20260918() {
+        final XmlParser xml = ParserFactory.createXmlParser();
+
+        final Text formatted = new Text();
+        formatted.value = "a<b>&c";
+
+        final String formattedXml = xml.serialize(formatted);
+
+        // Before the fix this was the raw <value>a<b>&c</value>.
+        assertTrue(formattedXml.contains("a&lt;b&gt;&amp;c"), formattedXml);
+        assertFalse(formattedXml.contains("<b>"), formattedXml);
+
+        // ... and the document is readable again, which it was not before (WstxUnexpectedCharException).
+        assertEquals(formatted.value, xml.deserialize(formattedXml, Text.class).value);
+
+        // JSON keeps its existing conventions: quoted escapes, unquoted stays raw.
+        final String quoted = parser.serialize(formatted, JsonSerConfig.create().setStringQuotation('"'));
+        assertEquals(formatted.value, parser.deserialize(quoted, Text.class).value);
+
+        final String raw = parser.serialize(formatted, JsonSerConfig.create().setStringQuotation((char) 0));
+        assertTrue(raw.contains(formatted.value), raw);
     }
 
 }

@@ -261,7 +261,7 @@ public class HttpResponse {
      * (derived from the {@code Content-Type} header). Supported types include:
      * <ul>
      *   <li>{@code String.class} - returns the body decoded with the response charset
-     *       (derived from the {@code Content-Type} header, defaulting to UTF-8 if absent)</li>
+     *       (selected by the client from the response headers, with the request charset as a fallback)</li>
      *   <li>{@code byte[].class} - returns a copy of the raw response bytes</li>
      *   <li>Any other class - deserializes based on content format (JSON, XML, Kryo,
      *       form URL-encoded). For unknown/{@code NONE} content formats a best-effort
@@ -325,8 +325,8 @@ public class HttpResponse {
     /**
      * Deserializes the response body to the specified parameterized type.
      * This method is useful for deserializing to generic types like {@code List<User>} or {@code Map<String, Object>}.
-     * The body bytes are decoded using the response charset derived from the {@code Content-Type}
-     * header (defaulting to UTF-8 if absent) before parsing.
+     * The body bytes are decoded using the charset selected by the client before parsing. The client
+     * derives it from the response {@code Content-Type}, falling back to the request charset and then UTF-8.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

@@ -17,8 +17,10 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class CodegenTemporaryFileTest {
+public class CodegenTemporaryFileTest extends TestBase {
     @TempDir
     Path directory;
 
@@ -105,8 +107,10 @@ public class CodegenTemporaryFileTest {
         final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
         while (!staged.await(20, TimeUnit.MILLISECONDS)) {
             // Surface reflection or worker failures promptly instead of hiding them behind a latch timeout.
-            if (first.isDone()) first.get();
-            if (second.isDone()) second.get();
+            if (first.isDone())
+                first.get();
+            if (second.isDone())
+                second.get();
             assertTrue(System.nanoTime() < deadline, "Writers did not reach the publication gate");
         }
     }

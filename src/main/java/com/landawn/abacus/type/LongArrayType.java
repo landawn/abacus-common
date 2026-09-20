@@ -174,12 +174,13 @@ public final class LongArrayType extends ObjectArrayType<Long> {
     /**
      * Writes a {@code Long[]} to a {@link CharacterWriter}.
      * The output format is a bracket-enclosed, comma-separated list.
-     * Null elements are written as {@code null}; {@code non-null} values use the writer's optimized
+     * Null elements are written as {@code null}, or {@code 0} when {@code writeNullNumberAsZero} is enabled; non-null values use the writer's optimized
      * long-write method. If {@code x} is {@code null}, the literal {@code null} is written.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes numeric literals and {@code null}
      * elements directly to the {@code CharacterWriter}. The supplied serialization config is forwarded to the
-     * long element type, including its {@code writeNullNumberAsZero} setting.
+     * long element type, including {@code writeNullNumberAsZero} and {@code writeLongAsString}.
+     * When {@code writeLongAsString} is enabled with a non-zero string quotation, numeric elements are quoted.
      * <p>
      * <b>serializeTo vs. appendTo:</b> both methods use the same bracket-enclosed scalar-element syntax for
      * {@code Long[]} values; {@code serializeTo} writes to a {@code CharacterWriter} for serializer pipelines.

@@ -53,7 +53,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      equivalence, leaving the second one behind. Its own inline comment already said "never a Set".
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B1_KeyStagingPreservesBackingMapEquivalence {
+    public class B1_KeyStagingPreservesBackingMapEquivalence extends TestBase {
 
         private Multiset<String> identityMultiset(final String a, final String b) {
             final Multiset<String> ms = new Multiset<>(IdentityHashMap.class);
@@ -143,7 +143,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      caller-supplied collection straight into the backing map. Iterator.remove() must stay.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B2_EntryViewRefusesSetValue {
+    public class B2_EntryViewRefusesSetValue extends TestBase {
 
         @Test
         public void b2_iteratorEntrySetValueThrows() {
@@ -276,7 +276,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      value instead of the true total.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B3_SpliteratorCarriesTheExactTotal {
+    public class B3_SpliteratorCarriesTheExactTotal extends TestBase {
 
         /** Two entries whose counts sum past Integer.MAX_VALUE, with no memory cost. */
         private Multiset<String> oversized() {
@@ -379,7 +379,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      empty collection that refused the add" block. Behaviour must be identical after the dedupe.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B4_PutFamilyIsUnchanged {
+    public class B4_PutFamilyIsUnchanged extends TestBase {
 
         @Test
         public void b4_putCreatesAndAppends() {
@@ -582,7 +582,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      collection's / backing map's own null and type behaviour.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B5_InheritedNullAndTypeBehaviour {
+    public class B5_InheritedNullAndTypeBehaviour extends TestBase {
 
         @Test
         public void b5_retainAllWithANonEmptyNullHostileCollectionPropagatesNpe() {
@@ -628,7 +628,7 @@ public class CollectionsRegressionCTest extends TestBase {
     // B6 - Multiset's iterator does not support remove(); now documented.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B6_IteratorRemoveIsUnsupported {
+    public class B6_IteratorRemoveIsUnsupported extends TestBase {
 
         @Test
         public void b6_removeThrowsUnsupportedOperation() {
@@ -654,7 +654,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      regardless of V, so any subclass reaching it would have failed with a ClassCastException.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B7_NoUnsafeBaseConstructors {
+    public class B7_NoUnsafeBaseConstructors extends TestBase {
 
         @Test
         public void b7_baseMultimapDeclaresNoIntConstructor() {
@@ -692,7 +692,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      with the target cleared and the key still mapped to it.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class D1_EmptyReplacementNeverLeavesAnEmptyMapping {
+    public class D1_EmptyReplacementNeverLeavesAnEmptyMapping extends TestBase {
 
         @Test
         public void d1_replaceValuesWithEmptyRemovesTheKey() {
@@ -787,7 +787,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      contents into a supplier-made collection instead.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class J3_ComputeIfAbsentCopiesContents {
+    public class J3_ComputeIfAbsentCopiesContents extends TestBase {
 
         @Test
         public void j3_theFunctionsCollectionIsNotStored() {
@@ -838,7 +838,7 @@ public class CollectionsRegressionCTest extends TestBase {
     // J4 - valueSpliterator() claimed "no characteristics"; Spliterators.spliterator adds SIZED|SUBSIZED.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class J4_ValueSpliteratorCharacteristics {
+    public class J4_ValueSpliteratorCharacteristics extends TestBase {
 
         @Test
         public void j4_reportsSizedAndSubsizedWithTheExactTotal() {
@@ -860,7 +860,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //      the exact anti-pattern flatValues' own example warns against. The documented form must work.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class J5_SizeHintIsAnExpectedCount {
+    public class J5_SizeHintIsAnExpectedCount extends TestBase {
 
         @Test
         public void j5_theDocumentedToMapFormWorksAndPreservesOrder() {
@@ -910,7 +910,7 @@ public class CollectionsRegressionCTest extends TestBase {
     }
 
     @Nested
-    public class C001_C006_SortedConvertersAreLosslessOrLoud {
+    public class C001_C006_SortedConvertersAreLosslessOrLoud extends TestBase {
 
         private Multiset<String> identityMultiset(final String a, final String b) {
             final Multiset<String> ms = new Multiset<>(IdentityHashMap.class);
@@ -1023,7 +1023,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //         accumulating them - dropping occurrences and disagreeing with the element-wise path.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class C008_CopyingAMultisetAccumulatesInsteadOfOverwriting {
+    public class C008_CopyingAMultisetAccumulatesInsteadOfOverwriting extends TestBase {
 
         private Multiset<String> identitySource(final String a, final String b) {
             final Multiset<String> ms = new Multiset<>(IdentityHashMap.class);
@@ -1128,7 +1128,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //         two equal-but-distinct elements at the SAME count yield entries equal to each other.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class C007_EntrySetCaveatForAFinerBacking {
+    public class C007_EntrySetCaveatForAFinerBacking extends TestBase {
 
         @Test
         public void c007_equalCountsMakeTheEntriesEqualToEachOther() {
@@ -1177,7 +1177,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //         contract-conformant; the class javadoc now says so, and this pins it.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class C002_BulkMethodsUseDifferentEquivalences {
+    public class C002_BulkMethodsUseDifferentEquivalences extends TestBase {
 
         private Multiset<String> identityMultiset(final String a, final String b) {
             final Multiset<String> ms = new Multiset<>(IdentityHashMap.class);
@@ -1268,7 +1268,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //         standard Map interfaces are supported too and resolve to their usual implementations.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class C003_BackingMapTypeAcceptsTheStandardInterfaces {
+    public class C003_BackingMapTypeAcceptsTheStandardInterfaces extends TestBase {
 
         @Test
         public void c003_mapInterfaceResolvesToAHashMap() {
@@ -1328,7 +1328,7 @@ public class CollectionsRegressionCTest extends TestBase {
     //         Multiset(Iterable) and Multiset(Supplier). Pins the documented workaround.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class C004_SupplierConstructorNeedsAnExplicitTargetType {
+    public class C004_SupplierConstructorNeedsAnExplicitTargetType extends TestBase {
 
         @Test
         public void c004_aHoistedSupplierReachesTheDocumentedIllegalArgumentException() {
@@ -1359,7 +1359,7 @@ public class CollectionsRegressionCTest extends TestBase {
     // Other - lazy staging in Multiset.removeIf, the self-argument shortcuts, and the accumulator rewrite.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class Other_MultisetBulkRemovalIsUnchanged {
+    public class Other_MultisetBulkRemovalIsUnchanged extends TestBase {
 
         @Test
         public void other_removeAllOccurrencesOfSelfClearsAndReportsChange() {

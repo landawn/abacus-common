@@ -155,7 +155,7 @@ class IteratorCharStream extends AbstractCharStream {
                 }
 
                 @Override
-                public char nextChar() {
+                public char nextChar() throws NoSuchElementException {
                     return values.nextChar();
                 }
             };
@@ -200,7 +200,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -249,7 +249,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -305,7 +305,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (!hasNext && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -340,7 +340,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 return mapper.applyAsChar(elements.nextChar());
             }
 
@@ -369,7 +369,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return mapper.applyAsInt(elements.nextChar());
             }
 
@@ -399,7 +399,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return mapper.apply(elements.nextChar());
             }
 
@@ -449,7 +449,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -505,7 +505,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -557,7 +557,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (idx >= len && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -610,7 +610,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -680,7 +680,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -737,7 +737,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 if ((cur == null || !cur.hasNext()) && !hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -788,7 +788,7 @@ class IteratorCharStream extends AbstractCharStream {
                 }
 
                 @Override
-                public char nextChar() {
+                public char nextChar() throws NoSuchElementException {
                     if (!hasNext && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
@@ -830,7 +830,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (cnt >= maxSize) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
@@ -910,7 +910,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 skipElements();
 
                 return elements.nextChar();
@@ -970,7 +970,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 final char next = elements.nextChar();
 
                 action.accept(next);
@@ -1765,7 +1765,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public int nextInt() {
+            public int nextInt() throws NoSuchElementException {
                 return elements.nextChar();
             }
 
@@ -1831,7 +1831,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }
@@ -1872,13 +1872,7 @@ class IteratorCharStream extends AbstractCharStream {
                             iter = s == null ? CharIteratorEx.empty() : s.iteratorEx(); // a null result appends nothing, like defer
                             holder.setValue(s);
                         } catch (final RuntimeException | Error e) {
-                            if (s != null) {
-                                try {
-                                    s.close();
-                                } catch (final RuntimeException ce) {
-                                    e.addSuppressed(ce);
-                                }
-                            }
+                            closeOpenedSource(s, e);
                             throw e;
                         }
                     }
@@ -1915,7 +1909,7 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             @Override
-            public char nextChar() {
+            public char nextChar() throws NoSuchElementException {
                 if (iter == null) {
                     init();
                 }

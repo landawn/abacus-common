@@ -85,7 +85,7 @@ public class AvroDeserConfig extends DeserializationConfig<AvroDeserConfig> {
 
     /**
      * Sets the Avro schema for deserialization.
-     * The schema is required for deserializing data that is not a {@code SpecificRecord} instance.
+     * The schema is required unless the target is a {@code SpecificRecord} or a collection with a declared/configured {@code SpecificRecord} element type.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

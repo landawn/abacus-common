@@ -261,8 +261,8 @@ public class PrimitiveListTest extends TestBase {
      */
     @Test
     public void testSearchOperationsBulletHoldsForEveryConcreteList() {
-        final Class<?>[] concreteLists = { BooleanList.class, ByteList.class, CharList.class, ShortList.class, IntList.class, LongList.class,
-                FloatList.class, DoubleList.class };
+        final Class<?>[] concreteLists = { BooleanList.class, ByteList.class, CharList.class, ShortList.class, IntList.class, LongList.class, FloatList.class,
+                DoubleList.class };
 
         for (final Class<?> cls : concreteLists) {
             assertTrue(hasMethodNamed(cls, "contains"), cls.getSimpleName());

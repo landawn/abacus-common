@@ -191,7 +191,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      *         {@code getObject}, so a text column is coerced there by the JDBC driver.)
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
-     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string included)
      * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
     @Override
@@ -230,7 +230,7 @@ public class OptionalShortType extends AbstractOptionalType<OptionalShort> {
      *         {@code getObject}, so a text column is coerced there by the JDBC driver.)
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
-     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string         included)
+     * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string included)
      * @throws ArithmeticException if the numeric value is nonfinite or its integer part is out of range
      */
     @Override

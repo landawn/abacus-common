@@ -1047,7 +1047,7 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if this is a number type (numeric primitive or wrapper).
+     * Checks if this is a numeric type, including numeric primitives, their wrappers, and other {@link Number} types.
      *
      * @return {@code true} if this is a number type, {@code false} otherwise
      */
@@ -1310,12 +1310,13 @@ public interface Type<T> {
     }
 
     /**
-     * Checks whether <em>values</em> of the represented Java type are immutable
-     * (for example {@link String}, {@link Integer}, or an enum constant).
+     * Returns this handler's immutability classification for values of the represented Java type.
      * This describes the value type, not the {@code Type} handler instance itself
-     * (handlers are expected to be immutable regardless).
+     * (handlers are expected to be immutable regardless). The classification is not a recursive guarantee:
+     * enum constants can have mutable fields, and immutable containers can hold mutable elements or wrap
+     * externally mutable backing data. Some immutable JDK types retain the default {@code false} classification.
      *
-     * @return {@code true} if values of this type are immutable, {@code false} otherwise
+     * @return {@code true} if this handler classifies its values as immutable, {@code false} otherwise
      */
     default boolean isImmutable() {
         return false; // Default implementation, can be overridden by specific types
@@ -1340,19 +1341,18 @@ public interface Type<T> {
     }
 
     /**
-     * Checks if values of this type can be serialized to a simple string representation.
+     * Checks whether serializers can write this type through its direct value handler.
      * Primitive types, wrappers, dates, and other scalar types are typically serializable.
      * Object arrays, beans, maps, and similar structured types typically report {@code false}
      * here. Collection/array container types may return {@code true} only when their element
      * type is itself serializable.
      *
      * <p>The default implementation returns {@code true} (the common case for the value/scalar
-     * types that dominate the type system). Structured types whose values are not directly
-     * serializable to a single string (object arrays, beans, maps, and similar) override this to
-     * return {@code false}. The base class {@link AbstractType} no longer overrides this method,
-     * so the interface default and the base-class behavior agree.</p>
+     * types that dominate the type system). Structured types such as object arrays, beans and maps override this to
+     * return {@code false} so serializers select their structural handling. This flag does not determine
+     * whether {@link #stringOf(Object)} is supported: structured handlers can still expose an explicit JSON string conversion.</p>
      *
-     * @return {@code true} if this type is directly serializable to a string, {@code false} otherwise
+     * @return {@code true} if serializers can use the direct value handler, {@code false} otherwise
      */
     default boolean isSerializable() {
         return true; // Default implementation, can be overridden by specific types
@@ -1462,7 +1462,7 @@ public interface Type<T> {
      *
      * @param x the first value; may be {@code null}
      * @param y the second value; may be {@code null}
-     * @return negative if x &lt; y, zero if x equals y, positive if x &gt; y
+     * @return negative if x sorts before y, zero if they compare as equal, positive if x sorts after y
      * @throws UnsupportedOperationException if this type is not comparable
      * @see #isComparable()
      */
@@ -1738,7 +1738,7 @@ public interface Type<T> {
 
     /**
      * Converts a value to its deep string representation.
-     * For arrays and collections, includes nested element strings.
+     * Nested arrays are rendered recursively; other values use their own string representation.
      *
      * @param x the value
      * @return the deep string representation

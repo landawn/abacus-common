@@ -11,8 +11,10 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-public class RateFractionalDebtTest {
+public class RateFractionalDebtTest extends TestBase {
     private static class Clock extends RateLimiter.SleepingStopwatch {
         long now;
         long slept;

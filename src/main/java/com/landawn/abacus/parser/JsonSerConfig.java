@@ -36,7 +36,7 @@ import com.landawn.abacus.util.N;
  *   <li>quotePropName: {@code true} - Property names are quoted by default</li>
  *   <li>quoteMapKey: {@code true} - Map keys are quoted by default</li>
  *   <li>bracketRootValue: {@code true} - Root values are bracketed by default</li>
- *   <li>wrapRootValue: {@code false} - Root values are not wrapped with type name by default</li>
+ *   <li>wrapRootValue: {@code false} - Bean values are not wrapped with type name by default</li>
  *   <li>writeNullToEmpty: {@code false} - {@code null} values remain {@code null} by default</li>
  *   <li>writeDatasetAsRows: {@code false} - Datasets are written by columns by default</li>
  *   <li>writeRowColumnKeyType: {@code false} - Sheet row/column key types are not written by default</li>
@@ -125,7 +125,8 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      * <p>Only bean properties are affected, and only when they survive the exclusion strategy: the default
      * exclusion ({@link Exclusion#NULL}, applied when no exclusion is set on the config or on the bean's
      * {@code @JsonXmlConfig}) drops {@code null} properties before this flag is consulted, so the flag has
-     * no visible effect unless {@link #setExclusion(Exclusion)} is set to {@link Exclusion#NONE}.
+     * no visible effect unless the effective exclusion is {@link Exclusion#NONE}, selected through
+     * {@link #setExclusion(Exclusion)} or the bean annotation.
      * For a surviving {@code null} property, a {@code CharSequence} is written as {@code ""}, a
      * collection/array as {@code []}, and a {@code Map} as <code>{}</code>; any other {@code null}
      * (numbers, booleans, dates, nested beans, ...) is left to the other flags and, with all of them off, is
@@ -489,7 +490,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
     }
 
     /**
-     * Checks if the root value should be wrapped with its type name.
+     * Checks if bean values should be wrapped with their simple type name as a property.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -499,14 +500,15 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      * config.isWrapRootValue();                     // returns true
      * }</pre>
      *
-     * @return {@code true} if root value should be wrapped, {@code false} otherwise
+     * @return {@code true} if bean values should be wrapped, {@code false} otherwise
      */
     public boolean isWrapRootValue() {
         return wrapRootValue;
     }
 
     /**
-     * Sets whether to wrap the root value with its type name as a property.
+     * Sets whether to wrap bean values with their simple type name as a property.
+     * This applies to nested beans as well as the root bean; scalar, collection and map values are not wrapped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -516,7 +518,7 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      * config.isWrapRootValue();                     // returns false
      * }</pre>
      *
-     * @param wrapRootValue {@code true} to wrap root value with type name, {@code false} otherwise
+     * @param wrapRootValue {@code true} to wrap bean values with their simple type name, {@code false} otherwise
      * @return {@code this} instance for method chaining
      */
     public JsonSerConfig setWrapRootValue(final boolean wrapRootValue) {

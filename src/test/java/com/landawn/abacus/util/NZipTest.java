@@ -120,8 +120,7 @@ public class NZipTest extends NTestSupport {
 
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> N.zip(a, b, (s, i) -> s + i, (Class<String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> N.zip(a, b, "", 0, (s, i) -> s + i, (Class<String>) null));
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-                () -> N.zip(a, b, c, (s, i, l) -> s + i + l, (Class<String>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> N.zip(a, b, c, (s, i, l) -> s + i + l, (Class<String>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> N.zip(a, b, c, "", 0, 0L, (s, i, l) -> s + i + l, (Class<String>) null));
         // Also on the empty-input path: a zero-length result still reaches the array factory.

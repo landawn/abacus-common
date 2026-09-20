@@ -1889,8 +1889,7 @@ public class RegExUtilTest extends AbstractTest {
         // the lookahead re-runs from its own start at every candidate position
         final CountingCharSequence phone = new CountingCharSequence(" ".repeat(n) + "x");
         assertFalse(RegExUtil.PHONE_NUMBER_FINDER.matcher(phone).find());
-        assertTrue(phone.reads > linearBudget,
-                "PHONE_NUMBER_FINDER is no longer superlinear (" + phone.reads + " reads): drop its Performance warning");
+        assertTrue(phone.reads > linearBudget, "PHONE_NUMBER_FINDER is no longer superlinear (" + phone.reads + " reads): drop its Performance warning");
 
         final CountingCharSequence withCode = new CountingCharSequence(" ".repeat(n) + "x");
         assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_FINDER.matcher(withCode).find());
@@ -1901,8 +1900,7 @@ public class RegExUtilTest extends AbstractTest {
         // has to try every split of the run between them
         final CountingCharSequence split = new CountingCharSequence("1".repeat(n) + "x");
         assertFalse(RegExUtil.PHONE_NUMBER_WITH_CODE_MATCHER.matcher(split).matches());
-        assertTrue(split.reads > linearBudget,
-                "PHONE_NUMBER_WITH_CODE_MATCHER no longer retries every split (" + split.reads + " reads)");
+        assertTrue(split.reads > linearBudget, "PHONE_NUMBER_WITH_CODE_MATCHER no longer retries every split (" + split.reads + " reads)");
 
         // control: the anchored PHONE_NUMBER_MATCHER has one start position and IS linear, as documented
         final CountingCharSequence anchored = new CountingCharSequence("1".repeat(n) + "x");

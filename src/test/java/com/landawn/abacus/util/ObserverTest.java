@@ -1015,6 +1015,21 @@ public class ObserverTest extends TestBase {
     // ==================== limit(long) ====================
 
     @Test
+    public void testSkipResumesAtLongMaxValueWithoutCounterOverflow() throws Exception {
+        final Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3)).skip(Long.MAX_VALUE);
+        final Object skipDispatcher = observer.dispatcher.downDispatcher;
+        final java.lang.reflect.Field counterField = skipDispatcher.getClass().getDeclaredField("counter");
+        counterField.setAccessible(true);
+
+        // Model the preceding MAX_VALUE - 1 items without iterating over that many values.
+        final java.util.concurrent.atomic.AtomicLong counter = (java.util.concurrent.atomic.AtomicLong) counterField.get(skipDispatcher);
+        counter.set(Long.MAX_VALUE - 1);
+
+        Assertions.assertEquals(Arrays.asList(2, 3), collect(observer));
+        Assertions.assertEquals(Long.MAX_VALUE, counter.get());
+    }
+
+    @Test
     public void testLimit() throws InterruptedException {
         Observer<Integer> observer = Observer.of(Arrays.asList(1, 2, 3, 4, 5));
         Observer<Integer> limited = observer.limit(3);

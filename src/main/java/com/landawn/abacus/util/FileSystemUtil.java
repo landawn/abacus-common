@@ -158,7 +158,8 @@ final class FileSystemUtil {
      * @return the amount of free space in kilobytes
      * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system, or contains
      *         a null byte or double-quote character on Windows
-     * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
+     * @throws IllegalStateException if the operating system is not Windows, Unix/Linux/macOS, AIX/HP-UX or Solaris, or the {@code os.name}
+     *         system property was unavailable when this class was initialized
      * @throws IOException if a Windows path cannot be normalized, the disk-space command cannot start,
      *         its output cannot be read or parsed as a non-negative long,
      *         it exits unsuccessfully, or the wait is interrupted
@@ -191,7 +192,8 @@ final class FileSystemUtil {
      * @return the amount of free space in kilobytes
      * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system, or contains
      *         a null byte or double-quote character on Windows
-     * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
+     * @throws IllegalStateException if the operating system is not Windows, Unix/Linux/macOS, AIX/HP-UX or Solaris, or the {@code os.name}
+     *         system property was unavailable when this class was initialized
      * @throws IOException if a Windows path cannot be normalized, the disk-space command cannot start,
      *         its output cannot be read or parsed as a non-negative long,
      *         it exits unsuccessfully, the wait is interrupted, or a positive timeout expires
@@ -215,7 +217,8 @@ final class FileSystemUtil {
      * }</pre>
      *
      * @return the amount of free space in the current directory in kilobytes
-     * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
+     * @throws IllegalStateException if the operating system is not Windows, Unix/Linux/macOS, AIX/HP-UX or Solaris, or the {@code os.name}
+     *         system property was unavailable when this class was initialized
      * @throws IOException if the disk-space command cannot start, its output cannot be read or parsed as a non-negative long,
      *         it exits unsuccessfully, or the wait is interrupted
      */
@@ -239,7 +242,8 @@ final class FileSystemUtil {
      *
      * @param timeout the timeout in milliseconds, or 0 or negative for no timeout
      * @return the amount of free space in the current directory in kilobytes
-     * @throws IllegalStateException if an error occurred in initialization or the OS is not supported
+     * @throws IllegalStateException if the operating system is not Windows, Unix/Linux/macOS, AIX/HP-UX or Solaris, or the {@code os.name}
+     *         system property was unavailable when this class was initialized
      * @throws IOException if the disk-space command cannot start, its output cannot be read or parsed as a non-negative long,
      *         it exits unsuccessfully, the wait is interrupted, or a positive timeout expires
      */
@@ -270,8 +274,8 @@ final class FileSystemUtil {
      * @return the amount of free space in kilobytes if {@code kb} is {@code true}; otherwise in bytes on Windows, or in the df command's default block units on Unix
      * @throws IllegalArgumentException if {@code path} is {@code null}, is empty on a Unix-like system, or contains
      *         a null byte or double-quote character on Windows
-     * @throws IllegalStateException if the operating system is unsupported, or if an error
-     *         occurred during initialization of the OS detection
+     * @throws IllegalStateException if {@code os} is {@code OTHER} (not Windows, Unix/Linux/macOS, AIX/HP-UX or Solaris)
+     *         or {@code INIT_PROBLEM} (the {@code os.name} system property was unavailable when this class was initialized)
      * @throws IOException if a Windows path cannot be normalized, the disk-space command cannot start,
      *         its output cannot be read or parsed as a non-negative long,
      *         it exits unsuccessfully, the wait is interrupted, or a positive timeout expires
@@ -502,6 +506,10 @@ final class FileSystemUtil {
         return performCommand(cmdAttrs, max, timeout, null);
     }
 
+    /**
+     * @throws IOException if the process cannot start, standard output cannot be read or is empty, the exit status is nonzero, waiting is interrupted, or
+     *         the process/output-reader deadline expires
+     */
     private List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout, final java.util.Map<String, String> environment)
             throws IOException {
 
@@ -634,6 +642,10 @@ final class FileSystemUtil {
         }
     }
 
+    /**
+     * @throws InterruptedException if the calling thread is interrupted while joining {@code gobbler}
+     * @throws IOException if {@code gobbler} remains alive after the positive command timeout expires
+     */
     private void joinGobbler(final Thread gobbler, final long startNanos, final long timeoutNanos, final long timeout, final String[] cmdAttrs)
             throws InterruptedException, IOException {
         if (timeout <= 0) {

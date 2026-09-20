@@ -29,6 +29,56 @@ import com.landawn.abacus.util.CharacterWriter;
 
 public class AbstractTypeTest extends TestBase {
 
+    @Test
+    public void temporalCharacterSlicesRejectLongHexadecimalTokens() {
+        final Class<?>[] temporalClasses = { java.time.Instant.class, java.time.OffsetDateTime.class, java.time.ZonedDateTime.class, java.util.Date.class,
+                java.sql.Date.class, java.sql.Time.class, java.sql.Timestamp.class, java.util.Calendar.class, java.util.GregorianCalendar.class,
+                javax.xml.datatype.XMLGregorianCalendar.class, org.joda.time.DateTime.class, org.joda.time.Instant.class, org.joda.time.MutableDateTime.class };
+
+        for (final Class<?> temporalClass : temporalClasses) {
+            final Type<?> type = Type.of(temporalClass);
+
+            // These tokens reach the general numeric parser's hexadecimal path when their length exceeds 18.
+            for (final String token : new String[] { "0x000001234567890123", "-0x000001234567890123", "+0X000001234567890123", "#0000001234567890123" }) {
+                final char[] wrapped = ("prefix" + token + "suffix").toCharArray();
+                final RuntimeException stringFailure = assertThrows(RuntimeException.class, () -> type.valueOf(token), temporalClass.getName() + ": " + token);
+                final RuntimeException sliceFailure = assertThrows(RuntimeException.class, () -> type.valueOf(wrapped, 6, token.length()),
+                        temporalClass.getName() + ": " + token);
+                assertEquals(stringFailure.getClass(), sliceFailure.getClass(), temporalClass.getName() + ": " + token);
+            }
+
+            for (final String token : new String[] { "1700000000000", "+1700000000000", "-1700000000000", "0000001700000000000" }) {
+                final char[] wrapped = ("prefix" + token + "suffix").toCharArray();
+                assertEquals(type.valueOf(token), type.valueOf(wrapped, 6, token.length()), temporalClass.getName() + ": " + token);
+            }
+        }
+    }
+
+    @Test
+    public void numericTypesAcceptOnlyOneLiteralSuffix() {
+        for (final Class<?> numericClass : new Class<?>[] { byte.class, Byte.class, short.class, Short.class, int.class, Integer.class, long.class, Long.class,
+                float.class, Float.class, double.class, Double.class }) {
+            final Type<?> type = Type.of(numericClass);
+            for (final String token : new String[] { "1LL", "1Ll", "1Lf", "1LD", "1ff", "1fD", "1dd", "1dF", "1dL", "1 F", "1F L", "1D\tF" }) {
+                assertThrows(NumberFormatException.class, () -> type.valueOf(token), numericClass.getName() + ": " + token);
+                final char[] wrapped = ("prefix" + token + "suffix").toCharArray();
+                assertThrows(NumberFormatException.class, () -> type.valueOf(wrapped, 6, token.length()), numericClass.getName() + ": " + token);
+            }
+            for (final String token : new String[] { "1", "1L", "1l", "1F", "1f", "1D", "1d" }) {
+                assertEquals(1.0, ((Number) type.valueOf(token)).doubleValue(), numericClass.getName() + ": " + token);
+                final char[] wrapped = ("prefix" + token + "suffix").toCharArray();
+                assertEquals(type.valueOf(token), type.valueOf(wrapped, 6, token.length()), numericClass.getName() + ": " + token);
+            }
+        }
+
+        for (final Class<?> numericClass : new Class<?>[] { Byte.class, Short.class, Integer.class, Long.class }) {
+            final Type<?> type = Type.of(numericClass);
+            assertEquals(31, ((Number) type.valueOf("0x1F")).intValue());
+            assertEquals(31, ((Number) type.valueOf("0x1FL")).intValue());
+        }
+        assertEquals(15.5, Type.<Double> of(Double.class).valueOf("0x1.fp3"));
+    }
+
     private Type<String> stringType;
     private Type<Integer> integerType;
     private Type<List<String>> listType;
@@ -296,6 +346,7 @@ public class AbstractTypeTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> AbstractType.parseChar("-1"));
         assertThrows(IllegalArgumentException.class, () -> AbstractType.parseChar("65536"));
     }
+
     @Test
     public void reviewFixes20260906_parseIntAndParseLongReportOverflowAsArithmeticException() {
         // T1-09 (documentation pin): well-formed digits outside the range go through Numbers.toInt/toLong,

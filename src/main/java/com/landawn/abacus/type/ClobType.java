@@ -64,8 +64,9 @@ public class ClobType extends AbstractType<Clob> {
      * {@code Clob} interface in type metadata.
      *
      * @param clazz the specific {@link Clob} implementation class to handle
+     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
      */
-    ClobType(final Class<? extends Clob> clazz) {
+    ClobType(final Class<? extends Clob> clazz) throws IllegalArgumentException {
         super(ClassUtil.getSimpleClassName(clazz));
         this.clazz = (Class<Clob>) clazz;
     }

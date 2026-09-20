@@ -8,8 +8,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class MappedIpv6Test {
+public class MappedIpv6Test extends TestBase {
     @Test
     void mappedLiteralsRequireAnExplicitPort() {
         for (final String input : List.of("::ffff:0:1234", "::ffff:127.0.0.1", "::ffff:c000:201", "::1:1234")) {

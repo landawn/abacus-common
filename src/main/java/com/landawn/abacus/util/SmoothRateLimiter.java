@@ -217,7 +217,7 @@ abstract class SmoothRateLimiter extends RateLimiter {
         /** The warmup period in microseconds. */
         private final long warmupPeriodMicros;
 
-        /** The slope of the line from the stable interval (when permits == 0), to the cold interval (when permits == maxPermits). */
+        /** The slope of the line from the stable interval at thresholdPermits to the cold interval at maxPermits. */
         private double slope;
 
         /** The threshold permits. */

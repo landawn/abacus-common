@@ -13,8 +13,10 @@ import java.util.function.IntConsumer;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @org.junit.jupiter.api.Tag("unit")
-public class IndexedCallbackTest {
+public class IndexedCallbackTest extends TestBase {
     private record Invocation(Object callback, Runnable invoke) {
     }
 

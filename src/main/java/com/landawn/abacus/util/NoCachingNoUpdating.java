@@ -140,16 +140,14 @@ public interface NoCachingNoUpdating {
          *         {@code len} is negative.
          */
         public static <T> DisposableArray<T> create(final Class<T> componentType, final int len) throws IllegalArgumentException {
-            if (len < 0) {
-                throw new IllegalArgumentException("Length must be non-negative: " + len);
-            }
-
             N.checkArgNotNull(componentType, cs.componentType);
 
             if (componentType.isPrimitive()) {
                 throw new IllegalArgumentException("'componentType' cannot be a primitive type: " + componentType.getName()
                         + ". Use the matching Disposable*Array for a primitive array.");
             }
+
+            N.checkArgNotNegative(len, cs.len);
 
             return new DisposableArray<>(N.newArray(componentType, len));
         }
@@ -3381,7 +3379,7 @@ public interface NoCachingNoUpdating {
          * DisposableFloatArray arr = DisposableFloatArray.wrap(new float[] {1, 2, 3});
          * arr.accept(a -> System.out.println(a.length));                                       // prints 3
          * DisposableFloatArray.wrap(new float[0]).accept(a -> System.out.println(a.length));   // prints 0
-         * DisposableFloatArray.wrap(new float[] {99}).accept(a -> System.out.println(a[0]));   // prints 99
+         * DisposableFloatArray.wrap(new float[] {99}).accept(a -> System.out.println(a[0]));   // prints 99.0
          * arr.accept(a -> {});                                                                 // invokes a no-op consumer
          * }</pre>
          *
@@ -3796,7 +3794,7 @@ public interface NoCachingNoUpdating {
          * DisposableDoubleArray arr = DisposableDoubleArray.wrap(new double[] {1, 2, 3});
          * arr.accept(a -> System.out.println(a.length));                                         // prints 3
          * DisposableDoubleArray.wrap(new double[0]).accept(a -> System.out.println(a.length));   // prints 0
-         * DisposableDoubleArray.wrap(new double[] {99}).accept(a -> System.out.println(a[0]));   // prints 99
+         * DisposableDoubleArray.wrap(new double[] {99}).accept(a -> System.out.println(a[0]));   // prints 99.0
          * arr.accept(a -> {});                                                                   // invokes a no-op consumer
          * }</pre>
          *

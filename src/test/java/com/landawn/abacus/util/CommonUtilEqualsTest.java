@@ -317,6 +317,7 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
         assertTrue(N.equals((String[]) null, 0, new String[] { "a" }, 1, 0));
         assertThrows(IndexOutOfBoundsException.class, () -> N.equalsIgnoreCase((String[]) null, 0, new String[] { "a" }, 0, 1));
     }
+
     @Test
     public void testRangeOverloadsTakeACountNotAToIndex() {
         // the trailing 2 is a COUNT: a[1], a[2] are compared with b[0], b[1]
@@ -345,8 +346,8 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
         for (final Method m : N.class.getMethods()) {
             final Class<?>[] pt = m.getParameterTypes();
 
-            if (!Modifier.isStatic(m.getModifiers()) || !sixNames.contains(m.getName()) || pt.length < 5 || pt[0] != pt[2]
-                    || pt[1] != int.class || pt[3] != int.class || pt[4] != int.class) {
+            if (!Modifier.isStatic(m.getModifiers()) || !sixNames.contains(m.getName()) || pt.length < 5 || pt[0] != pt[2] || pt[1] != int.class
+                    || pt[3] != int.class || pt[4] != int.class) {
                 continue; // not a (container, offset, container, offset, count) shape
             }
 
@@ -361,8 +362,7 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
         assertEquals(new TreeSet<>(Arrays.asList("compare", "mismatch")), overCollections);
 
         for (final String arraysOnly : Arrays.asList("equals", "deepEquals", "equalsIgnoreCase", "compareUnsigned")) {
-            assertThrows(NoSuchMethodException.class,
-                    () -> N.class.getMethod(arraysOnly, Collection.class, int.class, Collection.class, int.class, int.class));
+            assertThrows(NoSuchMethodException.class, () -> N.class.getMethod(arraysOnly, Collection.class, int.class, Collection.class, int.class, int.class));
         }
 
         assertDoesNotThrow(() -> N.class.getMethod("compare", Collection.class, int.class, Collection.class, int.class, int.class));

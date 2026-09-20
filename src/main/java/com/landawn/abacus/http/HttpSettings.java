@@ -271,7 +271,8 @@ public final class HttpSettings {
      * settings.setSSLSocketFactory(sslContext.getSocketFactory());
      * }</pre>
      *
-     * @param sslSocketFactory the SSL socket factory to use; {@code null} clears it so the default is used
+     * @param sslSocketFactory the SSL socket factory to use; {@code null} leaves the factory unspecified
+     *        so client-level or platform defaults apply
      * @return this HttpSettings instance for method chaining
      */
     public HttpSettings setSSLSocketFactory(final SSLSocketFactory sslSocketFactory) {
@@ -311,7 +312,8 @@ public final class HttpSettings {
      * settings.setProxy(proxy);
      * }</pre>
      *
-     * @param proxy the proxy to use; {@code null} clears it so the connection is made directly
+     * @param proxy the proxy to use; {@code null} leaves it unspecified so client-level or platform
+     *        proxy selection applies; use {@link Proxy#NO_PROXY} for an explicit direct connection
      * @return this HttpSettings instance for method chaining
      */
     public HttpSettings setProxy(final Proxy proxy) {
@@ -480,8 +482,8 @@ public final class HttpSettings {
     }
 
     /**
-     * Checks if this is a one-way request (fire-and-forget).
-     * One-way requests don't wait for or process the response.
+     * Checks whether successful response-body processing is disabled.
+     * The client still waits for the response status and checks it for errors.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -587,8 +589,8 @@ public final class HttpSettings {
     }
 
     /**
-     * Sets the content format for request/response serialization.
-     * This determines how request bodies are serialized and response bodies are deserialized.
+     * Sets the content format for request serialization and as a fallback for response deserialization.
+     * The response's own content headers take precedence when determining its format.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -949,8 +951,9 @@ public final class HttpSettings {
      * Creates a copy of this HttpSettings object.
      * The copy includes all settings: timeouts, SSL socket factory, proxy, the caching/input/output
      * flags, the one-way flag, the content format and the headers. The headers are copied into a new
-     * {@link HttpHeaders} instance, so header changes made on either object afterwards do not affect
-     * the other; the {@code sslSocketFactory} and {@code proxy} references themselves are shared.
+     * {@link HttpHeaders} instance, so adding, replacing, or removing headers does not affect
+     * the other instance. Mutable header values and the {@code sslSocketFactory} and {@code proxy}
+     * references themselves are shared.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

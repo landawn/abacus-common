@@ -21,6 +21,59 @@ import com.landawn.abacus.util.stream.ByteStream;
 public class ByteIteratorTest extends TestBase {
 
     @Test
+    public void testDeferRejectsReturningItself() {
+        for (int mode = 0; mode < 2; mode++) {
+            final int[] supplierCalls = { 0 };
+            final java.util.concurrent.atomic.AtomicReference<ByteIterator> reference = new java.util.concurrent.atomic.AtomicReference<>();
+            final ByteIterator iterator = ByteIterator.defer(() -> {
+                supplierCalls[0]++;
+                return reference.get();
+            });
+            reference.set(iterator);
+
+            final IllegalStateException failure = mode == 0 ? assertThrows(IllegalStateException.class, iterator::hasNext)
+                    : assertThrows(IllegalStateException.class, iterator::nextByte);
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::nextByte));
+            assertEquals(1, supplierCalls[0]);
+        }
+    }
+
+    @Test
+    public void testDeferCachesRecursiveInitializationFailure() {
+        for (int mode = 0; mode < 4; mode++) {
+            final boolean catchRecursion = (mode & 1) != 0;
+            final int[] supplierCalls = { 0 };
+            final ByteIterator[] reference = new ByteIterator[1];
+            final IllegalStateException[] recursiveFailure = new IllegalStateException[1];
+            reference[0] = ByteIterator.defer(() -> {
+                if (++supplierCalls[0] > 1) {
+                    throw new AssertionError("Supplier must not be reentered");
+                }
+
+                try {
+                    reference[0].hasNext();
+                } catch (final IllegalStateException failure) {
+                    recursiveFailure[0] = failure;
+                    if (!catchRecursion) {
+                        throw failure;
+                    }
+                }
+
+                return ByteIterator.empty();
+            });
+
+            final ByteIterator iterator = reference[0];
+            final IllegalStateException failure = mode < 2 ? assertThrows(IllegalStateException.class, iterator::hasNext)
+                    : assertThrows(IllegalStateException.class, iterator::nextByte);
+            assertSame(recursiveFailure[0], failure);
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::hasNext));
+            assertSame(failure, assertThrows(IllegalStateException.class, iterator::nextByte));
+            assertEquals(1, supplierCalls[0]);
+        }
+    }
+
+    @Test
     public void testShortCircuitStreamLeavesRemainingElements() {
         final ByteIterator iter = ByteIterator.of((byte) 1, (byte) 2, (byte) 3);
 

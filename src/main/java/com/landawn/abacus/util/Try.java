@@ -578,7 +578,8 @@ public final class Try<T extends AutoCloseable> {
      * Executes the provided callable and returns its result, or returns the default value if an exception occurs.
      *
      * <p>This is the simplest form of exception handling with a fallback value, useful when
-     * you have a known default that should be used in case of any error.</p>
+     * you have a known default that should be used when the callable throws an exception.
+     * A normal {@code null} result is returned unchanged.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -586,7 +587,7 @@ public final class Try<T extends AutoCloseable> {
      * String userInput = "not a number";
      * int value = Try.call(() -> Integer.parseInt(userInput), 0);
      *
-     * // Load optional configuration
+     * // A missing property returns null normally, so the exception fallback is not used.
      * java.util.Properties properties = new java.util.Properties();
      * String setting = Try.call(
      *     () -> properties.getProperty("advanced.setting"),
@@ -627,11 +628,11 @@ public final class Try<T extends AutoCloseable> {
      *     () -> "default for IO errors"
      * );
      *
-     * // Retry on timeout
+     * // Supply a fallback on timeout
      * String data = Try.call(
      *     () -> { throw new TimeoutException("timed out"); },
      *     ex -> ex instanceof TimeoutException,
-     *     () -> "retried value"
+     *     () -> "timeout fallback"
      * );
      * }</pre>
      *

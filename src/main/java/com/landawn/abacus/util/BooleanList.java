@@ -170,7 +170,7 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>Not Thread-Safe:</b> This implementation is not synchronized</li>
  *   <li><b>External Synchronization:</b> Required for concurrent access</li>
  *   <li><b>Iterators:</b> Not fail-fast; concurrent modification yields undefined results</li>
- *   <li><b>Read-Only Access:</b> Multiple threads can safely read simultaneously</li>
+ *   <li><b>Read-Only Access:</b> Concurrent reads require safe publication and no concurrent mutation, including through a shared backing array</li>
  * </ul>
  *
  * <p><b>Capacity Management:</b>
@@ -340,8 +340,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * The list will use the provided array as its internal storage without copying,
      * making this operation O(1) in time complexity.
      *
-     * <p><b>Note:</b> The array is used directly without copying. Any modifications to the list
-     * will affect the original array and vice versa.</p>
+     * <p><b>Note:</b> The array is used directly without copying. Changes to its elements are shared
+     * until an operation, such as growth or trimming, replaces the list's backing array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -362,8 +362,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Constructs a BooleanList using the specified array as the element array for this list without copying.
      * Only the first {@code size} elements of the array will be considered as part of the list.
      *
-     * <p><b>Note:</b> The array is used directly without copying. Any modifications to the list
-     * will affect the original array and vice versa.</p>
+     * <p><b>Note:</b> The array is used directly without copying. Changes to its elements are shared
+     * until an operation, such as growth or trimming, replaces the list's backing array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -524,9 +524,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate, but it is roughly two orders of magnitude slower than
-     * {@link java.util.concurrent.ThreadLocalRandom}; for bulk test data or fixtures, fill an array yourself
-     * and wrap it with {@code of(..)}.</p>
+     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
+     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
+     * and wrapping it with {@code of(..)}.</p>
      *
      * @param len the number of random boolean values to generate. Must be non-negative.
      * @return a new BooleanList containing random boolean values
@@ -546,7 +546,7 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Returns the internal array backing this list without creating a copy.
      *
      * <p><b>WARNING:</b> This method returns a direct reference to the internal array.
-     * Any modifications to the returned array will affect this list and vice versa.
+     * Changes to elements are shared until the list replaces its backing array, for example during growth or trimming.
      * The returned array may be larger than the list size; only elements from index 0
      * to {@code size()-1} are valid list elements.</p>
      *
@@ -2098,6 +2098,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * list.forEach(0, 10, b -> {});                         // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
+     *
      * @param fromIndex the starting index (inclusive) of the range to process
      * @param toIndex the ending index (exclusive) of the range to process, or {@code -1} to process
      *                from {@code fromIndex} down to and including index 0
@@ -2402,6 +2405,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
      * {@code fromIndex > toIndex}, or a negative step with {@code fromIndex < toIndex} — the result is an
      * empty list rather than an exception. Only {@code step == 0} is rejected.</p>
+     *
+     * <p>For a descending range, {@code fromIndex == size()} starts at the last logical element,
+     * even when the backing array has spare capacity.</p>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy
      * @param toIndex the ending index (exclusive) of the range to copy. May be -1 when fromIndex &gt; toIndex

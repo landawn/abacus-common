@@ -43,7 +43,7 @@ public class CollectionsRegressionATest extends TestBase {
     //     allocated a map proportional to those counts (and could exhaust the heap).
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B1_MultisetCopySizing {
+    public class B1_MultisetCopySizing extends TestBase {
 
         @Test
         public void copyConstructor_largeCountsFewDistinct_doesNotBlowUpAndCopiesCounts() {
@@ -151,7 +151,7 @@ public class CollectionsRegressionATest extends TestBase {
     // Multiset: containsAll fast path, entrySet read-only contract, argument-name diagnostics.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class MultisetMisc {
+    public class MultisetMisc extends TestBase {
 
         /**
          * Like the copy fix, this one is about cost rather than result: {@code containsAll} answered
@@ -290,7 +290,7 @@ public class CollectionsRegressionATest extends TestBase {
     //     was not equal to its source. copy() now reproduces the backing map faithfully.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B2_MultimapCopyFidelity {
+    public class B2_MultimapCopyFidelity extends TestBase {
 
         @Test
         public void listMultimap_copyEqualsSource_evenAfterAValueListWasEmptiedThroughGet() {
@@ -399,7 +399,7 @@ public class CollectionsRegressionATest extends TestBase {
     // a key mapped to an empty collection, and these are the consequences that are documented.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class DocumentedKeyLifecycle {
+    public class DocumentedKeyLifecycle extends TestBase {
 
         private ListMultimap<String, Integer> emptiedThroughGet() {
             final ListMultimap<String, Integer> m = ListMultimap.of("a", 1, "b", 2);
@@ -525,7 +525,7 @@ public class CollectionsRegressionATest extends TestBase {
     // J4: ListMultimap.getFirst/getFirstOrDefault cannot distinguish "absent" from "first value is null".
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class J4_GetFirstNullSemantics {
+    public class J4_GetFirstNullSemantics extends TestBase {
 
         @Test
         public void getFirstReturnsNullForAnAbsentKeyAndForAStoredNull() {
@@ -566,7 +566,7 @@ public class CollectionsRegressionATest extends TestBase {
     //     ListMultimap.wrap(Map) fell back to ArrayList for newly created keys.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B3_SetMultimapWrapFallback {
+    public class B3_SetMultimapWrapFallback extends TestBase {
 
         @Test
         public void wrap_acceptsImmutableAndViewValueSets() {
@@ -659,7 +659,7 @@ public class CollectionsRegressionATest extends TestBase {
     // B6 / B7: null-argument diagnostics.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class B6B7_NullDiagnostics {
+    public class B6B7_NullDiagnostics extends TestBase {
 
         @Test
         public void setMultimap_toImmutableMap_rejectsANullSupplierResultLikeItsListSibling() {
@@ -710,7 +710,7 @@ public class CollectionsRegressionATest extends TestBase {
     //     with Iterable.forEach(Consumer) which iterates at a different granularity.
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class D1_ForEachKeyValueRename {
+    public class D1_ForEachKeyValueRename extends TestBase {
 
         @Test
         public void forEachKeyValue_visitsEveryKeyElementPair() {
@@ -754,7 +754,7 @@ public class CollectionsRegressionATest extends TestBase {
     // putValues(Multimap) now iterates the source's entries instead of keySet() + get(key).
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class PutValuesFromMultimap {
+    public class PutValuesFromMultimap extends TestBase {
 
         @Test
         public void mergesIntoExistingKeysAndAddsNewOnes() {
@@ -816,7 +816,7 @@ public class CollectionsRegressionATest extends TestBase {
     // Array: J1 (set* conversion direction), B4 (component type), J2 (rangeClosed step doc).
     // ------------------------------------------------------------------------------------------------
     @Nested
-    public class ArrayFixes {
+    public class ArrayFixes extends TestBase {
 
         /** The eight {@code set*} Javadocs used to state the {@code get*} rule; this pins the real one. */
         @Test

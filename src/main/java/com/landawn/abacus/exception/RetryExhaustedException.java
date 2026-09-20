@@ -39,7 +39,7 @@ import java.io.Serial;
  *     Response response = retry.call(() -> httpClient.get(url));
  *     use(response);
  * } catch (RetryExhaustedException e) {
- *     // Every attempt returned, but every result was rejected.
+ *     // The final attempt returned a rejected result; earlier attempts may have thrown.
  *     log.warn("gave up after {} attempts ({} retries)", e.attempts(), e.retries());
  *     use(cachedFallback());
  * }
@@ -78,7 +78,8 @@ public class RetryExhaustedException extends IllegalStateException {
     /**
      * Returns the total number of times the operation was invoked, including the first attempt.
      *
-     * <p>This is always {@link #retries()}{@code  + 1}.</p>
+     * <p>For instances created by {@link com.landawn.abacus.util.Retry}, this equals
+     * {@code (long) retries() + 1}. The constructor stores caller-supplied counts without validation.</p>
      *
      * @return the number of invocations made before the policy gave up
      */

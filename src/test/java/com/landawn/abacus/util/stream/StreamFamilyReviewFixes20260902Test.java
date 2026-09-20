@@ -162,8 +162,7 @@ public class StreamFamilyReviewFixes20260902Test extends TestBase {
         assertEquals(1, a.get());
 
         final AtomicInteger b = new AtomicInteger();
-        assertEquals(N.asList("x"),
-                Stream.of("a", "b").onClose(b::incrementAndGet).transformViaJdkStream(s -> java.util.stream.Stream.of("x"), true).toList());
+        assertEquals(N.asList("x"), Stream.of("a", "b").onClose(b::incrementAndGet).transformViaJdkStream(s -> java.util.stream.Stream.of("x"), true).toList());
         assertEquals(1, b.get());
     }
 
@@ -212,8 +211,7 @@ public class StreamFamilyReviewFixes20260902Test extends TestBase {
         assertEquals(1, p.get());
 
         final AtomicInteger j = new AtomicInteger();
-        assertEquals(N.asList("A", "B"),
-                Stream.of("a", "b").onClose(j::incrementAndGet).transformViaJdkStream(s -> s.map(String::toUpperCase)).toList());
+        assertEquals(N.asList("A", "B"), Stream.of("a", "b").onClose(j::incrementAndGet).transformViaJdkStream(s -> s.map(String::toUpperCase)).toList());
         assertEquals(1, j.get());
     }
 
@@ -312,10 +310,7 @@ public class StreamFamilyReviewFixes20260902Test extends TestBase {
         final long gap = 250; // comfortably longer than the window
 
         final List<Integer> viaStream = Stream.of(N.asList(1, 2)).onEach(it -> N.sleepUninterruptibly(gap)).debounce(Duration.ofMillis(window)).toList();
-        final List<Integer> viaSeq = Seq.<Integer, Exception> of(1, 2)
-                .onEach(it -> N.sleepUninterruptibly(gap))
-                .debounce(Duration.ofMillis(window))
-                .toList();
+        final List<Integer> viaSeq = Seq.<Integer, Exception> of(1, 2).onEach(it -> N.sleepUninterruptibly(gap)).debounce(Duration.ofMillis(window)).toList();
 
         // element 1 is followed by a gap >= window, so it survives; element 2 is the final pending one
         assertEquals(N.asList(1, 2), viaStream);

@@ -99,8 +99,7 @@ public class TryTest extends TestBase {
     // annotation is RUNTIME-retained, so its absence is observable by reflection.
     @Test
     public void testVoidRunOverloadsAreNotAnnotatedMayReturnNull() throws Exception {
-        assertNull(Try.class.getMethod("run", Throwables.Consumer.class)
-                .getAnnotation(com.landawn.abacus.annotation.MayReturnNull.class));
+        assertNull(Try.class.getMethod("run", Throwables.Consumer.class).getAnnotation(com.landawn.abacus.annotation.MayReturnNull.class));
         assertNull(Try.class.getMethod("run", Throwables.Consumer.class, java.util.function.Consumer.class)
                 .getAnnotation(com.landawn.abacus.annotation.MayReturnNull.class));
         // both really are void, which is why the annotation could never have been meaningful

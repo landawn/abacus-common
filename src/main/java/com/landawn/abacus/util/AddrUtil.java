@@ -209,6 +209,10 @@ public final class AddrUtil {
     public static List<InetSocketAddress> getAddressList(final Collection<String> servers) throws IllegalArgumentException {
         N.checkArgNotNull(servers, cs.servers);
 
+        if (servers.isEmpty()) {
+            throw new IllegalArgumentException("servers cannot be empty");
+        }
+
         final List<InetSocketAddress> addrs = new ArrayList<>(servers.size());
 
         for (final String url : servers) {
@@ -217,10 +221,6 @@ public final class AddrUtil {
             }
 
             addrs.add(parseHostPort(url, servers));
-        }
-
-        if (addrs.isEmpty()) {
-            throw new IllegalArgumentException("servers cannot be empty");
         }
 
         return addrs;

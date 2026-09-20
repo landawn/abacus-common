@@ -179,8 +179,8 @@ import com.landawn.abacus.annotation.Internal;
  *   <li>Concurrent modifications require external synchronization</li>
  *   <li>Multiple readers can access safely if no writers are present</li>
  *   <li>Inverse views share underlying data — synchronize on the original BiMap for both sides</li>
- *   <li>Do not wrap a BiMap with {@code Collections.synchronizedMap}: that only covers the
- *       {@link Map} surface and cannot keep the dual key/value maps and inverse view consistent</li>
+ *   <li>{@code Collections.synchronizedMap} protects access through that wrapper only. Direct calls
+ *       on the BiMap or its inverse must also synchronize on the same wrapper monitor.</li>
  * </ul>
  *
  * <p><b>Backing-map equality:</b>
@@ -1034,8 +1034,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * source's runtime map class, so a {@link java.util.LinkedHashMap} or {@link java.util.SortedMap} source
      * does keep its order (a {@code SortedMap}'s comparator included). A source whose class cannot be
      * instantiated reflectively - {@code Collections.unmodifiableMap(aLinkedHashMap)}, for instance - falls
-     * back to a {@link HashMap}, and its order is then lost. Use {@link #builder()} and insert the entries
-     * yourself, or supply explicit map suppliers to {@link #BiMap(Supplier, Supplier)}, when a particular
+     * back to a {@link HashMap}, and its order is then lost. Supply explicit map suppliers to
+     * {@link #BiMap(Supplier, Supplier)} and insert the entries yourself when a particular
      * iteration order must be guaranteed.</p>
      *
      * @param <K> the type of the keys in the map.
@@ -1229,7 +1229,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      */
     @Override
     public void putAll(final Map<? extends K, ? extends V> m) throws NullPointerException, IllegalArgumentException {
-        N.requireNonNull(m, "m");
+        N.requireNonNull(m, cs.m);
 
         for (final Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
             put(e.getKey(), e.getValue());
@@ -1503,8 +1503,7 @@ public final class BiMap<K, V> implements Map<K, V> {
      * Associates the specified value with the specified key only if the key is not already present.
      * If the key is already mapped, the existing mapping is left unchanged and its value is returned.
      *
-     * <p>Unlike the inherited {@link Map#putIfAbsent(Object, Object)} default method, this override
-     * applies the bijective constraint: if the key is absent but the value is already bound to a
+     * <p>This method applies the bijective constraint: if the key is absent but the value is already bound to a
      * different key, an {@link IllegalArgumentException} is thrown (use {@link #forcePut(Object, Object)}
      * to override such a conflict).</p>
      *
@@ -1689,7 +1688,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * backing maps the two can differ, and with differently-typed backing maps (say a
      * {@code LinkedHashMap} forward map and a {@code TreeMap} reverse map) they routinely do.</p>
      *
-     * <p>{@code contains} is answered by the reverse map, so it stays a constant-time lookup.</p>
+     * <p>{@code contains} is answered by the reverse map, with the lookup complexity of that map
+     * (constant time on average with the default {@link HashMap} backing).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

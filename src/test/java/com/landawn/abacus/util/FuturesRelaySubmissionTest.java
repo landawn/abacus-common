@@ -19,10 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.Isolated;
 
+import com.landawn.abacus.TestBase;
+
 /** Temporarily saturates the shared relay pool; no other test may use Futures during this test. */
 @Tag("unit")
 @Isolated
-class FuturesRelaySubmissionTest {
+class FuturesRelaySubmissionTest extends TestBase {
     @Test
     @Timeout(20)
     void rejectedRelaySubmissionPropagatesAndAllowsRetry() throws Exception {

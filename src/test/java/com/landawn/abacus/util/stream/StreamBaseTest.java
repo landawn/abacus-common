@@ -50,6 +50,42 @@ import com.landawn.abacus.util.stream.StreamBase.LocalRunnable;
 public class StreamBaseTest extends TestBase {
 
     @Test
+    public void testSkipAndLimitHonorsLongMaxValueForUnboundedSource() {
+        for (long offset : new long[] { 0, 1 }) {
+            List<Long> advances = new ArrayList<>();
+            ObjIteratorEx<Integer> source = new ObjIteratorEx<>() {
+                @Override
+                public boolean hasNext() {
+                    return true;
+                }
+
+                @Override
+                public Integer next() {
+                    return 1;
+                }
+
+                @Override
+                boolean supportsFailureAtomicAdvance() {
+                    return true;
+                }
+
+                @Override
+                public void advance(final long n) {
+                    advances.add(n);
+                }
+            };
+
+            try (Stream<Integer> limited = Stream.of(source).skipAndLimit(offset, Long.MAX_VALUE)) {
+                ObjIteratorEx<Integer> iter = limited.iteratorEx();
+                iter.advance(Long.MAX_VALUE);
+                Assertions.assertFalse(iter.hasNext());
+                Assertions.assertThrows(NoSuchElementException.class, iter::next);
+                Assertions.assertEquals(offset == 0 ? List.of(Long.MAX_VALUE) : List.of(offset, Long.MAX_VALUE), advances);
+            }
+        }
+    }
+
+    @Test
     public void testIfEmptyRetriesSourceInspectionAndRunsActionOnce() {
         for (int type = 0; type < 8; type++) {
             for (boolean actionFails : new boolean[] { false, true }) {
@@ -170,8 +206,7 @@ public class StreamBaseTest extends TestBase {
         }
     }
 
-    private BaseStream<?, ?, ?, ?, ?, ?, ?, ?> dropWhileRegressionStream(int type, boolean iteratorSource,
-            java.util.function.IntPredicate predicate) {
+    private BaseStream<?, ?, ?, ?, ?, ?, ?, ?> dropWhileRegressionStream(int type, boolean iteratorSource, java.util.function.IntPredicate predicate) {
         return switch (type) {
             case 0 -> (iteratorSource ? Stream.of(ObjIteratorEx.of(1, 2, 3, 4)) : Stream.of(1, 2, 3, 4)).dropWhile(predicate::test);
             case 1 -> (iteratorSource ? ByteStream.of(ByteIteratorEx.of((byte) 1, (byte) 2, (byte) 3, (byte) 4))
@@ -239,8 +274,11 @@ public class StreamBaseTest extends TestBase {
                 };
                 Stream<Integer> source = sourceKind == 2 ? Stream.of(Arrays.asList(1, 2).iterator()) : Stream.of(1, 2);
                 Stream<Integer> stream = source.onClose(closeCount::incrementAndGet)
-                        .parallel(ParallelSettings.builder().maxThreadNum(2).splitStrategy(sourceKind == 0 ? SplitStrategy.ARRAY : SplitStrategy.ITERATOR)
-                                .executor(executor).build());
+                        .parallel(ParallelSettings.builder()
+                                .maxThreadNum(2)
+                                .splitStrategy(sourceKind == 0 ? SplitStrategy.ARRAY : SplitStrategy.ITERATOR)
+                                .executor(executor)
+                                .build());
                 final int nesting = nestingKind;
                 Throwables.Function<Integer, Iterable<Integer>, RuntimeException> mapper = value -> {
                     if (!rejectSubmission && value == 2) {
@@ -258,11 +296,14 @@ public class StreamBaseTest extends TestBase {
                 try {
                     java.util.concurrent.Future<Throwable> result = caller.submit(() -> Assertions.assertThrows(RuntimeException.class, () -> {
                         if (nesting == 0) {
-                            stream.forEach(mapper, (value, nested) -> { });
+                            stream.forEach(mapper, (value, nested) -> {
+                            });
                         } else if (nesting == 1) {
-                            stream.forEach(mapper, value -> Collections.singletonList(value), (value, nested, inner) -> { });
+                            stream.forEach(mapper, value -> Collections.singletonList(value), (value, nested, inner) -> {
+                            });
                         } else if (nesting == 2) {
-                            stream.forEach(mapper, value -> unbounded, (value, nested, inner) -> { });
+                            stream.forEach(mapper, value -> unbounded, (value, nested, inner) -> {
+                            });
                         } else {
                             stream.flatGroupTo(value -> {
                                 mapper.apply(value);
@@ -306,19 +347,22 @@ public class StreamBaseTest extends TestBase {
                 AtomicInteger closeCount = new AtomicInteger();
                 RejectedExecutionException rejection = new RejectedExecutionException("rejected submission");
                 IllegalStateException closeFailure = new IllegalStateException("close failed");
-                Stream<Integer> stream = (iteratorBacked ? Stream.of(Arrays.asList(1, 2).iterator()) : Stream.of(1, 2))
-                        .onClose(() -> {
-                            closeCount.incrementAndGet();
-                            throw closeFailure;
-                        }).parallel(2, command -> { throw rejection; });
+                Stream<Integer> stream = (iteratorBacked ? Stream.of(Arrays.asList(1, 2).iterator()) : Stream.of(1, 2)).onClose(() -> {
+                    closeCount.incrementAndGet();
+                    throw closeFailure;
+                }).parallel(2, command -> {
+                    throw rejection;
+                });
                 final int operation = terminal;
 
                 Assertions.assertSame(rejection, Assertions.assertThrows(RejectedExecutionException.class, () -> {
                     switch (operation) {
-                        case 0 -> stream.forEach(value -> { });
+                        case 0 -> stream.forEach(value -> {
+                        });
                         case 1 -> stream.collect(ArrayList<Integer>::new, List::add, List::addAll);
                         case 2 -> stream.reduce(0, Integer::sum, Integer::sum);
-                        case 3 -> stream.forEach(value -> { }, () -> Assertions.fail("onComplete must not run after rejection"));
+                        case 3 -> stream.forEach(value -> {
+                        }, () -> Assertions.fail("onComplete must not run after rejection"));
                         default -> throw new AssertionError(operation);
                     }
                 }));
@@ -337,27 +381,48 @@ public class StreamBaseTest extends TestBase {
             for (int type = 0; type < 8; type++) {
                 AtomicInteger closeCount = new AtomicInteger();
                 RejectedExecutionException rejection = new RejectedExecutionException("rejected submission");
-                java.util.concurrent.Executor executor = command -> { throw rejection; };
+                java.util.concurrent.Executor executor = command -> {
+                    throw rejection;
+                };
                 final int streamType = type;
 
                 Assertions.assertSame(rejection, Assertions.assertThrows(RejectedExecutionException.class, () -> {
                     switch (streamType) {
-                        case 0 -> (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3))
-                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                        case 0 -> (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3)).onClose(closeCount::incrementAndGet)
+                                .parallel(2, executor)
+                                .forEach(value -> {
+                                });
                         case 1 -> (iteratorBacked ? ByteStream.of(com.landawn.abacus.util.ByteIterator.of((byte) 1, (byte) 2, (byte) 3))
-                                : ByteStream.of((byte) 1, (byte) 2, (byte) 3)).onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                                : ByteStream.of((byte) 1, (byte) 2, (byte) 3)).onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> {
+                                });
                         case 2 -> (iteratorBacked ? CharStream.of(com.landawn.abacus.util.CharIterator.of('a', 'b', 'c')) : CharStream.of('a', 'b', 'c'))
-                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                                .onClose(closeCount::incrementAndGet)
+                                .parallel(2, executor)
+                                .forEach(value -> {
+                                });
                         case 3 -> (iteratorBacked ? ShortStream.of(com.landawn.abacus.util.ShortIterator.of((short) 1, (short) 2, (short) 3))
-                                : ShortStream.of((short) 1, (short) 2, (short) 3)).onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                                : ShortStream.of((short) 1, (short) 2, (short) 3)).onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> {
+                                });
                         case 4 -> (iteratorBacked ? IntStream.of(com.landawn.abacus.util.IntIterator.of(1, 2, 3)) : IntStream.of(1, 2, 3))
-                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                                .onClose(closeCount::incrementAndGet)
+                                .parallel(2, executor)
+                                .forEach(value -> {
+                                });
                         case 5 -> (iteratorBacked ? LongStream.of(com.landawn.abacus.util.LongIterator.of(1, 2, 3)) : LongStream.of(1, 2, 3))
-                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                                .onClose(closeCount::incrementAndGet)
+                                .parallel(2, executor)
+                                .forEach(value -> {
+                                });
                         case 6 -> (iteratorBacked ? FloatStream.of(com.landawn.abacus.util.FloatIterator.of(1, 2, 3)) : FloatStream.of(1, 2, 3))
-                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                                .onClose(closeCount::incrementAndGet)
+                                .parallel(2, executor)
+                                .forEach(value -> {
+                                });
                         case 7 -> (iteratorBacked ? DoubleStream.of(com.landawn.abacus.util.DoubleIterator.of(1, 2, 3)) : DoubleStream.of(1, 2, 3))
-                                .onClose(closeCount::incrementAndGet).parallel(2, executor).forEach(value -> { });
+                                .onClose(closeCount::incrementAndGet)
+                                .parallel(2, executor)
+                                .forEach(value -> {
+                                });
                         default -> throw new AssertionError(streamType);
                     }
                 }));
@@ -368,7 +433,10 @@ public class StreamBaseTest extends TestBase {
                 AtomicInteger closeCount = new AtomicInteger();
                 RejectedExecutionException rejection = new RejectedExecutionException("rejected result submission");
                 Stream<Integer> stream = (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3))
-                        .onClose(closeCount::incrementAndGet).parallel(2, command -> { throw rejection; });
+                        .onClose(closeCount::incrementAndGet)
+                        .parallel(2, command -> {
+                            throw rejection;
+                        });
 
                 Assertions.assertSame(rejection, Assertions.assertThrows(RejectedExecutionException.class, () -> {
                     if (collecting) {
@@ -458,10 +526,16 @@ public class StreamBaseTest extends TestBase {
                     };
 
                     if (terminalOperation == 0) {
-                        Stream.generate(() -> 1).takeWhile(value -> keepProducing.get()).onClose(closeCount::incrementAndGet).parallel(2, workers)
+                        Stream.generate(() -> 1)
+                                .takeWhile(value -> keepProducing.get())
+                                .onClose(closeCount::incrementAndGet)
+                                .parallel(2, workers)
                                 .collect(supplier, (count, value) -> count.incrementAndGet(), (left, right) -> left.addAndGet(right.get()));
                     } else if (terminalOperation == 1) {
-                        IntStream.generate(() -> 1).takeWhile(value -> keepProducing.get()).onClose(closeCount::incrementAndGet).parallel(2, workers)
+                        IntStream.generate(() -> 1)
+                                .takeWhile(value -> keepProducing.get())
+                                .onClose(closeCount::incrementAndGet)
+                                .parallel(2, workers)
                                 .collect(supplier, (count, value) -> count.incrementAndGet(), (left, right) -> left.addAndGet(right.get()));
                     } else {
                         IntStream.of(new com.landawn.abacus.util.IntIterator() {
@@ -504,8 +578,8 @@ public class StreamBaseTest extends TestBase {
             AtomicInteger supplierCalls = new AtomicInteger();
             AtomicInteger submissions = new AtomicInteger();
             IllegalStateException failure = new IllegalStateException("concurrent collector setup failed");
-            Stream<Integer> stream = (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3))
-                    .onClose(closeCount::incrementAndGet).parallel(2, command -> {
+            Stream<Integer> stream = (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3)).onClose(closeCount::incrementAndGet)
+                    .parallel(2, command -> {
                         submissions.incrementAndGet();
                         command.run();
                     });
@@ -1043,6 +1117,22 @@ public class StreamBaseTest extends TestBase {
         Stream<Integer> closedStream = createStream(1, 2, 3);
         closedStream.close();
         Assertions.assertThrows(IllegalStateException.class, () -> closedStream.transform(s -> s));
+
+        for (boolean parallelResult : new boolean[] { false, true }) {
+            AtomicInteger inputClosed = new AtomicInteger();
+            AtomicInteger outputClosed = new AtomicInteger();
+            Stream<Integer> input = createStream(1, 2).parallel(2).onClose(inputClosed::incrementAndGet);
+            try (Stream<Integer> transformed = input.transform(source -> {
+                Assertions.assertTrue(source.isParallel());
+                Stream<Integer> output = Stream.of(3, 4).onClose(outputClosed::incrementAndGet);
+                return parallelResult ? output.parallel(2) : output;
+            })) {
+                Assertions.assertEquals(parallelResult, transformed.isParallel());
+                Assertions.assertEquals(List.of(3, 4), transformed.toList());
+            }
+            Assertions.assertEquals(1, inputClosed.get());
+            Assertions.assertEquals(1, outputClosed.get());
+        }
     }
 
     @Test
@@ -1695,6 +1785,452 @@ public class StreamBaseTest extends TestBase {
         List<ObjIteratorEx<Integer>> iteratorsWithNull = StreamBase.iterateAll(streamsWithNull);
         Assertions.assertEquals(3, iteratorsWithNull.size());
         Assertions.assertFalse(iteratorsWithNull.get(1).hasNext());
+    }
+
+    @Test
+    public void testZipOpeningFailurePreservesPrimaryWhenCloseRethrowsIt() {
+        for (int sourceCount : new int[] { 2, 3, 4 }) {
+            IllegalStateException failure = new IllegalStateException("source opening failed");
+            AtomicInteger closed = new AtomicInteger();
+            Stream<Integer> first = Stream.of(1).onClose(() -> {
+                closed.incrementAndGet();
+                throw failure;
+            });
+            Stream<Integer> second = Stream.of(2).onClose(closed::incrementAndGet);
+            Stream<Integer> failing = streamFailingToOpen(failure);
+
+            IllegalStateException actual = Assertions.assertThrows(IllegalStateException.class, () -> {
+                if (sourceCount == 2) {
+                    Stream.zip(first, failing, Integer::sum);
+                } else if (sourceCount == 3) {
+                    Stream.zip(first, second, failing, (a, b, c) -> a + b + c);
+                } else {
+                    Stream.zip(Arrays.asList(first, null, second, failing), values -> values);
+                }
+            });
+
+            Assertions.assertSame(failure, actual);
+            Assertions.assertEquals(0, actual.getSuppressed().length);
+            Assertions.assertEquals(sourceCount == 2 ? 1 : 2, closed.get());
+            second.close();
+            failing.close();
+        }
+    }
+
+    @Test
+    public void testZipOpeningFailureSuppressesCloseErrorAndClosesRemainingSources() {
+        for (boolean collectionOverload : new boolean[] { false, true }) {
+            IllegalStateException failure = new IllegalStateException("source opening failed");
+            AssertionError closeError = new AssertionError("first source close failed");
+            IllegalArgumentException closeException = new IllegalArgumentException("second source close failed");
+            AtomicInteger closed = new AtomicInteger();
+            Stream<Integer> first = Stream.of(1).onClose(() -> {
+                closed.incrementAndGet();
+                throw closeError;
+            });
+            Stream<Integer> second = Stream.of(2).onClose(() -> {
+                closed.incrementAndGet();
+                throw closeException;
+            });
+            Stream<Integer> failing = streamFailingToOpen(failure);
+
+            IllegalStateException actual = Assertions.assertThrows(IllegalStateException.class, () -> {
+                if (collectionOverload) {
+                    Stream.zip(Arrays.asList(first, null, second, failing), values -> values);
+                } else {
+                    Stream.zip(first, second, failing, (a, b, c) -> a + b + c);
+                }
+            });
+
+            Assertions.assertSame(failure, actual);
+            Assertions.assertArrayEquals(new Throwable[] { closeError, closeException }, actual.getSuppressed());
+            Assertions.assertEquals(2, closed.get());
+            failing.close();
+        }
+    }
+
+    @Test
+    public void testZipOpeningErrorPreservesPrimaryAndLeavesUnopenedSourcesUsable() {
+        for (boolean collectionOverload : new boolean[] { false, true }) {
+            AssertionError failure = new AssertionError("source opening failed");
+            IllegalStateException cleanupFailure = new IllegalStateException("source close failed");
+            AtomicInteger closed = new AtomicInteger();
+            AtomicInteger unopenedClosed = new AtomicInteger();
+            Stream<Integer> first = Stream.of(1).onClose(() -> {
+                closed.incrementAndGet();
+                throw failure;
+            });
+            Stream<Integer> second = Stream.of(2).onClose(() -> {
+                closed.incrementAndGet();
+                throw cleanupFailure;
+            });
+            Stream<Integer> failing = new IteratorStream<Integer>(Collections.emptyIterator()) {
+                @Override
+                ObjIteratorEx<Integer> iteratorEx() {
+                    throw failure;
+                }
+            }.onClose(unopenedClosed::incrementAndGet);
+            Stream<Integer> suffix = Stream.of(4).onClose(unopenedClosed::incrementAndGet);
+
+            try {
+                AssertionError actual = Assertions.assertThrows(AssertionError.class, () -> {
+                    if (collectionOverload) {
+                        Stream.zip(Arrays.asList(first, null, second, failing, suffix), values -> values);
+                    } else {
+                        Stream.zip(first, second, failing, (a, b, c) -> a + b + c);
+                    }
+                });
+                Assertions.assertSame(failure, actual);
+                Assertions.assertArrayEquals(new Throwable[] { cleanupFailure }, actual.getSuppressed());
+                Assertions.assertEquals(2, closed.get());
+                Assertions.assertEquals(0, unopenedClosed.get());
+                Assertions.assertEquals(List.of(4), suffix.toList());
+            } finally {
+                failing.close();
+                suffix.close();
+            }
+            Assertions.assertEquals(2, unopenedClosed.get());
+        }
+    }
+
+    @Test
+    public void testEntryStreamTransferPreservesInputModeAndClosesOwnedStreams() {
+        for (int scenario = 0; scenario < 6; scenario++) {
+            int variant = scenario % 3;
+            boolean deferred = variant == 2;
+            boolean parallelResult = scenario >= 3;
+            AtomicInteger invoked = new AtomicInteger();
+            AtomicInteger inputClosed = new AtomicInteger();
+            AtomicInteger outputClosed = new AtomicInteger();
+            EntryStream<String, Integer> input = EntryStream.of("input", 1).parallel(2).onClose(inputClosed::incrementAndGet);
+            com.landawn.abacus.util.function.Function<Stream<java.util.Map.Entry<String, Integer>>, Stream<java.util.Map.Entry<String, Integer>>> transfer = source -> {
+                Assertions.assertTrue(source.isParallel());
+                invoked.incrementAndGet();
+                Stream<java.util.Map.Entry<String, Integer>> output = Stream.<java.util.Map.Entry<String, Integer>> of(
+                        new java.util.AbstractMap.SimpleImmutableEntry<>("output", 2)).onClose(outputClosed::incrementAndGet);
+                return parallelResult ? output.parallel(2) : output;
+            };
+            try (EntryStream<String, Integer> result = variant == 0 ? input.transformViaStream(transfer) : input.transformViaStream(transfer, deferred)) {
+                Assertions.assertEquals(deferred ? 0 : 1, invoked.get());
+                Assertions.assertEquals(parallelResult && !deferred, result.isParallel());
+                Assertions.assertEquals(java.util.Map.of("output", 2), result.toMap());
+                Assertions.assertEquals(1, invoked.get());
+                Assertions.assertEquals(1, inputClosed.get());
+                Assertions.assertEquals(1, outputClosed.get());
+            }
+            Assertions.assertEquals(1, inputClosed.get());
+            Assertions.assertEquals(1, outputClosed.get());
+        }
+    }
+
+    @Test
+    public void testJdkTransfersPreserveInputModeAndHonorReturnedMode() {
+        for (int type = 0; type < 4; type++) {
+            for (int scenario = 0; scenario < 16; scenario++) {
+                boolean deferred = (scenario & 1) != 0;
+                boolean parallelResult = (scenario & 2) != 0;
+                boolean arraySource = (scenario & 4) != 0;
+                boolean parallelInput = (scenario & 8) != 0;
+                AtomicInteger invoked = new AtomicInteger();
+                AtomicInteger inputClosed = new AtomicInteger();
+                AtomicInteger outputClosed = new AtomicInteger();
+                BaseStream<?, ?, ?, ?, ?, ?, ?, ?> input = switch (type) {
+                    case 0 -> arraySource ? Stream.of(1, 2) : Stream.of(Arrays.asList(1, 2).iterator());
+                    case 1 -> arraySource ? IntStream.of(1, 2) : IntStream.of(IntIteratorEx.of(new int[] { 1, 2 }));
+                    case 2 -> arraySource ? LongStream.of(1, 2) : LongStream.of(LongIteratorEx.of(new long[] { 1, 2 }));
+                    default -> arraySource ? DoubleStream.of(1, 2) : DoubleStream.of(DoubleIteratorEx.of(new double[] { 1, 2 }));
+                };
+                input = (parallelInput ? input.parallel(2) : input).onClose(inputClosed::incrementAndGet);
+                BaseStream<?, ?, ?, ?, ?, ?, ?, ?> transformed = switch (type) {
+                    case 0 -> ((Stream<Integer>) input).transformViaJdkStream(source -> {
+                        Assertions.assertEquals(parallelInput, source.isParallel());
+                        invoked.incrementAndGet();
+                        java.util.stream.Stream<Integer> output = java.util.stream.Stream.of(3, 4).onClose(outputClosed::incrementAndGet);
+                        return parallelResult ? output.parallel() : output;
+                    }, deferred);
+                    case 1 -> ((IntStream) input).transformViaJdkStream(source -> {
+                        Assertions.assertEquals(parallelInput, source.isParallel());
+                        invoked.incrementAndGet();
+                        java.util.stream.IntStream output = java.util.stream.IntStream.of(3, 4).onClose(outputClosed::incrementAndGet);
+                        return parallelResult ? output.parallel() : output;
+                    }, deferred);
+                    case 2 -> ((LongStream) input).transformViaJdkStream(source -> {
+                        Assertions.assertEquals(parallelInput, source.isParallel());
+                        invoked.incrementAndGet();
+                        java.util.stream.LongStream output = java.util.stream.LongStream.of(3, 4).onClose(outputClosed::incrementAndGet);
+                        return parallelResult ? output.parallel() : output;
+                    }, deferred);
+                    default -> ((DoubleStream) input).transformViaJdkStream(source -> {
+                        Assertions.assertEquals(parallelInput, source.isParallel());
+                        invoked.incrementAndGet();
+                        java.util.stream.DoubleStream output = java.util.stream.DoubleStream.of(3, 4).onClose(outputClosed::incrementAndGet);
+                        return parallelResult ? output.parallel() : output;
+                    }, deferred);
+                };
+                try (transformed) {
+                    Assertions.assertEquals(deferred ? 0 : 1, invoked.get());
+                    Assertions.assertEquals(parallelResult && !deferred, transformed.isParallel());
+                    Assertions.assertEquals(2, transformed.count());
+                    Assertions.assertEquals(1, invoked.get());
+                }
+                Assertions.assertEquals(1, inputClosed.get());
+                Assertions.assertEquals(1, outputClosed.get());
+            }
+        }
+    }
+
+    @Test
+    public void testContainsAllSupportsParallelSourcesAndClosesExactlyOnce() {
+        Integer[][] requests = { { 2 }, { 1, 3 }, { 2, 2, 2 }, { 2, 4 }, {} };
+        boolean[] expected = { true, true, true, false, true };
+        for (boolean arraySource : new boolean[] { false, true }) {
+            for (boolean collectionOverload : new boolean[] { false, true }) {
+                for (int i = 0; i < requests.length; i++) {
+                    AtomicInteger closed = new AtomicInteger();
+                    try (Stream<Integer> source = (arraySource ? Stream.of(1, 2, 3) : Stream.of(Arrays.asList(1, 2, 3).iterator())).parallel(2)
+                            .onClose(closed::incrementAndGet)) {
+                        Assertions.assertTrue(source.isParallel());
+                        boolean actual = collectionOverload ? source.containsAll(Arrays.asList(requests[i])) : source.containsAll(requests[i]);
+                        Assertions.assertEquals(expected[i], actual);
+                        Assertions.assertEquals(1, closed.get());
+                    }
+                    Assertions.assertEquals(1, closed.get());
+                }
+            }
+        }
+    }
+
+    private static Stream<Integer> streamFailingToOpen(final RuntimeException failure) {
+        return new IteratorStream<Integer>(Collections.emptyIterator()) {
+            @Override
+            ObjIteratorEx<Integer> iteratorEx() {
+                throw failure;
+            }
+        };
+    }
+
+    @Test
+    public void testAppendIfEmptyPreservesOpeningFailureAcrossStreamTypes() {
+        for (int type = 0; type < 8; type++) {
+            for (boolean arraySource : new boolean[] { false, true }) {
+                for (boolean sameFailure : new boolean[] { false, true }) {
+                    IllegalStateException failure = new IllegalStateException("fallback opening failed");
+                    AssertionError closeError = new AssertionError("fallback close failed");
+                    AtomicInteger closed = new AtomicInteger();
+                    BaseStream<?, ?, ?, ?, ?, ?, ?, ?> fallback = fallbackFailingToOpen(type, failure).onClose(() -> {
+                        closed.incrementAndGet();
+                        if (sameFailure) {
+                            throw failure;
+                        }
+                        throw closeError;
+                    });
+
+                    try (BaseStream<?, ?, ?, ?, ?, ?, ?, ?> stream = switch (type) {
+                        case 0 -> (arraySource ? Stream.<Integer> empty() : Stream.of(ObjIteratorEx.<Integer> empty()))
+                                .appendIfEmpty(() -> (Stream<Integer>) fallback);
+                        case 1 -> (arraySource ? ByteStream.empty() : ByteStream.of(ByteIteratorEx.empty())).appendIfEmpty(() -> (ByteStream) fallback);
+                        case 2 -> (arraySource ? CharStream.empty() : CharStream.of(CharIteratorEx.empty())).appendIfEmpty(() -> (CharStream) fallback);
+                        case 3 -> (arraySource ? ShortStream.empty() : ShortStream.of(ShortIteratorEx.empty())).appendIfEmpty(() -> (ShortStream) fallback);
+                        case 4 -> (arraySource ? IntStream.empty() : IntStream.of(IntIteratorEx.empty())).appendIfEmpty(() -> (IntStream) fallback);
+                        case 5 -> (arraySource ? LongStream.empty() : LongStream.of(LongIteratorEx.empty())).appendIfEmpty(() -> (LongStream) fallback);
+                        case 6 -> (arraySource ? FloatStream.empty() : FloatStream.of(FloatIteratorEx.empty())).appendIfEmpty(() -> (FloatStream) fallback);
+                        case 7 -> (arraySource ? DoubleStream.empty() : DoubleStream.of(DoubleIteratorEx.empty())).appendIfEmpty(() -> (DoubleStream) fallback);
+                        default -> throw new AssertionError(type);
+                    }) {
+                        IllegalStateException actual = Assertions.assertThrows(IllegalStateException.class, () -> stream.iterator().hasNext());
+                        Assertions.assertSame(failure, actual);
+                        Assertions.assertArrayEquals(sameFailure ? new Throwable[0] : new Throwable[] { closeError }, actual.getSuppressed());
+                        Assertions.assertEquals(1, closed.get());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testPrimitiveCollectionZipClosesOnlyOpenedSourcesOnFailure() {
+        for (int type = 1; type < 8; type++) {
+            for (boolean padded : new boolean[] { false, true }) {
+                for (boolean primitiveResult : new boolean[] { false, true }) {
+                    IllegalStateException failure = new IllegalStateException("primitive source opening failed");
+                    AssertionError closeError = new AssertionError("first close failed");
+                    AtomicInteger openedClosed = new AtomicInteger();
+                    AtomicInteger unopenedClosed = new AtomicInteger();
+                    BaseStream<?, ?, ?, ?, ?, ?, ?, ?> first = emptyPrimitiveStream(type).onClose(() -> {
+                        openedClosed.incrementAndGet();
+                        throw closeError;
+                    });
+                    BaseStream<?, ?, ?, ?, ?, ?, ?, ?> second = emptyPrimitiveStream(type).onClose(() -> {
+                        openedClosed.incrementAndGet();
+                        throw failure;
+                    });
+                    BaseStream<?, ?, ?, ?, ?, ?, ?, ?> failing = fallbackFailingToOpen(type, failure).onClose(unopenedClosed::incrementAndGet);
+                    BaseStream<?, ?, ?, ?, ?, ?, ?, ?> suffix = emptyPrimitiveStream(type).onClose(unopenedClosed::incrementAndGet);
+                    List<BaseStream<?, ?, ?, ?, ?, ?, ?, ?>> sources = Arrays.asList(null, first, second, failing, suffix);
+                    final int streamType = type;
+                    try {
+                        IllegalStateException actual = Assertions.assertThrows(IllegalStateException.class,
+                                () -> primitiveCollectionZip(streamType, padded, primitiveResult, sources));
+                        Assertions.assertSame(failure, actual);
+                        Assertions.assertArrayEquals(new Throwable[] { closeError }, actual.getSuppressed());
+                        Assertions.assertEquals(2, openedClosed.get());
+                        Assertions.assertEquals(0, unopenedClosed.get());
+                        Assertions.assertFalse(suffix.iterator().hasNext(), "Unopened suffix remains usable");
+                    } finally {
+                        failing.close();
+                        suffix.close();
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testParallelCollectionZipValidatesThreadCountBeforeOpeningSources() {
+        for (int threadCount : new int[] { 0, -1 }) {
+            for (boolean padded : new boolean[] { false, true }) {
+                AtomicInteger opened = new AtomicInteger();
+                AtomicInteger closed = new AtomicInteger();
+                try (Stream<Integer> source = new IteratorStream<Integer>(ObjIteratorEx.of(1, 2)) {
+                    @Override
+                    ObjIteratorEx<Integer> iteratorEx() {
+                        opened.incrementAndGet();
+                        return super.iteratorEx();
+                    }
+                }.onClose(closed::incrementAndGet)) {
+                    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+                        if (padded) {
+                            Stream.parallelZip(List.of(source), List.of(0), values -> values.get(0), threadCount);
+                        } else {
+                            Stream.parallelZip(List.of(source), values -> values.get(0), threadCount);
+                        }
+                    });
+                    Assertions.assertEquals(0, opened.get(), "Invalid options must not acquire source iterators");
+                    Assertions.assertEquals(0, closed.get());
+                    Assertions.assertEquals(List.of(1, 2), source.toList());
+                }
+                Assertions.assertEquals(1, closed.get());
+            }
+        }
+    }
+
+    private static BaseStream<?, ?, ?, ?, ?, ?, ?, ?> emptyPrimitiveStream(final int type) {
+        return switch (type) {
+            case 1 -> ByteStream.empty();
+            case 2 -> CharStream.empty();
+            case 3 -> ShortStream.empty();
+            case 4 -> IntStream.empty();
+            case 5 -> LongStream.empty();
+            case 6 -> FloatStream.empty();
+            case 7 -> DoubleStream.empty();
+            default -> throw new AssertionError(type);
+        };
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static BaseStream<?, ?, ?, ?, ?, ?, ?, ?> primitiveCollectionZip(final int type, final boolean padded, final boolean primitiveResult,
+            final Collection sources) {
+        return switch (type) {
+            case 1 -> {
+                com.landawn.abacus.util.function.ByteNFunction<Byte> zipper = values -> (byte) 0;
+                if (primitiveResult) {
+                    yield padded ? ByteStream.zip(sources, new byte[sources.size()], zipper) : ByteStream.zip(sources, zipper);
+                }
+                yield padded ? Stream.zip(sources, new byte[sources.size()], zipper) : Stream.zip(sources, zipper);
+            }
+            case 2 -> {
+                com.landawn.abacus.util.function.CharNFunction<Character> zipper = values -> (char) 0;
+                if (primitiveResult) {
+                    yield padded ? CharStream.zip(sources, new char[sources.size()], zipper) : CharStream.zip(sources, zipper);
+                }
+                yield padded ? Stream.zip(sources, new char[sources.size()], zipper) : Stream.zip(sources, zipper);
+            }
+            case 3 -> {
+                com.landawn.abacus.util.function.ShortNFunction<Short> zipper = values -> (short) 0;
+                if (primitiveResult) {
+                    yield padded ? ShortStream.zip(sources, new short[sources.size()], zipper) : ShortStream.zip(sources, zipper);
+                }
+                yield padded ? Stream.zip(sources, new short[sources.size()], zipper) : Stream.zip(sources, zipper);
+            }
+            case 4 -> {
+                com.landawn.abacus.util.function.IntNFunction<Integer> zipper = values -> (int) 0;
+                if (primitiveResult) {
+                    yield padded ? IntStream.zip(sources, new int[sources.size()], zipper) : IntStream.zip(sources, zipper);
+                }
+                yield padded ? Stream.zip(sources, new int[sources.size()], zipper) : Stream.zip(sources, zipper);
+            }
+            case 5 -> {
+                com.landawn.abacus.util.function.LongNFunction<Long> zipper = values -> (long) 0;
+                if (primitiveResult) {
+                    yield padded ? LongStream.zip(sources, new long[sources.size()], zipper) : LongStream.zip(sources, zipper);
+                }
+                yield padded ? Stream.zip(sources, new long[sources.size()], zipper) : Stream.zip(sources, zipper);
+            }
+            case 6 -> {
+                com.landawn.abacus.util.function.FloatNFunction<Float> zipper = values -> (float) 0;
+                if (primitiveResult) {
+                    yield padded ? FloatStream.zip(sources, new float[sources.size()], zipper) : FloatStream.zip(sources, zipper);
+                }
+                yield padded ? Stream.zip(sources, new float[sources.size()], zipper) : Stream.zip(sources, zipper);
+            }
+            case 7 -> {
+                com.landawn.abacus.util.function.DoubleNFunction<Double> zipper = values -> (double) 0;
+                if (primitiveResult) {
+                    yield padded ? DoubleStream.zip(sources, new double[sources.size()], zipper) : DoubleStream.zip(sources, zipper);
+                }
+                yield padded ? Stream.zip(sources, new double[sources.size()], zipper) : Stream.zip(sources, zipper);
+            }
+            default -> throw new AssertionError(type);
+        };
+    }
+
+    private static BaseStream<?, ?, ?, ?, ?, ?, ?, ?> fallbackFailingToOpen(final int type, final RuntimeException failure) {
+        return switch (type) {
+            case 0 -> streamFailingToOpen(failure);
+            case 1 -> new IteratorByteStream(ByteIteratorEx.empty()) {
+                @Override
+                ByteIteratorEx iteratorEx() {
+                    throw failure;
+                }
+            };
+            case 2 -> new IteratorCharStream(CharIteratorEx.empty()) {
+                @Override
+                CharIteratorEx iteratorEx() {
+                    throw failure;
+                }
+            };
+            case 3 -> new IteratorShortStream(ShortIteratorEx.empty()) {
+                @Override
+                ShortIteratorEx iteratorEx() {
+                    throw failure;
+                }
+            };
+            case 4 -> new IteratorIntStream(IntIteratorEx.empty()) {
+                @Override
+                IntIteratorEx iteratorEx() {
+                    throw failure;
+                }
+            };
+            case 5 -> new IteratorLongStream(LongIteratorEx.empty()) {
+                @Override
+                LongIteratorEx iteratorEx() {
+                    throw failure;
+                }
+            };
+            case 6 -> new IteratorFloatStream(FloatIteratorEx.empty()) {
+                @Override
+                FloatIteratorEx iteratorEx() {
+                    throw failure;
+                }
+            };
+            case 7 -> new IteratorDoubleStream(DoubleIteratorEx.empty()) {
+                @Override
+                DoubleIteratorEx iteratorEx() {
+                    throw failure;
+                }
+            };
+            default -> throw new AssertionError(type);
+        };
     }
 
     @Test
@@ -2468,8 +3004,7 @@ public class StreamBaseTest extends TestBase {
                                     Assertions.assertTrue(iterator.hasNext(), context);
                                     remaining.add(iterator.next());
                                 }
-                                List<Integer> expected = mergeAll ? Arrays.asList(failureAt)
-                                        : failureAt == 2 ? Arrays.asList(2, 3, 4) : Arrays.asList(3, 4);
+                                List<Integer> expected = mergeAll ? Arrays.asList(failureAt) : failureAt == 2 ? Arrays.asList(2, 3, 4) : Arrays.asList(3, 4);
                                 Assertions.assertEquals(expected, remaining, context);
                                 Assertions.assertThrows(java.util.NoSuchElementException.class, iterator::next, context);
                             }
@@ -2488,16 +3023,26 @@ public class StreamBaseTest extends TestBase {
                 com.landawn.abacus.util.function.BiPredicate<Integer, Integer> pair = predicate::test;
                 com.landawn.abacus.util.function.TriPredicate<Integer, Integer, Integer> triple = (first, previous, next) -> predicate.test(previous, next);
                 switch (operation) {
-                    case 0: return stream.rangeMap(pair, (first, last) -> first);
-                    case 1: return stream.collapse(pair).map(values -> values.get(0));
-                    case 2: return stream.collapse(pair, (first, next) -> first);
-                    case 3: return stream.collapse(triple, (first, next) -> first);
-                    case 4: return stream.collapse(pair, (Integer) null, (first, next) -> first == null ? next : first);
-                    case 5: return stream.collapse(triple, (Integer) null, (first, next) -> first == null ? next : first);
-                    case 6: return stream.collapse(pair, java.util.stream.Collectors.toList()).map(values -> values.get(0));
-                    case 7: return stream.collapse(triple, java.util.stream.Collectors.toList()).map(values -> values.get(0));
-                    case 8: return stream.collapse(triple).map(values -> values.get(0));
-                    default: throw new AssertionError(operation);
+                    case 0:
+                        return stream.rangeMap(pair, (first, last) -> first);
+                    case 1:
+                        return stream.collapse(pair).map(values -> values.get(0));
+                    case 2:
+                        return stream.collapse(pair, (first, next) -> first);
+                    case 3:
+                        return stream.collapse(triple, (first, next) -> first);
+                    case 4:
+                        return stream.collapse(pair, (Integer) null, (first, next) -> first == null ? next : first);
+                    case 5:
+                        return stream.collapse(triple, (Integer) null, (first, next) -> first == null ? next : first);
+                    case 6:
+                        return stream.collapse(pair, java.util.stream.Collectors.toList()).map(values -> values.get(0));
+                    case 7:
+                        return stream.collapse(triple, java.util.stream.Collectors.toList()).map(values -> values.get(0));
+                    case 8:
+                        return stream.collapse(triple).map(values -> values.get(0));
+                    default:
+                        throw new AssertionError(operation);
                 }
             }
             case "Byte": {
@@ -2505,12 +3050,18 @@ public class StreamBaseTest extends TestBase {
                 com.landawn.abacus.util.function.ByteBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
                 com.landawn.abacus.util.function.ByteTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
                 switch (operation) {
-                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
-                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
-                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
-                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
-                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
-                    default: throw new AssertionError(operation);
+                    case 0:
+                        return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1:
+                        return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2:
+                        return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3:
+                        return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4:
+                        return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default:
+                        throw new AssertionError(operation);
                 }
             }
             case "Char": {
@@ -2518,12 +3069,18 @@ public class StreamBaseTest extends TestBase {
                 com.landawn.abacus.util.function.CharBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
                 com.landawn.abacus.util.function.CharTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
                 switch (operation) {
-                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
-                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
-                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
-                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
-                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
-                    default: throw new AssertionError(operation);
+                    case 0:
+                        return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1:
+                        return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2:
+                        return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3:
+                        return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4:
+                        return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default:
+                        throw new AssertionError(operation);
                 }
             }
             case "Short": {
@@ -2531,12 +3088,18 @@ public class StreamBaseTest extends TestBase {
                 com.landawn.abacus.util.function.ShortBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
                 com.landawn.abacus.util.function.ShortTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
                 switch (operation) {
-                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
-                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
-                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
-                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
-                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
-                    default: throw new AssertionError(operation);
+                    case 0:
+                        return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1:
+                        return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2:
+                        return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3:
+                        return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4:
+                        return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default:
+                        throw new AssertionError(operation);
                 }
             }
             case "Int": {
@@ -2544,12 +3107,18 @@ public class StreamBaseTest extends TestBase {
                 com.landawn.abacus.util.function.IntBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
                 com.landawn.abacus.util.function.IntTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
                 switch (operation) {
-                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
-                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
-                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
-                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
-                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
-                    default: throw new AssertionError(operation);
+                    case 0:
+                        return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1:
+                        return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2:
+                        return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3:
+                        return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4:
+                        return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default:
+                        throw new AssertionError(operation);
                 }
             }
             case "Long": {
@@ -2557,12 +3126,18 @@ public class StreamBaseTest extends TestBase {
                 com.landawn.abacus.util.function.LongBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
                 com.landawn.abacus.util.function.LongTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
                 switch (operation) {
-                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
-                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
-                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
-                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
-                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
-                    default: throw new AssertionError(operation);
+                    case 0:
+                        return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1:
+                        return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2:
+                        return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3:
+                        return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4:
+                        return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default:
+                        throw new AssertionError(operation);
                 }
             }
             case "Float": {
@@ -2570,12 +3145,18 @@ public class StreamBaseTest extends TestBase {
                 com.landawn.abacus.util.function.FloatBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
                 com.landawn.abacus.util.function.FloatTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
                 switch (operation) {
-                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
-                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
-                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
-                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
-                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
-                    default: throw new AssertionError(operation);
+                    case 0:
+                        return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1:
+                        return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2:
+                        return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3:
+                        return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4:
+                        return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default:
+                        throw new AssertionError(operation);
                 }
             }
             case "Double": {
@@ -2583,15 +3164,22 @@ public class StreamBaseTest extends TestBase {
                 com.landawn.abacus.util.function.DoubleBiPredicate pair = (left, right) -> predicate.test((int) left, (int) right);
                 com.landawn.abacus.util.function.DoubleTriPredicate triple = (first, previous, next) -> predicate.test((int) previous, (int) next);
                 switch (operation) {
-                    case 0: return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
-                    case 1: return stream.rangeMapToObj(pair, (first, last) -> (int) first);
-                    case 2: return stream.collapse(pair).map(values -> (int) values.get(0));
-                    case 3: return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
-                    case 4: return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
-                    default: throw new AssertionError(operation);
+                    case 0:
+                        return stream.rangeMap(pair, (first, last) -> first).mapToObj(value -> (int) value);
+                    case 1:
+                        return stream.rangeMapToObj(pair, (first, last) -> (int) first);
+                    case 2:
+                        return stream.collapse(pair).map(values -> (int) values.get(0));
+                    case 3:
+                        return stream.collapse(pair, (first, next) -> first).mapToObj(value -> (int) value);
+                    case 4:
+                        return stream.collapse(triple, (first, next) -> first).mapToObj(value -> (int) value);
+                    default:
+                        throw new AssertionError(operation);
                 }
             }
-            default: throw new AssertionError(type);
+            default:
+                throw new AssertionError(type);
         }
     }
 
@@ -2706,8 +3294,7 @@ public class StreamBaseTest extends TestBase {
             };
 
             Assertions.assertThrows(IllegalStateException.class,
-                    () -> (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3))
-                            .onClose(closeCount::incrementAndGet)
+                    () -> (iteratorBacked ? Stream.of(Arrays.asList(1, 2, 3).iterator()) : Stream.of(1, 2, 3)).onClose(closeCount::incrementAndGet)
                             .parallel(2, executor)
                             .forEach(value -> {
                             }));

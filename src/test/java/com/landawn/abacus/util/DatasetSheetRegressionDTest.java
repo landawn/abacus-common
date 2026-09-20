@@ -65,7 +65,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B01_DivideColumnTupleOverloadsClearTheTuplePerRow {
+    public class B01_DivideColumnTupleOverloadsClearTheTuplePerRow extends TestBase {
 
         @Test
         public void tuple2ConsumerThatSetsNothingProducesNulls() {
@@ -130,7 +130,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B02_SheetReadsAreSafeWithoutWrites {
+    public class B02_SheetReadsAreSafeWithoutWrites extends TestBase {
 
         private Object indexMapOf(final Sheet<?, ?, ?> sheet, final String fieldName) throws Exception {
             final Field f = Sheet.class.getDeclaredField(fieldName);
@@ -250,7 +250,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B03_GetDoubleNarrowsWithDoubleValue {
+    public class B03_GetDoubleNarrowsWithDoubleValue extends TestBase {
 
         @Test
         public void floatCellReadsTheSameThroughCursorRowAndDoubleValue() {
@@ -282,7 +282,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B04_TopByKeepsTheEarliestTiedRows {
+    public class B04_TopByKeepsTheEarliestTiedRows extends TestBase {
 
         private final Dataset ds = Dataset.rows(Arrays.asList("id", "v"), new Object[][] { { 1, 5 }, { 2, 5 }, { 3, 5 }, { 4, 9 } });
 
@@ -321,7 +321,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B05_ColumnNamesViewIsRecognisedAsTheWholeColumnSet {
+    public class B05_ColumnNamesViewIsRecognisedAsTheWholeColumnSet extends TestBase {
 
         @Test
         public void everyViewIsRecognisedButNotACopyOfIt() {
@@ -415,7 +415,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B06_ColumnsStreamIsFailFast {
+    public class B06_ColumnsStreamIsFailFast extends TestBase {
 
         @Test
         public void structuralChangeAfterCreationThrowsConcurrentModification() {
@@ -453,7 +453,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B07_PivotResultColumnNeverCollidesWithTheKeyOrPivotColumn {
+    public class B07_PivotResultColumnNeverCollidesWithTheKeyOrPivotColumn extends TestBase {
 
         private final Dataset ds = Dataset.rows(Arrays.asList("region", "product", "sales"),
                 new Object[][] { { "North", "A", 100 }, { "North", "B", 200 }, { "South", "A", 150 }, { "North", "A", 5 } });
@@ -510,7 +510,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B08_RollupAndCubeValidateAtTheCallSite {
+    public class B08_RollupAndCubeValidateAtTheCallSite extends TestBase {
 
         private final Dataset ds = Dataset.rows(Arrays.asList("region", "country", "sales"),
                 new Object[][] { { "N", "US", 10 }, { "N", "CA", 5 }, { "S", "MX", 2 } });
@@ -566,7 +566,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B09_ReverseForEachRangeIsValidatedExactly {
+    public class B09_ReverseForEachRangeIsValidatedExactly extends TestBase {
 
         private final Dataset ds = Dataset.rows(Arrays.asList("id", "n"), new Object[][] { { 1, "a" }, { 2, "b" }, { 3, "c" } });
 
@@ -615,7 +615,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class B10_NullArgumentsThrowIllegalArgumentException {
+    public class B10_NullArgumentsThrowIllegalArgumentException extends TestBase {
 
         private Dataset ds() {
             return ab(new Object[] { 1, 2 });
@@ -679,7 +679,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
 
     /** Pins behaviour that was correct but undocumented until this pass. */
     @Nested
-    public class B11_ToXmlRejectsNamesThatAreNotXmlNames {
+    public class B11_ToXmlRejectsNamesThatAreNotXmlNames extends TestBase {
 
         @Test
         public void columnNameWithASpaceIsRejectedByToXmlButNotToJson() {
@@ -695,7 +695,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class D07_MappedColumnNameIsValidatedUpFront {
+    public class D07_MappedColumnNameIsValidatedUpFront extends TestBase {
 
         private final Dataset ds = ab(new Object[] { 1, 2 });
 
@@ -732,7 +732,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
     }
 
     @Nested
-    public class J07_ToMapRowTypeIsValidatedWithTheSharedMessage {
+    public class J07_ToMapRowTypeIsValidatedWithTheSharedMessage extends TestBase {
 
         @Test
         public void nullAndUnsupportedRowType() {
@@ -750,7 +750,7 @@ public class DatasetSheetRegressionDTest extends TestBase {
 
     /** Every claim rewritten in the javadoc this pass, executed. All of these pass on the pre-fix classes too. */
     @Nested
-    public class DocClaims {
+    public class DocClaims extends TestBase {
 
         @Test
         public void narrowingExamplesInTheGetterJavadocs() {

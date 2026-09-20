@@ -951,8 +951,12 @@ public class NComplexTest extends NTestSupport {
         String result = N.tryOrDefaultIfExceptionOccurred(() -> "success", "default");
         assertNull(N.tryOrDefaultIfExceptionOccurred(() -> null, "default"));
         assertNull(N.tryOrDefaultIfExceptionOccurred("input", value -> null, "default"));
-        assertNull(N.tryOrDefaultIfExceptionOccurred((Callable<String>) () -> { throw new IOException("failed"); }, (String) null));
-        assertNull(N.tryOrDefaultIfExceptionOccurred("input", value -> { throw new IOException("failed"); }, (String) null));
+        assertNull(N.tryOrDefaultIfExceptionOccurred((Callable<String>) () -> {
+            throw new IOException("failed");
+        }, (String) null));
+        assertNull(N.tryOrDefaultIfExceptionOccurred("input", value -> {
+            throw new IOException("failed");
+        }, (String) null));
         assertEquals("success", result);
 
         result = N.tryOrDefaultIfExceptionOccurred((Callable<String>) () -> {
@@ -3260,7 +3264,7 @@ public class NComplexTest extends NTestSupport {
     }
 
     @Test
-    public void testFprintln_nullFormatThrowsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> N.fprintln((String) null));
+    public void testFprintln_nullFormatThrowsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> N.fprintln((String) null));
     }
 }

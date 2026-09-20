@@ -1398,15 +1398,15 @@ public class WebUtilTest extends TestBase {
 
         // the name is matched case-insensitively, which is what CurlInterceptor needs:
         // okhttp3.Headers.toMultimap() lower-cases every name
-        final String fromInterceptorShape = WebUtil.buildCurlByMethodName("GET", "https://example.test/",
-                Map.of("cookie", List.of("a=1", "b=2")), null, null, '\'');
+        final String fromInterceptorShape = WebUtil.buildCurlByMethodName("GET", "https://example.test/", Map.of("cookie", List.of("a=1", "b=2")), null, null,
+                '\'');
         assertTrue(fromInterceptorShape.contains(" -H 'cookie: a=1; b=2'"), fromInterceptorShape);
 
         // a single-element collection and a plain String value are unchanged
         assertTrue(WebUtil.buildCurl(HttpMethod.GET, "https://example.test/", Map.of("Cookie", List.of("only=1")), null, null, '\'')
                 .contains(" -H 'Cookie: only=1'"));
-        assertTrue(WebUtil.buildCurl(HttpMethod.GET, "https://example.test/", Map.of("Cookie", "a=1; b=2"), null, null, '\'')
-                .contains(" -H 'Cookie: a=1; b=2'"));
+        assertTrue(
+                WebUtil.buildCurl(HttpMethod.GET, "https://example.test/", Map.of("Cookie", "a=1; b=2"), null, null, '\'').contains(" -H 'Cookie: a=1; b=2'"));
     }
 
     // ==================== R01 self-review fixes 2026-09-08 ====================
@@ -1434,8 +1434,7 @@ public class WebUtilTest extends TestBase {
         }
 
         // a value that only looks blank is still sent as-is
-        assertTrue(WebUtil.buildCurl(HttpMethod.GET, "https://example.test/", Map.of("X-Kept", " v "), null, null, '\'')
-                .contains(" -H 'X-Kept:  v '"));
+        assertTrue(WebUtil.buildCurl(HttpMethod.GET, "https://example.test/", Map.of("X-Kept", " v "), null, null, '\'').contains(" -H 'X-Kept:  v '"));
     }
 
     @Test

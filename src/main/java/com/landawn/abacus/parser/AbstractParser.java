@@ -38,6 +38,7 @@ import java.util.function.Function;
 
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.parser.ParserUtil.BeanInfo;
@@ -59,6 +60,7 @@ import com.landawn.abacus.util.ImmutableSortedMap;
 import com.landawn.abacus.util.ImmutableSortedSet;
 import com.landawn.abacus.util.MapEntity;
 import com.landawn.abacus.util.N;
+import com.landawn.abacus.util.cs;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Tuple;
 import com.landawn.abacus.util.Tuple.Tuple2;
@@ -146,89 +148,127 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws UncheckedIOException if creating or opening the destination file, writing the serialized data, or finishing its output
+     *         fails
      */
     @Override
-    public void serialize(final Object obj, final File output) {
+    public void serialize(final Object obj, final File output) throws IllegalArgumentException, UncheckedIOException {
         serialize(obj, null, output);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws UncheckedIOException if writing the serialized data to {@code output} or flushing buffered output fails
      */
     @Override
-    public void serialize(final Object obj, final OutputStream output) {
+    public void serialize(final Object obj, final OutputStream output) throws IllegalArgumentException, UncheckedIOException {
         serialize(obj, null, output);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws UncheckedIOException if writing the serialized data to {@code output} or flushing buffered output fails
      */
     @Override
-    public void serialize(final Object obj, final Writer output) {
+    public void serialize(final Object obj, final Writer output) throws IllegalArgumentException, UncheckedIOException {
         serialize(obj, null, output);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if {@code source} is {@code null} and the
+     *         concrete parser rejects it (the Avro and Kryo parsers do; the JSON and XML parsers return the target type's
+     *         default value for a {@code null} source instead)
      */
     @Override
-    public <T> T deserialize(final String source, final Type<? extends T> targetType) {
+    public <T> T deserialize(final String source, final Type<? extends T> targetType) throws IllegalArgumentException {
         return deserialize(source, null, targetType);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, or if {@code source} is {@code null} and the
+     *         concrete parser rejects it (the Avro and Kryo parsers do; the JSON and XML parsers return the target type's
+     *         default value for a {@code null} source instead)
      */
     @Override
-    public <T> T deserialize(final String source, final Class<? extends T> targetType) {
+    public <T> T deserialize(final String source, final Class<? extends T> targetType) throws IllegalArgumentException {
         return deserialize(source, null, targetType);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or {@code source} is a directory.
+     * @throws UncheckedIOException if opening or reading {@code source} fails, including a missing file, or an implementation cannot
+     *         close its owned file resource
      */
     @Override
-    public <T> T deserialize(final File source, final Type<? extends T> targetType) {
+    public <T> T deserialize(final File source, final Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
         return deserialize(source, null, targetType);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}, or {@code source} is a directory.
+     * @throws UncheckedIOException if opening or reading {@code source} fails, including a missing file, or an implementation cannot
+     *         close its owned file resource
      */
     @Override
-    public <T> T deserialize(final File source, final Class<? extends T> targetType) {
+    public <T> T deserialize(final File source, final Class<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
         return deserialize(source, null, targetType);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
+     * @throws UncheckedIOException if reading the serialized data from {@code source} fails
      */
     @Override
-    public <T> T deserialize(final InputStream source, final Type<? extends T> targetType) {
+    public <T> T deserialize(final InputStream source, final Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
         return deserialize(source, null, targetType);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
+     * @throws UncheckedIOException if reading the serialized data from {@code source} fails
      */
     @Override
-    public <T> T deserialize(final InputStream source, final Class<? extends T> targetType) {
+    public <T> T deserialize(final InputStream source, final Class<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
         return deserialize(source, null, targetType);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
+     * @throws UncheckedIOException if reading the serialized data from {@code source} fails
      */
     @Override
-    public <T> T deserialize(final Reader source, final Type<? extends T> targetType) {
+    public <T> T deserialize(final Reader source, final Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
         return deserialize(source, null, targetType);
     }
 
     /**
      * {@inheritDoc}
+     *
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
+     * @throws UncheckedIOException if reading the serialized data from {@code source} fails
      */
     @Override
-    public <T> T deserialize(final Reader source, final Class<? extends T> targetType) {
+    public <T> T deserialize(final Reader source, final Class<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
         return deserialize(source, null, targetType);
     }
 
@@ -318,7 +358,8 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * <ol>
      *   <li>If attribute type is provided and compatible, instantiate attribute type</li>
      *   <li>If attribute type instantiation fails or is incompatible, fall back to property class</li>
-     *   <li>If both fail or are {@code null}, throw ParsingException</li>
+     *   <li>If no property class remains after the attribute attempt, throw ParsingException;
+     *       failures instantiating a non-null property class propagate unchanged</li>
      * </ol>
      *
      * <p>This enables polymorphic deserialization where the serialized data contains type information
@@ -328,7 +369,7 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param propClass the declared property class from the target bean (may be {@code null})
      * @param attributeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
      * @return a new instance of the appropriate type
-     * @throws ParsingException if neither a property class nor a type-attribute class is available (instantiation failures propagate as runtime exceptions)
+     * @throws ParsingException if no property class is available and the type-attribute class is missing, incompatible, or cannot be instantiated
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
@@ -482,10 +523,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * create them automatically before the file is created.</p>
      *
      * @param file the file to create if it doesn't exist (must not be {@code null})
-     * @throws NullPointerException if {@code file} is {@code null}.
+     * @throws IllegalArgumentException if {@code file} is {@code null}.
      * @throws IOException if the file cannot be created
      */
-    protected static void createNewFileIfNotExists(final File file) throws NullPointerException, IOException {
+    protected static void createNewFileIfNotExists(final File file) throws IllegalArgumentException, IOException {
+        N.checkArgNotNull(file, cs.file);
+
         if (!file.exists() && !IOUtil.createFileIfNotExists(file)) {
             throw new IOException("Failed to create new file: " + file.getName());
         }

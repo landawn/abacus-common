@@ -19,6 +19,7 @@ package com.landawn.abacus.exception;
 import java.io.IOException;
 import java.io.Serial;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -80,6 +81,52 @@ public class HttpResponseException extends UncheckedIOException {
     /** The captured, possibly truncated error body; empty when no body was supplied. */
     private final String responseBody;
 
+    /** Defensive snapshot of the bounded raw error body, or {@code null} when unavailable. */
+    private final byte[] rawResponseBody;
+
+    /** Original decoding failure, also retained in the cause chain, or {@code null}. */
+    private final Throwable responseBodyDecodingFailure;
+
+    /**
+     * Creates an HTTP failure retaining an undecodable error body's raw prefix and its decoding failure.
+     * Raw bytes are copied and limited to {@link HttpUtil#MAX_ERROR_BODY_SIZE}; the text is best effort.
+     *
+     * <p>Java serialization preserves both the raw prefix and the decoding failure. As with other exceptions
+     * that retain a cause, serialization requires the supplied failure's reachable state to be serializable.</p>
+     *
+     * @param requestUrl request URL, or null when unavailable
+     * @param statusCode HTTP status
+     * @param responseMessage reason phrase, or null
+     * @param headers response headers, copied
+     * @param responseBody best-effort text, or null
+     * @param rawResponseBody raw bytes, or null when unavailable
+     * @param decodingFailure failure while decoding the body, or null
+     */
+    public HttpResponseException(final String requestUrl, final int statusCode, final String responseMessage, final Map<String, List<String>> headers,
+            final String responseBody, final byte[] rawResponseBody, final Throwable decodingFailure) {
+        this(requestUrl, statusCode, responseMessage, headers, responseBody,
+                new IOException(buildMessage(statusCode, responseMessage, responseBody), decodingFailure), rawResponseBody, decodingFailure);
+    }
+
+    /**
+     * Returns the raw error-body prefix captured before decoding failed.
+     *
+     * @return a defensive copy of at most {@link HttpUtil#MAX_ERROR_BODY_SIZE} bytes, or {@code null} when unavailable
+     */
+    public byte[] rawResponseBody() {
+        return rawResponseBody == null ? null : rawResponseBody.clone();
+    }
+
+    /**
+     * Returns the original failure encountered while decoding the error body.
+     * The same failure is retained as the cause of this exception's {@link IOException} cause.
+     *
+     * @return the body decoding failure, or {@code null} when none was recorded
+     */
+    public Throwable responseBodyDecodingFailure() {
+        return responseBodyDecodingFailure;
+    }
+
     /**
      * Creates a new {@code HttpResponseException}.
      *
@@ -101,7 +148,8 @@ public class HttpResponseException extends UncheckedIOException {
      */
     public HttpResponseException(final String requestUrl, final int statusCode, final String responseMessage, final Map<String, List<String>> headers,
             final String responseBody) {
-        this(requestUrl, statusCode, responseMessage, headers, responseBody, new IOException(buildMessage(statusCode, responseMessage, responseBody)));
+        this(requestUrl, statusCode, responseMessage, headers, responseBody, new IOException(buildMessage(statusCode, responseMessage, responseBody)), null,
+                null);
     }
 
     /**
@@ -114,11 +162,15 @@ public class HttpResponseException extends UncheckedIOException {
      * @param headers the response headers; may be {@code null}
      * @param responseBody the captured (possibly truncated) error body; may be {@code null}
      * @param cause the carrier of the rendered message
+     * @param rawResponseBody the raw error bytes to copy and bound, or {@code null}
+     * @param decodingFailure the original body decoding failure, or {@code null}
      */
     private HttpResponseException(final String requestUrl, final int statusCode, final String responseMessage, final Map<String, List<String>> headers,
-            final String responseBody, final IOException cause) {
+            final String responseBody, final IOException cause, final byte[] rawResponseBody, final Throwable decodingFailure) {
         super(cause.getMessage(), cause);
 
+        this.rawResponseBody = rawResponseBody == null ? null : Arrays.copyOf(rawResponseBody, Math.min(rawResponseBody.length, HttpUtil.MAX_ERROR_BODY_SIZE));
+        responseBodyDecodingFailure = decodingFailure;
         this.requestUrl = requestUrl;
         this.statusCode = statusCode;
         this.responseMessage = responseMessage;

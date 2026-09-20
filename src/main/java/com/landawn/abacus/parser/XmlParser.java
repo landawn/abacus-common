@@ -42,6 +42,21 @@ import com.landawn.abacus.type.Type;
  * <p>Whitespace inside scalar values is preserved, including whitespace-only text and CDATA
  * fragments. Indentation between nested elements is ignored by the structural readers.</p>
  *
+ * <p>The DOM and StAX readers convert an empty scalar {@code <e/>} wrapper in an array or collection through the
+ * selected type's {@code valueOf("")}. This preserves an empty String and produces the type's default
+ * for built-in numeric, boolean and character primitives and their boxed types. Types such as
+ * {@code BigDecimal}, {@code Instant} and enums return {@code null}. A custom type may reject the empty
+ * string; its conversion exception is propagated.
+ * An explicit {@code isNull="true"} marker bypasses scalar conversion.</p>
+ *
+ * <p>That rule covers array and collection element wrappers only. An empty <i>named</i> bean-property leaf
+ * element is still read differently by the two backends: for {@code <name/>} (or {@code <name></name>}) the DOM
+ * reader converts the element's empty text content through {@code valueOf("")}, while the StAX reader observes no
+ * character content and stores the property type's {@code defaultValue()}. The two agree wherever those two
+ * answers agree - notably every numeric, boolean and character type, boxed or not - and differ for {@code String},
+ * where DOM yields {@code ""} and StAX yields {@code null}. Write {@code isNull="true"} when a {@code null}
+ * property is intended, and a non-empty value otherwise.</p>
+ *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * XmlParser parser = ParserFactory.createXmlParser();
@@ -56,7 +71,7 @@ import com.landawn.abacus.type.Type;
  * // Deserialize from DOM Node
  * try {
  *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
- *     MyBean fromNode = parser.deserialize(doc.getFirstChild(), MyBean.class);
+ *     MyBean fromNode = parser.deserialize(doc.getDocumentElement(), MyBean.class);
  * } catch (Exception e) {
  *     // Handle parsing exception
  * }
@@ -90,7 +105,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * try {
      *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
      *     Type<MyBean> type = Type.of(MyBean.class);
-     *     MyBean bean = parser.deserialize(doc.getFirstChild(), type);
+     *     MyBean bean = parser.deserialize(doc.getDocumentElement(), type);
      * } catch (Exception e) {
      *     // Handle parsing exception
      * }
@@ -116,7 +131,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * <pre>{@code
      * try {
      *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
-     *     MyBean bean = parser.deserialize(doc.getFirstChild(), MyBean.class);
+     *     MyBean bean = parser.deserialize(doc.getDocumentElement(), MyBean.class);
      * } catch (Exception e) {
      *     // Handle parsing exception
      * }
@@ -146,7 +161,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * try {
      *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
      *     Type<MyBean> type = Type.of(MyBean.class);
-     *     MyBean bean = parser.deserialize(doc.getFirstChild(), config, type);
+     *     MyBean bean = parser.deserialize(doc.getDocumentElement(), config, type);
      * } catch (Exception e) {
      *     // Handle parsing exception
      * }
@@ -176,7 +191,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      *
      * try {
      *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
-     *     MyBean bean = parser.deserialize(doc.getFirstChild(), config, MyBean.class);
+     *     MyBean bean = parser.deserialize(doc.getDocumentElement(), config, MyBean.class);
      * } catch (Exception e) {
      *     // Handle parsing exception
      * }
@@ -327,7 +342,7 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      *
      * try {
      *     Document doc = XmlUtil.createDOMParser().parse(xmlFile);
-     *     Object result = parser.deserialize(doc.getFirstChild(), config, nodeTypes);
+     *     Object result = parser.deserialize(doc.getDocumentElement(), config, nodeTypes);
      * } catch (Exception e) {
      *     // Handle parsing exception
      * }

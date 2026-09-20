@@ -2107,8 +2107,7 @@ public class BiMapTest extends AbstractTest {
         final Map<String, String> reverse = new HashMap<>();
         final int[] forwardCalls = { 0 };
         final int[] reverseCalls = { 0 };
-        final BiMap<String, String> map = new BiMap<>(() -> forwardCalls[0]++ == 0 ? forward : reverse,
-                () -> reverseCalls[0]++ == 0 ? reverse : forward);
+        final BiMap<String, String> map = new BiMap<>(() -> forwardCalls[0]++ == 0 ? forward : reverse, () -> reverseCalls[0]++ == 0 ? reverse : forward);
 
         assertThrows(IllegalArgumentException.class, map::copy);
         assertThrows(IllegalArgumentException.class, () -> BiMap.copyOf(map));
@@ -2120,13 +2119,9 @@ public class BiMapTest extends AbstractTest {
     @Test
     public void testEveryOfOverloadAcceptsRepeatingTheSameMapping() {
         // A duplicate value is a conflict only when it belongs to a different key.
-        final java.util.List<BiMap<String, Integer>> maps = java.util.List.of(
-                BiMap.of("a", 1, "a", 1),
-                BiMap.of("a", 1, "a", 1, "a", 1),
-                BiMap.of("a", 1, "a", 1, "a", 1, "a", 1),
-                BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1),
-                BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1),
-                BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1),
+        final java.util.List<BiMap<String, Integer>> maps = java.util.List.of(BiMap.of("a", 1, "a", 1), BiMap.of("a", 1, "a", 1, "a", 1),
+                BiMap.of("a", 1, "a", 1, "a", 1, "a", 1), BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1),
+                BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1), BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1),
                 BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1),
                 BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1),
                 BiMap.of("a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1, "a", 1));

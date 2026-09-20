@@ -131,7 +131,8 @@ public class IndexedTypeTest extends TestBase {
     }
 
     @SuppressWarnings("unchecked")
-    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config) throws java.io.IOException {
+    private static String reviewFixes20260906_ser(final Type<?> type, final Object value, final com.landawn.abacus.parser.JsonXmlSerConfig<?> config)
+            throws java.io.IOException {
         final com.landawn.abacus.util.BufferedJsonWriter jsonWriter = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
 
         try {
@@ -151,9 +152,11 @@ public class IndexedTypeTest extends TestBase {
         assertEquals("[\"0\", \"v\"]", reviewFixes20260906_ser(indexedType, Indexed.of("v", 0L), las));
         assertEquals("[7, \"v\"]", reviewFixes20260906_ser(indexedType, Indexed.of("v", 7L), com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("[7, v]", reviewFixes20260906_ser(indexedType, Indexed.of("v", 7L), null));
-        assertEquals("[7, v]", reviewFixes20260906_ser(indexedType, Indexed.of("v", 7L), com.landawn.abacus.parser.XmlSerConfig.create().setWriteLongAsString(true)));
+        assertEquals("[7, v]",
+                reviewFixes20260906_ser(indexedType, Indexed.of("v", 7L), com.landawn.abacus.parser.XmlSerConfig.create().setWriteLongAsString(true)));
         assertEquals("[\"9223372036854775807\", \"v\"]", reviewFixes20260906_ser(indexedType, Indexed.of("v", Long.MAX_VALUE), las));
-        assertEquals("[9223372036854775807, \"v\"]", reviewFixes20260906_ser(indexedType, Indexed.of("v", Long.MAX_VALUE), com.landawn.abacus.parser.JsonSerConfig.create()));
+        assertEquals("[9223372036854775807, \"v\"]",
+                reviewFixes20260906_ser(indexedType, Indexed.of("v", Long.MAX_VALUE), com.landawn.abacus.parser.JsonSerConfig.create()));
         assertEquals("[\"7\", \"5\"]", reviewFixes20260906_ser(Type.of("Indexed<Long>"), Indexed.of(5L, 7L), las));
         assertEquals("null", reviewFixes20260906_ser(indexedType, null, las));
 

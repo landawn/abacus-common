@@ -39,9 +39,10 @@ import com.landawn.abacus.util.stream.Stream;
  * </ul>
  *
  * <p>Numeric values requested as {@link java.math.BigDecimal} preserve the input's decimal
- * precision and scale. Numeric conversions use the requested type's text syntax: fractional
- * or exponent notation is rejected for integral targets instead of being truncated. Exact
- * {@code BigDecimal}/{@code BigInteger} targets do not accept Java numeric suffixes.</p>
+ * precision and scale. Unquoted decimal values converted to integral targets are truncated
+ * toward zero: {@code [1.50]} read as {@code List<Integer>} yields {@code [1]}. Quoted numeric
+ * text uses the target type's parser, so {@code ["1.50"]} rejects that same integral target.
+ * Index and timestamp metadata in {@code Indexed}/{@code Timed} require integer notation.</p>
  *
  * <p>Object properties require a value after the colon, including ignored or unknown properties.
  * Use an explicit {@code null} or a quoted empty string when that is the intended value;
@@ -133,7 +134,7 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *
      * // For collections
      * String jsonArray = "[{\"id\":1},{\"id\":2}]";
-     * List<Item> items = parser.parse(jsonArray, List.class);
+     * List<Map<String, Object>> items = parser.parse(jsonArray, List.class);
      * }</pre>
      *
      * @param <T> the target type parameter
@@ -323,7 +324,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      *
      * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns
      *               without modifying {@code output}); must contain a JSON object when non-empty
-     * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
+     * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries with other keys are preserved,
+     *        while matching keys are overwritten
      * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UnsupportedOperationException if parsing attempts to add an entry to a map that does not support insertion.
      * @throws ParsingException if the source contains invalid JSON
@@ -348,7 +350,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param source the JSON string to parse (may be {@code null} or empty, in which case the method returns
      *               without modifying {@code output}); must contain a JSON object when non-empty
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
-     * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries are preserved
+     * @param output the Map to populate with parsed key-value pairs, must not be {@code null}; existing entries with other keys are preserved,
+     *        while matching keys are overwritten
      * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UnsupportedOperationException if parsing attempts to add an entry to a map that does not support insertion.
      * @throws ParsingException if the source contains invalid JSON
@@ -478,8 +481,8 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * Creates a stream for parsing JSON array elements lazily from a JSON string.
      * The stream should be closed after use to free resources.
      *
-     * <p>This method is useful for processing large JSON arrays without loading
-     * the entire content into memory. Elements are parsed on-demand as the stream is consumed.</p>
+     * <p>The source String is already in memory, but its elements are parsed on demand as the stream
+     * is consumed, without materializing the entire array of Java objects at once.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

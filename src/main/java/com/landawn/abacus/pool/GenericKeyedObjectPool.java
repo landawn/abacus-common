@@ -19,6 +19,7 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serial;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -39,6 +40,7 @@ import com.landawn.abacus.util.ClassUtil;
 import com.landawn.abacus.util.ExceptionUtil;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
+import com.landawn.abacus.util.cs;
 
 /**
  * A generic implementation of KeyedObjectPool that manages poolable objects by keys.
@@ -139,9 +141,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param capacity the maximum number of entries the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param evictionPolicy the policy to use for selecting entries to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
+     * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
-    protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy) {
+    protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy)
+            throws IllegalArgumentException, IllegalStateException {
         this(capacity, evictDelayInMillis, evictionPolicy, 0, null);
     }
 
@@ -151,14 +157,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param capacity the maximum number of entries the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param evictionPolicy the policy to use for selecting entries to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate entry memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if capacity, eviction delay, or maximum memory size is negative;
-     *         if the balance factor is non-finite or outside [0, 1]; or if a positive memory limit is specified without a memory measure.
+     * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative;
+     *         {@code maxMemorySize} is negative, or positive with a null {@code memoryMeasure}
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final long maxMemorySize,
-            final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) throws IllegalArgumentException {
+            final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) throws IllegalArgumentException, IllegalStateException {
         this(capacity, evictDelayInMillis, evictionPolicy, true, DEFAULT_BALANCE_FACTOR, maxMemorySize, memoryMeasure);
     }
 
@@ -168,12 +176,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param capacity the maximum number of entries the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param evictionPolicy the policy to use for selecting entries to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
+     * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative;
+     *         {@code balanceFactor} is non-finite or outside [0, 1]
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
-            final float balanceFactor) {
+            final float balanceFactor) throws IllegalArgumentException, IllegalStateException {
         this(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, 0, null);
     }
 
@@ -182,15 +194,20 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * @param capacity the maximum number of entries the pool can hold (must be non-negative)
      * @param evictDelayInMillis the delay in milliseconds between eviction runs, or 0 to disable eviction (must be non-negative)
-     * @param evictionPolicy the policy to use for selecting entries to evict
+     * @param evictionPolicy the policy to use for selecting entries to evict; {@code null} selects
+     *        {@link EvictionPolicy#LAST_ACCESS_TIME}
      * @param autoBalance whether to automatically remove entries when the pool is full
      * @param balanceFactor the proportion of entries to remove during balancing, typically 0.1 to 0.5 (must be finite and in [0, 1]; 0 selects the default 0.2)
      * @param maxMemorySize the maximum total memory in bytes, or 0 for no limit (must be non-negative)
      * @param memoryMeasure the function to calculate entry memory size; required when {@code maxMemorySize > 0}
-     * @throws IllegalArgumentException if a positive memory limit is specified without a memory measure.
+     * @throws IllegalArgumentException if {@code capacity} or {@code evictDelayInMillis} is negative;
+     *         {@code balanceFactor} is non-finite or outside [0, 1];
+     *         {@code maxMemorySize} is negative, or positive with a null {@code memoryMeasure}
+     * @throws IllegalStateException if JVM shutdown has begun when the pool registers its shutdown hook
      */
     protected GenericKeyedObjectPool(final int capacity, final long evictDelayInMillis, final EvictionPolicy evictionPolicy, final boolean autoBalance,
-            final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure) throws IllegalArgumentException {
+            final float balanceFactor, final long maxMemorySize, final KeyedObjectPool.MemoryMeasure<K, E> memoryMeasure)
+            throws IllegalArgumentException, IllegalStateException {
         super(capacity, evictDelayInMillis, evictionPolicy, autoBalance, balanceFactor, maxMemorySize);
 
         if (maxMemorySize > 0 && memoryMeasure == null) {
@@ -310,9 +327,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     public boolean put(final K key, final E value) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        if (key == null || value == null) {
-            throw new IllegalArgumentException("Key and value cannot be null");
-        }
+        N.checkArgNotNull(key, cs.key);
+        N.checkArgNotNull(value, cs.value);
 
         if (value.activityPrint().isExpired()) {
             return false;
@@ -462,11 +478,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param autoDestroyOnFailedToPut if {@code true}, calls {@code value.destroy(PUT_ADD_FAILURE)} when put fails,
      *        unless the same instance remains pooled at the cleanup check
      * @return {@code true} if the mapping was successfully added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key or value is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the key or value is null.
      */
     @Override
-    public boolean put(final K key, final E value, final boolean autoDestroyOnFailedToPut) throws IllegalArgumentException, IllegalStateException {
+    public boolean put(final K key, final E value, final boolean autoDestroyOnFailedToPut) throws IllegalStateException, IllegalArgumentException {
         boolean success = false;
 
         try {
@@ -513,13 +529,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             throws IllegalStateException, IllegalArgumentException, InterruptedException {
         assertNotClosed();
 
-        if (key == null || value == null) {
-            throw new IllegalArgumentException("Key and value cannot be null");
-        }
+        N.checkArgNotNull(key, cs.key);
+        N.checkArgNotNull(value, cs.value);
 
-        if (unit == null) {
-            throw new IllegalArgumentException("Time unit cannot be null");
-        }
+        N.checkArgNotNull(unit, cs.unit);
 
         if (value.activityPrint().isExpired()) {
             return false;
@@ -683,13 +696,13 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * @param autoDestroyOnFailedToPut if {@code true}, calls {@code value.destroy(PUT_ADD_FAILURE)} if put fails,
      *        unless the same instance remains pooled at the cleanup check
      * @return {@code true} if the value was added, {@code false} otherwise
-     * @throws IllegalArgumentException if the key, value, or unit is null.
      * @throws IllegalStateException if the pool has been closed
+     * @throws IllegalArgumentException if the key, value, or unit is null.
      * @throws InterruptedException if interrupted while waiting
      */
     @Override
     public boolean put(final K key, final E value, final long timeout, final TimeUnit unit, final boolean autoDestroyOnFailedToPut)
-            throws IllegalArgumentException, IllegalStateException, InterruptedException {
+            throws IllegalStateException, IllegalArgumentException, InterruptedException {
         boolean success = false;
 
         try {
@@ -809,9 +822,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     public E get(final K key, final long timeout, final TimeUnit unit) throws IllegalStateException, IllegalArgumentException, InterruptedException {
         assertNotClosed();
 
-        if (unit == null) {
-            throw new IllegalArgumentException("Time unit cannot be null");
-        }
+        N.checkArgNotNull(unit, cs.unit);
 
         E element = null;
         List<DestroyTask<K, E>> pendingDestroys = null;
@@ -1202,15 +1213,20 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     }
 
     /**
-     * Returns the hash code value for this pool. The hash code is computed from a snapshot of the
-     * pool's key-value mappings taken under the pool lock, using {@link java.util.Map#hashCode()}
-     * semantics on that snapshot (order-independent, sum of entry hash codes).
+     * Returns the hash code value for this pool. Key and value references are copied under the pool
+     * lock without hashing; {@link java.util.Map#hashCode()} semantics (order-independent sum of
+     * entry hash codes) are then applied after the lock is released. That keeps arbitrary
+     * {@code key.hashCode()}/{@code value.hashCode()} implementations off the critical section.
      *
      * @return a hash code value for this pool
      */
     @Override
     public int hashCode() {
-        return snapshot().hashCode();
+        int h = 0;
+        for (final Map.Entry<K, E> e : snapshotEntries()) {
+            h += e.hashCode();
+        }
+        return h;
     }
 
     /**
@@ -1243,13 +1259,31 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return N.equals(snapshot, otherSnapshot);
     }
 
-    private Map<K, E> snapshot() {
+    /**
+     * Copies key and value references under the pool lock without invoking {@code hashCode} or
+     * {@code equals}. The returned entries are independent of the live map, so hashing and equality
+     * can run after unlock.
+     */
+    private List<Map.Entry<K, E>> snapshotEntries() {
         lock.lock();
         try {
-            return new HashMap<>(pool);
+            final List<Map.Entry<K, E>> entries = new ArrayList<>(pool.size());
+            for (final Map.Entry<K, E> e : pool.entrySet()) {
+                entries.add(new AbstractMap.SimpleImmutableEntry<>(e.getKey(), e.getValue()));
+            }
+            return entries;
         } finally {
             lock.unlock();
         }
+    }
+
+    private Map<K, E> snapshot() {
+        final List<Map.Entry<K, E>> entries = snapshotEntries();
+        final Map<K, E> copy = N.newHashMap(entries.size());
+        for (final Map.Entry<K, E> e : entries) {
+            copy.put(e.getKey(), e.getValue());
+        }
+        return copy;
     }
 
     private boolean containsSameInstance(final E value) {
@@ -1287,15 +1321,16 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
     /**
      * Removes (vacates) the specified number of entries from the pool based on the eviction policy.
      * This is the sized counterpart to the public no-arg {@link #evict()} (which removes a
-     * balance-factor fraction); it removes <em>exactly</em> {@code numberToEvict} entries, choosing
+     * balance-factor fraction); it removes up to {@code numberToEvict} entries (none for a nonpositive count), choosing
      * victims via the configured {@link EvictionPolicy}. Destroyed entries use {@link Caller#VACATE}.
      * Victims are detached atomically under the pool lock, but user destruction callbacks run
      * after the lock is released. This sized operation is available to subclasses; public
      * {@link #evict()} performs its balance-factor count and detachment in one critical section.
      *
      * @param numberToEvict the number of entries to remove
+     * @throws IllegalStateException if this pool is closed
      */
-    protected void vacate(final int numberToEvict) {
+    protected void vacate(final int numberToEvict) throws IllegalStateException {
         Map<K, E> removingObjects = null;
 
         lock.lock();
@@ -1323,7 +1358,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
     /**
      * Selects and detaches vacate victims. The caller must hold {@link #lock}; this method never
-     * invokes user code and does not update destruction statistics or memory accounting.
+     * invokes a destruction callback and does not update destruction statistics or memory accounting.
+     * Key hashing/equality and activity metadata access can still invoke user-defined methods.
      */
     private Map<K, E> detachForVacateUnderLock(final int numberToEvict) {
         final int size = pool.size();
@@ -1427,8 +1463,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * entries under the pool lock and invoke the {@link Poolable#destroy(Caller)} callbacks after the
      * lock is released. It is intended for subclass-initiated destruction of entries that are already
      * detached from the pool. Because it updates the memory accounting (a non-thread-safe charge map
-     * and the total), it must be called either while holding the pool lock or for entries that are no
-     * longer pooled; calling it for a key still mapped strips that mapping's admission charge.</p>
+     * and the total), callers must hold the pool lock or otherwise prevent concurrent pool operations.
+     * Calling it for a key still mapped strips that mapping's admission charge. This legacy hook
+     * invokes the callback under the caller's synchronization.</p>
      *
      * @param key the key part of the entry (used for memory calculation if memoryMeasure is configured)
      * @param value the value of the entry to destroy
@@ -1477,7 +1514,7 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         return charge;
     }
 
-    /** Invokes the pooled object's destruction callback. Callers must not hold {@link #lock}. */
+    /** Invokes the pooled object's destruction callback. Normal pool operations release {@link #lock} first; legacy protected destruction hooks retain caller-managed synchronization. */
     private void invokeDestroyCallback(final E value, final Caller caller) {
         if (value != null) {
             if (logger.isDebugEnabled()) {
@@ -1564,8 +1601,8 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *
      * <p>Like {@code destroy}, this hook is not invoked by the pool's own eviction, clear or close
      * paths; it is intended for subclass-initiated destruction of entries already detached from the
-     * pool, and must be called while holding the pool lock or for entries no longer pooled because it
-     * updates the memory accounting.</p>
+     * pool. Callers must hold the pool lock or otherwise prevent concurrent pool operations because it
+     * updates shared memory accounting.</p>
      *
      * @param map the map of entries to destroy
      * @param caller the reason for destruction
@@ -1582,7 +1619,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
         removeAll(caller, false);
     }
 
-    private void removeAll(final Caller caller, final boolean requireOpen) {
+    /**
+     * @throws IllegalStateException if {@code requireOpen} is {@code true} and this pool is closed
+     */
+    private void removeAll(final Caller caller, final boolean requireOpen) throws IllegalStateException {
         // Snapshot, clear, and account under lock; invoke only user callbacks outside. See
         // GenericObjectPool.removeAll for the concurrency rationale.
         final Map<K, E> doomed;

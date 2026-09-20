@@ -96,10 +96,13 @@ public class InstantType extends AbstractTemporalType<Instant> {
      *
      * @param obj the object to convert; may be {@code null}
      * @return an {@link Instant} representing the input value, or {@code null} if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if the input is a non-lenient calendar containing invalid field values.
+     * @throws DateTimeParseException if the text representation is neither a supported millisecond value nor a valid
+     *         ISO-8601 {@code Instant} (see {@link #valueOf(String)}).
      */
     @MayReturnNull
     @Override
-    public Instant valueOf(final Object obj) {
+    public Instant valueOf(final Object obj) throws IllegalArgumentException, DateTimeParseException {
         if (obj == null) {
             return null;
         } else if (obj instanceof Instant instant) {
@@ -122,8 +125,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns {@link Instant#now()}</li>
-     *   <li>Numeric strings of more than four characters (an optional sign followed by decimal digits only, as
-     *       accepted by {@link Long#parseLong(String)}; no {@code 0x} hex, no {@code L} suffix): parsed as
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only; no {@code 0x} hex, no {@code L} suffix): parsed as
      *       milliseconds since the epoch (shorter numeric strings such as {@code "1234"} are handed to the ISO parser
      *       and rejected)</li>
      *   <li>20-character strings ending in {@code 'Z'}: parsed as ISO-8601 date-time</li>
@@ -191,8 +193,8 @@ public class InstantType extends AbstractTemporalType<Instant> {
 
     /**
      * Converts a region of a character array to an {@link Instant} instance.
-     * If the character sequence looks like a {@code long} value (an epoch-millisecond timestamp: digits ending in a
-     * digit, so a trailing {@code L}/{@code d}/{@code f} type suffix is not accepted), it is parsed as such; otherwise
+     * If the character sequence has more than four characters and consists of an optional sign followed only by
+     * ASCII decimal digits, it is parsed as epoch milliseconds (no hexadecimal prefix or type suffix); otherwise
      * the characters are converted to a {@link String} and delegated to {@link #valueOf(String)}, so both overloads
      * give the same answer for the same text.
      *
@@ -200,20 +202,20 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @param offset the index of the first character to use
      * @param len    the number of characters to use
      * @return the parsed {@link Instant}, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws DateTimeParseException if the text is neither a millisecond number nor a valid ISO-8601 representation
      *         (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public Instant valueOf(final char[] cbuf, final int offset, final int len) throws DateTimeParseException {
+    public Instant valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, DateTimeParseException {
         if ((cbuf == null) || (len == 0)) {
             return null; // NOSONAR
         }
 
-        // isPossibleMillis also requires the last char to be a digit: parseLong(char[]) tolerates a trailing
-        // l/L/f/F/d/D, which the String overload rejects, and an overflow (> 18 digits) surfaces as
-        // ArithmeticException - both fall through to valueOf(String) so that the two overloads report the same
-        // DateTimeParseException.
+        // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
+        // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
+        // to valueOf(String), preserving the String overload's parsing and exception behavior.
         if (isPossibleMillis(cbuf, offset, len)) {
             try {
                 return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
@@ -306,6 +308,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      *
      * @param appendable the {@link Appendable} to write to
      * @param x          the {@link Instant} to append; may be {@code null}
+     * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the formatted date/time text or null literal to {@code appendable} fails
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
@@ -318,7 +321,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Instant x) throws IOException {
+    public void appendTo(final Appendable appendable, final Instant x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -352,6 +355,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
      * @param writer the {@link CharacterWriter} to write to
      * @param x      the {@link Instant} to write; may be {@code null}
      * @param config the serialization configuration; may be {@code null}
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the selected date/time representation, quotation marks or null literal to {@code writer} fails
      * @throws ArithmeticException if the LONG format is selected and the epoch-millisecond value overflows a long
      * @throws DateTimeException if an ISO format is selected and the instant is outside the range representable as a UTC date-time
@@ -359,7 +363,7 @@ public class InstantType extends AbstractTemporalType<Instant> {
     @SuppressWarnings("null")
     @Override
     public void serializeTo(final CharacterWriter writer, final Instant x, final JsonXmlSerConfig<?> config)
-            throws IOException, ArithmeticException, DateTimeException {
+            throws NullPointerException, IOException, ArithmeticException, DateTimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

@@ -69,8 +69,9 @@ public class BlobType extends AbstractType<Blob> {
      * the standard {@code Blob} interface in type metadata.
      *
      * @param clazz the specific {@code Blob} implementation class to use as the Java type
+     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
      */
-    BlobType(final Class<? extends Blob> clazz) {
+    BlobType(final Class<? extends Blob> clazz) throws IllegalArgumentException {
         super(ClassUtil.getSimpleClassName(clazz));
         this.clazz = (Class<Blob>) clazz;
     }

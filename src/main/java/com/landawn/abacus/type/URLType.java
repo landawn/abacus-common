@@ -172,8 +172,11 @@ public class URLType extends AbstractType<URL> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
-     * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
-     * URL website = type.get(rs, 1);   // Get URL from first column
+     * try (ResultSet rs = statement.executeQuery("SELECT website FROM companies")) {
+     *     if (rs.next()) {
+     *         URL website = type.get(rs, 1);   // Get URL from first column
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from
@@ -197,8 +200,11 @@ public class URLType extends AbstractType<URL> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Type<URL> type = TypeFactory.getType(URL.class);
-     * ResultSet rs = statement.executeQuery("SELECT website FROM companies");
-     * URL website = type.get(rs, "website");   // Get URL by column name
+     * try (ResultSet rs = statement.executeQuery("SELECT website FROM companies")) {
+     *     if (rs.next()) {
+     *         URL website = type.get(rs, "website");   // Get URL by column name
+     *     }
+     * }
      * }</pre>
      *
      * @param rs the ResultSet to read from

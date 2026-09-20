@@ -706,24 +706,29 @@ public class JsonXmlSerConfigTest extends TestBase {
 
         // Exclusion.NONE: String/Integer/Boolean properties -> "", 0, false; List/Map/nested bean stay null;
         // typed elements -> "", 0, false
-        assertEquals("{\"s\": \"\", \"l\": null, \"m\": null, \"i\": 0, \"b\": false, \"nested\": null, \"tags\": [\"a\", \"\"], \"nums\": [1, 0], \"flags\": [true, false]}",
+        assertEquals(
+                "{\"s\": \"\", \"l\": null, \"m\": null, \"i\": 0, \"b\": false, \"nested\": null, \"tags\": [\"a\", \"\"], \"nums\": [1, 0], \"flags\": [true, false]}",
                 jp.serialize(new NullHolder(), all3));
 
         // each flag affects only its own slot kind
-        assertEquals("{\"s\": \"\", \"l\": null, \"m\": null, \"i\": null, \"b\": null, \"nested\": null, \"tags\": [\"a\", \"\"], \"nums\": [1, null], \"flags\": [true, null]}",
+        assertEquals(
+                "{\"s\": \"\", \"l\": null, \"m\": null, \"i\": null, \"b\": null, \"nested\": null, \"tags\": [\"a\", \"\"], \"nums\": [1, null], \"flags\": [true, null]}",
                 jp.serialize(new NullHolder(), new JsonSerConfig().setExclusion(Exclusion.NONE).setWriteNullStringAsEmpty(true)));
-        assertEquals("{\"s\": null, \"l\": null, \"m\": null, \"i\": 0, \"b\": null, \"nested\": null, \"tags\": [\"a\", null], \"nums\": [1, 0], \"flags\": [true, null]}",
+        assertEquals(
+                "{\"s\": null, \"l\": null, \"m\": null, \"i\": 0, \"b\": null, \"nested\": null, \"tags\": [\"a\", null], \"nums\": [1, 0], \"flags\": [true, null]}",
                 jp.serialize(new NullHolder(), new JsonSerConfig().setExclusion(Exclusion.NONE).setWriteNullNumberAsZero(true)));
-        assertEquals("{\"s\": null, \"l\": null, \"m\": null, \"i\": null, \"b\": false, \"nested\": null, \"tags\": [\"a\", null], \"nums\": [1, null], \"flags\": [true, false]}",
+        assertEquals(
+                "{\"s\": null, \"l\": null, \"m\": null, \"i\": null, \"b\": false, \"nested\": null, \"tags\": [\"a\", null], \"nums\": [1, null], \"flags\": [true, false]}",
                 jp.serialize(new NullHolder(), new JsonSerConfig().setExclusion(Exclusion.NONE).setWriteNullBooleanAsFalse(true)));
 
         // default exclusion (NULL) drops the null properties before the flags are consulted; elements still honour them
-        assertEquals("{\"tags\": [\"a\", \"\"], \"nums\": [1, 0], \"flags\": [true, false]}",
-                jp.serialize(new NullHolder(), new JsonSerConfig().setWriteNullStringAsEmpty(true).setWriteNullNumberAsZero(true).setWriteNullBooleanAsFalse(true)));
+        assertEquals("{\"tags\": [\"a\", \"\"], \"nums\": [1, 0], \"flags\": [true, false]}", jp.serialize(new NullHolder(),
+                new JsonSerConfig().setWriteNullStringAsEmpty(true).setWriteNullNumberAsZero(true).setWriteNullBooleanAsFalse(true)));
 
         // writeNullToEmpty takes precedence only for the types that have an empty form (String/Collection/array/Map);
         // a null Integer/Boolean property still honours writeNullNumberAsZero/writeNullBooleanAsFalse
-        assertEquals("{\"s\": \"\", \"l\": [], \"m\": {}, \"i\": 0, \"b\": false, \"nested\": null, \"tags\": [\"a\", \"\"], \"nums\": [1, 0], \"flags\": [true, false]}",
+        assertEquals(
+                "{\"s\": \"\", \"l\": [], \"m\": {}, \"i\": 0, \"b\": false, \"nested\": null, \"tags\": [\"a\", \"\"], \"nums\": [1, 0], \"flags\": [true, false]}",
                 jp.serialize(new NullHolder(), all3.copy().setWriteNullToEmpty(true)));
 
         // map values and untyped root collection elements: always null
@@ -733,15 +738,17 @@ public class JsonXmlSerConfigTest extends TestBase {
         assertEquals("[\"a\", null]", jp.serialize(N.asList("a", null), all3));
 
         // without the flags every null stays null
-        assertEquals("{\"s\": null, \"l\": null, \"m\": null, \"i\": null, \"b\": null, \"nested\": null, \"tags\": [\"a\", null], \"nums\": [1, null], \"flags\": [true, null]}",
+        assertEquals(
+                "{\"s\": null, \"l\": null, \"m\": null, \"i\": null, \"b\": null, \"nested\": null, \"tags\": [\"a\", null], \"nums\": [1, null], \"flags\": [true, null]}",
                 jp.serialize(new NullHolder(), new JsonSerConfig().setExclusion(Exclusion.NONE)));
 
         // XML serializers do not apply the flags: null properties are empty elements with isNull="true"
         final String xml = ParserFactory.createXmlParser()
-                .serialize(new NullHolder(), new XmlSerConfig().setExclusion(Exclusion.NONE)
-                        .setWriteNullStringAsEmpty(true)
-                        .setWriteNullNumberAsZero(true)
-                        .setWriteNullBooleanAsFalse(true));
+                .serialize(new NullHolder(),
+                        new XmlSerConfig().setExclusion(Exclusion.NONE)
+                                .setWriteNullStringAsEmpty(true)
+                                .setWriteNullNumberAsZero(true)
+                                .setWriteNullBooleanAsFalse(true));
         assertTrue(xml.contains("<s isNull=\"true\" />"), xml);
         assertTrue(xml.contains("<i isNull=\"true\" />"), xml);
         assertTrue(xml.contains("<b isNull=\"true\" />"), xml);

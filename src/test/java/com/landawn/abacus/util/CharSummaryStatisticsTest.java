@@ -325,7 +325,6 @@ public class CharSummaryStatisticsTest extends TestBase {
         assertTrue(str.contains("average="));
     }
 
-
     // FINDING 27: toString() must render the same text on every machine. Byte/Char/Short built their text with the
     // default locale, so the average printed as "15,000000" under a comma-decimal locale and the integral
     // conversions used the locale's own zero digit, while FloatSummaryStatistics already pinned Locale.ROOT - one

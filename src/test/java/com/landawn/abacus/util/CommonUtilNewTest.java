@@ -446,6 +446,7 @@ public class CommonUtilNewTest extends CommonUtilTestSupport {
         assertNull(padded.get(2, padded.getColumnIndex("City")));
         assertEquals("Charlie", padded.get(2, padded.getColumnIndex("Name")));
     }
+
     @Test
     public void testNewArray_sharedEmptyArrayAndRejectedComponentType() {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.newArray(null, 5));

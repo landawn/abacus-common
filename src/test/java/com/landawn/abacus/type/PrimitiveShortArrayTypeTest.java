@@ -256,7 +256,6 @@ public class PrimitiveShortArrayTypeTest extends TestBase {
         assertTrue(type.isPrimitiveArray());
     }
 
-
     @Test
     public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
         assertArrayEquals(new short[] { 32767, -32768, 0 }, type.valueOf("[32767, -32768, 0]"));

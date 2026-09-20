@@ -433,7 +433,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p>The copy is skipped only when {@code c} is a <i>plain</i> {@code ImmutableSet} that already owns its
      * backing storage - that is, one produced by this class's own {@code of(...)}, {@code copyOf(...)} or
      * {@link #empty()}, by a consumed no-argument {@link #builder()}, or by {@code toImmutableSet()} on an
-     * {@link ObjIterator} (or on any other iterator type in this package). An {@code ImmutableSet} produced by
+     * {@link ObjIterator}. An {@code ImmutableSet} produced by
      * {@link #wrap(Set)} or {@link #builder(Set)} is a live view over storage its creator may still modify,
      * so it is copied like any other collection; and a
      * subtype that compares elements by some other rule - {@link ImmutableSortedSet} or
@@ -628,7 +628,7 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
         /**
          * Adds a single element to the set being built.
-         * If the element is already present in the set (as determined by equals()),
+         * If the element is already present according to the backing set's comparison rules,
          * it is not added again. Null elements are permitted if the backing set supports them.
          *
          * <p><b>Usage Examples:</b></p>

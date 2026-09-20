@@ -532,7 +532,8 @@ public class SplitterTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class, () -> mapSplitter.split("a=1", (Type<?>) null, CommonUtil.typeOf(String.class)));
         assertThrows(IllegalArgumentException.class, () -> mapSplitter.split("a=1", CommonUtil.typeOf(String.class), (Type<?>) null));
         assertThrows(IllegalArgumentException.class, () -> mapSplitter.splitInto("a=1", String.class, String.class, (Map<String, String>) null));
-        assertThrows(IllegalArgumentException.class, () -> mapSplitter.splitInto("a=1", Type.of(String.class), Type.of(String.class), (Map<String, String>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> mapSplitter.splitInto("a=1", Type.of(String.class), Type.of(String.class), (Map<String, String>) null));
         assertThrows(IllegalArgumentException.class, () -> mapSplitter.splitToMap(null, (java.util.function.Supplier<Map<String, String>>) null));
         assertThrows(IllegalArgumentException.class, () -> mapSplitter.splitToMap(null, (java.util.function.Supplier<Map<String, String>>) () -> null));
 

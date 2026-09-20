@@ -67,7 +67,8 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *        when the value collection type is specified instead
      * @param valueTypeName the name of the value collection type parameter; may be empty
      *        when the element type is specified instead
-     * @throws IllegalArgumentException if a supplied value collection type is not a collection type, or if only the
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, a supplied type name is {@code null}, blank, or
+     *         structurally invalid, a supplied value collection type is not a collection type, or if only the
      *         element type is given and {@code typeClass} is neither a {@link ListMultimap} nor a {@link SetMultimap}.
      */
     MultimapType(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName)
@@ -295,9 +296,11 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * @param valueTypeName the name of the value collection type (can be empty)
      * @param isDeclaringName {@code true} to use declaring (simple) names; {@code false} for canonical names
      * @return the formatted type name string
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or a supplied non-empty type name is
+     *         {@code null}, blank, or structurally invalid.
      */
     protected static String getTypeName(final Class<?> typeClass, final String keyTypeName, final String valueElementTypeName, final String valueTypeName,
-            final boolean isDeclaringName) {
+            final boolean isDeclaringName) throws IllegalArgumentException {
         if (isDeclaringName) {
             return ClassUtil.getSimpleClassName(typeClass) + SK.LESS_THAN + TypeFactory.getType(keyTypeName).declaringName()
                     + (Strings.isEmpty(valueElementTypeName) ? "" : (SK.COMMA_SPACE + TypeFactory.getType(valueElementTypeName).declaringName()))

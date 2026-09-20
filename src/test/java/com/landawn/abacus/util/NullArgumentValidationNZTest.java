@@ -17,15 +17,18 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.TestBase;
+
 @Tag("unit")
-class NullArgumentValidationNZTest {
+class NullArgumentValidationNZTest extends TestBase {
 
     @Test
     void factoriesValidateRequiredArgumentsAndPreserveNullableContents() {
         assertThrows(IllegalArgumentException.class, () -> Pair.from((Map.Entry<String, String>) null));
         assertThrows(IllegalArgumentException.class, () -> Tuple.from((Map.Entry<String, String>) null));
         assertThrows(IllegalArgumentException.class, () -> Tuple.toList((Tuple.Tuple1<String>) null));
-        assertThrows(IllegalArgumentException.class, () -> Tuple.toList((Tuple.Tuple9<String, String, String, String, String, String, String, String, String>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Tuple.toList((Tuple.Tuple9<String, String, String, String, String, String, String, String, String>) null));
         assertThrows(IllegalArgumentException.class, () -> Tuple.flatten((Tuple.Tuple2<Tuple.Tuple2<String, String>, String>) null));
         assertThrows(NullPointerException.class, () -> Tuple.flatten(Tuple.of((Tuple.Tuple2<String, String>) null, "tail")));
         assertEquals(Arrays.asList(null, "value"), Tuple.toList(Tuple.of(null, "value")));
@@ -56,6 +59,7 @@ class NullArgumentValidationNZTest {
 
     @Test
     void requiredConfigurationArgumentsUseIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> new ShortSummaryStatistics().combine(null));
         assertThrows(IllegalArgumentException.class, () -> RateLimiter.create(1, 0, null));
         final RateLimiter limiter = RateLimiter.create(1);
         assertThrows(IllegalArgumentException.class, () -> limiter.tryAcquire(0, null));
@@ -63,7 +67,7 @@ class NullArgumentValidationNZTest {
         assertTrue(limiter.tryAcquire(0, TimeUnit.SECONDS));
         assertThrows(IllegalArgumentException.class, () -> Stopwatch.createUnstarted().elapsed(null));
         assertThrows(IllegalArgumentException.class, () -> Strings.shuffle("ab", null));
-        assertEquals("a", Strings.shuffle("a", null));
+        assertThrows(IllegalArgumentException.class, () -> Strings.shuffle("a", null));
         assertThrows(IllegalArgumentException.class, () -> Utf8.encodedLength(null));
         assertThrows(IllegalArgumentException.class, () -> Utf8.isWellFormed(null));
         assertThrows(IllegalArgumentException.class, () -> Utf8.isWellFormed(null, 0, 0));
@@ -96,7 +100,7 @@ class NullArgumentValidationNZTest {
 
     @Test
     void nullElementsAndJavaContractsContinueThrowingNullPointerException() {
-        final PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String>builder().add(Collections.singletonList("a"), "value").build();
+        final PrefixSearchTable<String, String> table = PrefixSearchTable.<String, String> builder().add(Collections.singletonList("a"), "value").build();
         assertThrows(IllegalArgumentException.class, () -> table.get(null));
         assertThrows(IllegalArgumentException.class, () -> table.getAll(null));
         assertThrows(IllegalArgumentException.class, () -> PrefixSearchTable.builder().add(null, "value"));
@@ -105,12 +109,12 @@ class NullArgumentValidationNZTest {
         assertThrows(NullPointerException.class, () -> u.Optional.of((Object) null));
         assertThrows(NullPointerException.class, () -> u.OptionalInt.empty().compareTo(null));
         assertThrows(NullPointerException.class, () -> ObjIterator.empty().toArray((Object[]) null));
-        assertThrows(NullPointerException.class, () -> new ShortSummaryStatistics().combine(null));
         final Properties<String, String> props = new Properties<>();
         props.set("present", "value");
         assertThrows(IllegalArgumentException.class, () -> props.get("present", (Class<String>) null));
         assertThrows(IllegalArgumentException.class, () -> props.getOrDefault("present", "default", null));
-        assertEquals("default", props.getOrDefault("missing", "default", null));
+        assertThrows(IllegalArgumentException.class, () -> props.getOrDefault("missing", "default", null));
+        assertEquals("default", props.getOrDefault("missing", "default", String.class));
         assertNotNull(table.get(Collections.singletonList("a")));
     }
 }

@@ -166,9 +166,9 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
     }
 
     /**
-     * Indicates whether values of this type are immutable.
-     * An {@link ImmutableSet} (including its sorted and navigable subtypes) cannot be modified after construction,
-     * so its values are immutable by construction.
+     * Indicates that this handler treats the container structure as immutable.
+     * The container prevents mutation through its own API; contained objects may still be mutable.
+     * A container created by wrapping an existing collection or map may also reflect changes to that backing data.
      *
      * @return {@code true}, always
      */

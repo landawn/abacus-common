@@ -288,7 +288,6 @@ public class ByteArrayTypeTest extends TestBase {
         assertNotNull(type.name());
     }
 
-
     @Test
     public void reviewFixes20260906_valueOfExceptionTypesForOverflowEmptyAndInvalidElements() {
         assertArrayEquals(new Byte[] { 127, null, -128 }, type.valueOf("[127, null, -128]"));

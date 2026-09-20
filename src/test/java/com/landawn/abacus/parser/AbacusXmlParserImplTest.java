@@ -59,6 +59,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 public class AbacusXmlParserImplTest extends TestBase {
+    private static java.util.Set<Class<?>> approvedTypes() {
+        final java.util.Set<Class<?>> types = new java.util.HashSet<>(java.util.Arrays.asList(AbacusXmlParserImplTest.class.getDeclaredClasses()));
+        types.add(java.time.DayOfWeek.class);
+        types.add(PersonType.class);
+        types.add(RecordB.class);
+        return types;
+    }
 
     @TempDir
     Path tempDir;
@@ -117,8 +124,8 @@ public class AbacusXmlParserImplTest extends TestBase {
     @BeforeEach
     public void setUp() {
         Assumptions.assumeTrue(ParserFactory.isAbacusXmlParserAvailable());
-        staxParser = new AbacusXmlParserImpl(XmlParserType.StAX);
-        domParser = new AbacusXmlParserImpl(XmlParserType.DOM);
+        staxParser = new AbacusXmlParserImpl(XmlParserType.StAX, null, null, approvedTypes());
+        domParser = new AbacusXmlParserImpl(XmlParserType.DOM, null, null, approvedTypes());
     }
 
     private Node firstChild(final String xml) throws Exception {
@@ -133,7 +140,7 @@ public class AbacusXmlParserImplTest extends TestBase {
                 "<value type=\"not-a-java-type\"><map><entry><key>nested</key><value>invalid</value></entry></map></value>" }) {
             String xml = "<map><entry><key>skip</key>" + value + "</entry><entry><key>keep</key><value>7</value></entry></map>";
             for (XmlParserType parserType : new XmlParserType[] { XmlParserType.StAX, XmlParserType.DOM, XmlParserType.SAX }) {
-                assertEquals(Map.of("keep", 7), new AbacusXmlParserImpl(parserType).deserialize(xml, config, Map.class));
+                assertEquals(Map.of("keep", 7), new AbacusXmlParserImpl(parserType, null, null, approvedTypes()).deserialize(xml, config, Map.class));
             }
         }
     }
@@ -149,7 +156,7 @@ public class AbacusXmlParserImplTest extends TestBase {
         });
         final String xml = "<list><e><person><name>A</name><age>1</age></person></e><e><person><name>B</name><age>2</age></person></e></list>";
         for (final XmlParserType parserType : new XmlParserType[] { XmlParserType.StAX, XmlParserType.DOM, XmlParserType.SAX }) {
-            final List<Person> result = new AbacusXmlParserImpl(parserType).deserialize(xml, null, targetType);
+            final List<Person> result = new AbacusXmlParserImpl(parserType, null, null, approvedTypes()).deserialize(xml, null, targetType);
             assertEquals(2, result.size());
             assertEquals("A", result.get(0).getName());
             assertEquals(1, result.get(0).getAge());
@@ -164,14 +171,15 @@ public class AbacusXmlParserImplTest extends TestBase {
         });
         final String xml = "<map><entry><key>MONDAY</key><value>7</value></entry><entry><key>FRIDAY</key><value>9</value></entry></map>";
         for (final XmlParserType parserType : new XmlParserType[] { XmlParserType.StAX, XmlParserType.DOM, XmlParserType.SAX }) {
-            assertEquals(Map.of(DayOfWeek.MONDAY, 7, DayOfWeek.FRIDAY, 9), new AbacusXmlParserImpl(parserType).deserialize(xml, null, targetType));
+            assertEquals(Map.of(DayOfWeek.MONDAY, 7, DayOfWeek.FRIDAY, 9),
+                    new AbacusXmlParserImpl(parserType, null, null, approvedTypes()).deserialize(xml, null, targetType));
         }
     }
 
     @Test
     public void testRootGenericTypesPreserveExplicitConfigAndNestedValues() {
         for (final XmlParserType parserType : new XmlParserType[] { XmlParserType.StAX, XmlParserType.DOM, XmlParserType.SAX }) {
-            final XmlParser parser = new AbacusXmlParserImpl(parserType);
+            final XmlParser parser = new AbacusXmlParserImpl(parserType, null, null, approvedTypes());
             final Type<List<Integer>> integers = Type.of("List<Integer>");
             assertEquals(List.of(1L), parser.deserialize("<list><e>1</e></list>", XmlDeserConfig.create().setElementType(Long.class), integers));
             assertEquals(List.of(), parser.deserialize("<list/>", null, integers));
@@ -187,9 +195,9 @@ public class AbacusXmlParserImplTest extends TestBase {
 
     @Test
     public void testConstructorAndSerialize() {
-        assertNotNull(new AbacusXmlParserImpl(XmlParserType.StAX));
+        assertNotNull(new AbacusXmlParserImpl(XmlParserType.StAX, null, null, approvedTypes()));
         assertNotNull(new AbacusXmlParserImpl(XmlParserType.StAX, new XmlSerConfig(), new XmlDeserConfig()));
-        assertNotNull(new AbacusXmlParserImpl(XmlParserType.StAX).serialize("test"));
+        assertNotNull(new AbacusXmlParserImpl(XmlParserType.StAX, null, null, approvedTypes()).serialize("test"));
         assertEquals("", staxParser.serialize(null));
 
         Person person = new Person("John", 30);
@@ -448,7 +456,7 @@ public class AbacusXmlParserImplTest extends TestBase {
         outer.setRec(new RecordB(7, "first", "last"));
         final String xml = staxParser.serialize(outer);
         final XmlDeserConfig xdc = new XmlDeserConfig();
-        final RecordWrapper fromSax = new AbacusXmlParserImpl(XmlParserType.SAX).deserialize(xml, xdc, RecordWrapper.class);
+        final RecordWrapper fromSax = new AbacusXmlParserImpl(XmlParserType.SAX, null, null, approvedTypes()).deserialize(xml, xdc, RecordWrapper.class);
         assertEquals(new RecordB(7, "first", "last"), fromSax.getRec());
         assertEquals("OUTER", fromSax.getName());
         assertEquals(staxParser.deserialize(xml, xdc, RecordWrapper.class).getRec(), fromSax.getRec());
@@ -489,7 +497,7 @@ public class AbacusXmlParserImplTest extends TestBase {
         outer.setTail("TAIL");
         final String xml = staxParser.serialize(outer, new XmlSerConfig().setTagByPropertyName(false));
         final XmlDeserConfig xdc = new XmlDeserConfig().setIgnoredPropNames(IgnInner.class, Set.of("drop1", "drop2"));
-        final XmlParser saxParser = new AbacusXmlParserImpl(XmlParserType.SAX);
+        final XmlParser saxParser = new AbacusXmlParserImpl(XmlParserType.SAX, null, null, approvedTypes());
         final IgnOuter fromSax = saxParser.deserialize(xml, xdc, IgnOuter.class);
         assertEquals("OUTER", fromSax.getName());
         assertEquals("TAIL", fromSax.getTail());
@@ -532,7 +540,8 @@ public class AbacusXmlParserImplTest extends TestBase {
         final Map<String, Object> root = new LinkedHashMap<>();
         root.put("a1", shared);
         root.put("a2", shared);
-        final String xml = new AbacusXmlParserImpl(XmlParserType.StAX).serialize(root, new XmlSerConfig().setCircularReferenceSupported(true));
+        final String xml = new AbacusXmlParserImpl(XmlParserType.StAX, null, null, approvedTypes()).serialize(root,
+                new XmlSerConfig().setCircularReferenceSupported(true));
         final int first = xml.indexOf("name");
         final int second = xml.indexOf("name", first + 1);
         assertTrue(first >= 0 && second > first, xml);
@@ -551,7 +560,7 @@ public class AbacusXmlParserImplTest extends TestBase {
             }
         };
         final com.landawn.abacus.exception.UncheckedIOException ex = assertThrows(com.landawn.abacus.exception.UncheckedIOException.class,
-                () -> new AbacusXmlParserImpl(XmlParserType.StAX).deserialize(failingReader, new XmlDeserConfig(), Map.class));
+                () -> new AbacusXmlParserImpl(XmlParserType.StAX, null, null, approvedTypes()).deserialize(failingReader, new XmlDeserConfig(), Map.class));
         assertTrue(ex.getCause() instanceof IOException);
     }
 
@@ -562,7 +571,7 @@ public class AbacusXmlParserImplTest extends TestBase {
     private static final XmlParserType[] ALL_TYPES = { XmlParserType.StAX, XmlParserType.DOM, XmlParserType.SAX };
 
     private static XmlParser parserOf(final XmlParserType type) {
-        return new AbacusXmlParserImpl(type);
+        return new AbacusXmlParserImpl(type, null, null, approvedTypes());
     }
 
     public static class CharBean {
@@ -844,37 +853,23 @@ public class AbacusXmlParserImplTest extends TestBase {
         }
     }
 
-    // P4-01 / P5-07 (b): an unset char is written as an empty element and reads back as '\0'.
     @Test
-    public void reviewFixes20260906_nulCharPropertyWritesEmptyElement() {
+    public void reviewFixes20260906_nulCharPropertyIsRejected() {
         final CharBean bean = new CharBean();
         bean.setI(7);
-        bean.setBoxed('\0');
-
-        final String xml = parserOf(XmlParserType.StAX).serialize(bean);
-        assertTrue(xml.contains("<c></c>"), xml);
-        assertTrue(xml.contains("<boxed></boxed>"), xml);
-        assertTrue(!xml.contains("&#x0;"), xml);
-
-        for (final XmlParserType type : ALL_TYPES) {
-            final CharBean back = parserOf(type).deserialize(xml, CharBean.class);
-            assertEquals('\0', back.getC(), type.toString());
-            assertEquals(7, back.getI(), type.toString());
-            assertNull(back.getBoxed(), type.toString()); // documented: a boxed Character reads back as null
+        bean.setBoxed((char) 0);
+        for (XmlParserType type : ALL_TYPES) {
+            assertThrows(ParsingException.class, () -> parserOf(type).serialize(bean));
         }
-
-        // Exclusion.DEFAULT still omits the default char.
-        final String xml2 = parserOf(XmlParserType.StAX).serialize(bean, XmlSerConfig.create().setExclusion(Exclusion.DEFAULT));
-        assertTrue(!xml2.contains("<c>"), xml2);
-
-        // A legal char still round-trips through the same path.
+        bean.setBoxed(null);
+        final String omitted = parserOf(XmlParserType.StAX).serialize(bean, XmlSerConfig.create().setExclusion(Exclusion.DEFAULT));
+        assertTrue(!omitted.contains("<c>"), omitted);
         bean.setC('x');
         bean.setBoxed('y');
-
-        for (final XmlParserType type : ALL_TYPES) {
+        for (XmlParserType type : ALL_TYPES) {
             final CharBean back = parserOf(type).deserialize(parserOf(type).serialize(bean), CharBean.class);
-            assertEquals('x', back.getC(), type.toString());
-            assertEquals(Character.valueOf('y'), back.getBoxed(), type.toString());
+            assertEquals('x', back.getC());
+            assertEquals(Character.valueOf('y'), back.getBoxed());
         }
     }
 
@@ -905,9 +900,8 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertThrows(ParsingException.class, () -> parser.serialize(new Object[] { value }), value);
         }
 
-        // A NUL Character element is the one lossless case: an empty <e></e>.
-        final String nulElement = parser.serialize(new Object[] { '\0' });
-        assertEquals("<array><e></e></array>", nulElement);
+        // A direct NUL Character has no XML representation; an empty element would lose the token.
+        assertThrows(ParsingException.class, () -> parser.serialize(new Object[] { '\0' }));
 
         // Legal edge values round-trip on all three readers.
         final String[] legal = { "\t\n\r", "", "  ", "\u007F", "\u0085", "\u2028", "\uD7FF", "\uE000", "\uFFFD", "\uFEFF", "😀", "<a&b>\"'" };
@@ -1025,6 +1019,100 @@ public class AbacusXmlParserImplTest extends TestBase {
             // trailing text after the wrapper is ignored, as before
             assertEquals("b", parser.deserialize("<family><friend><person><name>b</name></person>junk</friend></family>", Family.class).getFriend().getName(),
                     type.toString());
+        }
+    }
+
+    @Test
+    public void testDuplicatePropertyValueWrappersAreRejected() {
+        final String[] malformed = { "<family><friend><person/><person/></friend></family>",
+                "<family><friend><unknown><name>b</name></unknown><person/></friend></family>", "<family><friend><person/><list/></friend></family>",
+                "<family><tags><list/><list/></tags></family>", "<family><nums><array/><array/></nums></family>", "<family><m><map/><map/></m></family>",
+                "<family name=\"family\"><property name=\"friend\"><person name=\"friend\"/><person name=\"friend\"/></property></family>",
+                "<p:family xmlns:p=\"urn:test\"><p:friend><p:person/><p:person/></p:friend></p:family>" };
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+
+            for (final String xml : malformed) {
+                assertThrows(ParsingException.class, () -> parser.deserialize(xml, Family.class), type + " " + xml);
+
+                // A failed parse must not leave child-presence state in a pooled handler.
+                final Family back = parser.deserialize("<family><friend><person><name>ok</name><age>2</age></person></friend><age>5</age></family>",
+                        Family.class);
+                assertEquals(new Person("ok", 2), back.getFriend(), type.toString());
+                assertEquals(5, back.getAge(), type.toString());
+            }
+        }
+    }
+
+    @Test
+    public void testDuplicateItemAndMapValueWrappersAreRejected() {
+        // Empty structured values count too, including at an outer depth after nested values finish.
+        final Object[][] malformed = { { "<list><e><list/><list/></e></list>", Type.of("List<List<String>>") },
+                { "<array><e><array/><array/></e></array>", Type.of(String[][].class) },
+                { "<map><entry><key><list/><list/></key><value>x</value></entry></map>", Type.of("Map<List<String>, String>") },
+                { "<map><entry><key>x</key><value><map/><map/></value></entry></map>", Type.of("Map<String, Map<String, String>>") },
+                { "<list><e><list><e><list><e>1</e></list></e></list><list/></e></list>", Type.of("List<List<List<Integer>>>") } };
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+
+            for (final Object[] entry : malformed) {
+                final String xml = (String) entry[0];
+                final Type<?> targetType = (Type<?>) entry[1];
+                assertThrows(ParsingException.class, () -> parser.deserialize(xml, null, targetType), type + " " + xml);
+            }
+        }
+    }
+
+    @Test
+    public void testSingleValueWrappersAllowNestedContainersAndSiblingItems() {
+        final String nestedLists = "<list><e><list><e><list><e>1</e><e>2</e></list></e><e><list/></e></list></e>"
+                + "<e isNull=\"true\"/><e><list><e><list><e>3</e></list></e></list></e></list>";
+        final String structuredKeysAndValues = "<map><entry><key><list><e>a</e><e>b</e></list></key>" + "<value><list><e>1</e><e>2</e></list></value></entry>"
+                + "<entry><key><list/></key><value><list/></value></entry></map>";
+
+        for (final XmlParserType type : ALL_TYPES) {
+            final XmlParser parser = parserOf(type);
+            final List<List<List<Integer>>> lists = parser.deserialize(nestedLists, null, Type.of("List<List<List<Integer>>>"));
+            assertEquals(Arrays.asList(List.of(List.of(1, 2), List.of()), null, List.of(List.of(3))), lists, type.toString());
+
+            final Map<List<String>, List<Integer>> map = parser.deserialize(structuredKeysAndValues, null, Type.of("Map<List<String>, List<Integer>>"));
+            assertEquals(Map.of(List.of("a", "b"), List.of(1, 2), List.of(), List.of()), map, type.toString());
+
+            final int[][] arrays = parser.deserialize("<array><e><array><e>1</e><e>2</e></array></e><e><array/></e></array>", int[][].class);
+            assertEquals(2, arrays.length, type.toString());
+            assertArrayEquals(new int[] { 1, 2 }, arrays[0], type.toString());
+            assertArrayEquals(new int[0], arrays[1], type.toString());
+        }
+    }
+
+    @Test
+    public void testSaxValueWrapperTrackingSkipsIgnoredContentAndResetsAfterFailure() {
+        final XmlParser parser = parserOf(XmlParserType.SAX);
+        final String duplicate = "<family><friend><person/><person/></friend></family>";
+        final XmlDeserConfig ignoredFriend = XmlDeserConfig.create().setIgnoredPropNames(Family.class, Set.of("friend"));
+        final XmlDeserConfig ignoredKey = XmlDeserConfig.create().setIgnoredPropNames(Map.class, Set.of("skip"));
+
+        for (int i = 0; i < 3; i++) {
+            assertThrows(ParsingException.class, () -> parser.deserialize(duplicate, Family.class));
+
+            // Skipped subtrees never push frames; their closing events must not pop tracked frames either.
+            final Family ignored = parser.deserialize("<family><friend><person/><person/></friend><age>5</age></family>", ignoredFriend, Family.class);
+            assertNull(ignored.getFriend());
+            assertEquals(5, ignored.getAge());
+            final Family unmatched = parser.deserialize("<family><unknown><person/><person/></unknown><name>ok</name></family>",
+                    XmlDeserConfig.create().setIgnoreUnmatchedProperty(true), Family.class);
+            assertEquals("ok", unmatched.getName());
+            assertEquals(Map.of("keep", "ok"),
+                    parser.deserialize(
+                            "<map><entry><key>skip</key><value><list/><list/></value></entry>" + "<entry><key>keep</key><value>ok</value></entry></map>",
+                            ignoredKey, Map.class));
+
+            assertNull(parser.deserialize("<family isNull=\"true\"><friend><person/><person/></friend></family>", Family.class));
+            final Family valid = parser.deserialize("<family><friend isNull=\"true\"/><tags><list><e>a</e><e>b</e></list></tags></family>", Family.class);
+            assertNull(valid.getFriend());
+            assertEquals(List.of("a", "b"), valid.getTags());
         }
     }
 
@@ -1203,35 +1291,19 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertThrows(ParsingException.class, () -> parser.serialize(dataset));
         assertThrows(ParsingException.class, () -> parser.serialize(N.asMap("d", dataset)));
 
-        // ... unless failOnEmptyBean is off, which turns every unsupported class into an empty element
-        assertEquals("", parser.serialize(dataset, XmlSerConfig.create().setFailOnEmptyBean(false)));
+        assertThrows(ParsingException.class, () -> parser.serialize(dataset, XmlSerConfig.create().setFailOnEmptyBean(false)));
     }
 
-    // P8-02: failOnEmptyBean=false is honoured (writes nothing), the default still throws.
     @Test
-    public void reviewFixes20260906_failOnEmptyBeanFalseWritesNothing() {
-        final XmlSerConfig lenient = XmlSerConfig.create().setFailOnEmptyBean(false);
+    public void reviewFixes20260906_failOnEmptyBeanAllowsPropertylessObjects() {
         final EmptyHolder holder = new EmptyHolder();
         holder.setE(new Empty());
         holder.setS("x");
-
-        for (final XmlParserType type : ALL_TYPES) {
-            final XmlParser parser = parserOf(type);
-
-            assertEquals("", parser.serialize(new Empty(), lenient), type.toString());
-            assertEquals("<map><entry><key>e</key><value></value></entry></map>", parser.serialize(N.asMap("e", new Empty()), lenient), type.toString());
-            assertEquals("<emptyHolder><e></e><s>x</s></emptyHolder>", parser.serialize(holder, lenient), type.toString());
-            assertEquals("<list><e></e></list>", parser.serialize(N.asList(new Empty()), lenient), type.toString());
-            assertEquals(Map.of("e", ""), parser.deserialize(parser.serialize(N.asMap("e", new Empty()), lenient), Map.class), type.toString());
-
-            for (final Object obj : new Object[] { new Empty(), N.asMap("e", new Empty()), holder, N.asList(new Empty()) }) {
-                final ParsingException ex = assertThrows(ParsingException.class, () -> parser.serialize(obj), type.toString());
-                assertTrue(ex.getMessage().startsWith("Unsupported class:"), ex.getMessage());
-                assertThrows(ParsingException.class, () -> parser.serialize(obj, XmlSerConfig.create().setFailOnEmptyBean(true)), type.toString());
+        for (XmlParserType type : ALL_TYPES) {
+            for (Object value : new Object[] { new Empty(), N.asMap("e", new Empty()), holder, N.asList(new Empty()) }) {
+                assertThrows(ParsingException.class, () -> parserOf(type).serialize(value));
+                assertTrue(!parserOf(type).serialize(value, XmlSerConfig.create().setFailOnEmptyBean(false)).isEmpty());
             }
-
-            // a parser constructed with a lenient default config
-            assertEquals("", new AbacusXmlParserImpl(type, XmlSerConfig.create().setFailOnEmptyBean(false), null).serialize(new Empty()), type.toString());
         }
     }
 
@@ -1311,6 +1383,8 @@ public class AbacusXmlParserImplTest extends TestBase {
         present.setJoi(java.util.OptionalInt.of(5));
         present.setJos(java.util.Optional.of("j"));
         present.setN(u.Nullable.of(null));
+        assertThrows(ParsingException.class, () -> parserOf(XmlParserType.StAX).serialize(present));
+        present.setN(u.Nullable.empty());
         present.setP(Pair.of(1, "a,b"));
         present.setT(Tuple.of("x,y", 2));
         present.setOl(u.Optional.of(N.asList("a,b", "c")));
@@ -1341,7 +1415,7 @@ public class AbacusXmlParserImplTest extends TestBase {
                 assertEquals(u.Optional.of("null"), back.getOs(), type + " " + presentXml); // present "null" survives
                 assertEquals(java.util.OptionalInt.of(5), back.getJoi(), type + " " + presentXml);
                 assertEquals(java.util.Optional.of("j"), back.getJos(), type + " " + presentXml);
-                assertEquals(u.Nullable.empty(), back.getN(), type + " " + presentXml); // documented: Nullable.of(null) -> empty
+                assertEquals(u.Nullable.empty(), back.getN(), type + " " + presentXml); // Empty Nullable remains empty.
                 assertEquals(Pair.of(1, "a,b"), back.getP(), type + " " + presentXml);
                 assertEquals(Tuple.of("x,y", 2), back.getT(), type + " " + presentXml);
                 assertEquals(u.Optional.of(N.asList("a,b", "c")), back.getOl(), type + " " + presentXml);
@@ -1680,8 +1754,7 @@ public class AbacusXmlParserImplTest extends TestBase {
             final XmlDeserConfig scanAnchored = new XmlDeserConfig().setElementType(PersonType.class);
             assertThrows(ParsingException.class,
                     () -> parser.deserialize("<map><personType><key>a</key><value>1</value></personType></map>", scanAnchored, Map.class), type.toString());
-            assertThrows(ParsingException.class, () -> parser.deserialize("<map><pair><key>a</key><value>1</value></pair></map>", Map.class),
-                    type.toString());
+            assertThrows(ParsingException.class, () -> parser.deserialize("<map><pair><key>a</key><value>1</value></pair></map>", Map.class), type.toString());
             assertThrows(ParsingException.class, () -> parser.deserialize("<map><foo>a</foo></map>", Map.class), type.toString());
             assertThrows(ParsingException.class, () -> parser.deserialize("<map><entry><key>a</key><value>1</value></entry><foo/></map>", Map.class),
                     type.toString());
@@ -1689,11 +1762,9 @@ public class AbacusXmlParserImplTest extends TestBase {
             // the well-formed shapes are untouched, including the namespace-prefixed one
             assertEquals(Map.of("a", "1"), parser.deserialize("<map><entry><key>a</key><value>1</value></entry></map>", Map.class), type.toString());
             assertEquals(Map.of("a", "1"),
-                    parser.deserialize("<p:map xmlns:p=\"urn:x\"><p:entry><p:key>a</p:key><p:value>1</p:value></p:entry></p:map>", Map.class),
-                    type.toString());
+                    parser.deserialize("<p:map xmlns:p=\"urn:x\"><p:entry><p:key>a</p:key><p:value>1</p:value></p:entry></p:map>", Map.class), type.toString());
         }
     }
-
 
     // G04-104: the DOM branches of read(..) look the target type up under the element's LOCAL name (or its
     // `name` attribute) but reported node.getNodeName() when nothing matched, naming a key they never searched
@@ -1708,8 +1779,7 @@ public class AbacusXmlParserImplTest extends TestBase {
         assertTrue(fromStream.getMessage().contains("xml node: order"), fromStream.getMessage());
         assertTrue(fromStream.getMessage().contains("<ns:order>"), fromStream.getMessage());
 
-        final ParsingException fromReader = assertThrows(ParsingException.class,
-                () -> domParser.deserialize(new StringReader(prefixed), null, nodeTypes));
+        final ParsingException fromReader = assertThrows(ParsingException.class, () -> domParser.deserialize(new StringReader(prefixed), null, nodeTypes));
         assertTrue(fromReader.getMessage().contains("xml node: order"), fromReader.getMessage());
         assertTrue(fromReader.getMessage().contains("<ns:order>"), fromReader.getMessage());
 
@@ -1806,6 +1876,7 @@ public class AbacusXmlParserImplTest extends TestBase {
             assertEquals("<bean name=\"plainCustomXmlPropNameBean\"><property name=\"user_id\">v</property></bean>", parser.serialize(plain, generic));
         }
     }
+
     // R02-3 (2026-09-08): the G04-85 fix added toElementNode to XmlParserImpl so that an org.w3c.dom.Document -
     // what DocumentBuilder.parse returns, and what most callers hand to deserialize(Node, ..) - is read as its
     // document element. AbacusXmlParserImpl, the sibling DOM reader with the identical overloads, was not
@@ -1819,7 +1890,7 @@ public class AbacusXmlParserImplTest extends TestBase {
         final Map<String, Type<?>> nodeTypes = N.asMap("person", Type.of(Person.class));
 
         // deserialize(Node, ..) always reads through the DOM reader, whichever backend the parser was built with
-        for (final XmlParser parser : new XmlParser[] { staxParser, domParser, new AbacusXmlParserImpl(XmlParserType.SAX) }) {
+        for (final XmlParser parser : new XmlParser[] { staxParser, domParser, new AbacusXmlParserImpl(XmlParserType.SAX, null, null, approvedTypes()) }) {
             final Person byType = parser.deserialize(doc, null, Type.of(Person.class));
             assertEquals("NodeTest", byType.getName());
             assertEquals(40, byType.getAge());
@@ -1852,7 +1923,7 @@ public class AbacusXmlParserImplTest extends TestBase {
 
         final Thread caller = new Thread(() -> {
             try {
-                new AbacusXmlParserImpl(XmlParserType.SAX).deserialize(xml, List.class);
+                new AbacusXmlParserImpl(XmlParserType.SAX, null, null, approvedTypes()).deserialize(xml, List.class);
             } catch (final Throwable t) {
                 thrown[0] = t;
             }
@@ -1865,7 +1936,45 @@ public class AbacusXmlParserImplTest extends TestBase {
 
         // the StAX and DOM readers, which have no such frames, already reported it this way
         for (final XmlParserType type : new XmlParserType[] { XmlParserType.StAX, XmlParserType.DOM }) {
-            assertThrows(ParsingException.class, () -> new AbacusXmlParserImpl(type).deserialize(xml, List.class), type.toString());
+            assertThrows(ParsingException.class, () -> new AbacusXmlParserImpl(type, null, null, approvedTypes()).deserialize(xml, List.class),
+                    type.toString());
+        }
+    }
+
+    /**
+     * The ignored-name filter tested a null map key by passing the bare {@code null} to
+     * {@code ignoredPropNames.contains(..)}, which throws {@code NullPointerException} on a
+     * {@code Set.of(..)} - the very shape {@code ParserConfig.setIgnoredPropNames}' own javadoc examples use.
+     * A null key is written as the element {@code <null>}, so it must be filtered under the name "null",
+     * exactly as {@code XmlParserImpl} already does (see its
+     * {@code fixG04_aNullMapKeyIsIgnoredUnderTheNameItIsWrittenWith}). This covers the write path and both
+     * read paths (StAX and DOM).
+     */
+    @Test
+    public void test_nullMapKeyAgainstNullHostileIgnoredNames_regression_20260918() {
+        final Map<Object, String> withNullKey = new LinkedHashMap<>();
+        withNullKey.put(null, "v1");
+        withNullKey.put("k", "v2");
+
+        for (final XmlParserType type : new XmlParserType[] { XmlParserType.StAX, XmlParserType.DOM }) {
+            final AbacusXmlParserImpl parser = new AbacusXmlParserImpl(type, null, null, approvedTypes());
+
+            // A Set that rejects a null argument must not blow up the writer.
+            // Before the fix this threw NullPointerException from Set.of(..).contains(null).
+            final String written = parser.serialize(withNullKey, new XmlSerConfig().setIgnoredPropNames(Map.class, Set.of("k")));
+            assertTrue(written.contains("v1"), type + " -> " + written);
+            assertTrue(!written.contains("v2"), type + " -> " + written);
+
+            // The null key is filtered under the name it is written as ("null"), not skipped.
+            final String filtered = parser.serialize(withNullKey, new XmlSerConfig().setIgnoredPropNames(Map.class, N.asSet("null")));
+            assertTrue(filtered.contains("v2"), type + " -> " + filtered);
+            assertTrue(!filtered.contains("v1"), type + " -> " + filtered);
+
+            // And the read paths must survive the same null-hostile set.
+            final String xmlWithNullKey = parser.serialize(withNullKey);
+            final XmlDeserConfig dc = new XmlDeserConfig().setIgnoredPropNames(Map.class, Set.of("k"));
+            final Map<?, ?> readBack = parser.deserialize(xmlWithNullKey, dc, Map.class);
+            assertNotNull(readBack, type.toString());
         }
     }
 }

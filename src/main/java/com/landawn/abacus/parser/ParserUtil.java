@@ -15,7 +15,6 @@
 package com.landawn.abacus.parser;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
@@ -35,11 +34,13 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -71,6 +72,7 @@ import com.landawn.abacus.annotation.Table;
 import com.landawn.abacus.annotation.Transient;
 import com.landawn.abacus.annotation.Type.Scope;
 import com.landawn.abacus.exception.ParsingException;
+import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.logging.Logger;
 import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.type.ObjectType;
@@ -2268,7 +2270,7 @@ public final class ParserUtil {
          *
          * @param <T> the type of the instance
          * @return a new instance of the bean class
-         * @throws RuntimeException if instantiation fails
+         * @throws RuntimeException if the selected bean constructor is unavailable, cannot be invoked, or throws an exception
          */
         @Beta
         <T> T newInstance() throws RuntimeException {
@@ -2288,7 +2290,7 @@ public final class ParserUtil {
          * @param <T> the type of the instance
          * @param args constructor arguments
          * @return a new instance of the bean class
-         * @throws RuntimeException if instantiation fails
+         * @throws RuntimeException if the selected constructor is unavailable, its arguments are incompatible, or its invocation throws an exception
          */
         @Beta
         <T> T newInstance(final Object... args) throws RuntimeException {
@@ -2313,9 +2315,11 @@ public final class ParserUtil {
          * }</pre>
          *
          * @return an intermediate object for bean construction
+         * @throws UnsupportedOperationException if the immutable bean has neither a builder nor an all-arguments constructor
+         * @throws RuntimeException if invoking the bean constructor or creating its builder is not possible or throws an exception
          */
         @Beta
-        public Object createBeanResult() {
+        public Object createBeanResult() throws UnsupportedOperationException, RuntimeException {
             return isImmutable ? (builderInfo != null ? builderInfo.newBuilder() : createArgsForConstructor()) : N.newInstance(clazz);
         }
 
@@ -2336,9 +2340,11 @@ public final class ParserUtil {
          * @param <T> the type of the finished bean
          * @param result the intermediate result from createBeanResult
          * @return the finished bean instance
+         * @throws RuntimeException if {@code result} has the wrong representation for this bean, its constructor arguments are incompatible, or its
+         *         constructor or builder build method throws an exception
          */
         @Beta
-        public <T> T finishBeanResult(final Object result) {
+        public <T> T finishBeanResult(final Object result) throws RuntimeException {
             if (result == null) {
                 return null;
             }
@@ -2943,7 +2949,8 @@ public final class ParserUtil {
          * @param <T> the expected type of the property value
          * @param obj the object to get the property value from
          * @return the property value, cast to type T
-         * @throws RuntimeException if reflection access fails
+         * @throws RuntimeException if the target is incompatible with this property, its array representation lacks the property slot,
+         *         or reading its field or invoking its getter throws an exception
          */
         @SuppressWarnings("unchecked")
         public <T> T getPropValue(final Object obj) throws RuntimeException {
@@ -3009,7 +3016,8 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propValue the value to set (will be converted if necessary)
          * @throws UnsupportedOperationException if this property is read-only and cannot accept {@code propValue}
-         * @throws RuntimeException if reflection access fails or type conversion fails
+         * @throws RuntimeException if the target cannot accept the property value, conversion to the property type is unsupported,
+         *         or accessing the field or invoking its getter or setter throws an exception
          */
         @SuppressFBWarnings
         public void setPropValue(final Object obj, Object propValue) throws UnsupportedOperationException, RuntimeException {
@@ -3178,8 +3186,15 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws IllegalArgumentException if the formatted branch receives a null writer, or the property's date pattern, time zone,
+                 *         year or UTC offset cannot be represented by the selected format
+                 * @throws UncheckedIOException if appending the date text in the formatted branch to {@code writer} fails
+                 * @throws IOException if writing epoch milliseconds in the long-format branch to {@code writer} fails
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.util.Date x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.util.Date x, final CharacterWriter writer)
+                        throws IllegalArgumentException, UncheckedIOException, IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
@@ -3206,8 +3221,15 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws IllegalArgumentException if the formatted branch receives a null writer, or the property's date pattern, time zone,
+                 *         year or UTC offset cannot be represented by the selected format
+                 * @throws UncheckedIOException if appending the date text in the formatted branch to {@code writer} fails
+                 * @throws IOException if writing epoch milliseconds in the long-format branch to {@code writer} fails
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.util.Calendar x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.util.Calendar x, final CharacterWriter writer)
+                        throws IllegalArgumentException, UncheckedIOException, IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTimeInMillis());
                     } else {
@@ -3231,8 +3253,15 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws IllegalArgumentException if the formatted branch receives a null writer, or the property's date pattern, time zone,
+                 *         year or UTC offset cannot be represented by the selected format
+                 * @throws UncheckedIOException if appending the date text in the formatted branch to {@code writer} fails
+                 * @throws IOException if writing epoch milliseconds in the long-format branch to {@code writer} fails
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.sql.Timestamp x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.sql.Timestamp x, final CharacterWriter writer)
+                        throws IllegalArgumentException, UncheckedIOException, IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
@@ -3258,8 +3287,15 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws IllegalArgumentException if the formatted branch receives a null writer, or the property's date pattern, time zone,
+                 *         year or UTC offset cannot be represented by the selected format
+                 * @throws UncheckedIOException if appending the date text in the formatted branch to {@code writer} fails
+                 * @throws IOException if writing epoch milliseconds in the long-format branch to {@code writer} fails
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.sql.Date x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.sql.Date x, final CharacterWriter writer)
+                        throws IllegalArgumentException, UncheckedIOException, IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
@@ -3287,8 +3323,15 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws IllegalArgumentException if the formatted branch receives a null writer, or the property's date pattern, time zone,
+                 *         year or UTC offset cannot be represented by the selected format
+                 * @throws UncheckedIOException if appending the date text in the formatted branch to {@code writer} fails
+                 * @throws IOException if writing epoch milliseconds in the long-format branch to {@code writer} fails
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.sql.Time x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.sql.Time x, final CharacterWriter writer)
+                        throws IllegalArgumentException, UncheckedIOException, IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.getTime());
                     } else {
@@ -3314,8 +3357,15 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws DateTimeException if the configured formatter cannot represent the value's temporal fields, or appending its formatted
+                 *         text to {@code writer} fails
+                 * @throws ArithmeticException if the long date format is selected and the value exceeds the epoch-millisecond range
+                 * @throws IOException if writing epoch milliseconds to {@code writer} fails
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.time.LocalDateTime x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.time.LocalDateTime x, final CharacterWriter writer)
+                        throws DateTimeException, ArithmeticException, IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.atZone(propInfo.zoneId).toInstant().toEpochMilli());
                     } else {
@@ -3327,9 +3377,11 @@ public final class ParserUtil {
             propFuncMap.put(java.time.LocalDate.class, new DateTimeReaderWriter<java.time.LocalDate>() {
                 /**
                  * @throws UnsupportedOperationException if the property uses the long date format and the input is not null, empty, or the null literal
+                 * @throws DateTimeParseException if non-null, nonempty text other than the null literal cannot be parsed
+                 *         as the target type with the property's configured formatter
                  */
                 @Override
-                public java.time.LocalDate read(final PropInfo propInfo, final String strValue) throws UnsupportedOperationException {
+                public java.time.LocalDate read(final PropInfo propInfo, final String strValue) throws UnsupportedOperationException, DateTimeParseException {
                     if (isNullDateText(strValue)) {
                         return null;
                     }
@@ -3343,9 +3395,12 @@ public final class ParserUtil {
 
                 /**
                  * @throws UnsupportedOperationException if the property uses the long date format
+                 * @throws DateTimeException if the configured formatter cannot represent the value's temporal fields, or appending its formatted
+                 *         text to {@code writer} fails
                  */
                 @Override
-                public void write(final PropInfo propInfo, final java.time.LocalDate x, final CharacterWriter writer) throws UnsupportedOperationException {
+                public void write(final PropInfo propInfo, final java.time.LocalDate x, final CharacterWriter writer)
+                        throws UnsupportedOperationException, DateTimeException {
                     if (propInfo.isLongDateFormat) {
                         throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalDate");
                     } else {
@@ -3357,9 +3412,11 @@ public final class ParserUtil {
             propFuncMap.put(java.time.LocalTime.class, new DateTimeReaderWriter<java.time.LocalTime>() {
                 /**
                  * @throws UnsupportedOperationException if the property uses the long date format and the input is not null, empty, or the null literal
+                 * @throws DateTimeParseException if non-null, nonempty text other than the null literal cannot be parsed
+                 *         as the target type with the property's configured formatter
                  */
                 @Override
-                public java.time.LocalTime read(final PropInfo propInfo, final String strValue) throws UnsupportedOperationException {
+                public java.time.LocalTime read(final PropInfo propInfo, final String strValue) throws UnsupportedOperationException, DateTimeParseException {
                     if (isNullDateText(strValue)) {
                         return null;
                     }
@@ -3373,9 +3430,12 @@ public final class ParserUtil {
 
                 /**
                  * @throws UnsupportedOperationException if the property uses the long date format
+                 * @throws DateTimeException if the configured formatter cannot represent the value's temporal fields, or appending its formatted
+                 *         text to {@code writer} fails
                  */
                 @Override
-                public void write(final PropInfo propInfo, final java.time.LocalTime x, final CharacterWriter writer) throws UnsupportedOperationException {
+                public void write(final PropInfo propInfo, final java.time.LocalTime x, final CharacterWriter writer)
+                        throws UnsupportedOperationException, DateTimeException {
                     if (propInfo.isLongDateFormat) {
                         throw new UnsupportedOperationException("Date format cannot be 'long' for type java.time.LocalTime");
                     } else {
@@ -3398,8 +3458,15 @@ public final class ParserUtil {
                     }
                 }
 
+                /**
+                 * @throws DateTimeException if the configured formatter cannot represent the value's temporal fields, or appending its formatted
+                 *         text to {@code writer} fails
+                 * @throws ArithmeticException if the long date format is selected and the value exceeds the epoch-millisecond range
+                 * @throws IOException if writing epoch milliseconds to {@code writer} fails
+                 */
                 @Override
-                public void write(final PropInfo propInfo, final java.time.ZonedDateTime x, final CharacterWriter writer) throws IOException {
+                public void write(final PropInfo propInfo, final java.time.ZonedDateTime x, final CharacterWriter writer)
+                        throws DateTimeException, ArithmeticException, IOException {
                     if (propInfo.isLongDateFormat) {
                         writer.write(x.toInstant().toEpochMilli());
                     } else {
@@ -3503,20 +3570,28 @@ public final class ParserUtil {
          * @return the parsed value in the property's own type. A number-format read converts the parsed number
          *         to the property type ({@code Integer} for an {@code int}/{@code Integer} property, an exact
          *         {@code BigDecimal}/{@code BigInteger} for those property types, and so on), so the value can
-         *         be stored without a further conversion. Returns {@code null} when {@code strValue} is
-         *         {@code null}: the number-format branch, the date-format readers and most other types all
-         *         pass {@code null} through; every date-format reader also returns {@code null} for empty text
+         *         be stored without a further conversion. A {@code null} input returns {@code null} in the
+         *         number-format branch and most date-format readers; without formatting it follows
+         *         the property type's {@code valueOf} policy (primitive types return their default value).
+         *         Every nullable date-format reader also returns {@code null} for empty text
          *         and the literal {@code "null"} (case-insensitive), the same markers the no-format date types
-         *         accept. Two entries differ: a primitive {@code long} property with the {@code "long"} date
+         *         accept. A primitive {@code long} property with the {@code "long"} date
          *         format returns {@code 0L} for those markers, and a {@code String} property - whose reader is
          *         the identity - returns the text it was handed unchanged
-         * @throws UnsupportedOperationException if a date format is specified for an unsupported type
+         * @throws UnsupportedOperationException if a date format is specified for an unsupported type, or non-null, nonempty text
+         *         other than the null literal uses the long date format for a LocalDate or LocalTime property
+         * @throws IllegalArgumentException if non-null date text other than an empty string or the null literal cannot be parsed
+         *         as epoch milliseconds or by the configured legacy or Joda-Time date format
+         * @throws DateTimeException if non-null date text other than an empty string or the null literal cannot be parsed by
+         *         the configured java.time formatter or converted to the property's temporal type and time zone
+         * @throws ArithmeticException if a parsed SQL date or time cannot be represented as epoch milliseconds
          * @throws ParsingException if a number format is specified and {@code strValue} cannot be parsed
          *         against it in full
          * @throws RuntimeException if the parsed number cannot be converted to the property type (for example
          *         {@code NaN} into a {@code BigDecimal} property, which raises an {@code ArithmeticException})
          */
-        public Object readPropValue(final String strValue) throws UnsupportedOperationException, ParsingException, RuntimeException {
+        public Object readPropValue(final String strValue)
+                throws UnsupportedOperationException, IllegalArgumentException, DateTimeException, ArithmeticException, ParsingException, RuntimeException {
             if (hasFormat) {
                 if (dateFormat != null) {
                     final DateTimeReaderWriter<?> func = propFuncMap.get(clazz);
@@ -3592,12 +3667,20 @@ public final class ParserUtil {
          * @param writer the character writer to write to
          * @param x the value to write
          * @param config the serialization configuration
-         * @throws UnsupportedOperationException if date format is specified for unsupported types
-         * @throws IOException if writing the formatted, raw or type-serialized property value, its quotation marks or the null literal to
-         *         {@code writer} fails
+         * @throws UnsupportedOperationException if a date format is specified for an unsupported type, or the long date format is
+         *         selected for a LocalDate or LocalTime property
+         * @throws IllegalArgumentException if a legacy date pattern, time zone, year or UTC offset cannot be represented by the
+         *         selected format, or a number format is applied to a nonnumeric value
+         * @throws DateTimeException if a java.time formatter cannot represent the value's temporal fields, or appending its
+         *         formatted text to the destination fails
+         * @throws ArithmeticException if a LocalDateTime or ZonedDateTime value with the long date format exceeds the
+         *         epoch-millisecond range
+         * @throws UncheckedIOException if appending a formatted legacy date or calendar value to the destination fails
+         * @throws IOException if writing raw or type-serialized text, epoch milliseconds, String or Joda-Time formatted text,
+         *         quotation marks or the null literal to {@code writer} fails
          */
         public void writePropValue(final CharacterWriter writer, final Object x, final JsonXmlSerConfig<?> config)
-                throws UnsupportedOperationException, IOException {
+                throws UnsupportedOperationException, IllegalArgumentException, DateTimeException, ArithmeticException, UncheckedIOException, IOException {
             if (hasFormat) {
                 if (x == null) {
                     writer.write(NULL_CHAR_ARRAY);
@@ -3613,9 +3696,16 @@ public final class ParserUtil {
                                 + ClassUtil.getCanonicalClassName(clazz));
                     }
 
-                    if (config instanceof JsonSerConfig && isQuote) {
+                    if ((config instanceof JsonSerConfig && isQuote) || config instanceof XmlSerConfig) {
                         // Formatters write literal text; their quotes, backslashes and controls must
-                        // pass through the same escaping as other JSON strings.
+                        // pass through the same escaping as other JSON strings - and, for XML, their
+                        // markup characters must be escaped as entities. Writing the formatted text raw
+                        // produced XML this library's own parser rejects: a String property carrying a
+                        // dateFormat and the value "a<b>&c" was emitted as <value>a<b>&c</value>, while
+                        // the same property without the annotation is correctly written as
+                        // <value>a&lt;b&gt;&amp;c</value>.
+                        // JSON with stringQuotation == 0 deliberately stays on the raw branch below -
+                        // ParserDateFormatTest.quotationModesAndXmlKeepTheirConventions pins that.
                         final BufferedJsonWriter formatted = Objectory.createBufferedJsonWriter();
                         try {
                             func.write(this, x, formatted);
@@ -4572,7 +4662,7 @@ public final class ParserUtil {
                 return writer.toString();
             } catch (final IOException e) {
                 // Unreachable: a buffer-backed BufferedXmlWriter never fails.
-                throw new UncheckedIOException(e); //NOSONAR
+                throw new java.io.UncheckedIOException(e); //NOSONAR
             } finally {
                 Objectory.recycle(writer);
             }
@@ -4657,9 +4747,16 @@ public final class ParserUtil {
          * @param propInfo metadata for the target property.
          * @param x the date/time value to serialize.
          * @param writer the destination writer.
-         * @throws IOException if writing to the destination fails.
+         * @throws UnsupportedOperationException if the long date format is selected for a LocalDate or LocalTime property
+         * @throws IllegalArgumentException if a legacy date pattern, time zone, year or UTC offset cannot be represented by the
+         *         selected format, or its formatted branch receives a null writer
+         * @throws DateTimeException if a java.time formatter cannot represent the temporal fields, or appending its text fails
+         * @throws ArithmeticException if the long-format conversion of LocalDateTime or ZonedDateTime exceeds the epoch-millisecond range
+         * @throws UncheckedIOException if writing formatted legacy date or calendar text fails
+         * @throws IOException if writing unformatted text, epoch milliseconds or Joda-Time formatted text to the destination fails
          */
-        void write(PropInfo propInfo, T x, CharacterWriter writer) throws IOException;
+        void write(PropInfo propInfo, T x, CharacterWriter writer)
+                throws UnsupportedOperationException, IllegalArgumentException, DateTimeException, ArithmeticException, UncheckedIOException, IOException;
     }
 
     /**
@@ -4689,4 +4786,14 @@ public final class ParserUtil {
         }
     }
 
+    /**
+     * Internal marker for JSON embedded in XML. Value serializers reject present-null Nullable values under
+     * this configuration because XML cannot preserve their distinction from empty Nullable values.
+     * The marker is retained by {@link JsonSerConfig#copy()} and introduces no additional settings.
+     * Scalar wrappers must use the JSON writer overload; the String overload's root-scalar
+     * {@code stringOf} shortcut does not consult serialization settings.
+     */
+    @Internal
+    public static final class XmlEmbeddedJsonConfig extends JsonSerConfig {
+    }
 }

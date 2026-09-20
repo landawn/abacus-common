@@ -132,9 +132,9 @@ public final class BeanType<T> extends AbstractType<T> {
 
     /**
      * Indicates that bean types are not directly serializable as scalar values.
-     * Bean instances are always serialized via JSON conversion.
+     * The string conversion methods use JSON; format-specific parsers handle bean structure themselves.
      *
-     * @return {@code false} always, since beans require JSON serialization
+     * @return {@code false} always, since beans require structural serialization
      */
     @Override
     public boolean isSerializable() {

@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
+import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 
 public class SeqOfTest extends SeqTestSupport {
@@ -275,7 +276,7 @@ public class SeqOfTest extends SeqTestSupport {
             big.add(i);
         }
         assertEquals(200_000, Seq.<Integer, Exception> ofReversed(big).count());
-        assertEquals(Optional.of(199_999), Seq.<Integer, Exception> ofReversed(big).first());
+        assertEquals(Nullable.of(199_999), Seq.<Integer, Exception> ofReversed(big).first());
     }
 
     @Test
