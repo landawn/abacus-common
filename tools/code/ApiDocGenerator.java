@@ -67,6 +67,13 @@ import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 
+/**
+ * Generates the public API indexes from the current Java sources, without resolving dependencies
+ * or running annotation processors. Run with a JDK:
+ * {@code java tools/code/ApiDocGenerator.java [sourceRoot [markdownOut [jsonOut [pomPath]]]]}.
+ * Defaults are {@code src/main/java}, {@code docs/ai/API.md}, {@code docs/ai/api-index.json},
+ * and {@code pom.xml}. Lombok members used by this project are represented from their source annotations.
+ */
 public final class ApiDocGenerator {
 
     private ApiDocGenerator() {
@@ -157,6 +164,8 @@ public final class ApiDocGenerator {
         String type;
         String value;
         String javadocSummary;
+        String since;
+        DeprecatedInfo deprecated;
     }
 
     private static final class TypeInfo {
@@ -260,6 +269,9 @@ public final class ApiDocGenerator {
     private static int methodOrder;
 
     public static void main(final String[] args) throws Exception {
+        if (args.length > 4) {
+            throw new IllegalArgumentException("Usage: ApiDocGenerator [sourceRoot [markdownOut [jsonOut [pomPath]]]]");
+        }
         final Path sourceRoot = args.length > 0 ? Path.of(args[0]) : Path.of("src/main/java");
         final Path markdownOut = args.length > 1 ? Path.of(args[1]) : Path.of("./docs/ai/API.md");
         final Path jsonOut = args.length > 2 ? Path.of(args[2]) : Path.of("./docs/ai/api-index.json");
@@ -277,18 +289,26 @@ public final class ApiDocGenerator {
         }
 
         final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        final StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, Locale.ROOT, StandardCharsets.UTF_8);
-        final Iterable<? extends JavaFileObject> files = fileManager.getJavaFileObjectsFromPaths(javaFiles);
-        final JavacTask task = (JavacTask) compiler.getTask(new StringWriter(), fileManager, diagnostics, List.of("-proc:none", "-Xlint:none"), null, files);
-
         // Parse only — everything extracted here is syntactic. Running analyze() would inject
         // synthesized members (record canonical constructors/accessors, enum values/valueOf)
         // into the trees with positions pointing at the type declaration, corrupting signatures.
         final List<CompilationUnitTree> parsedUnits = new ArrayList<>();
-        for (final CompilationUnitTree unit : task.parse()) {
-            parsedUnits.add(unit);
+        final JavacTask task;
+        try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, Locale.ROOT, StandardCharsets.UTF_8)) {
+            final Iterable<? extends JavaFileObject> files = fileManager.getJavaFileObjectsFromPaths(javaFiles);
+            final String release = "unknown".equals(library.javaTarget) ? Integer.toString(Runtime.version().feature()) : library.javaTarget;
+            task = (JavacTask) compiler.getTask(new StringWriter(), fileManager, diagnostics,
+                    List.of("-proc:none", "-Xlint:none", "-encoding", "UTF-8", "--release", release), null, files);
+            for (final CompilationUnitTree unit : task.parse()) {
+                parsedUnits.add(unit);
+            }
+            final List<Diagnostic<? extends JavaFileObject>> errors = diagnostics.getDiagnostics().stream()
+                    .filter(d -> d.getKind() == Diagnostic.Kind.ERROR).toList();
+            if (!errors.isEmpty()) {
+                throw new IllegalStateException("Cannot generate API documentation: " + errors.size() + " source parse error(s).\n"
+                        + errors.stream().limit(10).map(Object::toString).collect(Collectors.joining("\n")));
+            }
         }
-        fileManager.close();
 
         final DocTrees docTrees = DocTrees.instance(task);
         final Trees trees = Trees.instance(task);
@@ -434,7 +454,9 @@ public final class ApiDocGenerator {
                 final DocInfo fieldDoc = readDoc(docTrees, new TreePath(typePath, varTree));
                 if (fieldDoc != null) {
                     field.javadocSummary = expandFieldValue(fieldDoc.summary, field.value);
+                    field.since = fieldDoc.since;
                 }
+                field.deprecated = readDeprecated(varTree.getModifiers(), fieldDoc);
                 type.fields.add(field);
             } else if (member instanceof MethodTree methodTree) {
                 if (isConstructor(methodTree, classTree)) {
@@ -505,6 +527,15 @@ public final class ApiDocGenerator {
                         nextOrder);
             }
         }
+
+        final List<VariableTree> instanceFields = classTree.getMembers()
+                .stream()
+                .filter(VariableTree.class::isInstance)
+                .map(VariableTree.class::cast)
+                .filter(field -> field.getType() != null && !field.getModifiers().getFlags().contains(Modifier.STATIC))
+                .toList();
+        addGeneratedValueMembers(classTree, type, instanceFields, type.declaresConstructor, typePath, docTrees);
+        nextOrder = addGeneratedBuilderMembers(classTree, type, instanceFields, unitData, packageMap, allTypes, nextOrder, typePath, docTrees);
 
         completeDefaultConstructor(type);
         completeRecordApi(type);
@@ -771,6 +802,214 @@ public final class ApiDocGenerator {
         type.constructors.add(ctor);
     }
 
+    /**
+     * Surfaces Lombok-generated public members that are not present in parse trees
+     * ({@code @Data}, {@code @Value}, {@code @AllArgsConstructor}, fluent {@code @Accessors}).
+     */
+    private static void addGeneratedValueMembers(final ClassTree classTree, final TypeInfo type, final List<VariableTree> instanceFields,
+            final boolean hasExplicitConstructor, final TreePath typePath, final DocTrees docTrees) {
+        final boolean data = hasAnnotation(classTree.getModifiers(), "Data");
+        final boolean value = hasAnnotation(classTree.getModifiers(), "Value");
+        final boolean record = "record".equals(type.kind);
+        if (!(data || value) || record) {
+            return;
+        }
+
+        final boolean fluent = annotationBooleanValue(classTree.getModifiers(), "Accessors", "fluent");
+        final boolean chain = annotationBooleanValue(classTree.getModifiers(), "Accessors", "chain")
+                || (fluent && !annotationHasArgument(classTree.getModifiers(), "Accessors", "chain"));
+
+        for (final VariableTree field : instanceFields) {
+            final String fieldName = field.getName().toString();
+            final String fieldType = normalize(field.getType().toString());
+            final String getterName;
+            if (fluent) {
+                getterName = fieldName;
+            } else if ("boolean".equals(fieldType)) {
+                getterName = "is" + capitalize(fieldName);
+            } else {
+                getterName = "get" + capitalize(fieldName);
+            }
+            final MethodInfo getter = addGeneratedMethod(type, getterName, "instance", fieldType,
+                    "public " + fieldType + " " + getterName + "()", List.of());
+            applyGeneratedPropertyDocumentation(getter, field, typePath, docTrees, true);
+
+            if (data && !field.getModifiers().getFlags().contains(Modifier.FINAL)) {
+                final String setterName = fluent ? fieldName : "set" + capitalize(fieldName);
+                final String setterReturnType = chain ? type.name : "void";
+                final ParamInfo param = generatedParam(fieldName, fieldType);
+                final MethodInfo setter = addGeneratedMethod(type, setterName, "instance", setterReturnType,
+                        "public " + setterReturnType + " " + setterName + "(" + fieldType + " " + fieldName + ")", List.of(param));
+                applyGeneratedPropertyDocumentation(setter, field, typePath, docTrees, false);
+            }
+        }
+
+        if (hasAnnotation(classTree.getModifiers(), "NoArgsConstructor")) {
+            addGeneratedConstructor(type, "public " + type.name + "()", List.of());
+        }
+        if (hasAnnotation(classTree.getModifiers(), "AllArgsConstructor")
+                || (value && !hasExplicitConstructor && !hasAnnotation(classTree.getModifiers(), "Builder"))) {
+            final List<ParamInfo> params = instanceFields.stream()
+                    .map(field -> generatedParam(field.getName().toString(), normalize(field.getType().toString())))
+                    .toList();
+            addGeneratedConstructor(type,
+                    "public " + type.name + "(" + params.stream().map(param -> param.type + " " + param.name).collect(Collectors.joining(", ")) + ")", params);
+        }
+
+        addGeneratedMethod(type, "equals", "instance", "boolean", "public boolean equals(Object other)", List.of(generatedParam("other", "Object")));
+        addGeneratedMethod(type, "hashCode", "instance", "int", "public int hashCode()", List.of());
+        addGeneratedMethod(type, "toString", "instance", "String", "public String toString()", List.of());
+    }
+
+    private static int addGeneratedBuilderMembers(final ClassTree classTree, final TypeInfo type, final List<VariableTree> instanceFields,
+            final UnitData unitData, final Map<String, PackageInfoData> packageMap, final Map<String, String> allTypes, final int startOrder,
+            final TreePath typePath, final DocTrees docTrees) {
+        int nextOrder = startOrder;
+        final MethodTree builderConstructor = findBuilderConstructor(classTree);
+        if (!hasAnnotation(classTree.getModifiers(), "Builder") && builderConstructor == null) {
+            return nextOrder;
+        }
+
+        final String builderName = type.name + "Builder";
+        addGeneratedMethod(type, "builder", "static", builderName, "public static " + builderName + " builder()", List.of());
+
+        TypeInfo builderType = packageMap.get(unitData.packageName).types.stream().filter(candidate -> candidate.fqn.equals(type.fqn + "." + builderName))
+                .findFirst()
+                .orElse(null);
+        if (builderType == null) {
+            builderType = new TypeInfo();
+            builderType.order = nextOrder++;
+            builderType.fqn = type.fqn + "." + builderName;
+            builderType.name = builderName;
+            builderType.kind = "class";
+            builderType.modifiers = List.of("public", "static");
+            builderType.javadocSummary = "Builder generated by Lombok for `" + type.name + "`.";
+            packageMap.get(unitData.packageName).types.add(builderType);
+            allTypes.putIfAbsent(builderType.fqn, builderType.fqn);
+        }
+
+        final List<ParamInfo> builderProperties = builderConstructor == null
+                ? instanceFields.stream().map(field -> generatedParam(field.getName().toString(), normalize(field.getType().toString()))).toList()
+                : builderConstructor.getParameters()
+                        .stream()
+                        .map(param -> generatedParam(param.getName().toString(), normalize(param.getType() == null ? "" : param.getType().toString())))
+                        .toList();
+        for (final ParamInfo property : builderProperties) {
+            final MethodInfo setter = addGeneratedMethod(builderType, property.name, "instance", builderName,
+                    "public " + builderName + " " + property.name + "(" + property.type + " " + property.name + ")", List.of(property));
+            if (builderConstructor == null) {
+                final VariableTree field = instanceFields.stream().filter(candidate -> candidate.getName().contentEquals(property.name)).findFirst().orElseThrow();
+                applyGeneratedPropertyDocumentation(setter, field, typePath, docTrees, false);
+            } else if (setter != null) {
+                final DocInfo constructorDoc = readDoc(docTrees, new TreePath(typePath, builderConstructor));
+                property.javadoc = constructorDoc == null ? null : constructorDoc.paramDocs.get(property.name);
+                setter.javadocSummary = property.javadoc;
+            }
+        }
+        addGeneratedMethod(builderType, "build", "instance", type.name, "public " + type.name + " build()", List.of());
+        addGeneratedMethod(builderType, "toString", "instance", "String", "public String toString()", List.of());
+        return nextOrder;
+    }
+
+    private static MethodTree findBuilderConstructor(final ClassTree classTree) {
+        for (final Tree member : classTree.getMembers()) {
+            if (member instanceof MethodTree methodTree && isConstructor(methodTree, classTree) && hasAnnotation(methodTree.getModifiers(), "Builder")) {
+                return methodTree;
+            }
+        }
+        return null;
+    }
+
+    private static void addGeneratedConstructor(final TypeInfo type, final String signature, final List<ParamInfo> params) {
+        if (type.constructors.stream().anyMatch(existing -> sameParameters(existing.params, params))) {
+            return;
+        }
+        final ConstructorInfo constructor = new ConstructorInfo();
+        constructor.signature = signature;
+        constructor.params = new ArrayList<>(params);
+        type.constructors.add(constructor);
+    }
+
+    private static MethodInfo addGeneratedMethod(final TypeInfo type, final String name, final String kind, final String returnType, final String signature,
+            final List<ParamInfo> params) {
+        if (type.methods.stream().anyMatch(existing -> existing.name.equals(name) && sameParameters(existing.params, params))) {
+            return null;
+        }
+        final MethodInfo method = new MethodInfo();
+        method.order = methodOrder++;
+        method.name = name;
+        method.kind = kind;
+        method.modifiers = "static".equals(kind) ? List.of("public", "static") : List.of("public");
+        method.signature = signature;
+        method.returnType = returnType;
+        method.params = new ArrayList<>(params);
+        type.methods.add(method);
+        return method;
+    }
+
+    private static void applyGeneratedPropertyDocumentation(final MethodInfo method, final VariableTree field, final TreePath typePath,
+            final DocTrees docTrees, final boolean getter) {
+        if (method == null) {
+            return; // Explicitly declared members retain their own documentation.
+        }
+        final DocInfo doc = readDoc(docTrees, new TreePath(typePath, field));
+        method.deprecated = readDeprecated(field.getModifiers(), doc);
+        if (doc != null) {
+            method.javadocSummary = doc.summary;
+            method.since = doc.since;
+            method.contract = new ArrayList<>(doc.contract);
+            method.performance = doc.performance;
+            method.apiNotes = new ArrayList<>(doc.apiNotes);
+            method.implementationNotes = new ArrayList<>(doc.implementationNotes);
+            method.seeAlso = new ArrayList<>(doc.seeAlso);
+            if (getter) {
+                method.returns = doc.returns == null ? doc.summary : doc.returns;
+            } else if (!method.params.isEmpty()) {
+                method.params.get(0).javadoc = doc.summary;
+            }
+        }
+    }
+
+    private static boolean annotationHasArgument(final ModifiersTree modifiers, final String annotationName, final String argumentName) {
+        return modifiers.getAnnotations().stream()
+                .filter(annotation -> annotationName.equals(simpleName(annotation.getAnnotationType().toString())))
+                .flatMap(annotation -> annotation.getArguments().stream())
+                .anyMatch(argument -> argument instanceof AssignmentTree assignment && assignment.getVariable().toString().equals(argumentName));
+    }
+
+    private static ParamInfo generatedParam(final String name, final String type) {
+        final ParamInfo param = new ParamInfo();
+        param.name = name;
+        param.type = type;
+        return param;
+    }
+
+    private static boolean sameParameters(final List<ParamInfo> left, final List<ParamInfo> right) {
+        if (left.size() != right.size()) {
+            return false;
+        }
+        for (int i = 0; i < left.size(); i++) {
+            if (!normalize(left.get(i).type).equals(normalize(right.get(i).type))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean hasAnnotation(final ModifiersTree modifiers, final String simpleAnnotationName) {
+        return modifiers.getAnnotations().stream().anyMatch(annotation -> simpleName(normalize(annotation.getAnnotationType().toString())).equals(simpleAnnotationName));
+    }
+
+    private static boolean annotationBooleanValue(final ModifiersTree modifiers, final String simpleAnnotationName, final String argumentName) {
+        return modifiers.getAnnotations()
+                .stream()
+                .filter(annotation -> simpleName(normalize(annotation.getAnnotationType().toString())).equals(simpleAnnotationName))
+                .flatMap(annotation -> annotation.getArguments().stream())
+                .filter(AssignmentTree.class::isInstance)
+                .map(AssignmentTree.class::cast)
+                .anyMatch(assignment -> assignment.getVariable().toString().equals(argumentName) && assignment.getExpression().toString().equals("true"));
+    }
+
     private static void addImplicitRecordMethod(final TypeInfo type, final String name, final String returnType, final String signature, final String paramName,
             final String paramType) {
         final int paramCount = paramName == null ? 0 : 1;
@@ -841,7 +1080,7 @@ public final class ApiDocGenerator {
     private static String readMethodSignature(final UnitData unitData, final SourcePositions sourcePositions, final MethodTree methodTree) {
         final long start = sourcePositions.getStartPosition(unitData.unit, methodTree);
         if (start < 0 || start >= unitData.source.length()) {
-            return normalize(methodTree.toString());
+            return readTreeMethodSignature(methodTree);
         }
         long end = sourcePositions.getEndPosition(unitData.unit, methodTree);
         final BlockTree body = methodTree.getBody();
@@ -855,6 +1094,35 @@ public final class ApiDocGenerator {
             end = unitData.source.length();
         }
         String value = unitData.source.substring((int) start, (int) end).trim();
+        if (value.endsWith("{")) {
+            value = value.substring(0, value.length() - 1).trim();
+        }
+        if (value.endsWith(";")) {
+            value = value.substring(0, value.length() - 1).trim();
+        }
+        // Synthesized members (records, enums, Lombok) can point at the enclosing type; slicing
+        // then emits the rest of the class as a bogus signature.
+        if (containsTypeDeclaration(value)) {
+            return readTreeMethodSignature(methodTree);
+        }
+        return normalize(value);
+    }
+
+    private static boolean containsTypeDeclaration(final String value) {
+        final String normalized = " " + normalize(value) + " ";
+        return normalized.contains(" class ") || normalized.contains(" interface ") || normalized.contains(" enum ") || normalized.contains(" record ");
+    }
+
+    private static String readTreeMethodSignature(final MethodTree methodTree) {
+        String value = methodTree.toString().trim();
+        final BlockTree body = methodTree.getBody();
+        if (body != null) {
+            final String bodyText = body.toString();
+            final int bodyIndex = value.lastIndexOf(bodyText);
+            if (bodyIndex >= 0) {
+                value = value.substring(0, bodyIndex).trim();
+            }
+        }
         if (value.endsWith("{")) {
             value = value.substring(0, value.length() - 1).trim();
         }
@@ -942,7 +1210,7 @@ public final class ApiDocGenerator {
                     if (!isBlank(value)) {
                         if ("apiNote".equals(unknown.getTagName())) {
                             doc.apiNotes.add(value);
-                        } else if ("implNote".equals(unknown.getTagName())) {
+                        } else if ("implNote".equals(unknown.getTagName()) || "implSpec".equals(unknown.getTagName())) {
                             doc.implementationNotes.add(value);
                         }
                     }
@@ -1313,7 +1581,10 @@ public final class ApiDocGenerator {
             final ParamInfo p = new ParamInfo();
             p.name = param.getName().toString();
             final String annotations = param.getModifiers().getAnnotations().stream().map(a -> normalize(a.toString())).collect(Collectors.joining(" "));
-            final String type = normalize(param.getType() == null ? "" : param.getType().toString());
+            String type = normalize(param.getType() == null ? "" : param.getType().toString());
+            if (type.endsWith("[]") && Pattern.compile("\\.\\.\\.\\s+" + Pattern.quote(p.name) + "$").matcher(normalize(param.toString())).find()) {
+                type = type.substring(0, type.length() - 2) + "...";
+            }
             p.type = annotations.isEmpty() ? type : annotations + " " + type;
             p.javadoc = doc == null ? null : doc.paramDocs.get(p.name);
             p.nullability = inferNullability(param.getModifiers().getAnnotations(), p.type);
@@ -1791,12 +2062,18 @@ public final class ApiDocGenerator {
     }
 
     private static String inferNullability(final List<? extends AnnotationTree> annotations, final String typeText) {
-        final String anns = annotations.stream().map(a -> a.getAnnotationType().toString().toLowerCase(Locale.ROOT)).collect(Collectors.joining(" "));
-        final String txt = (anns + " " + String.valueOf(typeText).toLowerCase(Locale.ROOT)).trim();
-        if (txt.contains("nullable") || txt.contains("checkfornull") || txt.contains("nullsafe")) {
+        final Set<String> names = new LinkedHashSet<>();
+        for (final AnnotationTree annotation : annotations) {
+            names.add(simpleName(normalize(annotation.getAnnotationType().toString())));
+        }
+        final String type = typeText == null ? "" : typeText;
+        // @NullSafe means null is accepted (params) or handled (methods), not that a method returns null.
+        // @MayReturnNull is the return-side nullable contract in this library.
+        if (names.contains("MayReturnNull") || names.contains("Nullable") || names.contains("CheckForNull") || names.contains("NullSafe")
+                || type.contains("@Nullable") || type.contains("@NullSafe") || type.contains("@MayReturnNull")) {
             return "nullable";
         }
-        if (txt.contains("nonnull") || txt.contains("notnull") || txt.contains("non_null")) {
+        if (names.contains("NotNull") || names.contains("NonNull") || names.contains("Nonnull") || type.contains("@NotNull") || type.contains("@NonNull")) {
             return "non-null";
         }
         return "unspecified";
@@ -1830,10 +2107,10 @@ public final class ApiDocGenerator {
             if (!isBlank(version)) {
                 out.version = version.trim();
             }
-            if (!isBlank(javaTarget)) {
-                out.javaTarget = javaTarget.trim();
-            } else if (!isBlank(javaRelease)) {
+            if (!isBlank(javaRelease)) {
                 out.javaTarget = javaRelease.trim();
+            } else if (!isBlank(javaTarget)) {
+                out.javaTarget = javaTarget.trim();
             }
         } catch (final Exception ignored) {
         }
@@ -1909,6 +2186,7 @@ public final class ApiDocGenerator {
                 if (!isBlank(t.since)) {
                     sb.append("**Since:** ").append(md(t.since)).append('\n');
                 }
+                appendDeprecatedMarkdown(sb, t.deprecated, "");
                 sb.append("**Thread-safety:** ").append(md(t.threadSafety)).append('\n');
                 sb.append("**Nullability:** ").append(md(t.nullability)).append('\n');
                 if (!t.annotations.isEmpty()) {
@@ -1949,6 +2227,10 @@ public final class ApiDocGenerator {
                             sb.append(" — ").append(md(c.javadocSummary));
                         }
                         sb.append('\n');
+                        if (!isBlank(c.since)) {
+                            sb.append("  - **Since:** ").append(md(c.since)).append('\n');
+                        }
+                        appendDeprecatedMarkdown(sb, c.deprecated, "  - ");
                         appendNotesMarkdown(sb, "API note", c.apiNotes, "  - **", ":**");
                         appendNotesMarkdown(sb, "Implementation note", c.implementationNotes, "  - **", ":**");
                         if (!c.throwsList.isEmpty()) {
@@ -1968,6 +2250,25 @@ public final class ApiDocGenerator {
                             }
                             sb.append("  ```\n");
                         }
+                    }
+                    sb.append('\n');
+                }
+
+                if (!t.fields.isEmpty()) {
+                    sb.append("#### Public Fields\n");
+                    for (final FieldInfo field : t.fields) {
+                        sb.append("- `").append(String.join(" ", field.modifiers)).append(' ').append(field.type).append(' ').append(field.name).append('`');
+                        if (!isBlank(field.javadocSummary)) {
+                            sb.append(" — ").append(md(field.javadocSummary));
+                        }
+                        sb.append('\n');
+                        if (!isBlank(field.value)) {
+                            sb.append("  - **Value:** `").append(field.value).append("`\n");
+                        }
+                        if (!isBlank(field.since)) {
+                            sb.append("  - **Since:** ").append(md(field.since)).append('\n');
+                        }
+                        appendDeprecatedMarkdown(sb, field.deprecated, "  - ");
                     }
                     sb.append('\n');
                 }
@@ -2006,6 +2307,10 @@ public final class ApiDocGenerator {
                 if (!isBlank(m.javadocSummary)) {
                     sb.append("- **Summary:** ").append(md(m.javadocSummary)).append('\n');
                 }
+                if (!isBlank(m.since)) {
+                    sb.append("- **Since:** ").append(md(m.since)).append('\n');
+                }
+                appendDeprecatedMarkdown(sb, m.deprecated, "- ");
                 if (m.inheritsDocumentation) {
                     sb.append("- **Documentation:** inherits documentation from the overridden member\n");
                 }
@@ -2070,6 +2375,23 @@ public final class ApiDocGenerator {
 
     private static String annotationList(final List<String> annotations) {
         return annotations.stream().map(a -> "@" + a).collect(Collectors.joining(", "));
+    }
+
+    private static void appendDeprecatedMarkdown(final StringBuilder sb, final DeprecatedInfo deprecated, final String prefix) {
+        if (deprecated == null) {
+            return;
+        }
+        sb.append(prefix).append("**Deprecated:** yes");
+        if (!isBlank(deprecated.since)) {
+            sb.append(" (since ").append(md(deprecated.since)).append(')');
+        }
+        if (deprecated.forRemoval) {
+            sb.append("; marked for removal");
+        }
+        if (!isBlank(deprecated.message)) {
+            sb.append(" — ").append(md(deprecated.message));
+        }
+        sb.append('\n');
     }
 
     private static void appendNotesMarkdown(final StringBuilder sb, final String label, final List<String> notes, final String prefix,
@@ -2244,6 +2566,12 @@ public final class ApiDocGenerator {
         }
         if (!isBlank(value.javadocSummary)) {
             out.put("javadoc_summary", value.javadocSummary);
+        }
+        if (!isBlank(value.since)) {
+            out.put("since", value.since);
+        }
+        if (value.deprecated != null) {
+            out.put("deprecated", deprecatedJson(value.deprecated));
         }
         return out;
     }
