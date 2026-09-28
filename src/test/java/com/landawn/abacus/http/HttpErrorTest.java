@@ -171,4 +171,166 @@ public class HttpErrorTest extends TestBase {
             closed = true;
         }
     }
+
+    // ---- bug review 2026-09-27 G003 begin ----
+    // G003-01: an error status sent without a body has no error stream; HttpResponse must still be returned
+    @Test
+    public void testGetHttpResponse_errorStatusWithoutBody() throws Exception {
+        for (final boolean gzip : new boolean[] { false, true }) {
+            final Fixture fixture = fixture(404, null, gzip);
+            final HttpResponse response = fixture.client.get(HttpResponse.class);
+            assertEquals(404, response.statusCode());
+            assertEquals(0, response.body().length);
+            assertEquals("missing", response.headers().get("X-Detail").get(0));
+            assertEquals(0, fixture.active.get());
+        }
+    }
+
+    // G003-01: same scenario against the real JDK HttpURLConnection (404 and 500+gzip with an empty body)
+    @Test
+    public void testGetHttpResponse_errorStatusWithoutBody_realServer() throws Exception {
+        final com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/notFound", exchange -> {
+            exchange.sendResponseHeaders(404, -1);
+            exchange.close();
+        });
+        server.createContext("/serverError", exchange -> {
+            exchange.getResponseHeaders().add("Content-Encoding", "gzip");
+            exchange.sendResponseHeaders(500, -1);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            final String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
+
+            final HttpResponse notFound = HttpClient.create(baseUrl + "/notFound").get(HttpResponse.class);
+            assertEquals(404, notFound.statusCode());
+            assertEquals("", notFound.body(String.class));
+
+            final HttpResponse serverError = HttpRequest.url(baseUrl + "/serverError").get();
+            assertEquals(500, serverError.statusCode());
+            assertEquals(0, serverError.body().length);
+
+            // Non-HttpResponse results keep failing with the status exception.
+            final HttpResponseException error = assertThrows(HttpResponseException.class, () -> HttpClient.create(baseUrl + "/notFound").get(String.class));
+            assertEquals(404, error.statusCode());
+        } finally {
+            server.stop(0);
+        }
+    }
+    // ---- bug review 2026-09-27 G003 end ----
+
+    // ---- bug review 2026-09-27 verify G115 begin ----
+    // Loopback server: /r?s=<status>&b=none|text&z=0|1 (b=none sends Content-Length 0; z=1 adds Content-Encoding: gzip).
+    private static com.sun.net.httpserver.HttpServer startStatusServer() throws IOException {
+        final com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/r", exchange -> {
+            try {
+                final Map<String, String> query = new java.util.HashMap<>();
+                for (final String pair : exchange.getRequestURI().getQuery().split("&")) {
+                    final String[] keyValue = pair.split("=");
+                    query.put(keyValue[0], keyValue[1]);
+                }
+                exchange.getRequestBody().readAllBytes();
+                exchange.getResponseHeaders().add("Content-Type", "text/plain; charset=UTF-8");
+                exchange.getResponseHeaders().add("X-Detail", "missing");
+                final boolean gzip = "1".equals(query.get("z"));
+                if (gzip) {
+                    exchange.getResponseHeaders().add("Content-Encoding", "gzip");
+                }
+                final int status = Integer.parseInt(query.get("s"));
+                if ("none".equals(query.get("b")) || "HEAD".equals(exchange.getRequestMethod())) {
+                    exchange.sendResponseHeaders(status, -1);
+                } else {
+                    final byte[] plain = "error-detail".getBytes(StandardCharsets.UTF_8);
+                    final byte[] bytes = gzip ? gzip(plain) : plain;
+                    exchange.sendResponseHeaders(status, bytes.length);
+                    exchange.getResponseBody().write(bytes);
+                }
+            } finally {
+                exchange.close();
+            }
+        });
+        server.start();
+        return server;
+    }
+
+    // Body-less 4xx/5xx is returned as an HttpResponse for every body-capable method, with and without a gzip Content-Encoding.
+    @Test
+    public void testHttpResponseForBodylessErrorStatus_allMethods() throws Exception {
+        final com.sun.net.httpserver.HttpServer server = startStatusServer();
+        try {
+            final String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort() + "/r";
+            for (final HttpMethod method : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE, HttpMethod.OPTIONS }) {
+                for (final int status : new int[] { 400, 401, 404, 410, 500, 503 }) {
+                    for (final String gzip : new String[] { "0", "1" }) {
+                        final Object request = method == HttpMethod.POST || method == HttpMethod.PUT ? "payload" : null;
+                        final HttpClient client = HttpClient.create(baseUrl + "?s=" + status + "&b=none&z=" + gzip);
+                        final HttpResponse response = client.execute(method, request, HttpResponse.class);
+                        final String label = method + " " + status + " z" + gzip;
+                        assertEquals(status, response.statusCode(), label);
+                        assertEquals(0, response.body().length, label);
+                        assertTrue(response.headers()
+                                .entrySet()
+                                .stream()
+                                .anyMatch(header -> "X-Detail".equalsIgnoreCase(header.getKey()) && header.getValue().contains("missing")), label);
+                    }
+                }
+            }
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    // Body-less 4xx through the async and HttpRequest entry points; String/byte[]/output-stream results still raise HttpResponseException.
+    @Test
+    public void testHttpResponseForBodylessErrorStatus_asyncAndRequestAndOtherResults() throws Exception {
+        final com.sun.net.httpserver.HttpServer server = startStatusServer();
+        try {
+            final String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/r?s=404&b=none&z=1";
+            assertEquals(404, HttpClient.create(url).asyncGet(HttpResponse.class).get().statusCode());
+            assertEquals(404, HttpRequest.url(url).delete().statusCode());
+            assertEquals(404, HttpRequest.url(url).body("payload").post().statusCode());
+            assertEquals(404, assertThrows(HttpResponseException.class, () -> HttpClient.create(url).get(byte[].class)).statusCode());
+            assertEquals(404, assertThrows(HttpResponseException.class, () -> HttpClient.create(url).post("payload", String.class)).statusCode());
+            final ByteArrayOutputStream output = new ByteArrayOutputStream();
+            assertEquals(404,
+                    assertThrows(HttpResponseException.class, () -> HttpClient.create(url).execute(HttpMethod.GET, null, null, output)).statusCode());
+            assertEquals(0, output.size());
+            // A one-way request never reads the body and keeps returning null.
+            assertEquals(null, HttpClient.create(url).get(HttpSettings.create().setOneWayRequest(true), HttpResponse.class));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    // Neighbours of the fix: error bodies (plain and gzip) are still delivered, HEAD and a body-less 3xx are unchanged.
+    @Test
+    public void testHttpResponseForErrorStatusWithBody_andNonErrorNeighbours() throws Exception {
+        final com.sun.net.httpserver.HttpServer server = startStatusServer();
+        try {
+            final String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort() + "/r";
+            for (final String gzip : new String[] { "0", "1" }) {
+                for (final HttpMethod method : new HttpMethod[] { HttpMethod.GET, HttpMethod.POST }) {
+                    final Object request = method == HttpMethod.POST ? "payload" : null;
+                    final HttpResponse response = HttpClient.create(baseUrl + "?s=500&b=text&z=" + gzip).execute(method, request, HttpResponse.class);
+                    assertEquals(500, response.statusCode());
+                    assertEquals("error-detail", response.body(String.class));
+                }
+                final HttpResponseException error = assertThrows(HttpResponseException.class,
+                        () -> HttpClient.create(baseUrl + "?s=404&b=text&z=" + gzip).get(String.class));
+                assertEquals("error-detail", error.responseBody());
+            }
+            final HttpResponse head = HttpClient.create(baseUrl + "?s=404&b=none&z=1").execute(HttpMethod.HEAD, null, HttpResponse.class);
+            assertEquals(404, head.statusCode());
+            assertEquals(0, head.body().length);
+            final HttpResponse redirect = HttpClient.create(baseUrl + "?s=302&b=none&z=0").get(HttpResponse.class);
+            assertEquals(302, redirect.statusCode());
+            assertEquals(0, redirect.body().length);
+        } finally {
+            server.stop(0);
+        }
+    }
+    // ---- bug review 2026-09-27 verify G115 end ----
 }

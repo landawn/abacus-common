@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class CommonUtilEqualsTest extends CommonUtilTestSupport {
 
@@ -377,4 +379,198 @@ public class CommonUtilEqualsTest extends CommonUtilTestSupport {
         assertArrayEquals(new int[] { 2, 3, 0 }, viaN);
     }
 
+
+    @Test
+    public void testEqualsByKeys_nullMapVersusEmptyAndNullValueVersusAbsentKey() {
+        Map<String, Integer> empty = new HashMap<>();
+        Map<String, Integer> nullValued = new HashMap<>();
+        nullValued.put("k", null);
+
+        assertFalse(CommonUtil.equalsByKeys(null, empty, Arrays.asList("k")));
+        assertFalse(CommonUtil.equalsByKeys(empty, null, Arrays.asList("k")));
+        assertTrue(CommonUtil.equalsInOrder((Map<String, Integer>) null, empty));
+
+        assertFalse(CommonUtil.equalsByKeys(nullValued, empty, Arrays.asList("k")));
+        assertFalse(CommonUtil.equalsByKeys(empty, nullValued, Arrays.asList("k")));
+        assertTrue(CommonUtil.equalsByKeys(empty, new HashMap<String, Integer>(), Arrays.asList("k")));
+    }
+
+
+    @Test
+    public void testEqualsEverythingTreatsPathAsLeafValue() {
+        // A Path is an Iterable whose name elements are Paths iterating to themselves; walking it
+        // element-wise used to recurse until StackOverflowError.
+        final Path p1 = Paths.get("a", "b");
+        final Path p2 = Paths.get("a", "b");
+        assertTrue(CommonUtil.equalsEverything(p1, p2));
+        assertFalse(CommonUtil.equalsEverything(p1, Paths.get("a", "c")));
+        assertTrue(CommonUtil.equalsEverything(Arrays.asList(p1, "x"), Arrays.asList(p2, "x")));
+        assertFalse(CommonUtil.equalsEverything(p1, Arrays.asList(Paths.get("a"), Paths.get("b"))));
+    }
+
+    @Test
+    public void testHashCodeEverythingTreatsPathAsLeafValue() {
+        final Path p1 = Paths.get("a", "b");
+        final Path p2 = Paths.get("a", "b");
+        assertEquals(CommonUtil.hashCodeEverything(p1), CommonUtil.hashCodeEverything(p2));
+        assertEquals(CommonUtil.hashCodeEverything(Arrays.asList(p1, "x")), CommonUtil.hashCodeEverything(Arrays.asList(p2, "x")));
+    }
+
+    // ---- perf review 2026-09-26 G026 begin ----
+    // G026-01: the primitive range overloads delegate to Arrays.equals(range); pin them against the element-wise
+    // Float.compare / Double.compare / == loop on random offsets/lengths, incl. -0.0, NaN payloads and vector tails.
+    @Test
+    public void testEqualsRange_primitiveArraysMatchElementWiseReference() {
+        final java.util.Random random = new java.util.Random(20260926L);
+        final float[] floatPool = { 0.0f, -0.0f, 1.0f, Float.NaN, Float.intBitsToFloat(0x7fc00001), Float.POSITIVE_INFINITY };
+        final double[] doublePool = { 0.0, -0.0, 1.0, Double.NaN, Double.longBitsToDouble(0x7ff8000000000001L), Double.NEGATIVE_INFINITY };
+
+        for (int round = 0; round < 400; round++) {
+            final int lenA = random.nextInt(80);
+            final int lenB = random.nextInt(80);
+            final int fromIndexA = random.nextInt(lenA + 1);
+            final int fromIndexB = random.nextInt(lenB + 1);
+            final int length = random.nextInt(Math.min(lenA - fromIndexA, lenB - fromIndexB) + 1);
+            final int base = round % 3 == 0 ? 2 : 1; // tiny alphabets so that long equal runs are common
+
+            final boolean[] za = new boolean[lenA], zb = new boolean[lenB];
+            final char[] ca = new char[lenA], cb = new char[lenB];
+            final byte[] ba = new byte[lenA], bb = new byte[lenB];
+            final short[] sa = new short[lenA], sb = new short[lenB];
+            final int[] ia = new int[lenA], ib = new int[lenB];
+            final long[] la = new long[lenA], lb = new long[lenB];
+            final float[] fa = new float[lenA], fb = new float[lenB];
+            final double[] da = new double[lenA], db = new double[lenB];
+
+            for (int i = 0; i < lenA; i++) {
+                final int v = random.nextInt(base);
+                za[i] = v == 0;
+                ca[i] = (char) v;
+                ba[i] = (byte) v;
+                sa[i] = (short) v;
+                ia[i] = v;
+                la[i] = v;
+                fa[i] = floatPool[random.nextInt(floatPool.length)];
+                da[i] = doublePool[random.nextInt(doublePool.length)];
+            }
+
+            for (int i = 0; i < lenB; i++) {
+                final int v = random.nextInt(base);
+                zb[i] = v == 0;
+                cb[i] = (char) v;
+                bb[i] = (byte) v;
+                sb[i] = (short) v;
+                ib[i] = v;
+                lb[i] = v;
+                fb[i] = floatPool[random.nextInt(floatPool.length)];
+                db[i] = doublePool[random.nextInt(doublePool.length)];
+            }
+
+            if (round % 2 == 0) {
+                // copy the compared range of a into b, then (every other time) plant one mismatch
+                for (int k = 0; k < length; k++) {
+                    zb[fromIndexB + k] = za[fromIndexA + k];
+                    cb[fromIndexB + k] = ca[fromIndexA + k];
+                    bb[fromIndexB + k] = ba[fromIndexA + k];
+                    sb[fromIndexB + k] = sa[fromIndexA + k];
+                    ib[fromIndexB + k] = ia[fromIndexA + k];
+                    lb[fromIndexB + k] = la[fromIndexA + k];
+                    fb[fromIndexB + k] = fa[fromIndexA + k];
+                    db[fromIndexB + k] = da[fromIndexA + k];
+                }
+
+                if (length > 0 && round % 4 == 0) {
+                    final int k = fromIndexB + random.nextInt(length);
+                    zb[k] = !zb[k];
+                    cb[k]++;
+                    bb[k]++;
+                    sb[k]++;
+                    ib[k]++;
+                    lb[k]++;
+                    fb[k] = Float.floatToRawIntBits(fb[k]) == 0 ? -0.0f : 0.0f;
+                    db[k] = Double.doubleToRawLongBits(db[k]) == 0L ? -0.0 : 0.0;
+                }
+            }
+
+            boolean expectedZ = true, expectedC = true, expectedB = true, expectedS = true;
+            boolean expectedI = true, expectedL = true, expectedF = true, expectedD = true;
+
+            for (int k = 0; k < length; k++) {
+                expectedZ &= za[fromIndexA + k] == zb[fromIndexB + k];
+                expectedC &= ca[fromIndexA + k] == cb[fromIndexB + k];
+                expectedB &= ba[fromIndexA + k] == bb[fromIndexB + k];
+                expectedS &= sa[fromIndexA + k] == sb[fromIndexB + k];
+                expectedI &= ia[fromIndexA + k] == ib[fromIndexB + k];
+                expectedL &= la[fromIndexA + k] == lb[fromIndexB + k];
+                expectedF &= Float.compare(fa[fromIndexA + k], fb[fromIndexB + k]) == 0;
+                expectedD &= Double.compare(da[fromIndexA + k], db[fromIndexB + k]) == 0;
+            }
+
+            final String ctx = "round=" + round + ", fromIndexA=" + fromIndexA + ", fromIndexB=" + fromIndexB + ", length=" + length;
+            assertEquals(expectedZ, CommonUtil.equals(za, fromIndexA, zb, fromIndexB, length), ctx);
+            assertEquals(expectedC, CommonUtil.equals(ca, fromIndexA, cb, fromIndexB, length), ctx);
+            assertEquals(expectedB, CommonUtil.equals(ba, fromIndexA, bb, fromIndexB, length), ctx);
+            assertEquals(expectedS, CommonUtil.equals(sa, fromIndexA, sb, fromIndexB, length), ctx);
+            assertEquals(expectedI, CommonUtil.equals(ia, fromIndexA, ib, fromIndexB, length), ctx);
+            assertEquals(expectedL, CommonUtil.equals(la, fromIndexA, lb, fromIndexB, length), ctx);
+            assertEquals(expectedF, CommonUtil.equals(fa, fromIndexA, fb, fromIndexB, length), ctx);
+            assertEquals(expectedD, CommonUtil.equals(da, fromIndexA, db, fromIndexB, length), ctx);
+        }
+    }
+
+    // G026-01: one mismatch at any position of a long run is found; 0.0 vs -0.0 differ, NaN payloads compare equal.
+    @Test
+    public void testEqualsRange_singleMismatchAtEveryPosition() {
+        final int n = 100;
+
+        for (int pos = 0; pos < n; pos++) {
+            final boolean[] za = new boolean[n + 3], zb = new boolean[n + 1];
+            final short[] sa = new short[n + 3], sb = new short[n + 1];
+            final int[] ia = new int[n + 3], ib = new int[n + 1];
+            final long[] la = new long[n + 3], lb = new long[n + 1];
+            final byte[] ba = new byte[n + 3], bb = new byte[n + 1];
+            final char[] ca = new char[n + 3], cb = new char[n + 1];
+            final float[] fa = new float[n + 3], fb = new float[n + 1];
+            final double[] da = new double[n + 3], db = new double[n + 1];
+            zb[1 + pos] = true;
+            sb[1 + pos] = -1;
+            ib[1 + pos] = 7;
+            lb[1 + pos] = 7L;
+            bb[1 + pos] = 7;
+            cb[1 + pos] = 'x';
+            fb[1 + pos] = -0.0f;
+            db[1 + pos] = -0.0;
+
+            assertFalse(CommonUtil.equals(za, 3, zb, 1, n));
+            assertFalse(CommonUtil.equals(sa, 3, sb, 1, n));
+            assertFalse(CommonUtil.equals(ia, 3, ib, 1, n));
+            assertFalse(CommonUtil.equals(la, 3, lb, 1, n));
+            assertFalse(CommonUtil.equals(ba, 3, bb, 1, n));
+            assertFalse(CommonUtil.equals(ca, 3, cb, 1, n));
+            assertFalse(CommonUtil.equals(fa, 3, fb, 1, n));
+            assertFalse(CommonUtil.equals(da, 3, db, 1, n));
+            assertTrue(CommonUtil.equals(za, 3, zb, 1, pos));
+            assertTrue(CommonUtil.equals(ia, 3, ib, 1, pos));
+            assertTrue(CommonUtil.equals(fa, 3, fb, 1, pos));
+            assertTrue(CommonUtil.equals(da, 3, db, 1, pos));
+        }
+
+        final float[] nanA = { 1.0f, Float.NaN, Float.intBitsToFloat(0x7fc00001) };
+        final float[] nanB = { 1.0f, Float.intBitsToFloat(0x7fc00002), Float.NaN };
+        assertTrue(CommonUtil.equals(nanA, 0, nanB, 0, 3));
+        final double[] doubleNanA = { Double.NaN, Double.longBitsToDouble(0x7ff8000000000001L) };
+        final double[] doubleNanB = { Double.longBitsToDouble(0x7ff8000000000002L), Double.NaN };
+        assertTrue(CommonUtil.equals(doubleNanA, 0, doubleNanB, 0, 2));
+
+        // overlapping ranges of the same array
+        final int[] same = { 1, 1, 1, 1, 2 };
+        assertTrue(CommonUtil.equals(same, 0, same, 1, 3));
+        assertFalse(CommonUtil.equals(same, 0, same, 1, 4));
+        // validation is unchanged: null arrays only with length 0, bad ranges still throw
+        assertTrue(CommonUtil.equals((double[]) null, 0, (double[]) null, 0, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equals((float[]) null, 0, new float[1], 0, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.equals(new short[3], 2, new short[3], 0, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.equals(new char[3], 0, new char[3], 0, -1));
+    }
+    // ---- perf review 2026-09-26 G026 end ----
 }

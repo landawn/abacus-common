@@ -209,26 +209,26 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * restTemplate.getMessageConverters().add(0, converter);
      * }</pre>
      *
-     * @param jsc the serialization configuration controlling how Java objects are converted to JSON.
+     * @param jsonSerConfig the serialization configuration controlling how Java objects are converted to JSON.
      *            Must not be {@code null}. Use {@link JsonSerConfig} to customize serialization behavior.
-     * @param jdc the deserialization configuration controlling how JSON is converted to Java objects.
+     * @param jsonDeserConfig the deserialization configuration controlling how JSON is converted to Java objects.
      *            Must not be {@code null}. Use {@link JsonDeserConfig} to customize deserialization behavior.
      *            Both configuration objects are retained by reference and should not be mutated while
      *            the converter is serving concurrent requests.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}, or if {@code jsc} cannot
+     * @throws IllegalArgumentException if {@code jsonSerConfig} or {@code jsonDeserConfig} is {@code null}, or if {@code jsonSerConfig} cannot
      *         produce valid JSON (a string or char quotation other than {@code '"'}, or
      *         {@code quotePropName}/{@code quoteMapKey}/{@code bracketRootValue} turned off).
      * @see JsonSerConfig
      * @see JsonDeserConfig
      * @see com.landawn.abacus.parser.Exclusion
      */
-    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc) throws IllegalArgumentException {
-        N.checkArgNotNull(jsc, cs.jsc);
-        N.checkArgNotNull(jdc, cs.jdc);
-        checkJsonCapable(jsc);
+    public JsonHttpMessageConverter(final JsonSerConfig jsonSerConfig, final JsonDeserConfig jsonDeserConfig) throws IllegalArgumentException {
+        N.checkArgNotNull(jsonSerConfig, cs.jsonSerConfig);
+        N.checkArgNotNull(jsonDeserConfig, cs.jsonDeserConfig);
+        checkJsonCapable(jsonSerConfig);
 
-        this.jsc = jsc;
-        this.jdc = jdc;
+        this.jsc = jsonSerConfig;
+        this.jdc = jsonDeserConfig;
     }
 
     /**
@@ -278,25 +278,25 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      *     new MediaType("application", "vnd.api+json"));
      * }</pre>
      *
-     * @param jsc the serialization configuration controlling how Java objects are converted to JSON. Must not be {@code null}.
-     * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
+     * @param jsonSerConfig the serialization configuration controlling how Java objects are converted to JSON. Must not be {@code null}.
+     * @param jsonDeserConfig the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
      * @param supportedMediaTypes the media types this converter should support. If {@code null} or empty,
      *                            the inherited default media types are kept unchanged.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}, or if {@code jsc} cannot
+     * @throws IllegalArgumentException if {@code jsonSerConfig} or {@code jsonDeserConfig} is {@code null}, or if {@code jsonSerConfig} cannot
      *         produce valid JSON (a string or char quotation other than {@code '"'}, or
      *         {@code quotePropName}/{@code quoteMapKey}/{@code bracketRootValue} turned off).
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
     @SafeVarargs
-    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final MediaType... supportedMediaTypes)
+    public JsonHttpMessageConverter(final JsonSerConfig jsonSerConfig, final JsonDeserConfig jsonDeserConfig, final MediaType... supportedMediaTypes)
             throws IllegalArgumentException {
-        N.checkArgNotNull(jsc, cs.jsc);
-        N.checkArgNotNull(jdc, cs.jdc);
-        checkJsonCapable(jsc);
+        N.checkArgNotNull(jsonSerConfig, cs.jsonSerConfig);
+        N.checkArgNotNull(jsonDeserConfig, cs.jsonDeserConfig);
+        checkJsonCapable(jsonSerConfig);
 
-        this.jsc = jsc;
-        this.jdc = jdc;
+        this.jsc = jsonSerConfig;
+        this.jdc = jsonDeserConfig;
 
         if (supportedMediaTypes != null && supportedMediaTypes.length > 0) {
             setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
@@ -312,24 +312,24 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * <p>A non-empty {@code supportedMediaTypes} list replaces the parent's default media types.
      * If the list is {@code null} or empty, those defaults are retained.</p>
      *
-     * @param jsc the serialization configuration controlling how Java objects are converted to JSON. Must not be {@code null}.
-     * @param jdc the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
+     * @param jsonSerConfig the serialization configuration controlling how Java objects are converted to JSON. Must not be {@code null}.
+     * @param jsonDeserConfig the deserialization configuration controlling how JSON is converted to Java objects. Must not be {@code null}.
      * @param supportedMediaTypes the media types this converter should support. If {@code null} or empty,
      *                            the inherited default media types are kept unchanged.
-     * @throws IllegalArgumentException if {@code jsc} or {@code jdc} is {@code null}, or if {@code jsc} cannot
+     * @throws IllegalArgumentException if {@code jsonSerConfig} or {@code jsonDeserConfig} is {@code null}, or if {@code jsonSerConfig} cannot
      *         produce valid JSON (a string or char quotation other than {@code '"'}, or
      *         {@code quotePropName}/{@code quoteMapKey}/{@code bracketRootValue} turned off).
      * @see JsonSerConfig
      * @see JsonDeserConfig
      */
-    public JsonHttpMessageConverter(final JsonSerConfig jsc, final JsonDeserConfig jdc, final List<MediaType> supportedMediaTypes)
+    public JsonHttpMessageConverter(final JsonSerConfig jsonSerConfig, final JsonDeserConfig jsonDeserConfig, final List<MediaType> supportedMediaTypes)
             throws IllegalArgumentException {
-        N.checkArgNotNull(jsc, cs.jsc);
-        N.checkArgNotNull(jdc, cs.jdc);
-        checkJsonCapable(jsc);
+        N.checkArgNotNull(jsonSerConfig, cs.jsonSerConfig);
+        N.checkArgNotNull(jsonDeserConfig, cs.jsonDeserConfig);
+        checkJsonCapable(jsonSerConfig);
 
-        this.jsc = jsc;
-        this.jdc = jdc;
+        this.jsc = jsonSerConfig;
+        this.jdc = jsonDeserConfig;
 
         if (N.notEmpty(supportedMediaTypes)) {
             setSupportedMediaTypes(supportedMediaTypes);
@@ -375,8 +375,11 @@ public class JsonHttpMessageConverter extends AbstractJsonHttpMessageConverter {
      * }</pre>
      *
      * <p><b>Shape leniency:</b> a JSON object body read into a {@code List<T>} target is handed to the
-     * abacus parser unchanged, which yields a one-element list whose element is a {@code Map} - the
-     * declared element type is not enforced. Callers that need strictness must validate the result.
+     * abacus parser unchanged, which yields a one-element list holding that object converted to the
+     * declared element type: a {@code Map} for an {@code Object} or {@code Map} element type, a bean for a
+     * bean element type, the object's JSON text for {@code String}, and a conversion failure (for example
+     * {@link NumberFormatException}) for an incompatible element type such as {@code Integer}. Callers
+     * that need to reject a non-array body must check the shape themselves.
      * Spring's {@code read(...)} wraps every exception thrown here in
      * {@code org.springframework.http.converter.HttpMessageNotReadableException}, keeping the original as
      * its cause.</p>

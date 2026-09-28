@@ -270,11 +270,13 @@ public final class DigestUtil {
      * @param algorithm the name of the algorithm (e.g., {@code "MD5"}, {@code "SHA-256"}, {@code "SHA-512"});
      *                  see the Java Cryptography Architecture documentation for standard names
      * @return A new MessageDigest instance for the specified algorithm
-     * @throws IllegalArgumentException if the algorithm is not available in the current JVM.
+     * @throws IllegalArgumentException if {@code algorithm} is {@code null}, or if the algorithm is not available in the current JVM.
      * @see MessageDigest#getInstance(String)
      * @see MessageDigestAlgorithms
      */
     public static MessageDigest getDigest(final String algorithm) throws IllegalArgumentException {
+        N.checkArgNotNull(algorithm, cs.algorithm);
+
         try {
             return getMessageDigest(algorithm);
         } catch (final NoSuchAlgorithmException e) {
@@ -635,8 +637,8 @@ public final class DigestUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MessageDigest sha = DigestUtil.getShaDigest();     // deprecated
-     * MessageDigest sha1 = DigestUtil.getSha1Digest();   // preferred
+     * MessageDigest sha = DigestUtil.getShaDigest();    // deprecated
+     * MessageDigest sha1 = DigestUtil.getSha1Digest();  // preferred
      * }</pre>
      *
      * @return An SHA-1 MessageDigest instance (produces 20-byte/160-bit hashes)

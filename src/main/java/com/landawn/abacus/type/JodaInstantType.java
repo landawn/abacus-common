@@ -95,6 +95,37 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
     }
 
     /**
+     * Converts an arbitrary object to a Joda {@link Instant} instance.
+     * Supported conversions:
+     * <ul>
+     *   <li>{@link Number}: treated as milliseconds since the epoch</li>
+     *   <li>{@link java.util.Date} (including its SQL subclasses): converted from its epoch-millisecond value, so
+     *       the milliseconds are kept</li>
+     *   <li>{@code null}: returns {@code null}</li>
+     *   <li>Any other type (including Joda date-time values and {@link java.util.Calendar}): converted to its
+     *       string form by its own type handler, then parsed via {@link #valueOf(String)}</li>
+     * </ul>
+     *
+     * @param obj the object to convert; may be {@code null}
+     * @return a Joda {@link Instant} representing the input value, or {@code null} if {@code obj} is {@code null}
+     * @throws IllegalArgumentException if the non-null value is not a supported date/time representation, or a
+     *         non-lenient calendar contains invalid fields.
+     */
+    @MayReturnNull
+    @Override
+    public Instant valueOf(final Object obj) throws IllegalArgumentException {
+        if (obj instanceof Number) {
+            return Instant.ofEpochMilli(((Number) obj).longValue());
+        } else if (obj instanceof java.util.Date) {
+            // Not through the text form: a plain java.util.Date is formatted at second precision, which would drop
+            // the milliseconds (and a short Number such as 1234 would be rejected as ambiguous date text).
+            return Instant.ofEpochMilli(((java.util.Date) obj).getTime());
+        }
+
+        return obj == null ? null : super.valueOf(obj);
+    }
+
+    /**
      * Converts a string representation to a Joda {@link Instant} instance.
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
@@ -170,31 +201,31 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      *
      * @param cbuf   the character array containing the value; may be {@code null}
      * @param offset the index of the first character to use
-     * @param len    the number of characters to use
-     * @return the parsed Joda instant, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param length    the number of characters to use
+     * @return the parsed Joda instant, or {@code null} if {@code cbuf} is {@code null} or {@code length} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see
      *         {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public Instant valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
-        if ((cbuf == null) || (len == 0)) {
+    public Instant valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return Instant.ofEpochMilli(parseLong(cbuf, offset, len));
+                return Instant.ofEpochMilli(parseLong(cbuf, offset, length));
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -238,15 +269,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * The {@link Instant} is converted to a {@link java.sql.Timestamp}.
      * A {@code null} value sets SQL {@code NULL}.
      *
-     * @param stmt        the {@link PreparedStatement} in which to set the parameter
+     * @param statement        the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the Joda {@link Instant} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Instant x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(columnIndex, x == null ? null : new Timestamp(x.getMillis()));
+    public void set(final PreparedStatement statement, final int columnIndex, final Instant x) throws NullPointerException, SQLException {
+        statement.setTimestamp(columnIndex, x == null ? null : new Timestamp(x.getMillis()));
     }
 
     /**
@@ -254,15 +285,15 @@ public class JodaInstantType extends AbstractJodaDateTimeType<Instant> {
      * The {@link Instant} is converted to a {@link java.sql.Timestamp}.
      * A {@code null} value sets SQL {@code NULL}.
      *
-     * @param stmt          the {@link CallableStatement} in which to set the parameter
+     * @param statement          the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the Joda {@link Instant} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Instant x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(parameterName, x == null ? null : new Timestamp(x.getMillis()));
+    public void set(final CallableStatement statement, final String parameterName, final Instant x) throws NullPointerException, SQLException {
+        statement.setTimestamp(parameterName, x == null ? null : new Timestamp(x.getMillis()));
     }
 
     /**

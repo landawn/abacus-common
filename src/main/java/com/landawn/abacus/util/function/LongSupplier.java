@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -46,18 +48,20 @@ public interface LongSupplier extends Throwables.LongSupplier<RuntimeException>,
     /**
      * A supplier that returns random long values.
      *
-     * <p>This supplier uses an internal random number generator to draw values uniformly across the
-     * entire range of {@code long}. Successive values are not guaranteed to be distinct.
+     * <p>This supplier draws values uniformly across the entire range of {@code long}. Successive values are
+     * not guaranteed to be distinct. Values come from the calling thread's {@link ThreadLocalRandom#current()}
+     * and are <b>not</b> cryptographically secure; use {@link java.security.SecureRandom} directly when
+     * unpredictable values are required.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongSupplier randomSupplier = LongSupplier.RANDOM;
-     * long value1 = randomSupplier.getAsLong();   // returns a random long
-     * long value2 = randomSupplier.getAsLong();   // returns another random long
+     * long value1 = randomSupplier.getAsLong();  // returns a random long
+     * long value2 = randomSupplier.getAsLong();  // returns another random long
      * }</pre>
      *
      */
-    LongSupplier RANDOM = Util.RAND_LONG::nextLong;
+    LongSupplier RANDOM = () -> ThreadLocalRandom.current().nextLong();
 
     /**
      * Gets a result as a long value.

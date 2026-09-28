@@ -26,6 +26,10 @@ package com.landawn.abacus.pool;
  * (connection, stream, handle) whose purpose is borrow/return, not persistence. Every
  * {@link Pool} remains serializable; serializing a pool that still contains
  * {@code AbstractPoolable} instances fails with {@link java.io.NotSerializableException}.
+ * Declaring {@code implements Serializable} on a subclass does not help: the object is then
+ * written without the inherited {@link ActivityPrint}, and reading it back fails with
+ * {@link java.io.InvalidClassException} ("no valid constructor") because this class has no
+ * no-argument constructor.
  * If a pool needs a persistable snapshot, expose an explicit DTO and reconstruct live
  * resources from it.
  *

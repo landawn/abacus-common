@@ -37,8 +37,8 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ImmutableArray<String> array = ImmutableArray.of("apple", "banana", "cherry");
- * String first = array.get(0);                  // returns "apple"
- * boolean hasApple = array.contains("apple");   // returns true
+ * String first = array.get(0);                 // returns "apple"
+ * boolean hasApple = array.contains("apple");  // returns true
  *
  * // Iterate over elements
  * for (String fruit : array) {
@@ -77,8 +77,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> empty = ImmutableArray.empty();
-     * int len = empty.length();          // returns 0
-     * boolean none = empty.isEmpty();    // returns true
+     * int len = empty.length();        // returns 0
+     * boolean none = empty.isEmpty();  // returns true
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -405,8 +405,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c", "b");
-     * int index = array.indexOf("b");      // returns 1
-     * int notFound = array.indexOf("d");   // returns -1
+     * int index = array.indexOf("b");     // returns 1
+     * int notFound = array.indexOf("d");  // returns -1
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -441,8 +441,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableArray<String> array = ImmutableArray.of("a", "b", "c");
-     * boolean hasB = array.contains("b");   // returns true
-     * boolean hasD = array.contains("d");   // returns false
+     * boolean hasB = array.contains("b");  // returns true
+     * boolean hasD = array.contains("d");  // returns false
      * }</pre>
      *
      * @param valueToFind the element whose presence is to be tested
@@ -619,8 +619,8 @@ public final class ImmutableArray<T> implements Iterable<T>, Immutable {
      * ImmutableArray<String> array2 = ImmutableArray.of("a", "b", "c");
      * ImmutableArray<String> array3 = ImmutableArray.of("a", "b", "d");
      *
-     * boolean equal1 = array1.equals(array2);   // returns true
-     * boolean equal2 = array1.equals(array3);   // returns false
+     * boolean equal1 = array1.equals(array2);  // returns true
+     * boolean equal2 = array1.equals(array3);  // returns false
      * }</pre>
      *
      * @param obj the object to be compared for equality with this array

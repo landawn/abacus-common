@@ -43,10 +43,10 @@ public interface ByteNConsumer {
      * logger.accept((byte) 1, (byte) 2, (byte) 3);   // Prints: 1 2 3
      * }</pre>
      *
-     * @param args the input arguments as a variable-length array of {@code byte} values.
+     * @param arguments the input arguments as a variable-length array of {@code byte} values.
      *             May be empty but must not be {@code null}.
      */
-    void accept(byte... args);
+    void accept(byte... arguments);
 
     /**
      * Returns a composed {@code ByteNConsumer} that performs, in sequence, this operation

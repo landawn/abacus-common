@@ -1708,9 +1708,9 @@ public class IntListTest extends IntListTestSupport {
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         final IntList empty = new IntList();
         assertThrows(IllegalArgumentException.class, () -> empty.toCollection(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> empty.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, ignored -> null));
         assertThrows(IllegalArgumentException.class, () -> empty.toMultiset(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> empty.toMultiset(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, ignored -> null));
     }
 
     @Test
@@ -1803,4 +1803,89 @@ public class IntListTest extends IntListTestSupport {
         assertTrue(f.retainAll(IntList.of(1)));
         assertEquals(1, f.size());
     }
+    // ---- perf review 2026-09-26 G115 begin ----
+    // G115-01: every PrimitiveList random(..) factory (now ThreadLocalRandom-backed) called from several threads at once.
+    @Test
+    public void testRandom_primitiveListFactoriesConcurrentCallers() throws Exception {
+        final int threadCount = 4;
+        final int length = 400;
+        final List<Throwable> errors = java.util.Collections.synchronizedList(new ArrayList<>());
+        final Thread[] threads = new Thread[threadCount];
+
+        for (int t = 0; t < threadCount; t++) {
+            threads[t] = new Thread(() -> {
+                try {
+                    for (int round = 0; round < 10; round++) {
+                        final BooleanList booleans = BooleanList.random(length);
+                        assertEquals(length, booleans.size());
+                        assertTrue(booleans.contains(true) && booleans.contains(false));
+
+                        final ByteList bytes = ByteList.random(length);
+                        assertEquals(length, bytes.size());
+                        assertTrue(bytes.min().orElseThrow() < 0 && bytes.max().orElseThrow() > 0);
+
+                        final ShortList shorts = ShortList.random(length);
+                        assertEquals(length, shorts.size());
+                        assertTrue(shorts.min().orElseThrow() < 0 && shorts.max().orElseThrow() > 0);
+
+                        assertEquals(length, CharList.random(length).size());
+
+                        final CharList ranged = CharList.random('a', 'e', length);
+                        assertEquals(length, ranged.size());
+                        for (int i = 0; i < length; i++) {
+                            assertTrue(ranged.get(i) >= 'a' && ranged.get(i) < 'e');
+                        }
+
+                        final CharList picked = CharList.random(new char[] { 'x', 'y' }, length);
+                        assertTrue(picked.contains('x') && picked.contains('y') && picked.size() == length);
+
+                        final IntList ints = IntList.random(length);
+                        assertEquals(length, ints.size());
+                        assertTrue(ints.min().orElseThrow() < 0 && ints.max().orElseThrow() > 0);
+
+                        final IntList rangedInts = IntList.random(-3, 3, length);
+                        assertEquals(length, rangedInts.size());
+                        assertTrue(rangedInts.min().orElseThrow() == -3 && rangedInts.max().orElseThrow() == 2);
+                        assertEquals(length, IntList.random(Integer.MIN_VALUE, Integer.MAX_VALUE, length).size());
+
+                        final LongList longs = LongList.random(length);
+                        assertEquals(length, longs.size());
+                        assertTrue(longs.min().orElseThrow() < 0 && longs.max().orElseThrow() > 0);
+
+                        final FloatList floats = FloatList.random(length);
+                        assertEquals(length, floats.size());
+                        assertTrue(floats.min().orElseThrow() >= 0f && floats.max().orElseThrow() < 1f && floats.min().orElseThrow() < floats.max().orElseThrow());
+
+                        final DoubleList doubles = DoubleList.random(length);
+                        assertEquals(length, doubles.size());
+                        assertTrue(doubles.min().orElseThrow() >= 0d && doubles.max().orElseThrow() < 1d && doubles.min().orElseThrow() < doubles.max().orElseThrow());
+                    }
+                } catch (final Throwable e) {
+                    errors.add(e);
+                }
+            });
+            threads[t].start();
+        }
+
+        for (final Thread thread : threads) {
+            thread.join();
+        }
+
+        assertTrue(errors.isEmpty(), errors::toString);
+    }
+
+    // G115-01: validation is unchanged - bad arguments still fail before any value is drawn.
+    @Test
+    public void testRandom_primitiveListFactoriesValidationUnchanged() {
+        assertThrows(NegativeArraySizeException.class, () -> IntList.random(-1));
+        assertThrows(IllegalArgumentException.class, () -> IntList.random(5, 5, 3));
+        assertThrows(NegativeArraySizeException.class, () -> IntList.random(0, 5, -1));
+        assertThrows(IllegalArgumentException.class, () -> CharList.random('z', 'a', 3));
+        assertThrows(IllegalArgumentException.class, () -> CharList.random(new char[0], 3));
+        assertThrows(NegativeArraySizeException.class, () -> CharList.random(new char[] { 'a', 'b' }, -1));
+        assertThrows(NegativeArraySizeException.class, () -> LongList.random(-1));
+        assertThrows(NegativeArraySizeException.class, () -> DoubleList.random(-1));
+        assertEquals(0, ByteList.random(0).size());
+    }
+    // ---- perf review 2026-09-26 G115 end ----
 }

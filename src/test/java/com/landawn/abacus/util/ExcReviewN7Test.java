@@ -21,7 +21,8 @@ public class ExcReviewN7Test extends com.landawn.abacus.TestBase {
         final Integer[] b = { 1 };
         final Long[] c = { 1L };
         final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> N.zip(a, b, (s, i) -> s + i, (Class<String>) null));
-        assertTrue(ex.getMessage().contains("componentType"), ex.getMessage());
+        // C-259 (2026-09-24): validated by N under its own parameter name (was the array factory's 'componentType').
+        assertTrue(ex.getMessage().contains("targetElementType"), ex.getMessage());
         assertThrows(IllegalArgumentException.class, () -> N.zip(a, b, "", 0, (s, i) -> s + i, (Class<String>) null));
         assertThrows(IllegalArgumentException.class, () -> N.zip(a, b, c, (s, i, l) -> s + i + l, (Class<String>) null));
         assertThrows(IllegalArgumentException.class, () -> N.zip(a, b, c, "", 0, 0L, (s, i, l) -> s + i + l, (Class<String>) null));
@@ -38,9 +39,9 @@ public class ExcReviewN7Test extends com.landawn.abacus.TestBase {
     }
 
     @Test
-    public void unzip_supplierReturningNull_isIAE() {
+    public void unzip_supplierReturningNull_isNPE() {
         final List<String> pairs = Arrays.asList("a=1");
-        assertThrows(IllegalArgumentException.class, () -> N.unzip(pairs, (s, out) -> out.set(s, s), size -> null));
+        assertThrows(NullPointerException.class, () -> N.unzip(pairs, (s, out) -> out.set(s, s), size -> null));
         assertThrows(IllegalArgumentException.class, () -> N.unzip(pairs, null));
         assertThrows(IllegalArgumentException.class, () -> N.unzip(pairs.iterator(), (s, out) -> out.set(s, s), null));
     }

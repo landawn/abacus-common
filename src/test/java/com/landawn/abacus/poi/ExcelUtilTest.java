@@ -833,4 +833,115 @@ public class ExcelUtilTest extends TestBase {
             assertEquals("d3", ds.get(0, 3));
         }
     }
+
+    @Test
+    public void testReadStreamAndExportBySheetNameNullSheetNameThrowsIae() throws Exception {
+        for (final String suffix : new String[] { ".xlsx", ".xls" }) {
+            final File excel = File.createTempFile("nullSheetNameSource", suffix);
+            final File csv = File.createTempFile("nullSheetNameTarget", ".csv");
+
+            try {
+                ExcelUtil.writeRowsToSheet("Data", List.of("h"), List.of(List.of("v")), excel);
+                final byte[] bytes = Files.readAllBytes(excel.toPath());
+                final Path excelPath = excel.toPath();
+
+                final List<org.junit.jupiter.api.function.Executable> operations = List.of(
+                        () -> ExcelUtil.readDatasetFromSheet(excel, (String) null, RowExtractors.DEFAULT),
+                        () -> ExcelUtil.readDatasetFromSheet(new ByteArrayInputStream(bytes), (String) null, RowExtractors.DEFAULT),
+                        () -> ExcelUtil.readDatasetFromSheet(excelPath, (String) null, RowExtractors.DEFAULT),
+                        () -> ExcelUtil.readRowsFromSheet(excel, (String) null, false, RowMappers.DEFAULT),
+                        () -> ExcelUtil.readRowsFromSheet(new ByteArrayInputStream(bytes), (String) null, false, RowMappers.DEFAULT),
+                        () -> ExcelUtil.readRowsFromSheet(excelPath, (String) null, false, RowMappers.DEFAULT),
+                        () -> ExcelUtil.streamRowsFromSheet(excel, (String) null, false),
+                        () -> ExcelUtil.streamRowsFromSheet(new ByteArrayInputStream(bytes), (String) null, false),
+                        () -> ExcelUtil.streamRowsFromSheet(excelPath, (String) null, false),
+                        () -> ExcelUtil.exportSheetToCsv(excel, (String) null, csv),
+                        () -> ExcelUtil.exportSheetToCsv(excel, (String) null, null, new StringWriter()));
+
+                for (final org.junit.jupiter.api.function.Executable operation : operations) {
+                    final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, operation, suffix);
+                    assertTrue(e.getMessage().contains("sheetName"), e.getMessage());
+                }
+            } finally {
+                excel.delete();
+                csv.delete();
+            }
+        }
+    }
+
+    // ---- deep review 2026-09-25 G010 begin ----
+    // G010-02: autoSizeColumn(true) promises every column is sized to its content, but only the header columns were: a
+    // ragged data row wider than the headers (or any row under an empty header list) kept the default width.
+    @Test
+    public void testWriteRowsToSheet_autoSizeColumnSizesColumnsBeyondHeaders() throws Exception {
+        final String longValue = "a considerably longer cell value that needs a much wider column than the default";
+        final SheetCreateOptions options = SheetCreateOptions.builder().autoSizeColumn(true).build();
+
+        for (final ExcelFormat format : ExcelFormat.values()) {
+            final ByteArrayOutputStream wide = new ByteArrayOutputStream();
+            ExcelUtil.writeRowsToSheet("Data", List.of("H"), List.of(List.of("x", longValue)), ExcelUtil.createSheetSetter(options, 1), wide, format);
+
+            try (Workbook workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(new ByteArrayInputStream(wide.toByteArray()))) {
+                final Sheet sheet = workbook.getSheetAt(0);
+                assertTrue(sheet.getColumnWidth(1) > 256 * 20, format + ": column 1 must be auto-sized, width=" + sheet.getColumnWidth(1));
+            }
+
+            final ByteArrayOutputStream noHeaders = new ByteArrayOutputStream();
+            ExcelUtil.writeRowsToSheet("Data", List.of(), List.of(List.of(longValue)), ExcelUtil.createSheetSetter(options, 0), noHeaders, format);
+
+            try (Workbook workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(new ByteArrayInputStream(noHeaders.toByteArray()))) {
+                final Sheet sheet = workbook.getSheetAt(0);
+                assertTrue(sheet.getColumnWidth(0) > 256 * 20, format + ": column 0 must be auto-sized, width=" + sheet.getColumnWidth(0));
+            }
+        }
+    }
+    // ---- deep review 2026-09-25 G010 end ----
+
+    // ---- perf review 2026-09-26 G010 begin ----
+    // G010-01: column lists are pre-sized from the physical row count; pins header-only, gapped and sparse sheets.
+    @Test
+    public void testReadDatasetFromSheet_presizedColumnsKeepShapeAndMutability() throws Exception {
+        for (final ExcelFormat format : ExcelFormat.values()) {
+            try (Workbook workbook = format == ExcelFormat.XLS ? new HSSFWorkbook() : new XSSFWorkbook()) {
+                final Sheet sheet = workbook.createSheet("S");
+                final Row header = sheet.createRow(0);
+                header.createCell(0).setCellValue("A");
+                header.createCell(1).setCellValue("B");
+
+                final ByteArrayOutputStream headerOnly = new ByteArrayOutputStream();
+                workbook.write(headerOnly);
+
+                final Dataset empty = ExcelUtil.readDatasetFromSheet(new ByteArrayInputStream(headerOnly.toByteArray()), 0, RowExtractors.DEFAULT);
+                assertEquals(0, empty.size(), format.name());
+                assertEquals(List.of("A", "B"), empty.columnNames(), format.name());
+                empty.addRow(Arrays.asList("x", "y"));
+                assertEquals(1, empty.size(), format.name());
+                assertEquals("y", (String) empty.get(0, 1), format.name());
+
+                // Physical rows 5 and 10 only (gaps are not rows); row 10 is wider than the header.
+                sheet.createRow(5).createCell(0).setCellValue("r5");
+                final Row row10 = sheet.createRow(10);
+                row10.createCell(1).setCellValue(2.0);
+                row10.createCell(2).setCellValue(true);
+
+                final ByteArrayOutputStream gapped = new ByteArrayOutputStream();
+                workbook.write(gapped);
+
+                final Dataset dataset = ExcelUtil.readDatasetFromSheet(new ByteArrayInputStream(gapped.toByteArray()), 0, RowExtractors.DEFAULT);
+                assertEquals(2, dataset.size(), format.name());
+                assertEquals(3, dataset.columnCount(), format.name());
+                assertEquals("r5", (String) dataset.get(0, 0), format.name());
+                assertNull(dataset.get(0, 1), format.name());
+                assertNull(dataset.get(0, 2), format.name());
+                assertNull(dataset.get(1, 0), format.name());
+                assertEquals(2.0, (Double) dataset.get(1, 1), format.name());
+                assertEquals(Boolean.TRUE, dataset.get(1, 2), format.name());
+
+                dataset.addRow(Arrays.asList("a", 3.0, false));
+                assertEquals(3, dataset.size(), format.name());
+                assertEquals("a", (String) dataset.get(2, 0), format.name());
+            }
+        }
+    }
+    // ---- perf review 2026-09-26 G010 end ----
 }

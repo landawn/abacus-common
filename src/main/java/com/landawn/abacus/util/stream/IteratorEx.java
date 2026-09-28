@@ -80,8 +80,8 @@ public interface IteratorEx<T> extends Iterator<T> {
      * <pre>{@code
      * // Example: Count remaining elements
      * IteratorEx<String> iter = ObjIteratorEx.of("a", "b", "c", "d", "e");
-     * long total = iter.count();                            // 5
-     * System.out.println("Found " + total + " elements");   // prints: Found 5 elements
+     * long total = iter.count();                           // 5
+     * System.out.println("Found " + total + " elements");  // prints: Found 5 elements
      * }</pre>
      *
      * @return the number of elements that remained in this iterator before this call

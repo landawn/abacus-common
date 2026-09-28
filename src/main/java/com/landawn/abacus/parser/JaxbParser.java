@@ -387,7 +387,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object instance
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
      * @throws IllegalArgumentException if {@code targetType} is null
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
@@ -411,7 +411,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object instance, or the default value for {@code targetClass} if {@code source} is empty
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
      * @throws IllegalArgumentException if {@code targetClass} is null
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
@@ -445,7 +445,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or {@code source} is a directory
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
      * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including an I/O cause reported by JAXB
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Type<? extends T> targetType)
@@ -470,7 +470,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @throws IllegalArgumentException if {@code source} or {@code targetClass} is null, or {@code source} is a directory
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
      * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including an I/O cause reported by JAXB
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      */
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Class<? extends T> targetClass)
@@ -503,7 +503,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object instance
      * @throws IllegalArgumentException if {@code source} is null, or {@code targetType} is null
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
@@ -528,7 +528,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object instance
      * @throws IllegalArgumentException if {@code source} is null, or {@code targetClass} is null
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
@@ -553,7 +553,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object instance
      * @throws IllegalArgumentException if {@code source} is null, or {@code targetType} is null
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
@@ -578,7 +578,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object instance
      * @throws IllegalArgumentException if {@code source} is null, or {@code targetClass} is null
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     @Override
@@ -638,7 +638,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object
      * @throws IllegalArgumentException if {@code source} is null, or {@code targetClass} is null
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     <T> T read(final InputStream source, final XmlDeserConfig config, final Class<? extends T> targetClass)
@@ -674,7 +674,7 @@ final class JaxbParser extends AbstractXmlParser {
      * @return the deserialized object
      * @throws IllegalArgumentException if {@code source} is null, or {@code targetClass} is null
      * @throws ParsingException if ignored property names are configured, or JAXB cannot unmarshal the XML into the target class
-     * @throws RuntimeException if the JAXB context or unmarshaller for the target class cannot be created
+     * @throws RuntimeException if the JAXB context or unmarshaller for the target class, or the hardened SAX parser, cannot be created
      * @throws UncheckedIOException if JAXB or a delegated value reader reports an I/O failure while consuming the XML
      */
     <T> T read(final Reader source, final XmlDeserConfig config, final Class<? extends T> targetClass)
@@ -736,12 +736,13 @@ final class JaxbParser extends AbstractXmlParser {
      * @param unmarshaller the JAXB unmarshaller
      * @param is the input source containing the XML payload
      * @return the unmarshalled value
-     * @throws ParsingException if a hardened XMLReader cannot be obtained or JAXB unmarshalling fails
+     * @throws RuntimeException if the hardened SAX parser cannot be created because its configuration is invalid
+     * @throws ParsingException if a hardened SAX parser or XMLReader cannot be obtained, or JAXB unmarshalling fails
      * @throws UncheckedIOException if reading the source fails, including a failure JAXB reports as an
      *         {@code UnmarshalException}
      */
     @SuppressWarnings("unchecked")
-    private static <T> T unmarshal(final Unmarshaller unmarshaller, final InputSource is) throws ParsingException, UncheckedIOException {
+    private static <T> T unmarshal(final Unmarshaller unmarshaller, final InputSource is) throws RuntimeException, ParsingException, UncheckedIOException {
         SAXParser sp = null;
 
         try {

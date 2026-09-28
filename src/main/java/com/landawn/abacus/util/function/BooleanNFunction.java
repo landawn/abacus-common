@@ -41,12 +41,12 @@ public interface BooleanNFunction<R> extends Throwables.BooleanNFunction<R, Runt
      * String result = formatter.apply(true, false);   // Returns "[true, false]"
      * }</pre>
      *
-     * @param args the function arguments as a variable-length array of {@code boolean} values.
+     * @param arguments the function arguments as a variable-length array of {@code boolean} values.
      *             May be empty but must not be {@code null}.
      * @return the function result
      */
     @Override
-    R apply(boolean... args);
+    R apply(boolean... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.

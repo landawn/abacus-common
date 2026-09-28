@@ -549,4 +549,20 @@ public class CommonUtilMismatchTest extends CommonUtilTestSupport {
         Assertions.assertEquals(0, CommonUtil.mismatch(a, 0, b, 0, 2));
         Assertions.assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.mismatch(a, 0, b, 0, 10));
     }
+
+    @Test
+    public void testMismatch_FloatArray_NaNAndSignedZero() {
+        assertEquals(-1, N.mismatch(new float[] { Float.NaN, 1.0f }, new float[] { Float.NaN, 1.0f }));
+        assertEquals(1, N.mismatch(new float[] { 1.0f, 0.0f }, new float[] { 1.0f, -0.0f }));
+        assertEquals(-1, N.mismatch(new float[] { 9.0f, Float.NaN }, 1, new float[] { Float.NaN }, 0, 1));
+        assertEquals(0, N.mismatch(new float[] { 9.0f, -0.0f }, 1, new float[] { 0.0f }, 0, 1));
+    }
+
+    @Test
+    public void testMismatch_DoubleArray_NaNAndSignedZero() {
+        assertEquals(-1, N.mismatch(new double[] { Double.NaN, 1.0 }, new double[] { Double.NaN, 1.0 }));
+        assertEquals(1, N.mismatch(new double[] { 1.0, 0.0 }, new double[] { 1.0, -0.0 }));
+        assertEquals(-1, N.mismatch(new double[] { 9.0, Double.NaN }, 1, new double[] { Double.NaN }, 0, 1));
+        assertEquals(0, N.mismatch(new double[] { 9.0, -0.0 }, 1, new double[] { 0.0 }, 0, 1));
+    }
 }

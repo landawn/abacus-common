@@ -238,7 +238,9 @@ public class CommonUtilNullTest extends CommonUtilTestSupport {
 
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance(Runnable.class, null));
 
-        assertNotNull(CommonUtil.newProxyInstance(new Class<?>[0], h));
+        // C-165 (2026-09-24): a proxy implementing no interface cannot be used as any T, so an empty array is rejected
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newProxyInstance(new Class<?>[0], h));
+        assertNotNull(CommonUtil.newProxyInstance(new Class<?>[] { Runnable.class }, h));
     }
 
 }

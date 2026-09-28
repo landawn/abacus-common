@@ -74,7 +74,7 @@ public class uTest extends uTestSupport {
         assertFalse(empty.map(String::length).isPresent());
         assertEquals(5, present.flatMap(s -> Optional.of(s.length())).get());
         assertFalse(empty.flatMap(s -> Optional.of(s.length())).isPresent());
-        assertThrows(IllegalArgumentException.class, () -> present.flatMap(s -> null));
+        assertThrows(NullPointerException.class, () -> present.flatMap(s -> null));
 
         AtomicBoolean called = new AtomicBoolean();
         present.ifPresent(v -> called.set(true));
@@ -167,7 +167,7 @@ public class uTest extends uTestSupport {
         assertFalse(presentNull.flatMapIfNotNull(s -> Nullable.of(10)).isPresent());
         assertFalse(empty.flatMapIfNotNull(s -> Nullable.of(10)).isPresent());
         assertThrows(IllegalArgumentException.class, () -> present.flatMapIfNotNull(null));
-        assertThrows(IllegalArgumentException.class, () -> present.flatMap(s -> null));
+        assertThrows(NullPointerException.class, () -> present.flatMap(s -> null));
 
         assertEquals(List.of("test"), present.toListIfNotNull());
         assertTrue(presentNull.toListIfNotNull().isEmpty());

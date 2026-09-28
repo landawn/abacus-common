@@ -51,8 +51,8 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = DoublePredicate.ALWAYS_TRUE.test(3.14);    // Always returns true
-     * boolean result2 = DoublePredicate.ALWAYS_TRUE.test(-0.0);   // Always returns true
+     * boolean result = DoublePredicate.ALWAYS_TRUE.test(3.14);   // Always returns true
+     * boolean result2 = DoublePredicate.ALWAYS_TRUE.test(-0.0);  // Always returns true
      * }</pre>
      *
      */
@@ -62,20 +62,22 @@ public interface DoublePredicate extends Throwables.DoublePredicate<RuntimeExcep
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = DoublePredicate.ALWAYS_FALSE.test(3.14);    // Always returns false
-     * boolean result2 = DoublePredicate.ALWAYS_FALSE.test(-0.0);   // Always returns false
+     * boolean result = DoublePredicate.ALWAYS_FALSE.test(3.14);   // Always returns false
+     * boolean result2 = DoublePredicate.ALWAYS_FALSE.test(-0.0);  // Always returns false
      * }</pre>
      *
      */
     DoublePredicate ALWAYS_FALSE = value -> false;
     /**
      * A predicate that tests if a double value is zero using {@link N#equals(double, double)}.
-     * Returns {@code true} if the value equals 0.
+     * Returns {@code true} only for {@code 0.0}; because the comparison uses total ordering,
+     * {@code -0.0} is not considered zero (see class documentation).
      */
     DoublePredicate IS_ZERO = value -> N.equals(value, 0);
     /**
      * A predicate that tests if a double value is not zero using {@link N#compare(double, double)}.
-     * Returns {@code true} if the value does not equal 0.
+     * Returns {@code true} for every value other than {@code 0.0}, including {@code -0.0} and {@code NaN}
+     * (total ordering; see class documentation).
      */
     DoublePredicate NOT_ZERO = value -> N.compare(value, 0) != 0;
     /**

@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedFloat indexedFloat = IndexedFloat.of(3.14f, 2);
- * float value = indexedFloat.value();   // returns 3.14f
- * int index = indexedFloat.index();     // returns 2
+ * float value = indexedFloat.value();  // returns 3.14f
+ * int index = indexedFloat.index();    // returns 2
  * }</pre>
  *
  * @see Indexed
@@ -105,8 +105,8 @@ public final class IndexedFloat extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedFloat indexed = IndexedFloat.of(2.718f, 10);
-     * float v = indexed.value();   // returns 2.718f
-     * int i = indexed.index();     // returns 10
+     * float v = indexed.value();  // returns 2.718f
+     * int i = indexed.index();    // returns 10
      * }</pre>
      *
      * @return the float value associated with this index
@@ -139,8 +139,8 @@ public final class IndexedFloat extends AbstractIndexed {
      * IndexedFloat indexed2 = IndexedFloat.of(3.14f, 5);
      * IndexedFloat indexed3 = IndexedFloat.of(2.71f, 5);
      *
-     * indexed1.equals(indexed2);   // returns true
-     * indexed1.equals(indexed3);   // returns false
+     * indexed1.equals(indexed2);  // returns true
+     * indexed1.equals(indexed3);  // returns false
      * }</pre>
      *
      * @param obj the object to compare with this {@code IndexedFloat} instance for equality

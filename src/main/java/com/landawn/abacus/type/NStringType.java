@@ -80,29 +80,29 @@ public class NStringType extends AbstractStringType {
      * Sets a parameter in a {@link PreparedStatement} at the specified index to a national
      * character string value using {@link PreparedStatement#setNString(int, String)}.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the national character string to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws NullPointerException, SQLException {
-        stmt.setNString(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final String x) throws NullPointerException, SQLException {
+        statement.setNString(columnIndex, x);
     }
 
     /**
      * Sets a parameter in a {@link CallableStatement} by name to a national character string value
      * using {@link CallableStatement#setNString(String, String)}.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the national character string to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final String x) throws NullPointerException, SQLException {
-        stmt.setNString(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final String x) throws NullPointerException, SQLException {
+        statement.setNString(parameterName, x);
     }
 }

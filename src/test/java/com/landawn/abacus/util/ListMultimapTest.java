@@ -1058,7 +1058,7 @@ public class ListMultimapTest extends TestBase {
         final ListMultimap<String, Integer> multimap = new ListMultimap<>();
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.toImmutableMap(null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.toImmutableMap(size -> null));
+        Assertions.assertThrows(NullPointerException.class, () -> multimap.toImmutableMap(size -> null));
     }
 
     @Test
@@ -1466,4 +1466,157 @@ public class ListMultimapTest extends TestBase {
         }
     }
 
+    // ---- deep review 2026-09-25 G051 begin ----
+    // G051-01: fromMap(BiMap) mirrored the BiMap, which then rejected an equal value list under a second key
+    @Test
+    public void testFromMap_biMapSource_allowsEqualValueListsUnderDifferentKeys() {
+        final BiMap<String, Integer> source = BiMap.of("a", 1, "b", 2);
+        final ListMultimap<String, Integer> multimap = ListMultimap.fromMap(source);
+
+        multimap.put("c", 1);
+
+        Assertions.assertEquals(Arrays.asList(1), multimap.get("a"));
+        Assertions.assertEquals(Arrays.asList(1), multimap.get("c"));
+        Assertions.assertEquals(3, multimap.keyCount());
+    }
+
+    // G051-01: merge(..) copies its first map with fromMap(..), so a BiMap first argument failed the same way
+    @Test
+    public void testMerge_biMapFirstArgument_sharedValue() {
+        final Map<String, Integer> second = new HashMap<>();
+        second.put("b", 1);
+
+        final ListMultimap<String, Integer> merged = ListMultimap.merge(BiMap.of("a", 1), second);
+
+        Assertions.assertEquals(Arrays.asList(1), merged.get("a"));
+        Assertions.assertEquals(Arrays.asList(1), merged.get("b"));
+    }
+    // ---- deep review 2026-09-25 G051 end ----
+
+
+    // ---- bug review 2026-09-27 G114 begin ----
+
+    // G114-02: invert() mirrored a BiMap backing map, which then rejected the second inverted key whose key list
+    // was equal to an earlier one ([a] for both 1 and 2).
+    @Test
+    public void testInvert_biMapBacking_allowsEqualInvertedKeyLists() {
+        final ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap(BiMap::new, ArrayList::new);
+        multimap.putValues("a", Arrays.asList(1, 2));
+        multimap.put("b", 3);
+
+        final ListMultimap<Integer, String> inverted = multimap.invert();
+
+        Assertions.assertEquals(Arrays.asList("a"), inverted.get(1));
+        Assertions.assertEquals(Arrays.asList("a"), inverted.get(2));
+        Assertions.assertEquals(Arrays.asList("b"), inverted.get(3));
+        Assertions.assertEquals(LinkedHashMap.class, inverted.backingMap.getClass());
+    }
+
+    // ---- bug review 2026-09-27 G114 end ----
+
+    // ---- bug review 2026-09-27 verify G121 begin ----
+
+    // invert() of a BiMap-backed multimap keeps the source's encounter order and repeated elements in each key list
+    @Test
+    public void testInvert_biMapBacking_encounterOrderAndDuplicates() {
+        final ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap(BiMap::new, ArrayList::new);
+        multimap.putValues("c", Arrays.asList(5, 1, 2, 1));
+        multimap.putValues("a", Arrays.asList(2, 3));
+        multimap.put("b", 4);
+
+        final List<Integer> expectedKeyOrder = new ArrayList<>();
+        for (final Map.Entry<String, List<Integer>> entry : multimap) {
+            for (final Integer e : entry.getValue()) {
+                if (!expectedKeyOrder.contains(e)) {
+                    expectedKeyOrder.add(e);
+                }
+            }
+        }
+
+        final ListMultimap<Integer, String> inverted = multimap.invert();
+
+        Assertions.assertEquals(LinkedHashMap.class, inverted.backingMap.getClass());
+        Assertions.assertEquals(expectedKeyOrder, new ArrayList<>(inverted.keySet()));
+        Assertions.assertEquals(Arrays.asList("c", "c"), inverted.get(1));
+        Assertions.assertEquals(Arrays.asList("c"), inverted.get(5));
+        Assertions.assertEquals(Arrays.asList("a"), inverted.get(3));
+        Assertions.assertEquals(Arrays.asList("b"), inverted.get(4));
+        Assertions.assertEquals(2, inverted.get(2).size());
+        Assertions.assertTrue(inverted.get(2).containsAll(Arrays.asList("a", "c")));
+    }
+
+    // invert() of an empty BiMap-backed multimap is empty (LinkedHashMap backing); a HashMap backing still inverts into a HashMap
+    @Test
+    public void testInvert_emptyBiMapBackingAndHashMapBackingUnchanged() {
+        final ListMultimap<Integer, String> emptyInverted = CommonUtil.<String, Integer> newListMultimap(BiMap::new, ArrayList::new).invert();
+        Assertions.assertTrue(emptyInverted.isEmpty());
+        Assertions.assertEquals(LinkedHashMap.class, emptyInverted.backingMap.getClass());
+
+        final ListMultimap<String, Integer> hashBacked = CommonUtil.newListMultimap(HashMap::new, ArrayList::new);
+        hashBacked.putValues("a", Arrays.asList(1, 2));
+        hashBacked.put("b", 3);
+        final ListMultimap<Integer, String> inverted = hashBacked.invert();
+        Assertions.assertEquals(HashMap.class, inverted.backingMap.getClass());
+        Assertions.assertEquals(Arrays.asList("a"), inverted.get(1));
+        Assertions.assertEquals(Arrays.asList("a"), inverted.get(2));
+        Assertions.assertEquals(Arrays.asList("b"), inverted.get(3));
+    }
+
+    // toImmutableMap() of a BiMap-backed multimap whose value lists were made equal in place used to throw from a BiMap copy
+    @Test
+    public void testToImmutableMap_biMapBackingWithValueListsMadeEqual() {
+        final ListMultimap<String, Integer> multimap = CommonUtil.newListMultimap(BiMap::new, ArrayList::new);
+        multimap.putValues("a", Arrays.asList(1, 3));
+        multimap.put("b", 1);
+        multimap.removeEntry("a", 3);
+        Assertions.assertEquals(multimap.get("a"), multimap.get("b"));
+
+        final ImmutableMap<String, ImmutableList<Integer>> immutable = multimap.toImmutableMap();
+
+        Assertions.assertEquals(new ArrayList<>(multimap.keySet()), new ArrayList<>(immutable.keySet()));
+        Assertions.assertEquals(Arrays.asList(1), immutable.get("a"));
+        Assertions.assertEquals(Arrays.asList(1), immutable.get("b"));
+    }
+
+    // toImmutableMap() of a BiMap-backed multimap with distinct lists, and of a reverse-sorted multimap, is unchanged
+    @Test
+    public void testToImmutableMap_biMapDistinctAndSortedBackingUnchanged() {
+        final ListMultimap<String, Integer> biMapBacked = CommonUtil.newListMultimap(BiMap::new, ArrayList::new);
+        biMapBacked.putValues("a", Arrays.asList(1, 2));
+        biMapBacked.put("b", 3);
+        final ImmutableMap<String, ImmutableList<Integer>> fromBiMap = biMapBacked.toImmutableMap();
+        Assertions.assertEquals(new ArrayList<>(biMapBacked.keySet()), new ArrayList<>(fromBiMap.keySet()));
+        Assertions.assertEquals(Arrays.asList(1, 2), fromBiMap.get("a"));
+        Assertions.assertEquals(Arrays.asList(3), fromBiMap.get("b"));
+
+        final ListMultimap<String, Integer> sorted = CommonUtil.newListMultimap(() -> new TreeMap<>(Comparator.<String> reverseOrder()), ArrayList::new);
+        sorted.put("a", 1);
+        sorted.put("c", 3);
+        sorted.put("b", 2);
+        Assertions.assertEquals(Arrays.asList("c", "b", "a"), new ArrayList<>(sorted.toImmutableMap().keySet()));
+    }
+
+    // ---- bug review 2026-09-27 verify G121 end ----
+
+    // ---- bug review 2026-09-27 verify G123 begin ----
+
+    // G123-02: toMap() of a BiMap-backed list multimap whose value lists were made equal in place used to throw from a BiMap copy
+    @Test
+    public void testToMap_biMapBackingWithValueListsMadeEqual() {
+        final ListMultimap<String, Integer> multimap = N.newListMultimap(BiMap::new, ArrayList::new);
+        multimap.put("a", 1);
+        multimap.put("b", 2);
+        multimap.put("b", 1);
+        multimap.removeEntry("b", 2);
+        Assertions.assertEquals(multimap.get("a"), multimap.get("b"));
+
+        final Map<String, List<Integer>> map = multimap.toMap();
+
+        Assertions.assertEquals(LinkedHashMap.class, map.getClass());
+        Assertions.assertEquals(new ArrayList<>(multimap.keySet()), new ArrayList<>(map.keySet()));
+        Assertions.assertEquals(Arrays.asList(1), map.get("a"));
+        Assertions.assertEquals(Arrays.asList(1), map.get("b"));
+    }
+
+    // ---- bug review 2026-09-27 verify G123 end ----
 }

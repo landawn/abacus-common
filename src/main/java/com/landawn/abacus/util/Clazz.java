@@ -236,17 +236,17 @@ public final class Clazz {
      * container class, so a {@code null} argument yields {@code null}.</p>
      *
      * @param <T> the target type parameter.
-     * @param cls the class to cast; may be {@code null}.
+     * @param targetClass the class to cast; may be {@code null}.
      * @return a typed Class reference whose generic type is present only in the compile-time signature;
-     *         {@code null} if {@code cls} is {@code null}.
+     *         {@code null} if {@code targetClass} is {@code null}.
      * @see TypeReference#type()
      * @see com.landawn.abacus.type.Type#of(String)
      * @see com.landawn.abacus.type.Type#of(Class)
      */
     @MayReturnNull
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <T> Class<T> of(final Class<? super T> cls) {
-        return (Class) cls;
+    public static <T> Class<T> of(final Class<? super T> targetClass) {
+        return (Class) targetClass;
     }
 
     /**
@@ -924,8 +924,8 @@ public final class Clazz {
      *
      * // Producer-consumer pattern
      * BlockingQueue<Task> queue = new LinkedBlockingQueue<>(100);
-     * queue.put(new Task());      // waits if the queue is full
-     * Task task = queue.take();   // waits if the queue is empty
+     * queue.put(new Task());     // waits if the queue is full
+     * Task task = queue.take();  // waits if the queue is empty
      * }</pre>
      *
      * @param <T> the element type of the blocking queue.

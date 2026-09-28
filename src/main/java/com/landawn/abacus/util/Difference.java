@@ -89,10 +89,10 @@ import com.landawn.abacus.util.function.TriPredicate;
  * List<String> list2 = Arrays.asList("b", "c", "d", "c");
  * Difference<List<String>, List<String>> diff = Difference.of(list1, list2);
  *
- * List<String> common = diff.common();             // returns ["b", "c"]
- * List<String> onlyOnLeft = diff.onlyOnLeft();     // returns ["a", "b"]
- * List<String> onlyOnRight = diff.onlyOnRight();   // returns ["c", "d"]
- * boolean equal = diff.areEqual();                 // returns false
+ * List<String> common = diff.common();            // returns ["b", "c"]
+ * List<String> onlyOnLeft = diff.onlyOnLeft();    // returns ["a", "b"]
+ * List<String> onlyOnRight = diff.onlyOnRight();  // returns ["c", "d"]
+ * boolean equal = diff.areEqual();                // returns false
  *
  * // Array comparison with primitive types
  * int[] array1 = {1, 2, 3, 2};
@@ -149,9 +149,12 @@ import com.landawn.abacus.util.function.TriPredicate;
  *       not add a factor; a {@code Set} is used as given, which means a {@code SortedSet} selection is
  *       probed in O(log k) under its own comparator rather than by {@code equals}/{@code hashCode}</li>
  *   <li>Space complexity: O(n + m) for storing difference results</li>
- *   <li>Primitive overloads store their results in the corresponding primitive-list type. The occurrence
- *       counting itself is <i>not</i> primitive: each element is boxed into a {@code Multiset} of the
- *       wrapper type, so a large primitive comparison allocates accordingly (measured: ~114 MB for a
+ *   <li>Primitive overloads store their results in the corresponding primitive-list type. The {@code boolean}
+ *       and {@code byte} overloads count occurrences in a small fixed-size array; the {@code char} and
+ *       {@code short} overloads do the same with an array indexed by value when the second list's values
+ *       span a range of at most {@code max(256, size)} values. Otherwise - and always for {@code int},
+ *       {@code long}, {@code float} and {@code double} - each element is boxed into a {@code Multiset} of
+ *       the wrapper type, so a large primitive comparison allocates accordingly (measured: ~114 MB for a
  *       single 1,000,000-element {@code IntList} pair)</li>
  * </ul>
  *
@@ -708,27 +711,42 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         } else if (N.isEmpty(b)) {
             onlyOnLeft = a.copy();
         } else {
-            final Multiset<Boolean> bOccurrences = b.toMultiset();
-
+            // Occurrence counts in a two-slot array: no boxing and no hash table sized for b.size() keys.
+            final int bSize = b.size();
+            final int[] bOccurrences = new int[2];
+            int remaining = bSize;
             boolean e = false;
+            int index = 0;
+
+            for (int i = 0; i < bSize; i++) {
+                e = b.get(i);
+                bOccurrences[e ? 1 : 0]++;
+            }
+
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
+                index = e ? 1 : 0;
 
-                if (bOccurrences.remove(e)) {
+                if (bOccurrences[index] > 0) {
+                    bOccurrences[index]--;
+                    remaining--;
                     common.add(e);
                 } else {
                     onlyOnLeft.add(e);
                 }
             }
 
-            for (int i = 0, len = b.size(); i < len; i++) {
+            for (int i = 0; i < bSize; i++) {
                 e = b.get(i);
+                index = e ? 1 : 0;
 
-                if (bOccurrences.remove(e)) {
+                if (bOccurrences[index] > 0) {
+                    bOccurrences[index]--;
+                    remaining--;
                     onlyOnRight.add(e);
                 }
 
-                if (bOccurrences.isEmpty()) {
+                if (remaining == 0) {
                     break;
                 }
             }
@@ -782,28 +800,84 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         } else if (N.isEmpty(b)) {
             onlyOnLeft = a.copy();
         } else {
-            final Multiset<Character> bOccurrences = b.toMultiset();
+            final int bSize = b.size();
+            char min = b.get(0);
+            char max = min;
 
-            char e = 0;
-            for (int i = 0, len = a.size(); i < len; i++) {
-                e = a.get(i);
+            for (int i = 1; i < bSize; i++) {
+                final char value = b.get(i);
 
-                if (bOccurrences.remove(e)) {
-                    common.add(e);
-                } else {
-                    onlyOnLeft.add(e);
+                if (value < min) {
+                    min = value;
+                } else if (value > max) {
+                    max = value;
                 }
             }
 
-            for (int i = 0, len = b.size(); i < len; i++) {
-                e = b.get(i);
+            if (max - min < Math.max(256, bSize)) {
+                // Dense value range: count occurrences in an array indexed by (value - min) instead of a boxing
+                // Multiset whose hash table is sized for b.size() keys; the array holds at most max(256, b.size()) ints.
+                final int[] bOccurrences = new int[max - min + 1];
+                int remaining = bSize;
+                char e = 0;
+                int index = 0;
 
-                if (bOccurrences.remove(e)) {
-                    onlyOnRight.add(e);
+                for (int i = 0; i < bSize; i++) {
+                    e = b.get(i);
+                    bOccurrences[e - min]++;
                 }
 
-                if (bOccurrences.isEmpty()) {
-                    break;
+                for (int i = 0, len = a.size(); i < len; i++) {
+                    e = a.get(i);
+                    index = e - min;
+
+                    if (index >= 0 && index < bOccurrences.length && bOccurrences[index] > 0) {
+                        bOccurrences[index]--;
+                        remaining--;
+                        common.add(e);
+                    } else {
+                        onlyOnLeft.add(e);
+                    }
+                }
+
+                for (int i = 0; i < bSize; i++) {
+                    e = b.get(i);
+                    index = e - min;
+
+                    if (bOccurrences[index] > 0) {
+                        bOccurrences[index]--;
+                        remaining--;
+                        onlyOnRight.add(e);
+                    }
+
+                    if (remaining == 0) {
+                        break;
+                    }
+                }
+            } else {
+                final Multiset<Character> bOccurrences = b.toMultiset();
+
+                char e = 0;
+                for (int i = 0, len = a.size(); i < len; i++) {
+                    e = a.get(i);
+
+                    if (bOccurrences.remove(e)) {
+                        common.add(e);
+                    } else {
+                        onlyOnLeft.add(e);
+                    }
+                }
+
+                for (int i = 0, len = b.size(); i < len; i++) {
+                    e = b.get(i);
+
+                    if (bOccurrences.remove(e)) {
+                        onlyOnRight.add(e);
+                    }
+
+                    if (bOccurrences.isEmpty()) {
+                        break;
+                    }
                 }
             }
         }
@@ -856,27 +930,42 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         } else if (N.isEmpty(b)) {
             onlyOnLeft = a.copy();
         } else {
-            final Multiset<Byte> bOccurrences = b.toMultiset();
-
+            // Occurrence counts in an array indexed by the unsigned byte value: no boxing and no hash table sized for b.size() keys.
+            final int bSize = b.size();
+            final int[] bOccurrences = new int[256];
+            int remaining = bSize;
             byte e = 0;
+            int index = 0;
+
+            for (int i = 0; i < bSize; i++) {
+                e = b.get(i);
+                bOccurrences[e & 0xFF]++;
+            }
+
             for (int i = 0, len = a.size(); i < len; i++) {
                 e = a.get(i);
+                index = e & 0xFF;
 
-                if (bOccurrences.remove(e)) {
+                if (bOccurrences[index] > 0) {
+                    bOccurrences[index]--;
+                    remaining--;
                     common.add(e);
                 } else {
                     onlyOnLeft.add(e);
                 }
             }
 
-            for (int i = 0, len = b.size(); i < len; i++) {
+            for (int i = 0; i < bSize; i++) {
                 e = b.get(i);
+                index = e & 0xFF;
 
-                if (bOccurrences.remove(e)) {
+                if (bOccurrences[index] > 0) {
+                    bOccurrences[index]--;
+                    remaining--;
                     onlyOnRight.add(e);
                 }
 
-                if (bOccurrences.isEmpty()) {
+                if (remaining == 0) {
                     break;
                 }
             }
@@ -930,28 +1019,84 @@ public sealed class Difference<L, R> permits KeyValueDifference {
         } else if (N.isEmpty(b)) {
             onlyOnLeft = a.copy();
         } else {
-            final Multiset<Short> bOccurrences = b.toMultiset();
+            final int bSize = b.size();
+            short min = b.get(0);
+            short max = min;
 
-            short e = 0;
-            for (int i = 0, len = a.size(); i < len; i++) {
-                e = a.get(i);
+            for (int i = 1; i < bSize; i++) {
+                final short value = b.get(i);
 
-                if (bOccurrences.remove(e)) {
-                    common.add(e);
-                } else {
-                    onlyOnLeft.add(e);
+                if (value < min) {
+                    min = value;
+                } else if (value > max) {
+                    max = value;
                 }
             }
 
-            for (int i = 0, len = b.size(); i < len; i++) {
-                e = b.get(i);
+            if (max - min < Math.max(256, bSize)) {
+                // Dense value range: count occurrences in an array indexed by (value - min) instead of a boxing
+                // Multiset whose hash table is sized for b.size() keys; the array holds at most max(256, b.size()) ints.
+                final int[] bOccurrences = new int[max - min + 1];
+                int remaining = bSize;
+                short e = 0;
+                int index = 0;
 
-                if (bOccurrences.remove(e)) {
-                    onlyOnRight.add(e);
+                for (int i = 0; i < bSize; i++) {
+                    e = b.get(i);
+                    bOccurrences[e - min]++;
                 }
 
-                if (bOccurrences.isEmpty()) {
-                    break;
+                for (int i = 0, len = a.size(); i < len; i++) {
+                    e = a.get(i);
+                    index = e - min;
+
+                    if (index >= 0 && index < bOccurrences.length && bOccurrences[index] > 0) {
+                        bOccurrences[index]--;
+                        remaining--;
+                        common.add(e);
+                    } else {
+                        onlyOnLeft.add(e);
+                    }
+                }
+
+                for (int i = 0; i < bSize; i++) {
+                    e = b.get(i);
+                    index = e - min;
+
+                    if (bOccurrences[index] > 0) {
+                        bOccurrences[index]--;
+                        remaining--;
+                        onlyOnRight.add(e);
+                    }
+
+                    if (remaining == 0) {
+                        break;
+                    }
+                }
+            } else {
+                final Multiset<Short> bOccurrences = b.toMultiset();
+
+                short e = 0;
+                for (int i = 0, len = a.size(); i < len; i++) {
+                    e = a.get(i);
+
+                    if (bOccurrences.remove(e)) {
+                        common.add(e);
+                    } else {
+                        onlyOnLeft.add(e);
+                    }
+                }
+
+                for (int i = 0, len = b.size(); i < len; i++) {
+                    e = b.get(i);
+
+                    if (bOccurrences.remove(e)) {
+                        onlyOnRight.add(e);
+                    }
+
+                    if (bOccurrences.isEmpty()) {
+                        break;
+                    }
                 }
             }
         }
@@ -1455,7 +1600,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * </ul>
      *
      * <p>This method properly handles {@code null} values and ensures type safety by checking
-     * that the compared object is also a {@code Difference} instance.
+     * that the compared object is also a {@code Difference} instance. A {@link KeyValueDifference}
+     * ({@link MapDifference} or {@link BeanDifference}) is never equal to a plain {@code Difference},
+     * even when all three containers are equal, because it also carries {@link KeyValueDifference#differentValues()}.
      *
      * <p><b>Usage Examples:</b>
      * <pre>{@code
@@ -1465,8 +1612,9 @@ public sealed class Difference<L, R> permits KeyValueDifference {
      * }</pre>
      *
      * @param obj the object to compare with this {@code Difference}; may be {@code null}
-     * @return {@code true} if the specified object is also a {@code Difference} with equal common,
-     *         left-only, and right-only contents; {@code false} otherwise (including when {@code obj} is {@code null})
+     * @return {@code true} if the specified object is also a plain (non-{@code KeyValueDifference}) {@code Difference}
+     *         with equal common, left-only, and right-only contents; {@code false} otherwise (including when {@code obj}
+     *         is {@code null})
      */
     @Override
     public boolean equals(Object obj) {
@@ -3107,7 +3255,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
          *         {@code valueEquivalence} is {@code null}.
-         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code valueEquivalence} throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -3183,7 +3331,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
          *         {@code valueEquivalence} is {@code null}.
-         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code valueEquivalence} throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -3261,7 +3409,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @return a {@code BeanDifference} object containing the comparison results
          * @throws IllegalArgumentException if a non-{@code null} bean argument is not a valid bean class, or if
          *         {@code valueEquivalence} is {@code null}.
-         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code valueEquivalence} throws during processing.
          * @see MapDifference#of(Map, Map)
          * @see BeanDifference#of(Object, Object, Collection)
          * @see Maps#difference(Map, Map)
@@ -3511,7 +3659,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
          *         instance, or if {@code idExtractor} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
-         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code idExtractor} throws during processing.
          */
         public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Function<? super T, K> idExtractor)
@@ -3567,7 +3715,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
          *         instance, or if {@code idExtractor} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
-         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code idExtractor} throws during processing.
          */
         public static <T, K> BeanDifference<List<T>, List<T>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T> a, final Collection<? extends T> b, final Collection<String> propNamesToCompare,
@@ -3627,7 +3775,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
          *         instance, or if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
-         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code idExtractor1} or {@code idExtractor2} throws during processing.
          */
         public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Function<? super T1, ? extends K> idExtractor1,
@@ -3698,7 +3846,7 @@ public sealed class Difference<L, R> permits KeyValueDifference {
          * @throws IllegalArgumentException if a non-{@code null} element of either collection is not a valid bean
          *         instance, or if any of {@code idExtractor1}, {@code idExtractor2} is {@code null}.
          * @throws IllegalStateException if duplicate identifiers are found within a single collection
-         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or the supplied identifier extractor or comparison callback throws during processing.
+         * @throws RuntimeException if bean metadata cannot be resolved, a selected property cannot be read, or {@code idExtractor1} or {@code idExtractor2} throws during processing.
          */
         public static <T1, T2, K> BeanDifference<List<T1>, List<T2>, Map<K, BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>>>> of(
                 final Collection<? extends T1> a, final Collection<? extends T2> b, final Collection<String> propNamesToCompare,

@@ -1067,4 +1067,113 @@ public class ParallelIteratorDoubleStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    // ---- perf review 2026-09-26 G103 begin ----
+    private static ParallelIteratorDoubleStream g103Parallel(final double... values) {
+        return new ParallelIteratorDoubleStream(com.landawn.abacus.util.DoubleIterator.of(values), false, 4, null, null, false, null);
+    }
+
+    private static double[] g103Values(final int size) {
+        final double[] values = new double[size];
+
+        for (int i = 0; i < size; i++) {
+            values[i] = i + 0.5d;
+        }
+
+        return values;
+    }
+
+    // G103-01: findFirst must keep the lowest-index match while several workers race over the shared iterator
+    @Test
+    public void testFindFirst_lowestIndexMatchAmongRacingWorkers() {
+        final double[] values = g103Values(3000);
+        final double threshold = values[1000];
+        int firstMod7 = -1;
+
+        for (int i = values.length - 1; i >= 0; i--) {
+            if (((int) values[i]) % 7 == 5) {
+                firstMod7 = i;
+            }
+        }
+
+        for (int round = 0; round < 20; round++) {
+            assertEquals(values[1000], g103Parallel(values).findFirst(v -> v >= threshold).get());
+            assertEquals(values[firstMod7], g103Parallel(values).findFirst(v -> ((int) v) % 7 == 5).get());
+            assertEquals(values[0], g103Parallel(values).findFirst(v -> true).get());
+        }
+
+        assertFalse(g103Parallel(values).findFirst(v -> false).isPresent());
+        assertFalse(g103Parallel().findFirst(v -> true).isPresent());
+        assertEquals(values[7], g103Parallel(values[7]).findFirst(v -> true).get());
+        assertFalse(g103Parallel(values[7]).findFirst(v -> false).isPresent());
+    }
+
+    // G103-01: findLast must keep the highest-index match and test every element exactly once
+    @Test
+    public void testFindLast_highestIndexMatchAmongRacingWorkers() {
+        final double[] values = g103Values(3000);
+        final double threshold = values[1000];
+        final double upper = values[10];
+        int lastMod7 = -1;
+
+        for (int i = 0; i < values.length; i++) {
+            if (((int) values[i]) % 7 == 5) {
+                lastMod7 = i;
+            }
+        }
+
+        for (int round = 0; round < 20; round++) {
+            final AtomicInteger calls = new AtomicInteger();
+            assertEquals(values[2999], g103Parallel(values).findLast(v -> {
+                calls.incrementAndGet();
+                return v >= threshold;
+            }).get());
+            assertEquals(values.length, calls.get());
+            assertEquals(values[9], g103Parallel(values).findLast(v -> v < upper).get());
+            assertEquals(values[lastMod7], g103Parallel(values).findLast(v -> ((int) v) % 7 == 5).get());
+        }
+
+        assertFalse(g103Parallel(values).findLast(v -> false).isPresent());
+        assertFalse(g103Parallel().findLast(v -> true).isPresent());
+        assertEquals(values[7], g103Parallel(values[7]).findLast(v -> true).get());
+    }
+
+    // G103-01: a predicate failure is still rethrown from the parallel findFirst/findLast
+    @Test
+    public void testFindFirstFindLast_predicateFailurePropagates() {
+        final double[] values = g103Values(3000);
+        final double failAt = values[1500];
+
+        final IllegalStateException first = assertThrows(IllegalStateException.class, () -> g103Parallel(values).findFirst(v -> {
+            if (v == failAt) {
+                throw new IllegalStateException("G103 findFirst");
+            }
+
+            return false;
+        }));
+        assertEquals("G103 findFirst", first.getMessage());
+
+        final IllegalStateException last = assertThrows(IllegalStateException.class, () -> g103Parallel(values).findLast(v -> {
+            if (v == failAt) {
+                throw new IllegalStateException("G103 findLast");
+            }
+
+            return false;
+        }));
+        assertEquals("G103 findLast", last.getMessage());
+    }
+
+    // G103-01: signed zero and NaN elements come back unchanged from findFirst/findLast
+    @Test
+    public void testFindFirstFindLast_signedZeroAndNaNElements() {
+        final double[] values = { 1, -0.0d, Double.NaN, 0.0d, Double.NaN, 2 };
+
+        for (int round = 0; round < 20; round++) {
+            assertEquals(Double.doubleToRawLongBits(-0.0d), Double.doubleToRawLongBits(g103Parallel(values).findFirst(v -> v == 0).get()));
+            assertEquals(Double.doubleToRawLongBits(0.0d), Double.doubleToRawLongBits(g103Parallel(values).findLast(v -> v == 0).get()));
+            assertTrue(Double.isNaN(g103Parallel(values).findFirst(v -> Double.isNaN(v)).get()));
+            assertTrue(Double.isNaN(g103Parallel(values).findLast(v -> Double.isNaN(v)).get()));
+        }
+    }
+    // ---- perf review 2026-09-26 G103 end ----
 }

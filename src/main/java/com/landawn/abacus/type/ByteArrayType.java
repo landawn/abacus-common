@@ -38,7 +38,9 @@ import com.landawn.abacus.util.Strings;
  *
  * <p>JDBC mapping: the {@code Byte[]} is unboxed to a primitive {@code byte[]} before being
  * stored via {@link java.sql.PreparedStatement#setBytes} and retrieved via
- * {@link java.sql.ResultSet#getBytes}, then re-boxed to {@code Byte[]}.</p>
+ * {@link java.sql.ResultSet#getBytes}, then re-boxed to {@code Byte[]}. Because a primitive {@code byte[]} cannot hold
+ * {@code null}, a {@code null} element is written as {@code (byte) 0} (a {@code null} array is still bound as SQL
+ * {@code NULL}), so such an array does not round-trip through the database.</p>
  */
 public final class ByteArrayType extends ObjectArrayType<Byte> {
 
@@ -157,30 +159,30 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * Sets a {@code Byte[]} parameter on a {@link java.sql.PreparedStatement} at the specified position.
      * The boxed {@code Byte[]} is unboxed to a primitive {@code byte[]} before being stored.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
-     * @param x the {@code Byte[]} value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @param x the {@code Byte[]} value to set; may be {@code null}; a {@code null} element is written as {@code (byte) 0}
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x) throws NullPointerException, SQLException {
-        stmt.setBytes(columnIndex, Array.unbox(x));
+    public void set(final PreparedStatement statement, final int columnIndex, final Byte[] x) throws NullPointerException, SQLException {
+        statement.setBytes(columnIndex, Array.unbox(x));
     }
 
     /**
      * Sets a named {@code Byte[]} parameter on a {@link java.sql.CallableStatement}.
      * The boxed {@code Byte[]} is unboxed to a primitive {@code byte[]} before being stored.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the {@code Byte[]} value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @param x the {@code Byte[]} value to set; may be {@code null}; a {@code null} element is written as {@code (byte) 0}
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Byte[] x) throws NullPointerException, SQLException {
-        stmt.setBytes(parameterName, Array.unbox(x));
+    public void set(final CallableStatement statement, final String parameterName, final Byte[] x) throws NullPointerException, SQLException {
+        statement.setBytes(parameterName, Array.unbox(x));
     }
 
     /**
@@ -188,16 +190,17 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * The boxed {@code Byte[]} is unboxed to a primitive {@code byte[]} before being stored.
      * The {@code sqlTypeOrLength} parameter is not used.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
-     * @param x the {@code Byte[]} value to set; may be {@code null}
+     * @param x the {@code Byte[]} value to set; may be {@code null}; a {@code null} element is written as {@code (byte) 0}
      * @param sqlTypeOrLength ignored for byte arrays
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Byte[] x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
-        stmt.setBytes(columnIndex, Array.unbox(x));
+    public void set(final PreparedStatement statement, final int columnIndex, final Byte[] x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
+        statement.setBytes(columnIndex, Array.unbox(x));
     }
 
     /**
@@ -205,17 +208,17 @@ public final class ByteArrayType extends ObjectArrayType<Byte> {
      * The boxed {@code Byte[]} is unboxed to a primitive {@code byte[]} before being stored.
      * The {@code sqlTypeOrLength} parameter is not used.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
-     * @param x the {@code Byte[]} value to set; may be {@code null}
+     * @param x the {@code Byte[]} value to set; may be {@code null}; a {@code null} element is written as {@code (byte) 0}
      * @param sqlTypeOrLength ignored for byte arrays
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Byte[] x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final Byte[] x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setBytes(parameterName, Array.unbox(x));
+        statement.setBytes(parameterName, Array.unbox(x));
     }
 
     /**

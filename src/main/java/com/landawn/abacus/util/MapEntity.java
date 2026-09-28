@@ -46,8 +46,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * user.set("name", "John");
  * user.set("age", 30);
  *
- * String name = user.get("name");             // returns "John"
- * int age = user.get("age", Integer.class);   // returns 30
+ * String name = user.get("name");            // returns "John"
+ * int age = user.get("age", Integer.class);  // returns 30
  * }</pre>
  *
  * @see NameUtil
@@ -103,13 +103,13 @@ public final class MapEntity implements Serializable {
      * }</pre>
      *
      * @param entityName the name of the entity
-     * @param props the initial properties to set
-     * @throws IllegalArgumentException if {@code props} is {@code null} or contains a {@code null} property name
+     * @param properties the initial properties to set
+     * @throws IllegalArgumentException if {@code properties} is {@code null} or contains a {@code null} property name
      */
-    public MapEntity(final String entityName, final Map<String, Object> props) throws IllegalArgumentException {
+    public MapEntity(final String entityName, final Map<String, Object> properties) throws IllegalArgumentException {
         this(entityName);
 
-        set(props);
+        set(properties);
     }
 
     /**
@@ -136,8 +136,8 @@ public final class MapEntity implements Serializable {
      * MapEntity user = new MapEntity("User");
      * user.set("email", "john@example.com");
      *
-     * String email = user.get("email");            // returns "john@example.com"
-     * String sameEmail = user.get("User.email");   // returns "john@example.com"
+     * String email = user.get("email");           // returns "john@example.com"
+     * String sameEmail = user.get("User.email");  // returns "john@example.com"
      * }</pre>
      *
      * @param <T> the type of the property value
@@ -170,8 +170,8 @@ public final class MapEntity implements Serializable {
      * MapEntity user = new MapEntity("User");
      * user.set("age", "25");
      *
-     * Integer age = user.get("age", Integer.class);         // returns 25
-     * Boolean active = user.get("active", Boolean.class);   // returns null (default for Boolean)
+     * Integer age = user.get("age", Integer.class);        // returns 25
+     * Boolean active = user.get("active", Boolean.class);  // returns null (default for Boolean)
      * }</pre>
      *
      * @param <T> the target type
@@ -194,6 +194,7 @@ public final class MapEntity implements Serializable {
      */
     public <T> T get(final String propName, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(propName, cs.propName);
+        N.checkArgNotNull(targetType, cs.targetType);
 
         Object propValue = get(propName);
 
@@ -324,8 +325,8 @@ public final class MapEntity implements Serializable {
      * MapEntity user = new MapEntity("User");
      * user.set("email", "john@example.com");
      *
-     * boolean hasEmail = user.containsKey("email");   // returns true
-     * boolean hasPhone = user.containsKey("phone");   // returns false
+     * boolean hasEmail = user.containsKey("email");  // returns true
+     * boolean hasPhone = user.containsKey("phone");  // returns false
      * }</pre>
      *
      * @param propName the property name to check (can be simple or canonical)

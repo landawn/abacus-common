@@ -334,13 +334,13 @@ public class DatesZoneDatabaseTest extends TestBase {
     }
 
     /**
-     * Characterization of the documented limit of {@code legacyRenderingZone}: the stand-in zone is a
-     * single offset, so arithmetic that carries a pre-1900 value out of its local-mean-time regime
-     * keeps the offset it started on and the wall clock shifts by that regime's delta. Within the
-     * regime the wall clock is preserved exactly, and every result still round-trips.
+     * Field arithmetic on a pre-1900 value resolves through the zone's real rules (review C-004,
+     * 2026-09-23): the wall clock is carried over exactly as {@code ZonedDateTime} carries it, whether
+     * or not the target lies past the end of the source's local-mean-time regime, and every result
+     * still round-trips.
      */
     @Test
-    public void fieldArithmeticThatLeavesTheLocalMeanTimeRegimeKeepsTheOffsetItStartedOn() {
+    public void fieldArithmeticThatLeavesTheLocalMeanTimeRegimeKeepsTheWallClock() {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata")); // +05:21:10 in 1899, +05:30 from 1906
         final java.util.Date old = new java.util.Date(Instant.parse("1899-06-15T06:30:00Z").toEpochMilli());
 
@@ -348,9 +348,12 @@ public class DatesZoneDatabaseTest extends TestBase {
         // Inside the regime the wall clock is preserved.
         assertEquals("1900-06-15 11:51:10", Dates.format(Dates.addYears(old, 1), Dates.LOCAL_DATE_TIME_FORMAT));
         assertEquals("1904-06-15 11:51:10", Dates.format(Dates.addYears(old, 5), Dates.LOCAL_DATE_TIME_FORMAT));
-        // Past the 1906 transition it shifts by the 8m50s delta, as documented.
-        assertEquals("2025-06-15 12:00:00", Dates.format(Dates.addYears(old, 126), Dates.LOCAL_DATE_TIME_FORMAT));
-        assertEquals("2030-06-15 12:00:00", Dates.format(Dates.setYears(old, 2030), Dates.LOCAL_DATE_TIME_FORMAT));
+        // Past the 1906 transition the wall clock is still preserved: the result is resolved through the
+        // zone's real rules, not through the single local-mean-time offset the source is rendered in.
+        assertEquals("2025-06-15 11:51:10", Dates.format(Dates.addYears(old, 126), Dates.LOCAL_DATE_TIME_FORMAT));
+        assertEquals("2030-06-15 11:51:10", Dates.format(Dates.setYears(old, 2030), Dates.LOCAL_DATE_TIME_FORMAT));
+        assertEquals(ZonedDateTime.ofInstant(old.toInstant(), ZoneId.of("Asia/Kolkata")).plusYears(126).toInstant().toEpochMilli(),
+                Dates.addYears(old, 126).getTime());
 
         // Whatever the result, it renders and re-parses to itself.
         for (final int years : new int[] { 1, 5, 7, 126 }) {

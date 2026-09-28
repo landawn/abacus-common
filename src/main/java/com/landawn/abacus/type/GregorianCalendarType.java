@@ -32,7 +32,8 @@ import com.landawn.abacus.util.N;
  *
  * <p>String representations follow the standard date/time formats supported by the
  * {@code Dates} utility. The special strings {@code "sysTime"} and {@code "SYS_TIME"} (case-insensitive) resolve to the current
- * system time. Numeric strings are interpreted as milliseconds since the epoch.
+ * system time. Numeric strings of more than four characters (an optional sign followed by ASCII digits) are interpreted
+ * as milliseconds since the epoch; shorter numeric strings such as {@code "0"} are rejected as ambiguous.
  * Database columns are read and written as {@link java.sql.Timestamp} values.
  */
 @SuppressWarnings("java:S2160")
@@ -95,7 +96,10 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      * <ul>
      *   <li>{@code null}, empty, or the literal {@code "null"} strings: returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns current time as {@code GregorianCalendar}</li>
-     *   <li>Numeric strings: interpreted as milliseconds since the epoch</li>
+     *   <li>More than four characters of ASCII digits, optionally preceded by {@code +} or {@code -}: epoch milliseconds,
+     *       converted via the {@code Dates.create*} epoch factory. Shorter numeric text such as {@code "0"} or {@code "2024"}
+     *       is not read as epoch milliseconds; it goes to the formatted parser, which rejects it as ambiguous
+     *       ({@link IllegalArgumentException})</li>
      *   <li>Date/time strings: parsed according to standard date formats</li>
      * </ul>
      *
@@ -142,31 +146,31 @@ public class GregorianCalendarType extends AbstractCalendarType<GregorianCalenda
      *
      * @param cbuf the character array containing the date/time representation; may be {@code null}
      * @param offset the start offset in the character array
-     * @param len the number of characters to parse
-     * @return the parsed {@code GregorianCalendar} instance, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param length the number of characters to parse
+     * @return the parsed {@code GregorianCalendar} instance, or {@code null} if {@code cbuf} is {@code null} or {@code length} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see {@link #valueOf(String)}),
      *         including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public GregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
-        if ((cbuf == null) || (len == 0)) {
+    public GregorianCalendar valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return Dates.createGregorianCalendar(parseLong(cbuf, offset, len));
+                return Dates.createGregorianCalendar(parseLong(cbuf, offset, length));
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**

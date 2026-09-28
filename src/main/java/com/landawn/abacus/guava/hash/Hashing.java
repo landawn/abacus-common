@@ -404,13 +404,13 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-MD5 with the given key
+     * @throws NullPointerException if {@code key} is {@code null}
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., a key
      *         that is not a raw secret key, such as an RSA public key). Note that the key's algorithm name is
      *         not checked against the MAC algorithm, so a {@code SecretKeySpec} labelled {@code "HmacSHA256"} is
      *         accepted by this method and yields the same MAC as {@link #hmacMd5(byte[])} over its raw bytes.
-     * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacMd5(final Key key) throws IllegalArgumentException, NullPointerException {
+    public static HashFunction hmacMd5(final Key key) throws NullPointerException, IllegalArgumentException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
@@ -428,10 +428,10 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-MD5 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
+     * @throws IllegalArgumentException if {@code key} is empty.
      */
-    public static HashFunction hmacMd5(final byte[] key) throws IllegalArgumentException, NullPointerException {
+    public static HashFunction hmacMd5(final byte[] key) throws NullPointerException, IllegalArgumentException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacMd5(key));
     }
 
@@ -448,11 +448,11 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA1 with the given key
+     * @throws NullPointerException if {@code key} is {@code null}
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., a key
      *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
-     * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha1(final Key key) throws IllegalArgumentException, NullPointerException {
+    public static HashFunction hmacSha1(final Key key) throws NullPointerException, IllegalArgumentException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
@@ -468,10 +468,10 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA1 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
+     * @throws IllegalArgumentException if {@code key} is empty.
      */
-    public static HashFunction hmacSha1(final byte[] key) throws IllegalArgumentException, NullPointerException {
+    public static HashFunction hmacSha1(final byte[] key) throws NullPointerException, IllegalArgumentException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha1(key));
     }
 
@@ -489,11 +489,11 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA256 with the given key
+     * @throws NullPointerException if {@code key} is {@code null}
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., a key
      *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
-     * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha256(final Key key) throws IllegalArgumentException, NullPointerException {
+    public static HashFunction hmacSha256(final Key key) throws NullPointerException, IllegalArgumentException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
@@ -510,10 +510,10 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA256 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
+     * @throws IllegalArgumentException if {@code key} is empty.
      */
-    public static HashFunction hmacSha256(final byte[] key) throws IllegalArgumentException, NullPointerException {
+    public static HashFunction hmacSha256(final byte[] key) throws NullPointerException, IllegalArgumentException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha256(key));
     }
 
@@ -531,11 +531,11 @@ public final class Hashing {
      *
      * @param key the secret key for HMAC computation
      * @return a hash function implementing HMAC-SHA512 with the given key
+     * @throws NullPointerException if {@code key} is {@code null}
      * @throws IllegalArgumentException if the given key is inappropriate for initializing this MAC (e.g., a key
      *         that is not a raw secret key); the key's algorithm name is not checked against the MAC algorithm.
-     * @throws NullPointerException if {@code key} is {@code null}
      */
-    public static HashFunction hmacSha512(final Key key) throws IllegalArgumentException, NullPointerException {
+    public static HashFunction hmacSha512(final Key key) throws NullPointerException, IllegalArgumentException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
@@ -553,10 +553,10 @@ public final class Hashing {
      *
      * @param key the key material for the secret key as a byte array
      * @return a hash function implementing HMAC-SHA512 with a key created from the given bytes
-     * @throws IllegalArgumentException if {@code key} is empty.
      * @throws NullPointerException if {@code key} is {@code null}
+     * @throws IllegalArgumentException if {@code key} is empty.
      */
-    public static HashFunction hmacSha512(final byte[] key) throws IllegalArgumentException, NullPointerException {
+    public static HashFunction hmacSha512(final byte[] key) throws NullPointerException, IllegalArgumentException {
         return GuavaHashFunction.wrap(com.google.common.hash.Hashing.hmacSha512(key));
     }
 
@@ -634,10 +634,12 @@ public final class Hashing {
      * collisions than many alternatives. While not cryptographically secure, it is
      * suitable for hash tables, checksums, and fingerprinting.
      *
-     * <p>The hash values generated are byte-wise identical to those created using the
-     * C++ version of FarmHash. Note that this implementation uses unsigned integers
-     * (see {@link com.google.common.primitives.UnsignedInts}), which should be considered
-     * when comparing with signed integer implementations.
+     * <p>The hash values generated are identical to those created using the C++ version of
+     * FarmHash: the {@code HashCode} holds the 64-bit fingerprint in little-endian byte order, so
+     * {@link HashCode#asLong()} returns the same 64 bits as {@code farmhash::Fingerprint64()}. The C++
+     * result is an <i>unsigned</i> 64-bit value, so compare or print the Java {@code long} as unsigned
+     * (see {@link com.google.common.primitives.UnsignedLongs}); fingerprints with the top bit set are
+     * negative as a signed {@code long}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -727,9 +729,9 @@ public final class Hashing {
      * <pre>{@code
      * // 384 bits from three independently seeded Murmur3 functions
      * List<HashFunction> functions = Arrays.asList(
-     *     Hashing.murmur3_128(),      // 128 bits
-     *     Hashing.murmur3_128(42),    // 128 bits
-     *     Hashing.murmur3_128(123)    // 128 bits
+     *     Hashing.murmur3_128(),    // 128 bits
+     *     Hashing.murmur3_128(42),  // 128 bits
+     *     Hashing.murmur3_128(123)  // 128 bits
      * );
      * HashFunction hash384 = Hashing.concatenating(functions);
      * }</pre>

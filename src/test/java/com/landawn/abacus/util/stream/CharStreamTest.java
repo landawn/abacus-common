@@ -5482,4 +5482,458 @@ public class CharStreamTest extends TestBase {
         assertThrows(NoSuchElementException.class, iter::nextChar);
         assertEquals(1, conditionCalls.get());
     }
+
+    @Test
+    public void testRangeWithStepReturnsEmptyForEqualBoundsOrMismatchedDirection() {
+        assertArrayEquals(new char[0], CharStream.range('a', 'a', 1).toArray());
+        assertArrayEquals(new char[0], CharStream.range('a', 'a', -1).toArray());
+        assertArrayEquals(new char[0], CharStream.range('a', 'f', -1).toArray());
+        assertArrayEquals(new char[0], CharStream.range('f', 'a', 1).toArray());
+        assertArrayEquals(new char[] { 'z', 'x', 'v' }, CharStream.range('z', 'u', -2).toArray());
+    }
+
+    // ---- perf review 2026-09-26 G091 begin ----
+    // G091-01: pins the column-major order of flatten(char[][], true) for jagged input with null/empty/short rows
+    @Test
+    public void testFlattenVertically_jaggedNullEmptyRowsMatchesColumnMajorReference() {
+        final Random random = new Random(20260926L);
+
+        for (int round = 0; round < 300; round++) {
+            final int rows = 2 + random.nextInt(8);
+            final char[][] a = new char[rows][];
+
+            for (int r = 0; r < rows; r++) {
+                final int kind = random.nextInt(6);
+                a[r] = kind == 0 ? null : new char[kind == 1 ? 0 : random.nextInt(7)];
+
+                if (a[r] != null) {
+                    for (int c = 0; c < a[r].length; c++) {
+                        a[r][c] = (char) ('a' + random.nextInt(26));
+                    }
+                }
+            }
+
+            int maxLen = 0;
+
+            for (final char[] row : a) {
+                maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+            }
+
+            final CharList expected = new CharList();
+
+            for (int c = 0; c < maxLen; c++) {
+                for (final char[] row : a) {
+                    if (row != null && c < row.length) {
+                        expected.add(row[c]);
+                    }
+                }
+            }
+
+            assertArrayEquals(expected.toArray(), CharStream.flatten(a, true).toArray());
+            assertEquals(expected.size(), CharStream.flatten(a, true).count());
+
+            if (expected.size() > 1) {
+                assertArrayEquals(expected.copy(1, expected.size()).toArray(), CharStream.flatten(a, true).skip(1).toArray());
+            }
+        }
+    }
+
+    // G091-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
+    @Test
+    public void testFlattenVertically_iteratorExhaustionAndLongRow() {
+        final char[][] a = { null, { 'a' }, {}, { 'b', 'c', 'd' }, null, { 'e', 'f' } };
+        final CharIterator iter = CharStream.flatten(a, true).iterator();
+        final StringBuilder sb = new StringBuilder();
+
+        while (iter.hasNext()) {
+            sb.append(iter.nextChar());
+        }
+
+        assertEquals("abecfd", sb.toString());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+        assertFalse(iter.hasNext());
+
+        final char[][] jagged = new char[201][];
+
+        for (int i = 0; i < 200; i++) {
+            jagged[i] = i % 3 == 0 ? null : new char[] { (char) ('A' + i % 26) };
+        }
+
+        jagged[200] = new char[5000];
+
+        for (int i = 0; i < 5000; i++) {
+            jagged[200][i] = (char) ('0' + i % 10);
+        }
+
+        final char[] result = CharStream.flatten(jagged, true).toArray();
+        final CharList expected = new CharList();
+
+        for (int i = 0; i < 200; i++) {
+            if (jagged[i] != null) {
+                expected.add(jagged[i][0]);
+            }
+        }
+
+        expected.add(jagged[200][0]);
+
+        for (int i = 1; i < 5000; i++) {
+            expected.add(jagged[200][i]);
+        }
+
+        assertArrayEquals(expected.toArray(), result);
+        assertArrayEquals(new char[0], CharStream.flatten(new char[][] { null, {}, null }, true).toArray());
+    }
+    // ---- perf review 2026-09-26 G091 end ----
+    // ---- perf review 2026-09-26 G112 begin ----
+    // G112-01: bulk count()/toCharList()/toArray() of concat(List<char[]>) / concat(char[]...) - null/empty arrays, skip into/at/after a
+    // segment, short (element-wise) and long (bulk copy) segments, fresh results, lazy read of the list, same list traversal calls
+    @Test
+    public void testConcatListOfArrays_bulkOpsMatchElementwise_G112() {
+        final char[] a = new char[20];
+        final char[] b = new char[40];
+        final char[] c = { (char) 1, (char) 2, (char) 3 };
+        for (int i = 0; i < a.length; i++) {
+            a[i] = (char) (10 + i);
+        }
+        for (int i = 0; i < b.length; i++) {
+            b[i] = (char) (100 + i);
+        }
+        final List<char[]> list = Arrays.asList(null, a, null, new char[0], c, b, c, new char[0]);
+        final char[] all = new char[66];
+        System.arraycopy(a, 0, all, 0, 20);
+        System.arraycopy(c, 0, all, 20, 3);
+        System.arraycopy(b, 0, all, 23, 40);
+        System.arraycopy(c, 0, all, 63, 3);
+
+        for (final int n : new int[] { 0, 1, 5, 19, 20, 21, 22, 23, 24, 40, 62, 63, 64, 65, 66, 70 }) {
+            final char[] expected = Arrays.copyOfRange(all, Math.min(n, all.length), all.length);
+            assertArrayEquals(expected, CharStream.concat(list).skip(n).toArray(), "skip " + n);
+            assertEquals(expected.length, CharStream.concat(list).skip(n).count(), "skip " + n);
+            final CharList xl = CharStream.concat(list).skip(n).toCharList();
+            assertArrayEquals(expected, xl.toArray(), "skip " + n);
+            xl.add((char) 7);
+            assertEquals(expected.length + 1, xl.size());
+        }
+
+        assertArrayEquals(all, CharStream.concat(a, c, b, c).toArray());
+        assertEquals(66, CharStream.concat(a, null, c, b, c).count());
+
+        final List<char[]> empties = Arrays.asList(null, new char[0]);
+        assertEquals(0, CharStream.concat(empties).toArray().length);
+        assertEquals(0, CharStream.concat(empties).count());
+        final CharList emptyList = CharStream.concat(empties).toCharList();
+        emptyList.add((char) 9);
+        assertEquals(1, emptyList.size());
+
+        final char[] result = CharStream.concat(Arrays.asList(b)).toArray();
+        assertArrayEquals(b, result);
+        assertFalse(result == b);
+        result[0] = (char) 0;
+        assertEquals((char) 100, b[0]);
+
+        // the list is read when the terminal operation runs; close handlers still run
+        final List<char[]> live = new ArrayList<>(Arrays.asList(new char[] { (char) 1 }, new char[] { (char) 2 }));
+        final CharStream stream = CharStream.concat(live);
+        live.set(1, b);
+        final AtomicInteger closed = new AtomicInteger();
+        assertEquals(41, stream.onClose(closed::incrementAndGet).count());
+        assertEquals(1, closed.get());
+
+        // partially consumed iterator, then drained in bulk
+        final CharIterator iter = CharStream.concat(list).iterator();
+        assertEquals((char) 10, iter.nextChar());
+        assertArrayEquals(Arrays.copyOfRange(all, 1, all.length), iter.toArray());
+        assertFalse(iter.hasNext());
+
+        // the list iterator is advanced exactly as element-by-element iteration advances it
+        final int[] calls = new int[2];
+        final List<char[]> counting = new ArrayList<char[]>(list) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public java.util.Iterator<char[]> iterator() {
+                final java.util.Iterator<char[]> it = super.iterator();
+
+                return new java.util.Iterator<char[]>() {
+                    @Override
+                    public boolean hasNext() {
+                        calls[0]++;
+                        return it.hasNext();
+                    }
+
+                    @Override
+                    public char[] next() {
+                        calls[1]++;
+                        return it.next();
+                    }
+                };
+            }
+        };
+
+        assertArrayEquals(all, CharStream.concat(counting).toArray());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+        calls[0] = calls[1] = 0;
+        assertEquals(66, CharStream.concat(counting).count());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+        calls[0] = calls[1] = 0;
+        assertEquals(66, CharStream.concat(counting).toCharList().size());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+    }
+
+    private static char[] g112Chars(final int length) {
+        final char[] data = new char[length];
+
+        for (int i = 0; i < length; i++) {
+            data[i] = (char) ('a' + (i * 7) % 26);
+        }
+
+        return data;
+    }
+
+    // Returns at most chunk chars per read and throws an IOException on read call number failAtCall (0-based; -1 = never).
+    private static final class G112ChunkedReader extends Reader {
+        private final char[] data;
+        private final int chunk;
+        private final int failAtCall;
+        private int pos = 0;
+        int readCalls = 0;
+        int closeCalls = 0;
+
+        G112ChunkedReader(final char[] data, final int chunk, final int failAtCall) {
+            this.data = data;
+            this.chunk = chunk;
+            this.failAtCall = failAtCall;
+        }
+
+        @Override
+        public int read(final char[] cbuf, final int off, final int len) throws IOException {
+            final int call = readCalls++;
+
+            if (call == failAtCall) {
+                throw new IOException("read failure at call " + call);
+            }
+
+            if (pos >= data.length) {
+                return -1;
+            }
+
+            final int n = Math.min(Math.min(chunk, len), data.length - pos);
+            System.arraycopy(data, pos, cbuf, off, n);
+            pos += n;
+            return n;
+        }
+
+        @Override
+        public void close() {
+            closeCalls++;
+        }
+    }
+
+    // G112-02: of(Reader) count()/toArray()/toCharList() consume whole buffered chunks - same read() calls, same results
+    @Test
+    public void testOfReader_bulkToArrayCountToList_chunks_G112() {
+        final char[] data = g112Chars(20000);
+
+        for (final int chunk : new int[] { 1, 5, 15, 16, 17, 3000, 8192, 10000 }) {
+            final int reads = (data.length + Math.min(chunk, 8192) - 1) / Math.min(chunk, 8192) + 1;
+
+            G112ChunkedReader reader = new G112ChunkedReader(data, chunk, -1);
+            assertArrayEquals(data, CharStream.of(reader).toArray(), "chunk " + chunk);
+            assertEquals(reads, reader.readCalls, "chunk " + chunk);
+
+            reader = new G112ChunkedReader(data, chunk, -1);
+            assertEquals(20000, CharStream.of(reader).count(), "chunk " + chunk);
+            assertEquals(reads, reader.readCalls, "chunk " + chunk);
+
+            reader = new G112ChunkedReader(data, chunk, -1);
+            final CharList list = CharStream.of(reader).toCharList();
+            assertEquals(CharList.of(data), list, "chunk " + chunk);
+            assertEquals(reads, reader.readCalls, "chunk " + chunk);
+            list.add('!');
+            assertEquals(20001, list.size());
+
+            // start inside a buffered chunk
+            for (final int skip : new int[] { 1, 2, 14, 15, 16, 2999, 4500, 8191, 8192, 8193, 19999, 20000, 20001 }) {
+                final char[] expected = Arrays.copyOfRange(data, Math.min(skip, data.length), data.length);
+                assertArrayEquals(expected, CharStream.of(new G112ChunkedReader(data, chunk, -1)).skip(skip).toArray(), "chunk " + chunk + " skip " + skip);
+                assertEquals(expected.length, CharStream.of(new G112ChunkedReader(data, chunk, -1)).skip(skip).count(), "chunk " + chunk + " skip " + skip);
+                assertEquals(CharList.of(expected), CharStream.of(new G112ChunkedReader(data, chunk, -1)).skip(skip).toCharList(),
+                        "chunk " + chunk + " skip " + skip);
+            }
+        }
+
+        final char[] big = g112Chars(3 * 8192 + 17);
+        assertArrayEquals(big, CharStream.of(new StringReader(new String(big))).toArray());
+        assertEquals(big.length, CharStream.of(new StringReader(new String(big))).count());
+        assertArrayEquals(Arrays.copyOfRange(big, 1, big.length), CharStream.of(new StringReader(new String(big))).skip(1).toArray());
+        assertEquals(CharList.of(Arrays.copyOfRange(big, 5, big.length)), CharStream.of(new StringReader(new String(big))).skip(5).toCharList());
+    }
+
+    // G112-02: empty input, read() == 0, a read failure in a later call, and close handling
+    @Test
+    public void testOfReader_bulkToArrayCountToList_edgeCases_G112() {
+        assertEquals(0, CharStream.of(new StringReader("")).toArray().length);
+        assertEquals(0, CharStream.of(new StringReader("")).count());
+        final CharList empty = CharStream.of(new StringReader("")).toCharList();
+        assertEquals(0, empty.size());
+        empty.add('x');
+        assertEquals(CharList.of('x'), empty);
+
+        final Reader zeroRead = new Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) {
+                return 0;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        assertEquals(0, CharStream.of(zeroRead).toArray().length);
+        assertEquals(0, CharStream.of(zeroRead).count());
+        assertEquals(0, CharStream.of(zeroRead).toCharList().size());
+
+        final char[] data = g112Chars(10000);
+
+        final G112ChunkedReader r1 = new G112ChunkedReader(data, 3000, 2);
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> CharStream.of(r1).toArray());
+        assertEquals(3, r1.readCalls);
+
+        final G112ChunkedReader r2 = new G112ChunkedReader(data, 3000, 2);
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> CharStream.of(r2).count());
+        assertEquals(3, r2.readCalls);
+
+        final G112ChunkedReader r3 = new G112ChunkedReader(data, 3000, 0);
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> CharStream.of(r3).toCharList());
+        assertEquals(1, r3.readCalls);
+
+        final G112ChunkedReader r4 = new G112ChunkedReader(data, 3000, -1);
+        assertArrayEquals(data, CharStream.of(r4, true).toArray());
+        assertEquals(1, r4.closeCalls);
+
+        final G112ChunkedReader r5 = new G112ChunkedReader(data, 3000, -1);
+        assertEquals(10000, CharStream.of(r5, false).count());
+        assertEquals(0, r5.closeCalls);
+
+        // a short-circuiting operation still reads only what it needs
+        final G112ChunkedReader r6 = new G112ChunkedReader(data, 3000, -1);
+        assertArrayEquals(Arrays.copyOf(data, 10), CharStream.of(r6).limit(10).toArray());
+        assertEquals(1, r6.readCalls);
+    }
+    // ---- perf review 2026-09-26 G112 end ----
+    // ---- perf review 2026-09-26 G114 begin ----
+    private static char[] flattenVerticallyReferenceG114(final char[][] a) {
+        final CharList ret = new CharList();
+        int maxLen = 0;
+
+        for (final char[] row : a) {
+            maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+        }
+
+        for (int col = 0; col < maxLen; col++) {
+            for (final char[] row : a) {
+                if (row != null && col < row.length) {
+                    ret.add(row[col]);
+                }
+            }
+        }
+
+        return ret.toArray();
+    }
+
+    private static void assertFlattenVerticallyMatchesReferenceG114(final char[][] a, final int skip) {
+        final char[] expected = flattenVerticallyReferenceG114(a);
+        final String message = Arrays.deepToString(a);
+        assertArrayEquals(expected, CharStream.flatten(a, true).toArray(), message);
+        assertEquals(expected.length, CharStream.flatten(a, true).count(), message);
+        assertArrayEquals(Arrays.copyOfRange(expected, Math.min(skip, expected.length), expected.length), CharStream.flatten(a, true).skip(skip).toArray(),
+                message);
+
+        final CharIterator iter = CharStream.flatten(a, true).iterator();
+
+        for (final char element : expected) {
+            assertTrue(iter.hasNext());
+            assertEquals(element, iter.nextChar());
+        }
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextChar);
+        assertFalse(iter.hasNext());
+    }
+
+    // G114-01: flatten(char[][], true) keeps the original walk for dense input and uses a compacted row walk when
+    // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
+    @Test
+    public void testFlattenVertically_denseAndSparseWalksMatchColumnMajorReference() {
+        final Random random = new Random(114);
+
+        for (int round = 0; round < 400; round++) {
+            // kind 0: dense jagged, 1: mostly null/empty rows plus a few long ones, 2: rectangular, 3: one long row among empty/null rows
+            final int kind = round % 4;
+            final int rows = 2 + random.nextInt(kind == 1 || kind == 3 ? 40 : 8);
+            final int width = 1 + random.nextInt(6);
+            final int longRow = random.nextInt(rows);
+            final char[][] a = new char[rows][];
+
+            for (int i = 0; i < rows; i++) {
+                final int len;
+
+                if (kind == 0) {
+                    len = random.nextInt(7) - 1;
+                } else if (kind == 1) {
+                    len = random.nextInt(6) == 0 ? random.nextInt(40) : random.nextInt(3) - 1;
+                } else if (kind == 2) {
+                    len = width;
+                } else {
+                    len = i == longRow ? 1 + random.nextInt(60) : random.nextInt(2) - 1;
+                }
+
+                if (len >= 0) {
+                    a[i] = new char[len];
+
+                    for (int j = 0; j < len; j++) {
+                        a[i][j] = (char) (i * 100 + j);
+                    }
+                }
+            }
+
+            assertFlattenVerticallyMatchesReferenceG114(a, random.nextInt(rows * 3 + 2));
+        }
+
+        // rows * longest row == 4 * elements keeps the original walk; one more empty row switches to the compacted walk
+        final char[][] boundary = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {} };
+        final char[][] boundaryPlusOne = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {}, {} };
+        assertArrayEquals(new char[] { 1, 5, 2, 6, 3, 7, 4, 8 }, CharStream.flatten(boundary, true).toArray());
+        assertArrayEquals(new char[] { 1, 5, 2, 6, 3, 7, 4, 8 }, CharStream.flatten(boundaryPlusOne, true).toArray());
+
+        for (int skip = 0; skip <= 9; skip++) {
+            assertFlattenVerticallyMatchesReferenceG114(boundary, skip);
+            assertFlattenVerticallyMatchesReferenceG114(boundaryPlusOne, skip);
+        }
+
+        // sparse: rows drop out of the compacted walk at different columns
+        final char[][] sparse = { null, {}, { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, {}, {}, { 10, 11 }, {}, null, {}, {}, { 12, 13, 14, 15 }, {} };
+        assertArrayEquals(new char[] { 1, 10, 12, 2, 11, 13, 3, 14, 4, 15, 5, 6, 7, 8, 9 }, CharStream.flatten(sparse, true).toArray());
+        assertFlattenVerticallyMatchesReferenceG114(sparse, 4);
+
+        // one long row among 999 null rows (first and last position)
+        final char[][] oneLongRow = new char[1000][];
+        oneLongRow[999] = new char[5000];
+
+        for (int j = 0; j < 5000; j++) {
+            oneLongRow[999][j] = (char) j;
+        }
+
+        assertArrayEquals(oneLongRow[999], CharStream.flatten(oneLongRow, true).toArray());
+        oneLongRow[0] = oneLongRow[999];
+        oneLongRow[999] = null;
+        assertFlattenVerticallyMatchesReferenceG114(oneLongRow, 4999);
+        assertEquals(0, CharStream.flatten(new char[][] { null, {}, null, {} }, true).count());
+    }
+    // ---- perf review 2026-09-26 G114 end ----
 }

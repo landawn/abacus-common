@@ -98,8 +98,8 @@ public final class Hex {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {0x01, (byte)0xAB};
-     * char[] lower = Hex.encode(data, true);    // returns ['0','1','a','b']
-     * char[] upper = Hex.encode(data, false);   // returns ['0','1','A','B']
+     * char[] lower = Hex.encode(data, true);   // returns ['0','1','a','b']
+     * char[] upper = Hex.encode(data, false);  // returns ['0','1','A','B']
      * }</pre>
      *
      * @param data the byte array to convert to hexadecimal characters.
@@ -152,8 +152,8 @@ public final class Hex {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] data = {(byte)0xFF, 0x00, 0x42};
-     * String lower = Hex.encodeToString(data, true);    // returns "ff0042"
-     * String upper = Hex.encodeToString(data, false);   // returns "FF0042"
+     * String lower = Hex.encodeToString(data, true);   // returns "ff0042"
+     * String upper = Hex.encodeToString(data, false);  // returns "FF0042"
      * }</pre>
      *
      * @param data the byte array to convert to a hexadecimal string.
@@ -204,9 +204,9 @@ public final class Hex {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte[] data1 = Hex.decode("48656c6c6f");   // returns bytes for "Hello"
-     * byte[] data2 = Hex.decode("FF00");         // returns {(byte)0xFF, 0x00}
-     * byte[] data3 = Hex.decode("DeadBeef");     // returns {(byte)0xDE, (byte)0xAD, (byte)0xBE, (byte)0xEF}; mixed case is accepted
+     * byte[] data1 = Hex.decode("48656c6c6f");  // returns bytes for "Hello"
+     * byte[] data2 = Hex.decode("FF00");        // returns {(byte)0xFF, 0x00}
+     * byte[] data3 = Hex.decode("DeadBeef");    // returns {(byte)0xDE, (byte)0xAD, (byte)0xBE, (byte)0xEF}; mixed case is accepted
      * }</pre>
      *
      * @param data a string containing hexadecimal digits (0-9, A-F, a-f).
@@ -219,7 +219,19 @@ public final class Hex {
         if (data == null) {
             throw new IllegalArgumentException("Data string cannot be null");
         }
-        return decode(data.toCharArray());
+        final int len = data.length();
+
+        if ((len & 0x01) != 0) {
+            throw new IllegalArgumentException("Odd number of characters: " + len);
+        }
+
+        final byte[] out = new byte[len >> 1];
+
+        for (int i = 0, j = 0; j < len; i++, j += 2) {
+            out[i] = (byte) ((toDigit(data.charAt(j), j) << 4) | toDigit(data.charAt(j + 1), j + 1));
+        }
+
+        return out;
     }
 
     /**

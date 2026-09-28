@@ -254,15 +254,15 @@ public class RefType extends AbstractType<Ref> {
      * }
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Ref value to set as the parameter
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Ref x) throws NullPointerException, SQLException {
-        stmt.setRef(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final Ref x) throws NullPointerException, SQLException {
+        statement.setRef(columnIndex, x);
     }
 
     /**
@@ -282,16 +282,16 @@ public class RefType extends AbstractType<Ref> {
      * }
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Ref value to set as the parameter
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Ref x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Ref x) throws NullPointerException, SQLException {
         // stmt.setRef(parameterName, x);
 
-        stmt.setObject(parameterName, x);
+        statement.setObject(parameterName, x);
     }
 }

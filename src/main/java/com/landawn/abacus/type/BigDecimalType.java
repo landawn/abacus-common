@@ -118,22 +118,22 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      *
      * @param cbuf the character array containing the decimal digits; may be {@code null}
      * @param offset the 0-based start position within {@code cbuf}
-     * @param len the number of characters to parse
+     * @param length the number of characters to parse
      * @return a new {@code BigDecimal} constructed from the specified characters,
-     *         or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     *         or {@code null} if {@code cbuf} is {@code null} or {@code length} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      * @throws NumberFormatException if the character sequence cannot be parsed as a valid {@code BigDecimal}, including a range that contains only
      *         whitespace (which trims to the empty string, exactly as {@code valueOf("   ")} does)
      */
     @Override
-    public BigDecimal valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, NumberFormatException {
-        if (cbuf == null || len == 0) {
+    public BigDecimal valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, NumberFormatException {
+        if (cbuf == null || length == 0) {
             return null;
         }
 
         // Same trimming rule as String.trim() (used by valueOf(String)), applied without copying.
         int from = offset;
-        int to = offset + len;
+        int to = offset + length;
 
         while (from < to && cbuf[from] <= ' ') {
             from++;
@@ -182,30 +182,30 @@ public final class BigDecimalType extends NumberType<BigDecimal> {
      * Sets a {@link java.math.BigDecimal} parameter on a {@link java.sql.PreparedStatement} at the specified position.
      * Delegates to {@link java.sql.PreparedStatement#setBigDecimal(int, java.math.BigDecimal)}.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code BigDecimal} value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final BigDecimal x) throws NullPointerException, SQLException {
-        stmt.setBigDecimal(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final BigDecimal x) throws NullPointerException, SQLException {
+        statement.setBigDecimal(columnIndex, x);
     }
 
     /**
      * Sets a named {@link java.math.BigDecimal} parameter on a {@link java.sql.CallableStatement}.
      * Delegates to {@link java.sql.CallableStatement#setBigDecimal(String, java.math.BigDecimal)}.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code BigDecimal} value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final BigDecimal x) throws NullPointerException, SQLException {
-        stmt.setBigDecimal(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final BigDecimal x) throws NullPointerException, SQLException {
+        statement.setBigDecimal(parameterName, x);
     }
 
     /**

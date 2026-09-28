@@ -18,6 +18,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
 import com.landawn.abacus.TestBase;
+import org.junit.jupiter.api.Assertions;
 
 public class GuavaMultisetTypeTest extends TestBase {
 
@@ -274,5 +275,22 @@ public class GuavaMultisetTypeTest extends TestBase {
             org.junit.jupiter.api.Assertions.assertThrows(ArithmeticException.class, () -> t.valueOf("{\"a\": 2147483648}"), typeName);
             org.junit.jupiter.api.Assertions.assertThrows(com.landawn.abacus.exception.ParsingException.class, () -> t.valueOf("{\"a\": 1"), typeName);
         }
+    }
+
+    @Test
+    public void testImmutableMultisetStringOfKeepsInsertionOrder() {
+        final Type<com.google.common.collect.ImmutableMultiset<String>> immutable = TypeFactory
+                .getType("com.google.common.collect.ImmutableMultiset<String>");
+        final String json = "{\"z\": 1, \"a\": 2, \"m\": 3, \"b\": 4, \"q\": 5}";
+
+        // valueOf builds the ImmutableMultiset in document order; stringOf must write that order back
+        Assertions.assertEquals(json, immutable.stringOf(immutable.valueOf(json)));
+
+        final com.google.common.collect.ImmutableMultiset<String> built = com.google.common.collect.ImmutableMultiset.<String> builder()
+                .addCopies("z", 1)
+                .addCopies("a", 2)
+                .addCopies("m", 3)
+                .build();
+        Assertions.assertEquals("{\"z\": 1, \"a\": 2, \"m\": 3}", immutable.stringOf(built));
     }
 }

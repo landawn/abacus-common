@@ -643,7 +643,8 @@ public abstract class StringsTestSupport extends AbstractTest {
     }
 
     protected static boolean isRemovableAccentMarkReference(final int codePoint) {
-        if (!Unicode17Data.isMark(codePoint) || codePoint == 0x034F) {
+        // C-513: the negation overlay U+0338 is preserved like U+034F
+        if (!Unicode17Data.isMark(codePoint) || codePoint == 0x034F || codePoint == 0x0338) {
             return false;
         }
 

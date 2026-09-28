@@ -2087,4 +2087,260 @@ public class XmlParserImplTest extends TestBase {
         map.put(key, value);
         return map;
     }
+
+    @Test
+    public void testDeserializeNodeTypesNullFileSourceNamesSourceParameter() {
+        final Map<String, Type<?>> nodeTypes = Map.of("value", Type.of(String.class));
+
+        for (final XmlParserType parserType : XmlParserType.values()) {
+            final XmlParserImpl parser = new XmlParserImpl(parserType);
+            final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> parser.deserialize((File) null, null, nodeTypes));
+            Assertions.assertEquals("'source' cannot be null", e.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testStaxEmptyCdataChunkDoesNotLeakTextIntoNextValue() {
+        final XmlParserImpl stax = new XmlParserImpl(XmlParserType.StAX);
+        final XmlParserImpl dom = new XmlParserImpl(XmlParserType.DOM);
+
+        // An empty CDATA section after the first text chunk of one value must not corrupt the next value.
+        final String beanXml = "<testBean><name>x<![CDATA[]]></name><renamedField>y<![CDATA[]]>z</renamedField></testBean>";
+        final XmlParserImplTest.TestBean bean = stax.deserialize(beanXml, null, XmlParserImplTest.TestBean.class);
+        Assertions.assertEquals("x", bean.getName());
+        Assertions.assertEquals("yz", bean.getRenamedField());
+        Assertions.assertEquals("yz", dom.deserialize(beanXml, null, XmlParserImplTest.TestBean.class).getRenamedField());
+
+        final String mapXml = "<map><a>x<![CDATA[]]></a><b>y<![CDATA[]]>z</b></map>";
+        final Map<String, Object> map = stax.deserialize(mapXml, null, Map.class);
+        Assertions.assertEquals("x", map.get("a"));
+        Assertions.assertEquals("yz", map.get("b"));
+        Assertions.assertEquals(map, dom.deserialize(mapXml, null, Map.class));
+
+        final MapEntity mapEntity = stax.deserialize("<ent><a>x<![CDATA[]]></a><b>y<![CDATA[]]>z</b></ent>", null, MapEntity.class);
+        Assertions.assertEquals("yz", mapEntity.get("b"));
+    }
+
+    @Test
+    public void testStaxEmptyCdataChunkDoesNotCorruptJsonListPayload() {
+        final XmlParserImpl stax = new XmlParserImpl(XmlParserType.StAX);
+
+        final List<Object> list = stax.deserialize("<list>[\"p\"<![CDATA[]]>]</list>", null, List.class);
+        Assertions.assertEquals(Arrays.asList("p"), list);
+
+        // The JSON text of the second list starts with its own first chunk, not with the previous list's text.
+        final Map<String, Object> map = stax.deserialize("<map><a>x<![CDATA[]]></a><l type=\"List\">[\"p\"<![CDATA[]]>,\"q\"]</l></map>", null, Map.class);
+        Assertions.assertEquals("x", map.get("a"));
+        Assertions.assertEquals(Arrays.asList("p", "q"), map.get("l"));
+    }
+
+    // ---- deep review 2026-09-25 G010 begin ----
+    @Data
+    @NoArgsConstructor
+    public static class G010Item {
+        private String name;
+        private int age;
+
+        public G010Item(final String name, final int age) {
+            this.name = name;
+            this.age = age;
+        }
+    }
+
+    @Data
+    public static class G010NestedContainerBean {
+        private List<List<G010Item>> listOfLists;
+        private G010Item[][] arrayOfArrays;
+        private List<G010Item[]> listOfArrays;
+        private Map<String, List<List<G010Item>>> mapOfListOfLists;
+    }
+
+    // G010-01: a property (or map value) whose element type is itself a collection/array of beans lost every bean on read:
+    // each inner <list>/<array> element was read as a map ([{"g010Item": {}}]) or failed with a ParsingException.
+    @Test
+    public void testDeserialize_nestedContainerOfBeansProperty_roundTrips() {
+        final G010NestedContainerBean bean = new G010NestedContainerBean();
+        final List<List<G010Item>> listOfLists = new ArrayList<>();
+        listOfLists.add(new ArrayList<>(Arrays.asList(new G010Item("a", 1), new G010Item("b", 2))));
+        listOfLists.add(new ArrayList<>());
+        listOfLists.add(new ArrayList<>(Arrays.asList(new G010Item("c", 3))));
+        bean.setListOfLists(listOfLists);
+        bean.setArrayOfArrays(new G010Item[][] { { new G010Item("d", 4) }, { new G010Item("e", 5), new G010Item("f", 6) } });
+        final List<G010Item[]> listOfArrays = new ArrayList<>();
+        listOfArrays.add(new G010Item[] { new G010Item("g", 7), new G010Item("h", 8) });
+        bean.setListOfArrays(listOfArrays);
+        final Map<String, List<List<G010Item>>> mapOfListOfLists = new LinkedHashMap<>();
+        mapOfListOfLists.put("k", new ArrayList<>(Arrays.asList(new ArrayList<>(Arrays.asList(new G010Item("i", 9))))));
+        bean.setMapOfListOfLists(mapOfListOfLists);
+
+        for (final boolean prettyFormat : new boolean[] { false, true }) {
+            for (final boolean writeTypeInfo : new boolean[] { false, true }) {
+                final String xml = staxParser.serialize(bean, XmlSerConfig.create().setPrettyFormat(prettyFormat).setWriteTypeInfo(writeTypeInfo));
+
+                for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                    final String label = (parser == staxParser ? "StAX" : "DOM") + " pretty=" + prettyFormat + " typeInfo=" + writeTypeInfo;
+                    final G010NestedContainerBean result = parser.deserialize(xml, null, G010NestedContainerBean.class);
+
+                    Assertions.assertEquals(listOfLists, result.getListOfLists(), label);
+                    Assertions.assertTrue(Arrays.deepEquals(bean.getArrayOfArrays(), result.getArrayOfArrays()), label);
+                    Assertions.assertEquals(1, result.getListOfArrays().size(), label);
+                    Assertions.assertArrayEquals(listOfArrays.get(0), result.getListOfArrays().get(0), label);
+                    Assertions.assertEquals(mapOfListOfLists, result.getMapOfListOfLists(), label);
+                }
+            }
+        }
+    }
+    @Data
+    public static class G010Person {
+        private String firstName;
+        private int age;
+    }
+
+    // G010-06: ignoredPropNames was matched against the element name only, so a case or naming-policy variant that
+    // getPropInfo resolves to the ignored property (<firstname>, <first_name>) bound it anyway, on both backends.
+    @Test
+    public void testDeserialize_ignoredPropertyNotBoundThroughNameVariant() {
+        final XmlDeserConfig config = XmlDeserConfig.create().setIgnoredPropNames(G010Person.class, java.util.Set.of("firstName"));
+        final String[] documents = { "<g010Person><firstName>x</firstName><age>3</age></g010Person>",
+                "<g010Person><firstname>x</firstname><age>3</age></g010Person>", "<g010Person><first_name>x</first_name><age>3</age></g010Person>",
+                "<g010Person><FIRST_NAME>x</FIRST_NAME><age>3</age></g010Person>",
+                "<bean name=\"g010Person\"><property name=\"first_name\">x</property><property name=\"age\">3</property></bean>" };
+
+        for (final String xml : documents) {
+            for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                final String label = (parser == staxParser ? "StAX " : "DOM ") + xml;
+                final G010Person person = parser.deserialize(xml, config, G010Person.class);
+
+                Assertions.assertNull(person.getFirstName(), label);
+                Assertions.assertEquals(3, person.getAge(), label);
+            }
+        }
+
+        // Without the ignore list the variants still bind, so the test exercises the resolution path it guards.
+        Assertions.assertEquals("x", staxParser.deserialize(documents[2], null, G010Person.class).getFirstName());
+        Assertions.assertEquals("x", domParser.deserialize(documents[2], null, G010Person.class).getFirstName());
+    }
+    // ---- deep review 2026-09-25 G010 end ----
+
+    // ---- perf review 2026-09-26 G113 begin ----
+
+    /** G113-02: optional, nullable and tuple-like properties written through the propName-aware writeUnwrappedValue. */
+    @Data
+    public static class PerfG113Bean {
+        private Optional<String> os;
+        private Nullable<String> n;
+        private Pair<String, Integer> p;
+        private java.util.Optional<StringBuilder> jo;
+    }
+
+    // G113-02: the XML and the XML-1.0 rejection messages of present optional/tuple properties and map values are unchanged.
+    @Test
+    public void testWriteUnwrappedValue_propertyAndValueMessagesPinned() {
+        final String bad = "a" + (char) 1 + "b";
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            final PerfG113Bean legal = new PerfG113Bean();
+            legal.setOs(Optional.of("v&<x"));
+            legal.setN(Nullable.of("v&<x"));
+            legal.setP(Pair.of("v&<x", 7));
+            legal.setJo(java.util.Optional.of(new StringBuilder("v&<x")));
+            Assertions.assertEquals(
+                    "<perfG113Bean><os>v&amp;&lt;x</os><n>v&amp;&lt;x</n><p>[&quot;v&amp;&lt;x&quot;, 7]</p><jo>v&amp;&lt;x</jo></perfG113Bean>",
+                    parser.serialize(legal));
+
+            final PerfG113Bean optional = new PerfG113Bean();
+            optional.setOs(Optional.of(bad));
+            Assertions.assertEquals("Property 'os' contains U+0001, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(optional)).getMessage());
+
+            final PerfG113Bean nullable = new PerfG113Bean();
+            nullable.setN(Nullable.of(bad));
+            Assertions.assertEquals("Property 'n' contains U+0001, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(nullable)).getMessage());
+
+            final PerfG113Bean jdkOptional = new PerfG113Bean();
+            jdkOptional.setJo(java.util.Optional.of(new StringBuilder(bad)));
+            Assertions.assertEquals("Property 'jo' contains U+0001, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(jdkOptional)).getMessage());
+
+            // a tuple is written as JSON text, which escapes the control character
+            final PerfG113Bean tuple = new PerfG113Bean();
+            tuple.setP(Pair.of(bad, 1));
+            Assertions.assertEquals("<perfG113Bean><p>[&quot;a\\u0001b&quot;, 1]</p></perfG113Bean>", parser.serialize(tuple));
+
+            // a map value has no property: the message names it "Value"
+            final Map<String, Object> map = new LinkedHashMap<>();
+            map.put("k", Optional.of(bad));
+            Assertions.assertEquals("Value contains U+0001, which cannot be represented in XML 1.0",
+                    Assertions.assertThrows(ParsingException.class, () -> parser.serialize(map)).getMessage());
+            map.put("k", Pair.of(bad, 1));
+            Assertions.assertEquals("<map><k>[&quot;a\\u0001b&quot;, 1]</k></map>", parser.serialize(map));
+        }
+    }
+
+    // ---- perf review 2026-09-26 G113 end ----
+
+    // ---- bug review 2026-09-27 G010 begin ----
+
+    /** G010-01: a property declared as Object, which is written through write(...) rather than as a scalar. */
+    @Data
+    public static class PrettyObjectPropBean {
+        private Object any;
+    }
+
+    // G010-01: pretty format appended the closing line break + indentation INSIDE the text of an Object property holding a scalar.
+    @Test
+    public void testSerialize_prettyFormatObjectPropertyHoldingScalar() {
+        final XmlSerConfig pretty = new XmlSerConfig().setPrettyFormat(true);
+
+        final PrettyObjectPropBean bean = new PrettyObjectPropBean();
+        bean.setAny("abc");
+
+        final String xml = staxParser.serialize(bean, pretty);
+        Assertions.assertEquals("<prettyObjectPropBean>\n    <any>abc</any>\n</prettyObjectPropBean>", xml);
+
+        for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+            Assertions.assertEquals("abc", parser.deserialize(xml, null, PrettyObjectPropBean.class).getAny());
+        }
+
+        bean.setAny(5);
+        Assertions.assertEquals("<prettyObjectPropBean>\n    <any>5</any>\n</prettyObjectPropBean>", staxParser.serialize(bean, pretty));
+
+        // a structured value keeps its own element and the closing indentation
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("k", "v");
+        bean.setAny(map);
+        Assertions.assertEquals("<prettyObjectPropBean>\n    <any>\n        <map>\n            <k>v</k>\n        </map>\n    </any>\n</prettyObjectPropBean>",
+                staxParser.serialize(bean, pretty));
+    }
+
+    // ---- bug review 2026-09-27 G010 end ----
+
+    // ---- bug review 2026-09-27 verify G116 begin ----
+
+    // pretty format: an Object property reads back on StAX and DOM exactly as the compact form does, for scalars
+    // (including surrounding blanks and the empty String) and for a structured value alike.
+    @Test
+    public void testSerialize_prettyObjectPropertyReadsLikeCompact() {
+        final Map<String, Object> map = new LinkedHashMap<>();
+        map.put("k", "v");
+        final Object[] values = { " a b ", "", 5, true, DayOfWeek.MONDAY, LocalDate.of(2020, 1, 2), map };
+
+        for (final Object value : values) {
+            final PrettyObjectPropBean bean = new PrettyObjectPropBean();
+            bean.setAny(value);
+
+            final String compactXml = staxParser.serialize(bean, new XmlSerConfig());
+            final String prettyXml = staxParser.serialize(bean, new XmlSerConfig().setPrettyFormat(true));
+
+            for (final XmlParserImpl parser : new XmlParserImpl[] { staxParser, domParser }) {
+                final Object expected = parser.deserialize(compactXml, null, PrettyObjectPropBean.class).getAny();
+                Assertions.assertEquals(expected, parser.deserialize(prettyXml, null, PrettyObjectPropBean.class).getAny(), prettyXml);
+            }
+        }
+    }
+
+    // ---- bug review 2026-09-27 verify G116 end ----
 }

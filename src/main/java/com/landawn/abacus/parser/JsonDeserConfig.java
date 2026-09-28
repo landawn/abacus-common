@@ -100,19 +100,20 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
 
     /**
      * Sets whether {@code null} or empty values encountered in the JSON source should be ignored
-     * during deserialization. When {@code true}, a JSON {@code null} or empty string will not
-     * overwrite the corresponding property on the target bean, leaving it at its existing value.
+     * during deserialization. When {@code true}, a JSON {@code null} or an empty value (empty string,
+     * array, collection or map, e.g. {@code []} or <code>{}</code> for a {@code List}/{@code Map} property)
+     * will not overwrite the corresponding property on the target bean, leaving it at its existing value.
      * It also applies to Map and Collection targets: entries/elements whose value is {@code null}
      * or empty (CharSequence/Array/Collection/Map) are skipped.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
-     * config.setIgnoreNullOrEmpty(true);                 // returns this (config)
-     * boolean enabled = config.isIgnoreNullOrEmpty();    // returns true
+     * config.setIgnoreNullOrEmpty(true);               // returns this (config)
+     * boolean enabled = config.isIgnoreNullOrEmpty();  // returns true
      *
-     * config.setIgnoreNullOrEmpty(false);                // returns this (config)
-     * boolean disabled = config.isIgnoreNullOrEmpty();   // returns false (default)
+     * config.setIgnoreNullOrEmpty(false);               // returns this (config)
+     * boolean disabled = config.isIgnoreNullOrEmpty();  // returns false (default)
      * }</pre>
      *
      * @param ignoreNullOrEmpty {@code true} to skip assigning {@code null} or empty JSON values
@@ -150,11 +151,11 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
-     * config.setReadNullToEmpty(true);                // returns this (config)
-     * boolean asEmpty = config.isReadNullToEmpty();   // returns true
+     * config.setReadNullToEmpty(true);               // returns this (config)
+     * boolean asEmpty = config.isReadNullToEmpty();  // returns true
      *
-     * config.setReadNullToEmpty(false);               // returns this (config)
-     * boolean asNull = config.isReadNullToEmpty();    // returns false (default)
+     * config.setReadNullToEmpty(false);             // returns this (config)
+     * boolean asNull = config.isReadNullToEmpty();  // returns false (default)
      * }</pre>
      *
      * @param readNullToEmpty {@code true} to read {@code null} as empty, {@code false} otherwise
@@ -219,8 +220,8 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      *
      * config.setMapInstanceType(TreeMap.class);
      * // Maps will be created as TreeMap for sorted keys
-     * parser.deserialize(json, config, Map.class);       // -> TreeMap
-     * parser.deserialize(json, config, HashMap.class);   // -> HashMap (declared concrete type wins)
+     * parser.deserialize(json, config, Map.class);      // -> TreeMap
+     * parser.deserialize(json, config, HashMap.class);  // -> HashMap (declared concrete type wins)
      * }</pre>
      *
      * @param mapInstanceType the Map implementation class to use (must not be {@code null}); interfaces/abstract classes are resolved by {@code Suppliers.ofMap} at deserialization time
@@ -255,6 +256,10 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      *   <li>The current element to be added</li>
      * </ol>
      *
+     * <p>The handler <i>replaces</i> the default {@code collection.add(element)}: the parser does not add the
+     * element itself, so a handler that wants to keep an element must add it to the collection (as the
+     * examples below do).</p>
+     *
      * <p>The handler is looked up by the immediate property or map-key name under which the JSON
      * array appears; dotted paths are not resolved.</p>
      *
@@ -276,7 +281,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      * @param propName the local property or map-key name under which the JSON array appears (dotted paths are not resolved)
      * @param handler the handler invoked for each element of a JSON array property (first parameter is the Collection being populated, second is the current element)
      * @return {@code this} instance for method chaining
-     * @throws IllegalArgumentException if {@code propName} is empty or {@code handler} is {@code null}.
+     * @throws IllegalArgumentException if {@code propName} is {@code null} or empty, or {@code handler} is {@code null}.
      */
     public JsonDeserConfig setPropHandler(final String propName, final BiConsumer<? super Collection<Object>, ?> handler) throws IllegalArgumentException {
         N.checkArgNotEmpty(propName, cs.propName);
@@ -309,7 +314,7 @@ public class JsonDeserConfig extends DeserializationConfig<JsonDeserConfig> {
      *
      * @param propName the property name (must not be empty)
      * @return the handler for the property, or {@code null} if not set
-     * @throws IllegalArgumentException if {@code propName} is empty.
+     * @throws IllegalArgumentException if {@code propName} is {@code null} or empty.
      * @see #setPropHandler(String, BiConsumer)
      */
     @MayReturnNull

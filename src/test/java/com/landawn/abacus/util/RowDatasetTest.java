@@ -2538,4 +2538,634 @@ public class RowDatasetTest extends RowDatasetTestSupport {
         });
     }
 
+    @Test
+    public void testToListNullRowTypeNamesRowTypeParameter() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" } });
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ds.toList((Class<Object>) null));
+        assertTrue(e.getMessage().contains("'rowType'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toList(0, 1, Arrays.asList("a"), (Class<Object>) null));
+        assertTrue(e.getMessage().contains("'rowType'"), e.getMessage());
+
+        // an empty Dataset rejects a null row type too
+        final Dataset empty = Dataset.rows(Arrays.asList("a"), new Object[0][]);
+        e = assertThrows(IllegalArgumentException.class, () -> empty.toList((Class<Object>) null));
+        assertTrue(e.getMessage().contains("'rowType'"), e.getMessage());
+
+        // the column selection is still validated first
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toList(0, 1, Arrays.asList("nope"), (Class<Object>) null));
+        assertTrue(e.getMessage().contains("nope"), e.getMessage());
+    }
+
+    @Test
+    public void testCombineColumnsNullNewColumnTypeNamesNewColumnTypeParameter() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, "x", 2 } });
+
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> ds.combineColumns(Arrays.asList("a", "b"), "ab", (Class<?>) null));
+        assertTrue(e.getMessage().contains("'newColumnType'"), e.getMessage());
+        assertEquals(Arrays.asList("a", "b", "c"), ds.columnNames());
+    }
+
+    @Test
+    public void testToJsonToXmlNullOutputNamesOutputParameter() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a"), new Object[][] { { 1 } });
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ds.toJson((java.io.OutputStream) null));
+        assertTrue(e.getMessage().contains("'output'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toJson((java.io.Writer) null));
+        assertTrue(e.getMessage().contains("'output'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toXml((java.io.OutputStream) null));
+        assertTrue(e.getMessage().contains("'output'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toXml((java.io.Writer) null));
+        assertTrue(e.getMessage().contains("'output'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toXml("r", (java.io.Writer) null));
+        assertTrue(e.getMessage().contains("'output'"), e.getMessage());
+
+        // an empty column selection already named 'output'
+        e = assertThrows(IllegalArgumentException.class, () -> ds.toJson(0, 1, new ArrayList<String>(), (java.io.Writer) null));
+        assertTrue(e.getMessage().contains("'output'"), e.getMessage());
+    }
+
+    @Test
+    public void testToMergedEntitiesNullIdPropNameNamesIdPropNameParameter() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 1, "x" } });
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> ds.toMergedEntities((String) null, RowDatasetTestSupport.Person.class));
+        assertTrue(e.getMessage().contains("'idPropName'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class,
+                () -> ds.toMergedEntities((String) null, Arrays.asList("id", "name"), RowDatasetTestSupport.Person.class));
+        assertTrue(e.getMessage().contains("'idPropName'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class,
+                () -> ds.toMergedEntities((String) null, new HashMap<String, String>(), RowDatasetTestSupport.Person.class));
+        assertTrue(e.getMessage().contains("'idPropName'"), e.getMessage());
+    }
+
+    @Test
+    public void testUpdateColumnFailsFastWhenFuncAddsRow() {
+        // In-place updates fail fast, like List.replaceAll, when the callback structurally modifies the Dataset:
+        // the loop otherwise wrote each result into a shifted row and left the remaining rows un-updated.
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.updateColumn("a", v -> {
+            if (Integer.valueOf(1).equals(v)) {
+                ds.addRow(0, new Object[] { 99, "new" });
+            }
+            return ((Integer) v) * 10;
+        }));
+
+        // The row added by the callback keeps its value instead of being overwritten by the stale result.
+        assertEquals(Arrays.asList(99, 1, 2, 3), ds.copyColumn("a"));
+    }
+
+    @Test
+    public void testUpdateColumnsFailsFastWhenFuncRemovesRow() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.updateColumns(Arrays.asList("a"), (i, c, v) -> {
+            if (i == 0) {
+                ds.removeRow(0);
+            }
+            return ((Integer) v) * 10;
+        }));
+
+        assertEquals(Arrays.asList(2, 3), ds.copyColumn("a"));
+    }
+
+    @Test
+    public void testUpdateRowFailsFastWhenFuncAddsRow() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.updateRow(0, v -> {
+            ds.addRow(0, new Object[] { 99, "new" });
+            return v;
+        }));
+
+        assertEquals(4, ds.size());
+        assertEquals(99, (Integer) ds.get(0, 0));
+    }
+
+    @Test
+    public void testUpdateRowsFailsFastWhenFuncAddsRow() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.updateRows(new int[] { 0, 1 }, (i, c, v) -> {
+            ds.addRow(0, new Object[] { 99, "new" });
+            return v;
+        }));
+
+        assertEquals(Arrays.asList(99, 1, 2, 3), ds.copyColumn("a"));
+    }
+
+    @Test
+    public void testUpdateAllFailsFastWhenFuncAddsRow() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.updateAll(v -> {
+            ds.addRow(0, new Object[] { 99, "new" });
+            return v;
+        }));
+
+        assertEquals(Arrays.asList(99, 1, 2, 3), ds.copyColumn("a"));
+    }
+
+    @Test
+    public void testUpdateAllIndexedFailsFastWhenFuncAddsRow() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.updateAll((i, c, v) -> {
+            ds.addRow(0, new Object[] { 99, "new" });
+            return v;
+        }));
+
+        assertEquals(Arrays.asList(99, 1, 2, 3), ds.copyColumn("a"));
+    }
+
+    @Test
+    public void testReplaceIfFailsFastWhenPredicateAddsRow() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.replaceIf(v -> {
+            ds.addRow(0, new Object[] { 99, "new" });
+            return true;
+        }, 0));
+
+        assertEquals(Arrays.asList(99, 1, 2, 3), ds.copyColumn("a"));
+    }
+
+    @Test
+    public void testReplaceIfIndexedFailsFastWhenPredicateAddsRow() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.replaceIf((i, c, v) -> {
+            ds.addRow(0, new Object[] { 99, "new" });
+            return true;
+        }, 0));
+
+        assertEquals(Arrays.asList(99, 1, 2, 3), ds.copyColumn("a"));
+    }
+
+    @Test
+    public void testInPlaceUpdatesAllowCellWritesFromCallback() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" }, { 3, "z" } });
+
+        // Writing a cell is not a structural modification, so the update still completes.
+        ds.updateColumn("a", v -> {
+            ds.set(0, 1, "touched");
+            return ((Integer) v) + 1;
+        });
+
+        assertEquals(Arrays.asList(2, 3, 4), ds.copyColumn("a"));
+        assertEquals("touched", ds.get(0, 1));
+    }
+
+    // ---- deep review 2026-09-25 G065 begin ----
+
+    // G065-01: an empty column selection wrote "[]" without flushing the caller's Writer (the non-empty path flushes).
+    @Test
+    public void testToJson_emptySelectionFlushesWriter() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" } });
+        final java.io.StringWriter target = new java.io.StringWriter();
+        final java.io.BufferedWriter writer = new java.io.BufferedWriter(target);
+
+        ds.toJson(0, 1, Collections.<String> emptyList(), writer);
+
+        assertEquals("[]", target.toString());
+    }
+
+    // G065-01: an empty column selection wrote "<dataset></dataset>" without flushing the caller's Writer.
+    @Test
+    public void testToXml_emptySelectionFlushesWriter() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" } });
+        final java.io.StringWriter target = new java.io.StringWriter();
+        final java.io.BufferedWriter writer = new java.io.BufferedWriter(target);
+
+        ds.toXml(0, 1, Collections.<String> emptyList(), "row", writer);
+
+        assertEquals("<dataset></dataset>", target.toString());
+    }
+
+    // ---- deep review 2026-09-25 G065 end ----
+    // ---- deep review 2026-09-25 G066 begin ----
+
+    // G066-01: a sortBy comparator that removes a row failed part way through the row permutation with an
+    // IndexOutOfBoundsException after it had already moved rows - losing one row and duplicating another.
+    @Test
+    public void testSortBy_comparatorRemovingRowThrowsCmeWithoutScramblingRows() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id"), new Object[][] { { 3 }, { 1 }, { 2 } });
+        final boolean[] removed = { false };
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.sortBy("id", (Comparator<Integer>) (a, b) -> {
+            if (!removed[0]) {
+                removed[0] = true;
+                ds.removeRow(2);
+            }
+
+            return Integer.compare(a, b);
+        }));
+
+        assertEquals(Arrays.asList(3, 1), ds.copyColumn("id"));
+    }
+
+    // G066-01: a same-size structural change (a nested sortBy) from the comparator went undetected, and the stale
+    // permutation was applied to the re-ordered rows, silently leaving them in the wrong order.
+    @Test
+    public void testSortBy_comparatorResortingDatasetThrowsCme() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 3, "c" }, { 1, "a" }, { 2, "b" } });
+        final boolean[] resorted = { false };
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.sortBy(Arrays.asList("id", "name"), (a, b) -> {
+            if (!resorted[0]) {
+                resorted[0] = true;
+                ds.sortBy("name", Comparator.<String> reverseOrder());
+            }
+
+            return Integer.compare((Integer) a[0], (Integer) b[0]);
+        }));
+
+        assertEquals(Arrays.asList(3, 2, 1), ds.copyColumn("id"));
+        assertEquals(Arrays.asList("c", "b", "a"), ds.copyColumn("name"));
+    }
+
+    // G066-01: a sortBy keyExtractor that adds a row failed with ArrayIndexOutOfBoundsException.
+    @Test
+    public void testSortBy_keyExtractorAddingRowThrowsCme() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id"), new Object[][] { { 3 }, { 1 }, { 2 } });
+        final boolean[] added = { false };
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.sortBy(Arrays.asList("id"), row -> {
+            if (!added[0]) {
+                added[0] = true;
+                ds.addRow(new Object[] { 0 });
+            }
+
+            return (Integer) row.get(0);
+        }));
+
+        assertEquals(Arrays.asList(3, 1, 2, 0), ds.copyColumn("id"));
+    }
+
+    // G066-01: parallelSortBy shares the sort path; a keyExtractor that removes a row failed with an IndexOutOfBoundsException.
+    @Test
+    public void testParallelSortBy_keyExtractorRemovingRowThrowsCme() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id"), new Object[][] { { 3 }, { 1 }, { 2 } });
+        final boolean[] removed = { false };
+
+        assertThrows(java.util.ConcurrentModificationException.class, () -> ds.parallelSortBy(Arrays.asList("id"), row -> {
+            if (!removed[0]) {
+                removed[0] = true;
+                ds.removeRow(0);
+            }
+
+            return (Integer) row.get(0);
+        }));
+
+        assertEquals(Arrays.asList(1, 2), ds.copyColumn("id"));
+    }
+
+    // G066-01: writing cell values from a comparator stays allowed (not a structural modification).
+    @Test
+    public void testSortBy_comparatorWritingCellDoesNotThrow() {
+        final Dataset ds = Dataset.rows(Arrays.asList("id", "name"), new Object[][] { { 2, "b" }, { 1, "a" } });
+
+        ds.sortBy("id", (Comparator<Integer>) (a, b) -> {
+            ds.set(0, 1, "w");
+            return Integer.compare(a, b);
+        });
+
+        assertEquals(Arrays.asList(1, 2), ds.copyColumn("id"));
+        assertEquals(Arrays.asList("a", "w"), ds.copyColumn("name"));
+    }
+
+    // ---- deep review 2026-09-25 G066 end ----
+
+    // ---- perf review 2026-09-26 G065 begin ----
+    public static class G065Child {
+        private int id;
+        private String name;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    public static class G065Parent {
+        private int id;
+        private G065Child child;
+        private List<G065Child> children;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(final int id) {
+            this.id = id;
+        }
+
+        public G065Child getChild() {
+            return child;
+        }
+
+        public void setChild(final G065Child child) {
+            this.child = child;
+        }
+
+        public List<G065Child> getChildren() {
+            return children;
+        }
+
+        public void setChildren(final List<G065Child> children) {
+            this.children = children;
+        }
+    }
+
+    public record G065Point(int x, String label) {
+    }
+
+    // G065-01: toEntities skips the identity-finishing pass for mutable beans; pins values, fresh distinct instances and a mutable result.
+    @Test
+    public void testToListBean_mutableBeansDistinctAndMutableResult() {
+        final Dataset ds = new RowDataset(Arrays.asList("id", "name", "age", "city"), Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, 2)),
+                new ArrayList<>(Arrays.asList("a", "b", "b")), new ArrayList<>(Arrays.asList(10, 20, 20)), new ArrayList<>(Arrays.asList("x", null, null))));
+
+        final List<Person> persons = ds.toList(Person.class);
+
+        assertEquals(3, persons.size());
+        assertEquals(Arrays.asList(1, 2, 2), persons.stream().map(Person::getId).toList());
+        assertEquals(Arrays.asList("a", "b", "b"), persons.stream().map(Person::getName).toList());
+        assertEquals(Arrays.asList(10, 20, 20), persons.stream().map(Person::getAge).toList());
+        assertEquals(Arrays.asList("x", null, null), persons.stream().map(Person::getCity).toList());
+        Assertions.assertNotSame(persons.get(1), persons.get(2));
+        Assertions.assertNotSame(persons.get(0), persons.get(1));
+
+        persons.add(new Person());
+        assertEquals(4, persons.size());
+
+        final List<Person> sub = ds.toList(1, 2, Arrays.asList("id", "name"), Person.class);
+        assertEquals(1, sub.size());
+        assertEquals(2, sub.get(0).getId());
+        assertEquals("b", sub.get(0).getName());
+        assertNull(sub.get(0).getCity());
+
+        assertTrue(ds.toList(1, 1, Person.class).isEmpty());
+        assertEquals(2, ds.toEntities(0, 2, null, Person.class).size());
+    }
+
+    // G065-01: nested mutable beans (single child and child collection), with and without merging, keep their shape and identities.
+    @Test
+    public void testToListBean_nestedMutableBeansAndMergedEntities() {
+        final Dataset ds = new RowDataset(Arrays.asList("id", "child.id", "child.name"), Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 2)),
+                new ArrayList<>(Arrays.asList(10, 10, 20)), new ArrayList<>(Arrays.asList("c10", "c10", "c20"))));
+
+        final List<G065Parent> parents = ds.toList(G065Parent.class);
+        assertEquals(3, parents.size());
+        assertEquals(Arrays.asList(10, 10, 20), parents.stream().map(it -> it.getChild().getId()).toList());
+        assertEquals(Arrays.asList("c10", "c10", "c20"), parents.stream().map(it -> it.getChild().getName()).toList());
+        Assertions.assertNotSame(parents.get(0), parents.get(1));
+        Assertions.assertNotSame(parents.get(0).getChild(), parents.get(1).getChild());
+
+        final Dataset rows = new RowDataset(Arrays.asList("id", "children.id", "children.name"),
+                Arrays.asList(new ArrayList<>(Arrays.asList(1, 1, 1, 2)), new ArrayList<>(Arrays.asList(10, 20, 10, 10)),
+                        new ArrayList<>(Arrays.asList("a", "b", "a2", "c"))));
+
+        final List<G065Parent> merged = rows.toMergedEntities("id", G065Parent.class);
+        assertEquals(2, merged.size());
+        assertEquals(1, merged.get(0).getId());
+        assertEquals(Arrays.asList(10, 20), merged.get(0).getChildren().stream().map(G065Child::getId).toList());
+        assertEquals("a2", merged.get(0).getChildren().get(0).getName());
+        assertEquals(Arrays.asList(10), merged.get(1).getChildren().stream().map(G065Child::getId).toList());
+        Assertions.assertNotSame(merged.get(0).getChildren().get(0), merged.get(1).getChildren().get(0));
+
+        final List<G065Parent> unmerged = rows.toList(G065Parent.class);
+        assertEquals(4, unmerged.size());
+        assertEquals(Arrays.asList(1, 1, 1, 2), unmerged.stream().map(G065Parent::getId).toList());
+        assertEquals(Arrays.asList(10, 20, 10, 10), unmerged.stream().map(it -> it.getChildren().get(0).getId()).toList());
+        assertTrue(unmerged.stream().allMatch(it -> it.getChildren().size() == 1));
+    }
+
+    // G065-01: immutable (record) beans still go through the finishing pass.
+    @Test
+    public void testToListBean_immutableRecordsStillFinished() {
+        final Dataset ds = new RowDataset(Arrays.asList("x", "label"),
+                Arrays.asList(new ArrayList<>(Arrays.asList(1, 2, null)), new ArrayList<>(Arrays.asList("a", "b", null))));
+
+        assertEquals(Arrays.asList(new G065Point(1, "a"), new G065Point(2, "b"), new G065Point(0, null)), ds.toList(G065Point.class));
+        assertEquals(Arrays.asList(new G065Point(2, "b")), ds.toList(1, 2, G065Point.class));
+    }
+    // ---- perf review 2026-09-26 G065 end ----
+    // ---- perf review 2026-09-26 G066 begin ----
+
+    private static Dataset perfG066Left() {
+        return Dataset.rows(Arrays.asList("id", "k1", "k2", "v"), new Object[][] { { 1, "a", 1, "x" }, { 2, "a", 2, "y" }, { 3, "b", 1, "z" },
+                { 4, "a", 1, "w" }, { 5, null, null, "n" }, { 6, null, null, "m" } });
+    }
+
+    private static Dataset perfG066Right() {
+        return Dataset.rows(Arrays.asList("k1", "k2", "r"), new Object[][] { { "a", 1, "R1" }, { "a", 1, "R2" }, { "c", 9, "R3" }, { null, null, "R4" } });
+    }
+
+    private static Map<String, String> perfG066On(final String... names) {
+        final Map<String, String> on = new LinkedHashMap<>();
+
+        for (final String name : names) {
+            on.put(name, name);
+        }
+
+        return on;
+    }
+
+    // G066-01: multi-key groupBy/distinctBy keep their groups (duplicates and null keys) with plain key arrays.
+    @Test
+    public void testGroupBy_multiKeyIdentityPaths_pinned() {
+        final Dataset ds = perfG066Left();
+        final List<String> keys = Arrays.asList("k1", "k2");
+
+        final Dataset keysOnly = ds.groupBy(keys);
+        assertEquals(Arrays.asList("a", "a", "b", null), keysOnly.copyColumn("k1"));
+        assertEquals(Arrays.asList(1, 2, 1, null), keysOnly.copyColumn("k2"));
+
+        final Dataset collected = ds.groupBy(keys, "v", "vs", Collectors.toList());
+        assertEquals(Arrays.asList("a", "a", "b", null), collected.copyColumn("k1"));
+        assertEquals(Arrays.asList(Arrays.asList("x", "w"), Arrays.asList("y"), Arrays.asList("z"), Arrays.asList("n", "m")), collected.copyColumn("vs"));
+
+        final Dataset mapped = ds.groupBy(keys, Arrays.asList("id", "v"), "rows", (Function<DisposableObjArray, String>) a -> a.get(0) + ":" + a.get(1),
+                Collectors.toList());
+        assertEquals(Arrays.asList(Arrays.asList("1:x", "4:w"), Arrays.asList("2:y"), Arrays.asList("3:z"), Arrays.asList("5:n", "6:m")),
+                mapped.copyColumn("rows"));
+
+        final Dataset typed = ds.groupBy(keys, Arrays.asList("id", "v"), "rows", List.class);
+        assertEquals(Arrays.asList(Arrays.asList(Arrays.asList(1, "x"), Arrays.asList(4, "w")), Arrays.asList(Arrays.asList(2, "y")),
+                Arrays.asList(Arrays.asList(3, "z")), Arrays.asList(Arrays.asList(5, "n"), Arrays.asList(6, "m"))), typed.copyColumn("rows"));
+
+        assertEquals(Arrays.asList(1, 2, 3, 5), ds.distinctBy(keys).copyColumn("id"));
+
+        final Dataset union = ds.unionBy(perfG066Right(), keys);
+        assertEquals(Arrays.asList("id", "k1", "k2", "v", "r"), union.columnNames());
+        assertEquals(Arrays.asList(1, 2, 3, 5, null), union.copyColumn("id"));
+        assertEquals(Arrays.asList("a", "a", "b", null, "c"), union.copyColumn("k1"));
+        assertEquals(Arrays.asList(null, null, null, null, "R3"), union.copyColumn("r"));
+
+        // The same results a second time: nothing was left in a shared pool that could leak between calls.
+        assertEquals(keysOnly, ds.groupBy(keys));
+        assertEquals(collected, ds.groupBy(keys, "v", "vs", Collectors.toList()));
+    }
+
+    // G066-01/G066-02: multi-key and single-key joins, with duplicate, null and unmatched keys on both sides.
+    @Test
+    public void testJoins_multiKeyAndRightColumnPaths_pinned() {
+        final Dataset left = perfG066Left();
+        final Dataset right = perfG066Right();
+        final Map<String, String> on2 = perfG066On("k1", "k2");
+        final Map<String, String> on1 = perfG066On("k1");
+
+        final Dataset inner = left.innerJoin(right, on2);
+        assertEquals(Arrays.asList("id", "k1", "k2", "v", "k1_2", "k2_2", "r"), inner.columnNames());
+        assertEquals(Arrays.asList(1, 1, 4, 4, 5, 6), inner.copyColumn("id"));
+        assertEquals(Arrays.asList("R1", "R2", "R1", "R2", "R4", "R4"), inner.copyColumn("r"));
+
+        final Dataset leftJoined = left.leftJoin(right, on2);
+        assertEquals(Arrays.asList(1, 1, 2, 3, 4, 4, 5, 6), leftJoined.copyColumn("id"));
+        assertEquals(Arrays.asList("R1", "R2", null, null, "R1", "R2", "R4", "R4"), leftJoined.copyColumn("r"));
+
+        final Dataset rightJoined = left.rightJoin(right, on2);
+        assertEquals(Arrays.asList(1, 4, 1, 4, null, 5, 6), rightJoined.copyColumn("id"));
+        assertEquals(Arrays.asList("R1", "R1", "R2", "R2", "R3", "R4", "R4"), rightJoined.copyColumn("r"));
+        assertEquals(Arrays.asList("a", "a", "a", "a", "c", null, null), rightJoined.copyColumn("k1_2"));
+
+        final Dataset rightJoined1 = left.rightJoin(right, on1);
+        assertEquals(Arrays.asList(1, 2, 4, 1, 2, 4, null, 5, 6), rightJoined1.copyColumn("id"));
+        assertEquals(Arrays.asList("R1", "R1", "R1", "R2", "R2", "R2", "R3", "R4", "R4"), rightJoined1.copyColumn("r"));
+        assertEquals(Arrays.asList(1, 1, 1, 1, 1, 1, 9, null, null), rightJoined1.copyColumn("k2_2"));
+
+        final Dataset full = left.fullJoin(right, on2);
+        assertEquals(Arrays.asList(1, 1, 2, 3, 4, 4, 5, 6, null), full.copyColumn("id"));
+        assertEquals(Arrays.asList("R1", "R2", null, null, "R1", "R2", "R4", "R4", "R3"), full.copyColumn("r"));
+        assertEquals(Arrays.asList(1, 1, null, null, 1, 1, null, null, 9), full.copyColumn("k2_2"));
+
+        final Dataset full1 = left.fullJoin(right, on1);
+        assertEquals(Arrays.asList(1, 1, 2, 2, 3, 4, 4, 5, 6, null), full1.copyColumn("id"));
+        assertEquals(Arrays.asList("R1", "R2", "R1", "R2", null, "R1", "R2", "R4", "R4", "R3"), full1.copyColumn("r"));
+
+        // Self join through the resolved right-hand columns.
+        final Dataset selfFull = left.fullJoin(left, perfG066On("id"));
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), selfFull.copyColumn("id_2"));
+        assertEquals(left.copyColumn("v"), selfFull.copyColumn("v_2"));
+    }
+
+    // G066-01: multi-key joins that build a new row-typed column, with and without a collection per left row.
+    @Test
+    public void testJoins_multiKeyNewColumnPaths_pinned() {
+        final Dataset left = perfG066Left();
+        final Dataset right = perfG066Right();
+        final Map<String, String> on2 = perfG066On("k1", "k2");
+        final List<Object> r1 = Arrays.asList("a", 1, "R1");
+        final List<Object> r2 = Arrays.asList("a", 1, "R2");
+        final List<Object> r3 = Arrays.asList("c", 9, "R3");
+        final List<Object> r4 = Arrays.asList(null, null, "R4");
+
+        final Dataset inner = left.innerJoin(right, on2, "rr", List.class);
+        assertEquals(Arrays.asList(1, 1, 4, 4, 5, 6), inner.copyColumn("id"));
+        assertEquals(Arrays.asList(r1, r2, r1, r2, r4, r4), inner.copyColumn("rr"));
+
+        final Dataset leftJoined = left.leftJoin(right, on2, "rr", List.class);
+        assertEquals(Arrays.asList(1, 1, 2, 3, 4, 4, 5, 6), leftJoined.copyColumn("id"));
+        assertEquals(Arrays.asList(r1, r2, null, null, r1, r2, r4, r4), leftJoined.copyColumn("rr"));
+
+        final Dataset rightJoined = left.rightJoin(right, on2, "rr", List.class);
+        assertEquals(Arrays.asList(1, 4, 1, 4, null, 5, 6), rightJoined.copyColumn("id"));
+        assertEquals(Arrays.asList(r1, r1, r2, r2, r3, r4, r4), rightJoined.copyColumn("rr"));
+
+        final Dataset full = left.fullJoin(right, on2, "rr", List.class);
+        assertEquals(Arrays.asList(1, 1, 2, 3, 4, 4, 5, 6, null), full.copyColumn("id"));
+        assertEquals(Arrays.asList(r1, r2, null, null, r1, r2, r4, r4, r3), full.copyColumn("rr"));
+
+        final IntFunction<List<Object>> supplier = ArrayList::new;
+
+        final Dataset innerColl = left.innerJoin(right, on2, "rr", List.class, supplier);
+        assertEquals(Arrays.asList(1, 4, 5, 6), innerColl.copyColumn("id"));
+        assertEquals(Arrays.asList(Arrays.asList(r1, r2), Arrays.asList(r1, r2), Arrays.asList(r4), Arrays.asList(r4)), innerColl.copyColumn("rr"));
+
+        final Dataset leftColl = left.leftJoin(right, on2, "rr", List.class, supplier);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), leftColl.copyColumn("id"));
+        assertEquals(Arrays.asList(Arrays.asList(r1, r2), null, null, Arrays.asList(r1, r2), Arrays.asList(r4), Arrays.asList(r4)),
+                leftColl.copyColumn("rr"));
+
+        final Dataset rightColl = left.rightJoin(right, on2, "rr", List.class, supplier);
+        assertEquals(Arrays.asList(1, 4, null, 5, 6), rightColl.copyColumn("id"));
+        assertEquals(Arrays.asList(Arrays.asList(r1, r2), Arrays.asList(r1, r2), Arrays.asList(r3), Arrays.asList(r4), Arrays.asList(r4)),
+                rightColl.copyColumn("rr"));
+
+        final Dataset fullColl = left.fullJoin(right, on2, "rr", List.class, supplier);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6, null), fullColl.copyColumn("id"));
+        assertEquals(Arrays.asList(Arrays.asList(r1, r2), null, null, Arrays.asList(r1, r2), Arrays.asList(r4), Arrays.asList(r4), Arrays.asList(r3)),
+                fullColl.copyColumn("rr"));
+    }
+
+    // ---- perf review 2026-09-26 G066 end ----
+
+    // ---- perf review 2026-09-26 G113 begin ----
+
+    // G113-03: multi-key removeDuplicateRowsBy keeps the first row of each key (deep array equality, nulls, many keys).
+    @Test
+    public void testRemoveDuplicateRowsBy_multiKeyIdentityPath_pinned() {
+        // int[] and BigInteger cells are not "simple" keys, so the Wrapper key-array path runs.
+        final Dataset ds = Dataset.rows(Arrays.asList("id", "k1", "k2"),
+                new Object[][] { { 1, new int[] { 1 }, java.math.BigInteger.ONE }, { 2, new int[] { 1 }, java.math.BigInteger.ONE },
+                        { 3, new int[] { 1 }, java.math.BigInteger.TEN }, { 4, null, null }, { 5, new int[] { 2 }, java.math.BigInteger.ONE },
+                        { 6, null, null }, { 7, new int[] { 1 }, java.math.BigInteger.TEN } });
+        ds.removeDuplicateRowsBy(Arrays.asList("k1", "k2"));
+        assertEquals(Arrays.asList(1, 3, 4, 5), ds.copyColumn("id"));
+
+        // no duplicates: every row stays
+        final Dataset distinct = Dataset.rows(Arrays.asList("id", "k1", "k2"),
+                new Object[][] { { 1, java.math.BigInteger.ONE, "a" }, { 2, java.math.BigInteger.ONE, "b" }, { 3, java.math.BigInteger.TEN, "a" } });
+        distinct.removeDuplicateRowsBy(Arrays.asList("k1", "k2"));
+        assertEquals(Arrays.asList(1, 2, 3), distinct.copyColumn("id"));
+
+        // more distinct keys than the object-array pool holds, each duplicated once
+        final Object[][] rows = new Object[400][];
+
+        for (int i = 0; i < rows.length; i++) {
+            rows[i] = new Object[] { i, java.math.BigInteger.valueOf(i % 200), i % 200 };
+        }
+
+        final Dataset many = Dataset.rows(Arrays.asList("id", "k1", "k2"), rows);
+        many.removeDuplicateRowsBy(Arrays.asList("k1", "k2"));
+        assertEquals(200, many.size());
+        assertEquals(0, (Integer) many.copyColumn("id").get(0));
+        assertEquals(199, (Integer) many.copyColumn("id").get(199));
+
+        // the same again on a fresh copy gives the same result
+        final Dataset again = Dataset.rows(Arrays.asList("id", "k1", "k2"), rows);
+        again.removeDuplicateRowsBy(Arrays.asList("k1", "k2"));
+        assertEquals(many, again);
+
+        // non-identity key extractor (scratch array handed to the callback) is unchanged
+        final Dataset extracted = Dataset.rows(Arrays.asList("id", "k1", "k2"), new Object[][] { { 1, java.math.BigInteger.ONE, "a" },
+                { 2, java.math.BigInteger.ONE, "A" }, { 3, java.math.BigInteger.TEN, "a" }, { 4, java.math.BigInteger.ONE, "b" } });
+        extracted.removeDuplicateRowsBy(Arrays.asList("k1", "k2"), a -> a.get(0) + "|" + ((String) a.get(1)).toLowerCase());
+        assertEquals(Arrays.asList(1, 3, 4), extracted.copyColumn("id"));
+    }
+
+    // ---- perf review 2026-09-26 G113 end ----
 }

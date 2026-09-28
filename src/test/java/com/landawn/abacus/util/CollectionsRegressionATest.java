@@ -664,17 +664,17 @@ public class CollectionsRegressionATest extends TestBase {
         @Test
         public void setMultimap_toImmutableMap_rejectsANullSupplierResultLikeItsListSibling() {
             final SetMultimap<String, Integer> s = SetMultimap.of("a", 1);
-            assertEquals("mapSupplier returned null", assertThrows(IllegalArgumentException.class, () -> s.toImmutableMap(size -> null)).getMessage());
+            assertEquals("mapSupplier returned null", assertThrows(NullPointerException.class, () -> s.toImmutableMap(size -> null)).getMessage());
 
             final ListMultimap<String, Integer> l = ListMultimap.of("a", 1);
-            assertEquals("mapSupplier returned null", assertThrows(IllegalArgumentException.class, () -> l.toImmutableMap(size -> null)).getMessage());
+            assertEquals("mapSupplier returned null", assertThrows(NullPointerException.class, () -> l.toImmutableMap(size -> null)).getMessage());
         }
 
         @Test
         public void setMultimap_toImmutableMap_rejectsANullSupplierResultForAnEmptyMultimap() {
             // The empty case never reaches map.put(...), so it used to slip a null into ImmutableMap.wrap.
             final SetMultimap<String, Integer> s = CommonUtil.newSetMultimap();
-            assertThrows(IllegalArgumentException.class, () -> s.toImmutableMap(size -> null));
+            assertThrows(NullPointerException.class, () -> s.toImmutableMap(size -> null));
         }
 
         @Test

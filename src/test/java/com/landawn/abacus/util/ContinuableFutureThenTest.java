@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,29 +23,37 @@ import org.junit.jupiter.api.Timeout;
 
 public class ContinuableFutureThenTest extends ContinuableFutureTestSupport {
     @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void testThenRunWithRunnable_afterException() throws Exception {
         AtomicBoolean executed = new AtomicBoolean(false);
+        final RuntimeException boom = new RuntimeException("error");
         ContinuableFuture<String> future = ContinuableFuture.call(() -> {
-            throw new RuntimeException("error");
+            throw boom;
         });
 
         ContinuableFuture<Void> nextFuture = future.thenRunAsync(() -> executed.set(true));
 
+        // Single wrapper: the cause is the upstream's own failure, not the upstream's ExecutionException.
         ExecutionException ex = assertThrows(ExecutionException.class, () -> nextFuture.get());
-        assertEquals("java.lang.RuntimeException: error", ex.getCause().getMessage());
+        assertSame(boom, ex.getCause());
+        assertEquals("error", ex.getCause().getMessage());
+        assertFalse(executed.get());
     }
 
     @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void testThenRunWithConsumer_throwsException() {
+        final RuntimeException boom = new RuntimeException("original error");
         ContinuableFuture<String> future = ContinuableFuture.call(() -> {
-            throw new RuntimeException("original error");
+            throw boom;
         });
 
         ContinuableFuture<Void> nextFuture = future.thenRunAsync(s -> {
         });
 
         ExecutionException ex = assertThrows(ExecutionException.class, () -> nextFuture.get());
-        assertEquals("java.lang.RuntimeException: original error", ex.getCause().getMessage());
+        assertSame(boom, ex.getCause());
+        assertEquals("original error", ex.getCause().getMessage());
     }
 
     @Test
@@ -63,10 +72,12 @@ public class ContinuableFutureThenTest extends ContinuableFutureTestSupport {
     }
 
     @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void testThenCallWithCallable_afterException() throws Exception {
         AtomicBoolean executed = new AtomicBoolean(false);
+        final RuntimeException boom = new RuntimeException("error");
         ContinuableFuture<String> future = ContinuableFuture.call(() -> {
-            throw new RuntimeException("error");
+            throw boom;
         });
 
         ContinuableFuture<String> nextFuture = future.thenCallAsync(() -> {
@@ -75,19 +86,24 @@ public class ContinuableFutureThenTest extends ContinuableFutureTestSupport {
         });
 
         ExecutionException ex = assertThrows(ExecutionException.class, () -> nextFuture.get());
-        assertEquals("java.lang.RuntimeException: error", ex.getCause().getMessage());
+        assertSame(boom, ex.getCause());
+        assertEquals("error", ex.getCause().getMessage());
+        assertFalse(executed.get());
     }
 
     @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void testThenCallWithFunction_throwsException() {
+        final RuntimeException boom = new RuntimeException("original error");
         ContinuableFuture<String> future = ContinuableFuture.call(() -> {
-            throw new RuntimeException("original error");
+            throw boom;
         });
 
         ContinuableFuture<String> nextFuture = future.thenCallAsync(s -> s.toUpperCase());
 
         ExecutionException ex = assertThrows(ExecutionException.class, () -> nextFuture.get());
-        assertEquals("java.lang.RuntimeException: original error", ex.getCause().getMessage());
+        assertSame(boom, ex.getCause());
+        assertEquals("original error", ex.getCause().getMessage());
     }
 
     @Test

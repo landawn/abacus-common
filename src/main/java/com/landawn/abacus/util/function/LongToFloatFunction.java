@@ -20,8 +20,8 @@ package com.landawn.abacus.util.function;
  *
  * <p>This is a functional interface whose functional method is {@link #applyAsFloat(long)}.
  *
- * <p>Note: Unlike other primitive function interfaces in this package, this interface does not extend
- * from java.util.function as the JDK does not provide a LongToFloatFunction interface.
+ * <p>Note: Unlike its siblings {@link LongToIntFunction} and {@link LongToDoubleFunction}, this interface
+ * does not extend a {@code java.util.function} interface, as the JDK does not provide a {@code LongToFloatFunction}.
  *
  * <p>Refer to JDK API documentation at: <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html">https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html</a></p>
  *
@@ -42,8 +42,8 @@ public interface LongToFloatFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongToFloatFunction converter = LongToFloatFunction.DEFAULT;
-     * float result = converter.applyAsFloat(42L);                         // returns 42.0f
-     * float largeResult = converter.applyAsFloat(9223372036854775807L);   // precision loss occurs
+     * float result = converter.applyAsFloat(42L);                        // returns 42.0f
+     * float largeResult = converter.applyAsFloat(9223372036854775807L);  // precision loss occurs
      * }</pre>
      *
      */

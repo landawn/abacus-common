@@ -223,8 +223,8 @@ public final class MutableFloat extends Number implements Comparable<MutableFloa
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableFloat num = MutableFloat.of(10.5f);
-     * boolean updated = num.setIf(v -> v < 15.0f, 20.5f);   // returns true, value is now 20.5f
-     * updated = num.setIf(v -> v < 15.0f, 30.5f);           // returns false, value remains 20.5f
+     * boolean updated = num.setIf(v -> v < 15.0f, 20.5f);  // returns true, value is now 20.5f
+     * updated = num.setIf(v -> v < 15.0f, 30.5f);          // returns false, value remains 20.5f
      *
      * // More complex predicates
      * MutableFloat temperature = MutableFloat.of(98.6f);

@@ -13,6 +13,7 @@
  */
 package com.landawn.abacus.util;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -27,10 +29,10 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.annotation.Beta;
-import com.landawn.abacus.logging.Logger;
-import com.landawn.abacus.logging.LoggerFactory;
 import com.landawn.abacus.util.Tuple.Tuple4;
 
 // This class is heavily inspired by CompletableFuture but redesigned for better usability and flexibility.
@@ -63,7 +65,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Recursive Cancellation:</b> {@code cancelAll()} propagates cancellation through entire execution chains</li>
  *   <li><b>Built-in Delay Support:</b> Native {@code thenDelay()} methods for time-based workflow control</li>
  *   <li><b>Result Wrapping:</b> {@code getAsResult()} methods return {@link Result} objects for enhanced error handling</li>
- *   <li><b>Executor Flexibility:</b> Per-operation executor configuration with {@code thenUse()} methods</li>
+ *   <li><b>Executor Flexibility:</b> Chain-wide executor selection with {@code thenUse()} - every later stage inherits it</li>
  *   <li><b>Multiple Combination Patterns:</b> Support for both/either completion scenarios with various callback types</li>
  *   <li><b>Type Safety:</b> Strong generic typing throughout the composition chain</li>
  *   <li><b>Explicit Dependencies:</b> Chained futures retain upstream references to support recursive cancellation</li>
@@ -89,10 +91,9 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * materially different continuation behavior. The table below lists the continuation methods on
  * {@code ContinuableFuture}, maps each to its closest {@link CompletableFuture} counterpart, and
  * states in the last column whether the behavior matches that counterpart (&quot;Same.&quot;) or how it
- * differs. The last column replaces what used to be a single vague &quot;Semantics&quot; column, splitting
- * the plain description (<b>Behavior</b>) from the same-vs-different comparison so the distinction is
- * explicit. A dash ({@code —}) in the {@code CompletableFuture} column means there is no direct
- * counterpart.</p>
+ * differs. A dash ({@code —}) in the {@code CompletableFuture} column means there is no direct
+ * counterpart. Every executor-backed method in this table submits a worker that blocks in
+ * {@code get()} on its inputs (see below); that shared difference is not repeated per row.</p>
  * <table border="1">
  *   <caption>{@code ContinuableFuture} continuation naming map</caption>
  *   <tr>
@@ -102,7 +103,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <th>Difference from {@code CompletableFuture}</th>
  *   </tr>
  *   <tr>
- *     <td>{@code map(Function)}</td>
+ *     <td>{@code map(Function)} ({@code @Beta})</td>
  *     <td>{@code thenApply}</td>
  *     <td>Transforms the successful result.</td>
  *     <td>Applied <b>lazily and synchronously</b> on the thread that calls {@code get()}, not on an executor;
@@ -112,15 +113,15 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <td>{@code thenRunAsync(Runnable)}</td>
  *     <td>{@code thenRunAsync}</td>
  *     <td>Runs after successful completion; ignores the upstream result.</td>
- *     <td>Submits a worker that blocks in {@code get()} immediately (not a completion callback).
- *         Parent cancellation completes the child exceptionally with {@code ExecutionException(CancellationException)}
- *         rather than {@code isCancelled() == true}; parent {@code ExecutionException} is wrapped again.</td>
+ *     <td>Same: an upstream failure or cancellation is reported as {@code ExecutionException(cause)} /
+ *         {@code ExecutionException(CancellationException)} with {@code isCancelled() == false}, exactly as a
+ *         {@code CompletableFuture} dependent reports it.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code thenRunAsync(Consumer)}</td>
  *     <td>{@code thenAcceptAsync}</td>
  *     <td>Consumes the successful upstream result.</td>
- *     <td>Same wrapping as {@code thenRunAsync(Runnable)}: blocking {@code get()} inside a {@code FutureTask}.</td>
+ *     <td>Same.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code thenRunAsync(BiConsumer)}</td>
@@ -128,7 +129,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <td>Receives the result and exception.</td>
  *     <td>Produces a {@code Void} result instead of preserving the upstream value the way {@code whenComplete}
  *         does. A normally returning callback also recovers an upstream failure; {@code whenComplete} preserves it.
- *         The callback receives {@link Exception}, not {@link Throwable}.</td>
+ *         The callback receives the unwrapped {@link Exception} (see "Failure shape" below), not a {@link Throwable}.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code thenCallAsync(Callable)}</td>
@@ -141,13 +142,13 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <td>{@code thenCallAsync(Function)}</td>
  *     <td>{@code thenApplyAsync}</td>
  *     <td>Transforms the successful upstream result.</td>
- *     <td>Same wrapping as {@code thenRunAsync(Runnable)}, except the callback may throw checked exceptions.</td>
+ *     <td>Same, except the callback may throw checked exceptions.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code thenCallAsync(BiFunction)}</td>
  *     <td>{@code handleAsync}</td>
  *     <td>Receives the result and exception and produces the next result, including recovery values.</td>
- *     <td>Same, except the callback receives {@link Exception} rather than {@link Throwable}.</td>
+ *     <td>Same, except the callback receives the unwrapped {@link Exception} rather than a {@link Throwable}.</td>
  *   </tr>
  *   <tr>
  *     <td>{@code runAsyncAfterBoth(other, Runnable)}</td>
@@ -238,14 +239,14 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *     <td>No counterpart.</td>
  *   </tr>
  *   <tr>
- *     <td>{@code runAsyncAfterFirstSuccess(other, BiConsumer)}</td>
- *     <td>No direct counterpart.</td>
+ *     <td>{@code runAsyncAfterFirstSuccess(other, BiConsumer)} ({@code @Beta})</td>
+ *     <td>{@code —}</td>
  *     <td>Receives the first successful result, or an exception if both inputs fail; a normally returning action recovers that failure.</td>
  *     <td>No counterpart.</td>
  *   </tr>
  *   <tr>
- *     <td>{@code callAsyncAfterFirstSuccess(other, BiFunction)}</td>
- *     <td>No direct counterpart.</td>
+ *     <td>{@code callAsyncAfterFirstSuccess(other, BiFunction)} ({@code @Beta})</td>
+ *     <td>{@code —}</td>
  *     <td>Transforms the first successful result, or an exception if both inputs fail, and may produce a recovery value.</td>
  *     <td>No counterpart.</td>
  *   </tr>
@@ -258,15 +259,41 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <tr>
  *     <td>{@code thenDelay(delay, unit)}</td>
  *     <td>{@code —} (compare {@link CompletableFuture#delayedExecutor(long, TimeUnit)})</td>
- *     <td>Inserts a shared delay after upstream completion; cancellation is immediately terminal.</td>
+ *     <td>Inserts a shared delay after upstream completion. Cancelling the delayed stage cancels the shared upstream
+ *         task while it is pending, or ends an open delay window once the upstream has completed (see
+ *         {@code thenDelay}); once the window has elapsed the stage is complete and {@code cancel()} is refused.</td>
  *     <td>No direct counterpart: use {@code delayedExecutor} to schedule a delayed continuation.</td>
  *   </tr>
  * </table>
  *
- * <p>Executor-backed methods submit tasks to the configured executor. An executor may run a task
- * directly on the calling thread, so an {@code Async} name does not itself guarantee an immediate return.
- * Cancellation or rejection can prevent a submitted continuation from executing, including callbacks
- * that handle both successful and exceptional upstream results.</p>
+ * <p><b>Worker model.</b> Executor-backed methods submit a task to the configured executor <i>immediately</i>;
+ * that task blocks in {@code get()} until its input future(s) complete and then runs the callback. It is not a
+ * completion callback the way a {@code CompletableFuture} stage is, so it occupies one executor thread while it
+ * waits. An executor may run a task directly on the calling thread, so an {@code Async} name does not itself
+ * guarantee an immediate return. Cancellation or rejection can prevent a submitted continuation from executing,
+ * including callbacks that handle both successful and exceptional upstream results. The {@code *AfterEither} and
+ * {@code *AfterFirstSuccess} families additionally start one short-lived relay task on an internal daemon pool for
+ * every input that is not a completed plain task (see {@link Futures}); a rejection by that pool surfaces as the
+ * stage's failure.</p>
+ *
+ * <p><b>Failure shape.</b> Every executor-backed family ({@code then*}, {@code *AfterBoth}, {@code *AfterEither},
+ * {@code *AfterFirstSuccess}) that propagates an upstream failure does so with a single wrapper: the
+ * returned future's {@code get()} throws {@link ExecutionException} whose cause is the upstream's own failure
+ * (the cause of the upstream's {@code ExecutionException}, or the {@link Error} itself when the upstream task threw
+ * an {@code Error}); it is never a nested {@code ExecutionException}, however long the chain (the one exception is
+ * a bare {@code Throwable} subclass that is neither an {@code Exception} nor an {@code Error}, which no task can
+ * declare and which stays inside its carrier). A cancelled upstream
+ * is reported as {@code ExecutionException(CancellationException)} with {@code isCancelled() == false}, exactly as a
+ * {@code CompletableFuture} dependent reports it. The lazy wrappers ({@code map}, {@code thenDelay}, {@code thenUse})
+ * instead mirror their source: a cancelled source makes them report {@code isCancelled() == true} and throw
+ * {@code CancellationException} itself. The callbacks that receive an exception argument
+ * ({@code BiConsumer}, {@code BiFunction}, {@code QuadConsumer}, {@code QuadFunction}, {@code Tuple4}) and the
+ * {@link Result} returned by {@code getAsResult()} carry the same unwrapped exception: the cause of an
+ * {@code ExecutionException}/{@code CompletionException}, a {@link CancellationException} for a cancelled input,
+ * and - because the slot is typed {@link Exception} - the {@code ExecutionException} carrier when the upstream
+ * failed with an {@code Error}. The synchronous {@code getAsResult}/{@code getThenApply}/{@code getThenAccept}
+ * getters may also hand over the <i>calling thread's own</i> {@link InterruptedException} (interrupt status
+ * restored) or {@link TimeoutException}.</p>
  *
  * <p>These are conceptual correspondences rather than signature-identical equivalents:
  * the bi-argument callbacks receive {@link Exception} (not {@link Throwable}), callbacks may throw
@@ -356,7 +383,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * <p><b>Executor Management and Threading:</b>
  * <ul>
  *   <li><b>Default Executor:</b> Uses the shared {@code N.ASYNC_EXECUTOR} thread pool unless an executor is supplied explicitly</li>
- *   <li><b>Custom Executors:</b> Per-operation executor specification via {@code thenUse()}</li>
+ *   <li><b>Custom Executors:</b> {@code thenUse()} selects the executor for every subsequent stage of the chain</li>
  *   <li><b>Async Variants:</b> Methods ending with "Async" for explicit asynchronous execution</li>
  *   <li><b>Thread Safety:</b> Future state and built-in coordination are thread-safe; callbacks supplied by callers
  *       must themselves be safe if they can be invoked concurrently (for example, by concurrent {@code map().get()} calls)</li>
@@ -365,11 +392,21 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *
  * <p><b>Performance Characteristics:</b>
  * <ul>
- *   <li><b>Chaining Overhead:</b> Each asynchronous stage submits a task that may occupy an executor thread while waiting for its upstream stage</li>
- *   <li><b>Memory Usage:</b> Chained stages retain upstream references so that {@code cancelAll()} can traverse the dependency graph</li>
+ *   <li><b>Chaining Overhead:</b> Each asynchronous stage submits a task that occupies an executor thread while waiting for its upstream stage</li>
+ *   <li><b>Starvation:</b> the default {@code N.ASYNC_EXECUTOR} pool has a fixed size and an unbounded queue, so it never grows
+ *       past its core size. If more stages are waiting for their inputs than the pool has workers, the work those inputs
+ *       depend on can sit behind them in the queue; long fan-outs of pending stages should use a dedicated executor
+ *       ({@code thenUse}) or {@link Futures}, whose aggregates never wait on the stage executor ({@code allOf}/
+ *       {@code combine}/{@code compose} wait on the calling thread; {@code anyOf}/{@code iterate} observe pending
+ *       inputs on an unbounded relay pool)</li>
+ *   <li><b>Memory Usage:</b> Chained stages retain upstream references so that {@code cancelAll()} can traverse the dependency
+ *       graph; a live downstream future therefore keeps every upstream stage and its result reachable</li>
  *   <li><b>Cancellation Cost:</b> O(n) where n is the length of the execution chain</li>
  *   <li><b>Combination Cost:</b> Coordination methods may use executor tasks that block while waiting for their input futures</li>
- *   <li><b>Delay Implementation:</b> Lazily applied when {@code get()} is called on the delayed future, using an interruptible wait</li>
+ *   <li><b>Delay Implementation:</b> The delay window starts when the delayed future first observes upstream completion
+ *       (a call to {@code get()}, {@code isDone()} or {@code cancel()} on it, {@code thenDelay()} itself if the upstream was
+ *       already done, or a further {@code thenDelay()}/{@code thenUse()} stage built on it while it is done) and is waited
+ *       out with an interruptible, cancellable wait</li>
  * </ul>
  *
  * <p><b>Thread Safety and Concurrency:</b>
@@ -399,8 +436,6 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>{@code wrap()}:</b> Wrap an existing {@link Future} as a {@code ContinuableFuture}</li>
  * </ul>
  *
- * <p>For multi-future combination ({@code allOf}/{@code anyOf}-style), see {@link Futures}.
- *
  * <p><b>Best Practices and Recommendations:</b>
  * <ul>
  *   <li>Use method chaining to build readable asynchronous workflows</li>
@@ -419,7 +454,7 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li>Ignoring cancellation propagation requirements in complex workflows</li>
  *   <li>Using default executor for both CPU-bound and I/O-bound operations</li>
  *   <li>Not handling exceptions appropriately in chained operations</li>
- *   <li>Creating memory leaks by not managing upstream future references</li>
+ *   <li>Holding long-lived references to the tail of a finished chain: it keeps every upstream stage and result reachable</li>
  * </ul>
  *
  * <p><b>Error Handling Strategies:</b>
@@ -480,7 +515,6 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  *   <li><b>Exception Stack Traces:</b> Preserves original exception information through chains</li>
  *   <li><b>Cancellation Propagation:</b> {@code cancelAll()} cancels the entire upstream chain</li>
  *   <li><b>State Inspection:</b> Standard Future methods for checking completion and cancellation state</li>
- *   <li><b>Chain Visualization:</b> Upstream future tracking enables dependency analysis</li>
  * </ul>
  *
  * @param <T> the type of the value returned by this Future's {@code get} method.
@@ -497,8 +531,6 @@ import com.landawn.abacus.util.Tuple.Tuple4;
  * @see <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Future.html">Future Documentation</a>
  */
 public class ContinuableFuture<T> implements Future<T> {
-
-    static final Logger logger = LoggerFactory.getLogger(ContinuableFuture.class);
 
     final Future<? extends T> future;
 
@@ -538,8 +570,6 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public static ContinuableFuture<Void> run(final Throwables.Runnable<? extends Exception> action)
             throws IllegalArgumentException, RejectedExecutionException {
-        N.checkArgNotNull(action, cs.action);
-
         return run(action, N.ASYNC_EXECUTOR.getExecutor());
     }
 
@@ -610,8 +640,6 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see N#asyncExecute(Callable)
      */
     public static <T> ContinuableFuture<T> call(final Callable<? extends T> action) throws IllegalArgumentException, RejectedExecutionException {
-        N.checkArgNotNull(action, cs.action);
-
         return call(action, N.ASYNC_EXECUTOR.getExecutor());
     }
 
@@ -685,33 +713,65 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a {@code ContinuableFuture} that is already completed with the provided result.
      */
     public static <T> ContinuableFuture<T> completed(final T result) {
-        return new ContinuableFuture<>(new Future<>() {
-            @Override
-            public boolean cancel(final boolean mayInterruptIfRunning) {
-                return false;
-            }
+        return new ContinuableFuture<>(new CompletedFuture<>(result));
+    }
 
-            @Override
-            public boolean isCancelled() {
-                return false;
-            }
+    /**
+     * The delegate of {@link #completed(Object)}: already done, never cancellable, and its {@code get()} only
+     * hands back the stored value. A named class (rather than an anonymous one) lets {@link #hasInstantOutcome()}
+     * recognise it as a delegate whose outcome can be read inline by {@link Futures}.
+     *
+     * @param <T> the type of the stored result
+     */
+    private static final class CompletedFuture<T> implements Future<T> {
+        private final T result;
 
-            @Override
-            public boolean isDone() {
-                return true;
-            }
+        CompletedFuture(final T result) {
+            this.result = result;
+        }
 
-            @Override
-            public T get() {
-                return result;
-            }
+        @Override
+        public boolean cancel(final boolean mayInterruptIfRunning) {
+            return false;
+        }
 
-            @Override
-            public T get(final long timeout, final TimeUnit unit) {
-                N.requireNonNull(unit, cs.unit);
-                return result;
-            }
-        }, null, N.ASYNC_EXECUTOR.getExecutor());
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return true;
+        }
+
+        @Override
+        public T get() {
+            return result;
+        }
+
+        @Override
+        public T get(final long timeout, final TimeUnit unit) {
+            N.requireNonNull(unit, cs.unit);
+            return result;
+        }
+    }
+
+    /**
+     * Tells whether this future is done and its {@code get()} does nothing but read a stored outcome: a plain
+     * {@code ContinuableFuture} (not a {@code map}/{@code thenDelay}/{@code thenUse} wrapper, which run user code
+     * or wait inside {@code get()}) over an exact {@link FutureTask}, an exact {@link CompletableFuture} or a
+     * {@link #completed(Object)} delegate. {@link Futures} reads such inputs on the calling thread instead of
+     * dedicating a relay thread to them.
+     *
+     * @return {@code true} if a call to {@code get()} on this future returns or throws immediately without running
+     *         user code
+     */
+    boolean hasInstantOutcome() {
+        // isDone() first, for every instance including the map/thenDelay/thenUse wrappers: a registration failure
+        // raised by a custom delegate's isDone() must surface (and be retryable) whatever wraps it.
+        return isDone() && getClass() == ContinuableFuture.class
+                && (future.getClass() == FutureTask.class || future.getClass() == CompletableFuture.class || future instanceof CompletedFuture);
     }
 
     /**
@@ -720,7 +780,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * standard {@code Future} objects.
      *
      * <p>The wrapped future retains all the characteristics of the original future, including
-     * its execution state, result, and cancellation behavior.
+     * its execution state, result, and cancellation behavior. A {@code ContinuableFuture} argument is
+     * returned <i>unchanged</i> (as {@code CompletableFuture.toCompletableFuture()} returns {@code this}): its
+     * executor and its upstream links stay intact, so {@code cancelAll()}/{@code isAllCancelled()} still reach the
+     * whole chain and later stages keep running on the executor chosen with {@code thenUse}. Wrapping it in a new
+     * node instead would silently sever both.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -743,11 +807,21 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <T> the type of the value returned by the future.
      * @param future the future to wrap; must not be {@code null}.
-     * @return a {@code ContinuableFuture} that wraps the provided future.
+     * @return a {@code ContinuableFuture} that wraps the provided future, or {@code future} itself when it already
+     *         is a {@code ContinuableFuture}.
      * @throws IllegalArgumentException if {@code future} is {@code null}.
      */
+    @SuppressWarnings("unchecked")
     public static <T> ContinuableFuture<T> wrap(final Future<? extends T> future) throws IllegalArgumentException {
         N.checkArgNotNull(future, cs.future);
+
+        if (future instanceof ContinuableFuture<?> continuableFuture) {
+            // Identity, not a new node: a fresh wrapper has no upstream links and the default executor, so
+            // cancelAll()/isAllCancelled() would stop here and the next stage would leave the thenUse executor.
+            // The cast is sound: T only ever appears in producer positions of this class (get, map, callbacks
+            // taking ? super T), so a ContinuableFuture<? extends T> can be used as a ContinuableFuture<T>.
+            return (ContinuableFuture<T>) continuableFuture;
+        }
 
         return new ContinuableFuture<>(future);
     }
@@ -760,8 +834,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>If cancellation succeeds, subsequent calls to {@link #isDone()} will always return {@code true}.
      * Subsequent calls to {@link #isCancelled()} will always return {@code true} if this method returned {@code true}.
      *
-     * <p><b>Note:</b> This method only cancels this future, not any upstream futures. To cancel the
-     * entire chain, use {@link #cancelAll(boolean)}.
+     * <p><b>Note:</b> This method only cancels this future's own task, not the upstream stages that run as
+     * separate tasks. To cancel the entire chain, use {@link #cancelAll(boolean)}. The lazy wrappers returned by
+     * {@link #map(Throwables.Function)}, {@link #thenDelay(long, TimeUnit)} and {@link #thenUse(Executor)} share
+     * their source's task, so cancelling either the wrapper or its source cancels both while that task is pending;
+     * a {@code thenDelay} stage whose upstream has already completed can additionally be cancelled on its own
+     * during its delay window, leaving the upstream result available.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -817,7 +895,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>The method attempts to cancel all futures in the chain and returns {@code true} only if
      * all cancellations were successful. If any future in the chain fails to cancel, the method
-     * still attempts to cancel the remaining futures.
+     * still attempts to cancel the remaining futures. A stage that had already completed cannot be cancelled, so
+     * the result is {@code false} as soon as any stage of the chain is complete - even when every stage that was
+     * still pending was cancelled; the return value does not distinguish "nothing left to cancel" from "could not
+     * cancel".
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1011,9 +1092,11 @@ public class ContinuableFuture<T> implements Future<T> {
      * }
      * }</pre>
      *
-     * @param timeout the maximum time to wait.
-     * @param unit the time unit of the timeout argument.
+     * @param timeout the maximum time to wait; a non-positive value polls without waiting.
+     * @param unit the time unit of the timeout argument; must not be {@code null}.
      * @return the computed result.
+     * @throws NullPointerException if {@code unit} is {@code null} (the {@link Future} contract; the abacus-only
+     *         timed getters of this class report it as {@link IllegalArgumentException} instead).
      * @throws InterruptedException if the current thread was interrupted while waiting.
      * @throws TimeoutException if the wait timed out.
      * @throws CancellationException if the computation was cancelled.
@@ -1021,7 +1104,8 @@ public class ContinuableFuture<T> implements Future<T> {
      * @see Future#get(long, TimeUnit)
      */
     @Override
-    public T get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException, CancellationException, ExecutionException {
+    public T get(final long timeout, final TimeUnit unit)
+            throws NullPointerException, InterruptedException, TimeoutException, CancellationException, ExecutionException {
         return future.get(timeout, unit);
     }
 
@@ -1094,10 +1178,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param timeout the maximum time to wait.
-     * @param unit the time unit of the timeout argument.
+     * @param unit the time unit of the timeout argument; must not be {@code null}.
      * @return a {@code Result} object containing either the computed result or the exception.
+     * @throws IllegalArgumentException if {@code unit} is {@code null}; an argument error is not a failed computation.
      */
-    public Result<T, Exception> getAsResult(final long timeout, final TimeUnit unit) {
+    public Result<T, Exception> getAsResult(final long timeout, final TimeUnit unit) throws IllegalArgumentException {
+        N.checkArgNotNull(unit, cs.unit);
+
         try {
             return Result.of(get(timeout, unit), null);
         } catch (final InterruptedException e) {
@@ -1211,10 +1298,10 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the type of the result of the function.
      * @param <E> the type of exception the function may throw.
      * @param timeout the maximum time to wait.
-     * @param unit the time unit of the timeout argument.
+     * @param unit the time unit of the timeout argument; must not be {@code null}.
      * @param action the function to apply to the result.
      * @return the result of applying the function to the computed result.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code unit}, {@code action} is {@code null}.
      * @throws InterruptedException if the current thread was interrupted while waiting.
      * @throws TimeoutException if the wait timed out.
      * @throws CancellationException if the computation was cancelled.
@@ -1223,6 +1310,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit, final Throwables.Function<? super T, ? extends U, E> action)
             throws IllegalArgumentException, InterruptedException, TimeoutException, CancellationException, ExecutionException, E {
+        N.checkArgNotNull(unit, cs.unit);
         N.checkArgNotNull(action, cs.action);
 
         return action.apply(get(timeout, unit));
@@ -1289,15 +1377,17 @@ public class ContinuableFuture<T> implements Future<T> {
      * @param <U> the type of the result of the function.
      * @param <E> the type of exception the function may throw.
      * @param timeout the maximum time to wait.
-     * @param unit the time unit of the timeout argument.
+     * @param unit the time unit of the timeout argument; must not be {@code null}.
      * @param action the bi-function to apply to the result and exception.
      * @return the result of applying the function.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code unit}, {@code action} is {@code null}; an argument error
+     *         is not handed to the bi-function as a failure.
      * @throws E if the bi-function throws an exception.
      * @see #getAsResult(long, TimeUnit)
      */
     public <U, E extends Exception> U getThenApply(final long timeout, final TimeUnit unit,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends U, E> action) throws IllegalArgumentException, E {
+        N.checkArgNotNull(unit, cs.unit);
         N.checkArgNotNull(action, cs.action);
 
         final Result<T, Exception> result = getAsResult(timeout, unit);
@@ -1358,9 +1448,9 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <E> the type of exception the consumer may throw.
      * @param timeout the maximum time to wait.
-     * @param unit the time unit of the timeout argument.
+     * @param unit the time unit of the timeout argument; must not be {@code null}.
      * @param action the consumer to execute with the result.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code unit}, {@code action} is {@code null}.
      * @throws InterruptedException if the current thread was interrupted while waiting.
      * @throws TimeoutException if the wait timed out.
      * @throws CancellationException if the computation was cancelled.
@@ -1369,6 +1459,7 @@ public class ContinuableFuture<T> implements Future<T> {
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit, final Throwables.Consumer<? super T, E> action)
             throws IllegalArgumentException, InterruptedException, TimeoutException, CancellationException, ExecutionException, E {
+        N.checkArgNotNull(unit, cs.unit);
         N.checkArgNotNull(action, cs.action);
 
         action.accept(get(timeout, unit));
@@ -1432,14 +1523,16 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * @param <E> the type of exception the bi-consumer may throw.
      * @param timeout the maximum time to wait.
-     * @param unit the time unit of the timeout argument.
+     * @param unit the time unit of the timeout argument; must not be {@code null}.
      * @param action the bi-consumer to execute with the result and exception.
-     * @throws IllegalArgumentException if {@code action} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code unit}, {@code action} is {@code null}; an argument error
+     *         is not handed to the bi-consumer as a failure.
      * @throws E if the bi-consumer throws an exception.
      * @see #getAsResult(long, TimeUnit)
      */
     public <E extends Exception> void getThenAccept(final long timeout, final TimeUnit unit,
             final Throwables.BiConsumer<? super T, ? super Exception, E> action) throws IllegalArgumentException, E {
+        N.checkArgNotNull(unit, cs.unit);
         N.checkArgNotNull(action, cs.action);
 
         final Result<T, Exception> result = getAsResult(timeout, unit);
@@ -1471,17 +1564,16 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param <U> the type of the transformed result.
-     * @param func the function to apply to the result.
+     * @param function the function to apply to the result.
      * @return a new {@code ContinuableFuture} that lazily applies the function on {@code get()}.
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see #thenCallAsync(Throwables.Function)
      */
     @Beta
-    public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public <U> ContinuableFuture<U> map(final Throwables.Function<? super T, ? extends U, ? extends Exception> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        //noinspection Convert2Diamond
-        return new ContinuableFuture<>(new Future<U>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
+        return new ContinuableFuture<>(new Future<U>() {
             @Override
             public boolean cancel(final boolean mayInterruptIfRunning) {
                 return ContinuableFuture.this.cancel(mayInterruptIfRunning);
@@ -1502,7 +1594,7 @@ public class ContinuableFuture<T> implements Future<T> {
                 final T ret = ContinuableFuture.this.get();
 
                 try {
-                    return func.apply(ret);
+                    return function.apply(ret);
                 } catch (final Throwable e) {
                     throw new ExecutionException(e);
                 }
@@ -1513,7 +1605,7 @@ public class ContinuableFuture<T> implements Future<T> {
                 final T ret = ContinuableFuture.this.get(timeout, unit);
 
                 try {
-                    return func.apply(ret);
+                    return function.apply(ret);
                 } catch (final Throwable e) {
                     throw new ExecutionException(e);
                 }
@@ -1537,7 +1629,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method returns a new {@code ContinuableFuture<Void>} that
      * completes when the action finishes executing. The action is only executed after
-     * this future completes successfully.
+     * this future completes successfully. If this future fails or is cancelled, the action is not run and the
+     * returned future's {@code get()} throws {@link ExecutionException} whose cause is this future's own failure
+     * (see the class-level "Failure shape": the original cause, never a nested {@code ExecutionException}) or its
+     * {@link CancellationException}; use the {@code BiConsumer} overload to handle the failure instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1559,7 +1654,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            get();
+            awaitValue(this);
             action.run();
             return null;
         });
@@ -1572,7 +1667,9 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method returns a new {@code ContinuableFuture<Void>} that
      * completes when the consumer finishes executing. The consumer receives the result
-     * of this future if it completes successfully.
+     * of this future if it completes successfully. If this future fails or is cancelled, the consumer is not run
+     * and the returned future's {@code get()} throws {@link ExecutionException} whose cause is this future's own
+     * failure (never a nested {@code ExecutionException}) or its {@link CancellationException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1594,7 +1691,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            action.accept(get());
+            action.accept(awaitValue(this));
             return null;
         });
     }
@@ -1608,7 +1705,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * completes when the bi-consumer finishes executing. The bi-consumer always executes,
      * regardless of whether this future completed normally or exceptionally. This is useful
      * for handling both success and failure cases in the asynchronous chain without breaking
-     * the flow.
+     * the flow. If the worker waiting for this future is interrupted before this future completes
+     * (for example by {@code cancel(true)} on the returned future), the bi-consumer is not executed:
+     * the interruption ends the returned stage rather than being reported as a failure of this future.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1636,7 +1735,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> result = getAsResult();
+            final Result<T, Exception> result = awaitResult(this); // never getAsResult here - see awaitResult
             action.accept(result.orElseIfFailure(null), result.getException());
             return null;
         });
@@ -1649,7 +1748,10 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method returns a new {@code ContinuableFuture} that completes
      * with the result of the callable. The callable is only executed after this future
-     * completes successfully.
+     * completes successfully. If this future fails or is cancelled, the callable is not run and the returned
+     * future's {@code get()} throws {@link ExecutionException} whose cause is this future's own failure (never a
+     * nested {@code ExecutionException}) or its {@link CancellationException}; use the {@code BiFunction} overload
+     * to recover instead.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1671,7 +1773,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            get();
+            awaitValue(this);
             return action.call();
         });
     }
@@ -1685,7 +1787,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * <p>This method returns a new {@code ContinuableFuture} that completes
      * with the transformed result. This method is similar to {@link #map(Throwables.Function)}
      * but executes asynchronously in the configured executor rather than synchronously when
-     * get() is called.
+     * get() is called. If this future fails or is cancelled, the function is not run and the returned future's
+     * {@code get()} throws {@link ExecutionException} whose cause is this future's own failure (never a nested
+     * {@code ExecutionException}, however long the chain) or its {@link CancellationException}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1708,7 +1812,7 @@ public class ContinuableFuture<T> implements Future<T> {
             throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(action, cs.action);
 
-        return execute(() -> action.apply(get()));
+        return execute(() -> action.apply(awaitValue(this)));
     }
 
     /**
@@ -1721,6 +1825,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * with the transformed result. The bi-function always executes, regardless of whether this
      * future completed normally or exceptionally. This is useful for recovery scenarios where
      * you want to provide alternative values or transform exceptions into valid results.
+     * If the worker waiting for this future is interrupted before this future completes
+     * (for example by {@code cancel(true)} on the returned future), the bi-function is not executed:
+     * the interruption ends the returned stage rather than being reported as a failure of this future.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1746,7 +1853,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> result = getAsResult();
+            final Result<T, Exception> result = awaitResult(this); // never getAsResult here - see awaitResult
             return action.apply(result.orElseIfFailure(null), result.getException());
         });
     }
@@ -1879,13 +1986,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            // awaitResult, not getAsResult: getAsResult converts the WORKER's own InterruptedException into
-            // "this future failed" and restores the interrupt flag, which then makes the very next get() fail
-            // instantly - so cancelling the combined stage used to invoke the callback with two fabricated
-            // InterruptedExceptions for two futures that had not completed at all. The strict overloads have
-            // always used awaitResult, whose `catch (InterruptedException e) { throw e; }` makes the
-            // interruption terminal for this stage while still reporting genuine input failures as a Result.
-            final Result<T, Exception> result = awaitResult(this);
+            final Result<T, Exception> result = awaitResult(this); // never getAsResult here - see awaitResult
             final Result<U, Exception> result2 = awaitResult(other);
 
             action.accept(Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
@@ -1931,13 +2032,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            // awaitResult, not getAsResult: getAsResult converts the WORKER's own InterruptedException into
-            // "this future failed" and restores the interrupt flag, which then makes the very next get() fail
-            // instantly - so cancelling the combined stage used to invoke the callback with two fabricated
-            // InterruptedExceptions for two futures that had not completed at all. The strict overloads have
-            // always used awaitResult, whose `catch (InterruptedException e) { throw e; }` makes the
-            // interruption terminal for this stage while still reporting genuine input failures as a Result.
-            final Result<T, Exception> result = awaitResult(this);
+            final Result<T, Exception> result = awaitResult(this); // never getAsResult here - see awaitResult
             final Result<U, Exception> result2 = awaitResult(other);
 
             action.accept(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException());
@@ -2077,13 +2172,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            // awaitResult, not getAsResult: getAsResult converts the WORKER's own InterruptedException into
-            // "this future failed" and restores the interrupt flag, which then makes the very next get() fail
-            // instantly - so cancelling the combined stage used to invoke the callback with two fabricated
-            // InterruptedExceptions for two futures that had not completed at all. The strict overloads have
-            // always used awaitResult, whose `catch (InterruptedException e) { throw e; }` makes the
-            // interruption terminal for this stage while still reporting genuine input failures as a Result.
-            final Result<T, Exception> result = awaitResult(this);
+            final Result<T, Exception> result = awaitResult(this); // never getAsResult here - see awaitResult
             final Result<U, Exception> result2 = awaitResult(other);
 
             return action.apply(Tuple.of(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException()));
@@ -2130,13 +2219,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            // awaitResult, not getAsResult: getAsResult converts the WORKER's own InterruptedException into
-            // "this future failed" and restores the interrupt flag, which then makes the very next get() fail
-            // instantly - so cancelling the combined stage used to invoke the callback with two fabricated
-            // InterruptedExceptions for two futures that had not completed at all. The strict overloads have
-            // always used awaitResult, whose `catch (InterruptedException e) { throw e; }` makes the
-            // interruption terminal for this stage while still reporting genuine input failures as a Result.
-            final Result<T, Exception> result = awaitResult(this);
+            final Result<T, Exception> result = awaitResult(this); // never getAsResult here - see awaitResult
             final Result<U, Exception> result2 = awaitResult(other);
 
             return action.apply(result.orElseIfFailure(null), result.getException(), result2.orElseIfFailure(null), result2.getException());
@@ -2173,7 +2256,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            firstCompletedOf(ContinuableFuture.this, other);
+            firstCompletedOf(this, other);
 
             action.run();
             return null;
@@ -2215,7 +2298,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> ret = firstCompletedOf(ContinuableFuture.this, other);
+            final Result<T, Exception> ret = firstCompletedOf(this, other);
 
             action.accept(ret.orElseIfFailure(null));
             return null;
@@ -2258,7 +2341,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> result = firstCompletedOf(ContinuableFuture.this, other);
+            final Result<T, Exception> result = firstCompletedOf(this, other);
 
             action.accept(result.orElseIfFailure(null), result.getException());
             return null;
@@ -2296,7 +2379,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            firstCompletedOf(ContinuableFuture.this, other);
+            firstCompletedOf(this, other);
 
             return action.call();
         }, other);
@@ -2334,7 +2417,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> ret = firstCompletedOf(ContinuableFuture.this, other);
+            final Result<T, Exception> ret = firstCompletedOf(this, other);
 
             return action.apply(ret.orElseIfFailure(null));
         }, other);
@@ -2382,7 +2465,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final Result<T, Exception> ret = firstCompletedOf(ContinuableFuture.this, other);
+            final Result<T, Exception> ret = firstCompletedOf(this, other);
 
             return action.apply(ret.orElseIfFailure(null), ret.getException());
         }, other);
@@ -2420,39 +2503,9 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            try {
-                final Result<Object, Exception> firstResult = nextOutcome(iter);
-
-                if (firstResult.isFailure()) {
-                    if (!iter.hasNext()) {
-                        // Without a second outcome there is nothing to combine with, and a bare next() would fail
-                        // with NoSuchElementException and hide the failure already in hand.
-                        throw firstResult.getException();
-                    }
-
-                    final Result<Object, Exception> secondResult = nextOutcome(iter);
-
-                    if (secondResult.isFailure()) {
-                        final Exception firstException = firstResult.getException();
-
-                        // Keep the second failure visible as a suppressed exception, matching the
-                        // AfterBoth family's throwIfEitherFailed. suppressOnce, not addSuppressed: these are the
-                        // input futures' own exceptions, so re-combining the same failed pair must not keep
-                        // appending the same entry.
-                        suppressOnce(firstException, secondResult.getException());
-
-                        throw firstException;
-                    }
-                }
-
-                action.run();
-                return null;
-            } finally {
-                // Stops after the first outcome when that outcome is a success: release the relay
-                // still blocked on the losing input instead of leaving a thread parked on it.
-                Futures.cancelPendingRelays(iter);
-            }
+            firstSuccessOf(this, other);
+            action.run();
+            return null;
         }, other);
     }
 
@@ -2488,45 +2541,8 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            try {
-                final Result<T, Exception> firstResult = nextOutcome(iter);
-                T ret = null;
-
-                if (firstResult.isFailure()) {
-                    if (!iter.hasNext()) {
-                        // Without a second outcome there is nothing to combine with, and a bare next() would fail
-                        // with NoSuchElementException and hide the failure already in hand.
-                        throw firstResult.getException();
-                    }
-
-                    final Result<T, Exception> secondResult = nextOutcome(iter);
-
-                    if (secondResult.isFailure()) {
-                        final Exception firstException = firstResult.getException();
-
-                        // Keep the second failure visible as a suppressed exception, matching the
-                        // AfterBoth family's throwIfEitherFailed. suppressOnce, not addSuppressed: these are the
-                        // input futures' own exceptions, so re-combining the same failed pair must not keep
-                        // appending the same entry.
-                        suppressOnce(firstException, secondResult.getException());
-
-                        throw firstException;
-                    } else {
-                        ret = secondResult.orElseIfFailure(null);
-                    }
-                } else {
-                    ret = firstResult.orElseIfFailure(null);
-                }
-
-                action.accept(ret);
-
-                return null;
-            } finally {
-                // Stops after the first outcome when that outcome is a success: release the relay
-                // still blocked on the losing input instead of leaving a thread parked on it.
-                Futures.cancelPendingRelays(iter);
-            }
+            action.accept(firstSuccessOf(this, other));
+            return null;
         }, other);
     }
 
@@ -2534,20 +2550,15 @@ public class ContinuableFuture<T> implements Future<T> {
      * Executes the provided BiConsumer action asynchronously after the first successful completion between this ContinuableFuture
      * and the other ContinuableFuture. The BiConsumer receives the result and the exception.
      *
-     * <p><b>BETA API - Subject to Change:</b></p>
-     * <p>This method is marked as {@code @Beta} and may be subject to change in future versions.
-     * Potential changes include:
-     * <ul>
-     *   <li>The behavior when both futures fail may be refined to provide better exception aggregation</li>
-     *   <li>Additional overloads with timeout parameters may be introduced</li>
-     *   <li>The method may be renamed for better clarity (e.g., runAfterAnySucceed)</li>
-     *   <li>Support for more than two futures may be added</li>
-     * </ul>
+     * <p><b>BETA API:</b> this overload is marked {@code @Beta}; the way the two failures are reported when both
+     * inputs fail (only the first, with the second attached as suppressed) may still be refined.</p>
      *
      * <p>If either future completes successfully, the BiConsumer receives {@code (firstSuccessfulResult, null)}.
      * Only if both futures fail does it receive {@code (null, exception)}, where the exception is the failure of
-     * the first future to complete. Unlike the other {@code runAsyncAfterFirstSuccess} overloads, this one never
-     * completes the returned future exceptionally because of an upstream failure.
+     * the first future to complete, with the other failure attached as suppressed to that failure - to the
+     * {@code Error} itself when the failure is an {@code ExecutionException} carrying one - once, however often the
+     * same failed pair is combined. Unlike the other {@code runAsyncAfterFirstSuccess} overloads, this
+     * one never completes the returned future exceptionally because of an upstream failure.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2577,39 +2588,9 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            try {
-                final Result<T, Exception> firstResult = nextOutcome(iter);
-                Result<T, Exception> ret = null;
-
-                // iter.hasNext(): with no second outcome there is nothing to prefer over firstResult, and a bare
-                // next() would fail with NoSuchElementException. It blocks on the same queue that next() did, so
-                // waiting for the other input is unchanged.
-                if (firstResult.isFailure() && iter.hasNext()) {
-                    final Result<T, Exception> secondResult = nextOutcome(iter);
-
-                    if (secondResult.isSuccess()) {
-                        ret = secondResult;
-                    } else if (firstResult.getException() != null) {
-                        // Both inputs failed and only the first exception is handed to the action. Keep the
-                        // second one visible as a suppressed exception, matching the Runnable/Consumer/Function
-                        // variants of this family (which report it the same way before rethrowing) - and only
-                        // once, however often the same failed pair is combined.
-                        suppressOnce(firstResult.getException(), secondResult.getException());
-                    }
-                }
-
-                if (ret == null) {
-                    ret = firstResult;
-                }
-
-                action.accept(ret.orElseIfFailure(null), ret.getException());
-                return null;
-            } finally {
-                // Stops after the first outcome when that outcome is a success: release the relay
-                // still blocked on the losing input instead of leaving a thread parked on it.
-                Futures.cancelPendingRelays(iter);
-            }
+            final Result<T, Exception> result = firstSuccessOrFirstFailureOf(this, other);
+            action.accept(result.orElseIfFailure(null), result.getException());
+            return null;
         }, other);
     }
 
@@ -2646,38 +2627,8 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final ObjIterator<Result<Object, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            try {
-                final Result<Object, Exception> firstResult = nextOutcome(iter);
-
-                if (firstResult.isFailure()) {
-                    if (!iter.hasNext()) {
-                        // Without a second outcome there is nothing to combine with, and a bare next() would fail
-                        // with NoSuchElementException and hide the failure already in hand.
-                        throw firstResult.getException();
-                    }
-
-                    final Result<Object, Exception> secondResult = nextOutcome(iter);
-
-                    if (secondResult.isFailure()) {
-                        final Exception firstException = firstResult.getException();
-
-                        // Keep the second failure visible as a suppressed exception, matching the
-                        // AfterBoth family's throwIfEitherFailed. suppressOnce, not addSuppressed: these are the
-                        // input futures' own exceptions, so re-combining the same failed pair must not keep
-                        // appending the same entry.
-                        suppressOnce(firstException, secondResult.getException());
-
-                        throw firstException;
-                    }
-                }
-
-                return action.call();
-            } finally {
-                // Stops after the first outcome when that outcome is a success: release the relay
-                // still blocked on the losing input instead of leaving a thread parked on it.
-                Futures.cancelPendingRelays(iter);
-            }
+            firstSuccessOf(this, other);
+            return action.call();
         }, other);
     }
 
@@ -2713,45 +2664,7 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(other, cs.other);
         N.checkArgNotNull(action, cs.action);
 
-        return execute(() -> {
-            final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            try {
-                final Result<T, Exception> firstResult = nextOutcome(iter);
-                T ret = null;
-
-                if (firstResult.isFailure()) {
-                    if (!iter.hasNext()) {
-                        // Without a second outcome there is nothing to combine with, and a bare next() would fail
-                        // with NoSuchElementException and hide the failure already in hand.
-                        throw firstResult.getException();
-                    }
-
-                    final Result<T, Exception> secondResult = nextOutcome(iter);
-
-                    if (secondResult.isFailure()) {
-                        final Exception firstException = firstResult.getException();
-
-                        // Keep the second failure visible as a suppressed exception, matching the
-                        // AfterBoth family's throwIfEitherFailed. suppressOnce, not addSuppressed: these are the
-                        // input futures' own exceptions, so re-combining the same failed pair must not keep
-                        // appending the same entry.
-                        suppressOnce(firstException, secondResult.getException());
-
-                        throw firstException;
-                    } else {
-                        ret = secondResult.orElseIfFailure(null);
-                    }
-                } else {
-                    ret = firstResult.orElseIfFailure(null);
-                }
-
-                return action.apply(ret);
-            } finally {
-                // Stops after the first outcome when that outcome is a success: release the relay
-                // still blocked on the losing input instead of leaving a thread parked on it.
-                Futures.cancelPendingRelays(iter);
-            }
-        }, other);
+        return execute(() -> action.apply(firstSuccessOf(this, other)), other);
     }
 
     /**
@@ -2764,11 +2677,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * result; unlike the other {@code callAsyncAfterFirstSuccess} overloads, this one never completes the
      * returned future exceptionally because of an upstream failure.
      *
-     * <p><b>Stability:</b> this overload is the exact mirror of
-     * {@link #runAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiConsumer)}, which is marked
-     * {@code @Beta}. The caveats stated there apply verbatim here: the both-fail behaviour described above may
-     * be refined to aggregate the two exceptions rather than report only the first, and the method may be
-     * renamed or gain overloads for more than two futures.
+     * <p><b>BETA API:</b> this overload is the exact mirror of
+     * {@link #runAsyncAfterFirstSuccess(ContinuableFuture, Throwables.BiConsumer)} and, like it, is marked
+     * {@code @Beta}: the way the two failures are reported when both inputs fail (only the first, with the second
+     * attached as suppressed to that failure - to the {@code Error} itself when the failure is an
+     * {@code ExecutionException} carrying one - once, however often the same failed pair is combined) may still
+     * be refined.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2794,6 +2708,7 @@ public class ContinuableFuture<T> implements Future<T> {
      * @throws RejectedExecutionException if the executor cannot accept the submitted task
      * @see #getAsResult()
      */
+    @Beta
     public <R> ContinuableFuture<R> callAsyncAfterFirstSuccess(final ContinuableFuture<? extends T> other,
             final Throwables.BiFunction<? super T, ? super Exception, ? extends R, ? extends Exception> action)
             throws IllegalArgumentException, RejectedExecutionException {
@@ -2801,38 +2716,8 @@ public class ContinuableFuture<T> implements Future<T> {
         N.checkArgNotNull(action, cs.action);
 
         return execute(() -> {
-            final ObjIterator<Result<T, Exception>> iter = Futures.iterate(Arrays.asList(ContinuableFuture.this, other), Fn.identity());
-            try {
-                final Result<T, Exception> firstResult = nextOutcome(iter);
-                Result<T, Exception> ret = null;
-
-                // iter.hasNext(): with no second outcome there is nothing to prefer over firstResult, and a bare
-                // next() would fail with NoSuchElementException. It blocks on the same queue that next() did, so
-                // waiting for the other input is unchanged.
-                if (firstResult.isFailure() && iter.hasNext()) {
-                    final Result<T, Exception> secondResult = nextOutcome(iter);
-
-                    if (secondResult.isSuccess()) {
-                        ret = secondResult;
-                    } else if (firstResult.getException() != null) {
-                        // Both inputs failed and only the first exception is handed to the action. Keep the
-                        // second one visible as a suppressed exception, matching the Runnable/Consumer/Function
-                        // variants of this family (which report it the same way before rethrowing) - and only
-                        // once, however often the same failed pair is combined.
-                        suppressOnce(firstResult.getException(), secondResult.getException());
-                    }
-                }
-
-                if (ret == null) {
-                    ret = firstResult;
-                }
-
-                return action.apply(ret.orElseIfFailure(null), ret.getException());
-            } finally {
-                // Stops after the first outcome when that outcome is a success: release the relay
-                // still blocked on the losing input instead of leaving a thread parked on it.
-                Futures.cancelPendingRelays(iter);
-            }
+            final Result<T, Exception> result = firstSuccessOrFirstFailureOf(this, other);
+            return action.apply(result.orElseIfFailure(null), result.getException());
         }, other);
     }
 
@@ -2841,8 +2726,9 @@ public class ContinuableFuture<T> implements Future<T> {
      * that outcome, then releases the background relay still blocked on the other one.
      *
      * <p>{@link Futures#iterate(java.util.Collection, java.util.function.Function)} starts one relay task
-     * per input; an "either" combinator consumes only the first outcome, so without the explicit release
-     * the losing input would keep a relay thread parked until it completed on its own.</p>
+     * per input that is not a completed plain task; an "either" combinator consumes only the first outcome, so
+     * without the explicit release the losing input would keep a relay thread parked until it completed on its
+     * own.</p>
      *
      * @param <V> the common result type of the two futures
      * @param first the first future to race
@@ -2867,12 +2753,12 @@ public class ContinuableFuture<T> implements Future<T> {
      * of the input futures.
      *
      * @param <V> the common result type of the futures being iterated
-     * @param iter the iterator to read the next outcome from
+     * @param iterator the iterator to read the next outcome from
      * @return the next outcome
      * @throws InterruptedException if the outcome just read is the iterator's stand-in for this thread's own interruption
      */
-    private static <V> Result<V, Exception> nextOutcome(final ObjIterator<Result<V, Exception>> iter) throws InterruptedException {
-        final Result<V, Exception> result = iter.next();
+    private static <V> Result<V, Exception> nextOutcome(final ObjIterator<Result<V, Exception>> iterator) throws InterruptedException {
+        final Result<V, Exception> result = iterator.next();
 
         // Futures.iterate reports the CONSUMING thread's own InterruptedException as a failure Result (re-setting
         // the interrupt flag) instead of throwing it, so without this an interrupted combining worker would read
@@ -2889,6 +2775,21 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
+     * Waits for {@code continuableFuture} and reports its outcome as a {@link Result}: the value on success, or the
+     * unwrapped failure (see {@link Futures#convertException(Throwable)}) - a cancelled input arrives as its
+     * {@link CancellationException}, an input whose task threw an {@link Error} as the {@code ExecutionException}
+     * carrier of that Error.
+     *
+     * <p>awaitResult, not getAsResult, is what every worker uses to read its inputs: getAsResult would turn the
+     * WORKER's own interruption (for example {@code cancel(true)} on the returned stage) into a fabricated
+     * "this input failed" outcome and restore the interrupt flag, which then makes the very next {@code get()} fail
+     * instantly - so cancelling a combined stage used to invoke the callback with two fabricated
+     * InterruptedExceptions for two futures that had not completed at all. Rethrowing the interruption instead ends
+     * the stage, exactly as an interrupted plain task ends.</p>
+     *
+     * @param <V> the result type of the future
+     * @param continuableFuture the input to wait for
+     * @return the input's outcome
      * @throws InterruptedException if waiting for {@code continuableFuture} is interrupted; other Exceptions are returned in the Result
      */
     private static <V> Result<V, Exception> awaitResult(final ContinuableFuture<? extends V> continuableFuture) throws InterruptedException {
@@ -2902,28 +2803,227 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
+     * Waits for {@code continuableFuture} and returns its value, or rethrows its failure with a single wrapper
+     * removed so that the worker's own {@code ExecutionException} carries the input's original failure (the cause
+     * of the input's {@code ExecutionException}, or the {@link Error} itself) rather than a nested
+     * {@code ExecutionException}. This is what keeps the strict {@code then*} family on the same failure shape as
+     * every other family and as {@code CompletableFuture}.
+     *
+     * @param <V> the result type of the future
+     * @param continuableFuture the input to wait for
+     * @return the input's value
+     * @throws InterruptedException if waiting is interrupted
+     * @throws Exception the input's unwrapped failure (a {@link CancellationException} for a cancelled input)
+     */
+    private static <V> V awaitValue(final ContinuableFuture<? extends V> continuableFuture) throws Exception {
+        final Result<V, Exception> result = awaitResult(continuableFuture);
+
+        if (result.isFailure()) {
+            throw rethrowable(result.getException(), null);
+        }
+
+        return result.orElseIfFailure(null);
+    }
+
+    /**
+     * Waits for whichever of the two inputs succeeds first. When the first outcome is a failure, the second
+     * outcome decides: its success is returned, or its failure is attached (once) as suppressed to the first one,
+     * which is then reported.
+     *
+     * @param <V> the common result type of the two futures
+     * @param first the first input
+     * @param second the second input
+     * @return the first success, or the first failure with the second failure suppressed on it
+     * @throws InterruptedException if this worker is interrupted while waiting
+     */
+    private static <V> Result<V, Exception> firstSuccessOrFirstFailureOf(final ContinuableFuture<? extends V> first,
+            final ContinuableFuture<? extends V> second) throws InterruptedException {
+        final ObjIterator<Result<V, Exception>> iter = Futures.iterate(Arrays.asList(first, second), Fn.identity());
+
+        try {
+            final Result<V, Exception> firstResult = nextOutcome(iter);
+
+            if (firstResult.isSuccess()) {
+                return firstResult;
+            }
+
+            // The iterator was built over exactly two inputs, so a second outcome always follows (this worker's own
+            // interruption arrives as a stand-in that nextOutcome rethrows).
+            final Result<V, Exception> secondResult = nextOutcome(iter);
+
+            if (secondResult.isSuccess()) {
+                return secondResult;
+            }
+
+            // Both inputs failed and only the first failure is reported. Keep the second one visible as a
+            // suppressed exception - once, however often the same failed pair is combined.
+            suppressOnce(firstResult.getException(), secondResult.getException());
+
+            return firstResult;
+        } finally {
+            // Stops after the first outcome when that outcome is a success: release the relay still blocked on the
+            // losing input instead of leaving a thread parked on it.
+            Futures.cancelPendingRelays(iter);
+        }
+    }
+
+    /**
+     * Strict form of {@link #firstSuccessOrFirstFailureOf}: returns the first successful value, or rethrows the
+     * first failure (unwrapped, with the second failure suppressed on it) when both inputs fail.
+     *
+     * @param <V> the common result type of the two futures
+     * @param first the first input
+     * @param second the second input
+     * @return the first successful value
+     * @throws InterruptedException if this worker is interrupted while waiting
+     * @throws Exception the first input failure when both inputs fail
+     */
+    private static <V> V firstSuccessOf(final ContinuableFuture<? extends V> first, final ContinuableFuture<? extends V> second) throws Exception {
+        final Result<V, Exception> result = firstSuccessOrFirstFailureOf(first, second);
+
+        if (result.isFailure()) {
+            throw rethrowable(result.getException(), null);
+        }
+
+        return result.orElseIfFailure(null);
+    }
+
+    /**
+     * Prepares an input failure for rethrow from a worker so that the worker's {@code ExecutionException} wraps the
+     * original failure exactly once: an {@code ExecutionException}/{@code CompletionException} that merely carries a
+     * non-{@code Exception} throwable is unwrapped, and an {@link Error} is thrown right here (a
+     * {@link Callable} cannot declare it). {@code secondary} is attached as suppressed to whatever is reported.
+     *
+     * @param primary the failure to report; must not be {@code null}
+     * @param secondary the other input's failure to attach, may be {@code null}
+     * @return the exception the caller should throw
+     * @throws Error if {@code primary} carries an {@code Error}
+     */
+    private static Exception rethrowable(final Exception primary, final Exception secondary) {
+        final Throwable reported = reportedFailure(primary);
+
+        suppressOnce(reported, secondary);
+
+        if (reported instanceof Error error) {
+            throw error;
+        }
+
+        return (Exception) reported;
+    }
+
+    /**
+     * The throwable that stands for an input failure once its per-{@code get()} carrier is removed: the
+     * {@link Error} inside an {@code ExecutionException}/{@code CompletionException} carrier, otherwise the
+     * exception itself (a bare {@code Throwable} subclass that is neither stays inside its carrier).
+     *
+     * @param failure the input failure; must not be {@code null}
+     * @return the long-lived throwable to report or to attach suppressed exceptions to
+     */
+    private static Throwable reportedFailure(final Exception failure) {
+        final Throwable unwrapped = Futures.unwrapErrorCarrier(failure);
+
+        // unwrapErrorCarrier only ever exposes a non-Exception cause, so the choice is "the Error inside" or the
+        // exception itself (a bare Throwable subclass that is neither stays inside its carrier).
+        return unwrapped instanceof Error ? unwrapped : failure;
+    }
+
+    /**
      * Records {@code secondary} as suppressed on {@code primary}, unless it is already there.
      *
      * <p>The two exceptions belong to the <i>input</i> futures and outlive any one combination, so combining the
-     * same failed pair twice used to append the same suppressed exception again and again - an unbounded,
-     * caller-visible mutation of an object this class does not own. The identity check keeps the exception
-     * instance itself unchanged, which callers do rely on.</p>
+     * same failed pair twice must not append the same suppressed exception again and again - an unbounded,
+     * caller-visible mutation of an object this class does not own. Hence: check-and-add is atomic under one
+     * class-wide lock ({@code SUPPRESSION_LOCK}; the individual {@code Throwable} monitors are only ever taken inside
+     * it, by {@code getSuppressed()}/{@code addSuppressed()}, so concurrent combinations of one pair in any order
+     * cannot race); an {@code Error} failure is attached as the long-lived Error itself rather than the fresh
+     * {@code ExecutionException} carrier that every {@code get()} creates (identity de-duplication never matched
+     * those); a cancelled input, whose {@link CancellationException} is likewise fresh per {@code get()}, is attached
+     * at most once by type; and a secondary from which the primary is already reachable through suppressed links is
+     * skipped, so no combination - in any order, over any number of inputs (A -&gt; B -&gt; C -&gt; A included) - can
+     * build a cycle that recursive suppressed-walkers choke on.</p>
      *
-     * @param primary the exception that will be thrown or handed to the action; must not be {@code null}
+     * @param primaryFailure the exception that will be thrown or handed to the action; must not be {@code null}
      * @param secondary the other input's failure, may be {@code null}
      */
-    private static void suppressOnce(final Exception primary, final Exception secondary) {
-        if (secondary == null || secondary == primary) {
+    private static void suppressOnce(final Throwable primaryFailure, final Exception secondary) {
+        if (secondary == null) {
             return;
         }
 
-        for (final Throwable already : primary.getSuppressed()) {
-            if (already == secondary) {
-                return;
+        // Both sides shed their per-get() carriers: the entry is attached to the long-lived Error, never to a
+        // carrier that the next get() replaces (which is what made "once" unbounded before).
+        final Throwable primary = primaryFailure instanceof Exception ex ? reportedFailure(ex) : primaryFailure;
+        final Throwable extra = reportedFailure(secondary);
+
+        if (extra == primary) {
+            return;
+        }
+
+        // One class-wide lock around the reachability check and the add: the check must be atomic with the add
+        // (two threads combining (A,B) and (B,A) at once used to pass a lock-free pair check and both add), and a
+        // static lock avoids ordering two Throwable monitors. getSuppressed()/addSuppressed() take the individual
+        // Throwable monitor inside it; nothing in this class or in Futures nests the two the other way round.
+        synchronized (SUPPRESSION_LOCK) {
+            // The cheap direct-children check first: a repeat combination of the same pair never pays for the walk.
+            for (final Throwable already : primary.getSuppressed()) {
+                if (already == extra || (extra instanceof CancellationException && already instanceof CancellationException)) {
+                    return;
+                }
+            }
+
+            if (reachesThroughSuppressed(extra, primary)) {
+                return; // attaching would close a cycle (A -> B -> C -> A included), not only the A <-> B pair
+            }
+
+            primary.addSuppressed(extra);
+        }
+    }
+
+    /** Guards {@link #suppressOnce}: the cycle check and the add must be atomic across all combinations. */
+    private static final Object SUPPRESSION_LOCK = new Object();
+
+    /**
+     * Tells whether {@code target} is reachable from {@code start} by following suppressed exceptions (identity
+     * comparison, each node visited once).
+     *
+     * @param start the throwable to start from
+     * @param target the throwable to look for
+     * @return {@code true} if {@code target} is {@code start} or is (transitively) suppressed under it
+     */
+    private static boolean reachesThroughSuppressed(final Throwable start, final Throwable target) {
+        if (start == target) {
+            return true;
+        }
+
+        final Throwable[] direct = start.getSuppressed();
+
+        if (direct.length == 0) {
+            return false; // the common case - a leaf secondary - allocates nothing
+        }
+
+        final IdentityHashMap<Throwable, Boolean> visited = new IdentityHashMap<>();
+        final ArrayDeque<Throwable> pending = new ArrayDeque<>();
+        visited.put(start, Boolean.TRUE);
+
+        for (final Throwable suppressed : direct) {
+            pending.push(suppressed);
+        }
+
+        while (!pending.isEmpty()) {
+            final Throwable current = pending.pop();
+
+            if (current == target) {
+                return true;
+            }
+
+            if (visited.put(current, Boolean.TRUE) == null) {
+                for (final Throwable suppressed : current.getSuppressed()) {
+                    pending.push(suppressed);
+                }
             }
         }
 
-        primary.addSuppressed(secondary);
+        return false;
     }
 
     /**
@@ -2934,11 +3034,9 @@ public class ContinuableFuture<T> implements Future<T> {
         final Exception exception2 = result2.getException();
 
         if (exception != null) {
-            suppressOnce(exception, exception2);
-
-            throw exception;
+            throw rethrowable(exception, exception2);
         } else if (exception2 != null) {
-            throw exception2;
+            throw rethrowable(exception2, null);
         }
     }
 
@@ -2962,8 +3060,7 @@ public class ContinuableFuture<T> implements Future<T> {
     private <R> ContinuableFuture<R> execute(final FutureTask<? extends R> futureTask, final ContinuableFuture<?> other) throws RejectedExecutionException {
         asyncExecutor.execute(futureTask);
 
-        @SuppressWarnings("rawtypes")
-        final List<ContinuableFuture<?>> upFutureList = other == null ? (List) List.of(this) : Arrays.asList(this, other);
+        final List<ContinuableFuture<?>> upFutureList = other == null ? List.<ContinuableFuture<?>> of(this) : List.<ContinuableFuture<?>> of(this, other);
         return new ContinuableFuture<>(futureTask, upFutureList, asyncExecutor);
     }
 
@@ -2973,12 +3070,24 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p>This method is useful for retry backoff, rate limiting, or introducing deliberate
      * pauses in asynchronous workflows. It does not impose a timeout on the upstream operation.
-     * The shared delay window begins after successful or exceptional upstream completion
-     * is observed. Cancellation bypasses the delay: {@code isDone()} returns {@code true} and
-     * {@code get()} throws {@link CancellationException} immediately. Delay precision is retained in the supplied
-     * {@link TimeUnit}, and concurrent callers wait independently on that same window so one caller cannot prevent
-     * another caller from observing its own timeout. For {@link #get(long, TimeUnit)}, the timeout
-     * is a single budget covering both the upstream wait and the remaining delay.
+     * The delay window (the delay converted to nanoseconds) is shared by every accessor of the returned future and
+     * begins when that future first <i>observes</i> upstream completion - inside {@code get()}, {@code isDone()} or
+     * {@code cancel()}, in this method itself if this future is already done, or when a further {@code thenDelay}/
+     * {@code thenUse} stage is built on it while it is done. A delayed future that is created and then left
+     * untouched does not count its window down in the background; its first {@code get()} waits the
+     * full delay. Concurrent callers wait independently on that same window, so one caller cannot prevent another
+     * caller from observing its own timeout. For {@link #get(long, TimeUnit)}, the timeout is a single budget
+     * covering both the upstream wait and the remaining delay.
+     *
+     * <p><b>Cancellation.</b> The returned future is a stage of its own and follows the {@link Future} contract: after
+     * {@code cancel()} returns, {@code isDone()} is {@code true}. Cancelling it before this future completes cancels
+     * this future's task (the two share it) and bypasses the delay; cancelling it once this future has completed
+     * but while the window is still open ends the window: {@code cancel()} returns {@code true}, the stage reports
+     * {@code isCancelled()}, every getter parked in the window wakes up with {@link CancellationException}, and the
+     * upstream result stays available from this future. Once the window has elapsed the stage is complete and
+     * {@code cancel()} returns {@code false}. {@code cancelAll()} on the returned future first cancels the upstream
+     * chain and then ends an open window in the same way; its result is still {@code false} when an upstream stage
+     * had already completed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2990,12 +3099,13 @@ public class ContinuableFuture<T> implements Future<T> {
      * }</pre>
      *
      * @param delay the delay duration before the next action is executed; values &lt;= 0 mean no delay.
-     * @param unit the time unit of the delay parameter; must not be {@code null} when {@code delay > 0}.
+     * @param unit the time unit of the delay parameter; must not be {@code null}.
      * @return a new ContinuableFuture configured with the specified delay if delay &gt; 0, or this future if delay &lt;= 0.
-     * @throws IllegalArgumentException if {@code delay > 0} and {@code unit} is {@code null}.
+     * @throws IllegalArgumentException if {@code unit} is {@code null}.
      */
-    @SuppressWarnings("deprecation")
     public ContinuableFuture<T> thenDelay(final long delay, final TimeUnit unit) throws IllegalArgumentException {
+        N.checkArgNotNull(unit, cs.unit);
+
         if (delay <= 0) {
             return this;
         }
@@ -3033,7 +3143,6 @@ public class ContinuableFuture<T> implements Future<T> {
      * @return a new ContinuableFuture configured with the specified executor.
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
      */
-    @SuppressWarnings("deprecation")
     public ContinuableFuture<T> thenUse(final Executor executor) throws IllegalArgumentException {
         N.checkArgNotNull(executor, cs.executor);
 
@@ -3041,202 +3150,36 @@ public class ContinuableFuture<T> implements Future<T> {
     }
 
     /**
-     * Internal method that creates a new ContinuableFuture with the specified executor and delay configuration.
-     * This method combines the functionality of thenDelay and thenUse. A positive delay starts
-     * after non-cancelled upstream completion is observed and is shared by every accessor of the returned future.
+     * Creates the stage behind {@link #thenDelay(long, TimeUnit)} and {@link #thenUse(Executor)}: a
+     * {@link DelayedFuture} over this future's task, with no upstream list of its own (its {@code cancelAll} and
+     * {@code isAllCancelled} delegate to this future, exactly like the {@link #map(Throwables.Function)} wrapper)
+     * and with {@code executor} as the executor of every later stage.
      *
-     * @param executor the executor to use for subsequent operations; must not be {@code null}.
-     * @param delay the delay before executing subsequent operations.
-     * @param unit the time unit for the delay.
+     * @param executor the executor to use for subsequent operations; already validated by the caller.
+     * @param delay the delay before executing subsequent operations; {@code 0} for a pure executor switch.
+     * @param unit the time unit for the delay; already validated by the caller.
      * @return a new ContinuableFuture with the specified configuration.
-     * @throws IllegalArgumentException if {@code executor} or {@code unit} is {@code null}
-     * @deprecated This is an internal method and should not be used directly. Use {@link #thenDelay(long, TimeUnit)} or {@link #thenUse(Executor)} instead.
      */
-    @Deprecated
-    ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) throws IllegalArgumentException {
-        N.checkArgNotNull(executor, cs.executor);
-        N.checkArgNotNull(unit, cs.unit);
+    private ContinuableFuture<T> with(final Executor executor, final long delay, final TimeUnit unit) {
+        // executor and unit were validated by the public caller (thenDelay / thenUse).
+        final DelayedFuture<T> delayed = new DelayedFuture<>(future, delay, unit);
 
-        //noinspection Convert2Diamond
-        return new ContinuableFuture<>(new Future<T>() { //  java.util.concurrent.Future is abstract; cannot be instantiated
-            private final long delayInNanos = unit.toNanos(delay);
-            private volatile boolean isDelayStarted = future.isDone();
-            private volatile long delayStartTimeInNanos = isDelayStarted ? System.nanoTime() : 0;
-            private volatile boolean isDelayed = false;
-
-            @Override
-            public boolean cancel(final boolean mayInterruptIfRunning) {
-                final boolean cancelled = future.cancel(mayInterruptIfRunning);
-
-                if (!cancelled && future.isDone()) {
-                    startDelayIfNeeded();
-                }
-
-                return cancelled;
-            }
-
-            @Override
-            public boolean isCancelled() {
-                return future.isCancelled();
-            }
-
-            @Override
-            public boolean isDone() {
-                if (future.isCancelled()) {
-                    return true;
-                }
-
-                // The delay stage is not complete until the post-completion delay has elapsed.
-                // Returning future.isDone() alone would make get()/getNow() block while isDone()
-                // was already true, which violates the Future contract.
-                if (!future.isDone()) {
-                    return false;
-                }
-
-                startDelayIfNeeded();
-
-                if (isDelayed) {
-                    return true;
-                }
-
-                if (System.nanoTime() - delayStartTimeInNanos >= delayInNanos) {
-                    isDelayed = true;
-                    return true;
-                }
-
-                return false;
-            }
-
-            @Override
-            public T get() throws InterruptedException, ExecutionException {
-                T result = null;
-                ExecutionException executionException = null;
-                RuntimeException runtimeException = null;
-                Error error = null;
-
-                try {
-                    result = future.get();
-                } catch (final CancellationException e) {
-                    // A getter already waiting upstream must also bypass the delay on cancellation.
-                    throw e;
-                } catch (final ExecutionException e) {
-                    executionException = e;
-                } catch (final RuntimeException e) {
-                    runtimeException = e;
-                } catch (final Error e) {
-                    error = e;
-                }
-
-                startDelayIfNeeded();
-                delay(Long.MAX_VALUE);
-
-                if (executionException != null) {
-                    throw executionException;
-                } else if (runtimeException != null) {
-                    throw runtimeException;
-                } else if (error != null) {
-                    throw error;
-                }
-
-                return result;
-            }
-
-            @Override
-            public T get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException, ExecutionException {
-                final long timeoutNanos = unit.toNanos(timeout);
-                final long startNanos = System.nanoTime();
-                T result = null;
-                ExecutionException executionException = null;
-                RuntimeException runtimeException = null;
-                Error error = null;
-
-                try {
-                    // Future.get permits non-positive timeouts. Normalize them to zero so broken
-                    // implementations do not reject a negative value before checking completion.
-                    result = future.get(Math.max(0L, timeoutNanos), TimeUnit.NANOSECONDS);
-                } catch (final CancellationException e) {
-                    // A getter already waiting upstream must also bypass the delay on cancellation.
-                    throw e;
-                } catch (final ExecutionException e) {
-                    executionException = e;
-                } catch (final RuntimeException e) {
-                    runtimeException = e;
-                } catch (final Error e) {
-                    error = e;
-                }
-
-                startDelayIfNeeded();
-
-                final long elapsedNanos = System.nanoTime() - startNanos;
-                final long remainingNanos = timeoutNanos <= 0 ? 0 : timeoutNanos - elapsedNanos;
-                delay(Math.max(0L, remainingNanos));
-
-                if (!isDelayed) {
-                    // The timeout budget was exhausted by the upstream wait and/or only part of
-                    // the post-completion delay. The value must not become visible early.
-                    throw new TimeoutException("Timeout after delay");
-                }
-
-                if (executionException != null) {
-                    throw executionException;
-                } else if (runtimeException != null) {
-                    throw runtimeException;
-                } else if (error != null) {
-                    throw error;
-                }
-
-                return result;
-            }
-
-            private void startDelayIfNeeded() {
-                if (!isDelayStarted) {
-                    synchronized (this) {
-                        if (!isDelayStarted) {
-                            delayStartTimeInNanos = System.nanoTime();
-                            isDelayStarted = true;
-                        }
-                    }
-                }
-            }
-
-            /**
-             * @throws InterruptedException if the calling thread is interrupted while sleeping for the remaining completion delay
-             */
-            private void delay(final long maxWaitNanos) throws InterruptedException {
-                if (isDelayed) {
-                    return;
-                }
-
-                final long waitStartTimeInNanos = System.nanoTime();
-
-                while (!isDelayed) {
-                    final long elapsedDelayNanos = System.nanoTime() - delayStartTimeInNanos;
-                    final long remainingDelayNanos = delayInNanos - elapsedDelayNanos;
-
-                    if (remainingDelayNanos <= 0) {
-                        isDelayed = true;
-                        return;
-                    }
-
-                    final long elapsedWaitNanos = System.nanoTime() - waitStartTimeInNanos;
-                    final long remainingWaitNanos = maxWaitNanos - elapsedWaitNanos;
-
-                    if (remainingWaitNanos <= 0) {
-                        return;
-                    }
-
-                    // Each caller waits independently. Holding this Future's monitor while
-                    // sleeping would let an untimed get() prevent another caller's timed get()
-                    // from observing its own timeout.
-                    TimeUnit.NANOSECONDS.sleep(Math.min(remainingDelayNanos, remainingWaitNanos));
-                }
-            }
-        }, null, executor) {
+        return new ContinuableFuture<>(delayed, null, executor) {
             @Override
             public boolean cancelAll(final boolean mayInterruptIfRunning) {
-                // Delegate to the enclosing future (like map()): this wrapper's upFutures is null,
-                // so a super-call would silently sever cancellation from the upstream chain.
-                return ContinuableFuture.this.cancelAll(mayInterruptIfRunning);
+                // Delegate to the enclosing future (like map()): this wrapper's upFutures is null, so a super-call
+                // would silently sever cancellation from the upstream chain. Never route through this wrapper's
+                // own cancel(): that would cancel the shared upstream task a second time and report the second
+                // (failing) attempt as "could not cancel".
+                final boolean upstreamCancelled = ContinuableFuture.this.cancelAll(mayInterruptIfRunning);
+
+                if (!upstreamCancelled) {
+                    // The upstream traversal cannot reach this stage's own delay window; end it when the upstream
+                    // had already completed. The result stays false: a completed upstream stage was not cancelled.
+                    delayed.cancelWindowIfUpstreamCompleted();
+                }
+
+                return upstreamCancelled;
             }
 
             @Override
@@ -3244,6 +3187,254 @@ public class ContinuableFuture<T> implements Future<T> {
                 return ContinuableFuture.this.isAllCancelled();
             }
         };
+    }
+
+    /**
+     * The delegate of {@link #thenDelay(long, TimeUnit)} / {@link #thenUse(Executor)}: the upstream outcome, held
+     * back for a delay window that opens when this future first observes upstream completion.
+     *
+     * <p>The window has one terminal transition, {@code PENDING -> ELAPSED | CANCELLED}, claimed by a CAS so that a
+     * getter returning the value and a {@code cancel()} returning {@code true} are mutually exclusive
+     * ({@code FutureTask} makes the same guarantee with its state CAS). Getters wait on a latch that {@code cancel()}
+     * releases, and the window's start is claimed by a CAS as well: this object's monitor is never taken, because a
+     * caller may hold it while another caller's timed {@code get()} must still observe its own timeout.</p>
+     *
+     * @param <T> the result type of the upstream future
+     */
+    private static final class DelayedFuture<T> implements Future<T> {
+        /** Window state: the delay has not elapsed and the stage has not been cancelled. */
+        private static final int WINDOW_PENDING = 0;
+        /** Window state: the delay has elapsed; the stage is complete with the upstream outcome. */
+        private static final int WINDOW_ELAPSED = 1;
+        /** Window state: the stage was cancelled while the window was open. */
+        private static final int WINDOW_CANCELLED = 2;
+        /** {@link #delayStartTimeInNanos} value while the window has not been opened yet. */
+        private static final long NOT_STARTED = Long.MIN_VALUE;
+
+        private final Future<? extends T> future;
+        private final long delayInNanos;
+        private final AtomicLong delayStartTimeInNanos = new AtomicLong(NOT_STARTED);
+        private final AtomicInteger window = new AtomicInteger(WINDOW_PENDING);
+        private final CountDownLatch windowCancelled = new CountDownLatch(1);
+
+        DelayedFuture(final Future<? extends T> future, final long delay, final TimeUnit unit) {
+            this.future = future;
+            delayInNanos = unit.toNanos(delay);
+
+            if (future.isDone()) {
+                startDelayIfNeeded();
+            }
+        }
+
+        @Override
+        public boolean cancel(final boolean mayInterruptIfRunning) {
+            if (future.cancel(mayInterruptIfRunning)) {
+                return true; // The upstream accepted: this stage is cancelled through it and the window is bypassed.
+            }
+
+            if (!future.isDone() || future.isCancelled()) {
+                // Either the upstream is still running and refuses cancellation (this stage's getters are blocked
+                // inside it, so there is nothing of our own to end), or it was already cancelled.
+                return false;
+            }
+
+            // The upstream completed, so the only pending work is this stage's own delay window. Future contract:
+            // once cancel() returns, isDone() must be true - so the window is ended rather than left to elapse.
+            startDelayIfNeeded();
+
+            return cancelWindow();
+        }
+
+        /**
+         * Ends an open window on behalf of {@link ContinuableFuture#cancelAll(boolean)}, which has already dealt with
+         * the upstream itself (so this must not call {@code future.cancel} again).
+         */
+        void cancelWindowIfUpstreamCompleted() {
+            // Not guarded by future.isCancelled(): for a cancelled upstream the CAS below is harmless (the stage
+            // already reports cancelled through the upstream), and skipping that query keeps cancelAll from
+            // touching the upstream more often than the traversal itself does.
+            if (future.isDone()) {
+                startDelayIfNeeded();
+                cancelWindow();
+            }
+        }
+
+        private boolean cancelWindow() {
+            settleWindowIfElapsed();
+
+            if (window.compareAndSet(WINDOW_PENDING, WINDOW_CANCELLED)) {
+                windowCancelled.countDown();
+                return true;
+            }
+
+            return false;
+        }
+
+        /**
+         * Claims the {@code ELAPSED} state once the window has run out.
+         *
+         * @return {@code true} if the window is over (elapsed), {@code false} while it is pending or once cancelled
+         */
+        private boolean settleWindowIfElapsed() {
+            if (window.get() == WINDOW_PENDING && System.nanoTime() - delayStartTimeInNanos.get() >= delayInNanos) {
+                window.compareAndSet(WINDOW_PENDING, WINDOW_ELAPSED);
+            }
+
+            return window.get() == WINDOW_ELAPSED;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return future.isCancelled() || window.get() == WINDOW_CANCELLED;
+        }
+
+        @Override
+        public boolean isDone() {
+            if (future.isCancelled() || window.get() == WINDOW_CANCELLED) {
+                return true;
+            }
+
+            // The delay stage is not complete until the post-completion delay has elapsed.
+            // Returning future.isDone() alone would make get()/getNow() block while isDone()
+            // was already true, which violates the Future contract.
+            if (!future.isDone()) {
+                return false;
+            }
+
+            startDelayIfNeeded();
+            settleWindowIfElapsed();
+
+            // One read: a cancel() that claims the window between the checks above and here still counts as done.
+            return window.get() != WINDOW_PENDING;
+        }
+
+        @Override
+        public T get() throws InterruptedException, ExecutionException {
+            T result = null;
+            ExecutionException executionException = null;
+            RuntimeException runtimeException = null;
+            Error error = null;
+
+            try {
+                result = future.get();
+            } catch (final CancellationException e) {
+                // A getter already waiting upstream must also bypass the delay on cancellation.
+                throw e;
+            } catch (final ExecutionException e) {
+                executionException = e;
+            } catch (final RuntimeException e) {
+                runtimeException = e;
+            } catch (final Error e) {
+                error = e;
+            }
+
+            startDelayIfNeeded();
+            awaitWindow(Long.MAX_VALUE);
+            throwIfWindowCancelled();
+
+            if (executionException != null) {
+                throw executionException;
+            } else if (runtimeException != null) {
+                throw runtimeException;
+            } else if (error != null) {
+                throw error;
+            }
+
+            return result;
+        }
+
+        @Override
+        public T get(final long timeout, final TimeUnit unit) throws InterruptedException, TimeoutException, ExecutionException {
+            N.requireNonNull(unit, cs.unit);
+
+            final long timeoutNanos = unit.toNanos(timeout);
+            final long startNanos = System.nanoTime();
+            T result = null;
+            ExecutionException executionException = null;
+            RuntimeException runtimeException = null;
+            Error error = null;
+
+            try {
+                // Future.get permits non-positive timeouts. Normalize them to zero so broken
+                // implementations do not reject a negative value before checking completion.
+                result = future.get(Math.max(0L, timeoutNanos), TimeUnit.NANOSECONDS);
+            } catch (final CancellationException e) {
+                // A getter already waiting upstream must also bypass the delay on cancellation.
+                throw e;
+            } catch (final ExecutionException e) {
+                executionException = e;
+            } catch (final RuntimeException e) {
+                runtimeException = e;
+            } catch (final Error e) {
+                error = e;
+            }
+
+            startDelayIfNeeded();
+
+            final long elapsedNanos = System.nanoTime() - startNanos;
+            final long remainingNanos = timeoutNanos <= 0 ? 0 : timeoutNanos - elapsedNanos;
+            awaitWindow(Math.max(0L, remainingNanos));
+            throwIfWindowCancelled();
+
+            if (window.get() != WINDOW_ELAPSED) {
+                // The timeout budget was exhausted by the upstream wait and/or only part of
+                // the post-completion delay. The value must not become visible early.
+                throw new TimeoutException("Timeout after delay");
+            }
+
+            if (executionException != null) {
+                throw executionException;
+            } else if (runtimeException != null) {
+                throw runtimeException;
+            } else if (error != null) {
+                throw error;
+            }
+
+            return result;
+        }
+
+        private void startDelayIfNeeded() {
+            if (delayStartTimeInNanos.get() == NOT_STARTED) {
+                delayStartTimeInNanos.compareAndSet(NOT_STARTED, System.nanoTime());
+            }
+        }
+
+        private void throwIfWindowCancelled() {
+            if (window.get() == WINDOW_CANCELLED) {
+                throw new CancellationException("Cancelled while waiting for the delay to elapse");
+            }
+        }
+
+        /**
+         * Waits until the window is settled (elapsed or cancelled) or {@code maxWaitNanos} have passed, whichever
+         * comes first.
+         *
+         * @param maxWaitNanos the caller's remaining budget
+         * @throws InterruptedException if the calling thread is interrupted while waiting for the remaining delay
+         */
+        private void awaitWindow(final long maxWaitNanos) throws InterruptedException {
+            final long waitStartTimeInNanos = System.nanoTime();
+
+            while (window.get() == WINDOW_PENDING) {
+                final long remainingDelayNanos = delayInNanos - (System.nanoTime() - delayStartTimeInNanos.get());
+
+                if (remainingDelayNanos <= 0) {
+                    window.compareAndSet(WINDOW_PENDING, WINDOW_ELAPSED);
+                    return;
+                }
+
+                final long remainingWaitNanos = maxWaitNanos - (System.nanoTime() - waitStartTimeInNanos);
+
+                if (remainingWaitNanos <= 0) {
+                    return;
+                }
+
+                // Each caller waits independently and never on this object's monitor: holding it while waiting
+                // would let an untimed get() prevent another caller's timed get() from observing its own timeout.
+                // The latch, not a sleep, is what lets cancel() wake every parked getter at once.
+                windowCancelled.await(Math.min(remainingDelayNanos, remainingWaitNanos), TimeUnit.NANOSECONDS);
+            }
+        }
     }
 
     // https://stackoverflow.com/questions/23301598/transform-java-future-into-a-completablefuture
@@ -3308,7 +3499,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p><b>Important Considerations:</b>
      * <ul>
-     *   <li>Cancelling the returned CompletableFuture does not cancel this ContinuableFuture</li>
+     *   <li>Cancelling the returned CompletableFuture does not cancel this ContinuableFuture, nor does it release the
+     *       retrieval worker, which stays blocked in {@code get()} until this future completes</li>
      *   <li>Cancelling this ContinuableFuture will cause the CompletableFuture to complete exceptionally</li>
      *   <li>The retrieval task calls {@code get()} and may wait for upstream work</li>
      *   <li>Uses this future's asyncExecutor, which may impact thread pool usage</li>
@@ -3410,7 +3602,8 @@ public class ContinuableFuture<T> implements Future<T> {
      *
      * <p><b>Important Considerations:</b>
      * <ul>
-     *   <li>Cancelling the returned CompletableFuture does not cancel this ContinuableFuture</li>
+     *   <li>Cancelling the returned CompletableFuture does not cancel this ContinuableFuture, nor does it release the
+     *       retrieval worker, which stays blocked in {@code get()} until this future completes</li>
      *   <li>Cancelling this ContinuableFuture will cause the CompletableFuture to complete exceptionally</li>
      *   <li>The retrieval task calls {@code get()} and may wait for upstream work</li>
      *   <li>The provided executor must be able to accept new tasks</li>

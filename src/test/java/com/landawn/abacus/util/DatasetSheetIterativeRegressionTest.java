@@ -245,7 +245,10 @@ public class DatasetSheetIterativeRegressionTest extends TestBase {
         final Dataset empty = Dataset.rows(List.of("\u6D77", "\uD83D\uDE00", "v", "extra"), new Object[0][]);
         final List<Dataset> emptyLevels = aggregate(empty, kind, originalKeys, originalValues, new java.util.concurrent.atomic.AtomicInteger()).toList();
         assertEquals(kind < 10 ? 3 : 4, emptyLevels.size());
-        emptyLevels.forEach(level -> assertEquals(0, level.size()));
+        // Every level of an empty Dataset is empty except the grand total, which has one row holding the aggregate of
+        // no rows, like SQL's empty grouping set (2026-09-22 ledger C-033; it used to have no row either).
+        emptyLevels.subList(0, emptyLevels.size() - 1).forEach(level -> assertEquals(0, level.size()));
+        assertEquals(1, emptyLevels.get(emptyLevels.size() - 1).size());
         assertThrows(IllegalArgumentException.class, () -> aggregate(empty, kind, null, originalValues, new java.util.concurrent.atomic.AtomicInteger()));
         assertThrows(IllegalArgumentException.class, () -> aggregate(empty, kind, List.of(), originalValues, new java.util.concurrent.atomic.AtomicInteger()));
         assertThrows(IllegalArgumentException.class,

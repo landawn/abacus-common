@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -47,19 +49,23 @@ public interface CharSupplier extends Throwables.CharSupplier<RuntimeException> 
      * a complete Unicode code point (for example, it may be a surrogate).
      * Successive values are not guaranteed to be distinct.
      * This supplier is useful for generating random characters for testing, simulation, or data generation purposes.
+     * Values come from the calling thread's {@link ThreadLocalRandom#current()} and are <b>not</b>
+     * cryptographically secure; use {@link java.security.SecureRandom} directly when unpredictable values are
+     * required.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * char randomChar1 = CharSupplier.RANDOM.getAsChar();   // Returns a random char, e.g., 'k'
-     * char randomChar2 = CharSupplier.RANDOM.getAsChar();   // Returns another random char, e.g., '&'
+     * char randomChar1 = CharSupplier.RANDOM.getAsChar();  // Returns a random char, e.g., 'k'
+     * char randomChar2 = CharSupplier.RANDOM.getAsChar();  // Returns another random char, e.g., '&'
      * }</pre>
      *
      */
     CharSupplier RANDOM = () -> {
+        final ThreadLocalRandom random = ThreadLocalRandom.current();
         char ch;
 
         do {
-            ch = (char) Util.RAND_CHAR.nextInt(Util.CHAR_MOD);
+            ch = (char) random.nextInt(Util.CHAR_MOD);
         } while (!Character.isDefined(ch));
 
         return ch;

@@ -1188,4 +1188,130 @@ public class ParallelIteratorIntStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    @Test
+    public void testCollectWorkerContainersReceiveInterleavedElements() {
+        final CountDownLatch secondTaken = new CountDownLatch(1);
+        final CountDownLatch thirdTaken = new CountDownLatch(1);
+
+        final com.landawn.abacus.util.IntList result = IntStream.of(com.landawn.abacus.util.IntIterator.of(0, 1, 2, 3))
+                .parallel(2)
+                .collect(com.landawn.abacus.util.IntList::new, (container, e) -> {
+                    container.add(e);
+
+                    try {
+                        if (e == 0) {
+                            assertTrue(secondTaken.await(5, TimeUnit.SECONDS));
+                        } else if (e == 1) {
+                            secondTaken.countDown();
+                            assertTrue(thirdTaken.await(5, TimeUnit.SECONDS));
+                        } else if (e == 2) {
+                            thirdTaken.countDown();
+                        }
+                    } catch (final InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        throw new AssertionError(ex);
+                    }
+                }, com.landawn.abacus.util.IntList::addAll);
+
+        // The worker that took 0 also took 2 and 3 while its sibling was still holding 1.
+        assertTrue(result.equals(com.landawn.abacus.util.IntList.of(0, 2, 3, 1)) || result.equals(com.landawn.abacus.util.IntList.of(1, 0, 2, 3)),
+                result.toString());
+    }
+
+    // ---- perf review 2026-09-26 G103 begin ----
+    private static ParallelIteratorIntStream g103Parallel(final int... values) {
+        return new ParallelIteratorIntStream(com.landawn.abacus.util.IntIterator.of(values), false, 4, null, null, false, null);
+    }
+
+    private static int[] g103Values(final int size) {
+        final int[] values = new int[size];
+
+        for (int i = 0; i < size; i++) {
+            values[i] = i;
+        }
+
+        return values;
+    }
+
+    // G103-01: findFirst must keep the lowest-index match while several workers race over the shared iterator
+    @Test
+    public void testFindFirst_lowestIndexMatchAmongRacingWorkers() {
+        final int[] values = g103Values(3000);
+        final int threshold = values[1000];
+        int firstMod7 = -1;
+
+        for (int i = values.length - 1; i >= 0; i--) {
+            if (((int) values[i]) % 7 == 5) {
+                firstMod7 = i;
+            }
+        }
+
+        for (int round = 0; round < 20; round++) {
+            assertEquals(values[1000], g103Parallel(values).findFirst(v -> v >= threshold).get());
+            assertEquals(values[firstMod7], g103Parallel(values).findFirst(v -> ((int) v) % 7 == 5).get());
+            assertEquals(values[0], g103Parallel(values).findFirst(v -> true).get());
+        }
+
+        assertFalse(g103Parallel(values).findFirst(v -> false).isPresent());
+        assertFalse(g103Parallel().findFirst(v -> true).isPresent());
+        assertEquals(values[7], g103Parallel(values[7]).findFirst(v -> true).get());
+        assertFalse(g103Parallel(values[7]).findFirst(v -> false).isPresent());
+    }
+
+    // G103-01: findLast must keep the highest-index match and test every element exactly once
+    @Test
+    public void testFindLast_highestIndexMatchAmongRacingWorkers() {
+        final int[] values = g103Values(3000);
+        final int threshold = values[1000];
+        final int upper = values[10];
+        int lastMod7 = -1;
+
+        for (int i = 0; i < values.length; i++) {
+            if (((int) values[i]) % 7 == 5) {
+                lastMod7 = i;
+            }
+        }
+
+        for (int round = 0; round < 20; round++) {
+            final AtomicInteger calls = new AtomicInteger();
+            assertEquals(values[2999], g103Parallel(values).findLast(v -> {
+                calls.incrementAndGet();
+                return v >= threshold;
+            }).get());
+            assertEquals(values.length, calls.get());
+            assertEquals(values[9], g103Parallel(values).findLast(v -> v < upper).get());
+            assertEquals(values[lastMod7], g103Parallel(values).findLast(v -> ((int) v) % 7 == 5).get());
+        }
+
+        assertFalse(g103Parallel(values).findLast(v -> false).isPresent());
+        assertFalse(g103Parallel().findLast(v -> true).isPresent());
+        assertEquals(values[7], g103Parallel(values[7]).findLast(v -> true).get());
+    }
+
+    // G103-01: a predicate failure is still rethrown from the parallel findFirst/findLast
+    @Test
+    public void testFindFirstFindLast_predicateFailurePropagates() {
+        final int[] values = g103Values(3000);
+        final int failAt = values[1500];
+
+        final IllegalStateException first = assertThrows(IllegalStateException.class, () -> g103Parallel(values).findFirst(v -> {
+            if (v == failAt) {
+                throw new IllegalStateException("G103 findFirst");
+            }
+
+            return false;
+        }));
+        assertEquals("G103 findFirst", first.getMessage());
+
+        final IllegalStateException last = assertThrows(IllegalStateException.class, () -> g103Parallel(values).findLast(v -> {
+            if (v == failAt) {
+                throw new IllegalStateException("G103 findLast");
+            }
+
+            return false;
+        }));
+        assertEquals("G103 findLast", last.getMessage());
+    }
+    // ---- perf review 2026-09-26 G103 end ----
 }

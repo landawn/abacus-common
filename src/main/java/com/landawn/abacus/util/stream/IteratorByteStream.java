@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +40,6 @@ import com.landawn.abacus.util.Numbers;
 import com.landawn.abacus.util.Suppliers;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
-import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.u.OptionalByte;
 import com.landawn.abacus.util.u.OptionalDouble;
 import com.landawn.abacus.util.function.ByteBinaryOperator;
@@ -129,8 +129,8 @@ class IteratorByteStream extends AbstractByteStream {
      *
      * IteratorByteStream stream = new IteratorByteStream(sortedIterator, true, closeHandlers);
      * try {
-     *     OptionalByte min = stream.min();            // returns the first element (optimized for sorted input)
-     *     System.out.println("Min: " + min.get());    // prints 1
+     *     OptionalByte min = stream.min();          // returns the first element (optimized for sorted input)
+     *     System.out.println("Min: " + min.get());  // prints 1
      * } finally {
      *     stream.close();
      * }
@@ -753,7 +753,7 @@ class IteratorByteStream extends AbstractByteStream {
     /**
      * Returns a stream consisting of the distinct elements of this stream.
      * If the stream is already sorted, an optimized adjacent-check algorithm is used;
-     * otherwise a hash set is used to track seen elements.
+     * otherwise a 256-entry presence table (one slot per byte value) tracks the elements already seen.
      *
      * @return a new {@code ByteStream} without duplicate elements
      * @throws IllegalStateException if the stream is already closed
@@ -802,10 +802,20 @@ class IteratorByteStream extends AbstractByteStream {
                 }
             }, isSorted());
         } else {
-            final Set<Object> set = N.newHashSet();
+            // A byte has only 256 values: a presence table replaces a HashSet of boxed Bytes.
+            final boolean[] seen = new boolean[256];
 
             // noinspection resource
-            return newStream(sequential().filter(set::add).iteratorEx(), isSorted());
+            return newStream(sequential().filter(value -> {
+                final int slot = value - Byte.MIN_VALUE;
+
+                if (seen[slot]) {
+                    return false;
+                }
+
+                seen[slot] = true;
+                return true;
+            }).iteratorEx(), isSorted());
         }
     }
 
@@ -1004,6 +1014,9 @@ class IteratorByteStream extends AbstractByteStream {
             while (elements.hasNext()) {
                 action.accept(elements.nextByte());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1023,6 +1036,12 @@ class IteratorByteStream extends AbstractByteStream {
 
         try {
             return elements.toArray();
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1042,6 +1061,9 @@ class IteratorByteStream extends AbstractByteStream {
 
         try {
             return elements.toList();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1083,21 +1105,26 @@ class IteratorByteStream extends AbstractByteStream {
      * @return the collection populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public <C extends Collection<Byte>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Byte>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextByte());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1124,21 +1151,26 @@ class IteratorByteStream extends AbstractByteStream {
      * @return the {@code Multiset<Byte>} populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public Multiset<Byte> toMultiset(final Supplier<? extends Multiset<Byte>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Byte> toMultiset(final Supplier<? extends Multiset<Byte>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Byte> result = supplier.get();
+            final Multiset<Byte> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextByte());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1162,13 +1194,14 @@ class IteratorByteStream extends AbstractByteStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if {@code keyMapper} throws
      * @throws E2 if {@code valueMapper} throws
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ByteFunction<? extends K, E> keyMapper,
             final Throwables.ByteFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1177,7 +1210,7 @@ class IteratorByteStream extends AbstractByteStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
             byte next = 0;
 
             while (elements.hasNext()) {
@@ -1186,6 +1219,9 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1195,7 +1231,7 @@ class IteratorByteStream extends AbstractByteStream {
      * Groups the elements of this stream by a key extracted by {@code keyMapper}, applies a
      * downstream collector to each group, and closes the stream.
      *
-     * <p>Keys must not be {@code null}; a {@code null} key causes an {@code IllegalArgumentException}.
+     * <p>Keys must not be {@code null}; a {@code null} key causes a {@code NullPointerException}.
      *
      * @param <K> the type of map keys
      * @param <D> the type of downstream reduction result
@@ -1206,13 +1242,14 @@ class IteratorByteStream extends AbstractByteStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}, or
-     *         {@code keyMapper} returns a {@code null} key.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} or {@code keyMapper} returns a {@code null} key.
      * @throws E if {@code keyMapper} throws
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.ByteFunction<? extends K, E> keyMapper,
-            final Collector<? super Byte, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Byte, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1220,7 +1257,7 @@ class IteratorByteStream extends AbstractByteStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Byte> downstreamAccumulator = (BiConsumer<Object, ? super Byte>) downstream.accumulator();
@@ -1234,7 +1271,7 @@ class IteratorByteStream extends AbstractByteStream {
 
             while (elements.hasNext()) {
                 next = elements.nextByte();
-                key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1249,6 +1286,9 @@ class IteratorByteStream extends AbstractByteStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1278,6 +1318,9 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1311,6 +1354,9 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             return OptionalByte.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1326,12 +1372,13 @@ class IteratorByteStream extends AbstractByteStream {
      * @param combiner a function that combines two result containers (used in parallel)
      * @return the populated result container
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjByteConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1339,13 +1386,16 @@ class IteratorByteStream extends AbstractByteStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 accumulator.accept(result, elements.nextByte());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1382,6 +1432,9 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             return OptionalByte.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1424,6 +1477,9 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             return OptionalByte.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1463,7 +1519,11 @@ class IteratorByteStream extends AbstractByteStream {
                         window[size++] = v;
                     } else {
                         window[idx] = v;
-                        idx = (idx + 1) % k;
+
+                        // Wrap with a compare instead of a per-element integer division ('%' by a non-constant k).
+                        if (++idx == k) {
+                            idx = 0;
+                        }
                     }
                 }
                 if (size < k) {
@@ -1476,10 +1536,28 @@ class IteratorByteStream extends AbstractByteStream {
                 return OptionalByte.empty();
             }
 
-            @SuppressWarnings("resource")
-            final Optional<Byte> optional = boxed().kthLargest(k, BYTE_COMPARATOR);
+            // A byte has only 256 values: count each value, then walk down from the largest one.
+            // O(n) with no boxing, instead of a boxed priority queue of up to k elements.
+            final long[] counts = new long[256];
 
-            return optional.isPresent() ? OptionalByte.of(optional.get()) : OptionalByte.empty();
+            do {
+                counts[elements.nextByte() - Byte.MIN_VALUE]++;
+            } while (elements.hasNext());
+
+            long remaining = k;
+
+            for (int slot = counts.length - 1; slot >= 0; slot--) {
+                remaining -= counts[slot];
+
+                if (remaining <= 0) {
+                    return OptionalByte.of((byte) (slot + Byte.MIN_VALUE));
+                }
+            }
+
+            return OptionalByte.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1499,13 +1577,37 @@ class IteratorByteStream extends AbstractByteStream {
         assertNotClosed();
 
         try {
-            long result = 0;
+            long sum = 0;
+            long carry = 0; // number of times 'sum' wrapped, in units of 2^64 (signed)
 
             while (elements.hasNext()) {
-                result += elements.nextByte();
+                // An iterator-backed stream can hold more than 2^56 elements, so the long accumulator itself can wrap.
+                // Math.addExact threw "long overflow" as soon as a PARTIAL sum left the long range,
+                // even when the exact total fits the documented int. Same wrap-safe accumulation as average(): detect the
+                // wrap with the addExact bit test (no exception, no allocation per element) and count it, so the exact
+                // total is carry * 2^64 + sum and the documented ArithmeticException is thrown only for a total outside
+                // the int range.
+                final byte value = elements.nextByte();
+                final long r = sum + value;
+
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
+                }
+
+                sum = r;
             }
 
-            return Numbers.toIntExact(result);
+            if (carry != 0) {
+                // The exact total carry * 2^64 + sum (with sum in the long range) is at least 2^63 in magnitude, so it
+                // cannot fit an int; same message as Math.toIntExact below. Reaching this branch takes more than
+                // 2^56 elements, which no unit test can afford (see PrimitiveStreamsReview20260925Test).
+                throw new ArithmeticException("integer overflow");
+            }
+
+            return Numbers.toIntExact(sum);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1528,14 +1630,31 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             long sum = 0;
+            long carry = 0; // number of times 'sum' wrapped, in units of 2^64 (signed)
             long count = 0;
 
             do {
-                sum += elements.nextByte();
+                // Same wrap-safe accumulation as IteratorIntStream.average(): detect a long wrap with the addExact bit
+                // test (no exception, no allocation per element); the exact total is carry * 2^64 + sum.
+                final byte value = elements.nextByte();
+                final long r = sum + value;
+
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
+                }
+
+                sum = r;
                 count++;
             } while (elements.hasNext());
 
-            return OptionalDouble.of(((double) sum) / count);
+            if (carry == 0) {
+                return OptionalDouble.of(((double) sum) / count);
+            }
+
+            return OptionalDouble.of(BigInteger.valueOf(carry).shiftLeft(64).add(BigInteger.valueOf(sum)).doubleValue() / count);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1554,6 +1673,9 @@ class IteratorByteStream extends AbstractByteStream {
 
         try {
             return elements.count();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1578,6 +1700,9 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1606,6 +1731,9 @@ class IteratorByteStream extends AbstractByteStream {
                     return true;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1637,6 +1765,9 @@ class IteratorByteStream extends AbstractByteStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1668,6 +1799,9 @@ class IteratorByteStream extends AbstractByteStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1701,6 +1835,9 @@ class IteratorByteStream extends AbstractByteStream {
                     return OptionalByte.of(element);
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1745,6 +1882,9 @@ class IteratorByteStream extends AbstractByteStream {
             }
 
             return hasResult ? OptionalByte.of(result) : OptionalByte.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

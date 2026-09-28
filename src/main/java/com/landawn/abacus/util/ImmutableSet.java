@@ -74,8 +74,14 @@ import com.landawn.abacus.annotation.Beta;
 @com.landawn.abacus.annotation.Immutable
 public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
 
+    // Collections.emptySet()'s spliterator is Spliterators.emptySpliterator(), which reports only
+    // SIZED|SUBSIZED and so drops the DISTINCT that Set.spliterator() promises and the ORDERED that every
+    // other ImmutableSet built by of(...)/copyOf(...)/builder() reports (they all back onto a LinkedHashSet);
+    // an operator that intersects characteristics (Stream.concat) then yields an unordered stream. Same fix
+    // as ImmutableList.EMPTY and ImmutableMap.EMPTY; do NOT "simplify" this to Set.of(): its contains(null)
+    // throws NullPointerException, which this empty set must not.
     @SuppressWarnings("rawtypes")
-    private static final ImmutableSet EMPTY = new ImmutableSet(N.emptySet(), true, true);
+    private static final ImmutableSet EMPTY = new ImmutableSet(Collections.unmodifiableSet(new LinkedHashSet<>(0)), true, true);
 
     /**
      * Constructs a non-owning ImmutableSet backed by the provided set.
@@ -115,8 +121,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableSet<String> empty = ImmutableSet.empty();
-     * System.out.println(empty.size());      // prints 0
-     * System.out.println(empty.isEmpty());   // prints true
+     * System.out.println(empty.size());     // prints 0
+     * System.out.println(empty.isEmpty());  // prints true
      * }</pre>
      *
      * @param <E> the type of elements in the set.
@@ -142,7 +148,11 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing only the specified element.
      */
     public static <E> ImmutableSet<E> of(final E e1) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1), false, true);
+        final Set<E> set = N.newLinkedHashSet(1);
+
+        set.add(e1);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -166,7 +176,12 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2), false, true);
+        final Set<E> set = N.newLinkedHashSet(2);
+
+        set.add(e1);
+        set.add(e2);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -187,7 +202,13 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3), false, true);
+        final Set<E> set = N.newLinkedHashSet(3);
+
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -209,7 +230,14 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4), false, true);
+        final Set<E> set = N.newLinkedHashSet(4);
+
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -232,7 +260,15 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5), false, true);
+        final Set<E> set = N.newLinkedHashSet(5);
+
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+        set.add(e5);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -256,7 +292,16 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6), false, true);
+        final Set<E> set = N.newLinkedHashSet(6);
+
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+        set.add(e5);
+        set.add(e6);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -281,7 +326,17 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7), false, true);
+        final Set<E> set = N.newLinkedHashSet(7);
+
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+        set.add(e5);
+        set.add(e6);
+        set.add(e7);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -307,7 +362,18 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8), false, true);
+        final Set<E> set = N.newLinkedHashSet(8);
+
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+        set.add(e5);
+        set.add(e6);
+        set.add(e7);
+        set.add(e8);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -334,7 +400,19 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * @return an ImmutableSet containing the specified distinct elements.
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9), false, true);
+        final Set<E> set = N.newLinkedHashSet(9);
+
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+        set.add(e5);
+        set.add(e6);
+        set.add(e7);
+        set.add(e8);
+        set.add(e9);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -363,7 +441,20 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      */
     public static <E> ImmutableSet<E> of(final E e1, final E e2, final E e3, final E e4, final E e5, final E e6, final E e7, final E e8, final E e9,
             final E e10) {
-        return new ImmutableSet<>(N.toLinkedHashSet(e1, e2, e3, e4, e5, e6, e7, e8, e9, e10), false, true);
+        final Set<E> set = N.newLinkedHashSet(10);
+
+        set.add(e1);
+        set.add(e2);
+        set.add(e3);
+        set.add(e4);
+        set.add(e5);
+        set.add(e6);
+        set.add(e7);
+        set.add(e8);
+        set.add(e9);
+        set.add(e10);
+
+        return new ImmutableSet<>(set, false, true);
     }
 
     /**
@@ -465,7 +556,13 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
         } else if (N.isEmpty(c)) {
             return empty();
         } else {
-            return new ImmutableSet<>(N.newLinkedHashSet(c), false, true);
+            // Size the copy for c's own element count: the LinkedHashSet(Collection) constructor never
+            // allocates fewer than 16 hash buckets, several times what a small immutable copy needs.
+            final Set<E> set = LinkedHashSet.newLinkedHashSet(c.size());
+
+            set.addAll(c);
+
+            return new ImmutableSet<>(set, false, true);
         }
     }
 
@@ -485,8 +582,8 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
      * mutableSet.add("initial");
      *
      * ImmutableSet<String> wrapped = ImmutableSet.wrap(mutableSet);
-     * mutableSet.add("added later");                         // This WILL be visible in wrapped!
-     * System.out.println(wrapped.contains("added later"));   // prints true
+     * mutableSet.add("added later");                        // This WILL be visible in wrapped!
+     * System.out.println(wrapped.contains("added later"));  // prints true
      * }</pre>
      *
      * @param <E> the type of elements in the set.
@@ -718,16 +815,16 @@ public class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
          * builder.addAll(iter);
          * }</pre>
          *
-         * @param iter the iterator over elements to add, may be {@code null}.
+         * @param iterator the iterator over elements to add, may be {@code null}.
          * @return this builder instance for method chaining.
          * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<E> addAll(final Iterator<? extends E> iter) throws IllegalStateException {
+        public Builder<E> addAll(final Iterator<? extends E> iterator) throws IllegalStateException {
             assertNotBuilt();
 
-            if (iter != null) {
-                while (iter.hasNext()) {
-                    set.add(iter.next());
+            if (iterator != null) {
+                while (iterator.hasNext()) {
+                    set.add(iterator.next());
                 }
             }
 

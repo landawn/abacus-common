@@ -2435,9 +2435,9 @@ public class LongListTest extends LongListTestSupport {
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
         assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
     }
 
     @Test
@@ -2575,4 +2575,131 @@ public class LongListTest extends LongListTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> source.forEach(source.size() + 1, -1, x -> {
         }));
     }
+
+    // ---- perf review 2026-09-26 G051 begin ----
+    private static boolean naiveContainsAllG051(final long[] a, final long[] b) {
+        for (final long x : b) {
+            boolean found = false;
+            for (final long y : a) {
+                if (x == y) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean naiveDisjointG051(final long[] a, final long[] b) {
+        for (final long x : b) {
+            for (final long y : a) {
+                if (x == y) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // G051-01: containsAll set path, both orientations (this larger / argument larger), duplicates, missing values
+    @Test
+    public void testContainsAll_setPathBothOrientations() {
+        final LongList big = LongList.of(5, 1, 9, 1, 7, 3, 3, 8, 2, 6, 4, 0);
+        assertTrue(big.containsAll(LongList.of(1, 3, 3, 9)));
+        assertTrue(big.containsAll(LongList.of(0, 0, 0, 0)));
+        assertFalse(big.containsAll(LongList.of(1, 3, 9, 11)));
+        assertFalse(big.containsAll(LongList.of(-1, 1, 3, 9)));
+        assertTrue(big.containsAll(LongList.of(4, 6, 2, 8, 3)));
+        assertTrue(big.containsAll(big));
+        assertTrue(big.containsAll(big.copy()));
+        assertTrue(big.containsAll(LongList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 1, 1)));
+        assertFalse(big.containsAll(LongList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 9, 1, 1)));
+        final LongList small = LongList.of(Long.MIN_VALUE, Long.MAX_VALUE, 0, -1);
+        final LongList wide = LongList.of(Long.MAX_VALUE, 3, -1, 4, 5, Long.MIN_VALUE, 7, 0, 9, 10, 11);
+        assertTrue(wide.containsAll(small));
+        assertFalse(small.containsAll(wide));
+        assertTrue(wide.containsAll(new long[] { 0, 0, -1, Long.MIN_VALUE }));
+        assertFalse(wide.containsAll(new long[] { 0, 0, -1, 1 }));
+        assertTrue(LongList.of(1, 2, 3, 4).containsAll(LongList.of(4, 3, 2, 1, 1, 2, 3, 4, 4, 4)));
+    }
+
+    // G051-02: disjoint set path, both orientations and self
+    @Test
+    public void testDisjoint_setPathBothOrientations() {
+        final LongList big = LongList.of(10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+        final LongList smallNo = LongList.of(1, 2, 3, 4);
+        final LongList smallYes = LongList.of(1, 2, 3, 20);
+        assertTrue(big.disjoint(smallNo));
+        assertTrue(smallNo.disjoint(big));
+        assertFalse(big.disjoint(smallYes));
+        assertFalse(smallYes.disjoint(big));
+        assertFalse(big.disjoint(big));
+        assertFalse(big.disjoint(big.copy()));
+        assertTrue(big.disjoint(new long[] { -10, -11, -12, -13 }));
+        assertFalse(big.disjoint(new long[] { -10, -11, -12, 10 }));
+        assertTrue(big.containsAny(new long[] { -10, -11, -12, 10 }));
+        assertFalse(big.containsAny(LongList.of(-10, -11, -12, -13, -14, -15)));
+        final LongList sameSizeA = LongList.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        assertTrue(sameSizeA.disjoint(LongList.of(11, 12, 13, 14, 15, 16, 17, 18, 19, 20)));
+        assertFalse(sameSizeA.disjoint(LongList.of(11, 12, 13, 14, 15, 16, 17, 18, 19, 1)));
+    }
+
+    // G051-01/02: randomized differential check of containsAll/disjoint against a naive nested scan
+    @Test
+    public void testContainsAllDisjoint_randomizedAgainstNaive() {
+        final Random rnd = new Random(20260926L);
+        for (int trial = 0; trial < 3000; trial++) {
+            final long[] a = new long[rnd.nextInt(25)];
+            final long[] b = new long[rnd.nextInt(25)];
+            final int range = 1 + rnd.nextInt(30);
+            for (int i = 0; i < a.length; i++) {
+                a[i] = rnd.nextInt(range) - range / 2;
+            }
+            for (int i = 0; i < b.length; i++) {
+                b[i] = rnd.nextInt(range) - range / 2;
+            }
+            final LongList la = LongList.of(a.clone());
+            final LongList lb = LongList.of(b.clone());
+            assertEquals(naiveContainsAllG051(a, b), la.containsAll(lb), () -> Arrays.toString(a) + " / " + Arrays.toString(b));
+            assertEquals(naiveContainsAllG051(b, a), lb.containsAll(la), () -> Arrays.toString(b) + " / " + Arrays.toString(a));
+            assertEquals(naiveDisjointG051(a, b), la.disjoint(lb), () -> Arrays.toString(a) + " / " + Arrays.toString(b));
+            assertEquals(naiveDisjointG051(b, a), lb.disjoint(la), () -> Arrays.toString(b) + " / " + Arrays.toString(a));
+            assertArrayEquals(a, la.toArray());
+            assertArrayEquals(b, lb.toArray());
+        }
+    }
+
+    // G051-03: removeDuplicates unsorted path keeps first occurrences in order and clears the tail
+    @Test
+    public void testRemoveDuplicates_unsortedKeepsFirstOccurrenceOrder() {
+        final LongList l = LongList.of(5, 3, 5, 1, 3, 9, 1, Long.MIN_VALUE, 5, Long.MIN_VALUE, 0, 0);
+        assertTrue(l.removeDuplicates());
+        assertEquals(LongList.of(5, 3, 1, 9, Long.MIN_VALUE, 0), l);
+        for (int i = l.size(); i < 12; i++) {
+            assertEquals(0L, l.internalArray()[i]);
+        }
+        final LongList noDup = LongList.of(3, 1, 2);
+        assertFalse(noDup.removeDuplicates());
+        assertEquals(LongList.of(3, 1, 2), noDup);
+        final Random rnd = new Random(7L);
+        for (int trial = 0; trial < 500; trial++) {
+            final long[] a = new long[rnd.nextInt(40)];
+            for (int i = 0; i < a.length; i++) {
+                a[i] = rnd.nextInt(12);
+            }
+            final List<Long> expected = new ArrayList<>();
+            for (final long x : a) {
+                if (!expected.contains(x)) {
+                    expected.add(x);
+                }
+            }
+            final LongList actual = LongList.of(a.clone());
+            assertEquals(expected.size() != a.length, actual.removeDuplicates());
+            assertEquals(expected, actual.boxed());
+        }
+    }
+    // ---- perf review 2026-09-26 G051 end ----
 }

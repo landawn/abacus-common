@@ -1004,4 +1004,115 @@ public class KryoParserTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> parser.deserialize((String) null, null, TestObject.class));
     }
 
+    @Test
+    public void testEncodeReverseOrderTreeMapDependsOnJavaUtilBeingOpened() {
+        final KryoParser kryoParser = ParserFactory.createKryoParser();
+        final TreeMap<String, Integer> reversed = new TreeMap<>(Comparator.reverseOrder());
+        reversed.put("a", 1);
+        reversed.put("b", 2);
+
+        // Copying never needs to instantiate the comparator singleton.
+        assertEquals(List.of("b", "a"), new ArrayList<>(kryoParser.deepCopy(reversed).keySet()));
+
+        if (Object.class.getModule().isOpen("java.util", KryoParser.class.getModule())) {
+            // --add-opens java.base/java.util: the singleton's private constructor is accessible to Kryo.
+            final TreeMap<String, Integer> decoded = kryoParser.decode(kryoParser.encode(reversed));
+            assertEquals(List.of("b", "a"), new ArrayList<>(decoded.keySet()));
+        } else {
+            assertThrows(KryoException.class, () -> kryoParser.decode(kryoParser.encode(reversed)));
+        }
+    }
+
+    // ---- perf review 2026-09-26 G008 begin ----
+    public static class G008IdTargetA {
+        public int value;
+    }
+
+    public static class G008IdTargetB {
+        public int value;
+    }
+
+    public static class G008IdTargetC {
+        public int value;
+    }
+
+    // G008-01: the merged-ID check result is reused, but a later global conflict is still reported on every call until removed
+    @Test
+    public void testCreateKryo_mergedIdCheckReusedButLateGlobalConflictStillReported() {
+        final int conflictingId = 1_926_008;
+        final int otherId = 1_926_009;
+        parser.register(G008IdTargetA.class, conflictingId);
+
+        final Kryo first = parser.createKryo();
+        parser.recycle(first);
+        final Kryo second = parser.createKryo();
+        parser.recycle(second);
+
+        try {
+            ParserFactory.registerKryo(G008IdTargetB.class, conflictingId);
+            assertThrows(IllegalArgumentException.class, parser::createKryo);
+            assertThrows(IllegalArgumentException.class, parser::createKryo);
+            assertThrows(IllegalArgumentException.class, () -> parser.serialize(new G008IdTargetA(), (KryoSerConfig) null));
+        } finally {
+            unregisterKryoForTest(G008IdTargetB.class);
+        }
+
+        final Kryo afterRemoval = parser.createKryo();
+        try {
+            assertEquals(conflictingId, afterRemoval.getRegistration(G008IdTargetA.class).getId());
+        } finally {
+            parser.recycle(afterRemoval);
+        }
+
+        parser.register(G008IdTargetC.class, otherId);
+        final Kryo afterInstanceRegistration = parser.createKryo();
+        try {
+            assertEquals(conflictingId, afterInstanceRegistration.getRegistration(G008IdTargetA.class).getId());
+            assertEquals(otherId, afterInstanceRegistration.getRegistration(G008IdTargetC.class).getId());
+        } finally {
+            parser.recycle(afterInstanceRegistration);
+        }
+
+        assertThrows(IllegalArgumentException.class, () -> parser.register(G008IdTargetB.class, otherId));
+
+        final G008IdTargetA source = new G008IdTargetA();
+        source.value = 42;
+        assertEquals(42, parser.deserialize(parser.serialize(source, (KryoSerConfig) null), null, G008IdTargetA.class).value);
+    }
+
+    // G008-02: a recycled Input must not keep the caller's payload array reachable from the static pool
+    @Test
+    public void testRecycleInput_releasesPayloadBuffer() {
+        final byte[] encoded = parser.encode("g008-payload");
+        assertEquals("g008-payload", parser.decode(encoded));
+
+        final Input pooled = KryoParser.createInput();
+        try {
+            assertNotSame(encoded, pooled.getBuffer());
+            assertEquals(0, pooled.limit());
+            assertEquals(0, pooled.position());
+            assertNull(pooled.getInputStream());
+        } finally {
+            KryoParser.recycle(pooled);
+        }
+    }
+
+    // G008-02: pooled Input instances keep decoding correctly across small and large payloads
+    @Test
+    public void testRecycleInput_reuseAcrossPayloadSizes() {
+        final String small = "abc";
+        final String large = Strings.repeat('x', 20_000);
+
+        for (int i = 0; i < 3; i++) {
+            assertEquals(small, parser.decode(parser.encode(small)));
+            assertEquals(large, parser.decode(parser.encode(large)));
+            assertEquals(small, parser.deserialize(parser.serialize(small), null, String.class));
+            assertEquals(large, parser.deserialize(new ByteArrayInputStream(parser.encode(large)), null, (Class<String>) null));
+            assertEquals(Integer.valueOf(7), parser.deserialize(parser.serialize(7), null, Integer.class));
+        }
+
+        assertThrows(KryoException.class, () -> parser.decode(N.EMPTY_BYTE_ARRAY));
+        assertEquals(small, parser.decode(parser.encode(small)));
+    }
+    // ---- perf review 2026-09-26 G008 end ----
 }

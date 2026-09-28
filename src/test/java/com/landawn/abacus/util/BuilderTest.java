@@ -36,6 +36,14 @@ import com.landawn.abacus.util.Builder.MapBuilder;
 import com.landawn.abacus.util.Builder.MultimapBuilder;
 import com.landawn.abacus.util.Builder.MultisetBuilder;
 import com.landawn.abacus.util.Builder.ShortListBuilder;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import com.landawn.abacus.util.Builder;
+import com.landawn.abacus.util.Dataset;
+import com.landawn.abacus.util.Pair;
+import com.landawn.abacus.util.Triple;
+import com.landawn.abacus.util.Tuple;
+import com.landawn.abacus.util.function.TriFunction;
 
 public class BuilderTest extends BuilderTestSupport {
 
@@ -192,5 +200,59 @@ public class BuilderTest extends BuilderTestSupport {
         assertEquals(Arrays.asList("n", "age"), Builder.of(reviewFixes20260906Dataset()).renameColumn("name", "n").val().columnNames());
         assertEquals(Arrays.asList("name", "age", "x"), Builder.of(reviewFixes20260906Dataset()).addColumn("x", Arrays.asList(1, 2)).val().columnNames());
         assertEquals(Arrays.asList("name"), Builder.of(reviewFixes20260906Dataset()).removeColumn("age").val().columnNames());
+    }
+
+
+    @Test
+    public void testDatasetBuilderRenameColumnNullOrEmptyNewNameThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, 2 } });
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).renameColumn("a", null));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).renameColumn("a", ""));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testDatasetBuilderAddColumnNullTupleFromColumnNamesThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
+        final BiFunction biFunc = (x, y) -> x;
+        final TriFunction triFunc = (x, y, z) -> x;
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn("x", (Tuple.Tuple2<String, String>) null, biFunc));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn(0, "x", (Tuple.Tuple2<String, String>) null, biFunc));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn("x", (Tuple.Tuple3<String, String, String>) null, triFunc));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).addColumn(0, "x", (Tuple.Tuple3<String, String, String>) null, triFunc));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testDatasetBuilderCombineColumnsNullTupleColumnNamesThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
+        final BiFunction biFunc = (x, y) -> x;
+        final TriFunction triFunc = (x, y, z) -> x;
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns((Tuple.Tuple2<String, String>) null, "x", biFunc));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns((Tuple.Tuple3<String, String, String>) null, "x", triFunc));
+    }
+
+    @Test
+    public void testDatasetBuilderCombineColumnsNullNewColumnClassThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[][] { { 1, 2, 3 } });
+        final Dataset noRows = Dataset.rows(Arrays.asList("a", "b", "c"), new Object[0][]);
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).combineColumns(Arrays.asList("a", "b"), "x", (Class<?>) null));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(noRows).combineColumns(Arrays.asList("a", "b"), "x", (Class<?>) null));
+    }
+
+    @Test
+    public void testDatasetBuilderDivideColumnNullTupleNewColumnNamesThrowsIae() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, 2 } });
+        final BiConsumer<Object, Pair<Object, Object>> pairOutput = (v, p) -> {
+        };
+        final BiConsumer<Object, Triple<Object, Object, Object>> tripleOutput = (v, t) -> {
+        };
+
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).divideColumn("a", (Tuple.Tuple2<String, String>) null, pairOutput));
+        assertThrows(IllegalArgumentException.class, () -> Builder.of(ds).divideColumn("a", (Tuple.Tuple3<String, String, String>) null, tripleOutput));
     }
 }

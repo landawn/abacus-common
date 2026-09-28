@@ -1449,6 +1449,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             for (int i = fromIndex; i < toIndex; i++) {
                 action.accept(elements[i]);
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1468,6 +1471,12 @@ class ArrayFloatStream extends AbstractFloatStream {
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1488,6 +1497,9 @@ class ArrayFloatStream extends AbstractFloatStream {
 
         try {
             return FloatList.of(N.copyOfRange(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1513,6 +1525,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1538,6 +1553,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1553,21 +1571,26 @@ class ArrayFloatStream extends AbstractFloatStream {
      * @return the collection supplied by {@code supplier} populated with all stream elements
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public <C extends Collection<Float>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Float>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1593,6 +1616,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1607,21 +1633,26 @@ class ArrayFloatStream extends AbstractFloatStream {
      * @return the multiset supplied by {@code supplier} populated with all stream elements
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public Multiset<Float> toMultiset(final Supplier<? extends Multiset<Float>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Float> toMultiset(final Supplier<? extends Multiset<Float>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Float> result = supplier.get();
+            final Multiset<Float> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1645,13 +1676,14 @@ class ArrayFloatStream extends AbstractFloatStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if the key mapper throws
      * @throws E2 if the value mapper throws
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.FloatFunction<? extends K, E> keyMapper,
             final Throwables.FloatFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1660,13 +1692,16 @@ class ArrayFloatStream extends AbstractFloatStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 Collectors.merge(result, keyMapper.apply(elements[i]), valueMapper.apply(elements[i]), mergeFunction);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1685,13 +1720,14 @@ class ArrayFloatStream extends AbstractFloatStream {
      * @param mapFactory a supplier providing a new empty map of the desired type
      * @return a map from keys to downstream-collected group results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}, or
-     *         {@code keyMapper} returns a {@code null} key.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} or {@code keyMapper} returns a {@code null} key.
      * @throws E if the key mapper throws
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.FloatFunction<? extends K, E> keyMapper,
-            final Collector<? super Float, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Float, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1699,7 +1735,7 @@ class ArrayFloatStream extends AbstractFloatStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Float> downstreamAccumulator = (BiConsumer<Object, ? super Float>) downstream.accumulator();
@@ -1710,7 +1746,7 @@ class ArrayFloatStream extends AbstractFloatStream {
             Object v = null;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                key = checkArgNotNull(keyMapper.apply(elements[i]), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(elements[i]), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1725,6 +1761,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1743,6 +1782,9 @@ class ArrayFloatStream extends AbstractFloatStream {
 
         try {
             return fromIndex < toIndex ? OptionalFloat.of(elements[fromIndex]) : OptionalFloat.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1761,6 +1803,9 @@ class ArrayFloatStream extends AbstractFloatStream {
 
         try {
             return fromIndex < toIndex ? OptionalFloat.of(elements[toIndex - 1]) : OptionalFloat.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1787,6 +1832,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             } else {
                 return OptionalFloat.empty();
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1816,6 +1864,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             } else {
                 throw new TooManyElementsException("There are at least two elements: " + Strings.concat(elements[fromIndex], ", ", elements[fromIndex + 1]));
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1845,6 +1896,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1877,6 +1931,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return OptionalFloat.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1896,12 +1953,13 @@ class ArrayFloatStream extends AbstractFloatStream {
      * @param combiner a function that combines two result containers (used in parallel reductions)
      * @return the mutable result container populated with all stream elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjFloatConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1909,13 +1967,16 @@ class ArrayFloatStream extends AbstractFloatStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 accumulator.accept(result, elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1944,6 +2005,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return OptionalFloat.of(N.min(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1969,6 +2033,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return OptionalFloat.of(N.max(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1998,6 +2065,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return OptionalFloat.of(N.kthLargest(elements, fromIndex, toIndex, k));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2017,6 +2087,9 @@ class ArrayFloatStream extends AbstractFloatStream {
 
         try {
             return toIndex - fromIndex; //NOSONAR
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2034,6 +2107,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2053,6 +2129,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return false;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2072,6 +2151,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return true;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2091,6 +2173,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return true;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2111,6 +2196,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return OptionalFloat.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2131,6 +2219,9 @@ class ArrayFloatStream extends AbstractFloatStream {
             }
 
             return OptionalFloat.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

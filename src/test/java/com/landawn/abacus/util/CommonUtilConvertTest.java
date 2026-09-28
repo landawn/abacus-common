@@ -41,6 +41,8 @@ import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.exception.UncheckedSQLException;
 import com.landawn.abacus.type.Type;
 import com.landawn.abacus.type.TypeFactory;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
 
 public class CommonUtilConvertTest extends CommonUtilTestSupport {
     @Test
@@ -1021,25 +1023,90 @@ public class CommonUtilConvertTest extends CommonUtilTestSupport {
     }
 
     /**
-     * A {@code Boolean} target must leave the source OPEN, because it never reads it.
+     * A {@code Boolean} target READS a text source and then closes it, like the {@code String} and number targets.
      *
-     * <p>This pins a deliberate asymmetry, so that making the branches "consistent" cannot quietly break the
-     * documented contract: {@code convert} releases a source it <i>consumes</i>, and explicitly states that
-     * "conversion paths that do not consume the source ... do not close it". {@code Type<Boolean>.valueOf} ignores
-     * a stream source entirely - the reader is still positioned at its first character afterwards - so closing it
-     * here would be closing a source {@code convert} never consumed.</p>
+     * <p>Until 2026-09-24 (C-174) this pinned the opposite: {@code Type<Boolean>.valueOf} ignored a stream source, so
+     * {@code convert(reader("true"), Boolean.class)} answered {@code false} and left the reader unread and open. The
+     * boolean branch now reads the text through the {@code String} branch (which closes or frees the source) and
+     * applies the text rule to it.</p>
      */
     @Test
-    public void testConvert_DoesNotCloseReaderForBooleanTarget() throws IOException {
+    public void testConvert_ReadsAndClosesReaderForBooleanTarget() throws IOException {
         final ClosingProbeReader reader = new ClosingProbeReader("true");
 
-        CommonUtil.convert(reader, Boolean.class);
-
-        assertFalse(reader.closed, "a Boolean conversion does not consume the source, so it must not close it");
-        assertTrue(reader.isUnread(), "nothing should have been read from the source");
+        assertTrue(CommonUtil.convert(reader, Boolean.class));
+        assertTrue(reader.closed, "a Boolean conversion consumes the source, so it must close it");
 
         final ClosingProbeStream stream = new ClosingProbeStream("true".getBytes());
-        CommonUtil.convert(stream, Boolean.class);
-        assertFalse(stream.closed);
+        assertTrue(CommonUtil.convert(stream, Boolean.class));
+        assertTrue(stream.closed);
+
+        final ClosingProbeReader blank = new ClosingProbeReader("");
+        assertFalse(CommonUtil.convert(blank, boolean.class));
+        assertTrue(blank.closed);
     }
+
+
+    @Test
+    public void testConvertZeroLengthBlobToByteArray() throws SQLException {
+        final SerialBlob blob = new SerialBlob(new byte[0]);
+
+        assertArrayEquals(new byte[0], CommonUtil.convert(blob, byte[].class));
+        assertThrows(SQLException.class, blob::length);
+    }
+
+    @Test
+    public void testConvertZeroLengthClobToCharArrayAndString() throws SQLException {
+        final SerialClob clobForChars = new SerialClob(new char[0]);
+        assertArrayEquals(new char[0], CommonUtil.convert(clobForChars, char[].class));
+        assertThrows(SQLException.class, clobForChars::length);
+
+        final SerialClob clobForString = new SerialClob(new char[0]);
+        assertEquals("", CommonUtil.convert(clobForString, String.class));
+        assertThrows(SQLException.class, clobForString::length);
+    }
+
+    // ---- bug review 2026-09-27 G027 begin ----
+    // G027-01: an integral value that fits a long is range-checked (IAE), not parsed as text (NumberFormatException)
+    @Test
+    public void testConvert_integralNumberFittingLongOutOfCharRange() {
+        for (final Object bad : new Object[] { new BigDecimal(Long.MIN_VALUE), 9.21e18, -9.21e18, -0x1p63, 9.21e18f }) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(bad, char.class), bad.toString());
+            assertTrue(e.getMessage().startsWith("Integer value out of char range: "), e.getMessage());
+        }
+
+        // beyond the long range the documented textual path is kept
+        assertThrows(NumberFormatException.class, () -> CommonUtil.convert(0x1p63, char.class));
+        assertThrows(NumberFormatException.class, () -> CommonUtil.convert(new BigDecimal(Long.MIN_VALUE).subtract(BigDecimal.ONE), char.class));
+        assertEquals('A', (char) CommonUtil.convert(new BigDecimal("65"), char.class));
+    }
+    // ---- bug review 2026-09-27 G027 end ----
+
+    // ---- bug review 2026-09-27 verify G120 begin ----
+    // integral values at the exact edges of the long range take the char range check; just outside it the textual path
+    @Test
+    public void testConvert_integralNumberAtLongRangeEdgesToChar() {
+        // inside the long range: IAE with the exact long value (Character target too)
+        final Object[] inside = { Math.nextDown(0x1p63), -0x1p63f, Math.nextDown(0x1p63f), new BigDecimal("-9223372036854775808.000"),
+                new BigDecimal(Long.MAX_VALUE), BigInteger.valueOf(Long.MIN_VALUE) };
+        for (final Object value : inside) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.convert(value, Character.class), value.toString());
+            assertTrue(e.getMessage().startsWith("Integer value out of char range: "), e.getMessage());
+        }
+
+        // outside the long range, fractional or non-finite: NumberFormatException
+        final Object[] outside = { Math.nextDown(-0x1p63), 0x1p63f, 1e19, new BigDecimal("9223372036854775808"), new BigDecimal("1E+19"),
+                BigInteger.ONE.shiftLeft(63), 65.5, Double.NaN, Double.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY };
+        for (final Object value : outside) {
+            assertThrows(NumberFormatException.class, () -> CommonUtil.convert(value, char.class), value.toString());
+        }
+
+        // in-range whole numbers of every representation
+        assertEquals('\0', (char) CommonUtil.convert(-0.0, char.class));
+        assertEquals('A', (char) CommonUtil.convert(65.0f, char.class));
+        assertEquals('A', (char) CommonUtil.convert(new BigDecimal("6.5E+1"), char.class));
+        assertEquals('A', (char) CommonUtil.convert(new BigDecimal("65.000"), char.class));
+        assertEquals('\uffff', (char) CommonUtil.convert(65535.0, char.class));
+    }
+    // ---- bug review 2026-09-27 verify G120 end ----
 }

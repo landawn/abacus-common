@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.logging;
 
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
@@ -56,6 +57,12 @@ class JdkLogger extends AbstractLogger {
      * logging framework frames and skipped when inferring the caller location.
      */
     static final String SUPER = AbstractLogger.class.getName();
+
+    /**
+     * Stack walker used to infer the caller location. Reflection frames are shown so that the visible frames are
+     * the same as those of a {@link Throwable} stack trace.
+     */
+    private static final StackWalker STACK_WALKER = StackWalker.getInstance(StackWalker.Option.SHOW_REFLECT_FRAMES);
 
     private final java.util.logging.Logger loggerImpl;
 
@@ -352,34 +359,34 @@ class JdkLogger extends AbstractLogger {
      * @param logRecord the {@code LogRecord} to update with caller information
      */
     private static void fillCallerData(final String callerFQCN, final LogRecord logRecord) {
-        final StackTraceElement[] steArray = new Throwable().getStackTrace();
+        /*
+         * The frames are walked lazily and the walk stops at the caller frame, a few frames from the top, instead of
+         * capturing and materializing the whole stack with new Throwable().getStackTrace(). SHOW_REFLECT_FRAMES keeps the
+         * same frames visible as a Throwable stack trace does (reflection frames shown, hidden frames not).
+         */
+        final StackWalker.StackFrame caller = STACK_WALKER.walk(frames -> {
+            boolean frameworkFrameSeen = false;
 
-        int selfIndex = -1;
-        for (int i = 0; i < steArray.length; i++) {
-            final String className = steArray[i].getClassName();
-            if (className.equals(callerFQCN) || className.equals(SUPER)) {
-                selfIndex = i;
-                break;
-            }
-        }
+            for (final Iterator<StackWalker.StackFrame> iter = frames.iterator(); iter.hasNext();) {
+                final StackWalker.StackFrame frame = iter.next();
+                final String className = frame.getClassName();
+                final boolean isFrameworkFrame = className.equals(callerFQCN) || className.equals(SUPER);
 
-        int callerIndex = -1;
-        if (selfIndex >= 0) {
-            for (int i = selfIndex + 1; i < steArray.length; i++) {
-                final String className = steArray[i].getClassName();
-                if (!(className.equals(callerFQCN) || className.equals(SUPER))) {
-                    callerIndex = i;
-                    break;
+                if (isFrameworkFrame) {
+                    frameworkFrameSeen = true;
+                } else if (frameworkFrameSeen) {
+                    return frame;
                 }
             }
-        }
 
-        if (callerIndex != -1) {
-            final StackTraceElement ste = steArray[callerIndex];
+            return null;
+        });
+
+        if (caller != null) {
             // setting the class name has the side effect of setting
             // the needToInferCaller variable to false.
-            logRecord.setSourceClassName(ste.getClassName());
-            logRecord.setSourceMethodName(ste.getMethodName());
+            logRecord.setSourceClassName(caller.getClassName());
+            logRecord.setSourceMethodName(caller.getMethodName());
         }
     }
 }

@@ -371,8 +371,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").appendAll(new String[]{"a", "b", "c"}).toString();   // returns: "a, b, c"
-     * Joiner.with("-").appendAll(new int[]{1, 2, 3}).toString();             // returns: "1-2-3"
+     * Joiner.with(", ").appendAll(new String[]{"a", "b", "c"}).toString();  // returns: "a, b, c"
+     * Joiner.with("-").appendAll(new int[]{1, 2, 3}).toString();            // returns: "1-2-3"
      * }</pre>
      *
      * @param separator the delimiter to use between joined elements, must not be {@code null}.
@@ -416,8 +416,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ", "[", "]").appendAll(new String[]{"a", "b", "c"}).toString();   // returns: "[a, b, c]"
-     * Joiner.with(" | ", "{", "}").appendAll(new int[]{1, 2, 3}).toString();           // returns: "{1 | 2 | 3}"
+     * Joiner.with(", ", "[", "]").appendAll(new String[]{"a", "b", "c"}).toString();  // returns: "[a, b, c]"
+     * Joiner.with(" | ", "{", "}").appendAll(new int[]{1, 2, 3}).toString();          // returns: "{1 | 2 | 3}"
      * }</pre>
      *
      * @param separator the delimiter to use between joined elements, must not be {@code null}.
@@ -459,8 +459,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").setEmptyValue("NONE").toString();                       // returns: "NONE"
-     * Joiner.with(", ").setEmptyValue("[]").appendAll(new int[0]).toString();   // returns: "[]"
+     * Joiner.with(", ").setEmptyValue("NONE").toString();                      // returns: "NONE"
+     * Joiner.with(", ").setEmptyValue("[]").appendAll(new int[0]).toString();  // returns: "[]"
      * }</pre>
      *
      * @param emptyValue the value to return when no elements have been added, must not be {@code null}.
@@ -541,8 +541,8 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Joiner.with(", ").skipNulls().appendAll(new Object[]{"a", null, "b"}).toString();   // returns: "a, b"
-     * Joiner.with(", ").appendAll(new Object[]{"a", null, "b"}).toString();               // returns: "a, null, b"
+     * Joiner.with(", ").skipNulls().appendAll(new Object[]{"a", null, "b"}).toString();  // returns: "a, b"
+     * Joiner.with(", ").appendAll(new Object[]{"a", null, "b"}).toString();              // returns: "a, null, b"
      * }</pre>
      *
      * @return this Joiner instance for method chaining.
@@ -731,8 +731,8 @@ public final class Joiner implements Closeable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String missing = null;
-     * Joiner.with(", ").append("hello").append("world").toString();                       // returns: "hello, world"
-     * Joiner.with(", ").skipNulls().append("a").append(missing).append("b").toString();   // returns: "a, b"
+     * Joiner.with(", ").append("hello").append("world").toString();                      // returns: "hello, world"
+     * Joiner.with(", ").skipNulls().append("a").append(missing).append("b").toString();  // returns: "a, b"
      * }</pre>
      *
      * @param element the String to append, may be null
@@ -2183,19 +2183,19 @@ public final class Joiner implements Closeable {
      * Joiner.with("->").appendAll(iter).toString();   // returns: "x->y->z"
      * }</pre>
      *
-     * @param iter the Iterator to append from; may be {@code null}
+     * @param iterator the Iterator to append from; may be {@code null}
      * @return this Joiner instance for method chaining
      * @throws IllegalStateException if this Joiner has been closed
      */
-    public Joiner appendAll(final Iterator<?> iter) throws IllegalStateException {
+    public Joiner appendAll(final Iterator<?> iterator) throws IllegalStateException {
         assertNotClosed();
 
-        if (iter != null) {
+        if (iterator != null) {
             StringBuilder sb = null;
             Object e = null;
 
-            while (iter.hasNext()) {
-                e = iter.next();
+            while (iterator.hasNext()) {
+                e = iterator.next();
 
                 if (e != null || !skipNulls) {
                     sb = appendRendered(sb, toString(e));
@@ -2218,23 +2218,24 @@ public final class Joiner implements Closeable {
      * }</pre>
      *
      * @param <T> the type of elements from the Iterator
-     * @param iter the Iterator to append from
+     * @param iterator the Iterator to append from
      * @param filter the predicate to test elements; only elements that pass are appended
      * @return this Joiner instance for method chaining
      * @throws IllegalStateException if this Joiner has been closed. Checked before argument validation.
      * @throws IllegalArgumentException if {@code filter} is {@code null}.
      */
-    public <T> Joiner appendAll(final Iterator<? extends T> iter, final Predicate<? super T> filter) throws IllegalStateException, IllegalArgumentException {
+    public <T> Joiner appendAll(final Iterator<? extends T> iterator, final Predicate<? super T> filter)
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         N.checkArgNotNull(filter, cs.filter);
 
-        if (iter != null) {
+        if (iterator != null) {
             StringBuilder sb = null;
             T e = null;
 
-            while (iter.hasNext()) {
-                e = iter.next();
+            while (iterator.hasNext()) {
+                e = iterator.next();
 
                 if (!filter.test(e)) {
                     continue;
@@ -2482,9 +2483,9 @@ public final class Joiner implements Closeable {
      * Appends a key-value pair with an Object value to the joiner.
      * The key and value are separated by the configured keyValueDelimiter.
      * The value is rendered with {@link N#toString(Object)} (arrays and collections are rendered element-wise,
-     * not with {@code Object.toString()}) and formatted according to nullText settings.
-     * The key is formatted according to the trimBeforeAppend and stripBeforeAppend settings. A {@code null} key is
-     * rendered using the configured {@code null} text, never skipped.
+     * not with {@code Object.toString()}); like the key, that rendering is then formatted according to the
+     * trimBeforeAppend and stripBeforeAppend settings. A {@code null} key or value is rendered using the configured
+     * {@code null} text, never skipped.
      * If multiple entries are appended, they are separated by the configured separator.
      *
      * <p><b>Usage Examples:</b></p>
@@ -3116,14 +3117,15 @@ public final class Joiner implements Closeable {
      * Adds the contents from the specified Joiner {@code other} without prefix and suffix as the next element if it is non-empty.
      * If the specified {@code Joiner} is empty, the call has no effect.
      * Only the content between prefix and suffix from the other Joiner is merged.
+     * If {@code other} is this Joiner, its content before the merge is appended once.
      *
      * <p><b>What "empty" means here:</b> {@code other} is empty only when <i>no element has ever been appended
      * to it</i>. A {@code Joiner} that was given an element which happens to render as the empty string is
      * <i>not</i> empty &mdash; that element is merged like any other, so the merge does contribute a separator.
      * This matches {@link java.util.StringJoiner#merge(java.util.StringJoiner)} exactly:</p>
      * <pre>{@code
-     * Joiner.with(", ").append("a").merge(Joiner.with(", ")).toString();              // "a"    - other never appended to
-     * Joiner.with(", ").append("a").merge(Joiner.with(", ").append("")).toString();   // "a, "  - other holds one empty element
+     * Joiner.with(", ").append("a").merge(Joiner.with(", ")).toString();             // "a"    - other never appended to
+     * Joiner.with(", ").append("a").merge(Joiner.with(", ").append("")).toString();  // "a, "  - other holds one empty element
      * }</pre>
      *
      * <p>Remember to close {@code other} Joiner if {@code reuseBuffer} is set to {@code true}.
@@ -3157,11 +3159,27 @@ public final class Joiner implements Closeable {
         if (other.buffer != null) {
             final int length = other.buffer.length();
             final StringBuilder builder = prepareBuilder();
-            builder.append(other.buffer, other.prefix.length(), length);
+            final int prefixLength = other.prefix.length();
+
+            if (other == this) {
+                // prepareBuilder() has just appended the separator to this same buffer: copy only the content before it.
+                builder.append(other.buffer, prefixLength, length);
+            } else if (prefixLength == 0) {
+                // append(CharSequence, int, int) copies a StringBuilder source one char at a time; the whole-builder
+                // append below is a bulk array copy.
+                builder.append(other.buffer);
+            } else {
+                // Bulk-copy the whole content, then drop the other Joiner's prefix (another bulk move).
+                final int start = builder.length();
+                builder.append(other.buffer);
+                builder.delete(start, start + prefixLength);
+            }
         } else if (other.latestToStringValue != null) {
             // Once the other Joiner's pooled builder has been released -- by a reuse-mode toString(), or by
             // close() -- its content lives on in latestToStringValue.
-            prepareBuilder().append(other.latestToStringValue, other.prefix.length(), other.latestToStringValue.length());
+            // Self-merge rehydrates this same Joiner and clears its retained snapshot in prepareBuilder().
+            final String snapshot = other.latestToStringValue;
+            prepareBuilder().append(snapshot, other.prefix.length(), snapshot.length());
         }
 
         return this;
@@ -3231,9 +3249,11 @@ public final class Joiner implements Closeable {
                 // to the buffer and rewinding it (the previous shape) could grow the buffer past the pool's
                 // size limit -- which silently stops it being recycled -- and briefly left the suffix inside a
                 // buffer that appending is supposed to continue from.
-                latestToStringValue = buffer.toString();
+                final String snapshot = buffer.toString();
+                // Only recycled builders need a retained snapshot to resume appending.
+                latestToStringValue = reuseBuffer ? snapshot : null;
 
-                return suffix.isEmpty() ? latestToStringValue : latestToStringValue.concat(suffix);
+                return suffix.isEmpty() ? snapshot : snapshot.concat(suffix);
             } finally {
                 recycleBuffer();
             }
@@ -3317,9 +3337,9 @@ public final class Joiner implements Closeable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Optional<Integer> result1 = Joiner.with(", ").mapIfNotEmpty(String::length);                   // returns: Optional.empty()
-     * Optional<Integer> result2 = Joiner.with(", ", "[", "]").mapIfNotEmpty(String::length);         // returns: Optional.empty()
-     * Optional<Integer> result3 = Joiner.with(", ").append("hello").mapIfNotEmpty(String::length);   // returns: Optional.of(5)
+     * Optional<Integer> result1 = Joiner.with(", ").mapIfNotEmpty(String::length);                  // returns: Optional.empty()
+     * Optional<Integer> result2 = Joiner.with(", ", "[", "]").mapIfNotEmpty(String::length);        // returns: Optional.empty()
+     * Optional<Integer> result3 = Joiner.with(", ").append("hello").mapIfNotEmpty(String::length);  // returns: Optional.of(5)
      * }</pre>
      *
      * @param <T> the type of the result
@@ -3486,6 +3506,8 @@ public final class Joiner implements Closeable {
                 buffer.append(separator);
             }
         }
+
+        latestToStringValue = null;
 
         return buffer;
     }

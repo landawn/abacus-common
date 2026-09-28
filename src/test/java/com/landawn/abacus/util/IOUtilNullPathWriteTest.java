@@ -296,15 +296,15 @@ public class IOUtilNullPathWriteTest extends TestBase {
         final File realDir = dir("d2-dir");
         final File real = file("d2-file.txt", "x");
 
-        assertMessageNames("srcFile", () -> IOUtil.copyToDirectory(null, realDir));
-        assertMessageNames("srcFile", () -> IOUtil.moveToDirectory(null, realDir));
-        assertMessageNames("srcFile", () -> IOUtil.copyFile(null, real));
-        assertMessageNames("srcDir", () -> IOUtil.copyDirectory(null, realDir));
+        assertMessageNames("sourceFile", () -> IOUtil.copyToDirectory(null, realDir));
+        assertMessageNames("sourceFile", () -> IOUtil.moveToDirectory(null, realDir));
+        assertMessageNames("sourceFile", () -> IOUtil.copyFile(null, real));
+        assertMessageNames("sourceDirectory", () -> IOUtil.copyDirectory(null, realDir));
         assertMessageNames("sourceFile", () -> IOUtil.zip((File) null, real));
-        assertMessageNames("srcZipFile", () -> IOUtil.unzip(null, realDir));
+        assertMessageNames("sourceZipFile", () -> IOUtil.unzip(null, realDir));
         // ...and the two-File methods now distinguish their two arguments.
         assertMessageNames("targetFile", () -> IOUtil.zip(real, (File) null));
-        assertMessageNames("destFile", () -> IOUtil.merge(Arrays.asList(real), (File) null));
+        assertMessageNames("destinationFile", () -> IOUtil.merge(Arrays.asList(real), (File) null)); // C-635 rename
     }
 
     private void assertMessageNames(final String argName, final Throwables.Runnable<Exception> call) {
@@ -420,5 +420,13 @@ public class IOUtilNullPathWriteTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> IOUtil.append((Reader) null, 0L, 1L, real));
 
         assertEquals("hello", IOUtil.readAllToString(real), "a rejected call leaves the file untouched");
+    }
+
+
+    @Test
+    public void testCopyFileToOutputStreamNullSrcFileMessageNamesSrcFile() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> IOUtil.copyFile((File) null, new ByteArrayOutputStream()));
+        assertTrue(e.getMessage().contains("sourceFile"), "expected the message to name 'sourceFile' but it was: " + e.getMessage());
     }
 }

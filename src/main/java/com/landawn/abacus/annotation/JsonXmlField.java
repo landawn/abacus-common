@@ -213,8 +213,9 @@ public @interface JsonXmlField {
      * <p><b>Deserialization is not affected:</b> the parsers still resolve the property by name, so a
      * matching value in the input is read and applied to the bean exactly as without the annotation, and
      * it is not reported as an unknown property even with {@code setIgnoreUnmatchedProperty(false)}. To
-     * drop a property from input as well, use {@link Transient @Transient} (or the {@code transient}
-     * modifier), or configure the parser with {@code DeserializationConfig.setIgnoredPropNames(Class, Set)}.
+     * drop a property from input as well, configure the parser with
+     * {@code DeserializationConfig.setIgnoredPropNames(Class, Set)}; {@link Transient @Transient} and the
+     * {@code transient} modifier are output-only too and do not block input.
      * To write a property but never read it, use {@link #direction()} {@code = Direction.SERIALIZE_ONLY}
      * instead; combining {@code ignore = true} with a non-default {@link #direction()} is rejected with an
      * {@code IllegalArgumentException} when the bean is first introspected.</p>

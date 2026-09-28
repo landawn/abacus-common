@@ -32,6 +32,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.DateTimeFormat;
+import com.landawn.abacus.util.N;
 
 public class JodaInstantTypeTest extends TestBase {
 
@@ -306,5 +307,33 @@ public class JodaInstantTypeTest extends TestBase {
 
         assertEquals("9999-12-31T23:59:59.999Z", instantType.stringOf(new Instant(253402300799999L)));
         assertEquals(253402300799999L, instantType.valueOf("9999-12-31T23:59:59.999Z").getMillis());
+    }
+
+    @Test
+    public void testValueOfObjectKeepsMillisecondsOfJavaUtilDate() {
+        final Type<Instant> type = TypeFactory.getType("JodaInstant");
+
+        // a plain java.util.Date used to go through its second-precision text form and lose the milliseconds
+        assertEquals(1700000000123L, type.valueOf((Object) new java.util.Date(1700000000123L)).getMillis());
+        assertEquals(1700000000123L, type.valueOf((Object) new java.sql.Date(1700000000123L)).getMillis());
+        assertEquals(1700000000123L, type.valueOf((Object) new Timestamp(1700000000123L)).getMillis());
+        assertEquals(1700000000123L, N.convert(new java.util.Date(1700000000123L), Instant.class).getMillis());
+    }
+
+    @Test
+    public void testValueOfObjectTreatsNumberAsEpochMillis() {
+        final Type<Instant> type = TypeFactory.getType("JodaInstant");
+
+        // a short Number used to be rejected as ambiguous date text instead of being read as epoch milliseconds
+        assertEquals(1234L, type.valueOf((Object) 1234L).getMillis());
+        assertEquals(5L, type.valueOf((Object) 5).getMillis());
+        assertEquals(-1L, type.valueOf((Object) (-1L)).getMillis());
+        assertEquals(1700000000123L, type.valueOf((Object) 1700000000123L).getMillis());
+        assertEquals(1234L, N.convert(1234L, Instant.class).getMillis());
+
+        // unchanged: other values still go through their own type handler's text form
+        final DateTime dateTime = new DateTime(1700000000123L, DateTimeZone.forID("Asia/Kolkata"));
+        assertEquals(1700000000123L, type.valueOf((Object) dateTime).getMillis());
+        assertNull(type.valueOf((Object) null));
     }
 }

@@ -151,7 +151,8 @@ public class NOccurrencesTest extends NTestSupport {
 
         java.util.function.Supplier<Map<String, Integer>> ci = () -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         assertEquals(CommonUtil.asMap("a", 2), N.frequencyMap(new String[] { "a", "A" }, ci));
-        assertEquals(CommonUtil.asMap("a", 1), N.frequencyMap(Arrays.asList("a", "A"), ci));
+        // C-230 (2026-09-24): the Iterable overload now accumulates through the supplied map, as the array one does.
+        assertEquals(CommonUtil.asMap("a", 2), N.frequencyMap(Arrays.asList("a", "A"), ci));
         assertEquals(N.frequencyMap(Arrays.asList("a", "A"), (java.util.function.Supplier<Map<String, Integer>>) LinkedHashMap::new),
                 N.frequencyMap(new String[] { "a", "A" }, (java.util.function.Supplier<Map<String, Integer>>) LinkedHashMap::new));
     }

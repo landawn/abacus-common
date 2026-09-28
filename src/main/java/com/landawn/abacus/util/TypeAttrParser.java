@@ -188,10 +188,10 @@ public final class TypeAttrParser {
      * TypeAttrParser p4 = TypeAttrParser.parse("HashMap<K, V>(16, 0.75f)");
      * }</pre>
      *
-     * @param attr the type attribute string to parse
+     * @param attribute the type attribute string to parse
      * @return a {@code TypeAttrParser} instance containing the parsed components; the returned
      *         instance never has {@code null} type-parameter or constructor-parameter arrays
-     * @throws IllegalArgumentException if {@code attr} is {@code null}, or if the class name (ignoring any trailing array brackets) or a generic
+     * @throws IllegalArgumentException if {@code attribute} is {@code null}, or if the class name (ignoring any trailing array brackets) or a generic
      *         parameter at any nesting level is empty, if generic angle brackets, constructor parentheses, or
      *         quoted constructor arguments are missing, unbalanced, out of order, or otherwise malformed, or if
      *         the declaration needs more than 64 levels of recursive parsing. That limit counts parsing levels
@@ -205,42 +205,42 @@ public final class TypeAttrParser {
      * @see #getTypeParameters()
      * @see #getParameters()
      */
-    public static TypeAttrParser parse(final String attr) throws IllegalArgumentException {
-        N.checkArgNotNull(attr, cs.attr);
+    public static TypeAttrParser parse(final String attribute) throws IllegalArgumentException {
+        N.checkArgNotNull(attribute, cs.attribute);
 
-        return parse(attr, 0, attr);
+        return parse(attribute, 0, attribute);
     }
 
     /**
-     * Parses {@code attr} at the given nesting depth. Every re-entry passes {@code depth + 1}, so a
+     * Parses {@code attribute} at the given nesting depth. Every re-entry passes {@code depth + 1}, so a
      * pathologically nested declaration is rejected with the documented {@code IllegalArgumentException}
      * rather than overflowing the stack. {@code root} is the declaration the caller handed to
-     * {@link #parse(String)}; it is what the depth-guard message names, because {@code attr} at the depth the
+     * {@link #parse(String)}; it is what the depth-guard message names, because {@code attribute} at the depth the
      * guard trips is an inner fragment that is not itself deeply nested.
      *
-     * @throws IllegalArgumentException if {@code depth} exceeds the parsing limit or {@code attr} has malformed type syntax
+     * @throws IllegalArgumentException if {@code depth} exceeds the parsing limit or {@code attribute} has malformed type syntax
      */
-    private static TypeAttrParser parse(final String attr, final int depth, final String root) throws IllegalArgumentException {
+    private static TypeAttrParser parse(final String attribute, final int depth, final String root) throws IllegalArgumentException {
         if (depth > MAX_NESTING_DEPTH) {
             throw new IllegalArgumentException("Malformed type attribute: nesting deeper than " + MAX_NESTING_DEPTH + " levels in: " + root);
         }
 
-        int componentEnd = attr.length();
-        while (componentEnd > 0 && Character.isWhitespace(attr.charAt(componentEnd - 1))) {
+        int componentEnd = attribute.length();
+        while (componentEnd > 0 && Character.isWhitespace(attribute.charAt(componentEnd - 1))) {
             componentEnd--;
         }
 
         int arrayDimensions = 0;
-        while (componentEnd >= 2 && attr.charAt(componentEnd - 2) == '[' && attr.charAt(componentEnd - 1) == ']') {
+        while (componentEnd >= 2 && attribute.charAt(componentEnd - 2) == '[' && attribute.charAt(componentEnd - 1) == ']') {
             componentEnd -= 2;
             arrayDimensions++;
 
             int previousDimensionEnd = componentEnd;
-            while (previousDimensionEnd > 0 && Character.isWhitespace(attr.charAt(previousDimensionEnd - 1))) {
+            while (previousDimensionEnd > 0 && Character.isWhitespace(attribute.charAt(previousDimensionEnd - 1))) {
                 previousDimensionEnd--;
             }
 
-            if (previousDimensionEnd < 2 || attr.charAt(previousDimensionEnd - 2) != '[' || attr.charAt(previousDimensionEnd - 1) != ']') {
+            if (previousDimensionEnd < 2 || attribute.charAt(previousDimensionEnd - 2) != '[' || attribute.charAt(previousDimensionEnd - 1) != ']') {
                 break;
             }
 
@@ -248,16 +248,16 @@ public final class TypeAttrParser {
         }
 
         if (arrayDimensions > 0) {
-            final String componentName = attr.substring(0, componentEnd).trim();
+            final String componentName = attribute.substring(0, componentEnd).trim();
             if (componentName.endsWith(")")) {
-                throw new IllegalArgumentException("Malformed type attribute: array dimensions after constructor arguments in: " + attr);
+                throw new IllegalArgumentException("Malformed type attribute: array dimensions after constructor arguments in: " + attribute);
             }
 
             final TypeAttrParser component = parse(componentName, depth + 1, root);
             return new TypeAttrParser(component.className + "[]".repeat(arrayDimensions), component.typeParameters, component.parameters);
         }
 
-        final String normalizedMemberType = normalizeQualifiedMemberType(attr, depth, root);
+        final String normalizedMemberType = normalizeQualifiedMemberType(attribute, depth, root);
 
         if (normalizedMemberType != null) {
             return parse(normalizedMemberType, depth + 1, root);
@@ -267,25 +267,25 @@ public final class TypeAttrParser {
         String[] typeParameters = null;
         String[] parameters = null;
 
-        final int firstParenthesisIndex = attr.indexOf(_PARENTHESIS_L);
-        final int classSyntaxEndIndex = firstParenthesisIndex < 0 ? attr.length() : firstParenthesisIndex;
-        int beginIndex = attr.substring(0, classSyntaxEndIndex).indexOf('<');
-        final int firstClosingGenericIndex = attr.substring(0, classSyntaxEndIndex).indexOf('>');
+        final int firstParenthesisIndex = attribute.indexOf(_PARENTHESIS_L);
+        final int classSyntaxEndIndex = firstParenthesisIndex < 0 ? attribute.length() : firstParenthesisIndex;
+        int beginIndex = attribute.substring(0, classSyntaxEndIndex).indexOf('<');
+        final int firstClosingGenericIndex = attribute.substring(0, classSyntaxEndIndex).indexOf('>');
 
         if (firstClosingGenericIndex >= 0 && (beginIndex < 0 || firstClosingGenericIndex < beginIndex)) {
-            throw new IllegalArgumentException("Malformed type attribute: unexpected closing '>' in: " + attr);
+            throw new IllegalArgumentException("Malformed type attribute: unexpected closing '>' in: " + attribute);
         }
 
-        final int firstClosingParenthesisIndex = attr.indexOf(_PARENTHESIS_R);
+        final int firstClosingParenthesisIndex = attribute.indexOf(_PARENTHESIS_R);
 
         if (firstClosingParenthesisIndex >= 0 && (firstParenthesisIndex < 0 || firstClosingParenthesisIndex < firstParenthesisIndex)) {
-            throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
+            throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attribute);
         }
 
         if (beginIndex >= 0) {
-            final int endIndex = findClosingGeneric(attr, beginIndex);
+            final int endIndex = findClosingGeneric(attribute, beginIndex);
 
-            className = attr.substring(0, beginIndex).trim();
+            className = attribute.substring(0, beginIndex).trim();
             final List<String> typeParameterList = new ArrayList<>();
 
             int bracketNum = 0;
@@ -294,13 +294,14 @@ public final class TypeAttrParser {
             int previousIndex = beginIndex + 1;
 
             for (int idx = previousIndex; idx < endIndex; idx++) {
-                final char ch = attr.charAt(idx);
+                final char ch = attribute.charAt(idx);
 
                 if (inQuotes) {
-                    if (ch == SK._BACKSLASH && idx + 1 < endIndex && (attr.charAt(idx + 1) == SK._DOUBLE_QUOTE || attr.charAt(idx + 1) == SK._BACKSLASH)) {
+                    if (ch == SK._BACKSLASH && idx + 1 < endIndex
+                            && (attribute.charAt(idx + 1) == SK._DOUBLE_QUOTE || attribute.charAt(idx + 1) == SK._BACKSLASH)) {
                         idx++;
                     } else if (ch == SK._DOUBLE_QUOTE) {
-                        if (idx + 1 < endIndex && attr.charAt(idx + 1) == SK._DOUBLE_QUOTE) {
+                        if (idx + 1 < endIndex && attribute.charAt(idx + 1) == SK._DOUBLE_QUOTE) {
                             idx++;
                         } else {
                             inQuotes = false;
@@ -316,7 +317,7 @@ public final class TypeAttrParser {
                     parenthesisDepth++;
                 } else if (ch == _PARENTHESIS_R) {
                     if (parenthesisDepth == 0) {
-                        throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
+                        throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attribute);
                     }
 
                     parenthesisDepth--;
@@ -330,27 +331,27 @@ public final class TypeAttrParser {
                     if (bracketNum > 0) {
                         bracketNum--;
                     } else {
-                        throw new IllegalArgumentException("Malformed type attribute: unexpected closing '>' in: " + attr);
+                        throw new IllegalArgumentException("Malformed type attribute: unexpected closing '>' in: " + attribute);
                     }
                 } else if (bracketNum == 0 && ch == ',') {
-                    typeParameterList.add(Strings.trim(attr.substring(previousIndex, idx)));
+                    typeParameterList.add(Strings.trim(attribute.substring(previousIndex, idx)));
                     previousIndex = idx + 1;
                 }
             }
 
             if (bracketNum != 0 || parenthesisDepth != 0 || inQuotes) {
-                throw new IllegalArgumentException("Malformed type attribute: unbalanced nested parameter syntax in: " + attr);
+                throw new IllegalArgumentException("Malformed type attribute: unbalanced nested parameter syntax in: " + attribute);
             }
 
-            typeParameterList.add(Strings.trim(attr.substring(previousIndex, endIndex)));
+            typeParameterList.add(Strings.trim(attribute.substring(previousIndex, endIndex)));
 
             if (Strings.isEmpty(className)) {
-                throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attr);
+                throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attribute);
             }
 
             for (final String typeParameter : typeParameterList) {
                 if (Strings.isEmpty(typeParameter)) {
-                    throw new IllegalArgumentException("Malformed type attribute: empty generic parameter in: " + attr);
+                    throw new IllegalArgumentException("Malformed type attribute: empty generic parameter in: " + attribute);
                 }
 
                 // Validate every nested declaration as well. Merely balancing the outer text is
@@ -364,20 +365,20 @@ public final class TypeAttrParser {
         }
 
         int endIndex = beginIndex;
-        beginIndex = attr.indexOf(_PARENTHESIS_L, N.max(0, beginIndex));
+        beginIndex = attribute.indexOf(_PARENTHESIS_L, N.max(0, beginIndex));
 
         if (beginIndex >= 0) {
-            if (className != null && endIndex >= 0 && N.notEmpty(attr.substring(endIndex + 1, beginIndex).trim())) {
-                throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attr);
+            if (className != null && endIndex >= 0 && N.notEmpty(attribute.substring(endIndex + 1, beginIndex).trim())) {
+                throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attribute);
             }
 
             if (className == null) {
-                className = attr.substring(0, beginIndex).trim();
+                className = attribute.substring(0, beginIndex).trim();
             }
 
-            endIndex = findClosingParenthesis(attr, beginIndex);
+            endIndex = findClosingParenthesis(attribute, beginIndex);
 
-            final String str = attr.substring(beginIndex + 1, endIndex).trim();
+            final String str = attribute.substring(beginIndex + 1, endIndex).trim();
 
             try {
                 parameters = str.isEmpty() ? N.EMPTY_STRING_ARRAY : (COMMA.equals(str) ? new String[] { COMMA } : ARGUMENT_PARSER.parseLineToArray(str));
@@ -385,22 +386,22 @@ public final class TypeAttrParser {
                 // The delimiter scanner above opens a quoted region on any '"', while the argument parser treats
                 // a '"' inside an unquoted field as data, so a substring the scanner accepted can still be
                 // malformed CSV. Report it as the malformed type attribute this method documents.
-                throw new IllegalArgumentException("Malformed type attribute: malformed quoted constructor argument in: " + attr, e);
+                throw new IllegalArgumentException("Malformed type attribute: malformed quoted constructor argument in: " + attribute, e);
             }
-        } else if (attr.indexOf(_PARENTHESIS_R, N.max(0, endIndex)) >= 0) {
-            throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
+        } else if (attribute.indexOf(_PARENTHESIS_R, N.max(0, endIndex)) >= 0) {
+            throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attribute);
         }
 
-        if (endIndex >= 0 && N.notEmpty(attr.substring(endIndex + 1).trim())) {
-            throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attr);
+        if (endIndex >= 0 && N.notEmpty(attribute.substring(endIndex + 1).trim())) {
+            throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attribute);
         }
 
         if (className == null) {
-            className = attr.trim(); // the generics/constructor-paren paths above both trim; a bare name must too
+            className = attribute.trim(); // the generics/constructor-paren paths above both trim; a bare name must too
         }
 
         if (Strings.isEmpty(withoutArrayBrackets(className))) {
-            throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attr);
+            throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attribute);
         }
 
         return new TypeAttrParser(className, typeParameters, parameters);
@@ -431,39 +432,39 @@ public final class TypeAttrParser {
      * @throws IllegalArgumentException if an owner or member class name is missing, a generic clause has unmatched
      *         delimiters, an owner type has malformed syntax, trailing text is invalid, or owner validation exceeds the nesting limit
      */
-    private static String normalizeQualifiedMemberType(final String attr, final int depth, final String root) throws IllegalArgumentException {
-        final int firstParenthesisIndex = attr.indexOf(_PARENTHESIS_L);
-        final int classSyntaxEndIndex = firstParenthesisIndex < 0 ? attr.length() : firstParenthesisIndex;
-        final int firstGenericStart = attr.substring(0, classSyntaxEndIndex).indexOf('<');
+    private static String normalizeQualifiedMemberType(final String attribute, final int depth, final String root) throws IllegalArgumentException {
+        final int firstParenthesisIndex = attribute.indexOf(_PARENTHESIS_L);
+        final int classSyntaxEndIndex = firstParenthesisIndex < 0 ? attribute.length() : firstParenthesisIndex;
+        final int firstGenericStart = attribute.substring(0, classSyntaxEndIndex).indexOf('<');
 
         if (firstGenericStart < 0) {
             return null;
         }
 
-        final int firstGenericEnd = findClosingGeneric(attr, firstGenericStart);
-        int cursor = skipWhitespace(attr, firstGenericEnd + 1);
+        final int firstGenericEnd = findClosingGeneric(attribute, firstGenericStart);
+        int cursor = skipWhitespace(attribute, firstGenericEnd + 1);
 
-        if (cursor >= attr.length() || (attr.charAt(cursor) != '.' && attr.charAt(cursor) != '$')) {
+        if (cursor >= attribute.length() || (attribute.charAt(cursor) != '.' && attribute.charAt(cursor) != '$')) {
             return null;
         }
 
-        final String ownerName = attr.substring(0, firstGenericStart).trim();
+        final String ownerName = attribute.substring(0, firstGenericStart).trim();
 
         if (Strings.isEmpty(ownerName)) {
-            throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attr);
+            throw new IllegalArgumentException("Malformed type attribute: missing class name in: " + attribute);
         }
 
         // Validate the owner's generic clause before removing it from the parser-facing name.
-        parse(ownerName + attr.substring(firstGenericStart, firstGenericEnd + 1), depth + 1, root);
+        parse(ownerName + attribute.substring(firstGenericStart, firstGenericEnd + 1), depth + 1, root);
 
         final StringBuilder normalized = new StringBuilder(ownerName);
 
-        while (cursor < attr.length() && (attr.charAt(cursor) == '.' || attr.charAt(cursor) == '$')) {
-            cursor = skipWhitespace(attr, cursor + 1);
+        while (cursor < attribute.length() && (attribute.charAt(cursor) == '.' || attribute.charAt(cursor) == '$')) {
+            cursor = skipWhitespace(attribute, cursor + 1);
             final int memberNameStart = cursor;
 
-            while (cursor < attr.length()) {
-                final char ch = attr.charAt(cursor);
+            while (cursor < attribute.length()) {
+                final char ch = attribute.charAt(cursor);
 
                 if (ch == '<' || ch == '.' || ch == '$' || ch == _PARENTHESIS_L || ch == _PARENTHESIS_R || ch == '>' || Character.isWhitespace(ch)) {
                     break;
@@ -473,19 +474,19 @@ public final class TypeAttrParser {
             }
 
             if (memberNameStart == cursor) {
-                throw new IllegalArgumentException("Malformed type attribute: missing member class name in: " + attr);
+                throw new IllegalArgumentException("Malformed type attribute: missing member class name in: " + attribute);
             }
 
-            final String memberName = attr.substring(memberNameStart, cursor);
+            final String memberName = attribute.substring(memberNameStart, cursor);
             normalized.append('.').append(memberName);
-            cursor = skipWhitespace(attr, cursor);
+            cursor = skipWhitespace(attribute, cursor);
 
-            if (cursor < attr.length() && attr.charAt(cursor) == '<') {
-                final int genericEnd = findClosingGeneric(attr, cursor);
-                final String genericClause = attr.substring(cursor, genericEnd + 1);
-                cursor = skipWhitespace(attr, genericEnd + 1);
+            if (cursor < attribute.length() && attribute.charAt(cursor) == '<') {
+                final int genericEnd = findClosingGeneric(attribute, cursor);
+                final String genericClause = attribute.substring(cursor, genericEnd + 1);
+                cursor = skipWhitespace(attribute, genericEnd + 1);
 
-                if (cursor < attr.length() && (attr.charAt(cursor) == '.' || attr.charAt(cursor) == '$')) {
+                if (cursor < attribute.length() && (attribute.charAt(cursor) == '.' || attribute.charAt(cursor) == '$')) {
                     // This member is itself an owner. Validate its generic arguments, then continue
                     // with the next member segment without exposing those arguments as the final
                     // member's own type parameters.
@@ -496,20 +497,20 @@ public final class TypeAttrParser {
                 normalized.append(genericClause);
             }
 
-            if (cursor == attr.length()) {
+            if (cursor == attribute.length()) {
                 return normalized.toString();
             }
 
-            if (attr.charAt(cursor) == _PARENTHESIS_L) {
-                return normalized.append(attr.substring(cursor)).toString();
+            if (attribute.charAt(cursor) == _PARENTHESIS_L) {
+                return normalized.append(attribute.substring(cursor)).toString();
             }
 
-            if (attr.charAt(cursor) != '.' && attr.charAt(cursor) != '$') {
-                throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attr);
+            if (attribute.charAt(cursor) != '.' && attribute.charAt(cursor) != '$') {
+                throw new IllegalArgumentException("Malformed type attribute: unexpected trailing text in: " + attribute);
             }
         }
 
-        throw new IllegalArgumentException("Malformed type attribute: missing member class name in: " + attr);
+        throw new IllegalArgumentException("Malformed type attribute: missing member class name in: " + attribute);
     }
 
     private static int skipWhitespace(final String str, int index) {
@@ -528,19 +529,19 @@ public final class TypeAttrParser {
      * @throws IllegalArgumentException if the generic clause beginning at {@code beginIndex} contains an unmatched
      *         closing parenthesis or has no matching closing angle bracket
      */
-    private static int findClosingGeneric(final String attr, final int beginIndex) throws IllegalArgumentException {
+    private static int findClosingGeneric(final String attribute, final int beginIndex) throws IllegalArgumentException {
         int depth = 0;
         int parenthesisDepth = 0;
         boolean inQuotes = false;
 
-        for (int i = beginIndex, len = attr.length(); i < len; i++) {
-            final char ch = attr.charAt(i);
+        for (int i = beginIndex, len = attribute.length(); i < len; i++) {
+            final char ch = attribute.charAt(i);
 
             if (inQuotes) {
-                if (ch == SK._BACKSLASH && i + 1 < len && (attr.charAt(i + 1) == SK._DOUBLE_QUOTE || attr.charAt(i + 1) == SK._BACKSLASH)) {
+                if (ch == SK._BACKSLASH && i + 1 < len && (attribute.charAt(i + 1) == SK._DOUBLE_QUOTE || attribute.charAt(i + 1) == SK._BACKSLASH)) {
                     i++;
                 } else if (ch == SK._DOUBLE_QUOTE) {
-                    if (i + 1 < len && attr.charAt(i + 1) == SK._DOUBLE_QUOTE) {
+                    if (i + 1 < len && attribute.charAt(i + 1) == SK._DOUBLE_QUOTE) {
                         i++;
                     } else {
                         inQuotes = false;
@@ -556,7 +557,7 @@ public final class TypeAttrParser {
                 parenthesisDepth++;
             } else if (ch == _PARENTHESIS_R) {
                 if (parenthesisDepth == 0) {
-                    throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attr);
+                    throw new IllegalArgumentException("Malformed type attribute: unexpected closing ')' in: " + attribute);
                 }
 
                 parenthesisDepth--;
@@ -575,7 +576,7 @@ public final class TypeAttrParser {
             }
         }
 
-        throw new IllegalArgumentException("Malformed type attribute: missing closing '>' in: " + attr);
+        throw new IllegalArgumentException("Malformed type attribute: missing closing '>' in: " + attribute);
     }
 
     /**
@@ -585,18 +586,18 @@ public final class TypeAttrParser {
      *
      * @throws IllegalArgumentException if the constructor clause beginning at {@code beginIndex} has no matching closing parenthesis
      */
-    private static int findClosingParenthesis(final String attr, final int beginIndex) throws IllegalArgumentException {
+    private static int findClosingParenthesis(final String attribute, final int beginIndex) throws IllegalArgumentException {
         int depth = 0;
         boolean inQuotes = false;
 
-        for (int i = beginIndex, len = attr.length(); i < len; i++) {
-            final char ch = attr.charAt(i);
+        for (int i = beginIndex, len = attribute.length(); i < len; i++) {
+            final char ch = attribute.charAt(i);
 
             if (inQuotes) {
-                if (ch == SK._BACKSLASH && i + 1 < len && (attr.charAt(i + 1) == SK._DOUBLE_QUOTE || attr.charAt(i + 1) == SK._BACKSLASH)) {
+                if (ch == SK._BACKSLASH && i + 1 < len && (attribute.charAt(i + 1) == SK._DOUBLE_QUOTE || attribute.charAt(i + 1) == SK._BACKSLASH)) {
                     i++;
                 } else if (ch == SK._DOUBLE_QUOTE) {
-                    if (i + 1 < len && attr.charAt(i + 1) == SK._DOUBLE_QUOTE) {
+                    if (i + 1 < len && attribute.charAt(i + 1) == SK._DOUBLE_QUOTE) {
                         i++;
                     } else {
                         inQuotes = false;
@@ -621,7 +622,7 @@ public final class TypeAttrParser {
             }
         }
 
-        throw new IllegalArgumentException("Malformed type attribute: missing closing ')' in: " + attr);
+        throw new IllegalArgumentException("Malformed type attribute: missing closing ')' in: " + attribute);
     }
 
     /**
@@ -650,24 +651,27 @@ public final class TypeAttrParser {
      * the caller is responsible for choosing a compatible result type.</p>
      *
      * @param <T> the type of object to create
-     * @param cls the class to instantiate, or {@code null} to derive it from the class name
+     * @param targetClass the class to instantiate, or {@code null} to derive it from the class name
      *            in the attribute string
-     * @param attr the type attribute string containing the class name and constructor parameters
+     * @param attribute the type attribute string containing the class name and constructor parameters
      * @return a new instance of the specified class
-     * @throws IllegalArgumentException if {@code attr} is {@code null}, or if {@code attr} has malformed type syntax or no suitable constructor is found
-     * @throws RuntimeException if the class cannot be resolved or instantiation fails
+     * @throws IllegalArgumentException if {@code attribute} is {@code null} or has malformed type syntax, if {@code targetClass} is {@code null} and the
+     *         class named in {@code attribute} cannot be found, or if no suitable constructor is found (when {@code attribute} declares no type or
+     *         constructor parameters: if the class is an unsupported abstract type or has no no-argument constructor)
+     * @throws RuntimeException if the selected constructor is inaccessible or the class cannot be instantiated, or the invoked
+     *         constructor throws an exception
      * @see #parse(String)
      */
     @SuppressWarnings("unchecked")
     @Internal
-    static <T> T newInstance(Class<T> cls, final String attr) throws IllegalArgumentException, RuntimeException {
-        final TypeAttrParser attrResult = TypeAttrParser.parse(attr);
+    static <T> T newInstance(Class<T> targetClass, final String attribute) throws IllegalArgumentException, RuntimeException {
+        final TypeAttrParser attrResult = TypeAttrParser.parse(attribute);
         final String className = attrResult.getClassName();
         final String[] attrTypeParameters = attrResult.getTypeParameters();
         final String[] attrParameters = attrResult.getParameters();
 
-        if (cls == null) {
-            cls = ClassUtil.forName(className);
+        if (targetClass == null) {
+            targetClass = ClassUtil.forName(className);
         }
 
         int parameterLength = attrTypeParameters.length + attrParameters.length;
@@ -686,7 +690,7 @@ public final class TypeAttrParser {
                 parameters[i + attrTypeParameters.length] = attrParameters[i];
             }
 
-            Constructor<?> constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
+            Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetClass, parameterTypes);
             // Keep the signature that was tried FIRST: the fallback below overwrites parameterTypes, and a
             // failure message naming only the String[] fallback hides the arity the caller actually wrote.
             final Class<?>[] primaryParameterTypes = parameterTypes;
@@ -709,19 +713,20 @@ public final class TypeAttrParser {
                     }
                 }
 
-                constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
+                constructor = ClassUtil.getDeclaredConstructor(targetClass, parameterTypes);
             }
 
             if (constructor == null) {
                 throw new IllegalArgumentException("No constructor found with parameters: " + N.toString(primaryParameterTypes)
-                        + (parameterTypes == primaryParameterTypes ? "" : " or " + N.toString(parameterTypes)) + ". in class: " + cls.getCanonicalName());
+                        + (parameterTypes == primaryParameterTypes ? "" : " or " + N.toString(parameterTypes)) + ". in class: "
+                        + targetClass.getCanonicalName());
             }
 
             ClassUtil.setAccessibleQuietly(constructor, true);
 
             return (T) ClassUtil.invokeConstructor(constructor, parameters);
         } else {
-            return (T) N.newInstance(cls);
+            return (T) N.newInstance(targetClass);
         }
     }
 
@@ -729,7 +734,7 @@ public final class TypeAttrParser {
      * Reflectively creates a new instance described by the type attribute plus explicit constructor arguments.
      * The attr string may include generic type parameters. Explicit args are passed as pairs of Class and Object.
      * These pairs are prepended to parsed type parameters and constructor parameters (all treated as String)
-     * to build a candidate constructor signature. If no exact match exists and {@code attr} contains any
+     * to build a candidate constructor signature. If no exact match exists and {@code attribute} contains any
      * constructor parameters, a fallback tries replacing those parameters with a single {@code String[]} parameter.
      *
      * <p><b>Usage Examples:</b></p>
@@ -743,81 +748,84 @@ public final class TypeAttrParser {
      * the caller is responsible for choosing a compatible result type.</p>
      *
      * @param <T> the type of object to create
-     * @param cls the target class to instantiate, or {@code null} to derive it from the
-     *            class name in {@code attr}
-     * @param attr the type attribute string with optional generics and constructor params
-     * @param args alternating {@code (Class, value)} pairs prepended to the parsed parameters;
+     * @param targetClass the target class to instantiate, or {@code null} to derive it from the
+     *            class name in {@code attribute}
+     * @param attribute the type attribute string with optional generics and constructor params
+     * @param arguments alternating {@code (Class, value)} pairs prepended to the parsed parameters;
      *             must have an even length, with every even-indexed element being a {@code Class}
      * @return a new instance of the specified class
-     * @throws IllegalArgumentException if {@code args} or {@code attr} is {@code null}, {@code attr} has malformed type syntax,
-     *         {@code args} has an odd length or an even-indexed element that is not a {@code Class}, or no matching constructor is found
-     * @throws RuntimeException if the class cannot be resolved or instantiation fails
+     * @throws IllegalArgumentException if {@code arguments} or {@code attribute} is {@code null}, {@code attribute} has malformed type syntax,
+     *         {@code targetClass} is {@code null} and the class named in {@code attribute} cannot be found, {@code arguments} has an odd length or an
+     *         even-indexed element that is not a {@code Class}, or no matching constructor is found (when there are no parameters at all:
+     *         the class is an unsupported abstract type or has no no-argument constructor)
+     * @throws RuntimeException if the selected constructor is inaccessible or the class cannot be instantiated, or the invoked
+     *         constructor throws an exception
      * @see #parse(String)
      */
     @SuppressWarnings("unchecked")
-    public static <T> T newInstance(Class<T> cls, final String attr, final Object... args) throws IllegalArgumentException, RuntimeException {
-        N.checkArgNotNull(args, cs.args);
+    public static <T> T newInstance(Class<T> targetClass, final String attribute, final Object... arguments) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(arguments, cs.arguments);
 
-        final TypeAttrParser attrResult = TypeAttrParser.parse(attr);
+        final TypeAttrParser attrResult = TypeAttrParser.parse(attribute);
         final String className = attrResult.getClassName();
         final String[] attrTypeParameters = attrResult.getTypeParameters();
         final String[] attrParameters = attrResult.getParameters();
 
-        if (cls == null) {
-            cls = ClassUtil.forName(className);
+        if (targetClass == null) {
+            targetClass = ClassUtil.forName(className);
         }
 
-        if ((args.length & 1) != 0) {
-            throw new IllegalArgumentException("The specified args must be [Class, value] pairs, but length is: " + args.length);
+        if ((arguments.length & 1) != 0) {
+            throw new IllegalArgumentException("The specified args must be [Class, value] pairs, but length is: " + arguments.length);
         }
 
-        for (int i = 0; i < args.length; i += 2) {
-            if (!(args[i] instanceof Class<?>)) {
-                throw new IllegalArgumentException("The arg at index " + i + " must be a Class, but was: " + N.toString(args[i]));
+        for (int i = 0; i < arguments.length; i += 2) {
+            if (!(arguments[i] instanceof Class<?>)) {
+                throw new IllegalArgumentException("The arg at index " + i + " must be a Class, but was: " + N.toString(arguments[i]));
             }
         }
 
-        int parameterLength = attrTypeParameters.length + attrParameters.length + (args.length / 2);
+        int parameterLength = attrTypeParameters.length + attrParameters.length + (arguments.length / 2);
 
         if (parameterLength > 0) {
             Class<?>[] parameterTypes = new Class<?>[parameterLength];
             Object[] parameters = new Object[parameterLength];
 
-            for (int i = 0; i < args.length; i += 2) {
-                parameterTypes[i / 2] = (Class<?>) args[i];
-                parameters[i / 2] = args[i + 1];
+            for (int i = 0; i < arguments.length; i += 2) {
+                parameterTypes[i / 2] = (Class<?>) arguments[i];
+                parameters[i / 2] = arguments[i + 1];
             }
 
             for (int i = 0; i < attrTypeParameters.length; i++) {
-                parameterTypes[i + (args.length / 2)] = String.class;
-                parameters[i + (args.length / 2)] = attrTypeParameters[i];
+                parameterTypes[i + (arguments.length / 2)] = String.class;
+                parameters[i + (arguments.length / 2)] = attrTypeParameters[i];
             }
 
             for (int i = 0; i < attrParameters.length; i++) {
-                parameterTypes[i + (args.length / 2) + attrTypeParameters.length] = String.class;
-                parameters[i + (args.length / 2) + attrTypeParameters.length] = attrParameters[i];
+                parameterTypes[i + (arguments.length / 2) + attrTypeParameters.length] = String.class;
+                parameters[i + (arguments.length / 2) + attrTypeParameters.length] = attrParameters[i];
             }
 
-            Constructor<?> constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
+            Constructor<?> constructor = ClassUtil.getDeclaredConstructor(targetClass, parameterTypes);
             // Keep the signature that was tried FIRST: the fallback below overwrites parameterTypes, and a
             // failure message naming only the String[] fallback hides the arity the caller actually wrote.
             final Class<?>[] primaryParameterTypes = parameterTypes;
 
             if (constructor == null && attrParameters.length > 0) {
-                parameterLength = attrTypeParameters.length + 1 + (args.length / 2);
+                parameterLength = attrTypeParameters.length + 1 + (arguments.length / 2);
 
                 if (parameterLength > 0) {
                     parameterTypes = new Class<?>[parameterLength];
                     parameters = new Object[parameterLength];
 
-                    for (int i = 0; i < args.length; i += 2) {
-                        parameterTypes[i / 2] = (Class<?>) args[i];
-                        parameters[i / 2] = args[i + 1];
+                    for (int i = 0; i < arguments.length; i += 2) {
+                        parameterTypes[i / 2] = (Class<?>) arguments[i];
+                        parameters[i / 2] = arguments[i + 1];
                     }
 
                     for (int i = 0; i < attrTypeParameters.length; i++) {
-                        parameterTypes[i + (args.length / 2)] = String.class;
-                        parameters[i + (args.length / 2)] = attrTypeParameters[i];
+                        parameterTypes[i + (arguments.length / 2)] = String.class;
+                        parameters[i + (arguments.length / 2)] = attrTypeParameters[i];
                     }
 
                     if (attrParameters.length > 0) {
@@ -826,19 +834,20 @@ public final class TypeAttrParser {
                     }
                 }
 
-                constructor = ClassUtil.getDeclaredConstructor(cls, parameterTypes);
+                constructor = ClassUtil.getDeclaredConstructor(targetClass, parameterTypes);
             }
 
             if (constructor == null) {
                 throw new IllegalArgumentException("No constructor found with parameters: " + N.toString(primaryParameterTypes)
-                        + (parameterTypes == primaryParameterTypes ? "" : " or " + N.toString(parameterTypes)) + ". in class: " + cls.getCanonicalName());
+                        + (parameterTypes == primaryParameterTypes ? "" : " or " + N.toString(parameterTypes)) + ". in class: "
+                        + targetClass.getCanonicalName());
             }
 
             ClassUtil.setAccessibleQuietly(constructor, true);
 
             return (T) ClassUtil.invokeConstructor(constructor, parameters);
         } else {
-            return (T) N.newInstance(cls);
+            return (T) N.newInstance(targetClass);
         }
     }
 

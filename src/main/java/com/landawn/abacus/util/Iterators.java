@@ -78,8 +78,10 @@ import lombok.experimental.Accessors;
  *   <li><b>Functional Programming:</b> Support for mapping, filtering, and functional composition</li>
  *   <li><b>Type Safety:</b> Generic methods with compile-time type checking</li>
  *   <li><b>Performance Optimized:</b> Efficient algorithms with minimal object allocation</li>
- *   <li><b>Interoperability:</b> Every adapter returns a plain {@link java.util.Iterator} ({@link ObjIterator} or a
- *       primitive {@code XxxIterator}), so results can be handed straight to
+ *   <li><b>Interoperability:</b> Every adapter returns a plain {@link java.util.Iterator}: an {@link ObjIterator} or a
+ *       primitive {@code XxxIterator}, except that {@code concat} over {@link BiIterator}/{@link TriIterator} sources
+ *       and {@code unzip}/{@code unzip3} return a {@link BiIterator}/{@link TriIterator}, which are {@code Iterator}s of
+ *       {@link Pair}/{@link Triple}. Results can therefore be handed straight to
  *       {@link com.landawn.abacus.util.stream.Stream#of(Iterator)}, {@link Seq#of(Iterator)} or any API that
  *       accepts an {@code Iterator}. This class itself neither accepts nor returns a
  *       {@link java.util.stream.Stream}</li>
@@ -91,7 +93,7 @@ import lombok.experimental.Accessors;
  *   <li><b>Search Operations:</b> {@code indexOf}, {@code frequency}, {@code count} with predicate support</li>
  *   <li><b>Transformation Operations:</b> {@code map}, {@code flatMap}, {@code flatmap}, {@code filter}, {@code skipNulls}, {@code distinct}, {@code distinctBy}</li>
  *   <li><b>Slicing Operations:</b> {@code skip}, {@code limit}, {@code skipAndLimit}, {@code takeWhile}, {@code takeWhileInclusive}, {@code dropWhile}, {@code skipUntil}</li>
- *   <li><b>Repetition Operations:</b> {@code repeat}, {@code repeatElements}, {@code cycle}, {@code cycleToSize}</li>
+ *   <li><b>Repetition Operations:</b> {@code repeat}, {@code repeatElements}, {@code repeatElementsToSize}, {@code cycle}, {@code cycleToSize}</li>
  *   <li><b>Parallel Operations:</b> {@code forEach} with multi-threaded reading/processing support</li>
  *   <li><b>Combination Operations:</b> {@code concat}, {@code merge}, {@code mergeSorted}, {@code zip}, {@code unzip} for iterator composition</li>
  * </ul>
@@ -339,24 +341,24 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterator.
-     * @param iter the iterator from which to retrieve the element, or {@code null} to return {@code Nullable.empty()}.
+     * @param iterator the iterator from which to retrieve the element, or {@code null} to return {@code Nullable.empty()}.
      * @param index the position in the iterator of the element to be returned. Indexing starts from 0.
      * @return a {@code Nullable} containing the element at the specified position in the iterator, or {@code Nullable.empty()} if the index is out of bounds.
      * @throws IllegalArgumentException if {@code index} is negative.
      * @see N#getElement(Iterator, long)
      */
-    public static <T> Nullable<T> elementAt(final Iterator<? extends T> iter, long index) throws IllegalArgumentException {
+    public static <T> Nullable<T> elementAt(final Iterator<? extends T> iterator, long index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
-        if (iter == null) {
+        if (iterator == null) {
             return Nullable.empty();
         }
 
-        while (iter.hasNext()) {
+        while (iterator.hasNext()) {
             if (index == 0) {
-                return Nullable.of(iter.next());
+                return Nullable.of(iterator.next());
             } else {
-                iter.next();
+                iterator.next();
                 index--;
             }
         }
@@ -390,28 +392,28 @@ public final class Iterators {
      * {@code 1}. Use {@link N#deepEquals(Object, Object)} through {@link #count(Iterator, Predicate)} when
      * array contents should match.</p>
      *
-     * @param iter the iterator to be searched, or {@code null} to return {@code 0}.
+     * @param iterator the iterator to be searched, or {@code null} to return {@code 0}.
      * @param valueToFind the value to count occurrences of, or {@code null} to count {@code null} occurrences.
-     * @return the number of occurrences of the value in the iterator, or {@code 0} if {@code iter} is {@code null}.
+     * @return the number of occurrences of the value in the iterator, or {@code 0} if {@code iterator} is {@code null}.
      * @see N#frequency(Iterator, Object)
      * @see #count(Iterator, Predicate)
      */
-    public static long frequency(final Iterator<?> iter, final Object valueToFind) {
-        if (iter == null) {
+    public static long frequency(final Iterator<?> iterator, final Object valueToFind) {
+        if (iterator == null) {
             return 0;
         }
 
         long occurrences = 0;
 
         if (valueToFind == null) {
-            while (iter.hasNext()) {
-                if (iter.next() == null) {
+            while (iterator.hasNext()) {
+                if (iterator.next() == null) {
                     occurrences++;
                 }
             }
         } else {
-            while (iter.hasNext()) {
-                if (N.equals(iter.next(), valueToFind)) {
+            while (iterator.hasNext()) {
+                if (N.equals(iterator.next(), valueToFind)) {
                     occurrences++;
                 }
             }
@@ -439,21 +441,21 @@ public final class Iterators {
      * // emptyCount => 0
      * }</pre>
      *
-     * @param iter the iterator to be counted, or {@code null} to return {@code 0}.
-     * @return the number of elements in the iterator, or {@code 0} if {@code iter} is {@code null}.
+     * @param iterator the iterator to be counted, or {@code null} to return {@code 0}.
+     * @return the number of elements in the iterator, or {@code 0} if {@code iterator} is {@code null}.
      * @see N#count(Iterator)
      * @see #count(Iterator, Predicate)
      * @see #frequency(Iterator, Object)
      */
-    public static long count(final Iterator<?> iter) {
-        if (iter == null) {
+    public static long count(final Iterator<?> iterator) {
+        if (iterator == null) {
             return 0;
         }
 
         long res = 0;
 
-        while (iter.hasNext()) {
-            iter.next();
+        while (iterator.hasNext()) {
+            iterator.next();
             res++;
         }
 
@@ -475,23 +477,23 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterator.
-     * @param iter the iterator to be searched, or {@code null} to return {@code 0}.
+     * @param iterator the iterator to be searched, or {@code null} to return {@code 0}.
      * @param predicate the predicate to apply to each element in the iterator.
-     * @return the number of elements in the iterator that match the provided predicate, or {@code 0} if {@code iter} is {@code null}.
+     * @return the number of elements in the iterator that match the provided predicate, or {@code 0} if {@code iterator} is {@code null}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see N#count(Iterator, Predicate)
      */
-    public static <T> long count(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+    public static <T> long count(final Iterator<? extends T> iterator, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        if (iter == null) {
+        if (iterator == null) {
             return 0;
         }
 
         long res = 0;
 
-        while (iter.hasNext()) {
-            if (predicate.test(iter.next())) {
+        while (iterator.hasNext()) {
+            if (predicate.test(iterator.next())) {
                 res++;
             }
         }
@@ -522,14 +524,14 @@ public final class Iterators {
      * // notFound => -1
      * }</pre>
      *
-     * @param iter the iterator to be searched, or {@code null} to return {@code -1}.
+     * @param iterator the iterator to be searched, or {@code null} to return {@code -1}.
      * @param valueToFind the value to find in the iterator, or {@code null} to find {@code null} values.
-     * @return the index of the first occurrence of the specified value in the iterator, or {@code -1} if the value is not found or {@code iter} is {@code null}.
+     * @return the index of the first occurrence of the specified value in the iterator, or {@code -1} if the value is not found or {@code iterator} is {@code null}.
      * @see Iterables#indexOf(Collection, Object)
      * @see N#indexOf(Iterator, Object)
      */
-    public static long indexOf(final Iterator<?> iter, final Object valueToFind) {
-        return indexOf(iter, valueToFind, 0);
+    public static long indexOf(final Iterator<?> iterator, final Object valueToFind) {
+        return indexOf(iterator, valueToFind, 0);
     }
 
     /**
@@ -547,15 +549,15 @@ public final class Iterators {
      * // notFound => -1 (skips first element)
      * }</pre>
      *
-     * @param iter the iterator to be searched, or {@code null} to return {@code -1}.
+     * @param iterator the iterator to be searched, or {@code null} to return {@code -1}.
      * @param valueToFind the value to find in the iterator, or {@code null} to find {@code null} values.
      * @param fromIndex the index to start the search from; a negative value is treated as {@code 0}.
-     * @return the index of the first occurrence of the specified value in the iterator, or {@code -1} if the value is not found or {@code iter} is {@code null}.
+     * @return the index of the first occurrence of the specified value in the iterator, or {@code -1} if the value is not found or {@code iterator} is {@code null}.
      * @see Iterables#indexOf(Collection, Object)
      * @see N#indexOf(Iterator, Object, int)
      */
-    public static long indexOf(final Iterator<?> iter, final Object valueToFind, final long fromIndex) {
-        if (iter == null) {
+    public static long indexOf(final Iterator<?> iterator, final Object valueToFind, final long fromIndex) {
+        if (iterator == null) {
             return N.INDEX_NOT_FOUND;
         }
 
@@ -563,14 +565,14 @@ public final class Iterators {
         long index = 0;
 
         if (startIndex > 0) {
-            while (index < startIndex && iter.hasNext()) {
-                iter.next();
+            while (index < startIndex && iterator.hasNext()) {
+                iterator.next();
                 index++;
             }
         }
 
-        while (iter.hasNext()) {
-            if (N.equals(iter.next(), valueToFind)) {
+        while (iterator.hasNext()) {
+            if (N.equals(iterator.next(), valueToFind)) {
                 return index;
             }
 
@@ -581,8 +583,6 @@ public final class Iterators {
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     *
      * Determines whether two iterators contain equal elements in the same order. More specifically,
      * this method returns {@code true} if {@code iterator1} and {@code iterator2} contain the same
      * number of elements and every element of {@code iterator1} is equal to the corresponding element
@@ -594,6 +594,8 @@ public final class Iterators {
      * <p><b>Comparison:</b> corresponding elements are compared with
      * {@link java.util.Objects#equals(Object, Object)}, so array elements are compared by <i>identity</i>, not by
      * content: two iterators each yielding an equal-but-distinct {@code int[]} are <b>not</b> equal in order.
+     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -698,7 +700,7 @@ public final class Iterators {
 
             /**
              * {@inheritDoc}
-             * @throws NoSuchElementException if no next element is available from the source iteration.
+             * @throws NoSuchElementException if the element has already been returned {@code n} times.
              */
             @Override
             public T next() throws NoSuchElementException {
@@ -802,15 +804,16 @@ public final class Iterators {
      *
      * <p><b>Live view:</b> {@code c.size()} is read when this method is called, to work out how many times each
      * element must be repeated, but the elements themselves are pulled lazily from
-     * {@link Collection#iterator() c.iterator()}, which is obtained on the first call to {@code next()}. A
-     * modification made <i>before</i> that first {@code next()} raises nothing - the iterator is created after
-     * it - but the per-element repeat counts were already fixed from the original {@code c.size()}: a source
-     * that has grown is still truncated to {@code size}, and one that has shrunk produces fewer than
-     * {@code size} elements, with {@code hasNext()} simply reporting {@code false}. If {@code c} has been
-     * emptied, the first {@code next()} throws {@link NoSuchElementException} even though {@code hasNext()}
-     * reported {@code true}. A structural modification made <i>after</i> the first {@code next()} is governed
-     * by that collection's own iterator contract: a fail-fast collection raises
-     * {@link java.util.ConcurrentModificationException}.</p>
+     * {@link Collection#iterator() c.iterator()}, which is obtained on the first call to {@code hasNext()} or
+     * {@code next()}. A modification made <i>before</i> that first call raises nothing - the iterator is created
+     * after it - but the per-element repeat counts were already fixed from the original {@code c.size()}: a
+     * source that has grown is still truncated to {@code size}, and one that has shrunk <i>or been emptied</i>
+     * produces fewer than {@code size} elements (none at all if emptied), with {@code hasNext()} simply
+     * reporting {@code false} once the source runs out. {@code while (it.hasNext()) it.next()} therefore never
+     * throws {@link NoSuchElementException}. A structural modification made <i>after</i> that first call is
+     * governed by that collection's own iterator contract: a fail-fast collection raises
+     * {@link java.util.ConcurrentModificationException}, while one whose iterator does not fail fast ends the
+     * iteration early in the same way once it runs out of elements.</p>
      *
      * @param <T> the type of elements in the collection.
      * @param c the collection whose elements are to be repeated. Must not be empty or {@code null} if {@code size > 0}.
@@ -835,24 +838,42 @@ public final class Iterators {
             private long mod = size % c.size();
 
             private Iterator<? extends T> iter = null;
+            private boolean started = false;
             private T next = null;
             private long cnt = mod-- > 0 ? n + 1 : n;
 
             // The per-element repeat counts above are fixed from c.size() when this iterator is constructed, but
-            // c.iterator() is only taken on the first next(). A source that GREW in between therefore offers more
-            // elements than those counts were divided among, and nothing else here bounds the total - the
-            // requested size is the one guarantee this method makes, so it is tracked explicitly. (A source that
-            // SHRANK is caught separately, by nextElement().)
+            // c.iterator() is only taken on the first hasNext()/next(). A source that GREW in between therefore
+            // offers more elements than those counts were divided among, and nothing else here bounds the total -
+            // the requested size is the one guarantee this method makes, so it is tracked explicitly. A source that
+            // SHRANK (or was emptied) simply runs out: hasNext() consults the source iterator before every pull of a
+            // new element, so it reports false and next() never has to throw on an element hasNext() promised.
             private long remaining = size;
 
             @Override
             public boolean hasNext() {
-                return remaining > 0 && (cnt > 0 || ((n > 0 || mod > 0) && (iter != null && iter.hasNext())));
+                if (remaining <= 0) {
+                    return false;
+                }
+
+                if (!started) {
+                    // The first element has not been pulled yet: the repeat count (cnt) says one is due, but only
+                    // the source can say whether it still has one - it may have been emptied since construction.
+                    if (iter == null) {
+                        iter = c.iterator();
+                    }
+
+                    return iter.hasNext();
+                }
+
+                return cnt > 0 || ((n > 0 || mod > 0) && iter.hasNext());
             }
 
             /**
              * {@inheritDoc}
-             * @throws NoSuchElementException if no next element is available from the source iteration.
+             * @throws NoSuchElementException if {@code size} elements have already been returned, or the source has
+             *         run out because {@code c} shrank or was emptied since {@code repeatElementsToSize} was called
+             *         (in which case {@code hasNext()} has already reported {@code false}).
              */
             @Override
             public T next() throws NoSuchElementException {
@@ -860,11 +881,11 @@ public final class Iterators {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                if (iter == null) {
-                    iter = c.iterator();
-                    next = nextElement();
+                if (!started) {
+                    started = true;
+                    next = iter.next();
                 } else if (cnt <= 0) {
-                    next = nextElement();
+                    next = iter.next();
                     cnt = mod-- > 0 ? n + 1 : n;
                 }
 
@@ -872,19 +893,6 @@ public final class Iterators {
                 remaining--;
 
                 return next;
-            }
-
-            /**
-             * @throws NoSuchElementException if no next element is available from the source iteration.
-             */
-            private T nextElement() throws NoSuchElementException {
-                if (!iter.hasNext()) {
-                    // The source shrank after this iterator was created, so the per-element repeat counts
-                    // computed from its original size can no longer add up to the requested total.
-                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                }
-
-                return iter.next();
             }
         };
     }
@@ -962,7 +970,8 @@ public final class Iterators {
      * Structural modification of the source is governed by that collection's own iterator contract: a fail-fast
      * collection raises {@link java.util.ConcurrentModificationException}, while one whose iterator does not fail
      * fast simply picks up the change on the next round - and, if the source has been emptied, ends the cycle by
-     * reporting {@code hasNext() == false} rather than looping forever. Any other {@code Iterable} cannot be assumed to
+     * reporting {@code hasNext() == false} rather than looping forever. That end is final: refilling the source
+     * afterwards does not restart the cycle. Any other {@code Iterable} cannot be assumed to
      * be re-iterable, so the first round is read through to the source and <b>snapshotted</b>: every element is
      * retained for the lifetime of the returned iterator and later changes to the source are not visible.
      * Do not call this on a non-{@code Collection} {@code Iterable} of unbounded size.</p>
@@ -999,8 +1008,17 @@ public final class Iterators {
             return new ObjIterator<>() {
                 private Iterator<? extends T> iter = firstRound;
 
+                // Once hasNext() has reported false the iteration is over for good, as in cycle(Iterable, long).
+                // Without this latch a refilled source brought an ended iterator back to life, and every hasNext()
+                // on an empty source allocated a fresh c.iterator().
+                private boolean done = false;
+
                 @Override
                 public boolean hasNext() {
+                    if (done) {
+                        return false;
+                    }
+
                     if (iter.hasNext()) {
                         return true;
                     }
@@ -1010,7 +1028,12 @@ public final class Iterators {
                     // A fresh iterator with no elements means the source has been emptied since this iterator was
                     // created. Report that honestly instead of promising an element next() could not supply: a
                     // constant true here made while (it.hasNext()) it.next() throw NoSuchElementException.
-                    return iter.hasNext();
+                    if (!iter.hasNext()) {
+                        done = true;
+                        return false;
+                    }
+
+                    return true;
                 }
 
                 /**
@@ -1035,9 +1058,10 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private List<T> list = new ArrayList<>();
-            private T[] a;
-            private int len;
+            // The first round is buffered here and later rounds index it directly: copying it into an array at the
+            // round boundary would briefly double the snapshot's memory for no benefit.
+            private final List<T> list = new ArrayList<>();
+            private int len = -1; // -1 while the first round is still being read from the source
             private int cursor = 0;
 
             @Override
@@ -1047,23 +1071,21 @@ public final class Iterators {
 
             @Override
             public T next() {
-                if (a == null) {
+                if (len < 0) {
                     if (iter.hasNext()) {
                         final T e = iter.next();
                         list.add(e);
                         return e;
-                    } else {
-                        a = list.toArray((T[]) new Object[list.size()]);
-                        len = a.length;
-                        list = null;
                     }
+
+                    len = list.size();
                 }
 
                 if (cursor >= len) {
                     cursor = 0;
                 }
 
-                return a[cursor++];
+                return list.get(cursor++);
             }
         };
     }
@@ -1094,8 +1116,10 @@ public final class Iterators {
      * round is read through to the source and <b>snapshotted</b>: every element is retained for later rounds,
      * which do not see source changes. A single requested round wraps the source iterator without caching.</p>
      *
-     * <p><b>Note:</b> {@code iterable.iterator()} is obtained eagerly, when this method is called, in order to
-     * detect an empty source.</p>
+     * <p><b>Note:</b> when {@code rounds > 0}, {@code iterable.iterator()} is obtained eagerly, when this method is
+     * called. For a non-{@code Collection} source it is also probed with {@code hasNext()} to detect an empty
+     * source; a {@code Collection}'s emptiness is read from {@link Collection#isEmpty()} instead, and its iterator
+     * is not probed. When {@code rounds == 0}, no iterator is obtained at all.</p>
      *
      * @param <T> the type of elements in the iterable.
      * @param iterable the iterable whose elements are to be cycled over, or {@code null} to return an empty iterator.
@@ -1185,9 +1209,11 @@ public final class Iterators {
         }
 
         return new ObjIterator<>() {
-            private List<T> list = new ArrayList<>();
-            private T[] a;
-            private int len;
+            // The first round is buffered here and later rounds index it directly: copying it into an array at the
+            // round boundary would briefly double the snapshot's memory for no benefit.
+            private final List<T> list = new ArrayList<>();
+            private boolean snapshotted = false;
+            private int len = 0;
             private long m = 1;
             private int cursor = 0;
 
@@ -1206,17 +1232,16 @@ public final class Iterators {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                if (a == null) {
+                if (!snapshotted) {
                     if (iter.hasNext()) {
                         final T e = iter.next();
                         list.add(e);
                         return e;
-                    } else {
-                        m++;
-                        a = list.toArray((T[]) new Object[list.size()]);
-                        len = a.length;
-                        list = null;
                     }
+
+                    m++;
+                    len = list.size();
+                    snapshotted = true;
                 }
 
                 if (cursor >= len) {
@@ -1224,7 +1249,7 @@ public final class Iterators {
                     cursor = 0;
                 }
 
-                return a[cursor++];
+                return list.get(cursor++);
             }
         };
     }
@@ -1281,7 +1306,8 @@ public final class Iterators {
 
             /**
              * {@inheritDoc}
-             * @throws NoSuchElementException if no next element is available from the source iteration.
+             * @throws NoSuchElementException if {@code size} elements have already been returned, or {@code c} has been
+             *         emptied since {@code cycleToSize} was called.
              */
             @Override
             public T next() throws NoSuchElementException {
@@ -2697,7 +2723,6 @@ public final class Iterators {
      * @see #merge(Collection, BiFunction)
      * @see #mergeSorted(Iterator, Iterator, Comparator)
      * @see N#merge(Iterable, Iterable, BiFunction)
-     * @see Maps#merge(Map, Object, Object, BiFunction)
      */
     public static <T> ObjIterator<T> merge(final Iterator<? extends T> a, final Iterator<? extends T> b,
             final BiFunction<? super T, ? super T, MergeResult> nextSelector) throws IllegalArgumentException {
@@ -2862,8 +2887,8 @@ public final class Iterators {
         return mergeLeftFold(sources, nextSelector);
     }
 
-    private static <T> Iterator<? extends T> nullToEmptyIterator(final Iterator<? extends T> iter) {
-        return iter == null ? ObjIterator.<T> empty() : iter;
+    private static <T> Iterator<? extends T> nullToEmptyIterator(final Iterator<? extends T> iterator) {
+        return iterator == null ? ObjIterator.<T> empty() : iterator;
     }
 
     /**
@@ -3188,15 +3213,19 @@ public final class Iterators {
      * {@link Comparator#naturalOrder()} would. Both inputs must therefore be sorted nulls-first as well. Pass an
      * explicit comparator to {@link #mergeSorted(Iterator, Iterator, Comparator)} for any other {@code null} policy.</p>
      *
-     * @param <T> the type of elements in the Iterators, which should implement the {@code Comparable} interface.
-     * @param sortedA the first Iterator to be merged. It should be in non-descending order, with {@code null}s first.
-     * @param sortedB the second Iterator to be merged. It should be in non-descending order, with {@code null}s first.
+     * <p><b>Stable:</b> of two elements that compare equal, the one from {@code sortedA} is returned first.</p>
+     *
+     * @param <T> the type of elements in the Iterators, which must be {@code Comparable} to one another.
+     * @param sortedA the first Iterator to be merged, or {@code null} which is treated as empty. It should be in
+     *        non-descending order, with {@code null}s first.
+     * @param sortedB the second Iterator to be merged, or {@code null} which is treated as empty. It should be in
+     *        non-descending order, with {@code null}s first.
      * @return an ObjIterator that will iterate over the elements of the provided Iterators in a sorted order.
      * @see #mergeSorted(Iterator, Iterator, Comparator)
      * @see Comparators#naturalOrder()
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB) {
+    @SuppressWarnings("unchecked")
+    public static <T extends Comparable<? super T>> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB) {
         return mergeSorted(sortedA, sortedB, N.NATURAL_COMPARATOR);
     }
 
@@ -3212,18 +3241,22 @@ public final class Iterators {
      * // result => [6, 5, 4, 3, 2, 1]
      * }</pre>
      *
+     * <p><b>Stable:</b> of two elements that compare equal, the one from {@code sortedA} is returned first.</p>
+     *
      * @param <T> the type of elements in the iterators.
-     * @param sortedA the first iterator to be merged. It should already be sorted according to {@code cmp}.
-     * @param sortedB the second iterator to be merged. It should already be sorted according to {@code cmp}.
-     * @param cmp the {@code Comparator} to determine the order of elements in the resulting iterator.
+     * @param sortedA the first iterator to be merged, or {@code null} which is treated as empty. It should already be
+     *        sorted according to {@code comparator}.
+     * @param sortedB the second iterator to be merged, or {@code null} which is treated as empty. It should already be
+     *        sorted according to {@code comparator}.
+     * @param comparator the {@code Comparator} to determine the order of elements in the resulting iterator.
      * @return an {@code ObjIterator} that will iterate over the elements of the provided iterators in a sorted order.
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB, final Comparator<? super T> cmp)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> ObjIterator<T> mergeSorted(final Iterator<? extends T> sortedA, final Iterator<? extends T> sortedB,
+            final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return merge(sortedA, sortedB, MergeResult.minFirst(cmp));
+        return merge(sortedA, sortedB, MergeResult.minFirst(comparator));
     }
 
     /**
@@ -3243,15 +3276,19 @@ public final class Iterators {
      * {@link Comparator#naturalOrder()} would. Both inputs must therefore be sorted nulls-first as well. Pass an
      * explicit comparator to {@link #mergeSorted(Iterable, Iterable, Comparator)} for any other {@code null} policy.</p>
      *
-     * @param <T> the type of elements in the Iterable objects, which should implement the {@code Comparable} interface.
-     * @param sortedA the first Iterable object to be merged. It should be in non-descending order, with {@code null}s first.
-     * @param sortedB the second Iterable object to be merged. It should be in non-descending order, with {@code null}s first.
+     * <p><b>Stable:</b> of two elements that compare equal, the one from {@code sortedA} is returned first.</p>
+     *
+     * @param <T> the type of elements in the Iterable objects, which must be {@code Comparable} to one another.
+     * @param sortedA the first Iterable object to be merged, or {@code null} which is treated as empty. It should be
+     *        in non-descending order, with {@code null}s first.
+     * @param sortedB the second Iterable object to be merged, or {@code null} which is treated as empty. It should be
+     *        in non-descending order, with {@code null}s first.
      * @return an ObjIterator that will iterate over the elements of the provided Iterable objects in a sorted order.
      * @see #mergeSorted(Iterable, Iterable, Comparator)
      * @see Comparators#naturalOrder()
      */
-    @SuppressWarnings("rawtypes")
-    public static <T extends Comparable> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB) {
+    @SuppressWarnings("unchecked")
+    public static <T extends Comparable<? super T>> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB) {
         return mergeSorted(sortedA, sortedB, N.NATURAL_COMPARATOR);
     }
 
@@ -3266,21 +3303,25 @@ public final class Iterators {
      * // Iterates through: "apple", "banana", "cherry", "date", "fig", "grape"
      * }</pre>
      *
+     * <p><b>Stable:</b> of two elements that compare equal, the one from {@code sortedA} is returned first.</p>
+     *
      * @param <T> the type of elements in the {@code Iterable} objects.
-     * @param sortedA the first {@code Iterable} object to be merged. It should already be sorted according to {@code cmp}.
-     * @param sortedB the second {@code Iterable} object to be merged. It should already be sorted according to {@code cmp}.
-     * @param cmp the {@code Comparator} to determine the order of elements in the resulting iterator.
+     * @param sortedA the first {@code Iterable} object to be merged, or {@code null} which is treated as empty. It
+     *        should already be sorted according to {@code comparator}.
+     * @param sortedB the second {@code Iterable} object to be merged, or {@code null} which is treated as empty. It
+     *        should already be sorted according to {@code comparator}.
+     * @param comparator the {@code Comparator} to determine the order of elements in the resulting iterator.
      * @return an {@code ObjIterator} that will iterate over the elements of the provided {@code Iterable} objects in a sorted order.
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB, final Comparator<? super T> cmp)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> ObjIterator<T> mergeSorted(final Iterable<? extends T> sortedA, final Iterable<? extends T> sortedB,
+            final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         final Iterator<? extends T> iterA = N.iterate(sortedA);
         final Iterator<? extends T> iterB = N.iterate(sortedB);
 
-        return mergeSorted(iterA, iterB, cmp);
+        return mergeSorted(iterA, iterB, comparator);
     }
 
     /**
@@ -3694,19 +3735,19 @@ public final class Iterators {
      * @param <T> the type of elements in the original Iterator.
      * @param <A> the type of the first element in the resulting BiIterator.
      * @param <B> the type of the second element in the resulting BiIterator.
-     * @param iter the original Iterator to be unzipped, or {@code null} to return an empty result.
+     * @param iterator the original Iterator to be unzipped, or {@code null} to return an empty result.
      * @param unzip a BiConsumer that takes an element from the original Iterator and a Pair to be filled with the resulting elements for the BiIterator.
-     * @return a BiIterator that will iterate over the elements created by <i>unzip</i>, or an empty one if {@code iter} is {@code null}.
+     * @return a BiIterator that will iterate over the elements created by <i>unzip</i>, or an empty one if {@code iterator} is {@code null}.
      * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @see BiIterator#unzip(Iterator, BiConsumer)
      * @see TriIterator#unzip(Iterator, BiConsumer)
      * @see N#unzip(Iterator, BiConsumer)
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzip)
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iterator, final BiConsumer<? super T, Pair<A, B>> unzip)
             throws IllegalArgumentException {
         N.checkArgNotNull(unzip, cs.unzip);
 
-        return BiIterator.unzip(iter, unzip);
+        return BiIterator.unzip(iterator, unzip);
     }
 
     /**
@@ -3763,9 +3804,9 @@ public final class Iterators {
      * @param <A> the type of the first element in the resulting TriIterator.
      * @param <B> the type of the second element in the resulting TriIterator.
      * @param <C> the type of the third element in the resulting TriIterator.
-     * @param iter the original Iterator to be unzipped, or {@code null} to return an empty result.
+     * @param iterator the original Iterator to be unzipped, or {@code null} to return an empty result.
      * @param unzip a BiConsumer that takes an element from the original Iterator and a Triple to be filled with the resulting elements for the TriIterator.
-     * @return a TriIterator that will iterate over the elements created by <i>unzip</i>, or an empty one if {@code iter} is {@code null}.
+     * @return a TriIterator that will iterate over the elements created by <i>unzip</i>, or an empty one if {@code iterator} is {@code null}.
      * @throws IllegalArgumentException if {@code unzip} is {@code null}.
      * @deprecated replaced by {@link TriIterator#unzip(Iterator, BiConsumer)}
      * @see TriIterator#unzip(Iterator, BiConsumer)
@@ -3773,11 +3814,11 @@ public final class Iterators {
      * @see TriIterator#unzipToSets(Supplier)
      */
     @Deprecated
-    public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzip)
+    public static <T, A, B, C> TriIterator<A, B, C> unzip3(final Iterator<? extends T> iterator, final BiConsumer<? super T, Triple<A, B, C>> unzip)
             throws IllegalArgumentException {
         N.checkArgNotNull(unzip, cs.unzip);
 
-        return TriIterator.unzip(iter, unzip);
+        return TriIterator.unzip(iterator, unzip);
     }
 
     /**
@@ -3817,12 +3858,12 @@ public final class Iterators {
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     *
      * Calls {@code next()} on {@code iterator}, either {@code numberToAdvance} times or until {@code hasNext()} returns {@code false}, whichever comes first.
      *
      * <p><b>Note:</b> this is the eager form; {@link #skip(Iterator, long)} is the lazy equivalent that wraps
      * the iterator instead of consuming it immediately.</p>
+     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3880,19 +3921,19 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
-     * @param iter the original iterator to be skipped, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be skipped, or {@code null} to return an empty iterator.
      * @param n the number of elements to skip from the beginning of the iterator.
-     * @return an {@code ObjIterator} that will iterate over the elements of the original iterator starting from the (n+1)th element, or an empty iterator if {@code iter} is {@code null}.
+     * @return an {@code ObjIterator} that will iterate over the elements of the original iterator starting from the (n+1)th element, or an empty iterator if {@code iterator} is {@code null}.
      * @throws IllegalArgumentException if {@code n} is negative.
      * @see #advance(Iterator, long)
      */
-    public static <T> ObjIterator<T> skip(final Iterator<? extends T> iter, final long n) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> skip(final Iterator<? extends T> iterator, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         } else if (n <= 0) {
-            return ObjIterator.of(iter);
+            return ObjIterator.of(iterator);
         }
 
         return new ObjIterator<>() {
@@ -3905,7 +3946,7 @@ public final class Iterators {
                     skip();
                 }
 
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             /**
@@ -3918,12 +3959,12 @@ public final class Iterators {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return iter.next();
+                return iterator.next();
             }
 
             private void skip() {
-                while (remaining > 0 && iter.hasNext()) {
-                    iter.next();
+                while (remaining > 0 && iterator.hasNext()) {
+                    iterator.next();
                     remaining--;
                 }
 
@@ -3947,18 +3988,18 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
-     * @param iter the original iterator to be limited, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be limited, or {@code null} to return an empty iterator.
      * @param count the maximum number of elements to be iterated over from the original iterator.
-     * @return an {@code ObjIterator} that will iterate over up to {@code count} elements of the original iterator, or an empty iterator if {@code iter} is {@code null}.
+     * @return an {@code ObjIterator} that will iterate over up to {@code count} elements of the original iterator, or an empty iterator if {@code iterator} is {@code null}.
      * @throws IllegalArgumentException if {@code count} is negative.
      */
-    public static <T> ObjIterator<T> limit(final Iterator<? extends T> iter, final long count) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> limit(final Iterator<? extends T> iterator, final long count) throws IllegalArgumentException {
         N.checkArgNotNegative(count, cs.count);
 
-        if (iter == null || count == 0) {
+        if (iterator == null || count == 0) {
             return ObjIterator.empty();
         } else if (count == Long.MAX_VALUE) {
-            return ObjIterator.of(iter);
+            return ObjIterator.of(iterator);
         }
 
         return new ObjIterator<>() {
@@ -3966,7 +4007,7 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                return cnt > 0 && iter.hasNext();
+                return cnt > 0 && iterator.hasNext();
             }
 
             /**
@@ -3979,7 +4020,7 @@ public final class Iterators {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final T result = iter.next();
+                final T result = iterator.next();
                 cnt--;
                 return result;
             }
@@ -4006,26 +4047,26 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterator.
-     * @param iter the iterator to be skipped and limited, or {@code null} to return an empty iterator.
+     * @param iterator the iterator to be skipped and limited, or {@code null} to return an empty iterator.
      * @param offset the number of elements to skip from the beginning. Must be non-negative.
      * @param count the maximum number of elements to return after skipping. Must be non-negative.
-     * @return an {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element, or an empty iterator if {@code iter} is {@code null}.
+     * @return an {@code ObjIterator} that will iterate over up to {@code count} elements starting from the (offset+1)th element, or an empty iterator if {@code iterator} is {@code null}.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative.
      * @see N#slice(Iterator, int, int)
      */
-    public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iter, final long offset, final long count) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> skipAndLimit(final Iterator<? extends T> iterator, final long offset, final long count) throws IllegalArgumentException {
         checkOffsetCount(offset, count);
 
-        if (iter == null || count == 0) {
+        if (iterator == null || count == 0) {
             return ObjIterator.empty();
         }
 
         if (offset == 0 && count == Long.MAX_VALUE) {
-            return ObjIterator.of(iter);
+            return ObjIterator.of(iterator);
         } else if (offset == 0) {
-            return limit(iter, count);
+            return limit(iterator, count);
         } else if (count == Long.MAX_VALUE) {
-            return skip(iter, offset);
+            return skip(iterator, offset);
         }
 
         return new ObjIterator<>() {
@@ -4039,7 +4080,7 @@ public final class Iterators {
                     skip();
                 }
 
-                return cnt > 0 && iter.hasNext();
+                return cnt > 0 && iterator.hasNext();
             }
 
             /**
@@ -4052,14 +4093,14 @@ public final class Iterators {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final T result = iter.next();
+                final T result = iterator.next();
                 cnt--;
                 return result;
             }
 
             private void skip() {
-                while (remainingToSkip > 0 && iter.hasNext()) {
-                    iter.next();
+                while (remainingToSkip > 0 && iterator.hasNext()) {
+                    iterator.next();
                     remainingToSkip--;
                 }
 
@@ -4136,11 +4177,11 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the iterator.
-     * @param iter the iterator whose {@code null} elements should be skipped, or {@code null} to return an empty iterator.
-     * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements, or an empty iterator if {@code iter} is {@code null}.
+     * @param iterator the iterator whose {@code null} elements should be skipped, or {@code null} to return an empty iterator.
+     * @return an {@code ObjIterator} that iterates over only the {@code non-null} elements, or an empty iterator if {@code iterator} is {@code null}.
      */
-    public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iter) {
-        return filter(iter, Fn.notNull());
+    public static <T> ObjIterator<T> skipNulls(final Iterator<? extends T> iterator) {
+        return filter(iterator, Fn.notNull());
     }
 
     /**
@@ -4192,11 +4233,11 @@ public final class Iterators {
      * run this to completion over an unbounded source.</p>
      *
      * @param <T> the type of elements in the original Iterator.
-     * @param iter the original Iterator to be processed for distinct elements, or {@code null} to return an empty iterator.
-     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterator, or an empty iterator if {@code iter} is {@code null}.
+     * @param iterator the original Iterator to be processed for distinct elements, or {@code null} to return an empty iterator.
+     * @return a new ObjIterator that will iterate over the distinct elements of the original Iterator, or an empty iterator if {@code iterator} is {@code null}.
      */
-    public static <T> ObjIterator<T> distinct(final Iterator<? extends T> iter) {
-        if (iter == null) {
+    public static <T> ObjIterator<T> distinct(final Iterator<? extends T> iterator) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -4209,8 +4250,8 @@ public final class Iterators {
             @Override
             public boolean hasNext() {
                 if (next == NONE) {
-                    while (iter.hasNext()) {
-                        final T e = iter.next();
+                    while (iterator.hasNext()) {
+                        final T e = iterator.next();
 
                         if (set.add(e)) {
                             next = e;
@@ -4298,15 +4339,16 @@ public final class Iterators {
      * this to completion over an unbounded source.</p>
      *
      * @param <T> the type of elements in the original iterator.
-     * @param iter the original iterator to be processed for distinct elements, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be processed for distinct elements, or {@code null} to return an empty iterator.
      * @param keyExtractor a {@code Function} that takes an element from the iterator and returns a key. Elements with the same key are considered duplicates.
      * @return an {@code ObjIterator} that will iterate over the distinct elements of the original iterator based on the keys derived from {@code keyExtractor}.
      * @throws IllegalArgumentException if {@code keyExtractor} is {@code null}.
      */
-    public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iter, final Function<? super T, ?> keyExtractor) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> distinctBy(final Iterator<? extends T> iterator, final Function<? super T, ?> keyExtractor)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -4319,8 +4361,8 @@ public final class Iterators {
             @Override
             public boolean hasNext() {
                 if (next == NONE) {
-                    while (iter.hasNext()) {
-                        final T e = iter.next();
+                    while (iterator.hasNext()) {
+                        final T e = iterator.next();
 
                         if (set.add(keyExtractor.apply(e))) {
                             next = e;
@@ -4396,17 +4438,17 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
-     * @param iter the original iterator to be filtered, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be filtered, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the iterator. Only elements that return {@code true} are included in the resulting {@code ObjIterator}.
      * @return an {@code ObjIterator} that will iterate over the elements of the original iterator that satisfy the provided {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see N#filter(Iterator, Predicate)
      * @see Maps#filter(Map, BiPredicate)
      */
-    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> filter(final Iterator<? extends T> iterator, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -4417,8 +4459,8 @@ public final class Iterators {
             @Override
             public boolean hasNext() {
                 if (next == NONE) {
-                    while (iter.hasNext()) {
-                        final T e = iter.next();
+                    while (iterator.hasNext()) {
+                        final T e = iterator.next();
 
                         if (predicate.test(e)) {
                             next = e;
@@ -4487,6 +4529,11 @@ public final class Iterators {
      * Returns an {@code ObjIterator} that includes elements from the original iterator as long as they satisfy the provided {@code Predicate}.
      * The iteration stops when an element that does not satisfy the {@code Predicate} is encountered.
      *
+     * <p><b>The stopping element is consumed and discarded:</b> the element that first fails {@code predicate} has
+     * already been pulled from {@code iterator} in order to test it, and it is not emitted - so continuing to read
+     * {@code iterator} afterwards resumes <i>after</i> that element. Use
+     * {@link #takeWhileInclusive(Iterator, Predicate)} to emit it instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4, 5, 2, 1).iterator();
@@ -4496,31 +4543,23 @@ public final class Iterators {
      * Iterator<String> words = Arrays.asList("short", "text", "verylongword", "a").iterator();
      * ObjIterator<String> shortWords = Iterators.takeWhile(words, s -> s.length() < 10);
      * // Yields: "short", "text" (stops at "verylongword")
-     * }</pre>
      *
-     * <p><b>The stopping element is consumed and discarded:</b> the element that first fails {@code predicate} has
-     * already been pulled from {@code iter} in order to test it, and it is not emitted - so continuing to read
-     * {@code iter} afterwards resumes <i>after</i> that element. Use
-     * {@link #takeWhileInclusive(Iterator, Predicate)} to emit it instead.</p>
-     *
-     * <p><b>Usage Examples:</b></p>
-     * <pre>{@code
      * Iterator<Integer> src = Arrays.asList(1, 2, 3, 4, 5).iterator();
      * ObjIterator<Integer> taken = Iterators.takeWhile(src, n -> n < 3);
      * // taken yields 1, 2 - and 3 has been consumed from src, which now continues at 4
      * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
-     * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the iterator. The iteration continues as long as the {@code Predicate} returns {@code true}.
      * @return an {@code ObjIterator} that will iterate over the elements of the original iterator as long as they satisfy the provided {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #takeWhileInclusive(Iterator, Predicate)
      */
-    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> takeWhile(final Iterator<? extends T> iterator, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -4531,8 +4570,8 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                if (next == NONE && hasMore && iter.hasNext()) {
-                    final T e = iter.next();
+                if (next == NONE && hasMore && iterator.hasNext()) {
+                    final T e = iterator.next();
 
                     if (predicate.test(e)) {
                         next = e;
@@ -4608,16 +4647,16 @@ public final class Iterators {
      * }</pre>
      *
      * @param <T> the type of elements in the original iterator.
-     * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the iterator. The iteration continues as long as the {@code Predicate} returns {@code true}, including the first element that returns {@code false}.
      * @return an {@code ObjIterator} that will iterate over the elements of the original iterator as long as they satisfy the provided {@code Predicate}, including the first element that does not satisfy the {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iter, final Predicate<? super T> predicate)
+    public static <T> ObjIterator<T> takeWhileInclusive(final Iterator<? extends T> iterator, final Predicate<? super T> predicate)
             throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -4628,8 +4667,8 @@ public final class Iterators {
 
             @Override
             public boolean hasNext() {
-                if (next == NONE && hasMore && iter.hasNext()) {
-                    final T e = iter.next();
+                if (next == NONE && hasMore && iterator.hasNext()) {
+                    final T e = iterator.next();
 
                     next = e;
                     // The first non-matching element is still emitted - it is simply the last one.
@@ -4708,16 +4747,16 @@ public final class Iterators {
      * <p>This is equivalent to {@code skipUntil(iter, predicate.negate())}.</p>
      *
      * @param <T> the type of elements in the original iterator.
-     * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests each element from the iterator. The iteration skips elements as long as the {@code Predicate} returns {@code true}.
      * @return an {@code ObjIterator} that will iterate over the elements of the original iterator starting from the first element that does not satisfy the provided {@code Predicate}.
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #skipUntil(Iterator, Predicate)
      */
-    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> dropWhile(final Iterator<? extends T> iterator, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -4729,19 +4768,20 @@ public final class Iterators {
             @Override
             public boolean hasNext() {
                 if (!hasDropped) {
-                    while (iter.hasNext()) {
-                        next = iter.next();
+                    while (iterator.hasNext()) {
+                        // Test a local and store it only once it is kept: if predicate.test throws, the untested
+                        // element must not linger in 'next' and be emitted by a caller that retries.
+                        final T e = iterator.next();
 
-                        if (predicate.test(next)) {
-                            next = NONE;
-                        } else {
+                        if (!predicate.test(e)) {
+                            next = e;
                             hasDropped = true;
                             break;
                         }
                     }
                 }
 
-                return next != NONE || iter.hasNext();
+                return next != NONE || iterator.hasNext();
             }
 
             /**
@@ -4759,7 +4799,7 @@ public final class Iterators {
                     next = NONE;
                     return tmp;
                 } else {
-                    return iter.next();
+                    return iterator.next();
                 }
             }
         };
@@ -4817,16 +4857,16 @@ public final class Iterators {
      * <p>This is equivalent to {@code dropWhile(iter, predicate.negate())}.</p>
      *
      * @param <T> the type of elements in the original iterator.
-     * @param iter the original iterator to be processed, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be processed, or {@code null} to return an empty iterator.
      * @param predicate a {@code Predicate} that tests elements from the original iterator.
      * @return an {@code ObjIterator} that will iterate over the remaining elements starting with the first element for which the {@code Predicate} returns {@code true} (that element is included).
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see #dropWhile(Iterator, Predicate)
      */
-    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iter, final Predicate<? super T> predicate) throws IllegalArgumentException {
+    public static <T> ObjIterator<T> skipUntil(final Iterator<? extends T> iterator, final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -4838,19 +4878,20 @@ public final class Iterators {
             @Override
             public boolean hasNext() {
                 if (!hasSkipped) {
-                    while (iter.hasNext()) {
-                        next = iter.next();
+                    while (iterator.hasNext()) {
+                        // Test a local and store it only once it is kept: if predicate.test throws, the untested
+                        // element must not linger in 'next' and be emitted by a caller that retries.
+                        final T e = iterator.next();
 
-                        if (predicate.test(next)) {
+                        if (predicate.test(e)) {
+                            next = e;
                             hasSkipped = true;
                             break;
-                        } else {
-                            next = NONE;
                         }
                     }
                 }
 
-                return next != NONE || iter.hasNext();
+                return next != NONE || iterator.hasNext();
             }
 
             /**
@@ -4868,7 +4909,7 @@ public final class Iterators {
                     next = NONE;
                     return tmp;
                 } else {
-                    return iter.next();
+                    return iterator.next();
                 }
             }
         };
@@ -4918,22 +4959,23 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
-     * @param iter the original iterator to be transformed, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be transformed, or {@code null} to return an empty iterator.
      * @param mapper a {@code Function} that takes an element from the iterator and returns a transformed element for the resulting {@code ObjIterator}.
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iter, final Function<? super T, ? extends U> mapper) throws IllegalArgumentException {
+    public static <T, U> ObjIterator<U> map(final Iterator<? extends T> iterator, final Function<? super T, ? extends U> mapper)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
         return new ObjIterator<>() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             /**
@@ -4946,7 +4988,7 @@ public final class Iterators {
                     throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return mapper.apply(iter.next());
+                return mapper.apply(iterator.next());
             }
         };
     }
@@ -5005,17 +5047,17 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
-     * @param iter the original iterator to be transformed, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be transformed, or {@code null} to return an empty iterator.
      * @param mapper a {@code Function} that takes an element from the iterator and returns an {@code Iterable} of
      *               transformed elements; a {@code null} or empty result contributes nothing and is skipped.
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iter, final Function<? super T, ? extends Iterable<? extends U>> mapper)
+    public static <T, U> ObjIterator<U> flatMap(final Iterator<? extends T> iterator, final Function<? super T, ? extends Iterable<? extends U>> mapper)
             throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -5025,8 +5067,8 @@ public final class Iterators {
             @Override
             public boolean hasNext() {
                 if (cur == null || !cur.hasNext()) {
-                    while (iter.hasNext()) {
-                        final Iterable<? extends U> mapped = mapper.apply(iter.next());
+                    while (iterator.hasNext()) {
+                        final Iterable<? extends U> mapped = mapper.apply(iterator.next());
                         cur = mapped == null ? null : mapped.iterator();
 
                         if (cur != null && cur.hasNext()) {
@@ -5112,17 +5154,17 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <U> the type of elements in the resulting {@code ObjIterator}.
-     * @param iter the original iterator to be transformed, or {@code null} to return an empty iterator.
+     * @param iterator the original iterator to be transformed, or {@code null} to return an empty iterator.
      * @param mapper a {@code Function} that takes an element from the iterator and returns an array of
      *               transformed elements; a {@code null} or empty result contributes nothing and is skipped.
      * @return an {@code ObjIterator} that will iterate over the transformed elements of the original iterator.
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      */
-    public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iter, final Function<? super T, ? extends U[]> mapper)
+    public static <T, U> ObjIterator<U> flatmap(final Iterator<? extends T> iterator, final Function<? super T, ? extends U[]> mapper)
             throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper); //NOSONAR
 
-        if (iter == null) {
+        if (iterator == null) {
             return ObjIterator.empty();
         }
 
@@ -5134,8 +5176,8 @@ public final class Iterators {
             @Override
             public boolean hasNext() {
                 if (cursor >= len) {
-                    while (iter.hasNext()) {
-                        a = mapper.apply(iter.next());
+                    while (iterator.hasNext()) {
+                        a = mapper.apply(iterator.next());
                         len = N.len(a);
                         cursor = 0;
 
@@ -5183,16 +5225,16 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iter the original iterator to be processed; {@code null} is treated as empty
+     * @param iterator the original iterator to be processed; {@code null} is treated as empty
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}.
      * @throws E if {@code elementConsumer} throws while processing a selected element.
      */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final Throwables.Consumer<? super T, E> elementConsumer)
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iterator, final Throwables.Consumer<? super T, E> elementConsumer)
             throws IllegalArgumentException, E {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
-        forEach(iter, elementConsumer, Fn.emptyAction());
+        forEach(iterator, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -5209,7 +5251,7 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iter the original iterator to be processed; {@code null} is treated as empty, and
+     * @param iterator the original iterator to be processed; {@code null} is treated as empty, and
      *        {@code onComplete} still runs.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterator have been processed.
@@ -5217,12 +5259,12 @@ public final class Iterators {
      * @throws E if {@code elementConsumer} throws while processing a selected element.
      * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
-    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter,
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iterator,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
-        forEach(iter, 0, Long.MAX_VALUE, elementConsumer, onComplete);
+        forEach(iterator, 0, Long.MAX_VALUE, elementConsumer, onComplete);
     }
 
     /**
@@ -5237,20 +5279,21 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iter the original iterator to be processed; {@code null} is treated as empty.
+     * @param iterator the original iterator to be processed; {@code null} is treated as empty.
      * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
-     * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
+     * @param count the maximum number of elements to be processed from the iterator. Must be non-negative. When
+     *        {@code 0}, nothing is read from {@code iterator} - not even the {@code offset} elements.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if {@code elementConsumer}
      *         is {@code null}.
      * @throws E if {@code elementConsumer} throws while processing a selected element.
      */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iterator, final long offset, final long count,
             final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, E {
         checkOffsetCount(offset, count);
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
-        forEach(iter, offset, count, elementConsumer, Fn.emptyAction());
+        forEach(iterator, offset, count, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -5271,10 +5314,12 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iter the original iterator to be processed; {@code null} is treated as empty, and
+     * @param iterator the original iterator to be processed; {@code null} is treated as empty, and
      *        {@code onComplete} still runs.
      * @param offset the starting point in the iterator from where elements will be processed. Must be non-negative.
-     * @param count the maximum number of elements to be processed from the iterator. Must be non-negative.
+     * @param count the maximum number of elements to be processed from the iterator. Must be non-negative. When
+     *        {@code 0}, nothing is read from {@code iterator} - not even the {@code offset} elements - and only
+     *        {@code onComplete} runs.
      * @param elementConsumer a {@code Consumer} that performs an action on each element in the iterator.
      * @param onComplete a {@code Runnable} action to be executed after all elements in the iterator have been processed.
      * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or if any of
@@ -5282,13 +5327,13 @@ public final class Iterators {
      * @throws E if {@code elementConsumer} throws while processing a selected element.
      * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
-    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final long offset, final long count,
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iterator, final long offset, final long count,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete) throws IllegalArgumentException, E, E2 {
         checkOffsetCount(offset, count);
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
-        doForEach(iter, offset, count, 0, 0, elementConsumer, onComplete);
+        doForEach(iterator, offset, count, 0, 0, elementConsumer, onComplete);
     }
 
     /**
@@ -5297,6 +5342,8 @@ public final class Iterators {
      *
      * <p>The iterator is consumed by this terminal operation. The effective input is first sliced by
      * {@code offset} and {@code count}, then each selected element is passed to {@code elementConsumer}.
+     * A {@code count} of {@code 0} reads nothing from {@code iterator}, not even the {@code offset} elements, whatever
+     * {@code processThreads} is.
      * The {@code readThreads} and {@code queueSize} options are ignored for this overload: a single iterator has
      * only one source and there is no reader hand-off to buffer. With {@code processThreads == 0}, the calling
      * thread reads it; otherwise the processing workers serialize calls to its {@code hasNext()} and {@code next()}.</p>
@@ -5334,23 +5381,24 @@ public final class Iterators {
      *
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
-     * @param iter the iterator to consume; {@code null} is treated as empty.
+     * @param iterator the iterator to consume; {@code null} is treated as empty.
      * @param options the slicing and processing configuration; {@code null} is treated as the default
      *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} and
      *        {@code queueSize} values are ignored.
      * @param elementConsumer the action to perform for each selected element.
      * @throws IllegalArgumentException if {@code elementConsumer} is {@code null}. Negative settings are rejected
      *         earlier, by {@code IterateOptions.builder()...build()}.
-     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws UncheckedInterruptedException if the calling thread is interrupted while it awaits the processing workers
+     *         ({@code processThreads > 0}); its interrupt status is restored.
      * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer, Throwables.Runnable)
      * @see IterateOptions
      */
-    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iter, final IterateOptions options,
+    public static <T, E extends Exception> void forEach(final Iterator<? extends T> iterator, final IterateOptions options,
             final Throwables.Consumer<? super T, E> elementConsumer) throws IllegalArgumentException, UncheckedInterruptedException, E {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
 
-        forEach(iter, options, elementConsumer, Fn.emptyAction());
+        forEach(iterator, options, elementConsumer, Fn.emptyAction());
     }
 
     /**
@@ -5359,6 +5407,8 @@ public final class Iterators {
      *
      * <p>The iterator is consumed by this terminal operation. The effective input is first sliced by
      * {@code offset} and {@code count}, then each selected element is passed to {@code elementConsumer}.
+     * A {@code count} of {@code 0} reads nothing from {@code iterator}, not even the {@code offset} elements, whatever
+     * {@code processThreads} is.
      * The {@code readThreads} and {@code queueSize} options are ignored for this overload: a single iterator has
      * only one source and there is no reader hand-off to buffer. With {@code processThreads == 0}, the calling
      * thread reads it; otherwise the processing workers serialize calls to its {@code hasNext()} and {@code next()}.</p>
@@ -5401,7 +5451,7 @@ public final class Iterators {
      * @param <T> the type of elements in the original iterator.
      * @param <E> the type of exception that can be thrown by the {@code elementConsumer}.
      * @param <E2> the type of exception that can be thrown by the {@code onComplete} action.
-     * @param iter the iterator to consume; {@code null} is treated as empty, and {@code onComplete} still runs.
+     * @param iterator the iterator to consume; {@code null} is treated as empty, and {@code onComplete} still runs.
      * @param options the slicing and processing configuration; {@code null} is treated as the default
      *        {@link IterateOptions} (no slicing, caller-thread processing). The {@code readThreads} and
      *        {@code queueSize} values are ignored.
@@ -5409,13 +5459,14 @@ public final class Iterators {
      * @param onComplete the action invoked after all selected elements have been processed; must not be {@code null}.
      * @throws IllegalArgumentException if any of {@code elementConsumer}, {@code onComplete} is {@code null}.
      *         Negative settings are rejected earlier, by {@code IterateOptions.builder()...build()}.
-     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws UncheckedInterruptedException if the calling thread is interrupted while it awaits the processing workers
+     *         ({@code processThreads > 0}); its interrupt status is restored.
      * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      * @see #forEach(Iterator, IterateOptions, Throwables.Consumer)
      * @see IterateOptions
      */
-    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iter, final IterateOptions options,
+    public static <T, E extends Exception, E2 extends Exception> void forEach(final Iterator<? extends T> iterator, final IterateOptions options,
             final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
             throws IllegalArgumentException, UncheckedInterruptedException, E, E2 {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
@@ -5423,7 +5474,7 @@ public final class Iterators {
 
         final IterateOptions opts = options == null ? IterateOptions.DEFAULT : options;
 
-        doForEach(iter, opts.offset(), opts.count(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);
+        doForEach(iterator, opts.offset(), opts.count(), opts.processThreads(), opts.queueSize(), elementConsumer, onComplete);
     }
 
     /**
@@ -5844,20 +5895,22 @@ public final class Iterators {
      * @param <T> the element type.
      * @param <E> the exception type the element consumer may throw.
      * @param <E2> the exception type the completion action may throw.
-     * @param iter the iterator to read from; {@code null} is treated as empty.
+     * @param iterator the iterator to read from; {@code null} is treated as empty.
      * @param offset the number of elements to skip.
-     * @param count the maximum number of elements to process after the offset.
+     * @param count the maximum number of elements to process after the offset; {@code 0} reads nothing from
+     *        {@code iterator}, not even the offset elements.
      * @param processThreads the number of worker threads; 0 processes on the calling thread.
      * @param queueSize the size of the buffer between reading and processing; unused here, because a single
      *        iterator is read directly by the calling thread or by serialized processing workers.
      * @param elementConsumer the action to run for each selected element.
      * @param onComplete the action to run once every element has been processed.
      * @throws IllegalArgumentException if any numeric argument is negative, or either action is {@code null}.
-     * @throws UncheckedInterruptedException if an interruption propagates while the calling thread awaits asynchronously read elements or parallel processing; its interrupt status is restored.
+     * @throws UncheckedInterruptedException if the calling thread is interrupted while it awaits the processing workers
+     *         ({@code processThreads > 0}); its interrupt status is restored.
      * @throws E if {@code elementConsumer} throws while processing a selected element; worker-thread failures propagate unchanged.
      * @throws E2 if {@code onComplete} throws after iteration completes successfully.
      */
-    private static <T, E extends Exception, E2 extends Exception> void doForEach(final Iterator<? extends T> iter, final long offset, final long count,
+    private static <T, E extends Exception, E2 extends Exception> void doForEach(final Iterator<? extends T> iterator, final long offset, final long count,
             final int processThreads, final int queueSize, final Throwables.Consumer<? super T, E> elementConsumer, final Throwables.Runnable<E2> onComplete)
             throws IllegalArgumentException, UncheckedInterruptedException, E, E2 {
         N.checkArgument(offset >= 0 && count >= 0, "'offset'=%s and 'count'=%s cannot be negative", offset, count);
@@ -5865,7 +5918,7 @@ public final class Iterators {
         N.checkArgNotNull(elementConsumer, cs.elementConsumer);
         N.checkArgNotNull(onComplete, cs.onComplete);
 
-        if (iter == null) {
+        if (iterator == null) {
             onComplete.run();
             return;
         }
@@ -5875,16 +5928,24 @@ public final class Iterators {
             // IterateOptions asks for. Delegating to doForEach(Collection, ..) would wrap the source in a
             // concat() view and a skipAndLimit() view - two extra virtual calls plus a few allocations per
             // call - to drive machinery that a single-threaded walk never uses.
+            if (count == 0) {
+                // Match the processThreads > 0 path (skipAndLimit) and the collection overloads: selecting nothing
+                // must not consume the offset either, or a tuning knob would decide how far the caller's
+                // iterator is advanced.
+                onComplete.run();
+                return;
+            }
+
             long idx = 0;
 
-            while (idx++ < offset && iter.hasNext()) {
-                iter.next();
+            while (idx++ < offset && iterator.hasNext()) {
+                iterator.next();
             }
 
             long remaining = count;
 
-            while (remaining-- > 0 && iter.hasNext()) {
-                elementConsumer.accept(iter.next());
+            while (remaining-- > 0 && iterator.hasNext()) {
+                elementConsumer.accept(iterator.next());
             }
 
             onComplete.run();
@@ -5892,7 +5953,7 @@ public final class Iterators {
             return;
         }
 
-        doForEach(Array.asList(iter), offset, count, 0, processThreads, queueSize, elementConsumer, onComplete);
+        doForEach(Array.asList(iterator), offset, count, 0, processThreads, queueSize, elementConsumer, onComplete);
     }
 
     /**

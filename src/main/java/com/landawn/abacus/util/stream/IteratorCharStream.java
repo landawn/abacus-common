@@ -14,6 +14,8 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.math.BigInteger;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -129,8 +131,8 @@ class IteratorCharStream extends AbstractCharStream {
      *
      * IteratorCharStream stream = new IteratorCharStream(sortedIterator, true, closeHandlers);
      * try {
-     *     OptionalChar min = stream.min();            // returns the first element (optimized for sorted input)
-     *     System.out.println("Min: " + min.get());    // prints a
+     *     OptionalChar min = stream.min();          // returns the first element (optimized for sorted input)
+     *     System.out.println("Min: " + min.get());  // prints a
      * } finally {
      *     stream.close();
      * }
@@ -750,7 +752,7 @@ class IteratorCharStream extends AbstractCharStream {
     /**
      * Returns a stream consisting of distinct elements of this stream.
      * If the stream is sorted, adjacent-element comparison is used (efficient O(n));
-     * otherwise a hash set is used to track seen elements.
+     * otherwise a bit set indexed by char value is used to track seen elements.
      * Lazily iterates the underlying iterator.
      *
      * @return a new {@code CharStream} containing only distinct elements
@@ -800,10 +802,20 @@ class IteratorCharStream extends AbstractCharStream {
                 }
             }, isSorted());
         } else {
-            final Set<Object> set = N.newHashSet();
+            // A char has only 65536 possible values: a BitSet (at most 8 KB, grown only up to the largest char seen)
+            // replaces a boxed HashSet, which costs a hash lookup and (for a char above 127) a Character allocation per
+            // element, plus a node per distinct value.
+            final BitSet seen = new BitSet();
 
             // noinspection resource
-            return newStream(sequential().filter(set::add).iteratorEx(), isSorted());
+            return newStream(sequential().filter(ch -> {
+                if (seen.get(ch)) {
+                    return false;
+                }
+
+                seen.set(ch);
+                return true;
+            }).iteratorEx(), isSorted());
         }
     }
 
@@ -868,7 +880,7 @@ class IteratorCharStream extends AbstractCharStream {
      * The underlying iterator is advanced lazily when the returned stream is first consumed.
      *
      * @param n the number of leading elements to skip; must be &gt;= 0
-     * @return a new {@code CharStream} with the first {@code n} elements skipped
+     * @return a {@code CharStream} with the first {@code n} elements skipped (this stream if {@code n} is 0)
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code n} is negative.
      */
@@ -998,6 +1010,9 @@ class IteratorCharStream extends AbstractCharStream {
             while (elements.hasNext()) {
                 action.accept(elements.nextChar());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1017,6 +1032,12 @@ class IteratorCharStream extends AbstractCharStream {
 
         try {
             return elements.toArray();
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1036,6 +1057,9 @@ class IteratorCharStream extends AbstractCharStream {
 
         try {
             return elements.toList();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1075,21 +1099,26 @@ class IteratorCharStream extends AbstractCharStream {
      * @return the collection populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public <C extends Collection<Character>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Character>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextChar());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1117,21 +1146,26 @@ class IteratorCharStream extends AbstractCharStream {
      * @return the {@code Multiset<Character>} populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public Multiset<Character> toMultiset(final Supplier<? extends Multiset<Character>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Character> toMultiset(final Supplier<? extends Multiset<Character>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Character> result = supplier.get();
+            final Multiset<Character> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextChar());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1154,13 +1188,14 @@ class IteratorCharStream extends AbstractCharStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if {@code keyMapper} throws
      * @throws E2 if {@code valueMapper} throws
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
             final Throwables.CharFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1169,7 +1204,7 @@ class IteratorCharStream extends AbstractCharStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
             char next = 0;
 
             while (elements.hasNext()) {
@@ -1178,6 +1213,9 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1195,14 +1233,14 @@ class IteratorCharStream extends AbstractCharStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}, or
-     *         {@code keyMapper} returns a {@code null} key.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} or {@code keyMapper} returns a {@code null} key.
      * @throws E if {@code keyMapper} throws
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.CharFunction<? extends K, E> keyMapper,
             final Collector<? super Character, ?, D> downstream, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1210,7 +1248,7 @@ class IteratorCharStream extends AbstractCharStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Character> downstreamAccumulator = (BiConsumer<Object, ? super Character>) downstream.accumulator();
@@ -1223,7 +1261,7 @@ class IteratorCharStream extends AbstractCharStream {
 
             while (elements.hasNext()) {
                 next = elements.nextChar();
-                key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1238,6 +1276,9 @@ class IteratorCharStream extends AbstractCharStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1268,6 +1309,9 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1301,6 +1345,9 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1321,12 +1368,13 @@ class IteratorCharStream extends AbstractCharStream {
      * @param combiner a function that combines two partial containers (used in parallel; ignored here)
      * @return the populated result container
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjCharConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1334,13 +1382,16 @@ class IteratorCharStream extends AbstractCharStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 accumulator.accept(result, elements.nextChar());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1377,6 +1428,9 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1419,6 +1473,9 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1459,7 +1516,10 @@ class IteratorCharStream extends AbstractCharStream {
                         window[size++] = v;
                     } else {
                         window[idx] = v;
-                        idx = (idx + 1) % k;
+                        // Wrap with a compare instead of a per-element integer division ('%' by a non-constant k).
+                        if (++idx == k) {
+                            idx = 0;
+                        }
                     }
                 }
                 if (size < k) {
@@ -1476,6 +1536,9 @@ class IteratorCharStream extends AbstractCharStream {
             final Optional<Character> optional = boxed().kthLargest(k, CHAR_COMPARATOR);
 
             return optional.isPresent() ? OptionalChar.of(optional.get()) : OptionalChar.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1494,13 +1557,37 @@ class IteratorCharStream extends AbstractCharStream {
         assertNotClosed();
 
         try {
-            long result = 0;
+            long sum = 0;
+            long carry = 0; // number of times 'sum' wrapped, in units of 2^64 (signed)
 
             while (elements.hasNext()) {
-                result += elements.nextChar();
+                // An iterator-backed stream can hold more than 2^47 elements, so the long accumulator itself can wrap.
+                // Math.addExact threw "long overflow" as soon as a PARTIAL sum left the long range,
+                // even when the exact total fits the documented int. Same wrap-safe accumulation as average(): detect the
+                // wrap with the addExact bit test (no exception, no allocation per element) and count it, so the exact
+                // total is carry * 2^64 + sum and the documented ArithmeticException is thrown only for a total outside
+                // the int range.
+                final char value = elements.nextChar();
+                final long r = sum + value;
+
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
+                }
+
+                sum = r;
             }
 
-            return Numbers.toIntExact(result);
+            if (carry != 0) {
+                // The exact total carry * 2^64 + sum (with sum in the long range) is at least 2^63 in magnitude, so it
+                // cannot fit an int; same message as Math.toIntExact below. Reaching this branch takes more than
+                // 2^47 elements, which no unit test can afford (see PrimitiveStreamsReview20260925Test).
+                throw new ArithmeticException("integer overflow");
+            }
+
+            return Numbers.toIntExact(sum);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1524,14 +1611,31 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             long sum = 0;
+            long carry = 0; // number of times 'sum' wrapped, in units of 2^64 (signed)
             long count = 0;
 
             do {
-                sum += elements.nextChar();
+                // Same wrap-safe accumulation as IteratorIntStream.average(): detect a long wrap with the addExact bit
+                // test (no exception, no allocation per element); the exact total is carry * 2^64 + sum.
+                final char value = elements.nextChar();
+                final long r = sum + value;
+
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
+                }
+
+                sum = r;
                 count++;
             } while (elements.hasNext());
 
-            return OptionalDouble.of(((double) sum) / count);
+            if (carry == 0) {
+                return OptionalDouble.of(((double) sum) / count);
+            }
+
+            return OptionalDouble.of(BigInteger.valueOf(carry).shiftLeft(64).add(BigInteger.valueOf(sum)).doubleValue() / count);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1550,6 +1654,9 @@ class IteratorCharStream extends AbstractCharStream {
 
         try {
             return elements.count();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1574,6 +1681,9 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1602,6 +1712,9 @@ class IteratorCharStream extends AbstractCharStream {
                     return true;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1633,6 +1746,9 @@ class IteratorCharStream extends AbstractCharStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1664,6 +1780,9 @@ class IteratorCharStream extends AbstractCharStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1697,6 +1816,9 @@ class IteratorCharStream extends AbstractCharStream {
                     return OptionalChar.of(element);
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1741,6 +1863,9 @@ class IteratorCharStream extends AbstractCharStream {
             }
 
             return hasResult ? OptionalChar.of(result) : OptionalChar.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

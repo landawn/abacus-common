@@ -592,8 +592,10 @@ final class ParallelArrayLongStream extends ArrayLongStream {
      * shared synchronized cursor (when using {@code ITERATOR} splitStrategy), with each thread
      * processing its assigned elements concurrently.
      *
-     * <p>The encounter order of action invocations is not guaranteed. Exceptions thrown by
-     * the action are collected and re-thrown after all threads complete.
+     * <p>The encounter order of action invocations is not guaranteed. Once the action throws,
+     * the workers stop taking further elements, so some elements may never be processed; after
+     * all workers have finished, the first exception is rethrown and any later ones are added to
+     * it as suppressed exceptions.
      *
      * @param <E> the type of exception the action may throw
      * @param action a non-interfering action to perform on each element
@@ -685,13 +687,14 @@ final class ParallelArrayLongStream extends ArrayLongStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.LongFunction<? extends K, E> keyMapper,
             final Throwables.LongFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -726,13 +729,14 @@ final class ParallelArrayLongStream extends ArrayLongStream {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a {@code Map} grouping elements by the classifier with values aggregated by the downstream collector
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null},
-     *         or if {@code keyMapper} returns a {@code null} key.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} or {@code keyMapper} returns a {@code null} key.
      * @throws E if the key mapper throws an exception
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.LongFunction<? extends K, E> keyMapper,
-            final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -755,7 +759,12 @@ final class ParallelArrayLongStream extends ArrayLongStream {
      * computes a partial result, and the partial results are combined using the same accumulator.
      *
      * <p>The accumulator function must be associative to produce correct results when run in
-     * parallel across multiple threads.
+     * parallel across multiple threads. With {@link BaseStream.SplitStrategy#ARRAY}, each thread
+     * reduces one contiguous slice and the partial results are combined in slice order. With the
+     * default {@link BaseStream.SplitStrategy#ITERATOR}, threads take elements one at a time from a
+     * shared cursor, so each partial result covers an interleaved subset of the elements; the
+     * accumulator must then also be commutative, otherwise the result can differ from a sequential
+     * reduction and from run to run.
      *
      * @param identity the identity value for the accumulation function (also the result for empty streams)
      * @param accumulator an associative, non-interfering, stateless function for combining two values
@@ -848,7 +857,12 @@ final class ParallelArrayLongStream extends ArrayLongStream {
      * accumulator. Returns an empty {@code OptionalLong} if the stream is empty.
      *
      * <p>The accumulator function must be associative to produce correct results when run in
-     * parallel across multiple threads.
+     * parallel across multiple threads. With {@link BaseStream.SplitStrategy#ARRAY}, each thread
+     * reduces one contiguous slice and the partial results are combined in slice order. With the
+     * default {@link BaseStream.SplitStrategy#ITERATOR}, threads take elements one at a time from a
+     * shared cursor, so each partial result covers an interleaved subset of the elements; the
+     * accumulator must then also be commutative, otherwise the result can differ from a sequential
+     * reduction and from run to run.
      *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code OptionalLong} with the result, or empty if the stream contains no elements
@@ -953,18 +967,25 @@ final class ParallelArrayLongStream extends ArrayLongStream {
      * elements into its own container created by the {@code supplier}, and the per-thread containers
      * are merged using the {@code combiner} after all threads complete.
      *
+     * <p>With {@link BaseStream.SplitStrategy#ARRAY}, each container receives one contiguous slice and
+     * the containers are merged in slice order, so encounter order is preserved. With the default
+     * {@link BaseStream.SplitStrategy#ITERATOR}, threads take elements one at a time from a shared
+     * cursor, so each container receives an interleaved subset of the elements; an order-sensitive
+     * result (for example a {@code List}) may then not follow the encounter order.
+     *
      * @param <R> the type of the mutable result container
      * @param supplier a function that creates a new mutable result container
      * @param accumulator a non-interfering, stateless function that folds an element into a container
      * @param combiner a non-interfering, stateless function that merges two containers (used in parallel execution)
      * @return the result of the parallel mutable reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjLongConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -990,7 +1011,10 @@ final class ParallelArrayLongStream extends ArrayLongStream {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
-                    final R container = supplier.get();
+                    // A null container is recorded like any other worker failure: execute(..) runs this worker under
+                    // callWithErrorCapture, so it stops the other workers and is rethrown as the NullPointerException
+                    // itself (the object streams make the same check inside their try block).
+                    final R container = N.requireNonNull(supplier.get(), "supplier returned null");
 
                     try {
                         while (cursor < to && eHolder.value() == null) {
@@ -1008,7 +1032,10 @@ final class ParallelArrayLongStream extends ArrayLongStream {
 
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final R container = supplier.get();
+                    // A null container is recorded like any other worker failure: execute(..) runs this worker under
+                    // callWithErrorCapture, so it stops the other workers and is rethrown as the NullPointerException
+                    // itself (the object streams make the same check inside their try block).
+                    final R container = N.requireNonNull(supplier.get(), "supplier returned null");
                     long next = 0;
 
                     try {
@@ -1326,17 +1353,18 @@ final class ParallelArrayLongStream extends ArrayLongStream {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
-                    final Pair<Integer, Long> pair = new Pair<>();
+                    int index = 0;
+                    long next = 0;
 
                     try {
                         while (cursor < to && (resultHolder.value() == null || cursor < resultHolder.value().left()) && eHolder.value() == null) {
-                            pair.setLeft(cursor);
-                            pair.setRight(elements[cursor++]);
+                            index = cursor;
+                            next = elements[cursor++];
 
-                            if (predicate.test(pair.right())) {
+                            if (predicate.test(next)) {
                                 synchronized (resultHolder) {
-                                    if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
-                                        resultHolder.setValue(pair.copy());
+                                    if (resultHolder.value() == null || index < resultHolder.value().left()) {
+                                        resultHolder.setValue(Pair.of(index, next));
                                     }
                                 }
 
@@ -1353,23 +1381,24 @@ final class ParallelArrayLongStream extends ArrayLongStream {
 
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final Pair<Integer, Long> pair = new Pair<>();
+                    int index = 0;
+                    long next = 0;
 
                     try {
                         while (resultHolder.value() == null && eHolder.value() == null) {
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
-                                    pair.setLeft(cursor.value());
-                                    pair.setRight(elements[cursor.getAndIncrement()]);
+                                    index = cursor.value();
+                                    next = elements[cursor.getAndIncrement()];
                                 } else {
                                     break;
                                 }
                             }
 
-                            if (predicate.test(pair.right())) {
+                            if (predicate.test(next)) {
                                 synchronized (resultHolder) {
-                                    if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
-                                        resultHolder.setValue(pair.copy());
+                                    if (resultHolder.value() == null || index < resultHolder.value().left()) {
+                                        resultHolder.setValue(Pair.of(index, next));
                                     }
                                 }
 
@@ -1526,17 +1555,18 @@ final class ParallelArrayLongStream extends ArrayLongStream {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final int from = fromIndex + sliceIndex * sliceSize;
                     int cursor = toIndex - from > sliceSize ? from + sliceSize : toIndex;
-                    final Pair<Integer, Long> pair = new Pair<>();
+                    int index = 0;
+                    long next = 0;
 
                     try {
                         while (cursor > from && (resultHolder.value() == null || cursor > resultHolder.value().left()) && eHolder.value() == null) {
-                            pair.setLeft(cursor);
-                            pair.setRight(elements[--cursor]);
+                            index = cursor;
+                            next = elements[--cursor];
 
-                            if (predicate.test(pair.right())) {
+                            if (predicate.test(next)) {
                                 synchronized (resultHolder) {
-                                    if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
-                                        resultHolder.setValue(pair.copy());
+                                    if (resultHolder.value() == null || index > resultHolder.value().left()) {
+                                        resultHolder.setValue(Pair.of(index, next));
                                     }
                                 }
 
@@ -1553,23 +1583,24 @@ final class ParallelArrayLongStream extends ArrayLongStream {
 
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final Pair<Integer, Long> pair = new Pair<>();
+                    int index = 0;
+                    long next = 0;
 
                     try {
                         while (resultHolder.value() == null && eHolder.value() == null) {
                             synchronized (elements) {
                                 if (cursor.value() > fromIndex) {
-                                    pair.setLeft(cursor.value());
-                                    pair.setRight(elements[cursor.decrementAndGet()]);
+                                    index = cursor.value();
+                                    next = elements[cursor.decrementAndGet()];
                                 } else {
                                     break;
                                 }
                             }
 
-                            if (predicate.test(pair.right())) {
+                            if (predicate.test(next)) {
                                 synchronized (resultHolder) {
-                                    if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
-                                        resultHolder.setValue(pair.copy());
+                                    if (resultHolder.value() == null || index > resultHolder.value().left()) {
+                                        resultHolder.setValue(Pair.of(index, next));
                                     }
                                 }
 
@@ -1613,8 +1644,10 @@ final class ParallelArrayLongStream extends ArrayLongStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, this::boxed, b::boxed,
+                (boxedA, boxedB) -> new ParallelIteratorLongStream(Stream.parallelZip(boxedA, boxedB, zipFunction::applyAsLong, maxThreadNum, asyncExecutor),
+                        false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1646,8 +1679,11 @@ final class ParallelArrayLongStream extends ArrayLongStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, c, this::boxed, b::boxed, c::boxed,
+                (boxedA, boxedB, boxedC) -> new ParallelIteratorLongStream(
+                        Stream.parallelZip(boxedA, boxedB, boxedC, zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy,
+                        asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1678,9 +1714,11 @@ final class ParallelArrayLongStream extends ArrayLongStream {
                     asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorLongStream(
-                Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, this::boxed, b::boxed,
+                (boxedA, boxedB) -> new ParallelIteratorLongStream(
+                        Stream.parallelZip(boxedA, boxedB, valueForNoneA, valueForNoneB, zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false,
+                        maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1714,8 +1752,12 @@ final class ParallelArrayLongStream extends ArrayLongStream {
                     splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorLongStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC,
-                zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, c, this::boxed, b::boxed, c::boxed,
+                (boxedA, boxedB,
+                        boxedC) -> new ParallelIteratorLongStream(Stream.parallelZip(boxedA, boxedB, boxedC, valueForNoneA, valueForNoneB, valueForNoneC,
+                                zipFunction::applyAsLong, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor,
+                                cancelUncompletedThreads, null));
     }
 
     /**

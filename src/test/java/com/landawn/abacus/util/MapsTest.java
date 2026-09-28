@@ -281,7 +281,8 @@ public class MapsTest extends MapsTestSupport {
         Map<?, ?> target = Maps.newTargetMap(source, 3);
         Map<?, ?> ordering = Maps.newOrderingMap(source);
 
-        assertEquals(HashMap.class, target.getClass());
+        // LinkedHashMap since the 2026-09-24 review (C-377): the HashMap fallback dropped the template's order
+        assertEquals(LinkedHashMap.class, target.getClass());
         assertTrue(target.isEmpty());
         assertEquals(LinkedHashMap.class, ordering.getClass());
         assertTrue(ordering.isEmpty());
@@ -341,10 +342,10 @@ public class MapsTest extends MapsTestSupport {
         final List<Integer> values = Arrays.asList(1, 2, 3);
 
         assertThrows(IllegalArgumentException.class, () -> Maps.zip(emptyKeys, values, (IntFunction<Map<String, Integer>>) null));
-        assertThrows(IllegalArgumentException.class, () -> Maps.zip(emptyKeys, values, ignored -> (Map<String, Integer>) null));
+        assertThrows(NullPointerException.class, () -> Maps.zip(emptyKeys, values, ignored -> (Map<String, Integer>) null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> Maps.zip(emptyKeys, values, (BiFunction<Integer, Integer, Integer>) null, HashMap::new));
-        assertThrows(IllegalArgumentException.class, () -> Maps.zip(emptyKeys, values, Integer::sum, ignored -> (Map<String, Integer>) null));
+        assertThrows(NullPointerException.class, () -> Maps.zip(emptyKeys, values, Integer::sum, ignored -> (Map<String, Integer>) null));
     }
 
     @Test
@@ -1890,8 +1891,8 @@ public class MapsTest extends MapsTestSupport {
 
         assertEquals(map.size(), sizeHint[0]);
         assertThrows(IllegalArgumentException.class, () -> Maps.filter(map, (k, v) -> true, (IntFunction<Map<String, Integer>>) null));
-        assertThrows(IllegalArgumentException.class, () -> Maps.filter(map, (k, v) -> true, ignored -> (Map<String, Integer>) null));
-        assertThrows(IllegalArgumentException.class, () -> Maps.filter((Map<String, Integer>) null, (k, v) -> true, ignored -> (Map<String, Integer>) null));
+        assertThrows(NullPointerException.class, () -> Maps.filter(map, (k, v) -> true, ignored -> (Map<String, Integer>) null));
+        assertThrows(NullPointerException.class, () -> Maps.filter((Map<String, Integer>) null, (k, v) -> true, ignored -> (Map<String, Integer>) null));
     }
 
     @Test
@@ -1907,7 +1908,7 @@ public class MapsTest extends MapsTestSupport {
 
         assertThrows(IllegalArgumentException.class, () -> Maps.flatten(new HashMap<>(), "", HashMap::new));
         assertThrows(IllegalArgumentException.class, () -> Maps.flatten(new HashMap<>(), ".", (IntFunction<Map<String, Object>>) null));
-        assertThrows(IllegalArgumentException.class, () -> Maps.flatten(new HashMap<>(), ".", ignored -> (Map<String, Object>) null));
+        assertThrows(NullPointerException.class, () -> Maps.flatten(new HashMap<>(), ".", ignored -> (Map<String, Object>) null));
     }
 
     @Test
@@ -1983,7 +1984,7 @@ public class MapsTest extends MapsTestSupport {
 
         assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(new HashMap<>(), "", HashMap::new));
         assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(new HashMap<>(), ".", (IntFunction<Map<String, Object>>) null));
-        assertThrows(IllegalArgumentException.class, () -> Maps.unflatten(new HashMap<>(), ".", ignored -> (Map<String, Object>) null));
+        assertThrows(NullPointerException.class, () -> Maps.unflatten(new HashMap<>(), ".", ignored -> (Map<String, Object>) null));
     }
 
     @Test
@@ -2178,10 +2179,10 @@ public class MapsTest extends MapsTestSupport {
     public void testSupplierReturningNull_hasAnExplanatoryMessage() {
         final Map<String, String> map = new HashMap<>();
 
-        final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class, () -> Maps.getOrDefaultIfAbsent(map, "x", () -> null));
+        final NullPointerException e1 = assertThrows(NullPointerException.class, () -> Maps.getOrDefaultIfAbsent(map, "x", () -> null));
         assertEquals("defaultValueSupplier returned null", e1.getMessage());
 
-        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () -> Maps.getOrPutIfAbsent(map, "x", () -> null));
+        final NullPointerException e2 = assertThrows(NullPointerException.class, () -> Maps.getOrPutIfAbsent(map, "x", () -> null));
         assertEquals("defaultValueSupplier returned null", e2.getMessage());
 
         // the map must be left untouched when the supplier misbehaves
@@ -2394,5 +2395,49 @@ public class MapsTest extends MapsTestSupport {
         ok.put("a2", 2);
         Maps.replaceKeys(ok, k -> k.substring(0, 1), Integer::sum);
         assertEquals(CommonUtil.asMap("a", 3), ok);
+    }
+
+    @Test
+    public void testTransposeBiMapWithSharedElementAtSamePosition() {
+        final BiMap<String, List<Integer>> columns = new BiMap<>();
+        columns.put("a", Arrays.asList(1, 2));
+        columns.put("b", Arrays.asList(1, 3));
+
+        final List<Map<String, Integer>> rows = Maps.transpose(columns);
+
+        assertEquals(2, rows.size());
+        assertEquals(1, rows.get(0).get("a"));
+        assertEquals(1, rows.get(0).get("b"));
+        assertEquals(2, rows.get(1).get("a"));
+        assertEquals(3, rows.get(1).get("b"));
+    }
+
+    @Test
+    public void testSymmetricDifferenceBiMapWithEqualValuesOnlyInSecondMap() {
+        final BiMap<String, Integer> first = new BiMap<>();
+        first.put("a", 1);
+
+        final Map<String, Integer> second = new LinkedHashMap<>();
+        second.put("x", 9);
+        second.put("y", 9);
+
+        final Map<String, Pair<Nullable<Integer>, Nullable<Integer>>> result = Maps.symmetricDifference(first, second);
+
+        assertEquals(3, result.size());
+        assertEquals(Pair.of(Nullable.of(1), Nullable.empty()), result.get("a"));
+        assertEquals(Pair.of(Nullable.empty(), Nullable.of(9)), result.get("x"));
+        assertEquals(Pair.of(Nullable.empty(), Nullable.of(9)), result.get("y"));
+    }
+
+    @Test
+    public void testFlatInvertBiMapResultFindsItsOwnValues() {
+        final BiMap<String, List<Integer>> map = new BiMap<>();
+        map.put("x", Arrays.asList(1, 2));
+
+        final Map<Integer, List<String>> inverted = Maps.flatInvert(map);
+
+        assertEquals(Arrays.asList("x"), inverted.get(1));
+        assertEquals(Arrays.asList("x"), inverted.get(2));
+        assertTrue(inverted.containsValue(Arrays.asList("x")));
     }
 }

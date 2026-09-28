@@ -1042,10 +1042,10 @@ public class IteratorsForTest extends IteratorsTestSupport {
         assertEquals(Arrays.asList(3), collectForEach(Arrays.asList(1, 2, 3).iterator(), 2, 5));
         assertEquals(Arrays.asList(1, 2, 3), collectForEach(Arrays.asList(1, 2, 3).iterator(), 0, Long.MAX_VALUE));
 
-        // an offset with count == 0 still consumes the offset, exactly as the pre-fast-path implementation did
+        // count == 0 reads nothing, not even the offset - like skipAndLimit and the processThreads > 0 path (C-327)
         final Iterator<Integer> iter = Arrays.asList(1, 2, 3, 4).iterator();
         Iterators.forEach(iter, 2, 0, x -> Assertions.fail("nothing should be processed"));
-        assertEquals(Arrays.asList(3, 4), drainToList(iter));
+        assertEquals(Arrays.asList(1, 2, 3, 4), drainToList(iter));
 
         // onComplete runs on the fast path, and does not run when the consumer fails
         final AtomicBoolean done = new AtomicBoolean(false);

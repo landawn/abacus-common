@@ -1001,4 +1001,81 @@ public class ImmutableSetTest extends TestBase {
         assertFalse(ImmutableSet.copyOf(caseInsensitive).contains("apple"));
         assertEquals(1, ImmutableSet.copyOf(caseInsensitive).size());
     }
+
+    // ---- deep review 2026-09-25 G045 begin ----
+    // G045-01: the shared empty set must report the DISTINCT that Set.spliterator() promises and the ORDERED
+    // every other ImmutableSet factory reports, so that Stream.concat with an ordered set stays ordered.
+    @Test
+    public void testEmpty_spliteratorReportsDistinctAndOrdered() {
+        final java.util.Spliterator<String> sp = ImmutableSet.<String> empty().spliterator();
+
+        assertTrue(sp.hasCharacteristics(java.util.Spliterator.DISTINCT));
+        assertTrue(sp.hasCharacteristics(java.util.Spliterator.ORDERED));
+        assertEquals(0, sp.getExactSizeIfKnown());
+
+        final java.util.stream.Stream<String> concat = java.util.stream.Stream.concat(ImmutableSet.<String> empty().stream(),
+                ImmutableSet.of("x", "y", "z").stream());
+        assertTrue(concat.spliterator().hasCharacteristics(java.util.Spliterator.ORDERED));
+
+        // unchanged: still the same shared instance, empty, null-tolerant and unmodifiable
+        assertSame(ImmutableSet.empty(), ImmutableSet.empty());
+        assertFalse(ImmutableSet.empty().contains(null));
+        assertEquals(java.util.Collections.emptySet(), ImmutableSet.empty());
+        assertEquals(0, ImmutableSet.empty().hashCode());
+        assertThrows(UnsupportedOperationException.class, () -> ImmutableSet.<String> empty().add("a"));
+    }
+    // ---- deep review 2026-09-25 G045 end ----
+    // ---- perf review 2026-09-26 G045 begin ----
+    // G045-01: of(...) now fills a presized LinkedHashSet element by element; pin order, first-wins de-duplication and nulls.
+    @Test
+    public void testOf_presizedBackingKeepsOrderDuplicatesAndNulls() {
+        assertEquals(Arrays.asList("a"), new ArrayList<>(ImmutableSet.of("a")));
+        assertEquals(Arrays.asList((String) null), new ArrayList<>(ImmutableSet.of((String) null)));
+        assertEquals(Arrays.asList("b", "a"), new ArrayList<>(ImmutableSet.of("b", "a")));
+        assertEquals(Arrays.asList("a"), new ArrayList<>(ImmutableSet.of("a", "a")));
+        assertEquals(Arrays.asList("c", null, "a"), new ArrayList<>(ImmutableSet.of("c", null, "a", null, "c")));
+        assertEquals(Arrays.asList(3, 1, 2), new ArrayList<>(ImmutableSet.of(3, 1, 3, 2)));
+        assertEquals(Arrays.asList(6, 5, 4, 3, 2, 1), new ArrayList<>(ImmutableSet.of(6, 5, 4, 3, 2, 1)));
+        assertEquals(Arrays.asList(7, 1, 2), new ArrayList<>(ImmutableSet.of(7, 1, 7, 2, 1, 7, 2)));
+        assertEquals(Arrays.asList(1, 2, 3, 4), new ArrayList<>(ImmutableSet.of(1, 2, 3, 4, 4, 3, 2, 1)));
+        assertEquals(Arrays.asList(9, 8, 7, 6, 5, 4, 3, 2, 1), new ArrayList<>(ImmutableSet.of(9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        assertEquals(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), new ArrayList<>(ImmutableSet.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)));
+
+        final ImmutableSet<String> set = ImmutableSet.of("x", "y", "z");
+        assertEquals(new LinkedHashSet<>(Arrays.asList("x", "y", "z")), set);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("x", "y", "z")).hashCode(), set.hashCode());
+        assertTrue(set.spliterator().hasCharacteristics(java.util.Spliterator.ORDERED | java.util.Spliterator.DISTINCT));
+        assertThrows(UnsupportedOperationException.class, () -> set.add("w"));
+        assertThrows(UnsupportedOperationException.class, () -> set.remove("x"));
+        assertThrows(UnsupportedOperationException.class, () -> set.iterator().remove());
+    }
+
+    // G045-01: copyOf(Collection) now sizes its LinkedHashSet copy by c.size() and fills it with addAll(c); pin the copy semantics.
+    @Test
+    public void testCopyOf_collectionPresizedCopyKeepsOrderDuplicatesAndNulls() {
+        assertEquals(Arrays.asList("a"), new ArrayList<>(ImmutableSet.copyOf(Arrays.asList("a"))));
+        assertEquals(Arrays.asList("b", null, "a"), new ArrayList<>(ImmutableSet.copyOf(Arrays.asList("b", null, "a", "b", null))));
+
+        final List<Integer> large = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            large.add(999 - i % 500);
+        }
+        final ImmutableSet<Integer> copy = ImmutableSet.copyOf(large);
+        assertEquals(500, copy.size());
+        assertEquals(new ArrayList<>(new LinkedHashSet<>(large)), new ArrayList<>(copy));
+
+        final Set<String> source = new HashSet<>(Arrays.asList("p", "q"));
+        final ImmutableSet<String> snapshot = ImmutableSet.copyOf(source);
+        source.add("r");
+        assertEquals(2, snapshot.size());
+        assertFalse(snapshot.contains("r"));
+        assertTrue(snapshot.spliterator().hasCharacteristics(java.util.Spliterator.ORDERED | java.util.Spliterator.DISTINCT));
+        assertThrows(UnsupportedOperationException.class, () -> snapshot.add("s"));
+
+        final ImmutableSet<String> owning = ImmutableSet.of("m");
+        assertSame(owning, ImmutableSet.copyOf(owning));
+        assertSame(ImmutableSet.empty(), ImmutableSet.copyOf(new ArrayList<String>()));
+        assertSame(ImmutableSet.empty(), ImmutableSet.copyOf((Collection<String>) null));
+    }
+    // ---- perf review 2026-09-26 G045 end ----
 }

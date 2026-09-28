@@ -85,7 +85,7 @@ public abstract class Wrapper<T> implements Immutable {
     /**
      * Creates a new {@code Wrapper} instance for the given value using deep equality semantics
      * (via {@link N#deepHashCode(Object)} and {@link N#deepEquals(Object, Object)}).
-     * When {@code array} is an actual array type, this yields content-based hash/equals behaviour
+     * When {@code value} is an array, this yields content-based hash/equals behaviour
      * suitable for using arrays as {@code Map} keys or {@code Set} elements.
      * Non-array values are also accepted; they will be compared with the same deep-equality functions.
      *

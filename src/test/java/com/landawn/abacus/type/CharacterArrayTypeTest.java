@@ -339,4 +339,55 @@ public class CharacterArrayTypeTest extends TestBase {
         Assertions.assertTrue(str.endsWith(", 'u', 'v']"), str.substring(str.length() - 20));
         assertArrayEquals(large, type.valueOf(str));
     }
+
+    // ---- perf review 2026-09-26 G013 begin ----
+    // G013-01: the verbatim fast path of stringOf must match per-element escapeEcmaScript for every char value.
+    @Test
+    public void testStringOf_everyCharMatchesPerElementEscaping() {
+        final Character[] all = new Character[0x10000 + 1];
+
+        for (int i = 0; i < 0x10000; i++) {
+            all[i] = (char) i;
+        }
+
+        all[0x10000] = null;
+
+        final StringBuilder expected = new StringBuilder("[");
+
+        for (int i = 0; i < all.length; i++) {
+            if (i > 0) {
+                expected.append(", ");
+            }
+
+            if (all[i] == null) {
+                expected.append("null");
+            } else {
+                expected.append('\'').append(com.landawn.abacus.util.EscapeUtil.escapeEcmaScript(String.valueOf(all[i]))).append('\'');
+            }
+        }
+
+        expected.append(']');
+
+        final String str = type.stringOf(all);
+        assertEquals(expected.toString(), str);
+        assertArrayEquals(all, type.valueOf(str));
+
+        final Character[] small = { 'a', '\'', '"', '\\', '/', ' ', '~', '\u007f', '\u0080', '\u001f', '\n', '\ud83d', '\ude00', null, 'Z' };
+        assertEquals("['a', '\\'', '\\\"', '\\\\', '\\/', ' ', '~', '\u007f', '\\u0080', '\\u001F', '\\n', '\\uD83D', '\\uDE00', null, 'Z']",
+                type.stringOf(small));
+        assertArrayEquals(small, type.valueOf(type.stringOf(small)));
+    }
+
+    // G013-01: quoted elements without a backslash skip unescaping; results and failures must be unchanged.
+    @Test
+    public void testValueOf_quotedElementsWithAndWithoutBackslash() {
+        assertArrayEquals(new Character[] { 'a', 'b', '\'', '"', '\\', '/', ' ', ',', '\u00e9', 'x' },
+                type.valueOf("['a', \"b\", '\\'', \"\\\"\", '\\\\', '/', ' ', ',', '\\u00e9', 'x']"));
+        assertArrayEquals(new Character[] { '\u00e9', '\u00e9', 'A' }, type.valueOf("['\u00e9', \"\u00e9\", '\\101']"));
+        assertArrayEquals(new Character[] { 'A', 'A' }, type.valueOf("['65', '\\u0036\\u0035']"));
+        Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("['ab']"));
+        Assertions.assertThrows(NumberFormatException.class, () -> type.valueOf("['a\\nb']"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> type.valueOf("['\\u00zz']"));
+    }
+    // ---- perf review 2026-09-26 G013 end ----
 }

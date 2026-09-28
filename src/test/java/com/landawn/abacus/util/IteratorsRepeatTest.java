@@ -408,8 +408,8 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
     /**
      * A source that shrinks behaves exactly as it did before the total-count guard was added.
      *
-     * <p>It returns short and silently: {@code hasNext()} consults {@code iter.hasNext()} before
-     * {@code nextElement()} can raise, so requesting 8 from a source that shrank from 4 elements to 2 yields 4.
+     * <p>It returns short and silently: {@code hasNext()} consults the source iterator before every new element
+     * is pulled, so requesting 8 from a source that shrank from 4 elements to 2 yields 4.
      * This test exists to pin that the guard - which only ever lowers the ceiling - did not change this path.
      * (The short return is a pre-existing characteristic of the shrink case, not something introduced here.)</p>
      */
@@ -432,8 +432,8 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
     }
 
     /**
-     * Pins the corrected "Live view" paragraph: if {@code c} has been emptied before the first {@code next()},
-     * {@code hasNext()} still reports {@code true} - the repeat counts say an element is due - and the first
+     * Pins the "Live view" paragraph (C-322, 2026-09-24): if {@code c} has been emptied before the first
+     * {@code next()}, it is treated like a shrunk source - {@code hasNext()} reports {@code false} and
      * {@code next()} throws {@link NoSuchElementException}.
      */
     @Test
@@ -443,7 +443,7 @@ public class IteratorsRepeatTest extends IteratorsTestSupport {
 
         source.clear();
 
-        assertTrue(iter.hasNext());
+        assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, iter::next);
     }
 

@@ -398,8 +398,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * ImmutableSortedMap<Integer, String> map = ImmutableSortedMap.of(
      *     8, "eight", 3, "three", 5, "five", 1, "one", 7, "seven", 2, "two", 6, "six", 4, "four"
      * );
-     * System.out.println(map.firstKey());   // prints 1
-     * System.out.println(map.lastKey());    // prints 8
+     * System.out.println(map.firstKey());  // prints 1
+     * System.out.println(map.lastKey());   // prints 8
      * }</pre>
      *
      * @param <K> the key type; must extend {@code Comparable<? super K>}
@@ -585,8 +585,8 @@ public class ImmutableSortedMap<K, V> extends ImmutableMap<K, V> implements Sort
      * mutable.put("b", 2);
      * mutable.put("a", 1);
      * ImmutableSortedMap<String, Integer> immutable = ImmutableSortedMap.copyOf(mutable);
-     * mutable.put("c", 3);             // does not affect immutable
-     * System.out.println(immutable);   // prints {a=1, b=2}
+     * mutable.put("c", 3);            // does not affect immutable
+     * System.out.println(immutable);  // prints {a=1, b=2}
      * }</pre>
      *
      * @param <K> the type of keys in the Map

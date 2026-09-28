@@ -151,18 +151,18 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * If {@code x} is {@code null}, the parameter is set to SQL NULL
      * ({@link java.sql.Types#BOOLEAN}); otherwise the contained boolean value is used.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code AtomicBoolean} value to set; {@code null} is stored as SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicBoolean x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final AtomicBoolean x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
+            statement.setNull(columnIndex, java.sql.Types.BOOLEAN);
         } else {
-            stmt.setBoolean(columnIndex, x.get());
+            statement.setBoolean(columnIndex, x.get());
         }
     }
 
@@ -172,18 +172,18 @@ public class AtomicBooleanType extends AbstractAtomicType<AtomicBoolean> {
      * If {@code x} is {@code null}, the parameter is set to SQL NULL
      * ({@link java.sql.Types#BOOLEAN}); otherwise the contained boolean value is used.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code AtomicBoolean} value to set; {@code null} is stored as SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final AtomicBoolean x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final AtomicBoolean x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
+            statement.setNull(parameterName, java.sql.Types.BOOLEAN);
         } else {
-            stmt.setBoolean(parameterName, x.get());
+            statement.setBoolean(parameterName, x.get());
         }
     }
 

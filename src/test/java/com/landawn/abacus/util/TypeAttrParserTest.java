@@ -31,7 +31,7 @@ public class TypeAttrParserTest extends TestBase {
         final IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> TypeAttrParser.newInstance(SingleArrayArg.class, "SingleArrayArg(alpha)", (Object[]) null));
 
-        Assertions.assertEquals("'args' cannot be null", exception.getMessage());
+        Assertions.assertEquals("'arguments' cannot be null", exception.getMessage());
     }
 
     @Test

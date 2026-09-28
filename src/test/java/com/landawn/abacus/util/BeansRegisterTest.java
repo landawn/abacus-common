@@ -438,4 +438,75 @@ public class BeansRegisterTest extends BeansTestSupport {
         assertFalse(Beans.getPropGetters(BuilderSymmetryBean.Builder.class).containsKey("note"));
         assertEquals("getKeptNote", Beans.getPropGetter(BuilderSymmetryBean.Builder.class, "keptNote").getName());
     }
+
+    // ---- deep review 2026-09-25 G020 begin ----
+    public static class G020InlineInner {
+        private String city;
+        private String zip;
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(final String city) {
+            this.city = city;
+        }
+
+        public String getZip() {
+            return zip;
+        }
+
+        public void setZip(final String zip) {
+            this.zip = zip;
+        }
+    }
+
+    public static class G020InlineOuter {
+        private String name;
+        private G020InlineInner inner;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public G020InlineInner getInner() {
+            return inner;
+        }
+
+        public void setInner(final G020InlineInner inner) {
+            this.inner = inner;
+        }
+    }
+
+    // G020-01: a registration against a nested bean type must also drop the dotted-path getter chains cached for the
+    // beans that reach it ("inner.city" on the outer class); otherwise the answer depends on whether the path was read
+    // before or after the registration.
+    @Test
+    public void testRegisterNonPropertyAccessor_dropsNestedPathCacheOfOuterBean() {
+        final G020InlineInner inner = new G020InlineInner();
+        inner.setCity("NYC");
+        inner.setZip("10001");
+        final G020InlineOuter outer = new G020InlineOuter();
+        outer.setName("o");
+        outer.setInner(inner);
+
+        // Read the dotted path once before the registration, so the outer class caches its getter chain.
+        assertEquals("NYC", Beans.getPropValue(outer, "inner.city"));
+        assertEquals("10001", Beans.getPropValue(outer, "inner.zip"));
+
+        Beans.registerNonPropertyAccessor(G020InlineInner.class, "city");
+
+        assertFalse(Beans.getPropNameList(G020InlineInner.class).contains("city"));
+        // Same answer as for a path that was never read before the registration.
+        assertNull(Beans.getPropValue(outer, "inner.city", true));
+        assertFalse(Beans.getPropValueIfPresent(outer, "inner.city").isPresent());
+        assertThrows(IllegalArgumentException.class, () -> Beans.getPropValue(outer, "inner.city"));
+        // An unaffected path through the same nested bean still resolves.
+        assertEquals("10001", Beans.getPropValue(outer, "inner.zip"));
+    }
+    // ---- deep review 2026-09-25 G020 end ----
 }

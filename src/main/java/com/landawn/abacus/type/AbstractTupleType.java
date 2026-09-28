@@ -180,8 +180,10 @@ abstract class AbstractTupleType<T extends Tuple<T>> extends AbstractType<T> {
      * @param converted the element array (already type-converted by {@link #valueOf(String)});
      *                  guaranteed to have exactly {@code parameterTypes().size()} elements
      * @return a new tuple instance of the appropriate arity
+     * @throws NullPointerException if {@code converted} is {@code null}
+     * @throws ArrayIndexOutOfBoundsException if {@code converted} has fewer elements than the tuple arity
      */
-    protected abstract T fromArray(Object[] converted);
+    protected abstract T fromArray(Object[] converted) throws NullPointerException, ArrayIndexOutOfBoundsException;
 
     /**
      * Appends the {@code toString()}-style string representation of the tuple to the given {@code Appendable}.

@@ -157,8 +157,8 @@ class RowDatasetValidationOrderTest extends TestBase {
     @Test
     void suppliedRowsStillRejectNullAndUndersizedResults() {
         RowDataset data = dataset();
-        assertThrows(IllegalArgumentException.class, () -> data.getRow(0, List.of("id"), length -> null));
-        assertThrows(IllegalArgumentException.class, () -> data.toList(0, 2, List.of("id"), length -> null));
+        assertThrows(NullPointerException.class, () -> data.getRow(0, List.of("id"), length -> null));
+        assertThrows(NullPointerException.class, () -> data.toList(0, 2, List.of("id"), length -> null));
         assertThrows(IllegalArgumentException.class, () -> data.getRow(0, List.of("id"), length -> new Object[0]));
         assertThrows(IllegalArgumentException.class, () -> data.toList(0, 2, List.of("id"), length -> new Object[0]));
     }

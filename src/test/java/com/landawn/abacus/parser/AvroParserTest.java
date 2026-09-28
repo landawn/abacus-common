@@ -789,4 +789,167 @@ public class AvroParserTest extends TestBase {
         // Stream sources have no such shortcut: an empty stream is not an Avro container.
         assertThrows(UncheckedIOException.class, () -> parser.deserialize(new ByteArrayInputStream(new byte[0]), config, TestBean.class));
     }
+
+    @Test
+    public void testDeserializeRootMapSchemaIntoMapTarget() {
+        final AvroParser avroParser = new AvroParser();
+        final Schema mapSchema = Schema.createMap(Schema.create(Schema.Type.INT));
+        final Map<String, Object> source = new java.util.LinkedHashMap<>();
+        source.put("a", 1);
+        source.put("b", 2);
+
+        final String encoded = avroParser.serialize(source, new AvroSerConfig().setSchema(mapSchema));
+        final AvroDeserConfig config = AvroDeserConfig.create().setSchema(mapSchema);
+
+        final Map<String, Integer> typed = avroParser.deserialize(encoded, config, Type.of("Map<String, Integer>"));
+        assertEquals(source, typed);
+
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        avroParser.serialize(source, new AvroSerConfig().setSchema(mapSchema), os);
+        final Map<?, ?> untyped = avroParser.deserialize(new ByteArrayInputStream(os.toByteArray()), config, HashMap.class);
+        assertEquals(HashMap.class, untyped.getClass());
+        assertEquals(2, untyped.size());
+        final Map<String, Object> byKeyText = new HashMap<>();
+        untyped.forEach((k, v) -> byKeyText.put(k.toString(), v));
+        assertEquals(source, byKeyText);
+    }
+
+    @Test
+    public void testDeserializeNonRecordDatumIntoBeanOrMapTargetThrowsIllegalArgument() {
+        final AvroParser avroParser = new AvroParser();
+        final Schema mapSchema = Schema.createMap(Schema.create(Schema.Type.INT));
+        final String mapEncoded = avroParser.serialize(Map.of("a", 1), new AvroSerConfig().setSchema(mapSchema));
+        assertThrows(IllegalArgumentException.class,
+                () -> avroParser.deserialize(mapEncoded, AvroDeserConfig.create().setSchema(mapSchema), AvroParserTest.TestBean.class));
+
+        final Schema arraySchema = Schema.createArray(Schema.create(Schema.Type.STRING));
+        final String arrayEncoded = avroParser.serialize(List.of("x", "y"), new AvroSerConfig().setSchema(arraySchema));
+        assertThrows(IllegalArgumentException.class, () -> avroParser.deserialize(arrayEncoded, AvroDeserConfig.create().setSchema(arraySchema), Map.class));
+    }
+
+    @Test
+    public void testGenericRecordRequiresSchemaInConfigForSerializeAndDeserialize() {
+        final AvroParser avroParser = new AvroParser();
+        final Schema recordSchema = new Schema.Parser()
+                .parse("{\"type\":\"record\",\"name\":\"SchemaRequired\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
+        final GenericRecord record = new GenericData.Record(recordSchema);
+        record.put("name", "x");
+
+        assertThrows(IllegalArgumentException.class, () -> avroParser.serialize(record, null, new ByteArrayOutputStream()));
+
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        avroParser.serialize(record, new AvroSerConfig().setSchema(recordSchema), os);
+        assertThrows(IllegalArgumentException.class, () -> avroParser.deserialize(new ByteArrayInputStream(os.toByteArray()), null, GenericRecord.class));
+
+        final GenericRecord read = avroParser.deserialize(new ByteArrayInputStream(os.toByteArray()), AvroDeserConfig.create().setSchema(recordSchema),
+                GenericRecord.class);
+        assertEquals("x", read.get("name").toString());
+    }
+
+    // ---- deep review 2026-09-25 G006 begin ----
+    public static class G006BytesBean {
+        private String name;
+        private byte[] data;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public byte[] getData() {
+            return data;
+        }
+
+        public void setData(byte[] data) {
+            this.data = data;
+        }
+    }
+
+    private static Schema g006BytesSchema() {
+        return new Schema.Parser().parse(
+                "{\"type\":\"record\",\"name\":\"G006Bytes\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"data\",\"type\":\"bytes\"}]}");
+    }
+
+    // G006-01: a byte[] bean property failed the whole write with a ClassCastException for a bytes field.
+    @Test
+    public void testSerialize_byteArrayPropertyToBytesField() {
+        final Schema schema = g006BytesSchema();
+        final G006BytesBean bean = new G006BytesBean();
+        bean.setName("n");
+        bean.setData(new byte[] { 1, 2, 3 });
+
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        parser.serialize(bean, new AvroSerConfig().setSchema(schema), os);
+
+        final GenericRecord read = parser.deserialize(new ByteArrayInputStream(os.toByteArray()), AvroDeserConfig.create().setSchema(schema),
+                GenericRecord.class);
+        final java.nio.ByteBuffer buffer = (java.nio.ByteBuffer) read.get("data");
+        final byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 1, 2, 3 }, bytes);
+    }
+
+    // G006-01: a bytes datum was converted through ByteBuffer.toString() and silently set the byte[] property to null.
+    @Test
+    public void testDeserialize_bytesFieldIntoByteArrayProperty() {
+        final Schema schema = g006BytesSchema();
+        final Map<String, Object> source = new HashMap<>();
+        source.put("name", "n");
+        source.put("data", java.nio.ByteBuffer.wrap(new byte[] { 4, 5, 6 }));
+
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+        final G006BytesBean bean = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), G006BytesBean.class);
+
+        assertEquals("n", bean.getName());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 4, 5, 6 }, bean.getData());
+    }
+    private static Schema g006FixedSchema() {
+        return new Schema.Parser().parse("{\"type\":\"record\",\"name\":\"G006Fixed\",\"fields\":[{\"name\":\"name\",\"type\":\"string\"},"
+                + "{\"name\":\"data\",\"type\":{\"type\":\"fixed\",\"name\":\"G006Two\",\"size\":2}}]}");
+    }
+
+    // G006-04: a byte[] bean property failed the write with a ClassCastException for a fixed field.
+    @Test
+    public void testSerialize_byteArrayPropertyToFixedField() {
+        final Schema schema = g006FixedSchema();
+        final G006BytesBean bean = new G006BytesBean();
+        bean.setName("n");
+        bean.setData(new byte[] { 7, 8 });
+
+        final ByteArrayOutputStream os = new ByteArrayOutputStream();
+        parser.serialize(bean, new AvroSerConfig().setSchema(schema), os);
+
+        final GenericRecord read = parser.deserialize(new ByteArrayInputStream(os.toByteArray()), AvroDeserConfig.create().setSchema(schema),
+                GenericRecord.class);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 7, 8 }, ((org.apache.avro.generic.GenericFixed) read.get("data")).bytes());
+    }
+
+    // G006-04: a byte[] whose length differs from the fixed size is an argument error, not an Avro write failure.
+    @Test
+    public void testSerialize_byteArrayOfWrongLengthToFixedFieldThrowsIAE() {
+        final G006BytesBean bean = new G006BytesBean();
+        bean.setName("n");
+        bean.setData(new byte[] { 1, 2, 3 });
+
+        assertThrows(IllegalArgumentException.class, () -> parser.serialize(bean, new AvroSerConfig().setSchema(g006FixedSchema()), new ByteArrayOutputStream()));
+    }
+
+    // G006-04: a fixed datum read into a byte[] property failed: Type.valueOf(Object) treated GenericData.Fixed as a bean.
+    @Test
+    public void testDeserialize_fixedFieldIntoByteArrayProperty() {
+        final Schema schema = g006FixedSchema();
+        final Map<String, Object> source = new HashMap<>();
+        source.put("name", "n");
+        source.put("data", new GenericData.Fixed(schema.getField("data").schema(), new byte[] { 5, 6 }));
+
+        final String encoded = parser.serialize(source, new AvroSerConfig().setSchema(schema));
+        final G006BytesBean bean = parser.deserialize(encoded, AvroDeserConfig.create().setSchema(schema), G006BytesBean.class);
+
+        assertEquals("n", bean.getName());
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 5, 6 }, bean.getData());
+    }
+    // ---- deep review 2026-09-25 G006 end ----
 }

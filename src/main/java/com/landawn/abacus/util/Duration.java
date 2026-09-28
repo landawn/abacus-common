@@ -83,20 +83,20 @@ import java.time.temporal.TemporalUnit;
  * Duration halfSecond = Duration.ofMillis(500);
  *
  * // Duration arithmetic
- * Duration total = fiveMinutes.plus(twoHours);      // returns 2 hours 5 minutes
- * Duration difference = oneDay.minus(twoHours);     // returns 22 hours
- * Duration doubled = fiveMinutes.multipliedBy(2);   // returns 10 minutes
- * Duration halved = twoHours.dividedBy(2);          // returns 1 hour
+ * Duration total = fiveMinutes.plus(twoHours);     // returns 2 hours 5 minutes
+ * Duration difference = oneDay.minus(twoHours);    // returns 22 hours
+ * Duration doubled = fiveMinutes.multipliedBy(2);  // returns 10 minutes
+ * Duration halved = twoHours.dividedBy(2);         // returns 1 hour
  *
  * // Duration properties and testing
- * boolean isZero = Duration.ZERO.isZero();                         // returns true
- * boolean isNegative = fiveMinutes.minus(twoHours).isNegative();   // returns true
- * Duration positive = fiveMinutes.minus(twoHours).abs();           // returns 1 hour 55 minutes
+ * boolean isZero = Duration.ZERO.isZero();                        // returns true
+ * boolean isNegative = fiveMinutes.minus(twoHours).isNegative();  // returns true
+ * Duration positive = fiveMinutes.minus(twoHours).abs();          // returns 1 hour 55 minutes
  *
  * // Converting to different units
- * long totalMinutes = twoHours.toMinutes();      // returns 120
- * long totalSeconds = fiveMinutes.toSeconds();   // returns 300
- * long totalMillis = halfSecond.toMillis();      // returns 500
+ * long totalMinutes = twoHours.toMinutes();     // returns 120
+ * long totalSeconds = fiveMinutes.toSeconds();  // returns 300
+ * long totalMillis = halfSecond.toMillis();     // returns 500
  * }</pre>
  *
  * <p><b>Advanced Usage Examples:</b></p>
@@ -273,8 +273,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration oneDay = Duration.ofDays(1);
      * Duration oneWeek = Duration.ofDays(7);
-     * Duration negativeDuration = Duration.ofDays(-3);   // returns -3 days
-     * long millis = oneWeek.toMillis();                  // returns 604800000
+     * Duration negativeDuration = Duration.ofDays(-3);  // returns -3 days
+     * long millis = oneWeek.toMillis();                 // returns 604800000
      * }</pre>
      *
      * @param days the number of days, positive or negative.
@@ -296,8 +296,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration twoHours = Duration.ofHours(2);
      * Duration workDay = Duration.ofHours(8);
-     * Duration negativeHour = Duration.ofHours(-1);   // returns -1 hour
-     * long minutes = twoHours.toMinutes();            // returns 120
+     * Duration negativeHour = Duration.ofHours(-1);  // returns -1 hour
+     * long minutes = twoHours.toMinutes();           // returns 120
      * }</pre>
      *
      * @param hours the number of hours, positive or negative.
@@ -319,8 +319,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration fiveMinutes = Duration.ofMinutes(5);
      * Duration oneHourThirty = Duration.ofMinutes(90);
-     * Duration negativeMinutes = Duration.ofMinutes(-15);   // returns -15 minutes
-     * long seconds = fiveMinutes.toSeconds();               // returns 300
+     * Duration negativeMinutes = Duration.ofMinutes(-15);  // returns -15 minutes
+     * long seconds = fiveMinutes.toSeconds();              // returns 300
      * }</pre>
      *
      * @param minutes the number of minutes, positive or negative.
@@ -342,8 +342,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration thirtySeconds = Duration.ofSeconds(30);
      * Duration twoMinutes = Duration.ofSeconds(120);
-     * Duration negativeSeconds = Duration.ofSeconds(-10);   // returns -10 seconds
-     * long millis = thirtySeconds.toMillis();               // returns 30000
+     * Duration negativeSeconds = Duration.ofSeconds(-10);  // returns -10 seconds
+     * long millis = thirtySeconds.toMillis();              // returns 30000
      * }</pre>
      *
      * @param seconds the number of seconds, positive or negative.
@@ -365,8 +365,8 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * <pre>{@code
      * Duration halfSecond = Duration.ofMillis(500);
      * Duration oneSecond = Duration.ofMillis(1000);
-     * Duration negativeMillis = Duration.ofMillis(-250);   // returns -250 milliseconds
-     * boolean isZero = Duration.ofMillis(0).isZero();      // returns true
+     * Duration negativeMillis = Duration.ofMillis(-250);  // returns -250 milliseconds
+     * boolean isZero = Duration.ofMillis(0).isZero();     // returns true
      * }</pre>
      *
      * @param millis the number of milliseconds, positive or negative.
@@ -526,9 +526,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @return a {@link Duration} representing the time difference from {@code start} to {@code end},
      *         positive if {@code end} is after {@code start}, negative if {@code end} is before {@code start}.
      * @throws IllegalArgumentException if either temporal is {@code null}.
-     * @throws ArithmeticException if the calculated number of milliseconds overflows a {@code long}.
      * @throws DateTimeException if the duration cannot be calculated (e.g., the temporal types are incompatible
      *         or do not support {@link ChronoUnit#MILLIS}).
+     * @throws ArithmeticException if the calculated number of milliseconds overflows a {@code long}.
      * @see #between(java.util.Date, java.util.Date)
      * @see #between(java.util.Calendar, java.util.Calendar)
      * @see Temporal#until(java.time.temporal.Temporal, java.time.temporal.TemporalUnit)
@@ -536,7 +536,7 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * @see ChronoUnit#between(Temporal, Temporal)
      * @see java.time.Duration#between(java.time.temporal.Temporal, java.time.temporal.Temporal)
      */
-    public static Duration between(final Temporal start, final Temporal end) throws IllegalArgumentException, ArithmeticException, DateTimeException {
+    public static Duration between(final Temporal start, final Temporal end) throws IllegalArgumentException, DateTimeException, ArithmeticException {
         N.checkArgNotNull(start, cs.start);
         N.checkArgNotNull(end, cs.end);
 
@@ -1353,9 +1353,9 @@ public final class Duration implements Comparable<Duration>, Immutable {
      * Duration oneHour = Duration.ofHours(1);
      * Duration thirtyMinutes = Duration.ofMinutes(30);
      *
-     * int cmp = oneHour.compareTo(thirtyMinutes);             // returns > 0 (1 hour > 30 min)
-     * int cmp2 = thirtyMinutes.compareTo(oneHour);            // returns < 0 (30 min < 1 hour)
-     * int cmp3 = oneHour.compareTo(Duration.ofMinutes(60));   // returns == 0 (equal)
+     * int cmp = oneHour.compareTo(thirtyMinutes);            // returns > 0 (1 hour > 30 min)
+     * int cmp2 = thirtyMinutes.compareTo(oneHour);           // returns < 0 (30 min < 1 hour)
+     * int cmp3 = oneHour.compareTo(Duration.ofMinutes(60));  // returns == 0 (equal)
      *
      * // Sorting durations
      * List<Duration> times = Arrays.asList(

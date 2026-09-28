@@ -33,11 +33,11 @@ import com.landawn.abacus.util.function.ShortConsumer;
  *     stats.accept(value);
  * }
  *
- * System.out.println("Count: " + stats.getCount());   // prints 5
- * System.out.println("Sum: " + stats.getSum());   // prints 150
- * System.out.println("Min: " + stats.getMin());   // prints 10
- * System.out.println("Max: " + stats.getMax());   // prints 50
- * System.out.println("Average: " + stats.getAverage());   // prints 30.0
+ * System.out.println("Count: " + stats.getCount());      // prints 5
+ * System.out.println("Sum: " + stats.getSum());          // prints 150
+ * System.out.println("Min: " + stats.getMin());          // prints 10
+ * System.out.println("Max: " + stats.getMax());          // prints 50
+ * System.out.println("Average: " + stats.getAverage());  // prints 30.0
  * }</pre>
  *
  * @see java.util.IntSummaryStatistics

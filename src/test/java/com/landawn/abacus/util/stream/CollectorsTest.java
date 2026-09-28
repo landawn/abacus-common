@@ -3801,11 +3801,11 @@ public class CollectorsTest extends TestBase {
 
         assertThrows(IllegalStateException.class, () -> Arrays.asList("a", "b", "a").stream().collect(Collectors.toMap(Function.identity(), String::length)));
 
-        // A null key is rejected with IllegalArgumentException, matching Stream.groupTo and the rest of this
-        // library, rather than the NullPointerException java.util.stream.Collectors.groupingBy would raise.
-        assertThrows(IllegalArgumentException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingBy(Function.identity())));
-        assertThrows(IllegalArgumentException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.countingBy(Function.identity())));
-        assertThrows(IllegalArgumentException.class,
+        // A null key is rejected with NullPointerException, matching Stream.groupTo and the rest of this
+        // library (and java.util.stream.Collectors.groupingBy).
+        assertThrows(NullPointerException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingBy(Function.identity())));
+        assertThrows(NullPointerException.class, () -> Arrays.asList("a", null, "b").stream().collect(Collectors.countingBy(Function.identity())));
+        assertThrows(NullPointerException.class,
                 () -> Arrays.asList("a", null, "b").stream().collect(Collectors.groupingByConcurrent(Function.identity())));
 
         assertThrows(UnsupportedOperationException.class, () -> stringList.parallelStream().collect(Collectors.first()));
@@ -4912,4 +4912,132 @@ public class CollectorsTest extends TestBase {
         assertTrue(delta < 32L * 1024 * 1024, "toSet(" + hugeBound + ") on a 3-element stream retained " + delta + " bytes");
     }
 
+    @Test
+    public void testMinMaxByOrdersNullKeyBeforeNonNullKeys() {
+        final Optional<Pair<String, String>> result = Stream.of("bb", "a", "ccc")
+                .collect(Collectors.minMaxBy(s -> "bb".equals(s) ? null : s.length()));
+
+        assertTrue(result.isPresent());
+        assertEquals("bb", result.get().left());
+        assertEquals("ccc", result.get().right());
+
+        // minBy, by contrast, orders null keys last.
+        assertEquals("a", Stream.of("bb", "a", "ccc").collect(Collectors.minBy(s -> "bb".equals(s) ? null : s.length())).get());
+
+        final Optional<String> withFinisher = Stream.of("bb", "a", "ccc")
+                .collect(Collectors.minMaxBy(s -> "bb".equals(s) ? null : s.length(), (min, max) -> min + "-" + max));
+        assertEquals("bb-ccc", withFinisher.get());
+    }
+    // ---- perf review 2026-09-26 G112 begin ----
+    // The previous accumulator of commonPrefix()/commonSuffix(), rebuilt from the public Strings helpers: returns the finished result.
+    private static String g112CommonAffixReference(final List<CharSequence> elements, final boolean prefix) {
+        CharSequence left = null;
+        int length = -1;
+
+        for (final CharSequence t : elements) {
+            if (length == -1) {
+                left = t;
+                length = N.len(t);
+            } else if (length > 0) {
+                length = Math.min(length,
+                        prefix ? com.landawn.abacus.util.Strings.lengthOfCommonPrefix(left, t) : com.landawn.abacus.util.Strings.lengthOfCommonSuffix(left, t));
+                left = N.len(t) < N.len(left) ? t : left;
+            }
+        }
+
+        if (left == null || length <= 0) {
+            return "";
+        }
+
+        return prefix ? left.subSequence(0, length).toString() : left.subSequence(left.length() - length, left.length()).toString();
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static String g112CollectSplit(final Collector collector, final List<CharSequence> first, final List<CharSequence> second) {
+        final Object a = collector.supplier().get();
+        final Object b = collector.supplier().get();
+        first.forEach(e -> collector.accumulator().accept(a, e));
+        second.forEach(e -> collector.accumulator().accept(b, e));
+        return (String) collector.finisher().apply(collector.combiner().apply(a, b));
+    }
+
+    private static String g112RandomString(final java.util.Random random, final char[] alphabet, final int maxLength) {
+        final int length = random.nextInt(maxLength + 1);
+        final char[] chars = new char[length];
+
+        for (int i = 0; i < length; i++) {
+            chars[i] = alphabet[random.nextInt(alphabet.length)];
+        }
+
+        return new String(chars);
+    }
+
+    // G112-06: commonPrefix()/commonSuffix() compare at most (current length + 1) chars per element - randomized differential test
+    // against the previous full-scan accumulator, incl. surrogate pairs and lone surrogates at the boundary, null/empty elements,
+    // long shared runs, StringBuilder elements and the combiner
+    @Test
+    public void testCommonPrefixSuffix_boundedScanMatchesFullScan_G112() {
+        final char[] alphabet = { 'a', 'b', (char) 0xD83D, (char) 0xDE00, (char) 0xDE01 };
+        final String pair0 = new String(new char[] { (char) 0xD83D, (char) 0xDE00 });
+        final String pair1 = new String(new char[] { (char) 0xD83D, (char) 0xDE01 });
+        final String pair2 = new String(new char[] { (char) 0xD83E, (char) 0xDE00 });
+        final java.util.Random random = new java.util.Random(20260926L);
+
+        for (int round = 0; round < 20000; round++) {
+            final String shared = g112RandomString(random, alphabet, random.nextInt(4) == 0 ? 12 : 3);
+            final int count = 1 + random.nextInt(6);
+            final List<CharSequence> elements = new ArrayList<>();
+
+            for (int i = 0; i < count; i++) {
+                final int kind = random.nextInt(20);
+
+                if (kind == 0) {
+                    elements.add(null);
+                } else if (kind == 1) {
+                    elements.add("");
+                } else {
+                    final String tail = g112RandomString(random, alphabet, 4);
+                    final String head = random.nextBoolean() ? shared.substring(0, random.nextInt(shared.length() + 1)) : shared;
+                    final String s = random.nextBoolean() ? head + tail : tail + head;
+                    elements.add(kind == 2 ? new StringBuilder(s) : s);
+                }
+            }
+
+            for (final boolean prefix : new boolean[] { true, false }) {
+                final String expected = g112CommonAffixReference(elements, prefix);
+                assertEquals(expected, prefix ? elements.stream().collect(Collectors.commonPrefix()) : elements.stream().collect(Collectors.commonSuffix()),
+                        elements + " prefix=" + prefix);
+
+                final int split = random.nextInt(elements.size() + 1);
+                final List<CharSequence> first = elements.subList(0, split);
+                final List<CharSequence> second = elements.subList(split, elements.size());
+                final String expectedSplit;
+
+                if (first.isEmpty()) {
+                    expectedSplit = g112CommonAffixReference(second, prefix);
+                } else if (second.isEmpty()) {
+                    expectedSplit = g112CommonAffixReference(first, prefix);
+                } else {
+                    final List<CharSequence> merged = new ArrayList<>(first);
+                    merged.add(g112CommonAffixReference(second, prefix));
+                    expectedSplit = g112CommonAffixReference(merged, prefix);
+                }
+
+                assertEquals(expectedSplit, g112CollectSplit(prefix ? Collectors.commonPrefix() : Collectors.commonSuffix(), first, second),
+                        elements + " split=" + split + " prefix=" + prefix);
+            }
+        }
+
+        // long shared runs beyond the current common prefix / suffix
+        final String run = com.landawn.abacus.util.Strings.repeat("z", 500);
+        assertEquals("a", Stream.of("aa" + run, "ab" + run, "aa" + run, "aa" + run).collect(Collectors.commonPrefix()));
+        assertEquals("a", Stream.of(run + "aa", run + "ba", run + "aa", run + "aa").collect(Collectors.commonSuffix()));
+        assertEquals("aa" + run, Stream.of("aa" + run, "aa" + run + "x", "aa" + run + "y").collect(Collectors.commonPrefix()));
+        assertEquals("x" + pair0, Stream.of("x" + pair0 + "a", "x" + pair0 + "b", "x" + pair0 + "a").collect(Collectors.commonPrefix()));
+        assertEquals("x", Stream.of("x" + pair0, "x" + pair1, "x" + pair0).collect(Collectors.commonPrefix()));
+        assertEquals("", Stream.of(pair0, pair1).collect(Collectors.commonPrefix()));
+        assertEquals("", Stream.of(pair0, pair2).collect(Collectors.commonSuffix()));
+        assertEquals("b", Stream.of(pair0 + "b", pair2 + "b", pair0 + "b").collect(Collectors.commonSuffix()));
+    }
+    // ---- perf review 2026-09-26 G112 end ----
 }

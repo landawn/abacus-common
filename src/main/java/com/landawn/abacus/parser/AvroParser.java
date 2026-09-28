@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -37,6 +38,7 @@ import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericEnumSymbol;
+import org.apache.avro.generic.GenericFixed;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
@@ -79,7 +81,10 @@ import com.landawn.abacus.util.cs;
  * retain their Avro representations. An array datum supplies the collection contents (only the first
  * array datum is read); record datums supply successive collection elements. A configured element
  * type overrides the outer declared element type. Scalar conversions use the target Type's range checks.
- * A schema field without a matching bean property is skipped while the inherited
+ * A Map target reads a record datum by field name, or the map datum written under a root {@code map} schema,
+ * whose keys and values are converted to the declared key/value types (untyped keys and values keep their Avro
+ * representations, for example {@code Utf8} keys). Any other datum for a bean or Map target, such as an array
+ * datum, is rejected with {@code IllegalArgumentException}. A schema field without a matching bean property is skipped while the inherited
  * {@code ignoreUnmatchedProperty} option is enabled (the default) and rejected with a
  * {@link ParsingException} otherwise.</p>
  *
@@ -92,7 +97,9 @@ import com.landawn.abacus.util.cs;
  * (an out-of-range value becomes infinity), as on the read side. Non-{@code Number} values such as a
  * {@code String} for an {@code int} field are still rejected by Avro. Java {@code Enum} constants and symbol
  * names are converted to Avro enum symbols for {@code enum} fields; an undefined symbol fails with
- * {@code IllegalArgumentException}. Bean properties and map keys that are not fields of the record schema are
+ * {@code IllegalArgumentException}. A {@code byte[]} value is written to a {@code bytes} field, or to a {@code fixed}
+ * field when its length is exactly the fixed size (otherwise {@code IllegalArgumentException}); a {@code bytes} or
+ * {@code fixed} datum is read back into a {@code byte[]} property, element or map value. Bean properties and map keys that are not fields of the record schema are
  * rejected by default, including null-valued properties and keys; {@link AvroSerConfig#setIgnoreUnknownFields(boolean) setIgnoreUnknownFields(true)}
  * explicitly enables projection that discards those fields, including in nested records.</p>
  *
@@ -173,7 +180,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *         {@code obj} is {@code null}
      * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, an
      *         inferred {@code SpecificRecord} collection contains nulls or more than one record class, or an
-     *         enum value is not one of the schema's symbols.
+     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size.
      * @throws ArithmeticException if a {@code Number} does not fit an {@code int}/{@code long} field
      * @throws NumberFormatException if a floating-point or decimal {@code Number} is written to an {@code int}/{@code long} field
      */
@@ -215,7 +222,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param output the output file to write to (must not be {@code null})
      * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, an
      *         inferred {@code SpecificRecord} collection contains nulls or more than one record class, or an
-     *         enum value is not one of the schema's symbols; or {@code output} is {@code null}.
+     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size;
+     *         or {@code output} is {@code null} or a directory.
      * @throws UncheckedIOException if creating or opening the output file, writing the Avro container, or flushing the output fails.
      * @throws ArithmeticException if a {@code Number} does not fit an {@code int}/{@code long} field
      * @throws NumberFormatException if a floating-point or decimal {@code Number} is written to an {@code int}/{@code long} field
@@ -254,7 +262,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * <ul>
      *   <li>SpecificRecord instances (Avro generated classes)</li>
      *   <li>Collections of SpecificRecord</li>
-     *   <li>GenericRecord instances</li>
+     *   <li>GenericRecord instances (requires schema in config)</li>
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
      *
@@ -283,7 +291,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @param output the output stream to write to; may be {@code null} only when {@code obj} is {@code null}
      * @throws IllegalArgumentException if a required schema is missing, the source type is unsupported, an
      *         inferred {@code SpecificRecord} collection contains nulls or more than one record class, or an
-     *         enum value is not one of the schema's symbols; or {@code obj} is non-null and {@code output} is {@code null}.
+     *         enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its {@code fixed} field's size;
+     *         or {@code obj} is non-null and {@code output} is {@code null}.
      * @throws UncheckedIOException if writing the Avro container header or records, or flushing the output fails.
      * @throws ArithmeticException if a {@code Number} does not fit an {@code int}/{@code long} field
      * @throws NumberFormatException if a floating-point or decimal {@code Number} is written to an {@code int}/{@code long} field
@@ -391,7 +400,9 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
     /**
      * Converts nested Java containers according to their datum schema, range-checks {@code Number} values for
      * {@code int}/{@code long} schemas with the same {@link Type} conversion the read side uses, and converts
-     * enum values to Avro symbols. Other scalar validation is left to Avro.
+     * enum values to Avro symbols and {@code byte[]} values to the {@code ByteBuffer}/{@code GenericFixed} a {@code bytes}/{@code fixed}
+     * schema requires.
+     * Other scalar validation is left to Avro.
      *
      * @param value the Java value, or {@code null}
      * @param schema the schema for this value
@@ -400,7 +411,8 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @throws ArithmeticException if a {@code Number} does not fit an {@code int}/{@code long} schema
      * @throws NumberFormatException if a numeric value's string representation cannot be parsed as an integer for its
      *         Avro {@code int} or {@code long} schema
-     * @throws IllegalArgumentException if an enum value is not one of the schema's symbols
+     * @throws IllegalArgumentException if an enum value is not one of the schema's symbols, or a {@code byte[]} length differs from its
+     *         {@code fixed} schema's size
      */
     private Object toAvroDatum(final Object value, final Schema schema, final boolean ignoreUnknownFields)
             throws ArithmeticException, NumberFormatException, IllegalArgumentException {
@@ -420,6 +432,21 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                 return value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte || !(value instanceof Number)
                         ? value
                         : LONG_TYPE.valueOf(value);
+            case BYTES:
+                // GenericDatumWriter requires a ByteBuffer for a bytes schema; the natural Java form of a bean property
+                // or map value is byte[], which failed the whole write with a ClassCastException.
+                return value instanceof byte[] bytes ? ByteBuffer.wrap(bytes) : value;
+            case FIXED:
+                if (value instanceof byte[] bytes) {
+                    // GenericDatumWriter requires a GenericFixed and writes exactly getFixedSize() bytes of it.
+                    if (bytes.length != schema.getFixedSize()) {
+                        throw new IllegalArgumentException("A byte[] of length " + bytes.length + " cannot be written to fixed " + schema.getFullName()
+                                + " of size " + schema.getFixedSize());
+                    }
+
+                    return new GenericData.Fixed(schema, bytes);
+                }
+                return value;
             case ENUM:
                 // GenericDatumWriter accepts only GenericEnumSymbol (Java enums are a SpecificDatumWriter feature),
                 // while the read side already maps a symbol back to a Java enum through Type.valueOf.
@@ -589,10 +616,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @throws UncheckedIOException if the nonempty Base64-decoded bytes have an invalid or truncated Avro container header or record
      * @throws ParsingException if a schema field has no matching bean property and
      *         {@code ignoreUnmatchedProperty} is disabled
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     @Override
     public <T> T deserialize(String source, AvroDeserConfig config, Type<? extends T> targetType)
-            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, ArithmeticException {
         N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetType, cs.targetType);
 
@@ -636,10 +664,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @throws UncheckedIOException if the nonempty Base64-decoded bytes have an invalid or truncated Avro container header or record
      * @throws ParsingException if a schema field has no matching bean property and
      *         {@code ignoreUnmatchedProperty} is disabled
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     @Override
     public <T> T deserialize(final String source, final AvroDeserConfig config, final Class<? extends T> targetClass)
-            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, ArithmeticException {
         N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetClass, cs.targetClass);
 
@@ -674,10 +703,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *         Avro container data
      * @throws ParsingException if a schema field has no matching bean property and
      *         {@code ignoreUnmatchedProperty} is disabled
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     @Override
     public <T> T deserialize(File source, AvroDeserConfig config, Type<? extends T> targetType)
-            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, ArithmeticException {
         N.checkArgNotNull(source, cs.source);
         N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
         N.checkArgNotNull(targetType, cs.targetType);
@@ -717,10 +747,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *         Avro container data
      * @throws ParsingException if a schema field has no matching bean property and
      *         {@code ignoreUnmatchedProperty} is disabled
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     @Override
     public <T> T deserialize(final File source, final AvroDeserConfig config, final Class<? extends T> targetClass)
-            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, ArithmeticException {
         N.checkArgNotNull(source, cs.source);
         N.checkArgument(!source.isDirectory(), "source must not be a directory: %s", source);
         N.checkArgNotNull(targetClass, cs.targetClass);
@@ -746,7 +777,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * <ul>
      *   <li>SpecificRecord classes (Avro generated classes)</li>
      *   <li>Collections of SpecificRecord</li>
-     *   <li>GenericRecord</li>
+     *   <li>GenericRecord (requires schema in config)</li>
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
      *
@@ -779,10 +810,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @throws UncheckedIOException if reading the Avro container header or records from {@code source} fails, including an empty,
      *         invalid or truncated container
      * @throws ParsingException if a schema field has no matching bean property and {@code ignoreUnmatchedProperty} is disabled
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     @Override
     public <T> T deserialize(InputStream source, AvroDeserConfig config, Type<? extends T> targetType)
-            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, ArithmeticException {
         N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetType, cs.targetType);
 
@@ -842,7 +874,22 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
                 if (GenericRecord.class.isAssignableFrom(targetClass)) {
                     return (T) (dataFileReader.hasNext() ? dataFileReader.next() : null);
                 } else if (targetType.isBean() || targetType.isMap()) {
-                    return dataFileReader.hasNext() ? fromGenericRecord((GenericRecord) dataFileReader.next(), targetType, ignoreUnmatchedProperty) : null;
+                    if (!dataFileReader.hasNext()) {
+                        return null;
+                    }
+
+                    final Object datum = dataFileReader.next();
+
+                    if (datum instanceof GenericRecord genericRecord) {
+                        return fromGenericRecord(genericRecord, targetType, ignoreUnmatchedProperty);
+                    } else if (targetType.isMap() && datum instanceof Map) {
+                        // A root map schema (which serialize writes for a Map) yields a map datum, not a record:
+                        // convert it exactly like a nested map value instead of failing with a ClassCastException.
+                        return (T) convertAvroValue(datum, targetType, ignoreUnmatchedProperty);
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Can't convert an Avro " + dataFileReader.getSchema().getType() + " datum to target type: " + targetType.name());
+                    }
                 } else if (targetType.isCollection()) {
                     // An array is one datum, whereas record collections are a sequence of datums.
                     // Inspect the datum before dispatching on its requested element type.
@@ -874,13 +921,13 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * Avro 1.12.2+ refuses to instantiate SpecificRecord types that are not on its trust list.
      * Trust the class the caller asked to deserialize, composing with any existing global predicate.
      */
-    private static void trustSpecificRecordClass(final Class<?> cls) {
+    private static void trustSpecificRecordClass(final Class<?> targetClass) {
         synchronized (AVRO_CLASS_TRUST_LOCK) {
             final ClassSecurityValidator.ClassSecurityPredicate current = ClassSecurityValidator.getGlobal();
-            if (current != null && current.isTrusted(cls)) {
+            if (current != null && current.isTrusted(targetClass)) {
                 return;
             }
-            final ClassSecurityValidator.ClassSecurityPredicate added = ClassSecurityValidator.builder().add(cls).build();
+            final ClassSecurityValidator.ClassSecurityPredicate added = ClassSecurityValidator.builder().add(targetClass).build();
             ClassSecurityValidator.setGlobal(current == null ? added : ClassSecurityValidator.composite(current, added));
         }
     }
@@ -888,10 +935,10 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
     private static OutputStream nonClosingOutputStream(final OutputStream output) {
         return new FilterOutputStream(output) {
             @Override
-            public void write(final byte[] b, final int off, final int len) throws IOException {
+            public void write(final byte[] b, final int off, final int length) throws IOException {
                 // FilterOutputStream's default bulk write loops byte-by-byte through write(int);
                 // delegate directly to avoid one syscall per byte for every Avro block.
-                out.write(b, off, len);
+                out.write(b, off, length);
             }
 
             @Override
@@ -928,7 +975,7 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * <ul>
      *   <li>SpecificRecord classes (Avro generated classes)</li>
      *   <li>Collections of SpecificRecord</li>
-     *   <li>GenericRecord</li>
+     *   <li>GenericRecord (requires schema in config)</li>
      *   <li>Regular Java beans and Maps (requires schema in config)</li>
      * </ul>
      *
@@ -962,10 +1009,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      *         invalid or truncated container
      * @throws ParsingException if a schema field has no matching bean property and
      *         {@code ignoreUnmatchedProperty} is disabled
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     @Override
     public <T> T deserialize(final InputStream source, final AvroDeserConfig config, final Class<? extends T> targetClass)
-            throws IllegalArgumentException, UncheckedIOException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, ArithmeticException {
         N.checkArgNotNull(source, cs.source);
         N.checkArgNotNull(targetClass, cs.targetClass);
 
@@ -1018,9 +1066,10 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
     /**
      * @throws IllegalArgumentException if an element cannot be converted to {@code elementType}
      * @throws ParsingException if an element record contains an unmatched property and {@code ignoreUnmatchedProperty} is false
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     private Collection<Object> convertAvroCollection(final Collection<?> source, final Type<?> targetType, final Type<?> elementType,
-            final boolean ignoreUnmatchedProperty) throws IllegalArgumentException, ParsingException {
+            final boolean ignoreUnmatchedProperty) throws IllegalArgumentException, ParsingException, ArithmeticException {
         if (source == null) {
             return null;
         }
@@ -1035,10 +1084,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
     /**
      * @throws IllegalArgumentException if a non-null value required to become a collection is not an Avro array or cannot be converted to its target type
      * @throws ParsingException if a record contains an unmatched property and unmatched properties are not ignored
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Object convertAvroValue(final Object value, final Type<?> targetType, final boolean ignoreUnmatchedProperty)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, ArithmeticException {
         if (value == null || targetType == null || targetType.isObject()) {
             return value;
         }
@@ -1061,6 +1111,16 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
             }
             return result;
         }
+        if (value instanceof ByteBuffer buffer && targetType.javaType() == byte[].class) {
+            // An Avro bytes datum: Type.valueOf(Object) goes through the buffer's toString() and silently answered null.
+            final byte[] bytes = new byte[buffer.remaining()];
+            buffer.duplicate().get(bytes);
+            return bytes;
+        }
+        if (value instanceof GenericFixed fixed && targetType.javaType() == byte[].class) {
+            // An Avro fixed datum: Type.valueOf(Object) would treat it as a bean and fail.
+            return fixed.bytes().clone();
+        }
         return targetType.javaType().isInstance(value) ? value : targetType.valueOf(value);
     }
 
@@ -1077,10 +1137,11 @@ public final class AvroParser extends AbstractParser<AvroSerConfig, AvroDeserCon
      * @throws IllegalArgumentException if the record cannot be converted to the target type
      * @throws ParsingException if a schema field has no matching bean property and
      *         {@code ignoreUnmatchedProperty} is {@code false}
+     * @throws ArithmeticException if a decoded integral value does not fit the numeric type of its target element, property or map entry
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private <T> T fromGenericRecord(final GenericRecord source, final Type<? extends T> targetType, final boolean ignoreUnmatchedProperty)
-            throws IllegalArgumentException, ParsingException {
+            throws IllegalArgumentException, ParsingException, ArithmeticException {
         if (source == null || targetType.javaType().isAssignableFrom(source.getClass())) {
             return (T) source;
         }

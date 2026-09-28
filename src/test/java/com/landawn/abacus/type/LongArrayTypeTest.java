@@ -252,4 +252,33 @@ public class LongArrayTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> longArrayType.valueOf("[x]"));
         assertThrows(NumberFormatException.class, () -> longArrayType.valueOf("[NULL]"));
     }
+
+    // ---- deep review 2026-09-25 G014 begin ----
+
+    // G014-04: valueOf rejected the quoted elements its own serializeTo writes under writeLongAsString.
+    @Test
+    public void testValueOf_quotedElementsFromWriteLongAsString() throws IOException {
+        final Long[] array = { 9007199254740993L, null, -3L };
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+        String text = null;
+
+        try {
+            longArrayType.serializeTo(writer, array, JsonSerConfig.create().setWriteLongAsString(true));
+            text = writer.toString();
+        } finally {
+            Objectory.recycle(writer);
+        }
+
+        assertEquals("[\"9007199254740993\", null, \"-3\"]", text);
+        assertArrayEquals(array, longArrayType.valueOf(text));
+        assertArrayEquals(new Long[] { 1L, null }, longArrayType.valueOf("[\"1\", null]"));
+        assertArrayEquals(new Long[] { 1L, 2L }, longArrayType.valueOf("['1', 2]"));
+
+        // null handling is unchanged: only the bare literal is a null element; empty or quoted null still fail
+        assertThrows(NumberFormatException.class, () -> longArrayType.valueOf("[\"\"]"));
+        assertThrows(NumberFormatException.class, () -> longArrayType.valueOf("[\"null\"]"));
+        assertThrows(NumberFormatException.class, () -> longArrayType.valueOf("[\"1']"));
+    }
+
+    // ---- deep review 2026-09-25 G014 end ----
 }

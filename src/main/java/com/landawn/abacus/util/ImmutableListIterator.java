@@ -112,9 +112,9 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableListIterator<String> empty = ImmutableListIterator.empty();
-     * System.out.println(empty.hasNext());         // prints false
-     * System.out.println(empty.nextIndex());       // prints 0
-     * System.out.println(empty.previousIndex());   // prints -1
+     * System.out.println(empty.hasNext());        // prints false
+     * System.out.println(empty.nextIndex());      // prints 0
+     * System.out.println(empty.previousIndex());  // prints -1
      * }</pre>
      *
      * @param <T> the type of elements (not) returned by this iterator
@@ -142,17 +142,20 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * What that is depends on the backing list - an {@link java.util.ArrayList} list iterator throws a
      * message-less {@link NoSuchElementException}, an {@link java.util.AbstractList} one throws a
      * {@code NoSuchElementException} carrying the internal {@link IndexOutOfBoundsException} as its cause (which
-     * is what {@link ImmutableList}'s own views do), and a list iterator left stale by a structural change to the
+     * is what an {@link ImmutableList} built by {@code of(...)} or {@code copyOf(Object[])} reports, being backed
+     * by {@code Arrays.asList}), and a list iterator left stale by a structural change to the
      * backing list throws {@link java.util.ConcurrentModificationException} instead of reporting exhaustion at
      * all. {@link ObjIterator#of(java.util.Iterator)} and {@link ObjListIterator#of(ListIterator)} behave the
      * same way - none of the wrapping factories normalise exhaustion. Only {@link #empty()} and the iterators
      * these classes build for themselves report {@code InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX}.</p>
      *
-     * <p>So one {@link ImmutableList} still reports exhaustion in two different SHAPES, because its two
-     * traversals wrap different sources: {@code iterator()} wraps the backing collection's iterator and yields a
-     * message-less {@code NoSuchElementException}, while {@code listIterator()} wraps its list iterator and
-     * yields one carrying an {@link IndexOutOfBoundsException}. Do not match on the message or cause of either;
-     * test {@code hasNext()} / {@code hasPrevious()} instead.</p>
+     * <p>So one {@link ImmutableList} built by {@code of(...)} still reports exhaustion in two different SHAPES,
+     * because its two traversals wrap different sources: {@code iterator()} wraps the backing collection's
+     * iterator and yields a message-less {@code NoSuchElementException}, while {@code listIterator()} wraps its
+     * list iterator and yields one carrying an {@link IndexOutOfBoundsException}. An {@code ArrayList}-backed
+     * {@code ImmutableList} (from {@link ImmutableList#copyOf(java.util.Collection)} or a builder) and a
+     * {@link ImmutableList#subList(int, int) subList} report the message-less, causeless form from both. Do not
+     * match on the message or cause of either; test {@code hasNext()} / {@code hasPrevious()} instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -168,22 +171,22 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
      * }</pre>
      *
      * @param <T> the type of elements returned by the iterator
-     * @param iter the {@link ListIterator} to wrap; may be {@code null}
+     * @param iterator the {@link ListIterator} to wrap; may be {@code null}
      * @return an {@code ImmutableListIterator} wrapping the provided iterator, or
-     *         {@link #empty()} if {@code iter} is {@code null}
+     *         {@link #empty()} if {@code iterator} is {@code null}
      * @see #empty()
      */
-    public static <T> ImmutableListIterator<T> of(final ListIterator<? extends T> iter) {
-        if (iter == null) {
+    public static <T> ImmutableListIterator<T> of(final ListIterator<? extends T> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter == EMPTY) {
+        } else if (iterator == EMPTY) {
             return empty();
         }
 
         return new ImmutableListIterator<>() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             /**
@@ -193,14 +196,14 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
             @Override
             public T next() throws NoSuchElementException {
                 // No hasNext() guard: exhaustion is reported by the wrapped list iterator, not normalised to
-                // ERROR_MSG_FOR_NO_SUCH_EX the way ObjIterator.of / ObjListIterator.of do it. Pinned by
-                // ImmutableListIteratorTest; see the note on of(ListIterator) before "fixing" the asymmetry.
-                return iter.next();
+                // ERROR_MSG_FOR_NO_SUCH_EX - exactly as ObjIterator.of / ObjListIterator.of behave. Pinned by
+                // ImmutableListIteratorTest; see the note on of(ListIterator) before adding a guard.
+                return iterator.next();
             }
 
             @Override
             public boolean hasPrevious() {
-                return iter.hasPrevious();
+                return iterator.hasPrevious();
             }
 
             /**
@@ -209,17 +212,17 @@ public abstract class ImmutableListIterator<T> extends ObjIterator<T> implements
              */
             @Override
             public T previous() throws NoSuchElementException {
-                return iter.previous();
+                return iterator.previous();
             }
 
             @Override
             public int nextIndex() {
-                return iter.nextIndex();
+                return iterator.nextIndex();
             }
 
             @Override
             public int previousIndex() {
-                return iter.previousIndex();
+                return iterator.previousIndex();
             }
         };
     }

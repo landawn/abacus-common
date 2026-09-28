@@ -61,14 +61,14 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * Package-private constructor for {@code ByteBufferType} with a specific {@link java.nio.ByteBuffer} subclass.
      * Instances are created by {@link TypeFactory}; do not instantiate directly.
      *
-     * @param cls the specific {@code ByteBuffer} subclass represented by this type handler; also used as the type name source
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @param targetClass the specific {@code ByteBuffer} subclass represented by this type handler; also used as the type name source
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    ByteBufferType(final Class<? extends ByteBuffer> cls) throws IllegalArgumentException {
-        super(ClassUtil.getSimpleClassName(cls));
+    ByteBufferType(final Class<? extends ByteBuffer> targetClass) throws IllegalArgumentException {
+        super(ClassUtil.getSimpleClassName(targetClass));
 
-        typeClass = (Class<ByteBuffer>) cls;
+        typeClass = (Class<ByteBuffer>) targetClass;
     }
 
     /**
@@ -219,8 +219,8 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteBuffer buf = ByteBuffer.allocate(10);
-     * buf.put((byte) 10).put((byte) 20);                // position is now 2
-     * byte[] bytes = ByteBufferType.byteArrayOf(buf);   // returns [10, 20]; buf.position() still 2
+     * buf.put((byte) 10).put((byte) 20);               // position is now 2
+     * byte[] bytes = ByteBufferType.byteArrayOf(buf);  // returns [10, 20]; buf.position() still 2
      * }</pre>
      *
      * @param x the {@code ByteBuffer} to extract bytes from; must not be {@code null}
@@ -248,9 +248,9 @@ public class ByteBufferType extends AbstractType<ByteBuffer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteBuffer buf = ByteBufferType.valueOf(new byte[] { 1, 2, 3 });
-     * buf.position();   // returns 3
-     * buf.limit();      // returns 3
-     * buf.capacity();   // returns 3
+     * buf.position();  // returns 3
+     * buf.limit();     // returns 3
+     * buf.capacity();  // returns 3
      * }</pre>
      *
      * <p>This is a {@code static} utility and therefore always produces a plain heap buffer. A handler bound

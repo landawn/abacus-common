@@ -34,6 +34,13 @@ import com.landawn.abacus.util.N;
  *
  * <p>The type name used in the type system is {@code "JUDate"} (to avoid ambiguity with
  * {@code java.sql.Date}).</p>
+ *
+ * <p><b>Text precision:</b> the text form written by {@code stringOf}, {@code appendTo} and {@code serializeTo}
+ * (with no {@code DateTimeFormat} or with {@code ISO_8601_DATE_TIME}) is {@link Dates#format(java.util.Date)}'s
+ * default for a plain {@code java.util.Date}: UTC at whole-second precision, e.g. {@code "2020-09-13T12:26:40Z"}.
+ * The millisecond fraction is dropped, so a value with non-zero milliseconds does not round-trip through that
+ * text. Serialize with {@code DateTimeFormat.LONG} or {@code ISO_8601_TIMESTAMP} to keep it; the JDBC accessors
+ * ({@link java.sql.Timestamp}) keep it as well.</p>
  */
 @SuppressWarnings({ "java:S1942", "java:S2143", "java:S2160" })
 public class JUDateType extends AbstractDateType<Date> {
@@ -112,8 +119,11 @@ public class JUDateType extends AbstractDateType<Date> {
      * <ul>
      *   <li>{@code null} or null-datetime strings: returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns the current system time</li>
-     *   <li>Purely numeric values (possible epoch milliseconds): converted via the {@code Dates.create*} epoch factory</li>
-     *   <li>All other values: parsed via {@link Dates#parseToJUDate(String)}</li>
+     *   <li>Numeric strings of more than four characters (an optional sign followed by ASCII decimal digits only;
+     *       no {@code 0x} hex, no {@code L} suffix) within the {@code long} range: treated as epoch milliseconds and
+     *       converted via the {@code Dates.create*} epoch factory</li>
+     *   <li>All other values: parsed via {@link Dates#parseToJUDate(String)}, which rejects shorter numeric strings
+     *       such as {@code "1234"} (and out-of-range numeric strings) as ambiguous date text</li>
      * </ul>
      *
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
@@ -157,31 +167,31 @@ public class JUDateType extends AbstractDateType<Date> {
      *
      * @param cbuf   the character array containing the value; may be {@code null}
      * @param offset the index of the first character to use
-     * @param len    the number of characters to use
-     * @return the parsed {@link java.util.Date} value, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param length    the number of characters to use
+     * @return the parsed {@link java.util.Date} value, or {@code null} if {@code cbuf} is {@code null} or {@code length} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see {@link #valueOf(String)}),
      *         including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public Date valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
-        if ((cbuf == null) || (len == 0)) {
+    public Date valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return Dates.createJUDate(parseLong(cbuf, offset, len));
+                return Dates.createJUDate(parseLong(cbuf, offset, length));
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -224,15 +234,15 @@ public class JUDateType extends AbstractDateType<Date> {
      * {@link java.sql.Timestamp} it is used directly without copying.
      * A {@code null} value sets SQL {@code NULL}.
      *
-     * @param stmt the {@link PreparedStatement} in which to set the parameter
+     * @param statement the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x the {@link java.util.Date} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Date x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(columnIndex, x == null ? null : x instanceof java.sql.Timestamp ? (java.sql.Timestamp) x : new java.sql.Timestamp(x.getTime()));
+    public void set(final PreparedStatement statement, final int columnIndex, final Date x) throws NullPointerException, SQLException {
+        statement.setTimestamp(columnIndex, x == null ? null : x instanceof java.sql.Timestamp ? (java.sql.Timestamp) x : new java.sql.Timestamp(x.getTime()));
     }
 
     /**
@@ -241,14 +251,15 @@ public class JUDateType extends AbstractDateType<Date> {
      * {@link java.sql.Timestamp} it is used directly without copying.
      * A {@code null} value sets SQL {@code NULL}.
      *
-     * @param stmt the {@link CallableStatement} in which to set the parameter
+     * @param statement the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@link java.util.Date} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Date x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(parameterName, x == null ? null : x instanceof java.sql.Timestamp ? (java.sql.Timestamp) x : new java.sql.Timestamp(x.getTime()));
+    public void set(final CallableStatement statement, final String parameterName, final Date x) throws NullPointerException, SQLException {
+        statement.setTimestamp(parameterName,
+                x == null ? null : x instanceof java.sql.Timestamp ? (java.sql.Timestamp) x : new java.sql.Timestamp(x.getTime()));
     }
 }

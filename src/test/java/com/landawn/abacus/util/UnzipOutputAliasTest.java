@@ -61,6 +61,6 @@ public class UnzipOutputAliasTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> BiIterator.empty().unzipToLists(() -> shared));
         assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().unzipToLists(() -> shared));
         assertThrows(IllegalArgumentException.class, () -> BiIterator.empty().unzipToLists(null));
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().unzipToLists(() -> null));
+        assertThrows(NullPointerException.class, () -> TriIterator.empty().unzipToLists(() -> null));
     }
 }

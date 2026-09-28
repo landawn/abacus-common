@@ -1037,4 +1037,59 @@ public class AsyncExecutorTest extends TestBase {
             executor.shutdown();
         }
     }
+
+    @Test
+    public void testExecuteWithRetryCallableFailsWithRetryExhaustedWhenFinalResultStillRejected() throws Exception {
+        final AsyncExecutor executor = new AsyncExecutor(1, 1, 1L, TimeUnit.SECONDS);
+
+        try {
+            final AtomicInteger attempts = new AtomicInteger();
+            final ContinuableFuture<String> future = executor.executeWithRetry(() -> {
+                attempts.incrementAndGet();
+                return (String) null;
+            }, 2, 0L, (result, e) -> result == null);
+
+            final ExecutionException ex = assertThrows(ExecutionException.class, future::get);
+            assertTrue(ex.getCause() instanceof com.landawn.abacus.exception.RetryExhaustedException, String.valueOf(ex.getCause()));
+            assertEquals(3, attempts.get());
+        } finally {
+            executor.shutdownAndAwait(5, TimeUnit.SECONDS);
+        }
+    }
+
+    @Test
+    public void testExecuteWithRetryCallableFailsWithFinalAttemptException() throws Exception {
+        final AsyncExecutor executor = new AsyncExecutor(1, 1, 1L, TimeUnit.SECONDS);
+
+        try {
+            final AtomicInteger attempts = new AtomicInteger();
+            final ContinuableFuture<String> future = executor.executeWithRetry(() -> {
+                throw new java.io.IOException("attempt " + attempts.incrementAndGet());
+            }, 1, 0L, (result, e) -> e != null);
+
+            final ExecutionException ex = assertThrows(ExecutionException.class, future::get);
+            assertTrue(ex.getCause() instanceof java.io.IOException, String.valueOf(ex.getCause()));
+            assertEquals("attempt 2", ex.getCause().getMessage());
+            assertEquals(2, attempts.get());
+        } finally {
+            executor.shutdownAndAwait(5, TimeUnit.SECONDS);
+        }
+    }
+
+    @Test
+    public void testToStringShowsNoExecutorBeforeCreationAndAfterShutdown() throws Exception {
+        final AsyncExecutor executor = new AsyncExecutor(1, 1, 1L, TimeUnit.SECONDS);
+
+        assertTrue(executor.toString().contains("activeCount: ?"), executor.toString());
+        assertTrue(executor.toString().endsWith("Executor: null}"), executor.toString());
+
+        assertEquals("x", executor.execute(() -> "x").get());
+        assertTrue(executor.toString().contains("ThreadPoolExecutor"), executor.toString());
+        assertFalse(executor.toString().contains("activeCount: ?"), executor.toString());
+
+        executor.shutdownAndAwait(5, TimeUnit.SECONDS);
+
+        assertTrue(executor.toString().contains("activeCount: ?"), executor.toString());
+        assertTrue(executor.toString().endsWith("Executor: null}"), executor.toString());
+    }
 }

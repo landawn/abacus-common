@@ -27,10 +27,12 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.HttpResponseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.parser.KryoParser;
 import com.landawn.abacus.parser.ParserFactory;
@@ -640,11 +642,14 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @param <T> the type of the tag
-     * @param type the class type used as a key for the tag
+     * @param type the class type used as a key for the tag; must not be {@code null}
      * @param tag the tag to attach, or {@code null} to remove existing tag
      * @return this OkHttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code type} is {@code null}.
      */
-    public <T> OkHttpRequest tag(final Class<? super T> type, final T tag) {
+    public <T> OkHttpRequest tag(final Class<? super T> type, final T tag) throws IllegalArgumentException {
+        N.checkArgNotNull(type, cs.type);
+
         requestBuilder.tag(type, tag);
         return this;
     }
@@ -688,11 +693,13 @@ public final class OkHttpRequest {
      * @param name the header name
      * @param value the header value
      * @return this OkHttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code name} is {@code null}.
+     * @throws IllegalArgumentException if {@code name} is {@code null} or empty, or the name or formatted value contains a character
+     *         rejected by OkHttp.
+     * @throws ArithmeticException if {@code value} is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest header(final String name, final Object value) throws IllegalArgumentException {
+    public OkHttpRequest header(final String name, final Object value) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(name, cs.name);
 
         requestBuilder.header(name, HttpHeaders.valueOf(name, value));
@@ -715,11 +722,17 @@ public final class OkHttpRequest {
      * @param name2 the second header name
      * @param value2 the second header value
      * @return this OkHttpRequest instance for method chaining
-     * @throws IllegalArgumentException if any header name is {@code null}.
+     * @throws IllegalArgumentException if any header name is {@code null} or empty, or a name or formatted value contains a character
+     *         rejected by OkHttp.
+     * @throws ArithmeticException if a header value is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
+    public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2)
+            throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(name1, cs.name1);
+        N.checkArgNotNull(name2, cs.name2);
+
         header(name1, value1);
         header(name2, value2);
 
@@ -746,12 +759,18 @@ public final class OkHttpRequest {
      * @param name3 the third header name
      * @param value3 the third header value
      * @return this OkHttpRequest instance for method chaining
-     * @throws IllegalArgumentException if any header name is {@code null}.
+     * @throws IllegalArgumentException if any header name is {@code null} or empty, or a name or formatted value contains a character
+     *         rejected by OkHttp.
+     * @throws ArithmeticException if a header value is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
     public OkHttpRequest headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, ArithmeticException {
+        N.checkArgNotNull(name1, cs.name1);
+        N.checkArgNotNull(name2, cs.name2);
+        N.checkArgNotNull(name3, cs.name3);
+
         header(name1, value1);
         header(name2, value2);
         header(name3, value3);
@@ -780,11 +799,12 @@ public final class OkHttpRequest {
      * @param headers A map containing header names and values
      * @return This OkHttpRequest instance for method chaining
      * @throws IllegalArgumentException if a header name is {@code null} or empty, or a name or formatted value contains a character rejected by OkHttp.
+     * @throws ArithmeticException if a header value is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      * @see #setHeaders(Headers)
      * @see Request.Builder#header(String, String)
      * @see HttpHeaders
      */
-    public OkHttpRequest headers(final Map<String, ?> headers) throws IllegalArgumentException {
+    public OkHttpRequest headers(final Map<String, ?> headers) throws IllegalArgumentException, ArithmeticException {
         if (N.notEmpty(headers)) {
             for (final Map.Entry<String, ?> entry : headers.entrySet()) {
                 header(entry.getKey(), entry.getValue());
@@ -838,10 +858,13 @@ public final class OkHttpRequest {
      *
      * @param headers the HttpHeaders object containing all headers to set
      * @return this OkHttpRequest instance for method chaining
+     * @throws ArithmeticException if a header value is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
+     * @throws IllegalArgumentException if a header name in {@code headers} is empty, or a name or formatted value contains a character
+     *         rejected by OkHttp.
      * @see Request.Builder#headers(Headers)
      * @see HttpHeaders
      */
-    public OkHttpRequest setHeaders(final HttpHeaders headers) {
+    public OkHttpRequest setHeaders(final HttpHeaders headers) throws ArithmeticException, IllegalArgumentException {
         final Headers.Builder builder = new Headers.Builder();
 
         if (headers != null && !headers.isEmpty()) {
@@ -883,7 +906,9 @@ public final class OkHttpRequest {
      * @param name the header name
      * @param value the header value
      * @return this OkHttpRequest instance for method chaining
-     * @throws IllegalArgumentException if {@code name} is {@code null}.
+     * @throws IllegalArgumentException if {@code name} is {@code null} or empty, or the name or formatted value contains a character
+     *         rejected by OkHttp.
+     * @throws ArithmeticException if {@code value} is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      * @deprecated This method is deprecated due to limited use cases in typical HTTP workflows.
      *             Most scenarios require replacing headers rather than adding duplicates.
      *             Use {@link #header(String, Object)} instead, which replaces any existing header
@@ -892,7 +917,7 @@ public final class OkHttpRequest {
      *             the underlying OkHttp RequestBuilder directly.
      */
     @Deprecated
-    public OkHttpRequest addHeader(final String name, final Object value) throws IllegalArgumentException {
+    public OkHttpRequest addHeader(final String name, final Object value) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(name, cs.name);
 
         requestBuilder.addHeader(name, HttpHeaders.valueOf(name, value));
@@ -990,6 +1015,8 @@ public final class OkHttpRequest {
      * @throws IllegalArgumentException if {@code json} is {@code null}.
      */
     public OkHttpRequest jsonBody(final String json) throws IllegalArgumentException {
+        N.checkArgNotNull(json, cs.json);
+
         return body(json, APPLICATION_JSON_MEDIA_TYPE);
     }
 
@@ -1007,8 +1034,10 @@ public final class OkHttpRequest {
      *
      * @param obj the object to serialize to JSON and send as the request body
      * @return this OkHttpRequest instance for method chaining
+     * @throws ParsingException if serializing {@code obj} to JSON fails because of unsupported or cyclic content
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while serializing {@code obj}
      */
-    public OkHttpRequest jsonBody(final Object obj) {
+    public OkHttpRequest jsonBody(final Object obj) throws ParsingException, UncheckedIOException {
         return body(N.toJson(obj), APPLICATION_JSON_MEDIA_TYPE);
     }
 
@@ -1028,6 +1057,8 @@ public final class OkHttpRequest {
      * @throws IllegalArgumentException if {@code xml} is {@code null}.
      */
     public OkHttpRequest xmlBody(final String xml) throws IllegalArgumentException {
+        N.checkArgNotNull(xml, cs.xml);
+
         return body(xml, APPLICATION_XML_MEDIA_TYPE);
     }
 
@@ -1045,8 +1076,10 @@ public final class OkHttpRequest {
      *
      * @param obj the object to serialize to XML and send as the request body
      * @return this OkHttpRequest instance for method chaining
+     * @throws ParsingException if serializing {@code obj} to XML fails because of unsupported or cyclic content
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while serializing {@code obj}
      */
-    public OkHttpRequest xmlBody(final Object obj) {
+    public OkHttpRequest xmlBody(final Object obj) throws ParsingException, UncheckedIOException {
         return body(N.toXml(obj), APPLICATION_XML_MEDIA_TYPE);
     }
 
@@ -1283,7 +1316,8 @@ public final class OkHttpRequest {
      *
      * @return the HTTP response; the caller must close it
      * @throws IllegalArgumentException if a request body has been configured on this request (OkHttp
-     *         forbids a body on GET)
+     *         forbids a body on GET), the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if the request could not be executed
      */
     public Response get() throws IllegalArgumentException, UncheckedIOException {
@@ -1302,8 +1336,10 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or {@link HttpResponse}, or a
-     *         request body has been configured on this request (OkHttp forbids a body on GET)
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or {@link HttpResponse}, a
+     *         request body has been configured on this request (OkHttp forbids a body on GET),
+     *         the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
@@ -1326,9 +1362,11 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return the HTTP response; the caller must close it
+     * @throws IllegalArgumentException if the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if the request could not be executed
      */
-    public Response post() throws UncheckedIOException {
+    public Response post() throws IllegalArgumentException, UncheckedIOException {
         return execute(HttpMethod.POST);
     }
 
@@ -1347,7 +1385,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class,
+     *         the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
@@ -1370,9 +1410,11 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return the HTTP response; the caller must close it
+     * @throws IllegalArgumentException if the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if the request could not be executed
      */
-    public Response put() throws UncheckedIOException {
+    public Response put() throws IllegalArgumentException, UncheckedIOException {
         return execute(HttpMethod.PUT);
     }
 
@@ -1391,7 +1433,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class,
+     *         the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
@@ -1414,9 +1458,11 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return the HTTP response; the caller must close it
+     * @throws IllegalArgumentException if the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if the request could not be executed
      */
-    public Response patch() throws UncheckedIOException {
+    public Response patch() throws IllegalArgumentException, UncheckedIOException {
         return execute(HttpMethod.PATCH);
     }
 
@@ -1435,7 +1481,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class,
+     *         the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
@@ -1456,9 +1504,11 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return the HTTP response; the caller must close it
+     * @throws IllegalArgumentException if the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if the request could not be executed
      */
-    public Response delete() throws UncheckedIOException {
+    public Response delete() throws IllegalArgumentException, UncheckedIOException {
         return execute(HttpMethod.DELETE);
     }
 
@@ -1475,7 +1525,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return The deserialized response body
-     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null} or is the abacus {@link HttpResponse} class,
+     *         the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
@@ -1499,7 +1551,8 @@ public final class OkHttpRequest {
      *
      * @return the HTTP response (with no body); the caller must close it
      * @throws IllegalArgumentException if a request body has been configured on this request (OkHttp
-     *         forbids a body on HEAD)
+     *         forbids a body on HEAD), the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if the request could not be executed
      */
     public Response head() throws IllegalArgumentException, UncheckedIOException {
@@ -1520,8 +1573,10 @@ public final class OkHttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return the HTTP response; the caller must close it
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or a request body has been
-     *         configured and {@code httpMethod} is GET or HEAD (OkHttp forbids a body on those methods)
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, a request body has been
+     *         configured and {@code httpMethod} is GET or HEAD (OkHttp forbids a body on those methods),
+     *         the request URL is not a valid HTTP or HTTPS URL, or the configured query cannot be encoded into it
+     *         (for example a query {@code Map} with a {@code null} key)
      * @throws UncheckedIOException if the request could not be executed
      */
     @Beta
@@ -1544,13 +1599,16 @@ public final class OkHttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      *                    Use {@link Response Response.class} to receive the raw OkHttp response, or
      *                    {@code Void.class} to discard the response body.
-     * @return the deserialized response body, or {@code null} if {@code resultClass} is {@code Void.class}
-     *         or the response carries no body. If {@code resultClass} is {@code Response.class}, the
+     * @return the deserialized response body, or {@code null} if {@code resultClass} is {@code Void.class}.
+     *         A successful response without content (a HEAD request, or a 204, 205 or 304 status) is not
+     *         mapped to {@code null}: it is decoded from empty input, so {@code String.class} yields {@code ""}
+     *         and {@code byte[].class} an empty array. If {@code resultClass} is {@code Response.class}, the
      *         caller must close the returned response.
      * @throws IllegalArgumentException if {@code httpMethod} or {@code resultClass} is {@code null}, or
      *         {@code resultClass} is the abacus {@link HttpResponse} type (use OkHttp's {@code Response} class
-     *         directly instead), or a request body has been configured and {@code httpMethod} is GET or HEAD
-     *         (OkHttp forbids a body on those methods).
+     *         directly instead), a request body has been configured and {@code httpMethod} is GET or HEAD
+     *         (OkHttp forbids a body on those methods), the request URL is not a valid HTTP or HTTPS URL, or the configured query
+     *         cannot be encoded into it (for example a query {@code Map} with a {@code null} key).
      * @throws UncheckedIOException if opening the connection, sending the request, or reading the response body fails
      * @throws HttpResponseException if the status code is not 2xx and resultClass is not okhttp3.Response.class
      */
@@ -1727,8 +1785,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public ContinuableFuture<Response> asyncGet() {
+    public ContinuableFuture<Response> asyncGet() throws RejectedExecutionException {
         return asyncGet(HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -1772,8 +1831,9 @@ public final class OkHttpRequest {
      * @param executor the executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response when the request finishes; the caller must close the completed response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public ContinuableFuture<Response> asyncGet(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Response> asyncGet(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(this::get, executor);
@@ -1796,8 +1856,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncGet(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -1817,8 +1878,9 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(() -> get(resultClass), executor);
@@ -1838,8 +1900,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public ContinuableFuture<Response> asyncPost() {
+    public ContinuableFuture<Response> asyncPost() throws RejectedExecutionException {
         return asyncPost(HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -1860,8 +1923,9 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public ContinuableFuture<Response> asyncPost(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Response> asyncPost(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(this::post, executor);
@@ -1882,8 +1946,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncPost(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -1904,8 +1969,9 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(() -> post(resultClass), executor);
@@ -1925,8 +1991,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public ContinuableFuture<Response> asyncPut() {
+    public ContinuableFuture<Response> asyncPut() throws RejectedExecutionException {
         return asyncPut(HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -1947,8 +2014,9 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public ContinuableFuture<Response> asyncPut(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Response> asyncPut(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(this::put, executor);
@@ -1969,8 +2037,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncPut(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -1991,8 +2060,9 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(() -> put(resultClass), executor);
@@ -2012,8 +2082,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public ContinuableFuture<Response> asyncPatch() {
+    public ContinuableFuture<Response> asyncPatch() throws RejectedExecutionException {
         return asyncPatch(HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -2034,8 +2105,9 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public ContinuableFuture<Response> asyncPatch(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Response> asyncPatch(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(this::patch, executor);
@@ -2056,8 +2128,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncPatch(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -2078,8 +2151,10 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncPatch(final Class<T> resultClass, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(() -> patch(resultClass), executor);
@@ -2098,8 +2173,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public ContinuableFuture<Response> asyncDelete() {
+    public ContinuableFuture<Response> asyncDelete() throws RejectedExecutionException {
         return asyncDelete(HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -2119,8 +2195,9 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public ContinuableFuture<Response> asyncDelete(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Response> asyncDelete(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(this::delete, executor);
@@ -2140,8 +2217,9 @@ public final class OkHttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncDelete(resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -2161,8 +2239,10 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(() -> delete(resultClass), executor);
@@ -2181,8 +2261,9 @@ public final class OkHttpRequest {
      * }</pre>
      *
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
-    public ContinuableFuture<Response> asyncHead() {
+    public ContinuableFuture<Response> asyncHead() throws RejectedExecutionException {
         return asyncHead(HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -2202,8 +2283,9 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
-    public ContinuableFuture<Response> asyncHead(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Response> asyncHead(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(this::head, executor);
@@ -2223,9 +2305,10 @@ public final class OkHttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
     @Beta
-    public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod) {
+    public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod) throws RejectedExecutionException {
         return asyncExecute(httpMethod, HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -2246,9 +2329,11 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return a ContinuableFuture that will complete with the HTTP response; the caller must close the completed response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
     @Beta
-    public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Response> asyncExecute(final HttpMethod httpMethod, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(() -> execute(httpMethod), executor);
@@ -2269,9 +2354,10 @@ public final class OkHttpRequest {
      * @param httpMethod The HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response body
+     * @throws RejectedExecutionException if the default executor refuses the task, for example after it has been shut down
      */
     @Beta
-    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncExecute(httpMethod, resultClass, HttpUtil.DEFAULT_EXECUTOR);
     }
 
@@ -2292,10 +2378,11 @@ public final class OkHttpRequest {
      * @param executor The executor to use for the asynchronous operation
      * @return A ContinuableFuture that will complete with the deserialized response body
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return submitAsync(() -> execute(httpMethod, resultClass), executor);

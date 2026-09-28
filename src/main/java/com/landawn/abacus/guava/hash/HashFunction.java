@@ -216,12 +216,12 @@ public interface HashFunction {
      *
      * @param input the byte array containing data to hash
      * @param off the starting offset in the array (zero-based, inclusive)
-     * @param len the number of bytes to hash from the array
+     * @param length the number of bytes to hash from the array
      * @return the hash code for the specified bytes
      * @throws NullPointerException if {@code input} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code off < 0} or {@code len < 0} or {@code off + len > input.length}
+     * @throws IndexOutOfBoundsException if {@code off < 0} or {@code length < 0} or {@code off + len > input.length}
      */
-    HashCode hash(byte[] input, int off, int len) throws NullPointerException, IndexOutOfBoundsException;
+    HashCode hash(byte[] input, int off, int length) throws NullPointerException, IndexOutOfBoundsException;
 
     /**
      * Computes the hash code for a character sequence without encoding. This is a
@@ -257,7 +257,7 @@ public interface HashFunction {
      *
      * <p><b>Warning:</b> Characters the charset cannot encode (including unpaired surrogates) are
      * replaced by the charset's replacement byte (typically {@code '?'}) before hashing, so such inputs
-     * can collide with each other: {@code hash("a\uD800", UTF_8)} equals {@code hash("a?", UTF_8)}, and
+     * can collide with each other: {@code hash("a" + (char) 0xD800, UTF_8)} equals {@code hash("a?", UTF_8)}, and
      * {@code hash("世", ISO_8859_1)} equals {@code hash("?", ISO_8859_1)}. Use {@link #hash(CharSequence)}
      * to hash every {@code char} exactly.
      *

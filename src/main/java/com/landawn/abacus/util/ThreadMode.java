@@ -16,7 +16,7 @@ package com.landawn.abacus.util;
 
 /**
  * Enumeration representing the threading mode used for event delivery in the
- * {@link com.landawn.abacus.eventbus.EventBus}. The mode controls whether subscriber
+ * {@code EventBus}. The mode controls whether subscriber
  * methods are invoked on the posting thread or dispatched through the configured executor.
  *
  * <p><b>Usage Examples:</b></p>
@@ -38,8 +38,6 @@ package com.landawn.abacus.util;
  * }
  * }</pre>
  *
- * @see com.landawn.abacus.eventbus.EventBus
- * @see com.landawn.abacus.eventbus.Subscribe
  */
 public enum ThreadMode {
 

@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.DoubleSummaryStatistics;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -139,8 +138,8 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      *
      * IteratorDoubleStream stream = new IteratorDoubleStream(sortedIterator, true, closeHandlers);
      * try {
-     *     OptionalDouble min = stream.min();                 // returns 1.0 (the minimum)
-     *     System.out.println("Min: " + min.getAsDouble());   // prints 1.0
+     *     OptionalDouble min = stream.min();                // returns 1.0 (the minimum)
+     *     System.out.println("Min: " + min.getAsDouble());  // prints 1.0
      * } finally {
      *     stream.close();
      * }
@@ -1193,7 +1192,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             private double[] aar;
             private int cursor = 0;
             private int to;
-            private LinkedList<Double> queue;
+            private DoubleList window;
+            // Index of the oldest retained value once full; preserve it across failed source pulls.
+            private int windowCursor;
             private Queue<Double> heap;
 
             @Override
@@ -1264,19 +1265,30 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                 if (!initialized) {
                     // Keep the window/heap across retries so a failed source read does not drop already-accepted candidates.
                     if (isSorted() && isSameComparator(comparator, comparator())) {
-                        if (queue == null) {
-                            queue = new LinkedList<>();
+                        if (window == null) {
+                            window = new DoubleList(Math.min(n, 16));
                         }
 
                         while (elements.hasNext()) {
-                            if (queue.size() >= n) {
-                                queue.poll();
+                            final double next = elements.nextDouble();
+                            if (window.size() < n) {
+                                window.add(next);
+                            } else {
+                                window.set(windowCursor, next);
+                                if (++windowCursor == n) {
+                                    windowCursor = 0;
+                                }
                             }
-
-                            queue.offer(elements.nextDouble());
                         }
 
-                        aar = Array.unbox(queue.toArray(N.EMPTY_DOUBLE_OBJ_ARRAY));
+                        aar = new double[window.size()];
+                        int outputIndex = 0;
+                        for (int i = windowCursor; i < window.size(); i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
+                        for (int i = 0; i < windowCursor; i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
                     } else {
                         final Comparator<? super Double> cmp = comparator;
                         if (heap == null) {
@@ -1301,7 +1313,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     }
 
                     to = aar.length;
-                    queue = null;
+                    window = null;
                     heap = null;
                     initialized = true;
                 }
@@ -1358,6 +1370,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             while (elements.hasNext()) {
                 action.accept(elements.nextDouble());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1377,6 +1392,12 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         try {
             return elements.toArray();
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1396,6 +1417,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         try {
             return elements.toList();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1435,21 +1459,26 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @return the collection populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public <C extends Collection<Double>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Double>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextDouble());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1477,21 +1506,26 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @return the {@code Multiset<Double>} populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public Multiset<Double> toMultiset(final Supplier<? extends Multiset<Double>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Double> toMultiset(final Supplier<? extends Multiset<Double>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Double> result = supplier.get();
+            final Multiset<Double> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextDouble());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1514,13 +1548,14 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if {@code keyMapper} throws
      * @throws E2 if {@code valueMapper} throws
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.DoubleFunction<? extends K, E> keyMapper,
             final Throwables.DoubleFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1529,7 +1564,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
             double next = 0;
 
             while (elements.hasNext()) {
@@ -1538,6 +1573,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1555,14 +1593,14 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}, or
-     *         {@code keyMapper} returns a {@code null} key.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} or {@code keyMapper} returns a {@code null} key.
      * @throws E if {@code keyMapper} throws
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.DoubleFunction<? extends K, E> keyMapper,
             final Collector<? super Double, ?, D> downstream, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1570,7 +1608,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Double> downstreamAccumulator = (BiConsumer<Object, ? super Double>) downstream.accumulator();
@@ -1583,7 +1621,7 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
             while (elements.hasNext()) {
                 next = elements.nextDouble();
-                key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1598,6 +1636,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1628,6 +1669,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1661,6 +1705,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             return OptionalDouble.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1681,12 +1728,13 @@ class IteratorDoubleStream extends AbstractDoubleStream {
      * @param combiner a function that combines two partial containers (used in parallel; ignored here)
      * @return the populated result container
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjDoubleConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1694,13 +1742,16 @@ class IteratorDoubleStream extends AbstractDoubleStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 accumulator.accept(result, elements.nextDouble());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1734,6 +1785,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             return OptionalDouble.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1773,6 +1827,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             return OptionalDouble.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1813,7 +1870,10 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                         window[size++] = v;
                     } else {
                         window[idx] = v;
-                        idx = (idx + 1) % k;
+                        // Wrap with a compare instead of a per-element integer division ('%' by a non-constant k).
+                        if (++idx == k) {
+                            idx = 0;
+                        }
                     }
                 }
                 if (size < k) {
@@ -1830,6 +1890,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             final Optional<Double> optional = boxed().kthLargest(k, DOUBLE_COMPARATOR);
 
             return optional.isPresent() ? OptionalDouble.of(optional.get()) : OptionalDouble.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1848,6 +1911,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
 
         try {
             return elements.count();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1872,6 +1938,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1900,6 +1969,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     return true;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1931,6 +2003,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1962,6 +2037,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1996,6 +2074,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
                     return OptionalDouble.of(e);
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2041,6 +2122,9 @@ class IteratorDoubleStream extends AbstractDoubleStream {
             }
 
             return hasResult ? OptionalDouble.of(result) : OptionalDouble.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

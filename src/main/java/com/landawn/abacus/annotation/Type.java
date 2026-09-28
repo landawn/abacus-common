@@ -173,8 +173,10 @@ public @interface Type {
      * its class carries {@link JsonXmlConfig @JsonXmlConfig}, the JSON/XML serializers take the enum
      * representation from those annotations (see {@link JsonXmlField#enumerated()}) and this element is
      * not consulted for JSON/XML output - a class-level {@code @JsonXmlConfig(enumerated = ORDINAL)} wins
-     * over {@code @Type(enumerated = NAME)}. This element always governs the property's general and
-     * database conversions ({@code PropInfo.type}/{@code dbType}).</p>
+     * over {@code @Type(enumerated = NAME)}. Within its {@link #scope()}, this element governs the
+     * property's general and database conversions: {@code PropInfo.type} when the scope is
+     * {@link Scope#ALL} or {@link Scope#SERIALIZATION}, and {@code PropInfo.dbType} when it is
+     * {@link Scope#ALL} or {@link Scope#PERSISTENCE}.</p>
      *
      * <p>{@link EnumType#NAME} (default):</p>
      * <ul>

@@ -188,8 +188,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> empty = ImmutableList.empty();
-     * System.out.println(empty.size());      // prints 0
-     * System.out.println(empty.isEmpty());   // prints true
+     * System.out.println(empty.size());     // prints 0
+     * System.out.println(empty.isEmpty());  // prints true
      * }</pre>
      *
      * @param <E> the type of elements in the list.
@@ -520,8 +520,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * mutable.add("initial");
      *
      * ImmutableList<String> wrapped = ImmutableList.wrap(mutable);
-     * mutable.add("added later");           // This WILL be visible in wrapped!
-     * System.out.println(wrapped.get(1));   // prints "added later"
+     * mutable.add("added later");          // This WILL be visible in wrapped!
+     * System.out.println(wrapped.get(1));  // prints "added later"
      * }</pre>
      *
      * @param <E> the type of elements in the list.
@@ -592,8 +592,8 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "b");
-     * int index = list.indexOf("b");      // returns 1
-     * int notFound = list.indexOf("d");   // returns -1
+     * int index = list.indexOf("b");     // returns 1
+     * int notFound = list.indexOf("d");  // returns -1
      * }</pre>
      *
      * @param valueToFind the element to search for, may be {@code null}.
@@ -661,9 +661,9 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
      * <pre>{@code
      * ImmutableList<String> list = ImmutableList.of("a", "b", "c", "d");
      * ImmutableListIterator<String> iter = list.listIterator(2);
-     * System.out.println(iter.next());       // prints "c"
-     * System.out.println(iter.previous());   // prints "c" again
-     * System.out.println(iter.previous());   // prints "b"
+     * System.out.println(iter.next());      // prints "c"
+     * System.out.println(iter.previous());  // prints "c" again
+     * System.out.println(iter.previous());  // prints "b"
      * }</pre>
      *
      * @param index the index of the first element to be returned from the list iterator (by a call to next()).
@@ -1560,16 +1560,16 @@ public sealed class ImmutableList<E> extends ImmutableCollection<E> implements L
          * builder.addAll(iter);
          * }</pre>
          *
-         * @param iter the iterator over elements to add, may be {@code null}.
+         * @param iterator the iterator over elements to add, may be {@code null}.
          * @return this builder instance for method chaining.
          * @throws IllegalStateException if {@link #build()} has already been called on this builder.
          */
-        public Builder<E> addAll(final Iterator<? extends E> iter) throws IllegalStateException {
+        public Builder<E> addAll(final Iterator<? extends E> iterator) throws IllegalStateException {
             assertNotBuilt();
 
-            if (iter != null) {
-                while (iter.hasNext()) {
-                    list.add(iter.next());
+            if (iterator != null) {
+                while (iterator.hasNext()) {
+                    list.add(iterator.next());
                 }
             }
 

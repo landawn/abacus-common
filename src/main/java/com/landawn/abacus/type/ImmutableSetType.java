@@ -53,8 +53,9 @@ public class ImmutableSetType<E> extends AbstractType<ImmutableSet<E>> {
      * This constructor is called by the TypeFactory to create ImmutableSet&lt;E&gt; type instances.
      *
      * @param parameterTypeName the name of the element type parameter
+     * @throws IllegalArgumentException if {@code parameterTypeName} is {@code null}, blank, or structurally invalid.
      */
-    ImmutableSetType(final String parameterTypeName) {
+    ImmutableSetType(final String parameterTypeName) throws IllegalArgumentException {
         this(ImmutableSet.class, parameterTypeName);
     }
 

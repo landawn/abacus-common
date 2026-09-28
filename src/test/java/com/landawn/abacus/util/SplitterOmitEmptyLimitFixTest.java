@@ -287,8 +287,8 @@ public class SplitterOmitEmptyLimitFixTest extends TestBase {
         public void nullAndNullReturningSuppliersStillFail() {
             final Supplier<List<String>> nullSupplier = () -> null;
 
-            assertThrows(IllegalArgumentException.class, () -> Splitter.with(",").splitToCollection("a", nullSupplier));
-            assertThrows(IllegalArgumentException.class, () -> MapSplitter.with(",", "=").splitToMap("a=1", () -> null));
+            assertThrows(NullPointerException.class, () -> Splitter.with(",").splitToCollection("a", nullSupplier));
+            assertThrows(NullPointerException.class, () -> MapSplitter.with(",", "=").splitToMap("a=1", () -> null));
         }
     }
 

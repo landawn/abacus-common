@@ -2080,4 +2080,211 @@ public class IteratorStreamTest extends TestBase {
         assertEquals(4, iter.next());
         assertFalse(iter.hasNext());
     }
+
+    // ---- perf review 2026-09-26 G099 begin ----
+
+    private static List<Integer> g099Source(final int size) {
+        final List<Integer> list = new ArrayList<>(size);
+
+        for (int i = 0; i < size; i++) {
+            list.add(i % 3 == 1 ? null : i);
+        }
+
+        return list;
+    }
+
+    // G099-01: takeLast ring buffer - every wrap offset, nulls, count() and iterator exhaustion
+    @Test
+    public void testTakeLast_ringBufferWrapNullsAndCount() {
+        for (final int n : new int[] { 1, 2, 3, 5, 16, 17, 33, 100 }) {
+            for (int size = 0; size <= 40; size++) {
+                final List<Integer> src = g099Source(size);
+                final List<Integer> expected = src.subList(Math.max(0, size - n), size);
+
+                assertEquals(expected, Stream.of(src.iterator()).takeLast(n).toList(), "n=" + n + ", size=" + size);
+                assertEquals(expected.size(), Stream.of(src.iterator()).takeLast(n).count(), "n=" + n + ", size=" + size);
+
+                final Iterator<Integer> iter = Stream.of(src.iterator()).takeLast(n).iterator();
+                for (final Integer e : expected) {
+                    assertTrue(iter.hasNext());
+                    assertEquals(e, iter.next());
+                }
+                assertFalse(iter.hasNext());
+                assertThrows(java.util.NoSuchElementException.class, iter::next);
+            }
+        }
+    }
+
+    private static Iterator<Integer> g099FailingNext(final int failAtCall, final int endAfterFailure) {
+        // Yields 1, 2, 3, ...; the failAtCall-th next() throws once (consuming nothing). After that failure the
+        // source ends once 'endAfterFailure' more elements were returned.
+        return new Iterator<>() {
+            private int value = 1;
+            private int calls = 0;
+            private int afterFailure = -1;
+
+            @Override
+            public boolean hasNext() {
+                return afterFailure < 0 || afterFailure < endAfterFailure;
+            }
+
+            @Override
+            public Integer next() {
+                if (++calls == failAtCall) {
+                    afterFailure = 0;
+                    throw new IllegalStateException("read failed");
+                }
+
+                if (afterFailure >= 0) {
+                    afterFailure++;
+                }
+
+                return value++;
+            }
+        };
+    }
+
+    private static List<Integer> g099Drain(final Iterator<Integer> iter) {
+        final List<Integer> result = new ArrayList<>();
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+        }
+
+        return result;
+    }
+
+    // G099-01: a failed read while the takeLast window is full evicts the oldest element first (as the former
+    // pollFirst-before-next did); a retry resumes from that partial tail
+    @Test
+    public void testTakeLast_failedReadWhenFullThenResume() {
+        // window [2, 3] full, the 4th read fails after evicting 2, the source is then exhausted -> [3]
+        Iterator<Integer> iter = Stream.of(g099FailingNext(4, 0)).takeLast(2).iterator();
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(Arrays.asList(3), g099Drain(iter));
+
+        // same, but the source then yields 4 and 5 -> [4, 5]
+        iter = Stream.of(g099FailingNext(4, 2)).takeLast(2).iterator();
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(Arrays.asList(4, 5), g099Drain(iter));
+
+        // then yields only 4 -> [3, 4]
+        iter = Stream.of(g099FailingNext(4, 1)).takeLast(2).iterator();
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(Arrays.asList(3, 4), g099Drain(iter));
+
+        // window not yet full when the read fails (takeLast(5)): nothing is evicted -> [1, 2, 3]
+        iter = Stream.of(g099FailingNext(4, 0)).takeLast(5).iterator();
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(Arrays.asList(1, 2, 3), g099Drain(iter));
+
+        // wrapped ring (takeLast(3) over 1..7), failure on the 8th read, then 8 and 9 -> [7, 8, 9]
+        iter = Stream.of(g099FailingNext(8, 2)).takeLast(3).iterator();
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(Arrays.asList(7, 8, 9), g099Drain(iter));
+
+        // wrapped ring, failure on the 8th read, then exhausted -> [6, 7]
+        iter = Stream.of(g099FailingNext(8, 0)).takeLast(3).iterator();
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertEquals(Arrays.asList(6, 7), g099Drain(iter));
+    }
+
+    // G099-02: skipLast ArrayDeque + null sentinel - nulls pass through, sizes around n
+    @Test
+    public void testSkipLast_nullsAndSizes() {
+        for (final int n : new int[] { 1, 2, 3, 7, 17 }) {
+            for (int size = 0; size <= 30; size++) {
+                final List<Integer> src = g099Source(size);
+                final List<Integer> expected = src.subList(0, Math.max(0, size - n));
+
+                assertEquals(expected, Stream.of(src.iterator()).skipLast(n).toList(), "n=" + n + ", size=" + size);
+                assertEquals(expected.size(), Stream.of(src.iterator()).skipLast(n).count(), "n=" + n + ", size=" + size);
+
+                final Iterator<Integer> iter = Stream.of(src.iterator()).skipLast(n).iterator();
+                for (final Integer e : expected) {
+                    assertEquals(e, iter.next());
+                }
+                assertFalse(iter.hasNext());
+                assertThrows(java.util.NoSuchElementException.class, iter::next);
+            }
+        }
+
+        final List<Integer> allNulls = Arrays.asList(null, null, null, null);
+        assertEquals(Arrays.asList(null, null), Stream.of(allNulls.iterator()).skipLast(2).toList());
+    }
+
+    // G099-03: sliding queue as ArrayDeque + null sentinel - windows, count, step (bulk advance with a non-empty
+    // shared queue), the collector variant and a non-default collection supplier, all with null elements, against
+    // the array-backed implementation
+    @Test
+    public void testSliding_nullsAdvanceCountAndCollector() {
+        final IntFunction<LinkedList<Integer>> linkedListSupplier = n -> new LinkedList<>();
+
+        for (int windowSize = 1; windowSize <= 5; windowSize++) {
+            for (int increment = 1; increment <= 6; increment++) {
+                for (int size = 0; size <= 13; size++) {
+                    final List<Integer> src = g099Source(size);
+                    final Integer[] array = src.toArray(new Integer[0]);
+                    final String msg = "w=" + windowSize + ", i=" + increment + ", size=" + size;
+
+                    final List<List<Integer>> expected = Stream.of(array).sliding(windowSize, increment).toList();
+
+                    assertEquals(expected, Stream.of(src.iterator()).sliding(windowSize, increment).toList(), msg);
+                    assertEquals(expected.size(), Stream.of(src.iterator()).sliding(windowSize, increment).count(), msg);
+                    assertEquals(expected, Stream.of(src.iterator()).sliding(windowSize, increment, Collectors.toList()).toList(), msg);
+                    assertEquals(expected.size(), Stream.of(src.iterator()).sliding(windowSize, increment, Collectors.toList()).count(), msg);
+                    assertEquals(expected,
+                            Stream.of(src.iterator()).sliding(windowSize, increment, linkedListSupplier).map(c -> (List<Integer>) new ArrayList<>(c)).toList(),
+                            msg);
+
+                    for (int step = 1; step <= 4; step++) {
+                        final List<List<Integer>> expectedStepped = new ArrayList<>();
+
+                        for (int i = 0; i < expected.size(); i += step) {
+                            expectedStepped.add(expected.get(i));
+                        }
+
+                        final String msg2 = msg + ", step=" + step;
+
+                        assertEquals(expectedStepped, Stream.of(src.iterator()).sliding(windowSize, increment).step(step).toList(), msg2);
+                        assertEquals(expectedStepped, Stream.of(src.iterator()).sliding(windowSize, increment, Collectors.toList()).step(step).toList(), msg2);
+                    }
+                }
+            }
+        }
+    }
+
+    // G099-04: kthLargest on a sorted stream uses a ring buffer of the last k elements - sizes around k, growth past 16
+    @Test
+    public void testKthLargest_sortedBranchRingBuffer() {
+        final Comparator<Integer> cmp = Comparator.naturalOrder();
+
+        for (final int k : new int[] { 1, 2, 3, 15, 16, 17, 32, 33, 40, 41, Integer.MAX_VALUE }) {
+            for (int size = 0; size <= 40; size++) {
+                final List<Integer> src = new ArrayList<>();
+                for (int i = 0; i < size; i++) {
+                    src.add((i * 7) % 11);
+                }
+
+                final List<Integer> sorted = new ArrayList<>(src);
+                sorted.sort(cmp);
+
+                final Optional<Integer> result = Stream.of(src.iterator()).sorted(cmp).kthLargest(k, cmp);
+
+                if (k > size) {
+                    assertFalse(result.isPresent(), "k=" + k + ", size=" + size);
+                } else {
+                    assertEquals(sorted.get(size - k), result.get(), "k=" + k + ", size=" + size);
+                    assertEquals(Stream.of(src.iterator()).kthLargest(k, cmp).get(), result.get(), "k=" + k + ", size=" + size);
+                }
+            }
+        }
+
+        // nulls sorted first: a non-null kth element is found; a null kth element makes Optional.of throw
+        final Comparator<Integer> nullsFirst = Comparator.nullsFirst(Comparator.naturalOrder());
+        assertEquals(2, Stream.of(Arrays.asList(3, null, 1, 2).iterator()).sorted(nullsFirst).kthLargest(2, nullsFirst).get());
+        assertThrows(NullPointerException.class, () -> Stream.of(Arrays.asList(3, null, 1, 2).iterator()).sorted(nullsFirst).kthLargest(4, nullsFirst));
+    }
+
+    // ---- perf review 2026-09-26 G099 end ----
 }

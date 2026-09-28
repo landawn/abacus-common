@@ -109,8 +109,8 @@ public enum AccountStatus {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * AccountStatus status = AccountStatus.fromCode(1);      // returns ACTIVE
-     * AccountStatus suspended = AccountStatus.fromCode(2);   // returns SUSPENDED
+     * AccountStatus status = AccountStatus.fromCode(1);     // returns ACTIVE
+     * AccountStatus suspended = AccountStatus.fromCode(2);  // returns SUSPENDED
      * }</pre>
      *
      * @param code the integer value to convert (0–5)

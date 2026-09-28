@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.util.u.Nullable;
 import com.landawn.abacus.util.u.Optional;
 import com.landawn.abacus.util.stream.Collectors;
+import java.util.Iterator;
 
 public class SeqTest extends SeqTestSupport {
 
@@ -1061,4 +1062,322 @@ public class SeqTest extends SeqTestSupport {
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).buffered(0));
         assertThrows(IllegalArgumentException.class, () -> Seq.of(1, 2, 3).rateLimited(0.0));
     }
+
+    @Test
+    public void testConcatIteratorsExhaustedInputsContributeNothing() throws Exception {
+        final Iterator<String> iter1 = List.of("a", "b").iterator();
+        final Iterator<String> iter2 = List.of("c", "d").iterator();
+
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.<String, Exception> concat(iter1, iter2).toList());
+
+        // Reusing the iterators consumed above yields nothing; fresh iterators are needed, and a null one is skipped.
+        assertEquals(Collections.emptyList(), Seq.<String, Exception> concat(iter1, null, iter2).toList());
+        assertEquals(Arrays.asList("a", "b", "c", "d"),
+                Seq.<String, Exception> concat(List.of("a", "b").iterator(), null, List.of("c", "d").iterator()).toList());
+    }
+
+    @Test
+    public void testConcatSeqsReusedAfterConsumptionThrows() throws Exception {
+        final Seq<String, Exception> seq1 = Seq.of("a", "b");
+        final Seq<String, Exception> seq2 = Seq.of("c", "d");
+
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(seq1, seq2).toList());
+
+        // Consuming the concatenation closed seq1 and seq2, so they cannot be concatenated again.
+        assertThrows(IllegalStateException.class, () -> Seq.concat(seq1, null, seq2).toList());
+        assertEquals(Arrays.asList("a", "b", "c", "d"), Seq.concat(Seq.<String, Exception> of("a", "b"), null, Seq.<String, Exception> of("c", "d")).toList());
+    }
+
+    @Test
+    public void testRangeFactoriesReturnEmptyWhenStepPointsAway() throws Exception {
+        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(5, 0).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> range(0, 10, -1).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> range(10, 0, 2).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> range(3, 3, 1).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(0, 10, -1).toList());
+        assertEquals(Collections.emptyList(), Seq.<Exception> rangeClosed(10, 0, 2).toList());
+        assertEquals(Arrays.asList(3), Seq.<Exception> rangeClosed(3, 3, -7).toList());
+    }
+
+    // ---- perf review 2026-09-26 G069 begin ----
+    private static List<String> g069Source(final int size) {
+        final List<String> list = new ArrayList<>();
+
+        for (int i = 0; i < size; i++) {
+            list.add(i % 3 == 1 ? null : "e" + i);
+        }
+
+        return list;
+    }
+
+    // G069-01: skipLast buffers in an ArrayDeque with a null sentinel - pins nulls, buffer growth past 16 and manual iteration.
+    @Test
+    public void testSkipLast_nullsGrowthAndManualIteration() throws Exception {
+        for (int size = 0; size <= 40; size++) {
+            final List<String> source = g069Source(size);
+
+            for (final int n : new int[] { 1, 2, 3, 15, 16, 17, 33, 40, 41, Integer.MAX_VALUE }) {
+                final List<String> expected = source.subList(0, Math.max(0, size - Math.min(n, size)));
+                assertEquals(expected, Seq.<String, Exception> of(source).skipLast(n).toList(), "size=" + size + ", n=" + n);
+            }
+        }
+
+        try (Seq<String, Exception> seq = Seq.<String, Exception> of(null, "a", null, "b", null).skipLast(2)) {
+            final Throwables.Iterator<String, Exception> iter = seq.iteratorEx();
+            assertTrue(iter.hasNext());
+            assertTrue(iter.hasNext());
+            assertEquals(null, iter.next());
+            assertEquals("a", iter.next());
+            assertTrue(iter.hasNext());
+            assertEquals(null, iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+
+        assertEquals(Arrays.asList(null, null), Seq.<String, Exception> of(null, null, null).skipLast(1).toList());
+        assertEquals(2, Seq.<String, Exception> of(null, "x", null, "y").skipLast(2).count());
+    }
+
+    // G069-02: takeLast keeps a ring buffer and rotates it into order - pins wrap-around at every offset, growth, nulls, count/skip.
+    @Test
+    public void testTakeLast_ringBufferWrapNullsAndCount() throws Exception {
+        for (int size = 0; size <= 40; size++) {
+            final List<String> source = g069Source(size);
+
+            for (final int n : new int[] { 1, 2, 3, 5, 15, 16, 17, 20, 40, 41, Integer.MAX_VALUE }) {
+                final List<String> expected = source.subList(Math.max(0, size - Math.min(n, size)), size);
+                assertEquals(expected, Seq.<String, Exception> of(source).takeLast(n).toList(), "size=" + size + ", n=" + n);
+                assertEquals(expected.size(), Seq.<String, Exception> of(source).takeLast(n).count(), "size=" + size + ", n=" + n);
+            }
+        }
+
+        assertEquals(Arrays.asList(8, 9, 10), Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).takeLast(5).skip(2).toList());
+        assertEquals(Arrays.asList(null, null), Seq.<String, Exception> of("a", null, null).takeLast(2).toList());
+
+        try (Seq<Integer, Exception> seq = Seq.<Integer, Exception> of(1, 2, 3, 4, 5, 6, 7).takeLast(3)) {
+            final Throwables.Iterator<Integer, Exception> iter = seq.iteratorEx();
+            assertEquals(5, iter.next());
+            assertTrue(iter.hasNext());
+            assertEquals(6, iter.next());
+            assertEquals(7, iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    // G069-03: groupTo(keyMapper, valueMapper, mapFactory) does a single get() for a known key - pins the map protocol.
+    @Test
+    public void testGroupTo_mapProtocolNullKeysAccessOrderAndPrepopulatedMaps() throws Exception {
+        final Map<Integer, List<String>> byLength = Seq.<String, Exception> of("a", null, "bb", null, "c")
+                .groupTo(s -> s == null ? null : s.length(), s -> s, java.util.HashMap::new);
+        assertEquals(Arrays.asList("a", "c"), byLength.get(1));
+        assertEquals(Arrays.asList(null, null), byLength.get(null));
+        assertEquals(Arrays.asList("bb"), byLength.get(2));
+        assertEquals(3, byLength.size());
+
+        // An access-ordered LinkedHashMap observes every get(): the final order must stay last-access order.
+        final java.util.LinkedHashMap<String, List<Integer>> accessOrdered = Seq.<String, Exception> of("a", "b", "a", "c", "b")
+                .groupTo(s -> s, String::length, () -> new java.util.LinkedHashMap<>(16, 0.75f, true));
+        assertEquals(Arrays.asList("a", "c", "b"), new ArrayList<>(accessOrdered.keySet()));
+        final List<List<Integer>> valuesInOrder = new ArrayList<>(accessOrdered.values());
+        assertEquals(Arrays.asList(Arrays.asList(1, 1), Arrays.asList(1), Arrays.asList(1, 1)), valuesInOrder);
+
+        // Callback order: keyMapper then valueMapper, once each per element.
+        final List<String> calls = new ArrayList<>();
+        final java.util.TreeMap<String, List<String>> sorted = Seq.<String, Exception> of("b", "a", "b").groupTo(s -> {
+            calls.add("k:" + s);
+            return s;
+        }, s -> {
+            calls.add("v:" + s);
+            return s.toUpperCase();
+        }, java.util.TreeMap::new);
+        assertEquals(Arrays.asList("k:b", "v:b", "k:a", "v:a", "k:b", "v:b"), calls);
+        assertEquals("{a=[A], b=[B, B]}", sorted.toString());
+
+        // A factory map that already holds a list for a key: new values are appended to that very list.
+        final List<String> existing = new ArrayList<>(Arrays.asList("x"));
+        final Map<Integer, List<String>> prepopulated = Seq.<String, Exception> of("a", "bb").groupTo(String::length, s -> s, () -> {
+            final Map<Integer, List<String>> m = new java.util.HashMap<>();
+            m.put(1, existing);
+            return m;
+        });
+        assertSame(existing, prepopulated.get(1));
+        assertEquals(Arrays.asList("x", "a"), existing);
+        assertEquals(Arrays.asList("bb"), prepopulated.get(2));
+
+        // A key mapped to null by the factory: the value mapper still runs, then adding to the null list fails.
+        final AtomicInteger valueMapperCalls = new AtomicInteger();
+        assertThrows(NullPointerException.class, () -> Seq.<String, Exception> of("a").groupTo(String::length, s -> {
+            valueMapperCalls.incrementAndGet();
+            return s;
+        }, () -> {
+            final Map<Integer, List<String>> m = new java.util.HashMap<>();
+            m.put(1, null);
+            return m;
+        }));
+        assertEquals(1, valueMapperCalls.get());
+
+        // A failing value mapper leaves the freshly created (empty) list for the key behind in the map.
+        final Map<Integer, List<String>> target = new java.util.HashMap<>();
+        assertThrows(IllegalStateException.class, () -> Seq.<String, Exception> of("a", "bb").groupTo(String::length, s -> {
+            if (s.length() == 2) {
+                throw new IllegalStateException("boom");
+            }
+            return s;
+        }, () -> target));
+        assertEquals(Arrays.asList("a"), target.get(1));
+        assertEquals(Collections.emptyList(), target.get(2));
+        assertEquals(2, target.size());
+    }
+    // ---- perf review 2026-09-26 G069 end ----
+    // ---- perf review 2026-09-26 G112 begin ----
+    // Reference windows for sliding(windowSize, increment): window i covers [i * increment, i * increment + windowSize) clipped to the
+    // source; it is emitted only if it contains at least one element the previous window did not contain.
+    private static <T> List<List<T>> g112Windows(final List<T> source, final int windowSize, final int increment) {
+        final List<List<T>> result = new ArrayList<>();
+        final int size = source.size();
+        int prevEnd = 0;
+
+        for (long start = 0; start < size; start += increment) {
+            final int end = (int) Math.min(start + windowSize, size);
+
+            if (start > 0 && end <= prevEnd) {
+                break;
+            }
+
+            result.add(new ArrayList<>(source.subList((int) start, end)));
+            prevEnd = end;
+        }
+
+        return result;
+    }
+
+    // G112-03: sliding(..) keeps its overlap in an ArrayDeque with a null sentinel - pins window contents with nulls, gaps, skip and count
+    @Test
+    public void testSliding_overlapBufferWithNullsSkipAndCount_G112() throws Exception {
+        for (int size = 0; size <= 11; size++) {
+            final List<String> source = new ArrayList<>();
+
+            for (int i = 0; i < size; i++) {
+                source.add(i % 3 == 1 ? null : "e" + i);
+            }
+
+            for (int windowSize = 1; windowSize <= 5; windowSize++) {
+                for (int increment = 1; increment <= 6; increment++) {
+                    final List<List<String>> expected = g112Windows(source, windowSize, increment);
+                    final String msg = "size=" + size + ", windowSize=" + windowSize + ", increment=" + increment;
+
+                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment).toList(), msg);
+                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment, n -> new java.util.LinkedList<String>()).toList(),
+                            msg);
+                    assertEquals(expected, Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).toList(), msg);
+                    assertEquals(expected.size(), Seq.<String, Exception> of(source).sliding(windowSize, increment).count(), msg);
+                    assertEquals(expected.size(), Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).count(), msg);
+
+                    for (int skip = 1; skip <= 4; skip++) {
+                        final List<List<String>> expectedAfterSkip = expected.subList(Math.min(skip, expected.size()), expected.size());
+                        assertEquals(expectedAfterSkip, Seq.<String, Exception> of(source).sliding(windowSize, increment).skip(skip).toList(),
+                                msg + ", skip=" + skip);
+                        assertEquals(expectedAfterSkip,
+                                Seq.<String, Exception> of(source).sliding(windowSize, increment, Collectors.toList()).skip(skip).toList(),
+                                msg + ", skip=" + skip);
+                    }
+                }
+            }
+        }
+
+        // manual iteration interleaving next() and advance()
+        try (Seq<List<String>, Exception> seq = Seq.<String, Exception> of(null, "a", null, "b", null, "c").sliding(3, 1)) {
+            final Throwables.Iterator<List<String>, Exception> iter = seq.iteratorEx();
+            assertEquals(Arrays.asList(null, "a", null), iter.next());
+            assertTrue(iter.hasNext());
+            assertEquals(Arrays.asList("a", null, "b"), iter.next());
+            iter.advance(1);
+            assertEquals(Arrays.asList("b", null, "c"), iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+    }
+
+    // G112-04: mapMulti buffers the emitted elements in an ArrayList read through a cursor - pins nulls, laziness, order, a consumer
+    // used after the mapper returned, and a mapper that fails after emitting
+    @Test
+    public void testMapMulti_bufferNullsLazinessEscapedConsumerAndFailure_G112() throws Exception {
+        final List<Integer> source = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7);
+        final List<Integer> expected = new ArrayList<>();
+
+        for (final Integer e : source) {
+            for (int k = 0; k < e % 4; k++) {
+                expected.add(k == 1 ? null : e * 10 + k);
+            }
+        }
+
+        final Throwables.BiConsumer<Integer, java.util.function.Consumer<Integer>, Exception> mapper = (e, consumer) -> {
+            for (int k = 0; k < e % 4; k++) {
+                consumer.accept(k == 1 ? null : e * 10 + k);
+            }
+        };
+
+        assertEquals(expected, Seq.<Integer, Exception> of(source).mapMulti(mapper).toList());
+        assertEquals(expected.size(), Seq.<Integer, Exception> of(source).mapMulti(mapper).count());
+        assertEquals(expected.subList(3, expected.size()), Seq.<Integer, Exception> of(source).mapMulti(mapper).skip(3).toList());
+
+        // lazy: the source is mapped only as far as needed
+        final AtomicInteger mapped = new AtomicInteger();
+        try (Seq<Integer, Exception> seq = Seq.<Integer, Exception> of(source).<Integer> mapMulti((e, consumer) -> {
+            mapped.incrementAndGet();
+            mapper.accept(e, consumer);
+        })) {
+            final Throwables.Iterator<Integer, Exception> iter = seq.iteratorEx();
+            assertEquals(0, mapped.get());
+            assertTrue(iter.hasNext());
+            assertEquals(2, mapped.get()); // 0 emits nothing, 1 emits one element
+            assertEquals(10, iter.next());
+            assertTrue(iter.hasNext());
+            assertEquals(3, mapped.get());
+            assertEquals(20, iter.next());
+            assertEquals(null, iter.next());
+            assertEquals(30, iter.next());
+            assertEquals(4, mapped.get());
+        }
+
+        // a consumer kept by the mapper and called later still feeds the same FIFO buffer
+        final List<java.util.function.Consumer<String>> saved = new ArrayList<>();
+        try (Seq<String, Exception> seq = Seq.<String, Exception> of("a", "b").<String> mapMulti((e, consumer) -> {
+            saved.add(consumer);
+            consumer.accept(e);
+        })) {
+            final Throwables.Iterator<String, Exception> iter = seq.iteratorEx();
+            assertEquals("a", iter.next());
+            saved.get(0).accept("late1");
+            saved.get(0).accept(null);
+            assertTrue(iter.hasNext());
+            assertEquals("late1", iter.next());
+            saved.get(0).accept("late2");
+            assertEquals(null, iter.next());
+            assertEquals("late2", iter.next());
+            assertEquals("b", iter.next());
+            assertFalse(iter.hasNext());
+            assertThrows(NoSuchElementException.class, iter::next);
+        }
+
+        // a mapper that fails after emitting: the emitted element is still delivered afterwards
+        final AtomicBoolean failed = new AtomicBoolean();
+        try (Seq<Integer, Exception> seq = Seq.<Integer, Exception> of(1, 2, 3).<Integer> mapMulti((e, consumer) -> {
+            consumer.accept(e * 10);
+
+            if (e == 2 && !failed.getAndSet(true)) {
+                throw new IllegalStateException("boom");
+            }
+        })) {
+            final Throwables.Iterator<Integer, Exception> iter = seq.iteratorEx();
+            assertEquals(10, iter.next());
+            assertThrows(IllegalStateException.class, iter::hasNext);
+            assertTrue(iter.hasNext());
+            assertEquals(20, iter.next());
+            assertEquals(30, iter.next());
+            assertFalse(iter.hasNext());
+        }
+    }
+    // ---- perf review 2026-09-26 G112 end ----
 }

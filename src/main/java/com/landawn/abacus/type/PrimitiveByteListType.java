@@ -86,7 +86,7 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
 
     /**
      * Converts a ByteList to its string representation.
-     * The list is first converted to a byte array, then serialized using the array type handler.
+     * The logical elements use the built-in array format or a registered array type handler.
      * Returns {@code null} if the input list is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -108,9 +108,10 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public String stringOf(final ByteList x) {
-        return x == null ? null : arrayType.stringOf(x.toArray());
+        return x == null ? null : arrayType instanceof PrimitiveByteArrayType ? stringOf(x.internalArray(), x.size()) : arrayType.stringOf(x.toArray());
     }
 
     /**
@@ -184,30 +185,30 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * Sets a ByteList value in a PreparedStatement at the specified parameter index.
      * The ByteList is converted to a byte array before being set in the statement.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the ByteList to set, or null
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final ByteList x) throws NullPointerException, SQLException {
-        stmt.setBytes(columnIndex, x == null ? null : x.toArray());
+    public void set(final PreparedStatement statement, final int columnIndex, final ByteList x) throws NullPointerException, SQLException {
+        statement.setBytes(columnIndex, x == null ? null : x.toArray());
     }
 
     /**
      * Sets a ByteList value in a CallableStatement using the specified parameter name.
      * The ByteList is converted to a byte array before being set in the statement.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the ByteList to set, or null
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final ByteList x) throws NullPointerException, SQLException {
-        stmt.setBytes(parameterName, x == null ? null : x.toArray());
+    public void set(final CallableStatement statement, final String parameterName, final ByteList x) throws NullPointerException, SQLException {
+        statement.setBytes(parameterName, x == null ? null : x.toArray());
     }
 
     /**
@@ -215,17 +216,17 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * The ByteList is converted to a byte array before being set in the statement.
      * The sqlTypeOrLength parameter is ignored as byte arrays have their own specific SQL type.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the ByteList to set, or null
      * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final ByteList x, final int sqlTypeOrLength)
+    public void set(final PreparedStatement statement, final int columnIndex, final ByteList x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setBytes(columnIndex, x == null ? null : x.toArray());
+        statement.setBytes(columnIndex, x == null ? null : x.toArray());
     }
 
     /**
@@ -233,22 +234,22 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * The ByteList is converted to a byte array before being set in the statement.
      * The sqlTypeOrLength parameter is ignored as byte arrays have their own specific SQL type.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the ByteList to set, or null
      * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final ByteList x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final ByteList x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setBytes(parameterName, x == null ? null : x.toArray());
+        statement.setBytes(parameterName, x == null ? null : x.toArray());
     }
 
     /**
      * Appends the string representation of a ByteList to an Appendable.
-     * Delegates to the array type handler after converting the list to an array.
+     * Writes the array-type representation, preserving a snapshot for application-controlled callbacks.
      * Appends "null" if the list is {@code null}.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
@@ -270,18 +271,23 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void appendTo(final Appendable appendable, final ByteList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            arrayType.appendTo(appendable, x.toArray());
+            if (arrayType instanceof PrimitiveByteArrayType && canWriteDirectly(appendable)) {
+                appendTo(appendable, x.internalArray(), x.size());
+            } else {
+                arrayType.appendTo(appendable, x.toArray());
+            }
         }
     }
 
     /**
      * Writes the character representation of a ByteList to a CharacterWriter.
-     * Delegates to the array type handler after converting the list to an array.
+     * Writes the array-type representation, preserving a snapshot for application-controlled callbacks.
      * Writes "null" if the list is {@code null}.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
@@ -299,12 +305,17 @@ public final class PrimitiveByteListType extends AbstractPrimitiveListType<ByteL
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void serializeTo(final CharacterWriter writer, final ByteList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            arrayType.serializeTo(writer, x.toArray(), config);
+            if (arrayType instanceof PrimitiveByteArrayType && canWriteDirectly(writer, config)) {
+                serializeTo(writer, x.internalArray(), x.size());
+            } else {
+                arrayType.serializeTo(writer, x.toArray(), config);
+            }
         }
     }
 }

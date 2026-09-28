@@ -477,12 +477,20 @@ public class CsvParser {
      * This variant avoids array allocation and is useful when parsing many lines
      * that have the same, known number of fields.
      *
+     * <p><b>Slots beyond the parsed field count keep their previous contents</b>, and this method reports no
+     * count, so a reused array can hold stale values from an earlier, longer line; clear it first when lines may
+     * have fewer fields. Fields are stored as they are parsed: unlike {@link #parseLineInto(String, Collection)},
+     * a line that fails with {@link ParsingException} or {@link ArrayIndexOutOfBoundsException} may already have
+     * overwritten the leading slots.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CsvParser parser = new CsvParser();
      * String[] output = new String[4];
      * parser.parseLineInto("a,b,c,d", output);
      * // output now contains: ["a", "b", "c", "d"]
+     * parser.parseLineInto("x,y", output);
+     * // output now contains: ["x", "y", "c", "d"] - slots 2 and 3 are left over from the previous line
      * }</pre>
      *
      * @param nextLine the CSV line to be parsed; may be {@code null} (no values are written to {@code output})

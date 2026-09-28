@@ -138,7 +138,7 @@ public final class SnappyOutputStream extends OutputStream {
 
     /**
      * Writes a portion of a byte array to the output stream after compression.
-     * Writes {@code len} bytes from the array {@code b}, starting at offset {@code off}.
+     * Writes {@code length} bytes from the array {@code b}, starting at offset {@code off}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -151,21 +151,21 @@ public final class SnappyOutputStream extends OutputStream {
      *
      * @param b the byte array containing data to write
      * @param off the start offset in the array
-     * @param len the number of bytes to write
+     * @param length the number of bytes to write
      * @throws NullPointerException if {@code b} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
-     *         or {@code len} is greater than {@code b.length - off}
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is negative,
+     *         or {@code length} is greater than {@code b.length - off}
      * @throws IOException if compressing the bytes or writing compressed data to the underlying stream fails
      */
     @Override
-    public void write(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IOException {
+    public void write(final byte[] b, final int off, final int length) throws NullPointerException, IndexOutOfBoundsException, IOException {
         // Enforce OutputStream.write(byte[], int, int) contract: org.xerial.snappy.SnappyOutputStream
         // does not validate bounds and silently no-ops for negative len, so we validate here.
-        if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", b.length=" + b.length);
+        if (off < 0 || length < 0 || length > b.length - off) {
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + length + ", b.length=" + b.length);
         }
 
-        out.write(b, off, len);
+        out.write(b, off, length);
     }
 
     /**

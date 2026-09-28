@@ -1736,4 +1736,56 @@ public class GenericKeyedObjectPoolTest extends TestBase {
         assertEquals(1, pool.size());
         assertThrows(IllegalArgumentException.class, () -> pool.put(null, new TestPoolable("v2")));
     }
+
+    // ---- deep review 2026-09-25 G011 begin ----
+    // G011-05: a value that the memory rule must reject anyway must not cost live pooled entries.
+    @Test
+    public void testPut_neverAdmissibleValueDoesNotVacate() throws InterruptedException {
+        final KeyedObjectPool.MemoryMeasure<String, TestPoolable> measure = (k, v) -> "big".equals(v.getValue()) ? 1000
+                : "bad".equals(v.getValue()) ? -1 : 10;
+        final KeyedObjectPool<String, TestPoolable> roomy = PoolFactory.createKeyedObjectPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 100L, measure);
+        final KeyedObjectPool<String, TestPoolable> full = PoolFactory.createKeyedObjectPool(3, 0, EvictionPolicy.LAST_ACCESS_TIME, 100L, measure);
+        try {
+            final List<TestPoolable> residents = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                final TestPoolable r = new TestPoolable("r" + i);
+                residents.add(r);
+                assertTrue(roomy.put("r" + i, r));
+            }
+            for (int i = 0; i < 3; i++) {
+                final TestPoolable r = new TestPoolable("f" + i);
+                residents.add(r);
+                assertTrue(full.put("f" + i, r));
+            }
+
+            final TestPoolable big = new TestPoolable("big");
+            final TestPoolable bad = new TestPoolable("bad");
+            assertFalse(roomy.put("x", big));
+            assertFalse(roomy.put("x", big, 0, TimeUnit.MILLISECONDS));
+            assertFalse(full.put("x", big));
+            assertFalse(full.put("x", bad));
+            assertFalse(full.put("x", big, 0, TimeUnit.MILLISECONDS));
+            assertFalse(full.put("x", bad, 0, TimeUnit.MILLISECONDS));
+
+            assertEquals(5, roomy.size());
+            assertEquals(3, full.size());
+            assertEquals(0, roomy.stats().evictionCount());
+            assertEquals(0, full.stats().evictionCount());
+            assertEquals(50, roomy.stats().dataSize());
+            assertEquals(30, full.stats().dataSize());
+            for (final TestPoolable r : residents) {
+                assertFalse(r.isDestroyed(), r.getValue());
+            }
+            assertFalse(big.isDestroyed());
+            assertFalse(bad.isDestroyed());
+
+            // An admissible value still balances a full pool as before.
+            assertTrue(full.put("ok", new TestPoolable("ok")));
+            assertEquals(1, full.stats().evictionCount());
+        } finally {
+            roomy.close();
+            full.close();
+        }
+    }
+    // ---- deep review 2026-09-25 G011 end ----
 }

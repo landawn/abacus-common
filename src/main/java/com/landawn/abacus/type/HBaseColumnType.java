@@ -156,12 +156,13 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      *
      * @param x the HBaseColumn to serialize; may be {@code null}
      * @return the serialized string, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if the stored value is incompatible with the declared value type or its type handler fails to produce a string.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @MayReturnNull
     @Override
-    public String stringOf(final HBaseColumn<T> x) {
+    public String stringOf(final HBaseColumn<T> x) throws RuntimeException {
         if (x == null) {
             return null;
         }
@@ -197,12 +198,13 @@ public class HBaseColumnType<T> extends AbstractType<HBaseColumn<T>> {
      * @return the deserialized column, or {@code null} if {@code str} is {@code null} or empty
      * @throws IllegalArgumentException if the string has no {@code ':'} separator.
      * @throws NumberFormatException if the version prefix before the first {@code ':'} is not a valid {@code long}
+     * @throws RuntimeException if the declared value type rejects the value text after the first {@code ':'} during conversion.
      * @see #valueOf(Object)
      * @see #stringOf(HBaseColumn)
      */
     @MayReturnNull
     @Override
-    public HBaseColumn<T> valueOf(final String str) throws IllegalArgumentException, NumberFormatException {
+    public HBaseColumn<T> valueOf(final String str) throws IllegalArgumentException, NumberFormatException, RuntimeException {
         if (Strings.isEmpty(str)) {
             return null; // NOSONAR
         }

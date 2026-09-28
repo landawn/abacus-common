@@ -60,15 +60,15 @@ public final class Functions {
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
-     * @param func the IntObjFunction that accepts an index and element and produces a result
+     * @param function the IntObjFunction that accepts an index and element and produces a result
      * @return a stateful Function that applies the given IntObjFunction with an incrementing index
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static <T, R> Function<T, R> indexed(final IntObjFunction<T, ? extends R> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T, R> Function<T, R> indexed(final IntObjFunction<T, ? extends R> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
         return new Function<>() {
             private long idx;
@@ -84,7 +84,7 @@ public final class Functions {
                     throw new ArithmeticException("Index exceeds Integer.MAX_VALUE");
                 }
 
-                return func.apply((int) idx++, t);
+                return function.apply((int) idx++, t);
             }
         };
     }

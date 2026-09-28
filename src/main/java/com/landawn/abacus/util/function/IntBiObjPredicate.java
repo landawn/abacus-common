@@ -44,8 +44,8 @@ public interface IntBiObjPredicate<T, U> extends Throwables.IntBiObjPredicate<T,
      * IntBiObjPredicate<List<String>, String> isValidUpdate =
      *     (index, list, value) -> index >= 0 && index < list.size() && value != null;
      * List<String> list = Arrays.asList("a", "b", "c");
-     * boolean canUpdate = isValidUpdate.test(1, list, "newValue");   // returns true
-     * boolean invalid = isValidUpdate.test(5, list, "newValue");     // returns false (out of bounds)
+     * boolean canUpdate = isValidUpdate.test(1, list, "newValue");  // returns true
+     * boolean invalid = isValidUpdate.test(5, list, "newValue");    // returns false (out of bounds)
      *
      * // Check if a map contains a key and value matches condition
      * IntBiObjPredicate<Map<String, String>, String> hasKeyAndValueLength =

@@ -267,16 +267,16 @@ public class NoCachingNoUpdatingTest extends NoCachingNoUpdatingTestSupport {
         assertThrows(IllegalArgumentException.class, () -> doubles.<List<Double>> toCollection(null));
         assertThrows(IllegalArgumentException.class, () -> deque.<List<Object>> toCollection(null));
 
-        assertThrows(IllegalArgumentException.class, () -> objects.<List<Object>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> booleans.<List<Boolean>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> chars.<List<Character>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> bytes.<List<Byte>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> shorts.<List<Short>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> ints.<List<Integer>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> longs.<List<Long>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> floats.<List<Float>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> doubles.<List<Double>> toCollection(size -> null));
-        assertThrows(IllegalArgumentException.class, () -> deque.<List<Object>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> objects.<List<Object>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> booleans.<List<Boolean>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> chars.<List<Character>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> bytes.<List<Byte>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> shorts.<List<Short>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> ints.<List<Integer>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> longs.<List<Long>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> floats.<List<Float>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> doubles.<List<Double>> toCollection(size -> null));
+        assertThrows(NullPointerException.class, () -> deque.<List<Object>> toCollection(size -> null));
     }
 
     @Test
@@ -576,7 +576,7 @@ public class NoCachingNoUpdatingTest extends NoCachingNoUpdatingTestSupport {
         }
 
         for (final Runnable call : nullResultCalls) {
-            assertEquals("supplier returned null", assertThrows(IllegalArgumentException.class, call::run).getMessage());
+            assertEquals("supplier returned null", assertThrows(NullPointerException.class, call::run).getMessage());
         }
     }
 
@@ -595,5 +595,17 @@ public class NoCachingNoUpdatingTest extends NoCachingNoUpdatingTestSupport {
         assertEquals(DisposableArray.class, hiddenCreate.getReturnType());
         assertNotNull(hiddenCreate.getAnnotation(Deprecated.class));
         assertThrows(UnsupportedOperationException.class, () -> DisposableObjArray.create(String.class, 5));
+    }
+
+    @Test
+    public void testDisposablePairWrapNullMessageNamesParameterP() {
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> DisposablePair.wrap(null));
+        assertEquals("'p' cannot be null", ex.getMessage());
+    }
+
+    @Test
+    public void testDisposableTripleWrapNullMessageNamesParameterP() {
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> DisposableTriple.wrap(null));
+        assertEquals("'p' cannot be null", ex.getMessage());
     }
 }

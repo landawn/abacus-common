@@ -51,12 +51,12 @@ public interface ToByteFunction<T> extends Throwables.ToByteFunction<T, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToByteFunction<Byte> unbox = ToByteFunction.UNBOX;
-     * byte result1 = unbox.applyAsByte((byte) 42);   // returns 42
-     * byte result2 = unbox.applyAsByte(null);        // returns 0
+     * byte result1 = unbox.applyAsByte((byte) 42);  // returns 42
+     * byte result2 = unbox.applyAsByte(null);       // returns 0
      *
      * ToByteFunction<Number> fromNum = ToByteFunction.FROM_NUM;
-     * byte result3 = fromNum.applyAsByte(100);   // returns 100
-     * byte result4 = fromNum.applyAsByte(256);   // returns 0 (truncation: 256 mod 256)
+     * byte result3 = fromNum.applyAsByte(100);  // returns 100
+     * byte result4 = fromNum.applyAsByte(256);  // returns 0 (truncation: 256 mod 256)
      *
      * ToByteFunction<String> firstByte = str -> str != null && str.length() > 0 ? (byte) str.charAt(0) : 0;
      * byte result5 = firstByte.applyAsByte("Hello");   // returns 72 (ASCII 'H')

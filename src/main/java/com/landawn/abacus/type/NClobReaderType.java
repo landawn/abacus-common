@@ -88,63 +88,64 @@ public class NClobReaderType extends ReaderType {
      * Sets a parameter in a {@link PreparedStatement} to an {@code NCLOB} value using a {@link java.io.Reader}.
      * The database will read from the {@code Reader} until end-of-file is reached.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
-        stmt.setNClob(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
+        statement.setNClob(columnIndex, x);
     }
 
     /**
      * Sets a parameter in a {@link CallableStatement} by name to an {@code NCLOB} value using a {@link java.io.Reader}.
      * The database will read from the {@code Reader} until end-of-file is reached.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws NullPointerException, SQLException {
-        stmt.setNClob(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final Reader x) throws NullPointerException, SQLException {
+        statement.setNClob(parameterName, x);
     }
 
     /**
      * Sets a parameter in a {@link PreparedStatement} at the specified index to an {@code NCLOB} value,
      * declaring that the {@link java.io.Reader} contains exactly {@code sqlTypeOrLength} characters.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
      * @param sqlTypeOrLength the declared number of characters in the stream
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
-        stmt.setNClob(columnIndex, x, sqlTypeOrLength);
+    public void set(final PreparedStatement statement, final int columnIndex, final Reader x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
+        statement.setNClob(columnIndex, x, sqlTypeOrLength);
     }
 
     /**
      * Sets a parameter in a {@link CallableStatement} by name to an {@code NCLOB} value,
      * declaring that the {@link java.io.Reader} contains exactly {@code sqlTypeOrLength} characters.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Reader} containing the character data to be stored as {@code NCLOB}
      * @param sqlTypeOrLength the declared number of characters in the stream
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final Reader x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setNClob(parameterName, x, sqlTypeOrLength);
+        statement.setNClob(parameterName, x, sqlTypeOrLength);
     }
 
     /**

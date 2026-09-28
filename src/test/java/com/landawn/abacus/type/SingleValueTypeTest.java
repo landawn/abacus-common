@@ -760,4 +760,165 @@ public class SingleValueTypeTest extends TestBase {
         // The framework's @JsonXmlValue documents the pair as mandatory, even on an enum.
         assertThrows(IllegalArgumentException.class, () -> Type.of(LoneJsonXmlValueEnum.class));
     }
+
+    // ---- bug review 2026-09-27 G016 begin ----
+    public static class G016BridgedJsonXmlValue implements java.util.function.Supplier<String> {
+        private final String value;
+
+        private G016BridgedJsonXmlValue(final String value) {
+            this.value = value;
+        }
+
+        @JsonXmlValue
+        @Override
+        public String get() {
+            return value;
+        }
+
+        @JsonXmlCreator
+        public static G016BridgedJsonXmlValue of(final String value) {
+            return new G016BridgedJsonXmlValue(value);
+        }
+    }
+
+    public static class G016BridgedJacksonValue implements java.util.function.Supplier<String> {
+        private final String value;
+
+        private G016BridgedJacksonValue(final String value) {
+            this.value = value;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        @Override
+        public String get() {
+            return value;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonCreator
+        public static G016BridgedJacksonValue of(final String value) {
+            return new G016BridgedJacksonValue(value);
+        }
+    }
+
+    // G016-01: the compiler-generated bridge "Object get()" carries a copy of the @JsonValue annotation and was
+    // counted as a second value member, so Type.of(..) threw "Multiple JsonValue members".
+    @Test
+    public void testConstructor_jsonValueOnOverridingMethodWithBridge() {
+        final Type<G016BridgedJsonXmlValue> type = Type.of(G016BridgedJsonXmlValue.class);
+        assertEquals("abc", type.stringOf(G016BridgedJsonXmlValue.of("abc")));
+        assertEquals("xyz", type.valueOf("xyz").get());
+
+        final Type<G016BridgedJacksonValue> jacksonType = Type.of(G016BridgedJacksonValue.class);
+        assertEquals("abc", jacksonType.stringOf(G016BridgedJacksonValue.of("abc")));
+        assertEquals("xyz", jacksonType.valueOf("xyz").get());
+    }
+    // ---- bug review 2026-09-27 G016 end ----
+
+    // ---- bug review 2026-09-27 verify G118 begin ----
+    public static class G118CovariantBase {
+        public Object value() {
+            return null;
+        }
+    }
+
+    public static class G118CovariantValue extends G118CovariantBase {
+        private final String value;
+
+        private G118CovariantValue(final String value) {
+            this.value = value;
+        }
+
+        @JsonXmlValue
+        @Override
+        public String value() {
+            return value;
+        }
+
+        @JsonXmlCreator
+        public static G118CovariantValue of(final String value) {
+            return new G118CovariantValue(value);
+        }
+    }
+
+    public enum G118SupplierEnum implements java.util.function.Supplier<String> {
+        RED("r"), GREEN("g");
+
+        private final String code;
+
+        G118SupplierEnum(final String code) {
+            this.code = code;
+        }
+
+        @com.fasterxml.jackson.annotation.JsonValue
+        @Override
+        public String get() {
+            return code;
+        }
+    }
+
+    // Package-private on purpose: javac gives the public subclass a visibility bridge "value()" carrying the annotation,
+    // and that bridge is the only declared copy of the value member.
+    static class G118HiddenValueBase {
+        String value;
+
+        @JsonXmlValue
+        public String value() {
+            return value;
+        }
+    }
+
+    public static class G118VisibilityBridgeValue extends G118HiddenValueBase {
+        @JsonXmlCreator
+        public static G118VisibilityBridgeValue of(final String value) {
+            final G118VisibilityBridgeValue result = new G118VisibilityBridgeValue();
+            result.value = value;
+            return result;
+        }
+    }
+
+    public static class G118InstanceCreator implements Function<String, G118InstanceCreator> {
+        @JsonXmlValue
+        public String value() {
+            return "v";
+        }
+
+        @JsonXmlCreator
+        @Override
+        public G118InstanceCreator apply(final String value) {
+            return new G118InstanceCreator();
+        }
+    }
+
+    // Covariant override of a NON-generic superclass method also gets an annotated bridge.
+    @Test
+    public void testConstructor_jsonValueOnCovariantOverride() {
+        final Type<G118CovariantValue> type = Type.of(G118CovariantValue.class);
+        assertEquals("abc", type.stringOf(G118CovariantValue.of("abc")));
+        assertEquals("xyz", type.valueOf("xyz").value());
+    }
+
+    // EnumType shares the constructor: a lone Jackson @JsonValue on an enum implementing Supplier<String>.
+    @Test
+    public void testEnumType_jsonValueOnOverridingMethodWithBridge() {
+        final Type<G118SupplierEnum> type = Type.of(G118SupplierEnum.class);
+        assertEquals("g", type.stringOf(G118SupplierEnum.GREEN));
+        assertEquals(G118SupplierEnum.RED, type.valueOf("r"));
+        assertEquals("[\"g\",\"r\"]", N.toJson(N.asList(G118SupplierEnum.GREEN, G118SupplierEnum.RED)).replace(" ", ""));
+    }
+
+    // A visibility bridge (public method inherited from a package-private class) has no declared twin and must still count.
+    @Test
+    public void testConstructor_jsonValueOnVisibilityBridgeStillDetected() {
+        final Type<G118VisibilityBridgeValue> type = Type.of(G118VisibilityBridgeValue.class);
+        assertEquals("abc", type.stringOf(G118VisibilityBridgeValue.of("abc")));
+        assertEquals("xyz", type.valueOf("xyz").value());
+    }
+
+    // The bridge of an annotated instance "creator" is skipped too, so the real signature error is reported.
+    @Test
+    public void testConstructor_instanceCreatorWithBridgeReportsStaticRequirement() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Type.of(G118InstanceCreator.class));
+        assertTrue(e.getMessage().contains("must be static"), e.getMessage());
+    }
+    // ---- bug review 2026-09-27 verify G118 end ----
 }

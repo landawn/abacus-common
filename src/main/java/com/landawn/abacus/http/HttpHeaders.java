@@ -709,8 +709,8 @@ public final class HttpHeaders {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "br"));   // "gzip, br"
-     * String date = HttpHeaders.valueOf(new Date());                     // date is formatted as an HTTP date
+     * String value = HttpHeaders.valueOf(Arrays.asList("gzip", "br"));  // "gzip, br"
+     * String date = HttpHeaders.valueOf(new Date());                    // date is formatted as an HTTP date
      * }</pre>
      *
      * @param headerValue the header value to convert
@@ -749,8 +749,8 @@ public final class HttpHeaders {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpHeaders.valueOf("Accept-Encoding", Arrays.asList("gzip", "br"));   // "gzip, br"
-     * HttpHeaders.valueOf("Cookie", Arrays.asList("a=1", "b=2"));            // "a=1; b=2"
+     * HttpHeaders.valueOf("Accept-Encoding", Arrays.asList("gzip", "br"));  // "gzip, br"
+     * HttpHeaders.valueOf("Cookie", Arrays.asList("a=1", "b=2"));           // "a=1; b=2"
      * }</pre>
      *
      * @param headerName the header field name; a {@code null} name is treated as an ordinary field
@@ -1200,8 +1200,8 @@ public final class HttpHeaders {
      * <pre>{@code
      * headers.setIfAbsent("User-Agent", "MyApp/1.0");   // set: no existing mapping
      * headers.set("X-Trace", (Object) null);
-     * headers.setIfAbsent("X-Trace", "abc");            // set: previous value was null (treated as absent)
-     * headers.setIfAbsent("User-Agent", "Other/2.0");   // no-op: already mapped to a non-null value
+     * headers.setIfAbsent("X-Trace", "abc");           // set: previous value was null (treated as absent)
+     * headers.setIfAbsent("User-Agent", "Other/2.0");  // no-op: already mapped to a non-null value
      * }</pre>
      *
      * @param name The header name
@@ -1236,10 +1236,10 @@ public final class HttpHeaders {
      * @param m The map of header names to values; must not be {@code null}
      * @return This HttpHeaders instance for method chaining
      * @throws IllegalArgumentException if {@code m} or any key in {@code m} is {@code null}.
-     * @throws NullPointerException if a null value is inserted into a backing map that does not permit null values.
      * @throws UnsupportedOperationException if the backing map does not support the requested modification.
+     * @throws NullPointerException if a null value is inserted into a backing map that does not permit null values.
      */
-    public HttpHeaders setAll(final Map<String, ?> m) throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
+    public HttpHeaders setAll(final Map<String, ?> m) throws IllegalArgumentException, UnsupportedOperationException, NullPointerException {
         N.checkArgNotNull(m, cs.m);
 
         for (final Map.Entry<String, ?> entry : m.entrySet()) {

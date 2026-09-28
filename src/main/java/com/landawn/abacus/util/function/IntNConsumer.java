@@ -43,9 +43,9 @@ public interface IntNConsumer {
      * summer.accept(1, 2, 3, 4);   // Prints: Sum: 10
      * }</pre>
      *
-     * @param args the input arguments as a variable-length array of {@code int} values
+     * @param arguments the input arguments as a variable-length array of {@code int} values
      */
-    void accept(int... args);
+    void accept(int... arguments);
 
     /**
      * Returns a composed {@code IntNConsumer} that performs, in sequence, this operation followed by

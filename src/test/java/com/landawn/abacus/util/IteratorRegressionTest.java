@@ -988,34 +988,34 @@ public class IteratorRegressionTest extends TestBase {
     public void testSupplierDiagnosticsAreDistinguishable() {
         final BiIterator<String, Integer> bi = BiIterator.zip(new String[] { "a" }, new Integer[] { 1 });
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> bi.unzipToLists(null));
+        RuntimeException ex = assertThrows(IllegalArgumentException.class, () -> bi.unzipToLists(null));
         assertTrue(ex.getMessage().contains("'supplier'"), ex.getMessage());
         assertFalse(ex.getMessage().contains("get()"), ex.getMessage());
 
-        ex = assertThrows(IllegalArgumentException.class, () -> BiIterator.zip(new String[] { "a" }, new Integer[] { 1 }).unzipToLists(() -> null));
+        ex = assertThrows(NullPointerException.class, () -> BiIterator.zip(new String[] { "a" }, new Integer[] { 1 }).unzipToLists(() -> null));
         assertTrue(ex.getMessage().contains("supplier.get()"), ex.getMessage());
 
-        ex = assertThrows(IllegalArgumentException.class, () -> BiIterator.zip(new String[] { "a" }, new Integer[] { 1 }).unzipToSets(() -> null));
+        ex = assertThrows(NullPointerException.class, () -> BiIterator.zip(new String[] { "a" }, new Integer[] { 1 }).unzipToSets(() -> null));
         assertTrue(ex.getMessage().contains("supplier.get()"), ex.getMessage());
 
         final TriIterator<String, Integer, Boolean> tri = TriIterator.zip(new String[] { "a" }, new Integer[] { 1 }, new Boolean[] { true });
-        ex = assertThrows(IllegalArgumentException.class, () -> tri.unzipToLists(() -> null));
+        ex = assertThrows(NullPointerException.class, () -> tri.unzipToLists(() -> null));
         assertTrue(ex.getMessage().contains("supplier.get()"), ex.getMessage());
     }
 
     @Test
     @DisplayName("C-103: unzipToCollections names WHICH supplier returned null")
     public void testUnzipToCollectionsNamesTheFailingSupplier() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        NullPointerException ex = assertThrows(NullPointerException.class,
                 () -> BiIterator.zip(new String[] { "a" }, new Integer[] { 1 }).unzipToCollections(() -> null, ArrayList::new));
         assertTrue(ex.getMessage().contains("leftSupplier.get()"), ex.getMessage());
 
-        ex = assertThrows(IllegalArgumentException.class,
+        ex = assertThrows(NullPointerException.class,
                 () -> BiIterator.zip(new String[] { "a" }, new Integer[] { 1 }).unzipToCollections(ArrayList::new, () -> null));
         assertTrue(ex.getMessage().contains("rightSupplier.get()"), ex.getMessage());
 
         final TriIterator<String, Integer, Boolean> tri = TriIterator.zip(new String[] { "a" }, new Integer[] { 1 }, new Boolean[] { true });
-        ex = assertThrows(IllegalArgumentException.class, () -> tri.unzipToCollections(ArrayList::new, () -> null, ArrayList::new));
+        ex = assertThrows(NullPointerException.class, () -> tri.unzipToCollections(ArrayList::new, () -> null, ArrayList::new));
         assertTrue(ex.getMessage().contains("middleSupplier.get()"), ex.getMessage());
     }
 
@@ -1024,11 +1024,11 @@ public class IteratorRegressionTest extends TestBase {
     public void testSupplierValidationConsumesNothing() {
         final BiIterator<Integer, Integer> bi = BiIterator.<Integer, Integer> generate(0, 3, (i, p) -> p.set(i, i));
 
-        assertThrows(IllegalArgumentException.class, () -> bi.unzipToLists(() -> null));
+        assertThrows(NullPointerException.class, () -> bi.unzipToLists(() -> null));
         assertEquals(Pair.of(0, 0), bi.next(), "no pair may have been consumed while validating");
 
         final TriIterator<Integer, Integer, Integer> tri = TriIterator.<Integer, Integer, Integer> generate(0, 3, (i, t) -> t.set(i, i, i));
-        assertThrows(IllegalArgumentException.class, () -> tri.unzipToCollections(ArrayList::new, ArrayList::new, () -> null));
+        assertThrows(NullPointerException.class, () -> tri.unzipToCollections(ArrayList::new, ArrayList::new, () -> null));
         assertEquals(Triple.of(0, 0, 0), tri.next());
     }
 

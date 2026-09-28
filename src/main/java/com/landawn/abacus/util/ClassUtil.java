@@ -217,8 +217,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * Object instance = N.newInstance(clazz);
  *
  * // Type conversion operations
- * Class<?> wrapperType = ClassUtil.wrap(int.class);           // returns Integer.class
- * Class<?> primitiveType = ClassUtil.unwrap(Integer.class);   // returns int.class
+ * Class<?> wrapperType = ClassUtil.wrap(int.class);          // returns Integer.class
+ * Class<?> primitiveType = ClassUtil.unwrap(Integer.class);  // returns int.class
  *
  * // Method handle creation for performance
  * Method getter = Beans.getPropGetter(MyBean.class, "name");
@@ -426,6 +426,8 @@ public final class ClassUtil {
     private static final String JAR_POSTFIX = ".jar";
 
     private static final String CLASS_POSTFIX = ".class";
+
+    private static final String PACKAGE_INFO_CLASS_FILE = "package-info" + CLASS_POSTFIX;
 
     // Initial-capacity hint, not a bound, for the name/alias maps. forName uses this library's defining
     // loader and retains its resolved names. Caller-supplied Class metadata is scoped by ClassValue below.
@@ -767,16 +769,16 @@ public final class ClassUtil {
      * // Returns: "/path/to/myapp/classes" or "/path/to/myapp.jar"
      * }</pre>
      *
-     * @param clazz the class whose source code location is to be retrieved
+     * @param targetClass the class whose source code location is to be retrieved
      * @return the file system path of the class's code source (classes directory or JAR file),
      *         or {@code null} if unavailable
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      */
     @MayReturnNull
-    public static String getClassLocation(final Class<?> clazz) throws IllegalArgumentException {
-        N.checkArgNotNull(clazz, cs.clazz);
+    public static String getClassLocation(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        final CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
+        final CodeSource codeSource = targetClass.getProtectionDomain().getCodeSource();
         if (codeSource == null || codeSource.getLocation() == null) {
             return null;
         }
@@ -891,6 +893,9 @@ public final class ClassUtil {
      * <ul>
      *   <li>Fully qualified class names</li>
      *   <li>Simple class names (attempts to load from java.lang package)</li>
+     *   <li>Simple names of this library's built-in types, which are resolved first - note that {@code "Date"}
+     *       resolves to {@code java.sql.Date}; use {@code "java.util.Date"} or the alias {@code "JUDate"} for
+     *       {@code java.util.Date}</li>
      *   <li>Array notation (e.g., "String[]", "int[][]")</li>
      *   <li>Inner class notation (with $ separator)</li>
      * </ul>
@@ -903,38 +908,38 @@ public final class ClassUtil {
      * }</pre>
      *
      * @param <T> the type the returned {@code Class} object is parameterized to (the caller-expected type)
-     * @param clsName the fully qualified name of the desired class; must not be {@code null}
+     * @param className the fully qualified name of the desired class; must not be {@code null}
      * @return the Class object for the class with the specified name
-     * @throws IllegalArgumentException if {@code clsName} is {@code null}
+     * @throws IllegalArgumentException if {@code className} is {@code null}
      *         or if the class cannot be located by the specified name.
      */
-    public static <T> Class<T> forName(final String clsName) throws IllegalArgumentException {
-        N.checkArgNotNull(clsName, cs.clsName);
+    public static <T> Class<T> forName(final String className) throws IllegalArgumentException {
+        N.checkArgNotNull(className, cs.className);
 
-        return forName(clsName, true);
+        return forName(className, true);
     }
 
     /**
      * Supports primitive types: boolean, char, byte, short, int, long, float, double. And array type with format {@code java.lang.String[]}.
      *
      * @param <T> the class type represented by the returned {@code Class} object
-     * @param clsName the fully qualified class name
+     * @param className the fully qualified class name
      * @param cacheResult {@code true} to cache the result, {@code false} otherwise
      * @return the Class object for the specified class name
-     * @throws IllegalArgumentException if class not found.
+     * @throws IllegalArgumentException if no class can be located by {@code className}.
      */
     @SuppressWarnings("unchecked")
-    private static <T> Class<T> forName(final String clsName, final boolean cacheResult) throws IllegalArgumentException {
-        Class<?> cls = clsNamePool.get(clsName);
+    private static <T> Class<T> forName(final String className, final boolean cacheResult) throws IllegalArgumentException {
+        Class<?> cls = clsNamePool.get(className);
 
         if (cls == null) {
-            cls = BUILT_IN_TYPE.get(clsName);
+            cls = BUILT_IN_TYPE.get(className);
 
             if (cls == null) {
                 try {
-                    cls = Class.forName(clsName); // NOSONAR
+                    cls = Class.forName(className); // NOSONAR
                 } catch (final ClassNotFoundException e) {
-                    String newClassName = clsName;
+                    String newClassName = className;
 
                     if (newClassName.indexOf(SK._PERIOD) < 0) {
                         final int index = newClassName.indexOf("[]");
@@ -947,7 +952,7 @@ public final class ClassUtil {
                                 cls = Class.forName(newClassName); // NOSONAR
 
                                 if (cacheResult) {
-                                    BUILT_IN_TYPE.put(clsName, cls);
+                                    BUILT_IN_TYPE.put(className, cls);
                                 }
                             } catch (final ClassNotFoundException e1) {
                                 // ignore.
@@ -956,7 +961,7 @@ public final class ClassUtil {
                     }
 
                     if (cls == null) {
-                        newClassName = clsName;
+                        newClassName = className;
                         final int index = newClassName.indexOf("[]");
 
                         if (index > 0) {
@@ -974,7 +979,7 @@ public final class ClassUtil {
                                         cls = Class.forName(prefixOfArray + symbolOfPrimitiveArrayClassName); // NOSONAR
 
                                         if (cacheResult) {
-                                            BUILT_IN_TYPE.put(clsName, cls);
+                                            BUILT_IN_TYPE.put(className, cls);
                                         }
                                     } catch (final ClassNotFoundException e2) {
                                         // ignore.
@@ -1001,7 +1006,7 @@ public final class ClassUtil {
                         }
 
                         if (cls == null) {
-                            newClassName = clsName;
+                            newClassName = className;
                             int lastIndex = -1;
 
                             while ((lastIndex = newClassName.lastIndexOf(SK._PERIOD)) > 0) {
@@ -1020,11 +1025,11 @@ public final class ClassUtil {
             }
 
             if (cls == null) {
-                throw new IllegalArgumentException("No class found by name: " + clsName);
+                throw new IllegalArgumentException("No class found by name: " + className);
             }
 
             if (cacheResult) {
-                clsNamePool.put(clsName, cls);
+                clsNamePool.put(className, cls);
             }
         }
 
@@ -1064,15 +1069,15 @@ public final class ClassUtil {
      * String name = ClassUtil.getCanonicalClassName(String.class);   // returns "java.lang.String"
      * }</pre>
      *
-     * @param cls the class whose canonical name is to be retrieved
+     * @param targetClass the class whose canonical name is to be retrieved
      * @return the canonical name of the class, or the class name if the canonical name is not available
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      * @see Class#getCanonicalName()
      */
-    public static String getCanonicalClassName(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static String getCanonicalClassName(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return canonicalClassNamePool.get(cls);
+        return canonicalClassNamePool.get(targetClass);
     }
 
     /**
@@ -1084,14 +1089,14 @@ public final class ClassUtil {
      * String name = ClassUtil.getClassName(String.class);   // returns "java.lang.String"
      * }</pre>
      *
-     * @param cls the class whose name is to be retrieved
+     * @param targetClass the class whose name is to be retrieved
      * @return the fully qualified name of the class
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      */
-    public static String getClassName(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static String getClassName(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return cls.getName();
+        return targetClass.getName();
     }
 
     /**
@@ -1103,53 +1108,59 @@ public final class ClassUtil {
      * String name = ClassUtil.getSimpleClassName(String.class);   // returns "String"
      * }</pre>
      *
-     * @param cls the class whose simple name is to be retrieved
+     * @param targetClass the class whose simple name is to be retrieved
      * @return the simple name of the class
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      */
-    public static String getSimpleClassName(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static String getSimpleClassName(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return simpleClassNamePool.get(cls);
+        return simpleClassNamePool.get(targetClass);
     }
 
     /**
      * Retrieves the package of the specified class.
-     * Returns {@code null} if the class is a primitive type or if no package is defined.
+     * Returns {@code null} if the class is a primitive type, {@code void} or an array type (as
+     * {@link Class#getPackage()} does - {@code String[].class} has no package), or if no package is defined.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Package pkg = ClassUtil.getPackage(String.class);   // returns java.lang package
+     * Package pkg = ClassUtil.getPackage(String.class);     // returns java.lang package
+     * Package none = ClassUtil.getPackage(String[].class);  // returns null (array type)
      * }</pre>
      *
-     * @param cls the class whose package is to be retrieved
-     * @return the package of the class, or {@code null} if the class is a primitive type or no package is defined
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @param targetClass the class whose package is to be retrieved
+     * @return the package of the class, or {@code null} if the class is a primitive type, {@code void} or an array type,
+     *         or no package is defined
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
     @MayReturnNull
-    public static Package getPackage(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static Package getPackage(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return packagePool.get(cls);
+        return packagePool.get(targetClass);
     }
 
     /**
      * Retrieves the package name of the specified class.
-     * If the class is a primitive type or no package is defined, it returns an empty string.
+     * If the class is a primitive type, {@code void} or an array type, or no package is defined, it returns an empty
+     * string (see {@link #getPackage(Class)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String pkgName = ClassUtil.getPackageName(String.class);   // returns "java.lang"
+     * String pkgName = ClassUtil.getPackageName(String.class);  // returns "java.lang"
+     * String none = ClassUtil.getPackageName(String[].class);   // returns "" (array type)
      * }</pre>
      *
-     * @param cls the class whose package name is to be retrieved
-     * @return the package name of the class, or an empty string if the class is a primitive type or no package is defined
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @param targetClass the class whose package name is to be retrieved
+     * @return the package name of the class, or an empty string if the class is a primitive type, {@code void} or an
+     *         array type, or no package is defined
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    public static String getPackageName(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static String getPackageName(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return packageNamePool.get(cls);
+        return packageNamePool.get(targetClass);
     }
 
     /**
@@ -1163,21 +1174,21 @@ public final class ClassUtil {
      * List<Class<?>> classes = ClassUtil.findClassesInPackage("com.example.myapp", true, false);
      * }</pre>
      *
-     * @param pkgName the name of the package to search for classes
+     * @param packageName the name of the package to search for classes
      * @param isRecursive if {@code true}, searches recursively in sub-packages
      * @param skipClassLoadingException if {@code true}, skips classes that cannot be loaded and continues scanning
      * @return a list of classes in the specified package. The classes are loaded but NOT initialized.
      *         Classes with no canonical name - anonymous and local classes, any class nested inside one of
-     *         those, and hidden classes - are excluded, exactly as in
+     *         those, and hidden classes - are excluded, as are {@code package-info} files, exactly as in
      *         {@link #findClassesInPackage(String, boolean, boolean, Predicate)}.
-     * @throws IllegalArgumentException if {@code pkgName} is null or empty, or no resources can be found for the specified package.
+     * @throws IllegalArgumentException if {@code packageName} is null or empty, or no resources can be found for the specified package.
      * @throws UncheckedIOException if enumerating package resources or reading a classpath JAR fails
      * @throws IllegalStateException if a discovered class cannot be loaded and {@code skipClassLoadingException} is {@code false}.
      * @see #findClassesInPackage(String, boolean, boolean, Predicate)
      */
-    public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException)
+    public static List<Class<?>> findClassesInPackage(final String packageName, final boolean isRecursive, final boolean skipClassLoadingException)
             throws IllegalArgumentException, UncheckedIOException, IllegalStateException {
-        return findClassesInPackage(pkgName, isRecursive, skipClassLoadingException, Fn.alwaysTrue());
+        return findClassesInPackage(packageName, isRecursive, skipClassLoadingException, Fn.alwaysTrue());
     }
 
     /**
@@ -1341,7 +1352,7 @@ public final class ClassUtil {
      *   <li><b>Memory Consumption:</b> Implement result streaming for large class sets</li>
      * </ul>
      *
-     * @param pkgName the fully qualified name of the package to scan for classes (e.g., "com.example.services").
+     * @param packageName the fully qualified name of the package to scan for classes (e.g., "com.example.services").
      *                Must not be {@code null} or empty. Packages in the JDK runtime image are not supported.
      * @param isRecursive if {@code true}, recursively scans sub-packages within the specified package hierarchy.
      *                    If {@code false}, scans only the immediate package without descending into sub-packages.
@@ -1357,7 +1368,10 @@ public final class ClassUtil {
      *         Classes with no canonical name are excluded: a class whose {@link Class#getCanonicalName()} is
      *         {@code null} - anonymous and local classes, any class nested inside one of those, and hidden
      *         classes - is skipped before {@code predicate} is applied, so the predicate never sees it.
-     * @throws IllegalArgumentException if {@code pkgName} is {@code null} or empty, or if no resources are found for
+     *         {@code package-info.class} files are skipped the same way: they hold package annotations, not a
+     *         class declared in the package. When scanning a directory recursively, sub-directories whose names
+     *         contain a {@code '.'} (resource folders such as {@code "v1.2"}) cannot be packages and are not descended into.
+     * @throws IllegalArgumentException if {@code packageName} is {@code null} or empty, or if no resources are found for
      *         the specified package (e.g., the package does not exist or is a JDK package), or if {@code predicate}
      *         is {@code null}.
      * @throws UncheckedIOException if enumerating package resources or opening a classpath JAR fails
@@ -1367,21 +1381,21 @@ public final class ClassUtil {
      * @see java.util.function.Predicate
      * @see java.util.jar.JarFile
      */
-    public static List<Class<?>> findClassesInPackage(final String pkgName, final boolean isRecursive, final boolean skipClassLoadingException,
+    public static List<Class<?>> findClassesInPackage(final String packageName, final boolean isRecursive, final boolean skipClassLoadingException,
             final Predicate<? super Class<?>> predicate) throws IllegalArgumentException, UncheckedIOException, IllegalStateException {
-        N.checkArgNotEmpty(pkgName, cs.pkgName);
+        N.checkArgNotEmpty(packageName, cs.packageName);
         N.checkArgNotNull(predicate, cs.predicate);
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Looking for classes in package: " + pkgName);
+            logger.debug("Looking for classes in package: " + packageName);
         }
 
-        final String pkgPath = packageNameToFilePath(pkgName);
+        final String pkgPath = packageNameToFilePath(packageName);
 
-        final List<URL> resourceList = getResources(pkgName);
+        final List<URL> resourceList = getResources(packageName);
 
         if (N.isEmpty(resourceList)) {
-            throw new IllegalArgumentException("No resource found for package: " + pkgName);
+            throw new IllegalArgumentException("No resource found for package: " + packageName);
         }
 
         final List<Class<?>> classes = new ArrayList<>();
@@ -1421,20 +1435,24 @@ public final class ClassUtil {
                         continue;
                     }
 
-                    // we are only interested in .class files
-                    if (file2.isFile() && file2.getName().endsWith(CLASS_POSTFIX)) {
+                    // we are only interested in .class files; package-info.class is a compiler artifact
+                    // (a synthetic interface named "package-info"), not a class declared in the package.
+                    if (file2.isFile() && file2.getName().endsWith(CLASS_POSTFIX) && !PACKAGE_INFO_CLASS_FILE.equals(file2.getName())) {
                         // removes the .class extension
-                        final String className = pkgName + '.' + file2.getName().substring(0, file2.getName().length() - CLASS_POSTFIX.length());
+                        final String className = packageName + '.' + file2.getName().substring(0, file2.getName().length() - CLASS_POSTFIX.length());
 
                         final Class<?> clazz = loadForDiscovery(className, skipClassLoadingException);
 
                         // Outside the try: a failure thrown by the caller's predicate is the caller's, and must
                         // not be swallowed by skipClassLoadingException or relabelled as a class-loading failure.
-                        if (clazz != null && clazz.getCanonicalName() != null && predicate.test(clazz)) {
+                        if (clazz != null && predicate.test(clazz)) {
                             classes.add(clazz);
                         }
-                    } else if (file2.isDirectory() && isRecursive) {
-                        final String subPkgName = pkgName + SK._PERIOD + file2.getName();
+                    } else if (file2.isDirectory() && isRecursive && file2.getName().indexOf('.') < 0) {
+                        // A directory whose name contains '.' (e.g. a "v1.2" resource folder) cannot be a package:
+                        // turning it into a sub-package name and back into a path splits it at the '.', so the
+                        // recursive lookup found no resource and the whole scan failed with "No resource found".
+                        final String subPkgName = packageName + SK._PERIOD + file2.getName();
                         //noinspection ConstantValue
                         classes.addAll(findClassesInPackage(subPkgName, isRecursive, skipClassLoadingException, predicate));
                     }
@@ -1453,7 +1471,8 @@ public final class ClassUtil {
                         entry = entries.nextElement();
                         entryName = entry.getName();
 
-                        if (!entry.isDirectory() && entryName.startsWith(pkgPath) && entryName.endsWith(CLASS_POSTFIX)) {
+                        if (!entry.isDirectory() && entryName.startsWith(pkgPath) && entryName.endsWith(CLASS_POSTFIX)
+                                && !entryName.endsWith("/" + PACKAGE_INFO_CLASS_FILE)) {
                             final String relativeEntryName = entryName.substring(pkgPath.length());
 
                             if (!isRecursive && relativeEntryName.indexOf('/') >= 0) {
@@ -1467,13 +1486,13 @@ public final class ClassUtil {
                             final Class<?> clazz = loadForDiscovery(className, skipClassLoadingException);
 
                             // See the directory branch: the predicate is evaluated outside the load's try block.
-                            if (clazz != null && clazz.getCanonicalName() != null && predicate.test(clazz)) {
+                            if (clazz != null && predicate.test(clazz)) {
                                 classes.add(clazz);
                             }
                         }
                     }
                 } catch (final IOException e) {
-                    throw new UncheckedIOException(pkgName + " (" + file + ") does not appear to be a valid package", e);
+                    throw new UncheckedIOException(packageName + " (" + file + ") does not appear to be a valid package", e);
                 } finally {
                     IOUtil.close(jarFile);
                 }
@@ -1495,13 +1514,18 @@ public final class ClassUtil {
      *
      * @param className the binary name of the class to load
      * @param skipClassLoadingException {@code true} to log and return {@code null} instead of throwing
-     * @return the loaded (uninitialized) class, or {@code null} if it could not be loaded and failures are skipped
+     * @return the loaded (uninitialized) class, or {@code null} if it has no canonical name, or if it could not be loaded
+     *         and failures are skipped
      * @throws IllegalStateException if the class cannot be found or linked and {@code skipClassLoadingException} is {@code false}.
      */
     @MayReturnNull
     private static Class<?> loadForDiscovery(final String className, final boolean skipClassLoadingException) throws IllegalStateException {
         try {
-            return Class.forName(className, false, ClassUtil.class.getClassLoader()); // NOSONAR
+            final Class<?> cls = Class.forName(className, false, ClassUtil.class.getClassLoader()); // NOSONAR
+
+            // getCanonicalName() loads the enclosing classes: a nested class whose outer class cannot be linked fails
+            // here with a LinkageError, which must be handled like a failure of the load itself.
+            return cls.getCanonicalName() == null ? null : cls;
         } catch (final ClassNotFoundException | LinkageError e) {
             // Narrow on purpose: only failures of the LOAD itself are eligible to be skipped. A LinkageError
             // (NoClassDefFoundError, UnsupportedClassVersionError, ...) is the normal outcome for a class whose
@@ -1521,9 +1545,9 @@ public final class ClassUtil {
     /**
      * @throws UncheckedIOException if a class loader fails to enumerate resources for the package.
      */
-    private static List<URL> getResources(final String pkgName) throws UncheckedIOException {
+    private static List<URL> getResources(final String packageName) throws UncheckedIOException {
         final List<URL> resourceList = new ArrayList<>();
-        final String pkgPath = packageNameToFilePath(pkgName);
+        final String pkgPath = packageNameToFilePath(packageName);
         final ClassLoader localClassLoader = ClassUtil.class.getClassLoader(); // NOSONAR
         final ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
 
@@ -1543,7 +1567,7 @@ public final class ClassUtil {
             }
 
             if (N.isEmpty(resourceList)) {
-                resources = localClassLoader.getResources(pkgName);
+                resources = localClassLoader.getResources(packageName);
 
                 while (resources != null && resources.hasMoreElements()) {
                     resourceList.add(resources.nextElement());
@@ -1551,7 +1575,7 @@ public final class ClassUtil {
             }
 
             if (N.isEmpty(resourceList)) {
-                resources = sysClassLoader.getResources(pkgName);
+                resources = sysClassLoader.getResources(packageName);
 
                 while (resources != null && resources.hasMoreElements()) {
                     resourceList.add(resources.nextElement());
@@ -1563,7 +1587,7 @@ public final class ClassUtil {
         }
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Found resources: " + resourceList + " by package name(" + pkgName + ")");
+            logger.debug("Found resources: " + resourceList + " by package name(" + packageName + ")");
         }
 
         return resourceList;
@@ -1574,8 +1598,8 @@ public final class ClassUtil {
         return pkgName.endsWith(".") ? pkgName.substring(0, pkgName.length() - 1) : pkgName;
     }
 
-    private static String packageNameToFilePath(final String pkgName) {
-        final String pkgPath = pkgName.replace('.', '/');
+    private static String packageNameToFilePath(final String packageName) {
+        final String pkgPath = packageName.replace('.', '/');
         return pkgPath.endsWith("/") ? pkgPath : (pkgPath + "/");
     }
 
@@ -1594,16 +1618,16 @@ public final class ClassUtil {
      * // Returns: List, SequencedCollection, Collection, Iterable, RandomAccess, Cloneable, Serializable
      * }</pre>
      *
-     * @param cls the class to look up
+     * @param targetClass the class to look up
      * @return a set of all interfaces implemented by the class and its superclasses;
-     *         an empty set if {@code cls} is {@code null} or implements no interfaces
+     *         an empty set if {@code targetClass} is {@code null} or implements no interfaces
      * @see #getAllSuperclasses(Class)
      * @see #getAllSuperTypes(Class)
      */
-    public static Set<Class<?>> getAllInterfaces(final Class<?> cls) {
+    public static Set<Class<?>> getAllInterfaces(final Class<?> targetClass) {
         final Set<Class<?>> interfacesFound = N.newLinkedHashSet();
 
-        getAllInterfaces(cls, interfacesFound);
+        getAllInterfaces(targetClass, interfacesFound);
 
         return interfacesFound;
     }
@@ -1618,17 +1642,17 @@ public final class ClassUtil {
      * // Returns: AbstractList, AbstractCollection
      * }</pre>
      *
-     * @param cls the class to look up
+     * @param targetClass the class to look up
      * @return a list of all superclasses, excluding {@code Object.class}
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      * @see #getAllInterfaces(Class)
      * @see #getAllSuperTypes(Class)
      */
-    public static List<Class<?>> getAllSuperclasses(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static List<Class<?>> getAllSuperclasses(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         final List<Class<?>> classes = new ArrayList<>();
-        Class<?> superclass = cls.getSuperclass();
+        Class<?> superclass = targetClass.getSuperclass();
 
         while (superclass != null && !superclass.equals(Object.class)) {
             classes.add(superclass);
@@ -1642,7 +1666,7 @@ public final class ClassUtil {
      * Returns all interfaces and superclasses that the specified class implements or extends, excluding {@code Object.class}.
      * The resulting set is equivalent to the union of what {@link #getAllInterfaces(Class)} and {@link #getAllSuperclasses(Class)}
      * would return for a {@code non-null} class, though this method uses its own traversal rather than calling either of them
-     * (and, unlike {@link #getAllSuperclasses(Class)}, tolerates a {@code null} {@code cls} instead of throwing).
+     * (and, unlike {@link #getAllSuperclasses(Class)}, tolerates a {@code null} {@code targetClass} instead of throwing).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1650,23 +1674,23 @@ public final class ClassUtil {
      * // Returns: List, SequencedCollection, Collection, Iterable, RandomAccess, Cloneable, Serializable, AbstractList, AbstractCollection
      * }</pre>
      *
-     * @param cls the class to look up
+     * @param targetClass the class to look up
      * @return a set of all interfaces and superclasses, excluding {@code Object.class};
-     *         an empty set if {@code cls} is {@code null}
+     *         an empty set if {@code targetClass} is {@code null}
      * @see #getAllInterfaces(Class)
      * @see #getAllSuperclasses(Class)
      */
-    public static Set<Class<?>> getAllSuperTypes(final Class<?> cls) {
+    public static Set<Class<?>> getAllSuperTypes(final Class<?> targetClass) {
         final Set<Class<?>> superTypesFound = N.newLinkedHashSet();
 
-        getAllSuperTypes(cls, superTypesFound);
+        getAllSuperTypes(targetClass, superTypesFound);
 
         return superTypesFound;
     }
 
-    private static void getAllInterfaces(Class<?> cls, final Set<Class<?>> interfacesFound) {
-        while (cls != null) {
-            final Class<?>[] interfaces = cls.getInterfaces();
+    private static void getAllInterfaces(Class<?> targetClass, final Set<Class<?>> interfacesFound) {
+        while (targetClass != null) {
+            final Class<?>[] interfaces = targetClass.getInterfaces();
 
             for (final Class<?> i : interfaces) {
                 if (interfacesFound.add(i)) {
@@ -1674,13 +1698,13 @@ public final class ClassUtil {
                 }
             }
 
-            cls = cls.getSuperclass();
+            targetClass = targetClass.getSuperclass();
         }
     }
 
-    private static void getAllSuperTypes(Class<?> cls, final Set<Class<?>> superTypesFound) {
-        while (cls != null) {
-            final Class<?>[] interfaces = cls.getInterfaces();
+    private static void getAllSuperTypes(Class<?> targetClass, final Set<Class<?>> superTypesFound) {
+        while (targetClass != null) {
+            final Class<?>[] interfaces = targetClass.getInterfaces();
 
             for (final Class<?> i : interfaces) {
                 if (superTypesFound.add(i)) {
@@ -1688,7 +1712,7 @@ public final class ClassUtil {
                 }
             }
 
-            final Class<?> superclass = cls.getSuperclass();
+            final Class<?> superclass = targetClass.getSuperclass();
 
             // No need to recurse into the superclass chain here: this while-loop already advances
             // through it (see "cls = superclass" below), so a recursive call would just re-walk
@@ -1697,7 +1721,7 @@ public final class ClassUtil {
                 superTypesFound.add(superclass);
             }
 
-            cls = superclass;
+            targetClass = superclass;
         }
     }
 
@@ -1714,15 +1738,15 @@ public final class ClassUtil {
      * Class<?> enclosing = ClassUtil.getEnclosingClass(Outer.Inner.class);   // returns Outer.class
      * }</pre>
      *
-     * @param cls the class whose enclosing class is to be retrieved
+     * @param targetClass the class whose enclosing class is to be retrieved
      * @return the enclosing class of the specified class, or {@code null} if it has no enclosing class
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      */
     @MayReturnNull
-    public static Class<?> getEnclosingClass(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static Class<?> getEnclosingClass(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return enclosingClassPool.get(cls);
+        return enclosingClassPool.get(targetClass);
     }
 
     /**
@@ -1736,24 +1760,24 @@ public final class ClassUtil {
      * }</pre>
      *
      * @param <T> the type whose constructor is to be retrieved
-     * @param cls the class object
+     * @param targetClass the class object
      * @param parameterTypes the parameter types of the constructor; may be empty for the no-arg constructor
      * @return the constructor declared in the specified class with the specified parameter types, or {@code null} if no constructor is found
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      * @see #getDeclaredMethod(Class, String, Class...)
      */
     @MayReturnNull
     @SafeVarargs
-    public static <T> Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>... parameterTypes) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static <T> Constructor<T> getDeclaredConstructor(final Class<T> targetClass, final Class<?>... parameterTypes) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         final List<Class<?>> signature = parameterTypes == null ? Collections.emptyList() : Array.asList(parameterTypes);
-        final Map<List<Class<?>>, Constructor<?>> constructors = classDeclaredConstructorPool.get(cls);
+        final Map<List<Class<?>>, Constructor<?>> constructors = classDeclaredConstructorPool.get(targetClass);
         Constructor<?> constructor = constructors.get(signature);
 
         if (constructor == null) {
             try {
-                constructor = cls.getDeclaredConstructor(parameterTypes);
+                constructor = targetClass.getDeclaredConstructor(parameterTypes);
             } catch (final NoSuchMethodException e) {
                 return null;
             }
@@ -1783,27 +1807,28 @@ public final class ClassUtil {
      * String result = (String) method.invoke("Hello", 0, 2);   // returns "He"
      * }</pre>
      *
-     * @param cls the class object
+     * @param targetClass the class object
      * @param methodName the name of the method to retrieve
      * @param parameterTypes the parameter types of the method; may be {@code null} or empty for a no-arg method
      * @return the method declared in the specified class with the specified name and parameter types, or {@code null} if no method is found
-     * @throws IllegalArgumentException if {@code cls} or {@code methodName} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} or {@code methodName} is {@code null}.
      * @see #getDeclaredConstructor(Class, Class...)
      */
     @MayReturnNull
     @SafeVarargs
-    public static Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static Method getDeclaredMethod(final Class<?> targetClass, final String methodName, final Class<?>... parameterTypes)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(methodName, cs.methodName);
 
         Method method = null;
 
         if (parameterTypes == null || parameterTypes.length == 0) {
-            final Map<String, Method> methodNamePool = classNoArgDeclaredMethodPool.get(cls);
+            final Map<String, Method> methodNamePool = classNoArgDeclaredMethodPool.get(targetClass);
             method = methodNamePool.get(methodName);
 
             if (method == null) {
-                method = lookupDeclaredMethod(cls, methodName, parameterTypes);
+                method = lookupDeclaredMethod(targetClass, methodName, parameterTypes);
 
                 // SHOULD NOT set it true here.
                 // if (method != null) {
@@ -1819,7 +1844,7 @@ public final class ClassUtil {
             }
         } else {
             final List<Class<?>> parameterTypeList = Array.asList(parameterTypes);
-            final Map<String, Map<List<Class<?>>, Method>> methodNamePool = classDeclaredMethodPool.get(cls);
+            final Map<String, Map<List<Class<?>>, Method>> methodNamePool = classDeclaredMethodPool.get(targetClass);
             Map<List<Class<?>>, Method> methodPool = methodNamePool.get(methodName);
 
             if (methodPool != null) {
@@ -1827,7 +1852,7 @@ public final class ClassUtil {
             }
 
             if (method == null) {
-                method = lookupDeclaredMethod(cls, methodName, parameterTypes);
+                method = lookupDeclaredMethod(targetClass, methodName, parameterTypes);
 
                 // SHOULD NOT set it true here.
                 // if (method != null) {
@@ -2074,8 +2099,8 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name1 = ClassUtil.formatParameterizedTypeName("class java.lang.String");              // returns "String"
-     * String name2 = ClassUtil.formatParameterizedTypeName("java.util.List<java.lang.Integer>");   // returns "java.util.List<Integer>"
+     * String name1 = ClassUtil.formatParameterizedTypeName("class java.lang.String");             // returns "String"
+     * String name2 = ClassUtil.formatParameterizedTypeName("java.util.List<java.lang.Integer>");  // returns "java.util.List<Integer>"
      * }</pre>
      *
      * @param parameterizedTypeName the raw parameterized type name to format, typically obtained from
@@ -2352,17 +2377,17 @@ public final class ClassUtil {
         };
     }
 
-    static Method lookupDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>... parameterTypes) {
+    static Method lookupDeclaredMethod(final Class<?> targetClass, final String methodName, final Class<?>... parameterTypes) {
         Method method = null;
 
         try {
-            method = cls.getDeclaredMethod(methodName, parameterTypes);
+            method = targetClass.getDeclaredMethod(methodName, parameterTypes);
         } catch (final NoSuchMethodException e) {
             // ignore.
         }
 
         if (method == null) {
-            final Method[] methods = cls.getDeclaredMethods();
+            final Method[] methods = targetClass.getDeclaredMethods();
 
             for (final Method m : methods) {
                 if (m.getName().equalsIgnoreCase(methodName)
@@ -2388,16 +2413,16 @@ public final class ClassUtil {
      *
      * @param <T> the type of the object to be created
      * @param constructor the constructor to be invoked
-     * @param args the arguments to be passed to the constructor
+     * @param arguments the arguments to be passed to the constructor
      * @return the newly created object
      * @throws IllegalArgumentException if {@code constructor} is {@code null}, or the arguments have an incompatible count or type.
      * @throws RuntimeException if the declaring class is abstract, the constructor is inaccessible, or the constructor throws an exception.
      */
-    public static <T> T invokeConstructor(final Constructor<T> constructor, final Object... args) throws IllegalArgumentException, RuntimeException {
+    public static <T> T invokeConstructor(final Constructor<T> constructor, final Object... arguments) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(constructor, cs.constructor);
 
         try {
-            return constructor.newInstance(args);
+            return constructor.newInstance(arguments);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -2415,15 +2440,15 @@ public final class ClassUtil {
      *
      * @param <T> the type of the object to be returned
      * @param method the static method to be invoked
-     * @param args the arguments to be passed to the method
+     * @param arguments the arguments to be passed to the method
      * @return the result of invoking the method
      * @throws IllegalArgumentException if {@code method} is {@code null}, or the arguments have an incompatible count or type.
      * @throws NullPointerException if the method is not static and no instance is supplied.
      * @throws RuntimeException if the underlying method is inaccessible or throws an exception
      * @see #invokeMethod(Object, Method, Object...)
      */
-    public static <T> T invokeMethod(final Method method, final Object... args) throws IllegalArgumentException, NullPointerException, RuntimeException {
-        return invokeMethod(null, method, args);
+    public static <T> T invokeMethod(final Method method, final Object... arguments) throws IllegalArgumentException, NullPointerException, RuntimeException {
+        return invokeMethod(null, method, arguments);
     }
 
     /**
@@ -2440,7 +2465,7 @@ public final class ClassUtil {
      * @param <T> the type of the object to be returned
      * @param instance the object on which the method is to be invoked, or {@code null} for static methods
      * @param method the method to be invoked
-     * @param args the arguments to be passed to the method
+     * @param arguments the arguments to be passed to the method
      * @return the result of invoking the method
      * @throws IllegalArgumentException if {@code method} is {@code null}, a non-static method receives an instance of an incompatible class,
      *         or the arguments have an incompatible count or type.
@@ -2448,32 +2473,32 @@ public final class ClassUtil {
      * @throws RuntimeException if the underlying method is inaccessible or throws an exception
      * @see #invokeMethod(Method, Object...)
      */
-    public static <T> T invokeMethod(final Object instance, final Method method, final Object... args)
+    public static <T> T invokeMethod(final Object instance, final Method method, final Object... arguments)
             throws IllegalArgumentException, NullPointerException, RuntimeException {
         N.checkArgNotNull(method, cs.method);
 
         try {
-            return (T) method.invoke(instance, args);
+            return (T) method.invoke(instance, arguments);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
     }
 
     /**
-     * Ensures the directory for {@code pkgName} exists under {@code srcPath}.
+     * Ensures the directory for {@code packageName} exists under {@code sourcePath}.
      *
-     * @param srcPath the source root; must not be {@code null}.
-     * @param pkgName the Java package name, or {@code null} for the default package.
+     * @param sourcePath the source root; must not be {@code null}.
+     * @param packageName the Java package name, or {@code null} for the default package.
      * @return the package directory path, always ending with a file separator.
-     * @throws IllegalArgumentException if {@code srcPath} is {@code null}.
+     * @throws IllegalArgumentException if {@code sourcePath} is {@code null}.
      * @throws IllegalStateException if the package directory does not exist and cannot be created.
      */
-    static String makeFolderForPackage(String srcPath, final String pkgName) throws IllegalArgumentException, IllegalStateException {
-        N.checkArgNotNull(srcPath, cs.srcPath);
+    static String makeFolderForPackage(String sourcePath, final String packageName) throws IllegalArgumentException, IllegalStateException {
+        N.checkArgNotNull(sourcePath, cs.sourcePath);
 
-        srcPath = (srcPath.endsWith("/") || srcPath.endsWith("\\")) ? srcPath : (srcPath + File.separator);
+        sourcePath = (sourcePath.endsWith("/") || sourcePath.endsWith("\\")) ? sourcePath : (sourcePath + File.separator);
 
-        final String classFilePath = (pkgName == null) ? srcPath : (srcPath + pkgName.replace('.', File.separatorChar) + File.separator);
+        final String classFilePath = (packageName == null) ? sourcePath : (sourcePath + packageName.replace('.', File.separatorChar) + File.separator);
         final File classFileFolder = new File(classFilePath);
 
         // mkdirs() returns false both when creation failed and when a concurrent caller won the race, so the
@@ -2558,26 +2583,26 @@ public final class ClassUtil {
 
     /**
      * Checks if the specified class is a bean class.
-     * Returns {@code false} if {@code cls} is {@code null}.
+     * Returns {@code false} if {@code targetClass} is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean isBean = ClassUtil.isBeanClass(User.class);        // returns true for typical POJO
-     * boolean isNotBean = ClassUtil.isBeanClass(String.class);   // returns false
+     * boolean isBean = ClassUtil.isBeanClass(User.class);       // returns true for typical POJO
+     * boolean isNotBean = ClassUtil.isBeanClass(String.class);  // returns false
      * }</pre>
      *
-     * @param cls the class to be checked
+     * @param targetClass the class to be checked
      * @return {@code true} if the specified class is a bean class, {@code false} otherwise
      * @deprecated Use {@link Beans#isBeanClass(Class)} instead
      */
     @Deprecated
-    public static boolean isBeanClass(final Class<?> cls) {
-        return Beans.isBeanClass(cls);
+    public static boolean isBeanClass(final Class<?> targetClass) {
+        return Beans.isBeanClass(targetClass);
     }
 
     /**
      * Checks if the specified class is a record class.
-     * Returns {@code false} if {@code cls} is {@code null}.
+     * Returns {@code false} if {@code targetClass} is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2585,13 +2610,13 @@ public final class ClassUtil {
      * boolean isRecord = ClassUtil.isRecordClass(Point.class);   // returns true
      * }</pre>
      *
-     * @param cls the class to be checked
+     * @param targetClass the class to be checked
      * @return {@code true} if the specified class is a record class, {@code false} otherwise
      * @deprecated Use {@link Beans#isRecordClass(Class)} instead
      */
     @Deprecated
-    public static boolean isRecordClass(final Class<?> cls) {
-        return Beans.isRecordClass(cls);
+    public static boolean isRecordClass(final Class<?> targetClass) {
+        return Beans.isRecordClass(targetClass);
     }
 
     /**
@@ -2606,14 +2631,14 @@ public final class ClassUtil {
      * boolean isAnon = ClassUtil.isAnonymousClass(r.getClass());   // returns true
      * }</pre>
      *
-     * @param cls the class to be checked
+     * @param targetClass the class to be checked
      * @return {@code true} if the specified class is an anonymous class, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      */
-    public static boolean isAnonymousClass(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static boolean isAnonymousClass(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return cls.isAnonymousClass();
+        return targetClass.isAnonymousClass();
     }
 
     /**
@@ -2628,14 +2653,14 @@ public final class ClassUtil {
      * boolean isMember = ClassUtil.isMemberClass(Outer.Inner.class);   // returns true
      * }</pre>
      *
-     * @param cls the class to be checked
+     * @param targetClass the class to be checked
      * @return {@code true} if the specified class is a member class, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      */
-    public static boolean isMemberClass(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static boolean isMemberClass(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return cls.isMemberClass();
+        return targetClass.isMemberClass();
     }
 
     /**
@@ -2650,19 +2675,19 @@ public final class ClassUtil {
      * Runnable r = new Runnable() {
      *     public void run() { }
      * };
-     * boolean member = ClassUtil.isAnonymousOrMemberClass(Outer.Inner.class);   // returns true
-     * boolean anon = ClassUtil.isAnonymousOrMemberClass(r.getClass());          // returns true
-     * boolean neither = ClassUtil.isAnonymousOrMemberClass(String.class);       // returns false
+     * boolean member = ClassUtil.isAnonymousOrMemberClass(Outer.Inner.class);  // returns true
+     * boolean anon = ClassUtil.isAnonymousOrMemberClass(r.getClass());         // returns true
+     * boolean neither = ClassUtil.isAnonymousOrMemberClass(String.class);      // returns false
      * }</pre>
      *
-     * @param cls the class to be checked
+     * @param targetClass the class to be checked
      * @return {@code true} if the specified class is either an anonymous class or a member class, {@code false} otherwise
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      */
-    public static boolean isAnonymousOrMemberClass(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static boolean isAnonymousOrMemberClass(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return cls.isAnonymousClass() || cls.isMemberClass();
+        return targetClass.isAnonymousClass() || targetClass.isMemberClass();
     }
 
     /**
@@ -2671,24 +2696,24 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = ClassUtil.isPrimitiveType(int.class);        // returns true
-     * boolean result2 = ClassUtil.isPrimitiveType(Integer.class);   // returns false
+     * boolean result = ClassUtil.isPrimitiveType(int.class);       // returns true
+     * boolean result2 = ClassUtil.isPrimitiveType(Integer.class);  // returns false
      * }</pre>
      *
-     * @param cls the class to be checked
+     * @param targetClass the class to be checked
      * @return {@code true} if the specified class is a primitive type, {@code false} otherwise
-     * @throws IllegalArgumentException if the class is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see #isPrimitiveWrapper(Class)
      * @see #isPrimitiveArrayType(Class)
      */
-    public static boolean isPrimitiveType(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static boolean isPrimitiveType(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         // Answer from the Class itself rather than Type.of(cls): Type.of registers a Type in a global,
         // process-lifetime cache for whatever class it is handed, which is a lot of machinery to answer a
         // boolean - and getPackage(Class) routes every class through here. void is excluded deliberately:
         // Class.isPrimitive() reports void as primitive, this method never has.
-        return cls.isPrimitive() && cls != void.class;
+        return targetClass.isPrimitive() && targetClass != void.class;
     }
 
     /**
@@ -2697,22 +2722,22 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = ClassUtil.isPrimitiveWrapper(Integer.class);   // returns true
-     * boolean result2 = ClassUtil.isPrimitiveWrapper(int.class);      // returns false
+     * boolean result = ClassUtil.isPrimitiveWrapper(Integer.class);  // returns true
+     * boolean result2 = ClassUtil.isPrimitiveWrapper(int.class);     // returns false
      * }</pre>
      *
-     * @param cls the class to be checked
+     * @param targetClass the class to be checked
      * @return {@code true} if the specified class is a primitive wrapper type, {@code false} otherwise
-     * @throws IllegalArgumentException if the class is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see #isPrimitiveType(Class)
      * @see #isPrimitiveArrayType(Class)
      */
-    public static boolean isPrimitiveWrapper(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static boolean isPrimitiveWrapper(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         // See isPrimitiveType(Class). PRIMITIVE_2_WRAPPER also holds the array pairs (int[] -> Integer[]),
         // so an array type has to be excluded explicitly to keep Integer[] from counting as a wrapper.
-        return !cls.isArray() && PRIMITIVE_2_WRAPPER.containsValue(cls);
+        return !targetClass.isArray() && PRIMITIVE_2_WRAPPER.containsValue(targetClass);
     }
 
     /**
@@ -2721,21 +2746,21 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = ClassUtil.isPrimitiveArrayType(int[].class);        // returns true
-     * boolean result2 = ClassUtil.isPrimitiveArrayType(Integer[].class);   // returns false
+     * boolean result = ClassUtil.isPrimitiveArrayType(int[].class);       // returns true
+     * boolean result2 = ClassUtil.isPrimitiveArrayType(Integer[].class);  // returns false
      * }</pre>
      *
-     * @param cls the class to be checked
+     * @param targetClass the class to be checked
      * @return {@code true} if the specified class is a primitive array type, {@code false} otherwise
-     * @throws IllegalArgumentException if the class is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see #isPrimitiveType(Class)
      * @see #isPrimitiveWrapper(Class)
      */
-    public static boolean isPrimitiveArrayType(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static boolean isPrimitiveArrayType(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
         // See isPrimitiveType(Class). Only one dimension counts: int[][] has component type int[], not a primitive.
-        return cls.isArray() && cls.getComponentType().isPrimitive();
+        return targetClass.isArray() && targetClass.getComponentType().isPrimitive();
     }
 
     // Bidirectional lookup between primitive types and their wrapper classes.
@@ -2770,23 +2795,23 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<?> wrapped = ClassUtil.wrap(int.class);        // returns Integer.class
-     * Class<?> wrapped2 = ClassUtil.wrap(Integer.class);   // returns Integer.class
-     * Class<?> wrapped3 = ClassUtil.wrap(String.class);    // returns String.class
-     * Class<?> wrapped4 = ClassUtil.wrap(int[].class);     // returns Integer[].class
+     * Class<?> wrapped = ClassUtil.wrap(int.class);       // returns Integer.class
+     * Class<?> wrapped2 = ClassUtil.wrap(Integer.class);  // returns Integer.class
+     * Class<?> wrapped3 = ClassUtil.wrap(String.class);   // returns String.class
+     * Class<?> wrapped4 = ClassUtil.wrap(int[].class);    // returns Integer[].class
      * }</pre>
      *
-     * @param cls the class to be wrapped
-     * @return the corresponding wrapper type if {@code cls} is a primitive type or primitive array, otherwise {@code cls} itself
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @param targetClass the class to be wrapped
+     * @return the corresponding wrapper type if {@code targetClass} is a primitive type or primitive array, otherwise {@code targetClass} itself
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see #unwrap(Class)
      */
-    public static Class<?> wrap(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static Class<?> wrap(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        final Class<?> wrapped = PRIMITIVE_2_WRAPPER.get(cls);
+        final Class<?> wrapped = PRIMITIVE_2_WRAPPER.get(targetClass);
 
-        return wrapped == null ? cls : wrapped;
+        return wrapped == null ? targetClass : wrapped;
     }
 
     /**
@@ -2798,23 +2823,23 @@ public final class ClassUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Class<?> unwrapped = ClassUtil.unwrap(Integer.class);      // returns int.class
-     * Class<?> unwrapped2 = ClassUtil.unwrap(int.class);         // returns int.class
-     * Class<?> unwrapped3 = ClassUtil.unwrap(String.class);      // returns String.class
-     * Class<?> unwrapped4 = ClassUtil.unwrap(Integer[].class);   // returns int[].class
+     * Class<?> unwrapped = ClassUtil.unwrap(Integer.class);     // returns int.class
+     * Class<?> unwrapped2 = ClassUtil.unwrap(int.class);        // returns int.class
+     * Class<?> unwrapped3 = ClassUtil.unwrap(String.class);     // returns String.class
+     * Class<?> unwrapped4 = ClassUtil.unwrap(Integer[].class);  // returns int[].class
      * }</pre>
      *
-     * @param cls the class to be unwrapped
-     * @return the corresponding primitive type if {@code cls} is a wrapper type or wrapper array, otherwise {@code cls} itself
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @param targetClass the class to be unwrapped
+     * @return the corresponding primitive type if {@code targetClass} is a wrapper type or wrapper array, otherwise {@code targetClass} itself
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see #wrap(Class)
      */
-    public static Class<?> unwrap(final Class<?> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static Class<?> unwrap(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        final Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(cls);
+        final Class<?> unwrapped = PRIMITIVE_2_WRAPPER.getByValue(targetClass);
 
-        return unwrapped == null ? cls : unwrapped;
+        return unwrapped == null ? targetClass : unwrapped;
     }
 
     /**

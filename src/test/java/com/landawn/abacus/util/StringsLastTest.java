@@ -177,8 +177,8 @@ public class StringsLastTest extends StringsTestSupport {
 
     @Test
     public void testLastIndexOfIgnoreCase_WithDelimiterAndStartIndex() {
-        // empty delimiter: falls back to lastIndexOfIgnoreCase without delimiter
-        assertTrue(StrUtil.lastIndexOfTokenIgnoreCase("hello world", "WORLD", "", 20) >= 0);
+        // C-538: an empty delimiter is rejected (a plain search is Strings.lastIndexOfIgnoreCase)
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.lastIndexOfTokenIgnoreCase("hello world", "WORLD", "", 20));
 
         // null str returns -1
         assertEquals(-1, StrUtil.lastIndexOfTokenIgnoreCase(null, "world", ",", 20));
@@ -334,10 +334,10 @@ public class StringsLastTest extends StringsTestSupport {
         // a plain search does find it
         assertEquals(2, Strings.lastIndexOf("x,a,b,y", "a,b"));
 
-        // the rule is scoped to a non-empty delimiter: an empty or null delimiter delegates to a plain search
-        assertEquals(2, StrUtil.lastIndexOfToken("x,a,b,y", "a,b", ""));
-        assertEquals(2, StrUtil.lastIndexOfToken("x,a,b,y", "a,b", null));
-        assertEquals(2, StrUtil.lastIndexOfTokenIgnoreCase("x,a,b,y", "A,B", ""));
+        // C-538: an empty or null delimiter is rejected instead of degrading to a plain search
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.lastIndexOfToken("x,a,b,y", "a,b", ""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.lastIndexOfToken("x,a,b,y", "a,b", null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.lastIndexOfTokenIgnoreCase("x,a,b,y", "A,B", ""));
 
         // the containment test of the IgnoreCase overloads is itself case-insensitive
         assertEquals(4, StrUtil.lastIndexOfToken("pANDxandyANDq", "xandy", "AND"));

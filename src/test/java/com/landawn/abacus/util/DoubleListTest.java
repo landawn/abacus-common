@@ -2025,9 +2025,9 @@ public class DoubleListTest extends DoubleListTestSupport {
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         final DoubleList empty = new DoubleList();
         assertThrows(IllegalArgumentException.class, () -> empty.toCollection(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> empty.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> empty.toCollection(0, 0, ignored -> null));
         assertThrows(IllegalArgumentException.class, () -> empty.toMultiset(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> empty.toMultiset(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> empty.toMultiset(0, 0, ignored -> null));
     }
 
     @Test
@@ -2286,4 +2286,145 @@ public class DoubleListTest extends DoubleListTestSupport {
             assertTrue(parallel.isSorted(), "size=" + size);
         }
     }
+
+    // ---- perf review 2026-09-26 G037 begin ----
+    private static boolean sameDoubleG037(final double x, final double y) {
+        return Double.compare(x, y) == 0;
+    }
+
+    private static boolean naiveContainsAllG037(final double[] a, final double[] b) {
+        for (final double x : b) {
+            boolean found = false;
+
+            for (final double y : a) {
+                if (sameDoubleG037(x, y)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean naiveDisjointG037(final double[] a, final double[] b) {
+        for (final double x : b) {
+            for (final double y : a) {
+                if (sameDoubleG037(x, y)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // G037-05: containsAll set path, both orientations, duplicates, NaN == NaN, 0.0 != -0.0
+    @Test
+    public void testContainsAll_setPathBothOrientationsG037() {
+        final DoubleList big = DoubleList.of(5, 1, 9, 1, 7, 3, 3, 8, 2, 6, 4, 0, Double.NaN);
+        assertTrue(big.containsAll(DoubleList.of(1, 3, 3, 9)));
+        assertTrue(big.containsAll(DoubleList.of(0, 0, 0, 0)));
+        assertFalse(big.containsAll(DoubleList.of(-0.0, 1, 3, 9)));
+        assertTrue(big.containsAll(DoubleList.of(Double.NaN, 1, 3, 9)));
+        assertFalse(big.containsAll(DoubleList.of(1, 3, 9, 11)));
+        assertTrue(big.containsAll(big));
+        assertTrue(big.containsAll(big.copy()));
+        assertTrue(big.containsAll(DoubleList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 1, 1, Double.NaN)));
+        assertFalse(big.containsAll(DoubleList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 9, 1, 1, Double.NaN)));
+        assertTrue(DoubleList.of(1, 2, 3, 4).containsAll(DoubleList.of(4, 3, 2, 1, 1, 2, 3, 4, 4, 4)));
+        assertFalse(DoubleList.of(1, 2, 3, -0.0).containsAll(DoubleList.of(4, 3, 2, 1, 1, 2, 3, 0.0, 4, 4)));
+        assertTrue(big.containsAll(new double[] { 0, 0, Double.NaN, 8 }));
+        assertFalse(big.containsAll(new double[] { 0, 0, Double.NaN, -0.0 }));
+    }
+
+    // G037-06: disjoint / containsAny set path, both orientations and self
+    @Test
+    public void testDisjoint_setPathBothOrientationsG037() {
+        final DoubleList big = DoubleList.of(10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 0.0);
+        assertTrue(big.disjoint(DoubleList.of(1, 2, 3, -0.0)));
+        assertTrue(DoubleList.of(1, 2, 3, -0.0).disjoint(big));
+        assertFalse(big.disjoint(DoubleList.of(1, 2, 3, 20)));
+        assertFalse(DoubleList.of(1, 2, 3, 20).disjoint(big));
+        assertFalse(big.disjoint(big));
+        assertTrue(big.disjoint(new double[] { Double.NaN, -1, -2, -3 }));
+        assertFalse(DoubleList.of(Double.NaN, 1, 2, 3).disjoint(DoubleList.of(-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, Double.NaN)));
+        assertTrue(big.containsAny(new double[] { -10, -11, -12, 10 }));
+        assertFalse(big.containsAny(DoubleList.of(-10, -11, -12, -13, -14, -0.0)));
+    }
+
+    // G037-05/06: randomized differential check of containsAll/disjoint against a naive nested scan
+    @Test
+    public void testContainsAllDisjoint_randomizedAgainstNaiveG037() {
+        final double[] specials = { Double.NaN, 0.0, -0.0, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY };
+        final Random rnd = new Random(20260926L);
+
+        for (int trial = 0; trial < 3000; trial++) {
+            final double[] a = new double[rnd.nextInt(25)];
+            final double[] b = new double[rnd.nextInt(25)];
+            final int range = 1 + rnd.nextInt(30);
+
+            for (int i = 0; i < a.length; i++) {
+                a[i] = rnd.nextInt(8) == 0 ? specials[rnd.nextInt(specials.length)] : rnd.nextInt(range) - range / 2;
+            }
+
+            for (int i = 0; i < b.length; i++) {
+                b[i] = rnd.nextInt(8) == 0 ? specials[rnd.nextInt(specials.length)] : rnd.nextInt(range) - range / 2;
+            }
+
+            final DoubleList la = DoubleList.of(a.clone());
+            final DoubleList lb = DoubleList.of(b.clone());
+            assertEquals(naiveContainsAllG037(a, b), la.containsAll(lb));
+            assertEquals(naiveContainsAllG037(b, a), lb.containsAll(la));
+            assertEquals(naiveDisjointG037(a, b), la.disjoint(lb));
+            assertEquals(naiveDisjointG037(b, a), lb.disjoint(la));
+            assertEquals(!naiveDisjointG037(a, b), la.containsAny(lb));
+            assertArrayEquals(a, la.toArray());
+            assertArrayEquals(b, lb.toArray());
+        }
+    }
+
+    // G037-07: removeDuplicates unsorted path keeps first occurrences in order and clears the tail
+    @Test
+    public void testRemoveDuplicates_unsortedKeepsFirstOccurrenceOrderG037() {
+        final DoubleList l = DoubleList.of(5, 3, 5, Double.NaN, 3, -0.0, 0.0, Double.NaN, 5, -0.0, 1, 1);
+        assertTrue(l.removeDuplicates());
+        assertEquals(DoubleList.of(5, 3, Double.NaN, -0.0, 0.0, 1), l);
+
+        for (int i = l.size(); i < 12; i++) {
+            assertEquals(0d, l.internalArray()[i]);
+        }
+
+        final DoubleList noDup = DoubleList.of(3, 1, 2, -0.0, 0.0, Double.NaN);
+        assertFalse(noDup.removeDuplicates());
+        assertEquals(DoubleList.of(3, 1, 2, -0.0, 0.0, Double.NaN), noDup);
+
+        final double[] specials = { Double.NaN, 0.0, -0.0 };
+        final Random rnd = new Random(7L);
+
+        for (int trial = 0; trial < 500; trial++) {
+            final double[] a = new double[rnd.nextInt(40)];
+
+            for (int i = 0; i < a.length; i++) {
+                a[i] = rnd.nextInt(6) == 0 ? specials[rnd.nextInt(specials.length)] : rnd.nextInt(12);
+            }
+
+            final List<Double> expected = new ArrayList<>();
+
+            for (final double x : a) {
+                if (!expected.contains(x)) {
+                    expected.add(x);
+                }
+            }
+
+            final DoubleList actual = DoubleList.of(a.clone());
+            assertEquals(expected.size() != a.length, actual.removeDuplicates());
+            assertEquals(expected, actual.boxed());
+        }
+    }
+    // ---- perf review 2026-09-26 G037 end ----
 }

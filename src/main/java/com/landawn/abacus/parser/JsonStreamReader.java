@@ -439,9 +439,11 @@ class JsonStreamReader extends JsonStringReader {
      * Reads the next character from the input source, refilling the buffer if necessary.
      *
      * @return the next character, or {@code -1} if the end of the input is reached
+     * @throws ParsingException if the pending token text must be copied into the token buffer before refilling and that buffer cannot
+     *         grow
      * @throws UncheckedIOException if refilling the input buffer from the underlying reader fails
      */
-    protected int nextChar() throws UncheckedIOException {
+    protected int nextChar() throws ParsingException, UncheckedIOException {
         if (strBeginIndex >= strEndIndex) {
             refill();
         }
@@ -460,7 +462,7 @@ class JsonStreamReader extends JsonStringReader {
     @Override
     protected char readEscapeCharacter() throws UncheckedIOException, ParsingException {
         if (strBeginIndex >= strEndIndex) {
-            refill();
+            refillWithinEscape();
             if (strBeginIndex >= strEndIndex) {
                 throw new ParsingException("Incomplete escape sequence at end of input");
             }
@@ -477,7 +479,7 @@ class JsonStreamReader extends JsonStringReader {
 
                 for (int i = 0, c = 0; i < 4; i++) {
                     if (strBeginIndex >= strEndIndex) {
-                        refill();
+                        refillWithinEscape();
                         if (strBeginIndex >= strEndIndex) {
                             throw new ParsingException("Incomplete unicode escape sequence: expected 4 hex digits");
                         }
@@ -525,6 +527,29 @@ class JsonStreamReader extends JsonStringReader {
     }
 
     /**
+     * Refills the read buffer while an escape sequence is being decoded.
+     *
+     * <p>Every caller of {@link #readEscapeCharacter()} has already moved the text that precedes the backslash
+     * into {@code cbuf} (via {@code saveToBuffer()}) or is in buffered mode. When an unquoted token starts with
+     * the escape, that text is empty and {@code nextChar} is still {@code 0}, so a plain {@link #refill()} would
+     * treat the partially consumed escape (for example the raw characters <code>&#92;u00</code>) as pending
+     * zero-copy token text and copy it into {@code cbuf} in front of the decoded character: the unquoted token
+     * <code>&#92;u0041</code> split by a buffer boundary read as <code>&#92;u00A</code> instead of {@code A}, or
+     * overran {@code cbuf}. The consumed escape characters are therefore dropped from the pending range before
+     * refilling. (A quoted string is not affected: its caller advances {@code nextChar} before decoding.)</p>
+     *
+     * @throws ParsingException if the pending token text must be copied into the token buffer and that buffer cannot grow
+     * @throws UncheckedIOException if refilling the input buffer from the underlying reader fails
+     */
+    private void refillWithinEscape() throws ParsingException, UncheckedIOException {
+        if (nextChar == 0) {
+            startIndexForText = strBeginIndex;
+        }
+
+        refill();
+    }
+
+    /**
      * Refills the internal read buffer from the underlying reader.
      *
      * <p>Any pending zero-copy text (the range {@code [startIndexForText, strBeginIndex)}) is
@@ -532,9 +557,10 @@ class JsonStreamReader extends JsonStringReader {
      * When there is no pending text and the read returns nothing (end of input), the text range
      * is left as it is: it stays empty, so {@link #hasText()} is {@code false} at EOF.</p>
      *
+     * @throws ParsingException if the pending token text must be copied into the token buffer and that buffer cannot grow
      * @throws UncheckedIOException if refilling the input buffer from the underlying reader fails
      */
-    protected void refill() throws UncheckedIOException {
+    protected void refill() throws ParsingException, UncheckedIOException {
         if (strBeginIndex >= strEndIndex) {
             if (nextChar == 0) {
                 endIndexForText = strBeginIndex;

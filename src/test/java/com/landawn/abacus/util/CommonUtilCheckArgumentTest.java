@@ -160,4 +160,12 @@ public class CommonUtilCheckArgumentTest extends CommonUtilTestSupport {
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, tracking));
         assertTrue(called[0]);
     }
+
+
+    @Test
+    public void testCheckArgumentVarargsTemplateWithFiveArguments() {
+        assertDoesNotThrow(() -> CommonUtil.checkArgument(true, "{}, {}, {}, {}, {}", 1, 2, 3, 4, 5));
+        assertEquals("1, 2, 3, 4, 5",
+                assertThrows(IllegalArgumentException.class, () -> CommonUtil.checkArgument(false, "{}, {}, {}, {}, {}", 1, 2, 3, 4, 5)).getMessage());
+    }
 }

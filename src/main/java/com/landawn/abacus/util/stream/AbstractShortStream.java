@@ -20,7 +20,6 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
@@ -266,10 +265,10 @@ abstract class AbstractShortStream extends ShortStream {
 
         if (isParallel()) {
             //noinspection resource
-            return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_SHORT).mapToShort(Fn.GET_AS_SHORT));
+            return mapToObj(mapper).psp(s -> s.filter(o -> AbstractStream.requireNonNullOptional(o, "OptionalShort").isPresent()).mapToShort(Fn.GET_AS_SHORT));
         } else {
             //noinspection resource
-            return mapToObj(mapper).filter(Fn.IS_PRESENT_SHORT).mapToShort(Fn.GET_AS_SHORT);
+            return mapToObj(mapper).filter(o -> AbstractStream.requireNonNullOptional(o, "OptionalShort").isPresent()).mapToShort(Fn.GET_AS_SHORT);
         }
     }
 
@@ -503,18 +502,20 @@ abstract class AbstractShortStream extends ShortStream {
             return this;
         }
 
-        final ShortPredicate filter = isParallel() ? new ShortPredicate() {
-            final AtomicLong cnt = new AtomicLong(n);
+        if (isParallel()) {
+            // A skip is a prefix operation: run it on the sequential view (as rateLimited/delay do), so the remaining
+            // elements keep encounter order and onSkip is called one element at a time, then restore this stream's
+            // parallel settings for the downstream stages. The former parallel dropWhile stage emitted the kept
+            // elements in completion order and serialised every element under its lock (about 6x slower) - C-133.
+            //noinspection resource
+            return sequential().skip(n, action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
+        }
 
-            @Override
-            public boolean test(final short value) {
-                return cnt.getAndDecrement() > 0;
-            }
-        } : new ShortPredicate() {
+        final ShortPredicate filter = new ShortPredicate() {
             final MutableLong cnt = MutableLong.of(n);
 
             @Override
-            public boolean test(final short value) throws IllegalStateException {
+            public boolean test(final short value) {
                 return cnt.getAndDecrement() > 0;
             }
         };
@@ -569,16 +570,42 @@ abstract class AbstractShortStream extends ShortStream {
         final ShortIteratorEx iter = iteratorEx();
 
         final ShortIterator shortIterator = new ShortIteratorEx() {
+            // The gap is skipped on the way *in* to the next element, not on the way out of the previous one (as in
+            // Seq.step). Skipping eagerly inside nextShort() made step(n).first()/limit(k) pull the whole trailing gap
+            // from the source - unbounded work or blocking on an infinite/timed source - and fail on elements never needed.
+            private long remainingGap = 0;
+
             @Override
             public boolean hasNext() {
+                skipGapIfNeeded();
+
                 return iter.hasNext();
             }
 
             @Override
             public short nextShort() throws NoSuchElementException {
+                skipGapIfNeeded();
+
                 final short next = iter.nextShort();
-                iter.advance(skip);
+                remainingGap = skip;
                 return next;
+            }
+
+            private void skipGapIfNeeded() {
+                if (remainingGap > 0) {
+                    final long gap = remainingGap;
+
+                    if (!iter.supportsFailureAtomicAdvance()) {
+                        // A failing non-atomic advance leaves an unknown position: never re-skip the gap on a retry.
+                        remainingGap = 0;
+                    }
+
+                    // Bulk advance, never element by element: upstream range/skip/array-backed iterators advance without
+                    // reading the skipped elements; iterators without a bulk advance() (such as map) fall back to reading
+                    // them one by one, exactly as the former eager advance(skip) did.
+                    iter.advance(gap);
+                    remainingGap = 0;
+                }
             }
         };
 
@@ -838,7 +865,10 @@ abstract class AbstractShortStream extends ShortStream {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return elements[(int) (((long) start + cnt++) % len) + fromIndex];
+                // 0 <= start + cnt < 2 * len here, so a conditional subtraction replaces the per-element modulo.
+                final long position = (long) start + cnt++;
+
+                return elements[(int) (position < len ? position : position - len) + fromIndex];
             }
 
             @Override
@@ -873,8 +903,16 @@ abstract class AbstractShortStream extends ShortStream {
 
                 final short[] a = new short[len - cnt];
 
-                for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = elements[(int) (((long) start + i) % len) + fromIndex];
+                if (cnt < len) {
+                    // The remaining rotated elements are at most two contiguous runs of the backing range:
+                    // [head, len) followed by [0, remaining - headLength). Copy each run in bulk.
+                    final long first = (long) start + cnt;
+                    final int head = (int) (first < len ? first : first - len);
+                    final int remaining = len - cnt;
+                    final int headLength = Math.min(len - head, remaining);
+
+                    System.arraycopy(elements, fromIndex + head, a, 0, headLength);
+                    System.arraycopy(elements, fromIndex, a, headLength, remaining - headLength);
                 }
 
                 cnt = len;
@@ -909,12 +947,12 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream shuffled(final Random rnd) throws IllegalStateException, IllegalArgumentException {
+    public ShortStream shuffled(final Random random) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(rnd, cs.rnd);
+        checkArgNotNull(random, cs.random);
 
         return lazyLoad(a -> {
-            N.shuffle(a, rnd);
+            N.shuffle(a, random);
             return a;
         }, false);
     }
@@ -1030,17 +1068,17 @@ abstract class AbstractShortStream extends ShortStream {
 
     /**
      * Creates a lazily-loaded ShortStream by applying the given array transformation operation.
-     * The stream materializes all elements into an array and applies {@code op} when the returned
+     * The stream materializes all elements into an array and applies {@code operator} when the returned
      * stream is first consumed.
      *
-     * @param op the transformation to apply to the collected element array
+     * @param operator the transformation to apply to the collected element array
      * @param sorted whether the resulting stream should be marked as sorted
      * @return a new ShortStream backed by the transformed array
      */
-    private ShortStream lazyLoad(final UnaryOperator<short[]> op, final boolean sorted) {
+    private ShortStream lazyLoad(final UnaryOperator<short[]> operator, final boolean sorted) {
         // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
         return newStream(ShortIterator.defer(() -> { //NOSONAR
-            final short[] a = op.apply(toArrayForIntermediateOp());
+            final short[] a = operator.apply(toArrayForIntermediateOp());
             return a == null || a.length == 0 ? ShortIterator.empty() : ShortIterator.of(a);
         }), sorted);
     }
@@ -1071,6 +1109,7 @@ abstract class AbstractShortStream extends ShortStream {
                     return true;
                 } else {
                     a = list.toArray();
+                    list = null; // The immutable cycle snapshot now owns the cached values.
                     len = a.length;
                     cursor = 0;
 
@@ -1150,6 +1189,7 @@ abstract class AbstractShortStream extends ShortStream {
                     return true;
                 } else {
                     a = list.toArray();
+                    list = null; // The immutable cycle snapshot now owns the cached values.
                     len = a.length;
                     cursor = 0;
                     roundsCompleted++;
@@ -1231,13 +1271,13 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream prepend(final OptionalShort op) throws IllegalStateException, IllegalArgumentException {
+    public ShortStream prepend(final OptionalShort optional) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(optional, cs.optional);
 
         // return prepend(op.stream());
-        return op.isEmpty() ? this : prepend(op.orElseThrow());
+        return optional.isEmpty() ? this : prepend(optional.orElseThrow());
     }
 
     @SafeVarargs
@@ -1260,13 +1300,13 @@ abstract class AbstractShortStream extends ShortStream {
     }
 
     @Override
-    public ShortStream append(final OptionalShort op) throws IllegalStateException, IllegalArgumentException { //NOSONAR
+    public ShortStream append(final OptionalShort optional) throws IllegalStateException, IllegalArgumentException { //NOSONAR
         assertNotClosed();
 
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(optional, cs.optional);
 
         // return append(op.stream());
-        return op.isEmpty() ? this : append(op.orElseThrow());
+        return optional.isEmpty() ? this : append(optional.orElseThrow());
     }
 
     @SafeVarargs
@@ -1349,7 +1389,7 @@ abstract class AbstractShortStream extends ShortStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ShortFunction<? extends K, E> keyMapper,
             final Throwables.ShortFunction<? extends V, E2> valueMapper, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1374,7 +1414,7 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.ShortFunction<? extends K, E> keyMapper,
-            final Collector<? super Short, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Short, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1409,6 +1449,9 @@ abstract class AbstractShortStream extends ShortStream {
             final ShortIterator iter = iteratorEx();
 
             return iter.hasNext() ? OptionalShort.of(iter.nextShort()) : OptionalShort.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1433,6 +1476,9 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             return OptionalShort.of(next);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1454,6 +1500,9 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1481,6 +1530,9 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             return Optional.of(N.percentilesOfSorted(a));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1508,6 +1560,9 @@ abstract class AbstractShortStream extends ShortStream {
                 }
                 return Pair.of(new ShortSummaryStatistics(a.length, a[0], a[a.length - 1], s), Optional.of(N.percentilesOfSorted(a)));
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1527,6 +1582,9 @@ abstract class AbstractShortStream extends ShortStream {
             }
 
             return joiner.toString();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1544,6 +1602,9 @@ abstract class AbstractShortStream extends ShortStream {
             while (iter.hasNext()) {
                 joiner.append(iter.nextShort());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1553,7 +1614,7 @@ abstract class AbstractShortStream extends ShortStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjShortConsumer<? super R> accumulator)
-            throws IllegalStateException, IllegalArgumentException, RuntimeException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

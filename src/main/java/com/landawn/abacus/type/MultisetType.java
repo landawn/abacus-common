@@ -150,7 +150,7 @@ public class MultisetType<E> extends AbstractType<Multiset<E>> {
      *
      * @param x the {@code Multiset} object to convert, may be {@code null}
      * @return the JSON string representation of the {@code Multiset} as an element-to-count map
-     *         (e.g., {@code {"apple":3,"orange":2}}), or {@code null} if the input is {@code null}
+     *         (e.g., {@code {"apple": 3, "orange": 2}}), or {@code null} if the input is {@code null}
      * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)

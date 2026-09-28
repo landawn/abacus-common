@@ -104,4 +104,73 @@ public class IntSupplierTest extends TestBase {
             IntSupplier.RANDOM.getAsInt();
         });
     }
+    // ---- perf review 2026-09-26 G115 begin ----
+    // G115-01: the *Supplier.RANDOM constants call ThreadLocalRandom.current() per draw - safe and varying from several threads.
+    @org.junit.jupiter.api.Test
+    public void testRandom_allSuppliersConcurrentCallers() throws Exception {
+        final int threadCount = 4;
+        final int draws = 2000;
+        final java.util.List<Throwable> errors = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
+        final Thread[] threads = new Thread[threadCount];
+
+        for (int t = 0; t < threadCount; t++) {
+            threads[t] = new Thread(() -> {
+                try {
+                    int trueCount = 0;
+                    final java.util.Set<Byte> bytes = new java.util.HashSet<>();
+                    final java.util.Set<Character> chars = new java.util.HashSet<>();
+                    final java.util.Set<Short> shorts = new java.util.HashSet<>();
+                    final java.util.Set<Integer> ints = new java.util.HashSet<>();
+                    final java.util.Set<Long> longs = new java.util.HashSet<>();
+                    final java.util.Set<Float> floats = new java.util.HashSet<>();
+                    final java.util.Set<Double> doubles = new java.util.HashSet<>();
+
+                    for (int i = 0; i < draws; i++) {
+                        if (BooleanSupplier.RANDOM.getAsBoolean()) {
+                            trueCount++;
+                        }
+
+                        bytes.add(ByteSupplier.RANDOM.getAsByte());
+
+                        final char ch = CharSupplier.RANDOM.getAsChar();
+                        org.junit.jupiter.api.Assertions.assertTrue(Character.isDefined(ch));
+                        chars.add(ch);
+
+                        shorts.add(ShortSupplier.RANDOM.getAsShort());
+                        ints.add(IntSupplier.RANDOM.getAsInt());
+                        longs.add(LongSupplier.RANDOM.getAsLong());
+
+                        final float f = FloatSupplier.RANDOM.getAsFloat();
+                        org.junit.jupiter.api.Assertions.assertTrue(f >= 0f && f < 1f);
+                        floats.add(f);
+
+                        final double d = DoubleSupplier.RANDOM.getAsDouble();
+                        org.junit.jupiter.api.Assertions.assertTrue(d >= 0d && d < 1d);
+                        doubles.add(d);
+                    }
+
+                    org.junit.jupiter.api.Assertions.assertTrue(trueCount > 0 && trueCount < draws);
+                    org.junit.jupiter.api.Assertions.assertTrue(bytes.size() > 100);
+                    org.junit.jupiter.api.Assertions.assertTrue(chars.size() > draws / 2);
+                    org.junit.jupiter.api.Assertions.assertTrue(shorts.size() > draws / 2);
+                    org.junit.jupiter.api.Assertions.assertTrue(ints.size() > draws / 2);
+                    org.junit.jupiter.api.Assertions.assertTrue(longs.size() > draws / 2);
+                    org.junit.jupiter.api.Assertions.assertTrue(floats.size() > draws / 2);
+                    org.junit.jupiter.api.Assertions.assertTrue(doubles.size() > draws / 2);
+                } catch (final Throwable e) {
+                    errors.add(e);
+                }
+            });
+            threads[t].start();
+        }
+
+        for (final Thread thread : threads) {
+            thread.join();
+        }
+
+        org.junit.jupiter.api.Assertions.assertTrue(errors.isEmpty(), errors::toString);
+        // The constants are still singletons.
+        org.junit.jupiter.api.Assertions.assertSame(IntSupplier.RANDOM, IntSupplier.RANDOM);
+    }
+    // ---- perf review 2026-09-26 G115 end ----
 }

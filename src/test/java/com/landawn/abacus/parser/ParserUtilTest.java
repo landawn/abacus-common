@@ -2847,4 +2847,308 @@ public class ParserUtilTest extends AbstractTest {
         assertEquals("<property name=\"p\" type=\"List&lt;String&gt;\">", String.valueOf(new XmlNameTag("p", "List<String>", false).epStartWithType));
     }
 
+    @Test
+    public void testGetBeanInfoNullBeanClassNamesBeanClassParameter() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> ParserUtil.getBeanInfo((Class<?>) null));
+        assertEquals("'beanClass' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testTypeAnnotationEnumeratedAppliesOnlyWithinItsScope() {
+        class ScopedEnumBean {
+            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL, scope = com.landawn.abacus.annotation.Type.Scope.PERSISTENCE)
+            private java.time.DayOfWeek dbOnly;
+
+            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL, scope = com.landawn.abacus.annotation.Type.Scope.SERIALIZATION)
+            private java.time.DayOfWeek serializationOnly;
+
+            @com.landawn.abacus.annotation.Type(enumerated = EnumType.ORDINAL)
+            private java.time.DayOfWeek everywhere;
+
+            public java.time.DayOfWeek getDbOnly() {
+                return dbOnly;
+            }
+
+            public void setDbOnly(final java.time.DayOfWeek dbOnly) {
+                this.dbOnly = dbOnly;
+            }
+
+            public java.time.DayOfWeek getSerializationOnly() {
+                return serializationOnly;
+            }
+
+            public void setSerializationOnly(final java.time.DayOfWeek serializationOnly) {
+                this.serializationOnly = serializationOnly;
+            }
+
+            public java.time.DayOfWeek getEverywhere() {
+                return everywhere;
+            }
+
+            public void setEverywhere(final java.time.DayOfWeek everywhere) {
+                this.everywhere = everywhere;
+            }
+        }
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(ScopedEnumBean.class);
+
+        final PropInfo dbOnly = beanInfo.getPropInfo("dbOnly");
+        assertTrue(dbOnly.dbType.name().contains("ORDINAL"), dbOnly.dbType.name());
+        assertFalse(dbOnly.type.name().contains("ORDINAL"), dbOnly.type.name());
+
+        final PropInfo serializationOnly = beanInfo.getPropInfo("serializationOnly");
+        assertTrue(serializationOnly.type.name().contains("ORDINAL"), serializationOnly.type.name());
+        assertFalse(serializationOnly.dbType.name().contains("ORDINAL"), serializationOnly.dbType.name());
+
+        final PropInfo everywhere = beanInfo.getPropInfo("everywhere");
+        assertTrue(everywhere.type.name().contains("ORDINAL"), everywhere.type.name());
+        assertTrue(everywhere.dbType.name().contains("ORDINAL"), everywhere.dbType.name());
+    }
+    // ---- deep review 2026-09-25 G009 begin ----
+    public static class G009ValidatingSetterBean {
+        static final java.util.concurrent.atomic.AtomicInteger SET_NAME_CALLS = new java.util.concurrent.atomic.AtomicInteger();
+
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            SET_NAME_CALLS.incrementAndGet();
+
+            if (name != null && name.startsWith("bad")) {
+                throw new IllegalStateException("rejected: " + name);
+            }
+
+            this.name = name;
+        }
+    }
+
+    // G009-01: the ASM PropInfo retried a setter that threw its own exception, so a rejecting setter ran twice.
+    @Test
+    public void testPropInfoSetPropValue_rejectingSetterInvokedOnce() {
+        final PropInfo propInfo = ParserUtil.getBeanInfo(G009ValidatingSetterBean.class).getPropInfo("name");
+        final G009ValidatingSetterBean bean = new G009ValidatingSetterBean();
+
+        G009ValidatingSetterBean.SET_NAME_CALLS.set(0);
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> propInfo.setPropValue(bean, "bad value"));
+        assertEquals("rejected: bad value", e.getMessage());
+        assertEquals(1, G009ValidatingSetterBean.SET_NAME_CALLS.get());
+        assertNull(bean.getName());
+
+        // A value of the wrong type is still converted and stored, with one successful setter call.
+        G009ValidatingSetterBean.SET_NAME_CALLS.set(0);
+        propInfo.setPropValue(bean, 123);
+        assertEquals("123", bean.getName());
+        assertEquals(1, G009ValidatingSetterBean.SET_NAME_CALLS.get());
+    }
+
+    public static class G009RefreshInner {
+        private String city;
+        private String zip;
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(final String city) {
+            this.city = city;
+        }
+
+        public String getZip() {
+            return zip;
+        }
+
+        public void setZip(final String zip) {
+            this.zip = zip;
+        }
+    }
+
+    public static class G009RefreshOuter {
+        private G009RefreshInner inner;
+
+        public G009RefreshInner getInner() {
+            return inner;
+        }
+
+        public void setInner(final G009RefreshInner inner) {
+            this.inner = inner;
+        }
+    }
+
+    // G009-02: refreshing the inner bean's metadata left the outer bean's memoized "inner.city" chain in place.
+    @Test
+    public void testGetPropInfoChain_droppedAfterNestedBeanRefresh() {
+        assertEquals(2, ParserUtil.getBeanInfo(G009RefreshOuter.class).getPropInfoChain("inner.city").size());
+
+        Beans.registerNonPropertyAccessor(G009RefreshInner.class, "city");
+
+        assertNull(ParserUtil.getBeanInfo(G009RefreshInner.class).getPropInfo("city"));
+
+        final BeanInfo outerInfo = ParserUtil.getBeanInfo(G009RefreshOuter.class);
+        assertTrue(outerInfo.getPropInfoChain("inner.city").isEmpty());
+
+        final G009RefreshOuter outer = new G009RefreshOuter();
+        assertFalse(outerInfo.setPropValue(outer, "inner.city", "X", true));
+        assertNull(outer.getInner());
+
+        // The paths the refresh did not affect still resolve.
+        assertEquals(2, outerInfo.getPropInfoChain("inner.zip").size());
+        assertTrue(outerInfo.setPropValue(outer, "inner.zip", "Z", true));
+        assertEquals("Z", outer.getInner().getZip());
+    }
+    // ---- deep review 2026-09-25 G009 end ----
+
+    // ---- bug review 2026-09-27 G009 begin ----
+    @JsonXmlConfig(dateFormat = "yyyy-MM-dd", timeZone = "UTC", numberFormat = "#,##0")
+    public static class G009ClassDateFormatLongBean {
+        private long id;
+        private Long ref;
+        private String name;
+        private Date createdOn;
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(final long id) {
+            this.id = id;
+        }
+
+        public Long getRef() {
+            return ref;
+        }
+
+        public void setRef(final Long ref) {
+            this.ref = ref;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+
+        public Date getCreatedOn() {
+            return createdOn;
+        }
+
+        public void setCreatedOn(final Date createdOn) {
+            this.createdOn = createdOn;
+        }
+    }
+
+    // G009-01: a class-level @JsonXmlConfig(dateFormat) was offered to long/Long/String properties (they have
+    // propFuncMap entries for a field-level dateFormat): every long was written as a JSON string and the
+    // class-level numberFormat was ignored for long/Long properties.
+    @Test
+    public void testClassLevelDateFormat_notAppliedToLongAndStringProperties() {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G009ClassDateFormatLongBean.class);
+        assertNull(beanInfo.getPropInfo("id").dateFormat);
+        assertNull(beanInfo.getPropInfo("ref").dateFormat);
+        assertNull(beanInfo.getPropInfo("name").dateFormat);
+        assertEquals("yyyy-MM-dd", beanInfo.getPropInfo("createdOn").dateFormat);
+
+        final G009ClassDateFormatLongBean bean = new G009ClassDateFormatLongBean();
+        bean.setId(123);
+        bean.setRef(4567L);
+        bean.setName("x");
+        bean.setCreatedOn(new Date(0));
+
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"id\": 123"), json);
+        assertTrue(json.contains("\"ref\": \"4,567\""), json);
+        assertTrue(json.contains("\"createdOn\": \"1970-01-01\""), json);
+
+        final G009ClassDateFormatLongBean copy = N.fromJson(json, G009ClassDateFormatLongBean.class);
+        assertEquals(123L, copy.getId());
+        assertEquals(Long.valueOf(4567L), copy.getRef());
+        assertEquals("x", copy.getName());
+        assertEquals(new Date(0), copy.getCreatedOn());
+    }
+    // ---- bug review 2026-09-27 G009 end ----
+
+    // ---- bug review 2026-09-27 verify G118 begin ----
+    @JsonXmlConfig(dateFormat = "yyyy-MM-dd", timeZone = "UTC", numberFormat = "#,##0")
+    public static class G118FieldLevelFormatBean {
+        private long plain;
+        @JsonXmlField(dateFormat = "long")
+        private long epoch;
+        @JsonXmlField(dateFormat = "yyyy")
+        private String text;
+
+        public long getPlain() {
+            return plain;
+        }
+
+        public void setPlain(final long plain) {
+            this.plain = plain;
+        }
+
+        public long getEpoch() {
+            return epoch;
+        }
+
+        public void setEpoch(final long epoch) {
+            this.epoch = epoch;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(final String text) {
+            this.text = text;
+        }
+    }
+
+    // A FIELD-level dateFormat on long/String still wins under a class-level config; the plain long takes the class-level numberFormat.
+    @Test
+    public void testClassLevelDateFormat_fieldLevelDateFormatOnLongAndStringStillApplied() {
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(G118FieldLevelFormatBean.class);
+        assertNull(beanInfo.getPropInfo("plain").dateFormat);
+        assertEquals("long", beanInfo.getPropInfo("epoch").dateFormat);
+        assertEquals("yyyy", beanInfo.getPropInfo("text").dateFormat);
+
+        final G118FieldLevelFormatBean bean = new G118FieldLevelFormatBean();
+        bean.setPlain(1234);
+        bean.setEpoch(11);
+        bean.setText("zz");
+
+        final String json = N.toJson(bean);
+        assertTrue(json.contains("\"plain\": \"1,234\""), json);
+        assertTrue(json.contains("\"epoch\": \"11\""), json);
+        assertTrue(json.contains("\"text\": \"zz\""), json);
+
+        final G118FieldLevelFormatBean copy = N.fromJson(json, G118FieldLevelFormatBean.class);
+        assertEquals(1234L, copy.getPlain());
+        assertEquals(11L, copy.getEpoch());
+        assertEquals("zz", copy.getText());
+    }
+
+    // XML: the class-level numberFormat now reaches long/Long properties and the value round-trips.
+    @Test
+    public void testClassLevelDateFormat_xmlLongUsesClassLevelNumberFormat() {
+        final G009ClassDateFormatLongBean bean = new G009ClassDateFormatLongBean();
+        bean.setId(1234);
+        bean.setRef(4567L);
+        bean.setName("a<b>&c");
+        bean.setCreatedOn(new Date(0));
+
+        final String xml = N.toXml(bean);
+        assertTrue(xml.contains("<id>1,234</id>"), xml);
+        assertTrue(xml.contains("<ref>4,567</ref>"), xml);
+        assertTrue(xml.contains("<name>a&lt;b&gt;&amp;c</name>"), xml);
+        assertTrue(xml.contains("<createdOn>1970-01-01</createdOn>"), xml);
+
+        final G009ClassDateFormatLongBean copy = N.fromXml(xml, G009ClassDateFormatLongBean.class);
+        assertEquals(1234L, copy.getId());
+        assertEquals(Long.valueOf(4567L), copy.getRef());
+        assertEquals("a<b>&c", copy.getName());
+        assertEquals(new Date(0), copy.getCreatedOn());
+    }
+    // ---- bug review 2026-09-27 verify G118 end ----
 }

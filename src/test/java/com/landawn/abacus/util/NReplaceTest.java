@@ -311,4 +311,22 @@ public class NReplaceTest extends NTestSupport {
         final byte[] huge = new byte[Integer.MAX_VALUE - 2];
         assertThrows(ArithmeticException.class, () -> N.replaceRange(huge, 0, 0, new byte[10]));
     }
+
+
+    @Test
+    public void testReplaceAll_floatDoubleSignedZeroAndNaN() {
+        float[] floats = { 0.0f, -0.0f, Float.NaN, 1.0f };
+        assertEquals(1, N.replaceAll(floats, 0.0f, 9.0f));
+        assertArrayEquals(new float[] { 9.0f, -0.0f, Float.NaN, 1.0f }, floats);
+        assertEquals(1, N.replaceAll(floats, Float.NaN, 7.0f));
+        assertArrayEquals(new float[] { 9.0f, -0.0f, 7.0f, 1.0f }, floats);
+
+        double[] doubles = { 0.0, -0.0, Double.NaN, 1.0 };
+        assertEquals(1, N.replaceAll(doubles, 0.0, 9.0));
+        assertArrayEquals(new double[] { 9.0, -0.0, Double.NaN, 1.0 }, doubles);
+        assertEquals(1, N.replaceAll(doubles, -0.0, 8.0));
+        assertArrayEquals(new double[] { 9.0, 8.0, Double.NaN, 1.0 }, doubles);
+        assertEquals(1, N.replaceAll(doubles, Double.NaN, 7.0));
+        assertArrayEquals(new double[] { 9.0, 8.0, 7.0, 1.0 }, doubles);
+    }
 }

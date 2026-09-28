@@ -254,4 +254,20 @@ public class RowDatasetStreamTest extends RowDatasetTestSupport {
         assertEquals("Jane", list.get(0).get("name"));
     }
 
+    @Test
+    public void testStreamWithNullRowTypeNamesRowTypeParameter() {
+        final Dataset ds = Dataset.rows(Arrays.asList("a", "b"), new Object[][] { { 1, "x" }, { 2, "y" } });
+
+        final IllegalArgumentException e1 = org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ds.stream((Class<Object[]>) null));
+        assertTrue(e1.getMessage().contains("rowType"), e1.getMessage());
+
+        final IllegalArgumentException e2 = org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> ds.stream(0, 1, Arrays.asList("a"), (Class<Object[]>) null));
+        assertTrue(e2.getMessage().contains("rowType"), e2.getMessage());
+
+        // The row range and column selection are still validated first.
+        org.junit.jupiter.api.Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ds.stream(0, 3, Arrays.asList("a"), (Class<Object[]>) null));
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> ds.stream(0, 1, Arrays.asList("zz"), (Class<Object[]>) null));
+    }
 }

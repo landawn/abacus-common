@@ -97,7 +97,7 @@ public class SetCopyPolicyTest extends TestBase {
         assertTrue(later.isEmpty(), "later input must not be filled by a factory alias");
         assertThrows(IllegalArgumentException.class, lossy::copy);
         assertThrows(IllegalArgumentException.class, occupied::copy);
-        assertThrows(IllegalArgumentException.class, nullFactory::copy);
+        assertThrows(NullPointerException.class, nullFactory::copy);
         SetMultimap<String, String> valid = independent.copy();
         assertEquals(unknown, valid.get("first"));
         source.put("null", null);

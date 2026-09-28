@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -36,10 +38,12 @@ public interface FloatSupplier extends Throwables.FloatSupplier<RuntimeException
     FloatSupplier ZERO = () -> 0;
     /**
      * A supplier that returns random float values between 0.0f (inclusive) and 1.0f (exclusive).
-     * The values are drawn from an internal random number generator; successive
-     * values are not guaranteed to be distinct.
+     * Successive values are not guaranteed to be distinct.
+     * Values come from the calling thread's {@link ThreadLocalRandom#current()} and are <b>not</b>
+     * cryptographically secure; use {@link java.security.SecureRandom} directly when unpredictable values are
+     * required.
      */
-    FloatSupplier RANDOM = Util.RAND_FLOAT::nextFloat;
+    FloatSupplier RANDOM = () -> ThreadLocalRandom.current().nextFloat();
 
     /**
      * Gets a float result.

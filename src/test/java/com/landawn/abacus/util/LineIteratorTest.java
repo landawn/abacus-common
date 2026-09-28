@@ -298,4 +298,13 @@ public class LineIteratorTest extends TestBase {
         }
         return lines;
     }
+
+    @Test
+    public void testOfInputStreamCharsetNullInputMessageNamesInput() {
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> LineIterator.of((InputStream) null, StandardCharsets.UTF_8));
+        assertEquals("'input' cannot be null", ex.getMessage());
+
+        final IllegalArgumentException ex2 = assertThrows(IllegalArgumentException.class, () -> LineIterator.of((InputStream) null));
+        assertEquals("'input' cannot be null", ex2.getMessage());
+    }
 }

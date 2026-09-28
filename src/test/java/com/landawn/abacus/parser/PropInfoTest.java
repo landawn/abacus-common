@@ -791,4 +791,21 @@ public class PropInfoTest extends TestBase {
         Assertions.assertEquals("{\"value\": \"v\"}", N.toJson(N.fromJson("{\"value\": \"v\"}", NonFinalByBuilder.class)));
     }
 
+    @Test
+    public void testSetPropValueJsonRawFieldConvertsEnumToJsonOnAsmAndReflectionPaths() {
+        final Object value = java.util.concurrent.TimeUnit.SECONDS;
+
+        // Default BeanInfo: ASM-backed PropInfo whenever reflectasm is on the classpath.
+        final PropInfoTest.TestBean asmBean = new PropInfoTest.TestBean();
+        ParserUtil.getBeanInfo(PropInfoTest.TestBean.class).getPropInfo("jsonRawField").setPropValue(asmBean, value);
+
+        @SuppressWarnings("deprecation")
+        final ParserUtil.BeanInfo reflectionBeanInfo = ParserUtil.getBeanInfo(PropInfoTest.TestBean.class, false);
+        final PropInfoTest.TestBean reflectionBean = new PropInfoTest.TestBean();
+        reflectionBeanInfo.getPropInfo("jsonRawField").setPropValue(reflectionBean, value);
+
+        // A raw-JSON property must hold JSON text: the quoted enum name, the same on both access paths.
+        Assertions.assertEquals("\"SECONDS\"", reflectionBean.getJsonRawField());
+        Assertions.assertEquals(reflectionBean.getJsonRawField(), asmBean.getJsonRawField());
+    }
 }

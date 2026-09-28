@@ -841,4 +841,15 @@ public class JsonXmlSerConfigTest extends TestBase {
         }
     }
 
+
+    @Test
+    public void testSetDateTimeFormatExampleRendersOneInstantAsIsoLongAndDefaultText() {
+        final JsonParser jsonParser = ParserFactory.createJsonParser();
+        final Map<String, Object> m = new LinkedHashMap<>();
+        m.put("d", new Date(1703500200000L));
+
+        assertEquals("{\"d\": \"2023-12-25T10:30:00Z\"}", jsonParser.serialize(m, new JsonSerConfig().setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME)));
+        assertEquals("{\"d\": 1703500200000}", jsonParser.serialize(m, new JsonSerConfig().setDateTimeFormat(DateTimeFormat.LONG)));
+        assertEquals("{\"d\": \"2023-12-25T10:30:00Z\"}", jsonParser.serialize(m, new JsonSerConfig().setDateTimeFormat(null)));
+    }
 }

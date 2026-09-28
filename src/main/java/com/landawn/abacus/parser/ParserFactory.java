@@ -362,12 +362,12 @@ public final class ParserFactory {
      * JsonParser parser = ParserFactory.createJsonParser(jsc, jdc);
      * }</pre>
      *
-     * @param jsc the JSON serialization configuration (may be {@code null} for default behavior)
-     * @param jdc the JSON deserialization configuration (may be {@code null} for default behavior)
+     * @param jsonSerConfig the JSON serialization configuration (may be {@code null} for default behavior)
+     * @param jsonDeserConfig the JSON deserialization configuration (may be {@code null} for default behavior)
      * @return a new {@code JsonParser} instance with the specified configurations
      */
-    public static JsonParser createJsonParser(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
-        return new JsonParserImpl(jsc, jdc);
+    public static JsonParser createJsonParser(final JsonSerConfig jsonSerConfig, final JsonDeserConfig jsonDeserConfig) {
+        return new JsonParserImpl(jsonSerConfig, jsonDeserConfig);
     }
 
     /**
@@ -433,7 +433,8 @@ public final class ParserFactory {
      * @throws IllegalArgumentException if the set is null or approved names are ambiguous
      * @throws NullPointerException if the set contains null
      */
-    public static XmlParser createAbacusXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc, final Set<Class<?>> allowedTypeClasses) {
+    public static XmlParser createAbacusXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc, final Set<Class<?>> allowedTypeClasses)
+            throws IllegalArgumentException, NullPointerException {
         return new AbacusXmlParserImpl(XmlParserType.StAX, xsc, xdc, allowedTypeClasses);
     }
 
@@ -529,7 +530,8 @@ public final class ParserFactory {
      * @throws IllegalArgumentException if the set is null or approved names are ambiguous
      * @throws NullPointerException if the set contains null
      */
-    public static XmlParser createXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc, final Set<Class<?>> allowedTypeClasses) {
+    public static XmlParser createXmlParser(final XmlSerConfig xsc, final XmlDeserConfig xdc, final Set<Class<?>> allowedTypeClasses)
+            throws IllegalArgumentException, NullPointerException {
         return new XmlParserImpl(XmlParserType.StAX, xsc, xdc, allowedTypeClasses);
     }
 

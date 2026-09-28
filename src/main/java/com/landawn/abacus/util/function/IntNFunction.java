@@ -56,12 +56,12 @@ public interface IntNFunction<R> extends Throwables.IntNFunction<R, RuntimeExcep
      * Integer result = sum.apply(1, 2, 3, 4, 5);   // Returns 15
      * }</pre>
      *
-     * @param args the function arguments as a variable-length array of {@code int} values.
+     * @param arguments the function arguments as a variable-length array of {@code int} values.
      *             Can be empty, contain a single value, or multiple values
      * @return the function result
      */
     @Override
-    R apply(int... args);
+    R apply(int... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies

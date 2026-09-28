@@ -56,12 +56,12 @@ public interface NFunction<T, R> extends Throwables.NFunction<T, R, RuntimeExcep
      * The varargs parameter may contain any number of arguments of type {@code T},
      * including zero (empty array).
      *
-     * @param args the function arguments as a varargs array
+     * @param arguments the function arguments as a varargs array
      * @return the function result
      */
     @SuppressWarnings("unchecked")
     @Override
-    R apply(T... args);
+    R apply(T... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input,

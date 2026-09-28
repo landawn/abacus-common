@@ -220,7 +220,8 @@ import com.landawn.abacus.util.u.Optional;
  *
  * <p><b>Integration Ecosystem:</b>
  * <ul>
- *   <li><b>{@link Optional}:</b> Can be converted to/from Optional for value presence scenarios</li>
+ *   <li><b>{@link Optional}:</b> There is no built-in conversion method; branch on {@code isSuccess()} as in the
+ *       conversion example above (a successful {@code null} value maps to an empty {@code Optional})</li>
  *   <li><b>{@link Pair}:</b> Direct conversion via {@code toPair()} for tuple-like usage</li>
  *   <li><b>{@link Tuple}:</b> Direct conversion via {@code toTuple()} for structured data scenarios</li>
  *   <li><b>{@link Throwables}:</b> Compatible with throwable utility methods for exception handling</li>
@@ -326,13 +327,13 @@ public class Result<T, E extends Throwable> implements Immutable {
      * <pre>{@code
      * // Creating a success result with a non-null value
      * Result<String, IOException> result = Result.success("Hello World");
-     * assert result.isSuccess();                           // returns true
-     * assert result.orElseThrow().equals("Hello World");   // returns "Hello World"
+     * assert result.isSuccess();                          // returns true
+     * assert result.orElseThrow().equals("Hello World");  // returns "Hello World"
      *
      * // Creating a success result with a null value (valid use case)
      * Result<User, SQLException> nullResult = Result.success(null);
-     * assert nullResult.isSuccess();                // returns true - operation succeeded
-     * assert nullResult.orElseThrow() == null;      // returns null - but that's the actual result
+     * assert nullResult.isSuccess();            // returns true - operation succeeded
+     * assert nullResult.orElseThrow() == null;  // returns null - but that's the actual result
      *
      * // Using with different value types
      * Result<Integer, ArithmeticException> intResult = Result.success(42);

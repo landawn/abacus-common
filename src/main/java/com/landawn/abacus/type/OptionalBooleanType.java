@@ -247,18 +247,18 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * // Sets parameter to SQL NULL
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalBoolean value to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalBoolean x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final OptionalBoolean x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
+            statement.setNull(columnIndex, java.sql.Types.BOOLEAN);
         } else {
-            stmt.setBoolean(columnIndex, x.get());
+            statement.setBoolean(columnIndex, x.get());
         }
     }
 
@@ -280,18 +280,18 @@ public class OptionalBooleanType extends AbstractOptionalType<OptionalBoolean> {
      * // Sets parameter to SQL NULL
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalBoolean value to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalBoolean x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final OptionalBoolean x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
+            statement.setNull(parameterName, java.sql.Types.BOOLEAN);
         } else {
-            stmt.setBoolean(parameterName, x.get());
+            statement.setBoolean(parameterName, x.get());
         }
     }
 

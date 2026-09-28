@@ -169,8 +169,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableBiMap<String, Integer> single = ImmutableBiMap.of("one", 1);
-     * System.out.println(single.get("one"));      // prints 1
-     * System.out.println(single.getByValue(1));   // prints "one"
+     * System.out.println(single.get("one"));     // prints 1
+     * System.out.println(single.getByValue(1));  // prints "one"
      * }</pre>
      *
      * @param <K> the type of the key
@@ -593,9 +593,10 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      *         or {@link #empty()} if {@code map} is {@code null} or empty
      * @throws IllegalArgumentException if {@code map}'s own map suppliers do not return a new, empty,
      *         distinct map on each call, because the defensive copy is made by {@link BiMap#copy()}
+     * @throws NullPointerException if {@code map}'s own map suppliers return {@code null}, for the same reason
      * @see #copyOf(Map)
      */
-    public static <K, V> ImmutableBiMap<K, V> copyOf(final BiMap<? extends K, ? extends V> map) throws IllegalArgumentException {
+    public static <K, V> ImmutableBiMap<K, V> copyOf(final BiMap<? extends K, ? extends V> map) throws IllegalArgumentException, NullPointerException {
         if (N.isEmpty(map)) {
             return empty();
         }
@@ -626,12 +627,15 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * <p><b>The result's own iteration order is best-effort, not guaranteed.</b> An {@code ImmutableBiMap}
      * source is reproduced exactly, through its own backing-map suppliers. Any other source is copied by
      * {@link BiMap#copyOf(Map)}, which mirrors the source's runtime map class where it can - so a
-     * {@link java.util.LinkedHashMap} or {@link java.util.SortedMap} source does keep its order - and falls
-     * back to a {@link java.util.HashMap} where it cannot, as for
-     * {@code Collections.unmodifiableMap(aLinkedHashMap)}. This differs from {@link ImmutableMap#copyOf(Map)},
-     * which always preserves the source's entry order. Build the entries into a {@code BiMap} whose backing
-     * maps you chose and call {@link #wrap(BiMap)} (or {@link #copyOf(BiMap)}) when a particular order
-     * matters.</p>
+     * {@link java.util.LinkedHashMap} or {@link java.util.SortedMap} source does keep its order - and copies a
+     * source whose class cannot be instantiated reflectively, such as
+     * {@code Collections.unmodifiableMap(aLinkedHashMap)}, into a {@code LinkedHashMap} that keeps the source's
+     * encounter order; only key semantics hidden behind such a wrapper (a comparator, identity equivalence) are
+     * lost. The value-to-key map is a {@link java.util.HashMap} for a {@code HashMap} source and a
+     * {@code LinkedHashMap} otherwise. This differs from {@link ImmutableMap#copyOf(Map)}, which always
+     * preserves the source's entry order and never depends on the source's class. Build the entries into a
+     * {@code BiMap} whose backing maps you chose and call {@link #wrap(BiMap)} (or {@link #copyOf(BiMap)}) when
+     * a particular order must be guaranteed.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -654,10 +658,12 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      *         bound to more than one key, or - when {@code map} is a {@code BiMap}-backed source that has to
      *         be copied - if that source's map suppliers do not return a new, empty, distinct map on each
      *         call, because the copy is then made by {@link BiMap#copy()}.
+     * @throws NullPointerException if {@code map} is a {@code BiMap}-backed source that has to be copied and that
+     *         source's map suppliers return {@code null}, for the same reason.
      * @see #copyOf(BiMap)
      */
     @SuppressWarnings("unchecked")
-    public static <K, V> ImmutableBiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws IllegalArgumentException {
+    public static <K, V> ImmutableBiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws IllegalArgumentException, NullPointerException {
         if (map instanceof ImmutableBiMap && ((ImmutableBiMap<K, V>) map).ownsBacking) {
             return (ImmutableBiMap<K, V>) map;
         } else if (N.isEmpty(map)) {
@@ -727,8 +733,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      *     "two", 2
      * );
      *
-     * String key = biMap.getByValue(2);        // returns "two"
-     * String notFound = biMap.getByValue(3);   // returns null
+     * String key = biMap.getByValue(2);       // returns "two"
+     * String notFound = biMap.getByValue(3);  // returns null
      * }</pre>
      *
      * @param value the value whose associated key is to be returned
@@ -736,11 +742,11 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      *         if this map contains no mapping for the value
      * @throws NullPointerException if {@code value} is {@code null} and the backing {@code BiMap}'s
      *         value-to-key map does not permit {@code null} keys (optional). The {@code of(...)} factories
-     *         and {@link #empty()} always build one that permits it; {@link #copyOf(Map)} instead derives
-     *         the value map from the source, so a {@link java.util.Hashtable} or
-     *         {@link java.util.concurrent.ConcurrentHashMap} source - or a {@code BiMap} or
-     *         {@code ImmutableBiMap} source whose own value map rejects {@code null} keys - produces one
-     *         that does not
+     *         and {@link #empty()} always build one that permits it, and so does {@link #copyOf(Map)} for a
+     *         plain source map - even a {@link java.util.Hashtable} or
+     *         {@link java.util.concurrent.ConcurrentHashMap} one, whose {@code null}-hostility concerns its keys,
+     *         not the reverse map's. Only a {@code BiMap} or {@code ImmutableBiMap} source whose own value map
+     *         rejects {@code null} keys produces one that does not
      * @throws ClassCastException if {@code value} has a type that the reverse backing map cannot query or compare
      */
     public K getByValue(final Object value) throws NullPointerException, ClassCastException {
@@ -808,8 +814,8 @@ public final class ImmutableBiMap<K, V> extends AbstractImmutableMap<K, V> {
      * <pre>{@code
      * ImmutableBiMap<String, Integer> biMap = ImmutableBiMap.of("one", 1, "two", 2);
      * ImmutableSet<Integer> values = biMap.values();
-     * System.out.println(values.contains(2));                     // prints true
-     * System.out.println(values.equals(Set.of(1, 2)));            // prints true
+     * System.out.println(values.contains(2));           // prints true
+     * System.out.println(values.equals(Set.of(1, 2)));  // prints true
      * }</pre>
      *
      * @return an immutable set view of the values contained in this map

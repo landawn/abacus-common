@@ -109,7 +109,7 @@ public final class EmailUtil {
      * @param content the plain text content of the email. May be {@code null} or empty
      * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
      * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
-     * @param props mail server properties; must not be {@code null}. Common properties include:
+     * @param properties mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
      *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
@@ -118,15 +118,15 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code props} is null
+     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code properties} is null
      * @throws NullPointerException if a recipient address is {@code null}
      * @throws RuntimeException if address parsing, message assembly, authentication, or mail transport fails
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      * @see #sendHtmlEmail(String[], String, String, String, String, String, Properties)
      */
     public static void sendEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
-            final String password, final Properties props) throws IllegalArgumentException, NullPointerException, RuntimeException {
-        sendEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
+            final String password, final Properties properties) throws IllegalArgumentException, NullPointerException, RuntimeException {
+        sendEmailWithAttachment(recipients, from, subject, content, null, userName, password, properties);
     }
 
     /**
@@ -154,7 +154,7 @@ public final class EmailUtil {
      *                      Files must exist and be readable. The file name (not full path) will be used as the attachment name
      * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
      * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
-     * @param props mail server properties; must not be {@code null}. Common properties include:
+     * @param properties mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
      *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
@@ -163,16 +163,16 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code props} is null
+     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code properties} is null
      * @throws NullPointerException if a recipient address or an attachment path is {@code null}
      * @throws RuntimeException if address parsing, message assembly, authentication, attachment reading, or mail transport fails
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
      * @see #sendHtmlEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      */
     public static void sendEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
-            final String[] attachedFiles, final String userName, final String password, final Properties props)
+            final String[] attachedFiles, final String userName, final String password, final Properties properties)
             throws IllegalArgumentException, NullPointerException, RuntimeException {
-        send(recipients, from, subject, content, attachedFiles, false, userName, password, props);
+        send(recipients, from, subject, content, attachedFiles, false, userName, password, properties);
     }
 
     /**
@@ -203,7 +203,7 @@ public final class EmailUtil {
      * @param content the HTML content of the email. May be {@code null} or empty
      * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
      * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
-     * @param props mail server properties; must not be {@code null}. Common properties include:
+     * @param properties mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
      *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
@@ -212,15 +212,15 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code props} is null
+     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code properties} is null
      * @throws NullPointerException if a recipient address is {@code null}
      * @throws RuntimeException if address parsing, message assembly, authentication, or mail transport fails
      * @see #sendHtmlEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      * @see #sendEmail(String[], String, String, String, String, String, Properties)
      */
     public static void sendHtmlEmail(final String[] recipients, final String from, final String subject, final String content, final String userName,
-            final String password, final Properties props) throws IllegalArgumentException, NullPointerException, RuntimeException {
-        sendHtmlEmailWithAttachment(recipients, from, subject, content, null, userName, password, props);
+            final String password, final Properties properties) throws IllegalArgumentException, NullPointerException, RuntimeException {
+        sendHtmlEmailWithAttachment(recipients, from, subject, content, null, userName, password, properties);
     }
 
     /**
@@ -257,7 +257,7 @@ public final class EmailUtil {
      *                      Files must exist and be readable. The file name (not full path) will be used as the attachment name
      * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
      * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
-     * @param props mail server properties; must not be {@code null}. Common properties include:
+     * @param properties mail server properties; must not be {@code null}. Common properties include:
      *              <ul>
      *              <li>{@code mail.smtp.host} - SMTP server host (required)</li>
      *              <li>{@code mail.smtp.port} - SMTP server port (e.g., 25, 587, 465)</li>
@@ -266,28 +266,28 @@ public final class EmailUtil {
      *              <li>{@code mail.smtp.ssl.enable} - enable SSL (true/false)</li>
      *              <li>{@code mail.smtp.ssl.trust} - trusted hosts</li>
      *              </ul>
-     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code props} is null
+     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code properties} is null
      * @throws NullPointerException if a recipient address or an attachment path is {@code null}
      * @throws RuntimeException if address parsing, message assembly, authentication, attachment reading, or mail transport fails
      * @see #sendHtmlEmail(String[], String, String, String, String, String, Properties)
      * @see #sendEmailWithAttachment(String[], String, String, String, String[], String, String, Properties)
      */
     public static void sendHtmlEmailWithAttachment(final String[] recipients, final String from, final String subject, final String content,
-            final String[] attachedFiles, final String userName, final String password, final Properties props)
+            final String[] attachedFiles, final String userName, final String password, final Properties properties)
             throws IllegalArgumentException, NullPointerException, RuntimeException {
-        send(recipients, from, subject, content, attachedFiles, true, userName, password, props);
+        send(recipients, from, subject, content, attachedFiles, true, userName, password, properties);
     }
 
     /**
-     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code props} is null
+     * @throws IllegalArgumentException if {@code recipients} is null or empty, {@code from} is null or empty, or {@code properties} is null
      * @throws NullPointerException if a recipient address or an attachment path is {@code null}
      * @throws RuntimeException if address parsing, message assembly, authentication, attachment reading, or mail transport fails
      */
     private static void send(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
-            final boolean isHTML, final String userName, final String password, final Properties props)
+            final boolean isHTML, final String userName, final String password, final Properties properties)
             throws IllegalArgumentException, NullPointerException, RuntimeException {
         try {
-            final MimeMessage mail = createMessage(recipients, from, subject, content, attachedFiles, isHTML, userName, password, props);
+            final MimeMessage mail = createMessage(recipients, from, subject, content, attachedFiles, isHTML, userName, password, properties);
             Transport.send(mail);
         } catch (final MessagingException e) {
             throw new RuntimeException("Failed to send email to " + recipients.length + " recipient(s)", e);
@@ -315,23 +315,23 @@ public final class EmailUtil {
      * @param isHTML {@code true} to send {@code content} as {@code text/html}, {@code false} for {@code text/plain}
      * @param userName the username for SMTP authentication; may be {@code null} when authentication is disabled
      * @param password the password for SMTP authentication; may be {@code null} when authentication is disabled
-     * @param props mail server properties; must not be {@code null}
+     * @param properties mail server properties; must not be {@code null}
      * @return the constructed message, ready to be passed to {@link Transport#send(Message)}
      * @throws IllegalArgumentException if {@code recipients} is {@code null} or empty, {@code from} is {@code null}
-     *         or empty, or {@code props} is {@code null}.
+     *         or empty, or {@code properties} is {@code null}.
      * @throws NullPointerException if a recipient address or an attachment path is {@code null}
      * @throws MessagingException if an address is invalid or the message cannot be assembled
      * @throws IllegalStateException if an address carries a display name and this JVM does not support the
      *         {@code UTF-8} charset, which every conformant JVM is required to provide
      */
     static MimeMessage createMessage(final String[] recipients, final String from, final String subject, final String content, final String[] attachedFiles,
-            final boolean isHTML, final String userName, final String password, final Properties props)
+            final boolean isHTML, final String userName, final String password, final Properties properties)
             throws IllegalArgumentException, NullPointerException, MessagingException, IllegalStateException {
         N.checkArgNotEmpty(recipients, cs.recipients);
         N.checkArgNotEmpty(from, cs.from);
-        N.checkArgNotNull(props, cs.props);
+        N.checkArgNotNull(properties, cs.properties);
 
-        final Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+        final Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(userName, password);

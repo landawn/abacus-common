@@ -31,9 +31,9 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Triple<String, Integer, Boolean> triple = Triple.of("Hello", 42, true);
- * String left = triple.left();        // returns "Hello"
- * Integer middle = triple.middle();   // returns 42
- * Boolean right = triple.right();     // returns true
+ * String left = triple.left();       // returns "Hello"
+ * Integer middle = triple.middle();  // returns 42
+ * Boolean right = triple.right();    // returns true
  * }</pre>
  *
  * <h2>{@code Triple} vs {@link Tuple3}</h2>
@@ -1033,9 +1033,9 @@ public final class Triple<L, M, R> implements Mutable {
      * Triple<String, Integer, Boolean> t2 = Triple.of("text", 42, true);
      * Triple<String, Integer, Boolean> t3 = Triple.of("other", 42, true);
      *
-     * t1.equals(t2);     // returns true
-     * t1.equals(t3);     // returns false
-     * t1.equals(null);   // returns false
+     * t1.equals(t2);    // returns true
+     * t1.equals(t3);    // returns false
+     * t1.equals(null);  // returns false
      * }</pre>
      *
      * @param obj the object to compare with this Triple for equality.

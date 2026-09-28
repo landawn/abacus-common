@@ -220,11 +220,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param <K> the type of keys in the map entries
      * @param <V> the type of values in the map entries
-     * @param iter the iterator of map entries to create the BiIterator from, may be {@code null}
+     * @param iterator the iterator of map entries to create the BiIterator from, may be {@code null}
      * @return a BiIterator over the entries of the iterator, or an empty BiIterator if the iterator is {@code null}
      */
-    public static <K, V> BiIterator<K, V> of(final Iterator<Map.Entry<K, V>> iter) {
-        if (iter == null) {
+    public static <K, V> BiIterator<K, V> of(final Iterator<Map.Entry<K, V>> iterator) {
+        if (iterator == null) {
             return empty();
         }
 
@@ -232,7 +232,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             /**
@@ -242,7 +242,11 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
              */
             @Override
             public Pair<K, V> next() throws NoSuchElementException, NullPointerException {
-                return Pair.from(nextEntry());
+                // Not Pair.from(entry): it rejects a null entry with IllegalArgumentException, while a null
+                // entry from the source is not an argument and every other traversal path here throws NPE.
+                final Map.Entry<K, V> entry = nextEntry();
+
+                return Pair.of(entry.getKey(), entry.getValue());
             }
 
             /**
@@ -270,7 +274,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
              * @throws NoSuchElementException if no pair or source entry remains
              */
             private Map.Entry<K, V> nextEntry() throws NoSuchElementException {
-                return iter.next();
+                return iterator.next();
             }
 
             /**
@@ -283,8 +287,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
                 Map.Entry<K, V> entry = null;
 
-                while (iter.hasNext()) {
-                    entry = iter.next();
+                while (iterator.hasNext()) {
+                    entry = iterator.next();
                     action.accept(entry.getKey(), entry.getValue());
                 }
             }
@@ -301,8 +305,8 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
 
                 Map.Entry<K, V> entry = null;
 
-                while (iter.hasNext()) {
-                    entry = iter.next();
+                while (iterator.hasNext()) {
+                    entry = iterator.next();
                     action.accept(entry.getKey(), entry.getValue());
                 }
             }
@@ -317,7 +321,7 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
                 return new ObjIterator<>() {
                     @Override
                     public boolean hasNext() {
-                        return iter.hasNext();
+                        return iterator.hasNext();
                     }
 
                     /**
@@ -1145,22 +1149,22 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <T> the type of elements in the iterator
      * @param <A> the first type of elements in the resulting pairs
      * @param <B> the second type of elements in the resulting pairs
-     * @param iter the iterator to unzip, may be {@code null}; returns an empty {@code BiIterator} when {@code null}
+     * @param iterator the iterator to unzip, may be {@code null}; returns an empty {@code BiIterator} when {@code null}
      * @param unzipFunction a {@code BiConsumer} that splits each element into a pair by populating the provided {@code Pair} object
-     * @return a {@code BiIterator} of pairs produced by the unzip function, or an empty {@code BiIterator} if {@code iter} is {@code null}
+     * @return a {@code BiIterator} of pairs produced by the unzip function, or an empty {@code BiIterator} if {@code iterator} is {@code null}
      * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}.
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction)
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterator<? extends T> iterator, final BiConsumer<? super T, Pair<A, B>> unzipFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(unzipFunction, cs.unzipFunction);
 
-        if (iter == null) {
+        if (iterator == null) {
             return BiIterator.empty();
         }
 
-        final BooleanSupplier booleanSupplier = iter::hasNext;
+        final BooleanSupplier booleanSupplier = iterator::hasNext;
 
-        final Consumer<Pair<A, B>> output = out -> unzipFunction.accept(iter.next(), out);
+        final Consumer<Pair<A, B>> output = out -> unzipFunction.accept(iterator.next(), out);
 
         return BiIterator.generate(booleanSupplier, output);
     }
@@ -1182,20 +1186,20 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <T> the type of elements in the iterable
      * @param <A> the first type of elements in the resulting pairs
      * @param <B> the second type of elements in the resulting pairs
-     * @param iter the iterable to unzip, may be {@code null}; returns an empty {@code BiIterator} when {@code null}
+     * @param iterable the iterable to unzip, may be {@code null}; returns an empty {@code BiIterator} when {@code null}
      * @param unzipFunction a {@code BiConsumer} that splits each element into a pair by populating the provided {@code Pair} object
-     * @return a {@code BiIterator} of pairs produced by the unzip function, or an empty {@code BiIterator} if {@code iter} is {@code null}
+     * @return a {@code BiIterator} of pairs produced by the unzip function, or an empty {@code BiIterator} if {@code iterable} is {@code null}
      * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}.
      */
-    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Pair<A, B>> unzipFunction)
+    public static <T, A, B> BiIterator<A, B> unzip(final Iterable<? extends T> iterable, final BiConsumer<? super T, Pair<A, B>> unzipFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(unzipFunction, cs.unzipFunction);
 
-        if (iter == null) {
+        if (iterable == null) {
             return BiIterator.empty();
         }
 
-        return unzip(iter.iterator(), unzipFunction);
+        return unzip(iterable.iterator(), unzipFunction);
     }
 
     /**
@@ -1222,22 +1226,23 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <B> the second type of elements produced by the unzip function
      * @param <LC> the type of the first output collection
      * @param <RC> the type of the second output collection
-     * @param iter the iterator to unzip, may be {@code null}; returns empty output collections when {@code null}
+     * @param iterator the iterator to unzip, may be {@code null}; returns empty output collections when {@code null}
      * @param unzipFunction a {@code BiConsumer} that splits each element into a pair by populating the provided {@code Pair} object
      * @param leftSupplier a function that provides the first output collection; always called with a size hint of {@code 0}
      * @param rightSupplier a function that provides the second output collection; always called with a size hint of {@code 0}
      * @return a {@code Pair} containing the two output collections
-     * @throws IllegalArgumentException if a callback or supplier is null, either supplier returns null, or the suppliers return the same output collection
+     * @throws IllegalArgumentException if a callback or supplier is null, or the suppliers return the same output collection
+     * @throws NullPointerException if either supplier returns null
      * @throws UnsupportedOperationException if a pair remains and a supplied output collection does not support adding its component
      */
-    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterator<? extends T> iter,
+    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterator<? extends T> iterator,
             final BiConsumer<? super T, Pair<A, B>> unzipFunction, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier)
-            throws IllegalArgumentException, UnsupportedOperationException {
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(unzipFunction, cs.unzipFunction);
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(rightSupplier, cs.rightSupplier);
 
-        return unzip(iter, unzipFunction).unzipToCollections(() -> leftSupplier.apply(0), () -> rightSupplier.apply(0));
+        return unzip(iterator, unzipFunction).unzipToCollections(() -> leftSupplier.apply(0), () -> rightSupplier.apply(0));
     }
 
     /**
@@ -1258,24 +1263,25 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param <B> the second type of elements produced by the unzip function
      * @param <LC> the type of the first output collection
      * @param <RC> the type of the second output collection
-     * @param iter the iterable to unzip, may be {@code null}; returns empty output collections when {@code null}
+     * @param iterable the iterable to unzip, may be {@code null}; returns empty output collections when {@code null}
      * @param unzipFunction a {@code BiConsumer} that splits each element into a pair by populating the provided {@code Pair} object
      * @param leftSupplier a function that provides the first output collection
      * @param rightSupplier a function that provides the second output collection
      * @return a {@code Pair} containing the two output collections
-     * @throws IllegalArgumentException if a callback or supplier is null, either supplier returns null, or the suppliers return the same output collection
+     * @throws IllegalArgumentException if a callback or supplier is null, or the suppliers return the same output collection
+     * @throws NullPointerException if either supplier returns null
      * @throws UnsupportedOperationException if a pair remains and a supplied output collection does not support adding its component
      */
-    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> iter,
+    public static <T, A, B, LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzip(final Iterable<? extends T> iterable,
             final BiConsumer<? super T, Pair<A, B>> unzipFunction, final IntFunction<? extends LC> leftSupplier, final IntFunction<? extends RC> rightSupplier)
-            throws IllegalArgumentException, UnsupportedOperationException {
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(unzipFunction, cs.unzipFunction);
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(rightSupplier, cs.rightSupplier);
 
-        final int len = iter instanceof Collection ? ((Collection<?>) iter).size() : 0;
+        final int len = iterable instanceof Collection ? ((Collection<?>) iterable).size() : 0;
 
-        return unzip(iter, unzipFunction).unzipToCollections(() -> leftSupplier.apply(len), () -> rightSupplier.apply(len));
+        return unzip(iterable, unzipFunction).unzipToCollections(() -> leftSupplier.apply(len), () -> rightSupplier.apply(len));
     }
 
     /**
@@ -1833,17 +1839,18 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param supplier a supplier invoked twice to create the left and right lists; each call must return a {@code non-null} {@code List}
      * @return a {@code Pair} whose left list contains all first components and whose right list contains all second components
-     * @throws IllegalArgumentException if a collection supplier is {@code null}, returns {@code null}, or returns the same collection for both sides.
+     * @throws IllegalArgumentException if a collection supplier is {@code null}, or returns the same collection for both sides.
+     * @throws NullPointerException if a collection supplier returns {@code null}.
      * @throws UnsupportedOperationException if a pair remains and a supplied output collection does not support adding its component
      * @see #unzipToSets(Supplier)
      * @see #unzipToCollections(Supplier, Supplier)
      */
     public Pair<List<A>, List<B>> unzipToLists(@SuppressWarnings("rawtypes") final Supplier<? extends List> supplier)
-            throws IllegalArgumentException, UnsupportedOperationException {
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final List<A> listA = N.checkArgNotNull(supplier.get(), "supplier.get()");
-        final List<B> listB = N.checkArgNotNull(supplier.get(), "supplier.get()");
+        final List<A> listA = N.requireNonNull(supplier.get(), "supplier.get()");
+        final List<B> listB = N.requireNonNull(supplier.get(), "supplier.get()");
         N.checkArgument(listA != listB, "Output collections must be distinct instances");
 
         this.foreachRemaining((a, b) -> {
@@ -1878,18 +1885,19 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      * @param leftSupplier a supplier that provides the collection for first components; must not return {@code null}
      * @param rightSupplier a supplier that provides the collection for second components; must not return {@code null}
      * @return a {@code Pair} whose left collection contains all first components and whose right collection contains all second components
-     * @throws IllegalArgumentException if a collection supplier is {@code null}, returns {@code null}, or returns the same collection for both sides.
+     * @throws IllegalArgumentException if a collection supplier is {@code null}, or returns the same collection for both sides.
+     * @throws NullPointerException if a collection supplier returns {@code null}.
      * @throws UnsupportedOperationException if a pair remains and a supplied output collection does not support adding its component
      * @see #unzipToLists(Supplier)
      * @see #unzipToSets(Supplier)
      */
     public <LC extends Collection<A>, RC extends Collection<B>> Pair<LC, RC> unzipToCollections(final Supplier<? extends LC> leftSupplier,
-            final Supplier<? extends RC> rightSupplier) throws IllegalArgumentException, UnsupportedOperationException {
+            final Supplier<? extends RC> rightSupplier) throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(rightSupplier, cs.rightSupplier);
 
-        final LC collectionA = N.checkArgNotNull(leftSupplier.get(), "leftSupplier.get()");
-        final RC collectionB = N.checkArgNotNull(rightSupplier.get(), "rightSupplier.get()");
+        final LC collectionA = N.requireNonNull(leftSupplier.get(), "leftSupplier.get()");
+        final RC collectionB = N.requireNonNull(rightSupplier.get(), "rightSupplier.get()");
         N.checkArgument(collectionA != collectionB, "Output collections must be distinct instances");
 
         this.foreachRemaining((a, b) -> {
@@ -1923,17 +1931,18 @@ public abstract class BiIterator<A, B> extends ImmutableIterator<Pair<A, B>> {
      *
      * @param supplier a supplier invoked twice to create the left and right sets; each call must return a {@code non-null} {@code Set}
      * @return a {@code Pair} whose left set contains the distinct first components and whose right set contains the distinct second components
-     * @throws IllegalArgumentException if a collection supplier is {@code null}, returns {@code null}, or returns the same collection for both sides.
+     * @throws IllegalArgumentException if a collection supplier is {@code null}, or returns the same collection for both sides.
+     * @throws NullPointerException if a collection supplier returns {@code null}.
      * @throws UnsupportedOperationException if a pair remains and a supplied output collection does not support adding its component
      * @see #unzipToLists(Supplier)
      * @see #unzipToCollections(Supplier, Supplier)
      */
     public Pair<Set<A>, Set<B>> unzipToSets(@SuppressWarnings("rawtypes") final Supplier<? extends Set> supplier)
-            throws IllegalArgumentException, UnsupportedOperationException {
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final Set<A> setA = N.checkArgNotNull(supplier.get(), "supplier.get()");
-        final Set<B> setB = N.checkArgNotNull(supplier.get(), "supplier.get()");
+        final Set<A> setA = N.requireNonNull(supplier.get(), "supplier.get()");
+        final Set<B> setB = N.requireNonNull(supplier.get(), "supplier.get()");
         N.checkArgument(setA != setB, "Output collections must be distinct instances");
 
         this.foreachRemaining((a, b) -> {

@@ -34,8 +34,8 @@ public interface ToIntFunction<T> extends Throwables.ToIntFunction<T, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Integer boxed = 42;
-     * int primitive = ToIntFunction.UNBOX.applyAsInt(boxed);     // returns 42
-     * int defaultValue = ToIntFunction.UNBOX.applyAsInt(null);   // returns 0
+     * int primitive = ToIntFunction.UNBOX.applyAsInt(boxed);    // returns 42
+     * int defaultValue = ToIntFunction.UNBOX.applyAsInt(null);  // returns 0
      * }</pre>
      *
      */

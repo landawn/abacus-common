@@ -89,30 +89,30 @@ public class ClobReaderType extends ReaderType {
      * Sets a {@link Reader} as a CLOB parameter in a {@link java.sql.PreparedStatement}.
      * The reader's content is bound via {@link java.sql.PreparedStatement#setClob(int, Reader)}.
      *
-     * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param statement        the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
-        stmt.setClob(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
+        statement.setClob(columnIndex, x);
     }
 
     /**
      * Sets a {@link Reader} as a named CLOB parameter in a {@link java.sql.CallableStatement}.
      * The reader's content is bound via {@link java.sql.CallableStatement#setClob(String, Reader)}.
      *
-     * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
+     * @param statement          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws NullPointerException, SQLException {
-        stmt.setClob(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final Reader x) throws NullPointerException, SQLException {
+        statement.setClob(parameterName, x);
     }
 
     /**
@@ -120,16 +120,17 @@ public class ClobReaderType extends ReaderType {
      * specifying the number of characters to read.
      * The reader's content is bound via {@link java.sql.PreparedStatement#setClob(int, Reader, long)}.
      *
-     * @param stmt            the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param statement            the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex     the 1-based parameter index
      * @param x               the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of characters to read from the reader
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
-        stmt.setClob(columnIndex, x, sqlTypeOrLength);
+    public void set(final PreparedStatement statement, final int columnIndex, final Reader x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
+        statement.setClob(columnIndex, x, sqlTypeOrLength);
     }
 
     /**
@@ -137,17 +138,17 @@ public class ClobReaderType extends ReaderType {
      * specifying the number of characters to read.
      * The reader's content is bound via {@link java.sql.CallableStatement#setClob(String, Reader, long)}.
      *
-     * @param stmt            the {@link java.sql.CallableStatement} in which to set the parameter
+     * @param statement            the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName   the name of the parameter to set
      * @param x               the {@link Reader} whose content will be stored as CLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of characters to read from the reader
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final Reader x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setClob(parameterName, x, sqlTypeOrLength);
+        statement.setClob(parameterName, x, sqlTypeOrLength);
     }
 
     /**

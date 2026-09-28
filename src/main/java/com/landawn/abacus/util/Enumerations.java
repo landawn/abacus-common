@@ -109,9 +109,9 @@ public final class Enumerations {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Enumeration<String> single = Enumerations.just("Hello");
-     * single.hasMoreElements();   // returns true
-     * single.nextElement();       // returns "Hello"
-     * single.hasMoreElements();   // returns false
+     * single.hasMoreElements();  // returns true
+     * single.nextElement();      // returns "Hello"
+     * single.hasMoreElements();  // returns false
      * }</pre>
      *
      * @param <T> the type of the element
@@ -229,13 +229,13 @@ public final class Enumerations {
      * }</pre>
      *
      * @param <T> the type of elements
-     * @param iter the iterator to wrap as an Enumeration; should not be {@code null}
+     * @param iterator the iterator to wrap as an Enumeration; should not be {@code null}
      * @return an Enumeration that delegates to the specified Iterator
-     * @throws IllegalArgumentException if {@code iter} is {@code null}
+     * @throws IllegalArgumentException if {@code iterator} is {@code null}
      * @see #create(Collection)
      */
-    public static <T> Enumeration<T> create(final Iterator<? extends T> iter) throws IllegalArgumentException {
-        N.checkArgNotNull(iter, cs.iter);
+    public static <T> Enumeration<T> create(final Iterator<? extends T> iterator) throws IllegalArgumentException {
+        N.checkArgNotNull(iterator, cs.iterator);
 
         return new Enumeration<>() {
             /**
@@ -243,7 +243,7 @@ public final class Enumerations {
              */
             @Override
             public boolean hasMoreElements() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             /**
@@ -252,7 +252,7 @@ public final class Enumerations {
              */
             @Override
             public T nextElement() throws NoSuchElementException {
-                return iter.next();
+                return iterator.next();
             }
         };
     }
@@ -459,16 +459,17 @@ public final class Enumerations {
      * @param e the Enumeration to convert; may be {@code null}
      * @param supplier the supplier to create the target collection; must not be {@code null} and must not supply a {@code null} collection
      * @return the collection created by {@code supplier} containing all elements from the Enumeration; an empty collection if {@code e} is {@code null}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if it supplies a {@code null} collection.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} supplies a {@code null} collection.
      * @throws UnsupportedOperationException if the enumeration has an element and the supplied collection does not support adding it
      * @see #toList(Enumeration)
      * @see #toSet(Enumeration)
      */
     public static <T, C extends Collection<T>> C toCollection(final Enumeration<? extends T> e, final Supplier<? extends C> supplier)
-            throws IllegalArgumentException, UnsupportedOperationException {
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final C c = N.checkArgNotNull(supplier.get(), "supplier returned null");
+        final C c = N.requireNonNull(supplier.get(), "supplier returned null");
 
         if (e != null) {
             while (e.hasMoreElements()) {

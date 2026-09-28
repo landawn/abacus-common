@@ -29,6 +29,7 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.ShortIterator;
 import com.landawn.abacus.util.Throwables;
@@ -532,8 +533,10 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * consume elements from the shared synchronized iterator concurrently, with each thread
      * processing its obtained elements independently.
      *
-     * <p>The encounter order of action invocations is not guaranteed. Exceptions thrown by
-     * the action are collected and re-thrown after all threads complete.
+     * <p>The encounter order of action invocations is not guaranteed. Once the action throws,
+     * the workers stop taking further elements, so some elements may never be processed; after
+     * all workers have finished, the first exception is rethrown and any later ones are added to
+     * it as suppressed exceptions.
      *
      * @param <E> the type of exception the action may throw
      * @param action a non-interfering action to perform on each element
@@ -589,6 +592,11 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * <p>If multiple elements map to the same key, the merge function is used to resolve the
      * conflict. The map is created using the provided factory.
      *
+     * <p>In this parallel stream, threads take elements one at a time from a shared cursor into separate
+     * partial maps, which are merged afterwards, so colliding values reach {@code mergeFunction} in no
+     * particular order. The merge function must therefore be commutative as well as associative; for example
+     * {@code (a, b) -> a} does not reliably keep the value of the first element in encounter order.
+     *
      * @param <K> the type of map keys
      * @param <V> the type of map values
      * @param <M> the type of the resulting Map
@@ -602,13 +610,14 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ShortFunction<? extends K, E> keyMapper,
             final Throwables.ShortFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -633,6 +642,10 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * each group using the provided downstream collector, evaluated in parallel. Falls back to
      * sequential execution if the thread count is insufficient to justify parallel overhead.
      *
+     * <p>In this parallel stream, threads take elements one at a time from a shared cursor, so each
+     * downstream container receives an interleaved subset of its group's elements; an order-sensitive
+     * downstream result (for example {@code Collectors.toList()}) may not follow the encounter order.
+     *
      * @param <K> the type of map keys
      * @param <D> the result type of the downstream reduction
      * @param <M> the type of the resulting Map
@@ -642,13 +655,14 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * @param mapFactory a supplier providing the result map
      * @return a Map containing grouped stream elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null},
-     *         or if {@code keyMapper} returns a {@code null} key.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} or {@code keyMapper} returns a {@code null} key.
      * @throws E if the key mapper throws an exception
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.ShortFunction<? extends K, E> keyMapper,
-            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -671,10 +685,13 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * of elements using the identity as the initial value, and the partial results are combined
      * by additional accumulator applications.
      *
-     * <p>The accumulator function must be associative and stateless to ensure correct parallel results.
+     * <p>Threads take elements one at a time from a shared cursor, so each partial result covers an
+     * interleaved subset of the elements. The accumulator function must therefore be stateless,
+     * associative and also commutative; otherwise the result can differ from a sequential reduction
+     * and from run to run.
      *
      * @param identity the identity value for the accumulating function
-     * @param accumulator a non-interfering, stateless, associative function for combining two values
+     * @param accumulator a non-interfering, stateless, associative and commutative function for combining two values
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
@@ -735,9 +752,12 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * or an empty optional if the stream is empty. Each thread independently reduces a subset
      * of elements; partial results are then combined.
      *
-     * <p>The accumulator function must be associative and stateless to ensure correct parallel results.
+     * <p>Threads take elements one at a time from a shared cursor, so each partial result covers an
+     * interleaved subset of the elements. The accumulator function must therefore be stateless,
+     * associative and also commutative; otherwise the result can differ from a sequential reduction
+     * and from run to run.
      *
-     * @param accumulator a non-interfering, stateless, associative function for combining two values
+     * @param accumulator a non-interfering, stateless, associative and commutative function for combining two values
      * @return an OptionalShort with the result of the reduction, or empty if the stream is empty
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
@@ -811,18 +831,23 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
      * <p>The supplier, accumulator, and combiner functions must be non-interfering and stateless.
      * The combiner must be compatible with the accumulator for correct parallel results.
      *
+     * <p>Threads take elements one at a time from a shared cursor, so each container receives an
+     * interleaved subset of the elements; an order-sensitive result (for example a {@code ShortList})
+     * may not follow the encounter order.
+     *
      * @param <R> the type of the mutable result container
      * @param supplier a function that creates a new result container
      * @param accumulator a function to fold an element into a result container
      * @param combiner a function to combine two partial result containers
      * @return the result of the mutable reduction
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjShortConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -839,7 +864,10 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final R container = supplier.get();
+                // A null container is recorded like any other worker failure: execute(..) runs this worker under
+                // callWithErrorCapture, so it stops the other workers and is rethrown as the NullPointerException
+                // itself (the object streams make the same check inside their try block).
+                final R container = N.requireNonNull(supplier.get(), "supplier returned null");
                 short next = 0;
 
                 try {
@@ -1086,23 +1114,25 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final Pair<Long, Short> pair = new Pair<>();
+                // Primitive locals: no boxed index/element per taken element (inside the lock); a Pair is created only on a match.
+                long nextIndex = 0;
+                short next = 0;
 
                 try {
                     while (resultHolder.value() == null && eHolder.value() == null) {
                         synchronized (elements) {
                             if (elements.hasNext()) {
-                                pair.setLeft(index.getAndIncrement());
-                                pair.setRight(elements.nextShort());
+                                nextIndex = index.getAndIncrement();
+                                next = elements.nextShort();
                             } else {
                                 break;
                             }
                         }
 
-                        if (predicate.test(pair.right())) {
+                        if (predicate.test(next)) {
                             synchronized (resultHolder) {
-                                if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
-                                    resultHolder.setValue(pair.copy());
+                                if (resultHolder.value() == null || nextIndex < resultHolder.value().left()) {
+                                    resultHolder.setValue(Pair.of(nextIndex, next));
                                 }
                             }
 
@@ -1221,23 +1251,25 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final Pair<Long, Short> pair = new Pair<>();
+                // Primitive locals: no boxed index/element per taken element (inside the lock); a Pair is created only on a match.
+                long nextIndex = 0;
+                short next = 0;
 
                 try {
                     while (eHolder.value() == null) {
                         synchronized (elements) {
                             if (elements.hasNext()) {
-                                pair.setLeft(index.getAndIncrement());
-                                pair.setRight(elements.nextShort());
+                                nextIndex = index.getAndIncrement();
+                                next = elements.nextShort();
                             } else {
                                 break;
                             }
                         }
 
-                        if (predicate.test(pair.right())) {
+                        if (predicate.test(next)) {
                             synchronized (resultHolder) {
-                                if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
-                                    resultHolder.setValue(pair.copy());
+                                if (resultHolder.value() == null || nextIndex > resultHolder.value().left()) {
+                                    resultHolder.setValue(Pair.of(nextIndex, next));
                                 }
                             }
                         }
@@ -1280,8 +1312,10 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorShortStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsShort, maxThreadNum, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, this::boxed, b::boxed,
+                (boxedA, boxedB) -> new ParallelIteratorShortStream(Stream.parallelZip(boxedA, boxedB, zipFunction::applyAsShort, maxThreadNum, asyncExecutor),
+                        false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1314,8 +1348,11 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorShortStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsShort, maxThreadNum, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, c, this::boxed, b::boxed, c::boxed,
+                (boxedA, boxedB, boxedC) -> new ParallelIteratorShortStream(
+                        Stream.parallelZip(boxedA, boxedB, boxedC, zipFunction::applyAsShort, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy,
+                        asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1349,9 +1386,11 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                     asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorShortStream(
-                Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsShort, maxThreadNum, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, this::boxed, b::boxed,
+                (boxedA, boxedB) -> new ParallelIteratorShortStream(
+                        Stream.parallelZip(boxedA, boxedB, valueForNoneA, valueForNoneB, zipFunction::applyAsShort, maxThreadNum, asyncExecutor), false,
+                        maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1388,8 +1427,12 @@ final class ParallelIteratorShortStream extends IteratorShortStream {
                     splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorShortStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC,
-                zipFunction::applyAsShort, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, c, this::boxed, b::boxed, c::boxed,
+                (boxedA, boxedB,
+                        boxedC) -> new ParallelIteratorShortStream(Stream.parallelZip(boxedA, boxedB, boxedC, valueForNoneA, valueForNoneB, valueForNoneC,
+                                zipFunction::applyAsShort, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor,
+                                cancelUncompletedThreads, null));
     }
 
     /**

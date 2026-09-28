@@ -1078,9 +1078,9 @@ public final class Pair<L, R> implements Map.Entry<L, R>, Mutable {
      * Pair<String, Integer> pair2 = Pair.of("Hello", 42);
      * Pair<String, Integer> pair3 = Pair.of("Hello", 43);
      *
-     * pair1.equals(pair2);     // returns true
-     * pair1.equals(pair3);     // returns false
-     * pair1.equals("Hello");   // returns false (different type)
+     * pair1.equals(pair2);    // returns true
+     * pair1.equals(pair3);    // returns false
+     * pair1.equals("Hello");  // returns false (different type)
      *
      * Pair<String, Integer> pair4 = Pair.of(null, null);
      * Pair<String, Integer> pair5 = Pair.of(null, null);

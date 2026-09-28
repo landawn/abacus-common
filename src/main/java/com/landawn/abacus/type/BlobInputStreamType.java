@@ -91,15 +91,15 @@ public class BlobInputStreamType extends InputStreamType {
      * The JDBC driver reads data from the stream as needed to populate the BLOB.
      * Delegates to {@link java.sql.PreparedStatement#setBlob(int, java.io.InputStream)}.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
-        stmt.setBlob(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
+        statement.setBlob(columnIndex, x);
     }
 
     /**
@@ -107,15 +107,15 @@ public class BlobInputStreamType extends InputStreamType {
      * The JDBC driver reads data from the stream as needed to populate the BLOB.
      * Delegates to {@link java.sql.CallableStatement#setBlob(String, java.io.InputStream)}.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
-        stmt.setBlob(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
+        statement.setBlob(parameterName, x);
     }
 
     /**
@@ -123,17 +123,17 @@ public class BlobInputStreamType extends InputStreamType {
      * at the specified position, with an explicit byte-length hint for the JDBC driver.
      * Delegates to {@link java.sql.PreparedStatement#setBlob(int, java.io.InputStream, long)}.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of bytes in the stream
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
+    public void set(final PreparedStatement statement, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setBlob(columnIndex, x, sqlTypeOrLength);
+        statement.setBlob(columnIndex, x, sqlTypeOrLength);
     }
 
     /**
@@ -141,17 +141,17 @@ public class BlobInputStreamType extends InputStreamType {
      * with an explicit byte-length hint for the JDBC driver.
      * Delegates to {@link java.sql.CallableStatement#setBlob(String, java.io.InputStream, long)}.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code InputStream} containing binary BLOB data; may be {@code null}
      * @param sqlTypeOrLength the number of bytes in the stream
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final InputStream x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setBlob(parameterName, x, sqlTypeOrLength);
+        statement.setBlob(parameterName, x, sqlTypeOrLength);
     }
 
     /**

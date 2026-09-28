@@ -131,17 +131,17 @@ public final class Synchronized<T> {
      * @param <T> the type of the mutex.
      * @param <E> the type of exception that the command might throw.
      * @param mutex the object to synchronize on.
-     * @param cmd the runnable command to execute.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code cmd} is {@code null}.
+     * @param command the runnable command to execute.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code command} is {@code null}.
      * @throws E if the command throws an exception of type E.
      */
-    public static <T, E extends Throwable> void run(final T mutex, final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
+    public static <T, E extends Throwable> void run(final T mutex, final Throwables.Runnable<E> command) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex, cs.mutex);
-        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(command, cs.command);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
-            cmd.run();
+            command.run();
         }
     }
 
@@ -168,18 +168,18 @@ public final class Synchronized<T> {
      * @param <R> the type of the result returned by the callable.
      * @param <E> the type of exception that the callable might throw.
      * @param mutex the object to synchronize on.
-     * @param cmd the callable command to execute.
+     * @param command the callable command to execute.
      * @return the result of the callable command.
-     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code cmd} is {@code null}.
+     * @throws IllegalArgumentException if the provided mutex is {@code null}, or if {@code command} is {@code null}.
      * @throws E if the callable throws an exception of type E.
      */
-    public static <T, R, E extends Throwable> R call(final T mutex, final Throwables.Callable<? extends R, E> cmd) throws IllegalArgumentException, E {
+    public static <T, R, E extends Throwable> R call(final T mutex, final Throwables.Callable<? extends R, E> command) throws IllegalArgumentException, E {
         N.checkArgNotNull(mutex, cs.mutex);
-        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(command, cs.command);
 
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (mutex) {
-            return cmd.call();
+            return command.call();
         }
     }
 
@@ -404,15 +404,15 @@ public final class Synchronized<T> {
      * }</pre>
      *
      * @param <E> the type of exception that the command might throw.
-     * @param cmd the runnable command to execute.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @param command the runnable command to execute.
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @throws E if the command throws an exception of type E.
      */
-    public <E extends Throwable> void run(final Throwables.Runnable<E> cmd) throws IllegalArgumentException, E {
-        N.checkArgNotNull(cmd, cs.cmd);
+    public <E extends Throwable> void run(final Throwables.Runnable<E> command) throws IllegalArgumentException, E {
+        N.checkArgNotNull(command, cs.command);
 
         synchronized (mutex) {
-            cmd.run();
+            command.run();
         }
     }
 
@@ -432,16 +432,16 @@ public final class Synchronized<T> {
      *
      * @param <R> the type of the result.
      * @param <E> the type of exception that the callable might throw.
-     * @param cmd the callable command to execute.
+     * @param command the callable command to execute.
      * @return the result of the callable command.
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @throws E if the callable throws an exception of type E.
      */
-    public <R, E extends Throwable> R call(final Throwables.Callable<? extends R, E> cmd) throws IllegalArgumentException, E {
-        N.checkArgNotNull(cmd, cs.cmd);
+    public <R, E extends Throwable> R call(final Throwables.Callable<? extends R, E> command) throws IllegalArgumentException, E {
+        N.checkArgNotNull(command, cs.command);
 
         synchronized (mutex) {
-            return cmd.call();
+            return command.call();
         }
     }
 

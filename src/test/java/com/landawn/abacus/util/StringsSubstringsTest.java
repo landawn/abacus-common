@@ -1205,7 +1205,7 @@ public class StringsSubstringsTest extends StringsTestSupport {
 
     @Test
     public void testAbbreviate_TooSmallLengthThrows() {
-        // maxLength must be at least abbrevMarker.length + 1.
+        // maxLength must be at least abbreviationMarker.length + 1.
         assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefg", 3));
         assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefg", "...", 3));
         // OK boundaries.
@@ -1341,7 +1341,7 @@ public class StringsSubstringsTest extends StringsTestSupport {
         assertEquals(0, Strings.codePointDisplayWidth(0x20E3)); // keycap mark: zero-width, cluster promoter only
         assertEquals(1, Strings.codePointDisplayWidth(0x093E)); // Devanagari spacing vowel sign is visible when standalone
         assertEquals(1, Strings.displayWidth("\u093E"));
-        assertEquals(1, Strings.displayWidth("\u0915\u093E")); // Mc attaches to a base without adding another cell
+        assertEquals(2, Strings.displayWidth("\u0915\u093E")); // C-568: an Mc after a visible base takes a cell of its own
         assertEquals(2, Strings.displayWidth("한"));
         assertEquals(2, Strings.displayWidth(java.text.Normalizer.normalize("한", java.text.Normalizer.Form.NFD)));
         assertEquals(1, Strings.codePointDisplayWidth('a'));
@@ -2414,8 +2414,9 @@ public class StringsSubstringsTest extends StringsTestSupport {
 
     @Test
     public void testPadToDisplayWidth_padSpaceAbsorbedByBoundaryCluster() {
-        // A leading Extend/SpacingMark code point pulls the adjacent pad space into its own grapheme cluster,
-        // and a cluster is only as wide as its widest code point, so that space used to add no column at all.
+        // A leading Extend/SpacingMark code point pulls the adjacent pad space into its own grapheme cluster. A width-2
+        // Extend (the emoji modifier) then measures max(1, 2) with the space, so that space used to add no column at all;
+        // since C-568 a spacing mark adds its own cell after the space, and a Prepend still adds none to its cluster.
         final String emojiModifier = new String(Character.toChars(0x1F3FB)); // EMOJI MODIFIER FITZPATRICK TYPE-1-2 (Extend, width 2)
         final String devanagariAa = new String(Character.toChars(0x093E)); // DEVANAGARI VOWEL SIGN AA (SpacingMark, width 1)
         final String malayalamDotReph = new String(Character.toChars(0x0D4E)); // MALAYALAM LETTER DOT REPH (Prepend, width 1)
@@ -2554,5 +2555,36 @@ public class StringsSubstringsTest extends StringsTestSupport {
 
         assertEquals("D", StrUtil.substringAfterOrElse(null, "", "D"));
         assertEquals("D", StrUtil.substringBeforeLastOrElse(null, "", "D"));
+    }
+
+
+    @Test
+    public void testEncodeUrlQuery_verbatimQueryString() {
+        assertEquals("q=a b;c=d", Strings.encodeUrlQuery("q=a b;c=d"));
+        assertEquals("q=a%20b&flag", Strings.encodeUrlQuery("q=a%20b&flag"));
+        assertEquals("q=\u00e9", Strings.encodeUrlQuery("q=\u00e9", StandardCharsets.US_ASCII));
+        assertEquals("a%26b+c", Strings.encodeUrlQuery("a&b c"));
+
+        final Map<String, Object> nonAscii = new LinkedHashMap<>();
+        nonAscii.put("q", "\u00e9");
+        assertThrows(IllegalArgumentException.class, () -> Strings.encodeUrlQuery(nonAscii, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    public void testEncodeUrlQuery_emptyNameWithNullValue() {
+        final Map<String, Object> emptyNameNullValue = new LinkedHashMap<>();
+        emptyNameNullValue.put("", null);
+        assertThrows(IllegalArgumentException.class, () -> Strings.encodeUrlQuery(emptyNameNullValue));
+        assertThrows(IllegalArgumentException.class, () -> Strings.encodeUrlQuery(emptyNameNullValue, StandardCharsets.UTF_8));
+        assertThrows(IllegalArgumentException.class, () -> Strings.encodeUrlQuery(new Object[] { "", null }));
+        assertEquals("=v", Strings.encodeUrlQuery(new Object[] { "", "v" }));
+    }
+
+    @Test
+    public void testParseUrlQuery_nullHostileMapTarget() {
+        assertThrows(NullPointerException.class, () -> Strings.parseUrlQuery("a=1&flag", java.util.Hashtable.class));
+        assertThrows(NullPointerException.class, () -> Strings.parseUrlQuery("flag", StandardCharsets.UTF_8, java.util.Hashtable.class));
+        assertEquals("1", ((Map<?, ?>) Strings.parseUrlQuery("a=1", java.util.Hashtable.class)).get("a"));
+        assertTrue(Strings.parseUrlQueryToMultimap("a=1&flag").containsKey("flag"));
     }
 }

@@ -255,18 +255,18 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * // Sets parameter to SQL NULL
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalByte value to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalByte x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final OptionalByte x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(columnIndex, java.sql.Types.TINYINT);
+            statement.setNull(columnIndex, java.sql.Types.TINYINT);
         } else {
-            stmt.setByte(columnIndex, x.get());
+            statement.setByte(columnIndex, x.get());
         }
     }
 
@@ -288,18 +288,18 @@ public class OptionalByteType extends AbstractOptionalType<OptionalByte> {
      * // Sets parameter to SQL NULL
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalByte value to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalByte x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final OptionalByte x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(parameterName, java.sql.Types.TINYINT);
+            statement.setNull(parameterName, java.sql.Types.TINYINT);
         } else {
-            stmt.setByte(parameterName, x.get());
+            statement.setByte(parameterName, x.get());
         }
     }
 

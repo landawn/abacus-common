@@ -3049,4 +3049,197 @@ public class ParallelArrayStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    @Test
+    public void testReduceAndCollectWithArraySplitStrategyFollowEncounterOrder() {
+        final Integer[] source = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        final ParallelSettings ps = ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build();
+        final List<Integer> expected = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+
+        // "last element wins" is associative but not commutative: ARRAY slices are contiguous and combined in slice order
+        assertEquals(9, Stream.of(source).parallel(ps).reduce((a, b) -> b).get());
+        assertEquals(9, Stream.of(source).parallel(ps).reduce(-1, (a, b) -> b, (a, b) -> b));
+
+        final List<Integer> collected = Stream.of(source).parallel(ps).collect(ArrayList::new, (c, e) -> c.add(e), ArrayList::addAll);
+        assertEquals(expected, collected);
+        assertEquals(expected, Stream.of(source).parallel(ps).collect(java.util.stream.Collectors.toList()));
+    }
+
+    @Test
+    public void testGroupToNullKeyWithArraySplitWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch siblingStarted = new CountDownLatch(1);
+        final AtomicBoolean siblingFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedSibling = new AtomicBoolean();
+        final Stream<Integer> testStream = Stream.of(new Integer[] { 1, 2 })
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .onClose(() -> closeObservedFinishedSibling.set(siblingFinished.get()));
+
+        final NullPointerException thrown = assertThrows(NullPointerException.class, () -> testStream.groupTo(value -> {
+            if (value == 2) {
+                siblingStarted.countDown();
+                Thread.sleep(200);
+                siblingFinished.set(true);
+                return value;
+            }
+
+            if (!siblingStarted.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+
+            return null;
+        }, value -> value, Collectors.counting(), HashMap::new));
+
+        assertEquals("element cannot be mapped to a null key", thrown.getMessage());
+        assertTrue(siblingFinished.get());
+        assertTrue(closeObservedFinishedSibling.get());
+    }
+
+    @Test
+    public void testGroupToNullKeyWithIteratorSplitWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch siblingStarted = new CountDownLatch(1);
+        final AtomicBoolean siblingFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedSibling = new AtomicBoolean();
+        final Stream<Integer> testStream = Stream.of(new Integer[] { 1, 2 })
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(2).build())
+                .onClose(() -> closeObservedFinishedSibling.set(siblingFinished.get()));
+
+        final NullPointerException thrown = assertThrows(NullPointerException.class, () -> testStream.groupTo(value -> {
+            if (value == 2) {
+                siblingStarted.countDown();
+                Thread.sleep(200);
+                siblingFinished.set(true);
+                return value;
+            }
+
+            if (!siblingStarted.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+
+            return null;
+        }, value -> value, Collectors.counting(), HashMap::new));
+
+        assertEquals("element cannot be mapped to a null key", thrown.getMessage());
+        assertTrue(siblingFinished.get());
+        assertTrue(closeObservedFinishedSibling.get());
+    }
+
+    @Test
+    public void testFlatGroupToNullKeyWithArraySplitWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch siblingStarted = new CountDownLatch(1);
+        final AtomicBoolean siblingFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedSibling = new AtomicBoolean();
+        final Stream<Integer> testStream = Stream.of(new Integer[] { 1, 2 })
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(2).build())
+                .onClose(() -> closeObservedFinishedSibling.set(siblingFinished.get()));
+
+        final NullPointerException thrown = assertThrows(NullPointerException.class, () -> testStream.flatGroupTo(value -> {
+            if (value == 2) {
+                siblingStarted.countDown();
+                Thread.sleep(200);
+                siblingFinished.set(true);
+                return Arrays.asList(value);
+            }
+
+            if (!siblingStarted.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+
+            return Arrays.asList((Integer) null);
+        }, (key, value) -> value, Collectors.counting(), HashMap::new));
+
+        assertEquals("element cannot be mapped to a null key", thrown.getMessage());
+        assertTrue(siblingFinished.get());
+        assertTrue(closeObservedFinishedSibling.get());
+    }
+
+    @Test
+    public void testFlatGroupToNullKeyWithIteratorSplitWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch siblingStarted = new CountDownLatch(1);
+        final AtomicBoolean siblingFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedSibling = new AtomicBoolean();
+        final Stream<Integer> testStream = Stream.of(new Integer[] { 1, 2 })
+                .parallel(ParallelSettings.builder().splitStrategy(SplitStrategy.ITERATOR).maxThreadNum(2).build())
+                .onClose(() -> closeObservedFinishedSibling.set(siblingFinished.get()));
+
+        final NullPointerException thrown = assertThrows(NullPointerException.class, () -> testStream.flatGroupTo(value -> {
+            if (value == 2) {
+                siblingStarted.countDown();
+                Thread.sleep(200);
+                siblingFinished.set(true);
+                return Arrays.asList(value);
+            }
+
+            if (!siblingStarted.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+
+            return Arrays.asList((Integer) null);
+        }, (key, value) -> value, Collectors.counting(), HashMap::new));
+
+        assertEquals("element cannot be mapped to a null key", thrown.getMessage());
+        assertTrue(siblingFinished.get());
+        assertTrue(closeObservedFinishedSibling.get());
+    }
+
+    // ---- perf review 2026-09-26 G102 begin ----
+    // G102-01: findFirst/findLast track the candidate index in primitive locals; pins lowest/highest-index results on both split strategies.
+    @Test
+    public void testFindFirstFindLast_primitiveCandidateTracking() {
+        final Integer[] source = new Integer[1000];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = i * 3 - 1500;
+        }
+
+        final List<java.util.function.Predicate<Integer>> predicates = Arrays.asList(value -> value % 7 == 0, value -> value > 1400, value -> value < -1400,
+                value -> value == 1497, value -> value == -1500, value -> value == 2, value -> true, value -> false);
+
+        for (final SplitStrategy splitStrategy : new SplitStrategy[] { SplitStrategy.ARRAY, SplitStrategy.ITERATOR }) {
+            for (final int threadNum : new int[] { 2, 3, 4, 7 }) {
+                for (final int[] range : new int[][] { { 0, 1000 }, { 5, 997 }, { 10, 12 } }) {
+                    for (final java.util.function.Predicate<Integer> predicate : predicates) {
+                        int first = -1;
+                        int last = -1;
+
+                        for (int i = range[0]; i < range[1]; i++) {
+                            if (predicate.test(source[i])) {
+                                if (first < 0) {
+                                    first = i;
+                                }
+
+                                last = i;
+                            }
+                        }
+
+                        final Optional<Integer> expectedFirst = first < 0 ? Optional.empty() : Optional.of(source[first]);
+                        final Optional<Integer> expectedLast = last < 0 ? Optional.empty() : Optional.of(source[last]);
+
+                        assertEquals(expectedFirst, new ParallelArrayStream<>(source, range[0], range[1], false, null, threadNum, splitStrategy, null, false,
+                                new ArrayList<>()).findFirst(predicate::test));
+                        assertEquals(expectedLast, new ParallelArrayStream<>(source, range[0], range[1], false, null, threadNum, splitStrategy, null, false,
+                                new ArrayList<>()).findLast(predicate::test));
+                    }
+                }
+            }
+
+            for (final boolean last : new boolean[] { false, true }) {
+                final AtomicInteger calls = new AtomicInteger();
+                final Stream<Integer> stream = new ParallelArrayStream<>(source, 0, source.length, false, null, 4, splitStrategy, null, false, new ArrayList<>());
+
+                assertEquals(Optional.empty(), last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
+                assertEquals(source.length, calls.get());
+            }
+
+            final Integer[] withNull = source.clone();
+            withNull[500] = null;
+
+            assertThrows(NullPointerException.class, () -> new ParallelArrayStream<>(withNull, 0, withNull.length, false, null, 4, splitStrategy, null, false,
+                    new ArrayList<>()).findFirst(value -> value == null));
+            assertThrows(NullPointerException.class, () -> new ParallelArrayStream<>(withNull, 0, withNull.length, false, null, 4, splitStrategy, null, false,
+                    new ArrayList<>()).findLast(value -> value == null));
+            assertEquals(Optional.of(-3), new ParallelArrayStream<>(withNull, 0, withNull.length, false, null, 4, splitStrategy, null, false, new ArrayList<>())
+                    .findFirst(value -> value != null && value == -3));
+        }
+    }
+    // ---- perf review 2026-09-26 G102 end ----
 }

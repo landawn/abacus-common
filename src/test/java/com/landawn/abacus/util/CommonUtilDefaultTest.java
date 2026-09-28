@@ -75,7 +75,7 @@ public class CommonUtilDefaultTest extends CommonUtilTestSupport {
         Supplier<String> supplier = () -> "default";
         assertEquals("default", CommonUtil.defaultIfNull((String) null, supplier));
         assertEquals("test", CommonUtil.defaultIfNull("test", supplier));
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfNull(null, (Supplier<String>) () -> null));
+        assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfNull(null, (Supplier<String>) () -> null));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfNull("test", (Supplier<String>) null));
         assertEquals("default", CommonUtil.defaultIfNull((String) null, Fn.s(() -> "default")));
     }
@@ -100,7 +100,7 @@ public class CommonUtilDefaultTest extends CommonUtilTestSupport {
         assertEquals("default", CommonUtil.defaultIfEmpty("", emptyDefault));
         assertEquals("actual", CommonUtil.defaultIfEmpty("actual", emptyDefault));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty("", (Supplier<String>) () -> ""));
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfEmpty("", (Supplier<String>) () -> null));
+        assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfEmpty("", (Supplier<String>) () -> null));
         assertEquals("default", CommonUtil.defaultIfEmpty("", Fn.s(() -> "default")));
 
         List<String> list = Arrays.asList("a", "b");
@@ -134,7 +134,7 @@ public class CommonUtilDefaultTest extends CommonUtilTestSupport {
         assertEquals("default", CommonUtil.defaultIfBlank("   ", blankDefault));
         assertEquals("actual", CommonUtil.defaultIfBlank("actual", blankDefault));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfBlank("   ", (Supplier<String>) () -> "   "));
-        assertThrows(IllegalArgumentException.class, () -> CommonUtil.defaultIfBlank("   ", (Supplier<String>) () -> null));
+        assertThrows(NullPointerException.class, () -> CommonUtil.defaultIfBlank("   ", (Supplier<String>) () -> null));
         assertEquals("default", CommonUtil.defaultIfBlank(" ", Fn.s(() -> "default")));
     }
 

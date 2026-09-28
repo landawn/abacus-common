@@ -274,4 +274,36 @@ public class CsvUtilStreamTest extends CsvUtilTestSupport {
             assertEquals(List.of("2"), oneColumn.toList());
         }
     }
+
+    @Test
+    public void testStream_BeanTargetRejectsUnknownPropertyInWholeHeaderSelection() {
+        // Partial explicit selection naming a column the bean has no property for is rejected ...
+        try (Stream<CsvUtilTestSupport.Person> partial = CsvUtil.stream(new StringReader("id,unknownColumn,name\n1,x,John\n"), List.of("id", "unknownColumn"), CsvUtilTestSupport.Person.class,
+                true)) {
+            assertThrows(IllegalArgumentException.class, partial::toList);
+        }
+
+        // ... and so is an explicit selection that happens to name every header column.
+        try (Stream<CsvUtilTestSupport.Person> whole = CsvUtil.stream(new StringReader("id,unknownColumn\n1,x\n"), List.of("unknownColumn", "id"), CsvUtilTestSupport.Person.class, true)) {
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, whole::toList);
+            assertTrue(ex.getMessage().contains("unknownColumn"));
+        }
+
+        // A null (unspecified) selection still skips header columns the bean does not have.
+        try (Stream<CsvUtilTestSupport.Person> all = CsvUtil.stream(new StringReader("id,unknownColumn\n1,x\n"), null, CsvUtilTestSupport.Person.class, true)) {
+            List<CsvUtilTestSupport.Person> persons = all.toList();
+            assertEquals(1, persons.size());
+            assertEquals("1", persons.get(0).getId());
+        }
+    }
+
+    @Test
+    public void testStream_SingleValueTargetThatLooksLikeBeanIsConvertedAsOneValue() {
+        try (Stream<java.util.GregorianCalendar> stream = CsvUtil.stream(new StringReader("d,x\n2020-01-01T00:00:00Z,1\n"), List.of("d"),
+                java.util.GregorianCalendar.class, true)) {
+            List<java.util.GregorianCalendar> result = stream.toList();
+            assertEquals(1, result.size());
+            assertEquals(1577836800000L, result.get(0).getTimeInMillis());
+        }
+    }
 }

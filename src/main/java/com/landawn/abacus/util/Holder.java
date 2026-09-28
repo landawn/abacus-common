@@ -343,8 +343,8 @@ public final class Holder<T> implements Mutable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Holder<Integer> holder = Holder.of(5);
-     * boolean updated = holder.setIf(n -> n != null && n < 10, 10);    // returns true, holder now contains 10
-     * boolean notUpdated = holder.setIf(n -> n != null && n < 5, 3);   // returns false, holder still contains 10
+     * boolean updated = holder.setIf(n -> n != null && n < 10, 10);   // returns true, holder now contains 10
+     * boolean notUpdated = holder.setIf(n -> n != null && n < 5, 3);  // returns false, holder still contains 10
      * }</pre>
      *
      * @param <E> the type of exception that the predicate may throw.

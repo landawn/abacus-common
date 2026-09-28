@@ -5974,4 +5974,225 @@ public class EntryStreamTest extends TestBase {
                 EntryStream.of("a", 1, "a", 2).collapseByKey((k1, k2) -> k1.equals(k2), Map.Entry::getValue, Collectors.toList()).toList());
     }
 
+    @Test
+    public void testSkipWithNullOnSkipNamesOnSkipParameter() {
+        final Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        final AtomicInteger closed = new AtomicInteger();
+        final EntryStream<String, Integer> stream = EntryStream.of(map).onClose(closed::incrementAndGet);
+
+        final IllegalArgumentException ex = Assertions.assertThrows(IllegalArgumentException.class, () -> stream.skip(1, null));
+
+        assertTrue(ex.getMessage().contains("onSkip"), ex.getMessage());
+        assertEquals(1, closed.get());
+    }
+
+    @Test
+    public void testSkipWithNegativeCountAndNullOnSkipReportsCountFirst() {
+        final IllegalArgumentException ex = Assertions.assertThrows(IllegalArgumentException.class, () -> EntryStream.of("a", 1).skip(-1, null));
+
+        assertTrue(ex.getMessage().contains("'n'"), ex.getMessage());
+    }
+
+    @Test
+    public void testTransformViaStreamTreatsNullResultAsEmptyAndClosesInput() {
+        final AtomicInteger inputClosed = new AtomicInteger();
+        final EntryStream<String, Integer> input = EntryStream.of("a", 1, "b", 2).onClose(inputClosed::incrementAndGet);
+
+        final EntryStream<String, Integer> result = input.<String, Integer> transformViaStream(s -> null);
+
+        assertEquals(0, result.count());
+        assertEquals(1, inputClosed.get());
+    }
+
+    @Test
+    public void testTransformViaStreamDeferredTreatsNullResultAsEmptyAndClosesInput() {
+        final AtomicInteger inputClosed = new AtomicInteger();
+        final EntryStream<String, Integer> input = EntryStream.of("a", 1, "b", 2).onClose(inputClosed::incrementAndGet);
+
+        final List<Map.Entry<String, Integer>> result = input.<String, Integer> transformViaStream(s -> null, true).toList();
+
+        assertTrue(result.isEmpty());
+        assertEquals(1, inputClosed.get());
+    }
+
+    // ---- perf review 2026-09-26 G095 begin ----
+    private static <K, V> Map.Entry<K, V> g095Entry(final K key, final V value) {
+        return new AbstractMap.SimpleImmutableEntry<>(key, value);
+    }
+
+    private static final class G095RecordingEntry extends AbstractMap.SimpleImmutableEntry<String, Integer> {
+        private static final long serialVersionUID = 1L;
+        private final transient List<String> log;
+
+        G095RecordingEntry(final String key, final Integer value, final List<String> log) {
+            super(key, value);
+            this.log = log;
+        }
+
+        @Override
+        public String getKey() {
+            log.add("getKey:" + super.getKey());
+            return super.getKey();
+        }
+
+        @Override
+        public Integer getValue() {
+            log.add("getValue:" + super.getValue());
+            return super.getValue();
+        }
+    }
+
+    private static <T> Collection<T> g095RecordingCollection(final List<T> list, final List<String> log) {
+        return new java.util.AbstractCollection<>() {
+            @Override
+            public int size() {
+                return list.size();
+            }
+
+            @Override
+            public Iterator<T> iterator() {
+                log.add("iterator");
+                final Iterator<T> iter = list.iterator();
+
+                return new Iterator<>() {
+                    @Override
+                    public boolean hasNext() {
+                        return iter.hasNext();
+                    }
+
+                    @Override
+                    public T next() {
+                        final T next = iter.next();
+                        log.add("next:" + next);
+                        return next;
+                    }
+                };
+            }
+        };
+    }
+
+    // G095-01: sequential flatmapKey/flatmapValue expand null, empty, singleton and duplicate collections as before
+    @Test
+    public void testFlatmapKeyValue_sequentialNullEmptyDuplicates() {
+        final Map<String, Integer> source = new LinkedHashMap<>();
+        source.put("n", 0);
+        source.put("e", 1);
+        source.put("s", 2);
+        source.put("d", 3);
+
+        final Function<String, Collection<String>> keyMapper = k -> k.equals("n") ? null
+                : k.equals("e") ? Collections.emptyList() : k.equals("s") ? Collections.singletonList("S") : Arrays.asList("D", "D", null);
+        final List<Map.Entry<String, Integer>> expectedKeys = Arrays.asList(g095Entry("S", 2), g095Entry("D", 3), g095Entry("D", 3), g095Entry(null, 3));
+
+        assertEquals(expectedKeys, EntryStream.of(source).flatmapKey(keyMapper).toList());
+        assertEquals(expectedKeys, EntryStream.of(source).flatmapKey((k, v) -> keyMapper.apply(k)).toList());
+
+        final Function<Integer, Collection<Integer>> valueMapper = v -> v == 0 ? null
+                : v == 1 ? new ArrayList<>() : v == 2 ? Collections.singleton(20) : new LinkedList<>(Arrays.asList(30, 30, null));
+        final List<Map.Entry<String, Integer>> expectedValues = Arrays.asList(g095Entry("s", 20), g095Entry("d", 30), g095Entry("d", 30),
+                g095Entry("d", null));
+
+        assertEquals(expectedValues, EntryStream.of(source).flatmapValue(valueMapper).toList());
+        assertEquals(expectedValues, EntryStream.of(source).flatmapValue((k, v) -> valueMapper.apply(v)).toList());
+
+        assertEquals(0, EntryStream.<String, Integer> empty().flatmapKey(k -> Arrays.asList(k, k)).count());
+        assertEquals(0, EntryStream.of("a", 1).flatmapValue(v -> null).count());
+        assertEquals(Arrays.asList(g095Entry("x", 1), g095Entry("y", 1)),
+                EntryStream.of("a", 1).flatmapKey(k -> new LinkedHashSet<>(Arrays.asList("x", "y"))).toList());
+    }
+
+    // G095-01: pins the order of keyMapper / collection iterator / Entry accessor calls and the laziness under a short-circuit
+    @Test
+    public void testFlatmapKeyValue_sequentialCallOrderAndLaziness() {
+        final List<String> log = new ArrayList<>();
+        final List<Map.Entry<String, Integer>> source = Arrays.asList(new G095RecordingEntry("a", 1, log), new G095RecordingEntry("b", 2, log),
+                new G095RecordingEntry("c", 3, log));
+
+        final List<Map.Entry<String, Integer>> keyResult = EntryStream.of(source).flatmapKey(k -> {
+            log.add("map:" + k);
+            return g095RecordingCollection(Arrays.asList(k + "1", k + "2", k + "3"), log);
+        }).limit(4).toList();
+
+        assertEquals(Arrays.asList(g095Entry("a1", 1), g095Entry("a2", 1), g095Entry("a3", 1), g095Entry("b1", 2)), keyResult);
+        assertEquals(Arrays.asList("getKey:a", "map:a", "iterator", "next:a1", "getValue:1", "next:a2", "getValue:1", "next:a3", "getValue:1", "getKey:b",
+                "map:b", "iterator", "next:b1", "getValue:2"), log);
+
+        log.clear();
+
+        final Map.Entry<String, Integer> first = EntryStream.of(source).flatmapValue((k, v) -> {
+            log.add("map:" + k + "=" + v);
+            return g095RecordingCollection(v == 1 ? Collections.<Integer> emptyList() : Arrays.asList(v * 10, v * 100), log);
+        }).first().orElseThrow();
+
+        assertEquals(g095Entry("b", 20), first);
+        assertEquals(Arrays.asList("getKey:a", "getValue:1", "map:a=1", "getKey:b", "getValue:2", "map:b=2", "iterator", "next:20", "getKey:b"), log);
+    }
+
+    // G095-01: close handlers still run exactly once, and a mapper failure propagates unchanged and closes the stream
+    @Test
+    public void testFlatmapKeyValue_sequentialCloseAndMapperFailure() {
+        final AtomicInteger closed = new AtomicInteger();
+        final List<Map.Entry<String, Integer>> result = EntryStream.of("a", 1, "b", 2)
+                .onClose(closed::incrementAndGet)
+                .flatmapValue(v -> Arrays.asList(v, -v))
+                .toList();
+
+        assertEquals(Arrays.asList(g095Entry("a", 1), g095Entry("a", -1), g095Entry("b", 2), g095Entry("b", -2)), result);
+        assertEquals(1, closed.get());
+
+        final AtomicInteger closedOnFailure = new AtomicInteger();
+        final IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> EntryStream.of("a", 1, "b", 2).onClose(closedOnFailure::incrementAndGet).flatmapKey((k, v) -> {
+                    if (k.equals("b")) {
+                        throw new IllegalStateException("boom-" + k);
+                    }
+
+                    return Collections.singletonList(k + v);
+                }).toList());
+
+        assertEquals("boom-b", ex.getMessage());
+        assertEquals(1, closedOnFailure.get());
+
+        final EntryStream<String, Integer> stream = EntryStream.of("a", 1);
+        stream.close();
+        assertThrows(IllegalStateException.class, () -> stream.flatmapKey(k -> Arrays.asList(k)));
+        assertThrows(IllegalArgumentException.class, () -> EntryStream.of("a", 1).flatmapValue((Function<Integer, Collection<Integer>>) null));
+    }
+
+    // G095-01: the parallel path (left on the Stream-based expansion) still yields every expanded entry
+    @Test
+    public void testFlatmapKeyValue_parallel() {
+        final Map<Integer, Integer> source = new LinkedHashMap<>();
+
+        for (int i = 0; i < 200; i++) {
+            source.put(i, i * 2);
+        }
+
+        final List<Map.Entry<Integer, Integer>> expectedKeys = new ArrayList<>();
+        final List<Map.Entry<Integer, Integer>> expectedValues = new ArrayList<>();
+
+        for (int i = 0; i < 200; i++) {
+            expectedKeys.add(g095Entry(i, i * 2));
+            expectedKeys.add(g095Entry(i + 1000, i * 2));
+            expectedValues.add(g095Entry(i, i * 2));
+            expectedValues.add(g095Entry(i, -i * 2));
+        }
+
+        final Comparator<Map.Entry<Integer, Integer>> byKeyThenValue = Comparator.<Map.Entry<Integer, Integer>> comparingInt(Map.Entry::getKey)
+                .thenComparingInt(Map.Entry::getValue);
+        expectedKeys.sort(byKeyThenValue);
+        expectedValues.sort(byKeyThenValue);
+
+        final EntryStream<Integer, Integer> keyStream = EntryStream.of(source).parallel(4).flatmapKey((k, v) -> Arrays.asList(k, k + 1000));
+        assertTrue(keyStream.isParallel());
+        final List<Map.Entry<Integer, Integer>> keys = new ArrayList<>(keyStream.toList());
+        keys.sort(byKeyThenValue);
+        assertEquals(expectedKeys, keys);
+
+        final List<Map.Entry<Integer, Integer>> values = new ArrayList<>(EntryStream.of(source).parallel(4).flatmapValue(v -> Arrays.asList(v, -v)).toList());
+        values.sort(byKeyThenValue);
+        assertEquals(expectedValues, values);
+    }
+    // ---- perf review 2026-09-26 G095 end ----
 }

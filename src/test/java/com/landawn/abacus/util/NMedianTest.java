@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class NMedianTest extends NTestSupport {
     @Test
@@ -447,4 +448,283 @@ public class NMedianTest extends NTestSupport {
         assertEquals(2.0d, N.median(new float[] { 1.0f, 2.0f, Float.NaN }, 0, 3), 0.0d);
         assertEquals(2.0d, N.median(new double[] { 1.0d, 2.0d, Double.NaN }, 0, 3), 0.0d);
     }
+
+
+    @Test
+    public void testKthLargestComparableTreatsNullAsSmallest() {
+        final Integer[] a = { 3, null, 1, 2 };
+
+        assertEquals(3, N.kthLargest(a, 1));
+        assertEquals(1, N.kthLargest(a, 3));
+        assertNull(N.kthLargest(a, 4));
+        assertEquals(2, N.kthLargest(a, 1, 4, 1));
+        assertNull(N.kthLargest(a, 1, 4, 3));
+
+        final List<Integer> c = Arrays.asList(3, null, 1, 2);
+
+        assertEquals(3, N.kthLargest(c, 1));
+        assertEquals(1, N.kthLargest(c, 3));
+        assertNull(N.kthLargest(c, 4));
+        assertEquals(2, N.kthLargest(c, 1, 4, 1));
+        assertNull(N.kthLargest(c, 1, 4, 3));
+    }
+
+    @Test
+    public void testLowerMedianComparableTreatsNullAsSmallest() {
+        assertNull(N.lowerMedian(new Integer[] { 5, null, null, 1 }));
+        assertEquals(1, N.lowerMedian(new Integer[] { 5, null, 1 }));
+        assertNull(N.lowerMedian(new Integer[] { 7, 5, null, 1 }, 1, 3));
+        assertEquals(1, N.lowerMedian(new Integer[] { 7, 5, null, 1 }, 1, 4));
+
+        assertNull(N.lowerMedian(Arrays.asList(5, null, null, 1)));
+        assertEquals(1, N.lowerMedian(Arrays.asList(5, null, 1)));
+        assertNull(N.lowerMedian(Arrays.asList(7, 5, null, 1), 1, 3));
+        assertEquals(1, N.lowerMedian(Arrays.asList(7, 5, null, 1), 1, 4));
+    }
+
+    // ---- perf review 2026-09-26 G057 begin ----
+
+    private static int[] g057IntData(final Random rnd, final int size, final int shape) {
+        final int[] a = new int[size];
+
+        for (int i = 0; i < size; i++) {
+            switch (shape) {
+                case 0:
+                    a[i] = rnd.nextInt();
+                    break;
+                case 1:
+                    a[i] = rnd.nextInt(3) - 1;
+                    break;
+                case 2:
+                    a[i] = i;
+                    break;
+                case 3:
+                    a[i] = size - i;
+                    break;
+                case 4:
+                    a[i] = i < size / 2 ? i : size - i; // organ pipe
+                    break;
+                case 5:
+                    a[i] = i % 7; // sawtooth
+                    break;
+                default:
+                    a[i] = rnd.nextBoolean() ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+            }
+        }
+
+        return a;
+    }
+
+    private static final int[] G057_SIZES = { 4, 5, 15, 16, 17, 18, 33, 64, 129, 130, 131, 200, 257, 1000, 1001, 4096, 20001 };
+
+    // G057-01: median/lowerMedian/kthLargest(int[]) select instead of sorting a copy - results must equal the sorted-copy answer
+    @Test
+    public void testMedian_intLargeArraysMatchSortedCopy() {
+        final Random rnd = new Random(20260926L);
+
+        for (final int size : G057_SIZES) {
+            for (int shape = 0; shape < 7; shape++) {
+                final int[] a = g057IntData(rnd, size, shape);
+                final int[] original = a.clone();
+                final int from = size > 40 ? 3 : 0;
+                final int to = size > 40 ? size - 2 : size;
+                final int len = to - from;
+                final int[] sorted = Arrays.copyOfRange(a, from, to);
+                Arrays.sort(sorted);
+                final int m = len / 2;
+                final double expectedMedian = len % 2 != 0 ? sorted[m] : sorted[m - 1] / 2d + sorted[m] / 2d;
+
+                assertEquals(Double.doubleToRawLongBits(expectedMedian), Double.doubleToRawLongBits(N.median(a, from, to)));
+                assertEquals(sorted[len - (len / 2 + 1)], N.lowerMedian(a, from, to));
+
+                for (final int k : new int[] { 1, 2, 64, 65, 66, len / 3, len / 2, len / 2 + 1, len - 65, len - 64, len - 1, len }) {
+                    if (k >= 1 && k <= len) {
+                        assertEquals(sorted[len - k], N.kthLargest(a, from, to, k));
+                    }
+                }
+
+                if (from == 0) {
+                    assertEquals(Double.doubleToRawLongBits(expectedMedian), Double.doubleToRawLongBits(N.median(a)));
+                }
+
+                assertArrayEquals(original, a); // the input is never modified
+            }
+        }
+
+        final int[] all = g057IntData(rnd, 300, 0);
+        final int[] sortedAll = all.clone();
+        Arrays.sort(sortedAll);
+
+        for (int k = 1; k <= all.length; k++) {
+            assertEquals(sortedAll[all.length - k], N.kthLargest(all, k));
+        }
+    }
+
+    // G057-01: long overloads - exactLongMean of the two middle values, extremes included
+    @Test
+    public void testMedian_longLargeArraysMatchSortedCopy() {
+        final Random rnd = new Random(7L);
+
+        for (final int size : G057_SIZES) {
+            for (int shape = 0; shape < 8; shape++) {
+                final long[] a = new long[size];
+                final int[] ints = g057IntData(rnd, size, shape % 7);
+
+                for (int i = 0; i < size; i++) {
+                    if (shape == 7) {
+                        a[i] = rnd.nextBoolean() ? Long.MAX_VALUE - rnd.nextInt(3) : Long.MIN_VALUE + rnd.nextInt(3);
+                    } else if (shape == 0) {
+                        a[i] = rnd.nextLong();
+                    } else {
+                        a[i] = ints[i] * 3_000_000_000L;
+                    }
+                }
+
+                final long[] original = a.clone();
+                final int from = size > 40 ? 1 : 0;
+                final int to = size > 40 ? size - 3 : size;
+                final int len = to - from;
+                final long[] sorted = Arrays.copyOfRange(a, from, to);
+                Arrays.sort(sorted);
+                final int m = len / 2;
+                final double expectedMedian = len % 2 != 0 ? sorted[m] : N.median(new long[] { sorted[m - 1], sorted[m] });
+
+                assertEquals(Double.doubleToRawLongBits(expectedMedian), Double.doubleToRawLongBits(N.median(a, from, to)));
+                assertEquals(sorted[len - (len / 2 + 1)], N.lowerMedian(a, from, to));
+
+                for (final int k : new int[] { 1, 65, 66, len / 2, len / 2 + 1, len - 65, len }) {
+                    if (k >= 1 && k <= len) {
+                        assertEquals(sorted[len - k], N.kthLargest(a, from, to, k));
+                    }
+                }
+
+                assertArrayEquals(original, a);
+            }
+        }
+    }
+
+    private static double[] g057DoubleData(final Random rnd, final int size, final int shape) {
+        final double[] a = new double[size];
+
+        for (int i = 0; i < size; i++) {
+            switch (shape) {
+                case 0:
+                    a[i] = rnd.nextGaussian();
+                    break;
+                case 1:
+                    a[i] = rnd.nextBoolean() ? -0.0 : 0.0; // signed zeros only
+                    break;
+                case 2:
+                    a[i] = rnd.nextInt(4) == 0 ? (rnd.nextBoolean() ? -0.0 : 0.0) : rnd.nextInt(5) - 2;
+                    break;
+                case 3:
+                    a[i] = rnd.nextInt(3) == 0 ? (rnd.nextBoolean() ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY) : rnd.nextDouble();
+                    break;
+                case 4:
+                    a[i] = rnd.nextBoolean() ? Double.MAX_VALUE : -Double.MAX_VALUE;
+                    break;
+                case 5:
+                    // NaNs with distinct bit patterns: the NaN returned must be the one a full sort puts there
+                    a[i] = rnd.nextInt(3) == 0 ? Double.longBitsToDouble(0x7ff8000000000001L + i) : rnd.nextInt(10);
+                    break;
+                case 6:
+                    a[i] = i < size / 2 ? i : size - i;
+                    break;
+                default:
+                    a[i] = Double.longBitsToDouble(0x7ff8000000000001L + i); // all NaN
+            }
+        }
+
+        return a;
+    }
+
+    private static void g057AssertSameBits(final double expected, final double actual) {
+        assertEquals(Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(actual));
+    }
+
+    // A median of two NaNs is computed by arithmetic, whose NaN bit pattern the JIT may pick from either operand: only NaN-ness is stable.
+    private static void g057AssertMedian(final double expected, final double actual) {
+        if (Double.isNaN(expected)) {
+            assertEquals(true, Double.isNaN(actual));
+        } else {
+            g057AssertSameBits(expected, actual);
+        }
+    }
+
+    // The sort path (min(k, len - k + 1) > 64) must return the very NaN a sort puts there; the heap path (unchanged) only an equal value.
+    private static void g057AssertKth(final double expected, final double actual, final int k, final int len) {
+        if (Math.min(k, len - k + 1) > 64) {
+            g057AssertSameBits(expected, actual);
+        } else {
+            assertEquals(0, Double.compare(expected, actual));
+        }
+    }
+
+    private static void g057AssertKth(final float expected, final float actual, final int k, final int len) {
+        if (Math.min(k, len - k + 1) > 64) {
+            assertEquals(Float.floatToRawIntBits(expected), Float.floatToRawIntBits(actual));
+        } else {
+            assertEquals(0, Float.compare(expected, actual));
+        }
+    }
+
+    // G057-01: double/float overloads - bitwise identical to the sorted-copy answer for NaN (any payload), -0.0/0.0, infinities, overflow
+    @Test
+    public void testMedian_doubleAndFloatLargeArraysMatchSortedCopy() {
+        final Random rnd = new Random(11L);
+
+        for (final int size : G057_SIZES) {
+            for (int shape = 0; shape < 8; shape++) {
+                final double[] a = g057DoubleData(rnd, size, shape);
+                final double[] original = a.clone();
+                final int from = size > 40 ? 2 : 0;
+                final int to = size > 40 ? size - 1 : size;
+                final int len = to - from;
+                final double[] sorted = Arrays.copyOfRange(a, from, to);
+                Arrays.sort(sorted);
+                final int m = len / 2;
+                final double expectedMedian = len % 2 != 0 ? sorted[m] : N.median(new double[] { sorted[m - 1], sorted[m] });
+
+                g057AssertMedian(expectedMedian, N.median(a, from, to));
+                g057AssertKth(sorted[len - (len / 2 + 1)], N.lowerMedian(a, from, to), len / 2 + 1, len);
+
+                for (final int k : new int[] { 1, 65, 66, len / 3, len / 2, len / 2 + 1, len - 65, len }) {
+                    if (k >= 1 && k <= len) {
+                        g057AssertKth(sorted[len - k], N.kthLargest(a, from, to, k), k, len);
+                    }
+                }
+
+                for (int i = 0; i < size; i++) {
+                    assertEquals(Double.doubleToRawLongBits(original[i]), Double.doubleToRawLongBits(a[i]));
+                }
+
+                final float[] f = new float[size];
+
+                for (int i = 0; i < size; i++) {
+                    if (Double.isNaN(a[i])) {
+                        f[i] = Float.intBitsToFloat(0x7fc00001 + i);
+                    } else if (shape == 4) {
+                        f[i] = a[i] > 0 ? Float.MAX_VALUE : -Float.MAX_VALUE;
+                    } else {
+                        f[i] = (float) a[i];
+                    }
+                }
+
+                final float[] sortedF = Arrays.copyOfRange(f, from, to);
+                Arrays.sort(sortedF);
+                final double expectedMedianF = len % 2 != 0 ? sortedF[m] : sortedF[m - 1] / 2d + sortedF[m] / 2d;
+
+                g057AssertMedian(expectedMedianF, N.median(f, from, to));
+                g057AssertKth(sortedF[len - (len / 2 + 1)], N.lowerMedian(f, from, to), len / 2 + 1, len);
+
+                for (final int k : new int[] { 1, 65, 66, len / 2, len / 2 + 1, len - 65, len }) {
+                    if (k >= 1 && k <= len) {
+                        g057AssertKth(sortedF[len - k], N.kthLargest(f, from, to, k), k, len);
+                    }
+                }
+            }
+        }
+    }
+
+    // ---- perf review 2026-09-26 G057 end ----
 }

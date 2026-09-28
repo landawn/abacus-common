@@ -21,15 +21,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.SAXParser;
@@ -65,6 +68,7 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.XmlUtil;
 import com.landawn.abacus.util.cs;
 
@@ -154,7 +158,14 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     private static final ThreadLocal<int[]> SERIALIZATION_DEPTH = ThreadLocal.withInitial(() -> new int[1]);
 
     // Cached node-name and node-type metadata used during deserialization.
-    private static final Map<Class<?>, Map<String, Class<?>>> nodeNameClassMapPool = new ConcurrentHashMap<>(POOL_SIZE);
+    private static final ClassValue<Map<String, WeakReference<Class<?>>>> nodeNameClassMapPool = new ClassValue<>() {
+        @Override
+        protected Map<String, WeakReference<Class<?>>> computeValue(final Class<?> type) {
+            // Keep the value JDK-only: a map subclass would retain this loader through long-lived target classes.
+            // Reads are unlocked; insertion below bounds input-driven names and weak values allow class unloading.
+            return new ConcurrentHashMap<>(64);
+        }
+    };
 
     private static final Map<String, NodeType> nodeTypePool = new ConcurrentCacheMap<>(64);
 
@@ -196,7 +207,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         this.parserType = parserType;
     }
 
-    AbacusXmlParserImpl(final XmlParserType parserType, final XmlSerConfig xsc, final XmlDeserConfig xdc, final java.util.Set<Class<?>> allowedTypeClasses) {
+    AbacusXmlParserImpl(final XmlParserType parserType, final XmlSerConfig xsc, final XmlDeserConfig xdc, final java.util.Set<Class<?>> allowedTypeClasses)
+            throws IllegalArgumentException, NullPointerException {
         super(xsc, xdc, allowedTypeClasses);
         this.parserType = parserType;
     }
@@ -300,7 +312,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param obj the object to serialize; may be {@code null}
      * @param config the serialization configuration (may be {@code null} for default behavior)
      * @param output the file to write the XML content to; must not be {@code null}
-     * @throws IllegalArgumentException if {@code output} is {@code null}.
+     * @throws IllegalArgumentException if {@code output} is {@code null} or a directory.
      * @throws ParsingException if the object type is not supported for serialization
      * @throws UncheckedIOException if creating, opening, writing, flushing or closing {@code output}, or reading a resource-backed value
      *         while producing XML, fails
@@ -499,10 +511,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                             final Object unwrapped = unwrapOptional(obj);
 
                             if (unwrapped != null) {
-                                writeUnwrappedValue(bw, null, unwrapped, configToUse, "Property '" + propInfo.name + "'");
+                                writeUnwrappedValue(bw, null, unwrapped, configToUse, "Property", propInfo.name);
                             }
                         } else {
-                            writeXmlScalar(bw, type, obj, configToUse, "Property '" + propInfo.name + "'");
+                            // The property name is passed separately so the failure message is only built on failure.
+                            writeXmlScalar(bw, type, obj, configToUse, "Property", propInfo.name);
                         }
                     }
 
@@ -750,25 +763,29 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 if (propInfo.isJsonRawValue) {
                     writeRawJson(bw, serializeEmbeddedJson(propValue, config));
                 } else if (unwrapped) {
-                    writeUnwrappedValue(bw, propInfo.jsonXmlType.elementType(), propValue, config, "Property '" + propName + "'");
+                    writeUnwrappedValue(bw, propInfo.jsonXmlType.elementType(), propValue, config, "Property", propName);
                 } else if (propInfo.jsonXmlType.isSerializable()) {
                     if (propInfo.jsonXmlType.isObjectArray() || propInfo.jsonXmlType.isCollection()) {
                         // jsonParser.serialize(bw, propValue);
 
                         strType.serializeTo(bw, serializeEmbeddedJson(propValue, config), config);
                     } else if (isTupleLike(propInfo.jsonXmlType)) {
-                        writeUnwrappedValue(bw, propInfo.jsonXmlType, propValue, config, "Property '" + propName + "'");
+                        writeUnwrappedValue(bw, propInfo.jsonXmlType, propValue, config, "Property", propName);
                     } else {
                         if (propInfo.hasFormat) {
                             propInfo.writePropValue(bw, propValue, config);
                         } else {
-                            writeXmlScalar(bw, propInfo.jsonXmlType, propValue, config, "Property '" + propName + "'");
+                            // The property name is passed separately so the failure message is only built on failure.
+                            writeXmlScalar(bw, propInfo.jsonXmlType, propValue, config, "Property", propName);
                         }
                     }
                 } else {
                     write(propValue, propInfo, config, nextIndentation, serializedObjects, bw, false);
 
-                    if (isPrettyFormat) {
+                    // A declared type that is not serializable (an Object property) may hold a scalar at runtime, which
+                    // write() emits as bare element text: a trailing line break here would become part of that value
+                    // (<any>abc\n    </any> read back as "abc\n    "). Only a structured value gets the closing indentation.
+                    if (isPrettyFormat && !isBareScalar(propValue)) {
                         bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                         bw.write(propIndentation);
                     }
@@ -783,6 +800,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         }
     }
 
+    // Whether write(value, ...) writes the value as element text rather than as a nested element.
+    private static boolean isBareScalar(final Object value) {
+        final Type<Object> type = Type.of(value.getClass());
+
+        return type.serializationType() == SerializationType.SERIALIZABLE && !type.isObjectArray() && !type.isCollection();
+    }
+
     /**
      * Writes a map to XML, emitting an enclosing map element and, for each entry, an
      * {@code <entry>} element containing a {@code <key>} element followed by a {@code <value>} element.
@@ -793,10 +817,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
      * @param type the type information for the map
      * @param bw the buffered XML writer
+     * @throws ParsingException if a key or value contains a code unit that cannot be represented in XML 1.0, or a nested value cannot be serialized
+     *         (see {@link #write(Object, PropInfo, XmlSerConfig, String, IdentityHashSet, BufferedXmlWriter, boolean)})
      * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     void writeMap(final Map<?, ?> m, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
-            final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
+            final Type<Object> type, final BufferedXmlWriter bw) throws ParsingException, IOException {
         //    if (hasCircularReference(m, serializedObjects, bw)) {
         //        return;
         //    }
@@ -994,10 +1020,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
      * @param type the type information for the array
      * @param bw the buffered XML writer
+     * @throws ParsingException if an element contains a code unit that cannot be represented in XML 1.0, or a nested value cannot be serialized
+     *         (see {@link #write(Object, PropInfo, XmlSerConfig, String, IdentityHashSet, BufferedXmlWriter, boolean)})
      * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     void writeArray(final Object obj, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
-            final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
+            final Type<Object> type, final BufferedXmlWriter bw) throws ParsingException, IOException {
         //    if (hasCircularReference(obj, serializedObjects, bw)) {
         //        return;
         //    }
@@ -1097,10 +1125,12 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param serializedObjects set of already serialized objects for circular reference detection, or {@code null}
      * @param type the type information for the collection
      * @param bw the buffered XML writer
+     * @throws ParsingException if an element contains a code unit that cannot be represented in XML 1.0, or a nested value cannot be serialized
+     *         (see {@link #write(Object, PropInfo, XmlSerConfig, String, IdentityHashSet, BufferedXmlWriter, boolean)})
      * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     void writeCollection(final Collection<?> c, final XmlSerConfig config, final String indentation, final IdentityHashSet<Object> serializedObjects,
-            final Type<Object> type, final BufferedXmlWriter bw) throws IOException {
+            final Type<Object> type, final BufferedXmlWriter bw) throws ParsingException, IOException {
         //    if (hasCircularReference(c, serializedObjects, bw)) {
         //        return;
         //    }
@@ -1639,6 +1669,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
+
         InputStream is = null;
 
         try {
@@ -1676,12 +1708,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      * @throws UncheckedIOException if the DOM or SAX backend reports an {@code IOException} while reading XML from {@code source}
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return read(source, config, nodeTypes, null, false);
     }
 
@@ -1711,12 +1744,14 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null} and this parser uses {@link XmlParserType#StAX} (the
+     *         {@link XmlParserType#SAX} and {@link XmlParserType#DOM} backends report a {@code null} reader as an {@code UncheckedIOException})
      * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      * @throws UncheckedIOException if the DOM or SAX backend reports an {@code IOException} while reading XML from {@code source}
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return read(source, config, nodeTypes, null, false);
     }
 
@@ -1788,13 +1823,14 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      *        which case the StAX reader also verifies that nothing but whitespace, comments and processing
      *        instructions follows the root element; {@code false} for a caller-supplied stream that may stay open
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML is malformed, no target type can be resolved for the root node,
      *         or the configured parser type is not supported
      * @throws UncheckedIOException if the DOM or SAX backend reports an {@code IOException} while reading XML from {@code source}
      */
     @SuppressWarnings("unchecked")
     <T> T read(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType,
-            final boolean boundedSource) throws ParsingException, UncheckedIOException {
+            final boolean boundedSource) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final XmlDeserConfig configToUse = check(config);
 
         switch (parserType) {
@@ -1921,13 +1957,15 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      *        the StAX reader also verifies that nothing but whitespace, comments and processing instructions
      *        follows the root element; {@code false} for a caller-supplied reader that may stay open
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null} and this parser uses {@link XmlParserType#StAX} (the
+     *         {@link XmlParserType#SAX} and {@link XmlParserType#DOM} backends report a {@code null} reader as an {@code UncheckedIOException})
      * @throws ParsingException if the XML is malformed, no target type can be resolved for the root node,
      *         or the configured parser type is not supported
      * @throws UncheckedIOException if the DOM or SAX backend reports an {@code IOException} while reading XML from {@code source}
      */
     @SuppressWarnings("unchecked")
     <T> T read(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType,
-            final boolean boundedSource) throws ParsingException, UncheckedIOException {
+            final boolean boundedSource) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final XmlDeserConfig configToUse = check(config);
 
         switch (parserType) {
@@ -2271,7 +2309,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                                 propInfo = beanInfo.getPropInfo(propName);
 
-                                if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                // Test the resolved property name too: getPropInfo also matches case and snake-case variants
+                                // (<firstname>, <first_name>), which would otherwise bind an ignored property.
+                                if (propName != null && ignoredClassPropNames != null
+                                        && (ignoredClassPropNames.contains(propName) || (propInfo != null && ignoredClassPropNames.contains(propInfo.name)))) {
                                     propInfo = null;
                                     continue;
                                 }
@@ -2353,8 +2394,23 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                             }
 
                             text = xmlReader.getText();
+                            // Only read for an unknown property (propInfo == null): whether ALL of its text fragments are blank.
+                            boolean isUnknownPropTextBlank = true;
 
-                            if (text != null && isTextEvent(event = xmlReader.next())) {
+                            if (propInfo == null) {
+                                // An unknown property's text is dropped, so its fragments are not joined: a large value
+                                // used to grow sb, whose capacity was then kept for the rest of the bean. The only thing
+                                // the text decides is the blank-before-START_ELEMENT check below.
+                                if (text != null) {
+                                    isUnknownPropTextBlank = text.isBlank();
+
+                                    while (isTextEvent(event = xmlReader.next())) {
+                                        if (isUnknownPropTextBlank) {
+                                            isUnknownPropTextBlank = xmlReader.getText().isBlank();
+                                        }
+                                    }
+                                }
+                            } else if (text != null && isTextEvent(event = xmlReader.next())) {
                                 do {
                                     if (sb == null) {
                                         sb = new StringBuilder(text.length() * 2);
@@ -2373,15 +2429,16 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     sb.append(xmlReader.getText());
                                 } while (isTextEvent(event = xmlReader.next()));
 
-                                if (sb != null && sb.length() > text.length()) {
-                                    text = sb.toString();
-                                    sb.setLength(0);
-                                }
+                                // Always drain the buffer: when the later fragments are empty (an empty CDATA section) the
+                                // joined text is no longer than the first fragment, and a buffer left holding it was
+                                // prepended to the next multi-fragment text read in this element.
+                                text = sb.toString();
+                                sb.setLength(0);
                             }
 
                             // Indentation before a nested value is structural. Replay its START_ELEMENT;
                             // whitespace ending at the property end is scalar content and must be kept.
-                            if (event == XMLStreamConstants.START_ELEMENT && text.isBlank()) {
+                            if (event == XMLStreamConstants.START_ELEMENT && (propInfo == null ? isUnknownPropTextBlank : text.isBlank())) {
                                 advanceEvent = false;
                                 break;
                             }
@@ -2484,8 +2541,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     return null;
                 }
 
+                // Immutable* targets are filled through a mutable stand-in and wrapped on return, and an EnumMap needs its
+                // key enum, as in JsonParserImpl.readMap: N.newMap would hand back a plain HashMap/TreeMap for all of them.
+                final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(targetClass);
+
                 @SuppressWarnings("rawtypes")
-                final Map<Object, Object> mResult = N.newMap((Class<Map>) targetClass);
+                final Map<Object, Object> mResult = EnumMap.class.isAssignableFrom(targetClass) ? newEnumMap(keyType, XmlDeserConfig.class)
+                        : creatorAndConverter != null ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass) : N.newMap((Class<Map>) targetClass);
                 Object key = null;
                 Type<?> entryKeyType = null;
                 Type<?> entryValueType = null;
@@ -2510,9 +2572,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                             typeAttr = getAttribute(xmlReader, XmlConstants.TYPE);
                             entryKeyType = resolvePresentTypeAttribute(typeAttr);
 
-                            if (entryKeyType == null) {
-                                entryKeyType = keyType;
-                            }
+                            // keep the declared type arguments when the attribute names the declared class
+                            // itself (or a raw refinement of it), as resolveItemType does for collection items - see the value below.
+                            entryKeyType = entryKeyType == null ? keyType : retainDeclaredParameters(keyType, entryKeyType);
                             isStringKey = entryKeyType.javaType().equals(String.class);
                             key = readWrappedValue(xmlReader, config, entryKeyType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, inputType);
 
@@ -2541,9 +2603,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                             typeAttr = getAttribute(xmlReader, XmlConstants.TYPE);
                             entryValueType = resolvePresentTypeAttribute(typeAttr);
 
-                            if (entryValueType == null) {
-                                entryValueType = valueType;
-                            }
+                            // a map value written with type info carries its RAW runtime type
+                            // (`type="java.util.EnumMap<Object, Object>"`, `type="ImmutableList<Object>"`). Taking it as-is dropped
+                            // the key enum of a declared EnumMap<K, V> value ("EnumMap requires an enum key type") and the element
+                            // type of a declared ImmutableList<E> value. Keep the declared type arguments, as the DOM reader does.
+                            entryValueType = entryValueType == null ? valueType : retainDeclaredParameters(valueType, entryValueType);
 
                             if (hasPropTypes && isStringKey) {
                                 final Type<?> tmpType = config.getValueType(N.toString(key));
@@ -2573,7 +2637,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         }
 
                         case XMLStreamConstants.END_ELEMENT: {
-                            return (T) mResult;
+                            return (T) (creatorAndConverter == null ? mResult : creatorAndConverter._2.apply(mResult));
                         }
 
                         default:
@@ -2659,10 +2723,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                         sb.append(xmlReader.getText());
                                     } while (isTextEvent(event = xmlReader.next()));
 
-                                    if (sb != null && sb.length() > text.length()) {
-                                        text = sb.toString();
-                                        sb.setLength(0);
-                                    }
+                                    // Always drain the buffer (see the bean branch): an empty trailing fragment must not leave it filled.
+                                    text = sb.toString();
+                                    sb.setLength(0);
                                 }
 
                                 // The text is the JSON form only when it is the whole content; text next to <e>
@@ -2742,8 +2805,13 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     return null;
                 }
 
+                // Immutable* targets are filled through a mutable stand-in and wrapped on return, as in
+                // JsonParserImpl.readCollection: N.newCollection would hand back a plain ArrayList/HashSet/TreeSet.
+                final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(targetClass);
+
                 @SuppressWarnings("rawtypes")
-                final Collection<Object> result = N.newCollection((Class<Collection>) targetClass);
+                final Collection<Object> result = creatorAndConverter != null ? (Collection<Object>) creatorAndConverter._1.apply(targetClass)
+                        : N.newCollection((Class<Collection>) targetClass);
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                     switch (event) {
@@ -2778,10 +2846,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                     sb.append(xmlReader.getText());
                                 } while (isTextEvent(event = xmlReader.next()));
 
-                                if (sb != null && sb.length() > text.length()) {
-                                    text = sb.toString();
-                                    sb.setLength(0);
-                                }
+                                // Always drain the buffer: when the later fragments are empty (an empty CDATA section) the
+                                // joined text is no longer than the first fragment, and a buffer left holding it was
+                                // prepended to the next multi-fragment text read in this element.
+                                text = sb.toString();
+                                sb.setLength(0);
                             }
 
                             // The text is the JSON form only when it is the whole content; text next to <e>
@@ -2794,7 +2863,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                                 if (propValue != null) {
                                     return (T) propValue;
                                 } else {
-                                    return (T) result;
+                                    return (T) (creatorAndConverter == null ? result : creatorAndConverter._2.apply(result));
                                 }
                             } else if (event == XMLStreamConstants.START_ELEMENT) {
                                 // The for-loop update would step past this element; read it here.
@@ -2806,7 +2875,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         }
 
                         case XMLStreamConstants.END_ELEMENT: {
-                            return (T) result;
+                            return (T) (creatorAndConverter == null ? result : creatorAndConverter._2.apply(result));
                         }
 
                         default:
@@ -2832,8 +2901,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * @param eleType the element type
      * @param targetType the array or collection type to produce
      * @return the parsed value, or {@code null} for blank text
+     * @throws ParsingException if {@code text} is not valid JSON for {@code targetType}
      */
-    private static Object parseJsonCollectionText(final String text, final Type<?> eleType, final Type<?> targetType) {
+    private static Object parseJsonCollectionText(final String text, final Type<?> eleType, final Type<?> targetType) throws ParsingException {
         if (Strings.isBlank(text)) {
             return null;
         }
@@ -2956,16 +3026,24 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      * Resolves collection/array item metadata before advancing past its wrapper. Declared generic
      * arguments survive compatible concrete-container refinement; explicit element types take
      * precedence over conflicting metadata. Map wrappers apply their own key/value precedence.
+     *
+     * @throws ParsingException if the element carries a nonblank {@code type} attribute that is not allowed
      */
-    private Type<?> resolveItemType(final XMLStreamReader xmlReader, final Type<?> declaredType) {
+    private Type<?> resolveItemType(final XMLStreamReader xmlReader, final Type<?> declaredType) throws ParsingException {
         return resolveItemType(declaredType, getConcreteClass(xmlReader, declaredType.javaType()), getAttribute(xmlReader, XmlConstants.TYPE));
     }
 
-    private Type<?> resolveItemType(final Node node, final Type<?> declaredType) {
+    /**
+     * @throws ParsingException if the element carries a nonblank {@code type} attribute that is not allowed
+     */
+    private Type<?> resolveItemType(final Node node, final Type<?> declaredType) throws ParsingException {
         return resolveItemType(declaredType, getConcreteClass(node, declaredType.javaType()), XmlUtil.getAttribute(node, XmlConstants.TYPE));
     }
 
-    private Type<?> resolveItemType(final Attributes attributes, final Type<?> declaredType) {
+    /**
+     * @throws ParsingException if the element carries a nonblank {@code type} attribute that is not allowed
+     */
+    private Type<?> resolveItemType(final Attributes attributes, final Type<?> declaredType) throws ParsingException {
         return resolveItemType(declaredType, getConcreteClass(attributes, declaredType.javaType()),
                 attributes == null ? null : attributes.getValue(XmlConstants.TYPE));
     }
@@ -2976,6 +3054,24 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         final Type<?> attributeType = resolveTypeAttribute(typeAttribute);
         final Type<?> result = attributeType != null && attributeType.javaType() == concreteClass ? attributeType : declaredType;
         return retainDeclaredParameters(declaredType, result);
+    }
+
+    /**
+     * Keeps the declared type - with its type arguments - when the concrete class resolved from a {@code type}
+     * attribute is the declared class itself, and answers the raw type of the concrete class otherwise.
+     *
+     * <p>{@code Type.of(Class)} is raw, so building the type from the concrete class alone
+     * dropped the key enum of a declared {@code EnumMap<K, V>} ("EnumMap requires an enum key type") and the element
+     * type of a declared {@code ImmutableList<E>} at the SAX property/key/value sites; the DOM reader applies this
+     * rule already. Nothing changes when type info is ignored or the attribute names a different class.</p>
+     *
+     * @param declaredType the declared property, key or value type
+     * @param concreteClass the class resolved through {@code getConcreteClass}, i.e. the declared class when the
+     *        attribute is absent, incompatible or names an uninstantiable container
+     * @return {@code declaredType} when {@code concreteClass} is its class, otherwise {@code Type.of(concreteClass)}
+     */
+    private static Type<?> keepDeclaredType(final Type<?> declaredType, final Class<?> concreteClass) {
+        return concreteClass == declaredType.javaType() ? declaredType : Type.of(concreteClass);
     }
 
     private static Type<?> retainDeclaredParameters(final Type<?> declaredType, Type<?> result) {
@@ -3006,13 +3102,22 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
     private Object readWrappedValue(final XMLStreamReader xmlReader, final XmlDeserConfig config, final Type<?> valueType, final boolean checkedAttr,
             final boolean isTagByPropertyName, final boolean ignoreTypeInfo, final Type<?> inputType) throws XMLStreamException, ParsingException {
         final boolean isNull = Boolean.parseBoolean(getAttribute(xmlReader, XmlConstants.IS_NULL));
-        final StringBuilder text = new StringBuilder();
+        // A wrapper usually holds a single text event: keep that fragment as is and only join once a second one arrives.
+        String text = null;
+        StringBuilder sb = null;
         while (xmlReader.hasNext()) {
             final int event = xmlReader.next();
             if (isTextEvent(event)) {
-                text.append(xmlReader.getText());
+                if (text == null) {
+                    text = String.valueOf(xmlReader.getText());
+                } else {
+                    if (sb == null) {
+                        sb = new StringBuilder(text);
+                    }
+                    sb.append(xmlReader.getText());
+                }
             } else if (event == XMLStreamConstants.START_ELEMENT) {
-                if (!text.toString().isBlank()) {
+                if (text != null && !(sb == null ? text : sb.toString()).isBlank()) {
                     throw new ParsingException("Mixed scalar and nested XML values are not supported");
                 }
                 final Object value = readByStreamParser(xmlReader, config, valueType, null, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, valueType,
@@ -3022,7 +3127,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 }
                 return isNull ? null : value;
             } else if (event == XMLStreamConstants.END_ELEMENT) {
-                return isNull ? null : valueType.valueOf(text.toString());
+                return isNull ? null : valueType.valueOf(sb != null ? sb.toString() : text == null ? Strings.EMPTY : text);
             }
         }
         throw new ParsingException("Unexpected end of XML value wrapper");
@@ -3253,7 +3358,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                     propInfo = beanInfo.getPropInfo(propName);
 
-                    if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                    // Test the resolved property name too: getPropInfo also matches case and snake-case variants.
+                    if (ignoredClassPropNames != null
+                            && (ignoredClassPropNames.contains(propName) || (propInfo != null && ignoredClassPropNames.contains(propInfo.name)))) {
                         continue;
                     }
 
@@ -3270,10 +3377,14 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     propType = hasPropTypes ? config.getValueType(propName) : null;
 
                     if (propType == null) {
-                        if (propInfo.jsonXmlType.isSerializable()) {
+                        if (propInfo.jsonXmlType.isSerializable() || ignoreTypeInfo) {
                             propType = propInfo.jsonXmlType;
                         } else {
-                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : Type.of(getConcreteClass(propNode, propInfo.jsonXmlType.javaType()));
+                            // Keep the declared type (with its type arguments) when the type attribute names the declared class
+                            // itself: Type.of(Class) is raw, and a raw EnumMap<K, V> property would lose the key enum it needs.
+                            final Class<?> concreteClass = getConcreteClass(propNode, propInfo.jsonXmlType.javaType());
+
+                            propType = concreteClass == propInfo.jsonXmlType.javaType() ? propInfo.jsonXmlType : Type.of(concreteClass);
                         }
                     }
 
@@ -3331,7 +3442,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                final Map<Object, Object> mResult = newPropInstance(targetClass, node);
+                // Same creation as the StAX reader above: Immutable* via a mutable stand-in, EnumMap keyed by its enum.
+                final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(targetClass);
+
+                final Map<Object, Object> mResult = EnumMap.class.isAssignableFrom(targetClass) ? newEnumMap(keyType, XmlDeserConfig.class)
+                        : creatorAndConverter != null ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass) : newPropInstance(targetClass, node);
 
                 final NodeList entryNodes = node.getChildNodes();
                 Node entryNode = null;
@@ -3423,7 +3538,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         propValueClass = String.class;
                     }
 
-                    propValueType = propValueClass == valueType.javaType() ? valueType : Type.of(propValueClass);
+                    // A configured value type is kept whole, as the StAX and SAX readers keep it: Type.of(its class) is raw,
+                    // so a configured List<Integer> value read back as a list of Strings.
+                    propValueType = propValueType != null && propValueType.javaType() == propValueClass ? propValueType
+                            : propValueClass == valueType.javaType() ? valueType : Type.of(propValueClass);
 
                     //noinspection DataFlowIssue
                     if (XmlUtil.isTextElement(propValueNode)) {
@@ -3437,7 +3555,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     mResult.put(propKey, propValue);
                 }
 
-                return (T) mResult;
+                return (T) (creatorAndConverter == null ? mResult : creatorAndConverter._2.apply(mResult));
             }
 
             case ARRAY: { //NOSONAR
@@ -3546,7 +3664,11 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                 propName = XmlConstants.E; //NOSONAR
 
-                final Collection<Object> result = newPropInstance(targetClass, node);
+                // Same creation as the StAX reader above: Immutable* targets via a mutable stand-in, wrapped on return.
+                final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(targetClass);
+
+                final Collection<Object> result = creatorAndConverter != null ? (Collection<Object>) creatorAndConverter._1.apply(targetClass)
+                        : newPropInstance(targetClass, node);
 
                 if (XmlUtil.isTextElement(node)) {
                     // JSON text form <list>[1, 2, 3]</list>, as the StAX reader accepts it; blank text is an empty collection.
@@ -3556,7 +3678,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         result.addAll((Collection<Object>) parsed);
                     }
 
-                    return (T) result;
+                    return (T) (creatorAndConverter == null ? result : creatorAndConverter._2.apply(result));
                 }
 
                 final NodeList eleNodes = node.getChildNodes();
@@ -3583,7 +3705,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                return (T) result;
+                return (T) (creatorAndConverter == null ? result : creatorAndConverter._2.apply(result));
             }
 
             default:
@@ -3611,13 +3733,20 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
      *
      * @param nodeName the element name
      * @param previousNodeType the node type of the enclosing element
-     * @return {@code PROPERTY} for any child of a bean element; otherwise the type reserved for the
-     *         element name (array, list/set/collection, map, entry, key, value, e), or {@code ENTITY}
-     *         when the name is not reserved
+     * @return {@code PROPERTY} for any child of a bean element, {@code ELEMENT} for any child of an array or
+     *         collection element; otherwise the type reserved for the element name (array, list/set/collection,
+     *         map, entry, key, value, e), or {@code ENTITY} when the name is not reserved
      */
     private static NodeType getNodeType(final String nodeName, final NodeType previousNodeType) {
         if (previousNodeType == NodeType.ENTITY) {
             return NodeType.PROPERTY;
+        }
+
+        // Every child of an array/collection is an item wrapper, whatever its name, exactly as the StAX and DOM readers
+        // treat it. Classified by name instead, a non-<e> child such as <list><c isNull="true"/></list> became a bean that
+        // no ELEMENT end ever added to the collection: silently dropped, misread, or failing with an IAE/NPE.
+        if (previousNodeType == NodeType.COLLECTION || previousNodeType == NodeType.ARRAY) {
+            return NodeType.ELEMENT;
         }
 
         final NodeType nodeType = nodeTypePool.get(nodeName);
@@ -3631,30 +3760,35 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
     /**
      * Resolves the bean class whose simple name matches an XML element name, searching the package of
-     * {@code cls} (or, for JDK classes, the package of the nearest application class on the call stack).
-     * Results - including misses - are cached per {@code cls}.
+     * {@code targetClass} (or, for {@code java.lang}/{@code java.util} classes and classes without a package, the package
+     * of the outermost call-stack class - the one nearest the thread's entry point - outside {@code java.lang},
+     * {@code java.util} and this parser's package).
+     * Results - including misses - are cached per {@code targetClass}, with at most 256 names retained.
+     * Resolved classes are weakly referenced; an evicted name or collected class is resolved again on demand.
      *
      * @param <T> the resolved class type
      * @param nodeName the element name to resolve; matched case-insensitively, and retried against the
      *        normalized form of the name
-     * @param cls the class whose package anchors the search; {@code null} yields {@code null}
+     * @param targetClass the class whose package anchors the search; {@code null} yields {@code null}
      * @return the matching class, or {@code null} if no class in the searched package matches or that package
      *         cannot be scanned
      */
     @SuppressWarnings({ "unchecked", "deprecation", "null" })
-    private static <T> Class<T> getClassByNodeName(final String nodeName, final Class<?> cls) {
-        if (cls == null) {
+    private static <T> Class<T> getClassByNodeName(final String nodeName, final Class<?> targetClass) {
+        if (targetClass == null) {
             return null;
         }
 
         Class<?> nodeClass = null;
-        Map<String, Class<?>> nodeNameClassMap = nodeNameClassMapPool.computeIfAbsent(cls, k -> new ConcurrentHashMap<>());
-        nodeClass = nodeNameClassMap.get(nodeName);
+        final Map<String, WeakReference<Class<?>>> nodeNameClassMap = nodeNameClassMapPool.get(targetClass);
+        final WeakReference<Class<?>> cachedClass = nodeNameClassMap.get(nodeName);
+        nodeClass = cachedClass == null ? null : cachedClass.get();
 
         if (nodeClass == null) {
             String packName = null;
 
-            if (cls.getPackage() == null || cls.getPackage().getName().startsWith("java.lang") || cls.getPackage().getName().startsWith("java.util")) {
+            if (targetClass.getPackage() == null || targetClass.getPackage().getName().startsWith("java.lang")
+                    || targetClass.getPackage().getName().startsWith("java.util")) {
                 final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
                 final String xmlUtilPackageName = AbacusXmlParserImpl.class.getPackage().getName();
                 String className = null;
@@ -3669,7 +3803,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     }
                 }
             } else {
-                packName = cls.getPackage().getName();
+                packName = targetClass.getPackage().getName();
             }
 
             if (Strings.isEmpty(packName)) {
@@ -3695,14 +3829,22 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             }
 
             if ((nodeClass == null) && !nodeName.equalsIgnoreCase(Beans.normalizePropName(nodeName))) {
-                nodeClass = getClassByNodeName(Beans.normalizePropName(nodeName), cls);
+                nodeClass = getClassByNodeName(Beans.normalizePropName(nodeName), targetClass);
             }
 
             if (nodeClass == null) {
                 nodeClass = ClassUtil.SENTINEL_CLASS;
             }
 
-            nodeNameClassMap.put(nodeName, nodeClass);
+            // Resolve outside the lock. All writes share this lock so eviction and insertion keep a strict
+            // bound under concurrent misses, without making cache hits wait or clearing the entire cache.
+            synchronized (nodeNameClassMap) {
+                if (!nodeNameClassMap.containsKey(nodeName) && nodeNameClassMap.size() >= 256) {
+                    nodeNameClassMap.remove(nodeNameClassMap.keySet().iterator().next());
+                }
+
+                nodeNameClassMap.put(nodeName, new WeakReference<>(nodeClass));
+            }
         }
 
         return (Class<T>) ((nodeClass == ClassUtil.SENTINEL_CLASS) ? null : nodeClass);
@@ -3862,6 +4004,10 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         private final List<Type<?>> valueTypeQueue = new ArrayList<>();
 
         private final IdentityHashMap<Object, BeanInfo> beanInfoQueue = new IdentityHashMap<>(1);
+
+        // Mutable stand-ins created for Immutable* map/collection targets, keyed by identity, with the converter that wraps
+        // them once their element closes (see finishContainer).
+        private final IdentityHashMap<Object, Function<Object, Object>> containerConverters = new IdentityHashMap<>(1);
 
         private boolean isNull = false;
 
@@ -4113,7 +4259,20 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     keyTypeQueue.add(keyType);
                     valueTypeQueue.add(valueType);
 
-                    map = xmlParser.newPropInstance(targetClass, attrs);
+                    // Same creation as the StAX/DOM readers: Immutable* via a mutable stand-in (wrapped in finishContainer),
+                    // EnumMap keyed by its enum.
+                    final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> mapCreatorAndConverter = mapOfCreatorAndConverterForTargetType
+                            .get(targetClass);
+
+                    if (EnumMap.class.isAssignableFrom(targetClass)) {
+                        map = newEnumMap(keyType, XmlDeserConfig.class);
+                    } else if (mapCreatorAndConverter != null) {
+                        map = (Map<Object, Object>) mapCreatorAndConverter._1.apply(targetClass);
+                        containerConverters.put(map, mapCreatorAndConverter._2);
+                    } else {
+                        map = xmlParser.newPropInstance(targetClass, attrs);
+                    }
+
                     nodeValueQueue.add(map);
 
                     if (isFirstCall) {
@@ -4212,7 +4371,17 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                     eleTypeQueue.add(eleType);
 
-                    coll = xmlParser.newPropInstance(targetClass, attrs);
+                    // Same creation as the StAX/DOM readers: Immutable* via a mutable stand-in, wrapped in finishContainer.
+                    final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> collCreatorAndConverter = mapOfCreatorAndConverterForTargetType
+                            .get(targetClass);
+
+                    if (collCreatorAndConverter != null) {
+                        coll = (Collection<Object>) collCreatorAndConverter._1.apply(targetClass);
+                        containerConverters.put(coll, collCreatorAndConverter._2);
+                    } else {
+                        coll = xmlParser.newPropInstance(targetClass, attrs);
+                    }
+
                     nodeValueQueue.add(coll);
 
                     if (isFirstCall) {
@@ -4245,7 +4414,9 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                     propInfo = beanInfo.getPropInfo(beanOrPropName);
                     ignoredClassPropNames = config.getIgnoredPropNames(beanClass);
 
-                    if (N.notEmpty(ignoredClassPropNames) && ignoredClassPropNames.contains(beanOrPropName)) {
+                    // Test the resolved property name too: getPropInfo also matches case and snake-case variants.
+                    if (N.notEmpty(ignoredClassPropNames)
+                            && (ignoredClassPropNames.contains(beanOrPropName) || (propInfo != null && ignoredClassPropNames.contains(propInfo.name)))) {
                         inIgnorePropRefCount = 1;
 
                         break;
@@ -4260,14 +4431,17 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         }
                     }
 
+                    // keep the declared (parameterized) property type when the attribute names its class.
                     if (hasPropTypes) {
                         propType = config.getValueType(beanOrPropName);
 
                         if (propType == null) {
-                            propType = ignoreTypeInfo ? propInfo.jsonXmlType : Type.of(xmlParser.getConcreteClass(attrs, propInfo.clazz));
+                            propType = ignoreTypeInfo ? propInfo.jsonXmlType
+                                    : keepDeclaredType(propInfo.jsonXmlType, xmlParser.getConcreteClass(attrs, propInfo.clazz));
                         }
                     } else {
-                        propType = ignoreTypeInfo ? propInfo.jsonXmlType : Type.of(xmlParser.getConcreteClass(attrs, propInfo.clazz));
+                        propType = ignoreTypeInfo ? propInfo.jsonXmlType
+                                : keepDeclaredType(propInfo.jsonXmlType, xmlParser.getConcreteClass(attrs, propInfo.clazz));
                     }
 
                     if ((propType == null) || propType.javaType() == Object.class) {
@@ -4296,7 +4470,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         throw new ParsingException(MALFORMED_MAP_ENTRY);
                     }
 
-                    propType = ignoreTypeInfo ? keyType : Type.of(xmlParser.getConcreteClass(attrs, keyType.javaType()));
+                    // keep the declared key type (the enum key of an EnumMap) when the attribute names its class.
+                    propType = ignoreTypeInfo ? keyType : keepDeclaredType(keyType, xmlParser.getConcreteClass(attrs, keyType.javaType()));
 
                     if ((propType == null) || propType.javaType() == Object.class) {
                         propType = defaultKeyType;
@@ -4308,19 +4483,22 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                 case VALUE: {
                     checkEntryHasKey();
 
+                    // a map value written with type info carries its RAW runtime type
+                    // (`type="java.util.EnumMap<Object, Object>"`, `type="ImmutableList<Object>"`); Type.of(concrete class) dropped
+                    // the key enum of a declared EnumMap<K, V> value and the element type of a declared ImmutableList<E> value.
                     if (hasPropTypes) {
                         final Object key = keyQueue.get(keyQueue.size() - 1);
                         if (key != null && key.getClass() == String.class) {
                             propType = config.getValueType((String) key);
 
                             if (propType == null) {
-                                propType = ignoreTypeInfo ? valueType : Type.of(xmlParser.getConcreteClass(attrs, valueType.javaType()));
+                                propType = ignoreTypeInfo ? valueType : keepDeclaredType(valueType, xmlParser.getConcreteClass(attrs, valueType.javaType()));
                             }
                         } else {
-                            propType = ignoreTypeInfo ? valueType : Type.of(xmlParser.getConcreteClass(attrs, valueType.javaType()));
+                            propType = ignoreTypeInfo ? valueType : keepDeclaredType(valueType, xmlParser.getConcreteClass(attrs, valueType.javaType()));
                         }
                     } else {
-                        propType = ignoreTypeInfo ? valueType : Type.of(xmlParser.getConcreteClass(attrs, valueType.javaType()));
+                        propType = ignoreTypeInfo ? valueType : keepDeclaredType(valueType, xmlParser.getConcreteClass(attrs, valueType.javaType()));
                     }
 
                     if ((propType == null) || propType.javaType() == Object.class) {
@@ -4452,6 +4630,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
                         }
                     }
 
+                    finishContainer();
                     popupNodeValue();
 
                     break;
@@ -4459,6 +4638,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                 case MAP: {
 
+                    finishContainer();
                     popupNodeValue();
 
                     break;
@@ -4544,7 +4724,8 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
 
                     if (mapIgnoredPropNames != null) {
                         final Object latestKey = keyQueue.get(keyQueue.size() - 1);
-                        if (latestKey != null && mapIgnoredPropNames.contains(latestKey.toString())) {
+                        // A null key is ignored under the name it is written as ("null"), as in the StAX and DOM readers.
+                        if (mapIgnoredPropNames.contains(latestKey == null ? NULL_STRING : latestKey.toString())) {
                             inIgnorePropRefCount = 1;
                         }
                     }
@@ -4620,6 +4801,31 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
         private void checkEntryHasKey() throws ParsingException {
             if (map == null || entryKeyMarkQueue.isEmpty() || keyQueue.size() != entryKeyMarkQueue.get(entryKeyMarkQueue.size() - 1) + 1) {
                 throw new ParsingException(MALFORMED_MAP_ENTRY);
+            }
+        }
+
+        /**
+         * Replaces the just-closed map/collection on top of the value stack by its {@code Immutable*} wrapper when it
+         * is the mutable stand-in created for an immutable target; the root result is re-pointed as well.
+         */
+        @SuppressWarnings("unchecked")
+        private void finishContainer() {
+            if (containerConverters.isEmpty() || nodeValueQueue.isEmpty()) {
+                return;
+            }
+
+            final int top = nodeValueQueue.size() - 1;
+            final Object container = nodeValueQueue.get(top);
+            final Function<Object, Object> converter = containerConverters.remove(container);
+
+            if (converter != null) {
+                final Object converted = converter.apply(container);
+
+                nodeValueQueue.set(top, converted);
+
+                if (resultHolder.value() == container) {
+                    resultHolder.setValue((T) converted);
+                }
             }
         }
 
@@ -4750,6 +4956,7 @@ final class AbacusXmlParserImpl extends AbstractXmlParser {
             keyTypeQueue.clear();
             valueTypeQueue.clear();
             beanInfoQueue.clear();
+            containerConverters.clear();
 
             // Per-node parsing flags.
             isNull = false;

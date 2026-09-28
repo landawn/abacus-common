@@ -205,4 +205,64 @@ public class CommonUtilIsTest extends CommonUtilTestSupport {
         assertTrue(CommonUtil.isSorted(byLength, 1, 4, Comparator.comparing(String::length).reversed()));
         assertFalse(CommonUtil.isSorted(byLength, 0, 3, Comparator.naturalOrder()));
     }
+
+    // ---- perf review 2026-09-26 G030 begin ----
+    // G030-01: the range overloads position a List iterator at fromIndex; pin results and the exact comparator call sequence.
+    @Test
+    public void testIsSortedCollectionRange_listIteratorPositioning() {
+        final List<Integer> base = Arrays.asList(9, 7, 1, 2, 2, 3, 0, 5);
+        final List<Collection<Integer>> sources = new ArrayList<>();
+        sources.add(new ArrayList<>(base));
+        sources.add(new java.util.LinkedList<>(base));
+        sources.add(base);
+        sources.add(Collections.unmodifiableList(new ArrayList<>(base)));
+        sources.add(new java.util.concurrent.CopyOnWriteArrayList<>(base));
+        sources.add(new ArrayList<>(base).subList(0, base.size()));
+        sources.add(new java.util.ArrayDeque<>(base));
+
+        for (final Collection<Integer> c : sources) {
+            for (int from = 0; from <= base.size(); from++) {
+                for (int to = from; to <= base.size(); to++) {
+                    boolean expected = true;
+                    final List<String> expectedCalls = new ArrayList<>();
+
+                    for (int i = from + 1; i < to; i++) {
+                        expectedCalls.add(base.get(i) + "," + base.get(i - 1));
+
+                        if (base.get(i) < base.get(i - 1)) {
+                            expected = false;
+                            break;
+                        }
+                    }
+
+                    final List<String> calls = new ArrayList<>();
+                    final Comparator<Integer> recording = (a, b) -> {
+                        calls.add(a + "," + b);
+                        return Integer.compare(a, b);
+                    };
+
+                    assertTrue(expected == CommonUtil.isSorted(c, from, to), c.getClass() + " " + from + ".." + to);
+                    assertTrue(expected == CommonUtil.isSorted(c, from, to, recording), c.getClass() + " " + from + ".." + to);
+                    assertTrue(expectedCalls.equals(calls), c.getClass() + " " + from + ".." + to + " " + calls);
+                }
+            }
+        }
+    }
+
+    // G030-01: nulls sort first in the natural-order range overload, for List and non-List sources.
+    @Test
+    public void testIsSortedCollectionRange_nullsAndBounds() {
+        final List<String> list = Arrays.asList("z", null, null, "a", "b", "a");
+        assertTrue(CommonUtil.isSorted(list, 1, 5));
+        assertFalse(CommonUtil.isSorted(list, 0, 2));
+        assertFalse(CommonUtil.isSorted(list, 4, 6));
+        assertTrue(CommonUtil.isSorted(new java.util.LinkedList<>(list), 1, 5));
+        assertTrue(CommonUtil.isSorted(list, 5, 6));
+        assertTrue(CommonUtil.isSorted(list, 6, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.isSorted(list, 5, 7));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.isSorted(list, -1, 3, Comparator.<String> naturalOrder()));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.isSorted(list, 1, 3, (Comparator<String>) null));
+        assertTrue(CommonUtil.isSorted((List<String>) null, 0, 0));
+    }
+    // ---- perf review 2026-09-26 G030 end ----
 }

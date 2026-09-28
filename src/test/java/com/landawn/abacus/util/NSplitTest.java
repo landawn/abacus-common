@@ -175,4 +175,18 @@ public class NSplitTest extends NTestSupport {
         assertEquals(3, smallerFirst.get(0).length);
         assertEquals(4, smallerFirst.get(2).length);
     }
+
+    @Test
+    public void testSplit_charSequenceCountsCharsNotCodePoints() {
+        final String smiley = new String(Character.toChars(0x1F600));
+        final String str = smiley + smiley;
+
+        final List<String> chunks = N.split(str, 1);
+        assertEquals(4, chunks.size());
+        assertEquals(String.valueOf(smiley.charAt(0)), chunks.get(0));
+        assertEquals(String.valueOf(smiley.charAt(1)), chunks.get(1));
+
+        assertEquals(Arrays.asList(str.substring(0, 3), str.substring(3)), N.split(str, 3));
+        assertEquals(Arrays.asList(str.substring(1, 3)), N.split(str, 1, 3, 2));
+    }
 }

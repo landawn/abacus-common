@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -36,8 +38,11 @@ public interface DoubleSupplier extends Throwables.DoubleSupplier<RuntimeExcepti
     /**
      * A {@code DoubleSupplier} which returns a random double value between {@code 0.0d} (inclusive) and {@code 1.0d} (exclusive).
      * Each invocation draws another value, but successive values are not guaranteed to be distinct.
+     * Values come from the calling thread's {@link ThreadLocalRandom#current()} and are <b>not</b>
+     * cryptographically secure; use {@link java.security.SecureRandom} directly when unpredictable values are
+     * required.
      */
-    DoubleSupplier RANDOM = Util.RAND_DOUBLE::nextDouble;
+    DoubleSupplier RANDOM = () -> ThreadLocalRandom.current().nextDouble();
 
     /**
      * Gets a double result.

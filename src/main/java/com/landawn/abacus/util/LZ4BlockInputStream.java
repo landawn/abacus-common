@@ -64,8 +64,8 @@ public final class LZ4BlockInputStream extends InputStream {
      * @throws IllegalArgumentException if {@code is} is {@code null}.
      */
     public LZ4BlockInputStream(final InputStream is) throws IllegalArgumentException {
-        N.checkArgNotNull(is, cs.is);
-        in = new net.jpountz.lz4.LZ4BlockInputStream(is);
+        N.checkArgNotNull(is, cs.is); 
+        in = net.jpountz.lz4.LZ4BlockInputStream.newBuilder().build(is);
     }
 
     /**
@@ -122,7 +122,7 @@ public final class LZ4BlockInputStream extends InputStream {
      * Reads up to len bytes of decompressed data from the input stream into
      * an array of bytes, starting at the specified offset.
      *
-     * <p>This method blocks until some input is available, unless {@code len} is zero. A valid
+     * <p>This method blocks until some input is available, unless {@code length} is zero. A valid
      * zero-length request returns zero without reading the underlying stream. The buffer and the whole
      * {@code (off, len)} range are validated before anything is read.</p>
      *
@@ -134,16 +134,16 @@ public final class LZ4BlockInputStream extends InputStream {
      *
      * @param b the buffer into which the data is read
      * @param off the start offset in the buffer at which the data is written
-     * @param len the maximum number of bytes to read
+     * @param length the maximum number of bytes to read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
      * @throws NullPointerException if {@code b} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative,
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative,
      *         or {@code off + len} is greater than {@code b.length}
      * @throws IOException if the compressed input is truncated or corrupt, or reading from the underlying stream fails
      */
     @Override
-    public int read(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IOException {
+    public int read(final byte[] b, final int off, final int length) throws NullPointerException, IndexOutOfBoundsException, IOException {
         // Validate the whole range here rather than only the len == 0 branch: the delegate reports a negative
         // length as IllegalArgumentException, which contradicts the IndexOutOfBoundsException this method
         // documents (and, for a null buffer with a negative length, that IAE fired before the NPE).
@@ -152,16 +152,16 @@ public final class LZ4BlockInputStream extends InputStream {
         }
 
         // Subtraction, not off + len, so a length near Integer.MAX_VALUE cannot overflow into a passing check.
-        if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException("off: " + off + ", len: " + len + ", length: " + b.length);
+        if (off < 0 || length < 0 || length > b.length - off) {
+            throw new IndexOutOfBoundsException("off: " + off + ", len: " + length + ", length: " + b.length);
         }
 
-        if (len == 0) {
+        if (length == 0) {
             // The decoder may refill even for a zero-byte request; do not delegate it.
             return 0;
         }
 
-        return in.read(b, off, len);
+        return in.read(b, off, length);
     }
 
     /**

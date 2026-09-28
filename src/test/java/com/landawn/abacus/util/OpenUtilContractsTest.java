@@ -18,8 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
 import com.landawn.abacus.TestBase;
-import com.landawn.abacus.eventbus.EventBus;
-import com.landawn.abacus.eventbus.Subscribe;
 
 @Tag("unit")
 public class OpenUtilContractsTest extends TestBase {
@@ -66,31 +64,6 @@ public class OpenUtilContractsTest extends TestBase {
         assertEquals("", triple.getLeft());
         assertEquals("乙🙂", triple.getMiddle());
         assertNull(triple.getRight());
-    }
-
-    public static class Listener {
-        Thread thread;
-        String value;
-
-        @Subscribe(threadMode = ThreadMode.THREAD_POOL_EXECUTOR)
-        public void receive(String event) {
-            thread = Thread.currentThread();
-            value = event;
-        }
-    }
-
-    @Test
-    void executorDispatchCanRunOnThePostingThread() {
-        final EventBus bus = EventBus.create("direct-contract", Runnable::run);
-        final Listener listener = new Listener();
-        bus.register(listener);
-        try {
-            bus.post("你好🙂");
-            assertSame(Thread.currentThread(), listener.thread);
-            assertEquals("你好🙂", listener.value);
-        } finally {
-            bus.unregister(listener);
-        }
     }
 
     @Test

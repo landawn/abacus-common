@@ -605,4 +605,28 @@ public class HttpSettingsTest extends TestBase {
         assertNotNull(HttpSettings.create().header("A", "b").headersOrNull());
     }
 
+    @Test
+    public void testMultiHeadersNullNameIsRejectedBeforeAnyHeaderIsSet() {
+        final HttpSettings settings = HttpSettings.create();
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> settings.headers("X-First", "v", null, "w"));
+        assertTrue(e.getMessage().contains("'name2'"), e.getMessage());
+        assertFalse(settings.headers().containsHeader("X-First"));
+
+        e = assertThrows(IllegalArgumentException.class, () -> settings.headers("X-First", "v", "X-Second", "w", null, "x"));
+        assertTrue(e.getMessage().contains("'name3'"), e.getMessage());
+        assertFalse(settings.headers().containsHeader("X-First"));
+        assertFalse(settings.headers().containsHeader("X-Second"));
+
+        e = assertThrows(IllegalArgumentException.class, () -> settings.headers(null, "v", "X-Second", "w"));
+        assertTrue(e.getMessage().contains("'name1'"), e.getMessage());
+    }
+
+    @Test
+    public void testHttpRequestMultiHeadersNullNameIsRejectedBeforeAnyHeaderIsSet() {
+        final HttpRequest request = HttpRequest.url("http://localhost:18080/data");
+
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> request.headers("X-First", "v", null, "w"));
+        assertTrue(e.getMessage().contains("'name2'"), e.getMessage());
+    }
 }

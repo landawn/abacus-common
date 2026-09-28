@@ -4263,4 +4263,486 @@ public class ByteStreamTest extends TestBase {
         assertThrows(NoSuchElementException.class, iter::nextByte);
         assertEquals(1, conditionCalls.get());
     }
+
+    @Test
+    public void testFlatmapNullByteElementEmittedAsZero() {
+        final byte[] result = ByteStream.of((byte) 1, (byte) 2).flatmap(b -> Arrays.asList((Byte) null, b)).toArray();
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 0, 1, 0, 2 }, result);
+    }
+
+    @Test
+    public void testAppendIfEmptySupplierNullResultAndLazyClose() {
+        final AtomicInteger calls = new AtomicInteger();
+        final ByteStream fromNull = ByteStream.of(new byte[0]).appendIfEmpty(() -> {
+            calls.incrementAndGet();
+            return null;
+        });
+
+        org.junit.jupiter.api.Assertions.assertEquals(0, calls.get());
+        org.junit.jupiter.api.Assertions.assertEquals(0, fromNull.toArray().length);
+        org.junit.jupiter.api.Assertions.assertEquals(1, calls.get());
+
+        final AtomicBoolean suppliedClosed = new AtomicBoolean(false);
+        final ByteStream s = ByteStream.of(new byte[0]).appendIfEmpty(() -> ByteStream.of((byte) 7).onClose(() -> suppliedClosed.set(true)));
+        final ByteIterator iter = s.iterator();
+
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 7, iter.nextByte());
+        org.junit.jupiter.api.Assertions.assertFalse(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertFalse(suppliedClosed.get());
+
+        s.close();
+
+        org.junit.jupiter.api.Assertions.assertTrue(suppliedClosed.get());
+    }
+
+    @Test
+    public void testOfBoxedArrayAndCollectionUnboxNullElementsToZero() {
+        assertArrayEquals(new byte[] { 1, 0, 3 }, ByteStream.of(new Byte[] { 1, null, 3 }).toArray());
+        assertArrayEquals(new byte[] { 0, 3 }, ByteStream.of(new Byte[] { 1, null, 3, 4 }, 1, 3).toArray());
+        assertArrayEquals(new byte[] { 1, 0, 3 }, ByteStream.of(Arrays.asList((byte) 1, null, (byte) 3)).toArray());
+
+        assertEquals(0, ByteStream.of((Byte[]) null).count());
+        assertEquals(0, ByteStream.of((Collection<Byte>) null).count());
+    }
+
+    // ---- perf review 2026-09-26 G087 begin ----
+    // G087-01: unsorted ArrayByteStream.distinct() keeps first occurrences in encounter order over the full byte domain
+    @Test
+    public void testDistinct_unsortedArrayFullDomainMatchesFirstOccurrenceOrder() {
+        final byte[] edge = { 0, -128, 127, -1, 1, -128, 0, 127, -1, 64, -64, 64 };
+        assertArrayEquals(new byte[] { 0, -128, 127, -1, 1, 64, -64 }, ByteStream.of(edge).distinct().toArray());
+        assertArrayEquals(new byte[] { 127, -1, 1, -128, 0, 64 }, ByteStream.of(edge, 2, 10).distinct().toArray());
+        assertArrayEquals(new byte[0], ByteStream.of(new byte[0]).distinct().toArray());
+        assertArrayEquals(new byte[] { -7 }, ByteStream.of(new byte[] { -7 }).distinct().toArray());
+        assertArrayEquals(new byte[] { -7 }, ByteStream.of(new byte[] { -7, -7, -7 }).distinct().toArray());
+
+        final Random random = new Random(20260926L);
+
+        for (int round = 0; round < 20; round++) {
+            final byte[] data = new byte[random.nextInt(2000)];
+            random.nextBytes(data);
+
+            final java.util.LinkedHashSet<Byte> expected = new java.util.LinkedHashSet<>();
+
+            for (final byte b : data) {
+                expected.add(b);
+            }
+
+            final byte[] expectedArray = new byte[expected.size()];
+            int idx = 0;
+
+            for (final Byte b : expected) {
+                expectedArray[idx++] = b;
+            }
+
+            assertArrayEquals(expectedArray, ByteStream.of(data).distinct().toArray());
+            assertEquals(expected.size(), ByteStream.of(data).distinct().count());
+
+            final byte[] parallelResult = ByteStream.of(data).parallel(4).distinct().toArray();
+            Arrays.sort(parallelResult);
+            final byte[] sortedExpected = expectedArray.clone();
+            Arrays.sort(sortedExpected);
+            assertArrayEquals(sortedExpected, parallelResult);
+        }
+    }
+
+    // G087-01: the distinct filter is lazy and each distinct() call has its own seen-table
+    @Test
+    public void testDistinct_unsortedArrayLazyAndIndependentPerCall() {
+        final byte[] data = { 3, 1, 3, 2, 1, 5 };
+        final ByteIterator iter = ByteStream.of(data).distinct().iterator();
+        assertTrue(iter.hasNext());
+        assertEquals(3, iter.nextByte());
+        assertEquals(1, iter.nextByte());
+        assertEquals(2, iter.nextByte());
+        assertEquals(5, iter.nextByte());
+        assertFalse(iter.hasNext());
+
+        assertArrayEquals(new byte[] { 3, 1, 2, 5 }, ByteStream.of(data).distinct().toArray());
+        assertArrayEquals(new byte[] { 3, 1, 2, 5 }, ByteStream.of(data).distinct().toArray());
+    }
+    // ---- perf review 2026-09-26 G087 end ----
+    // ---- perf review 2026-09-26 G090 begin ----
+    private static final class G090ChunkedInputStream extends InputStream {
+        private final byte[] data;
+        private final int chunk;
+        private final int failAfterReads;
+        private int pos = 0;
+        int readCalls = 0;
+
+        G090ChunkedInputStream(final byte[] data, final int chunk, final int failAfterReads) {
+            this.data = data;
+            this.chunk = chunk;
+            this.failAfterReads = failAfterReads;
+        }
+
+        @Override
+        public int read() throws IOException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) throws IOException {
+            readCalls++;
+
+            if (failAfterReads >= 0 && readCalls > failAfterReads) {
+                throw new IOException("G090 read failure");
+            }
+
+            if (pos >= data.length) {
+                return -1;
+            }
+
+            final int n = Math.min(Math.min(len, chunk), data.length - pos);
+            System.arraycopy(data, pos, b, off, n);
+            pos += n;
+            return n;
+        }
+    }
+
+    private static byte[] g090Data(final int size) {
+        final byte[] data = new byte[size];
+
+        for (int i = 0; i < size; i++) {
+            data[i] = (byte) (i * 31 + 7);
+        }
+
+        return data;
+    }
+
+    // G090-01: bulk toArray/toByteList/count of of(InputStream) - same content and same read(buf) calls as element-wise iteration
+    @Test
+    public void testOfInputStream_bulkToArrayCountToList_multiChunk() {
+        final byte[] data = g090Data(20000);
+
+        G090ChunkedInputStream is = new G090ChunkedInputStream(data, 3000, -1);
+        assertArrayEquals(data, ByteStream.of(is).toArray());
+        assertEquals(8, is.readCalls);
+
+        is = new G090ChunkedInputStream(data, 3000, -1);
+        assertEquals(20000, ByteStream.of(is).count());
+        assertEquals(8, is.readCalls);
+
+        is = new G090ChunkedInputStream(data, 3000, -1);
+        assertEquals(ByteList.of(data), ByteStream.of(is).toByteList());
+        assertEquals(8, is.readCalls);
+
+        // start in the middle of a buffered chunk
+        is = new G090ChunkedInputStream(data, 3000, -1);
+        assertArrayEquals(Arrays.copyOfRange(data, 4500, 20000), ByteStream.of(is).skip(4500).toArray());
+        assertEquals(8, is.readCalls);
+
+        is = new G090ChunkedInputStream(data, 3000, -1);
+        assertEquals(20000 - 2999, ByteStream.of(is).skip(2999).count());
+        assertEquals(8, is.readCalls);
+
+        // larger than the internal 8192-byte buffer, full reads
+        final byte[] big = g090Data(3 * 8192 + 17);
+        assertArrayEquals(big, ByteStream.of(new ByteArrayInputStream(big)).toArray());
+        assertEquals(big.length, ByteStream.of(new ByteArrayInputStream(big)).count());
+        assertArrayEquals(Arrays.copyOfRange(big, 8192, big.length), ByteStream.of(new ByteArrayInputStream(big)).skip(8192).toArray());
+        assertEquals(ByteList.of(Arrays.copyOfRange(big, 1, big.length)), ByteStream.of(new ByteArrayInputStream(big)).skip(1).toByteList());
+    }
+
+    // G090-01: empty / fully skipped / read()==0 inputs
+    @Test
+    public void testOfInputStream_bulkToArrayCountToList_emptyAndEdge() {
+        final byte[] empty = ByteStream.of(new ByteArrayInputStream(new byte[0])).toArray();
+        assertEquals(0, empty.length);
+        assertEquals(0, ByteStream.of(new ByteArrayInputStream(new byte[0])).count());
+        assertEquals(0, ByteStream.of(new ByteArrayInputStream(new byte[0])).toByteList().size());
+
+        final ByteList list = ByteStream.of(new ByteArrayInputStream(new byte[0])).toByteList();
+        list.add((byte) 5);
+        assertEquals(ByteList.of((byte) 5), list);
+
+        final byte[] data = g090Data(10);
+        assertEquals(0, ByteStream.of(new ByteArrayInputStream(data)).skip(10).toArray().length);
+        assertEquals(0, ByteStream.of(new ByteArrayInputStream(data)).skip(100).count());
+        assertArrayEquals(new byte[] { data[9] }, ByteStream.of(new ByteArrayInputStream(data)).skip(9).toArray());
+
+        final ByteList mutable = ByteStream.of(new ByteArrayInputStream(data)).toByteList();
+        mutable.add((byte) 1);
+        assertEquals(11, mutable.size());
+
+        final InputStream zeroRead = new InputStream() {
+            @Override
+            public int read() {
+                return 1;
+            }
+
+            @Override
+            public int read(final byte[] b, final int off, final int len) {
+                return 0;
+            }
+        };
+
+        assertEquals(0, ByteStream.of(zeroRead).toArray().length);
+        assertEquals(0, ByteStream.of(zeroRead).count());
+    }
+
+    // G090-01: an IOException in a later read still surfaces as UncheckedIOException from toArray/count/toByteList
+    @Test
+    public void testOfInputStream_bulkToArrayCountToList_readFailure() {
+        final byte[] data = g090Data(10000);
+
+        final G090ChunkedInputStream is1 = new G090ChunkedInputStream(data, 3000, 2);
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> ByteStream.of(is1).toArray());
+        assertEquals(3, is1.readCalls);
+
+        final G090ChunkedInputStream is2 = new G090ChunkedInputStream(data, 3000, 2);
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> ByteStream.of(is2).count());
+        assertEquals(3, is2.readCalls);
+
+        final G090ChunkedInputStream is3 = new G090ChunkedInputStream(data, 3000, 0);
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> ByteStream.of(is3).toByteList());
+        assertEquals(1, is3.readCalls);
+    }
+
+    // G090-02: bulk toArray/toByteList/count of concat(List<byte[]>) / concat(byte[]...) - null and empty arrays, mid-array start
+    @Test
+    public void testConcatArrays_bulkToArrayCountToList() {
+        final byte[] a = { 1, 2 };
+        final byte[] b = { 3, 4, 5 };
+        final List<byte[]> list = Arrays.asList(null, a, new byte[0], null, b, null, new byte[0]);
+
+        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.concat(list).toArray());
+        assertEquals(5, ByteStream.concat(list).count());
+        assertEquals(ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5), ByteStream.concat(list).toByteList());
+        assertArrayEquals(new byte[] { 2, 3, 4, 5 }, ByteStream.concat(list).skip(1).toArray());
+        assertArrayEquals(new byte[] { 4, 5 }, ByteStream.concat(list).skip(3).toArray());
+        assertEquals(1, ByteStream.concat(list).skip(4).count());
+        assertEquals(0, ByteStream.concat(list).skip(5).toArray().length);
+        assertEquals(0, ByteStream.concat(list).skip(50).count());
+
+        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, ByteStream.concat(a, b).toArray());
+        assertEquals(5, ByteStream.concat(a, null, b).count());
+        assertArrayEquals(new byte[] { 3, 4, 5 }, ByteStream.concat(new byte[0], b).toArray());
+
+        final List<byte[]> empties = Arrays.asList(null, new byte[0]);
+        assertEquals(0, ByteStream.concat(empties).toArray().length);
+        assertEquals(0, ByteStream.concat(empties).count());
+        final ByteList emptyList = ByteStream.concat(empties).toByteList();
+        emptyList.add((byte) 9);
+        assertEquals(1, emptyList.size());
+
+        // the result is a fresh array and the arrays are read when the stream is traversed (live view)
+        final byte[] c = { 7, 8 };
+        final ByteStream stream = ByteStream.concat(c);
+        c[1] = 9;
+        final byte[] result = stream.toArray();
+        assertArrayEquals(new byte[] { 7, 9 }, result);
+        result[0] = 0;
+        assertEquals(7, c[0]);
+
+        final byte[] big1 = g090Data(10000);
+        final byte[] big2 = g090Data(7777);
+        final byte[] expected = new byte[big1.length + big2.length];
+        System.arraycopy(big1, 0, expected, 0, big1.length);
+        System.arraycopy(big2, 0, expected, big1.length, big2.length);
+        assertArrayEquals(expected, ByteStream.concat(big1, big2).toArray());
+        assertArrayEquals(Arrays.copyOfRange(expected, 9999, expected.length), ByteStream.concat(big1, big2).skip(9999).toArray());
+        assertEquals(expected.length, ByteStream.concat(big1, big2).count());
+    }
+    // G090-03: pins the column-major order of flatten(byte[][], true) for jagged input with null/empty/short rows
+    @Test
+    public void testFlattenVertically_jaggedNullEmptyRowsMatchesColumnMajorReference() {
+        final Random random = new Random(20260926L);
+
+        for (int round = 0; round < 300; round++) {
+            final int rows = 2 + random.nextInt(8);
+            final byte[][] a = new byte[rows][];
+
+            for (int r = 0; r < rows; r++) {
+                final int kind = random.nextInt(6);
+                a[r] = kind == 0 ? null : new byte[kind == 1 ? 0 : random.nextInt(7)];
+
+                if (a[r] != null) {
+                    for (int c = 0; c < a[r].length; c++) {
+                        a[r][c] = (byte) random.nextInt(256);
+                    }
+                }
+            }
+
+            int maxLen = 0;
+
+            for (final byte[] row : a) {
+                maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+            }
+
+            final ByteList expected = new ByteList();
+
+            for (int c = 0; c < maxLen; c++) {
+                for (final byte[] row : a) {
+                    if (row != null && c < row.length) {
+                        expected.add(row[c]);
+                    }
+                }
+            }
+
+            assertArrayEquals(expected.toArray(), ByteStream.flatten(a, true).toArray());
+            assertEquals(expected.size(), ByteStream.flatten(a, true).count());
+
+            if (expected.size() > 1) {
+                assertArrayEquals(expected.copy(1, expected.size()).toArray(), ByteStream.flatten(a, true).skip(1).toArray());
+            }
+        }
+    }
+
+    // G090-03: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
+    @Test
+    public void testFlattenVertically_iteratorExhaustionAndLongRow() {
+        final byte[][] a = { null, { 1 }, {}, { 2, 3, 4 }, null, { 5, 6 } };
+        final ByteIterator iter = ByteStream.flatten(a, true).iterator();
+        final ByteList actual = new ByteList();
+
+        while (iter.hasNext()) {
+            actual.add(iter.nextByte());
+        }
+
+        assertEquals(ByteList.of((byte) 1, (byte) 2, (byte) 5, (byte) 3, (byte) 6, (byte) 4), actual);
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextByte);
+        assertFalse(iter.hasNext());
+
+        final byte[][] jagged = new byte[201][];
+
+        for (int i = 0; i < 200; i++) {
+            jagged[i] = i % 3 == 0 ? null : new byte[] { (byte) (i % 26) };
+        }
+
+        jagged[200] = new byte[5000];
+
+        for (int i = 0; i < 5000; i++) {
+            jagged[200][i] = (byte) (i % 10 + 100);
+        }
+
+        final byte[] result = ByteStream.flatten(jagged, true).toArray();
+        final ByteList expected = new ByteList();
+
+        for (int i = 0; i < 200; i++) {
+            if (jagged[i] != null) {
+                expected.add(jagged[i][0]);
+            }
+        }
+
+        for (int i = 0; i < 5000; i++) {
+            expected.add(jagged[200][i]);
+        }
+
+        assertArrayEquals(expected.toArray(), result);
+        assertArrayEquals(new byte[0], ByteStream.flatten(new byte[][] { null, {}, null }, true).toArray());
+    }
+    // ---- perf review 2026-09-26 G090 end ----
+    // ---- perf review 2026-09-26 G114 begin ----
+    private static byte[] flattenVerticallyReferenceG114(final byte[][] a) {
+        final ByteList ret = new ByteList();
+        int maxLen = 0;
+
+        for (final byte[] row : a) {
+            maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+        }
+
+        for (int col = 0; col < maxLen; col++) {
+            for (final byte[] row : a) {
+                if (row != null && col < row.length) {
+                    ret.add(row[col]);
+                }
+            }
+        }
+
+        return ret.toArray();
+    }
+
+    private static void assertFlattenVerticallyMatchesReferenceG114(final byte[][] a, final int skip) {
+        final byte[] expected = flattenVerticallyReferenceG114(a);
+        final String message = Arrays.deepToString(a);
+        assertArrayEquals(expected, ByteStream.flatten(a, true).toArray(), message);
+        assertEquals(expected.length, ByteStream.flatten(a, true).count(), message);
+        assertArrayEquals(Arrays.copyOfRange(expected, Math.min(skip, expected.length), expected.length), ByteStream.flatten(a, true).skip(skip).toArray(),
+                message);
+
+        final ByteIterator iter = ByteStream.flatten(a, true).iterator();
+
+        for (final byte element : expected) {
+            assertTrue(iter.hasNext());
+            assertEquals(element, iter.nextByte());
+        }
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextByte);
+        assertFalse(iter.hasNext());
+    }
+
+    // G114-01: flatten(byte[][], true) keeps the original walk for dense input and uses a compacted row walk when
+    // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
+    @Test
+    public void testFlattenVertically_denseAndSparseWalksMatchColumnMajorReference() {
+        final Random random = new Random(114);
+
+        for (int round = 0; round < 400; round++) {
+            // kind 0: dense jagged, 1: mostly null/empty rows plus a few long ones, 2: rectangular, 3: one long row among empty/null rows
+            final int kind = round % 4;
+            final int rows = 2 + random.nextInt(kind == 1 || kind == 3 ? 40 : 8);
+            final int width = 1 + random.nextInt(6);
+            final int longRow = random.nextInt(rows);
+            final byte[][] a = new byte[rows][];
+
+            for (int i = 0; i < rows; i++) {
+                final int len;
+
+                if (kind == 0) {
+                    len = random.nextInt(7) - 1;
+                } else if (kind == 1) {
+                    len = random.nextInt(6) == 0 ? random.nextInt(40) : random.nextInt(3) - 1;
+                } else if (kind == 2) {
+                    len = width;
+                } else {
+                    len = i == longRow ? 1 + random.nextInt(60) : random.nextInt(2) - 1;
+                }
+
+                if (len >= 0) {
+                    a[i] = new byte[len];
+
+                    for (int j = 0; j < len; j++) {
+                        a[i][j] = (byte) (i * 100 + j);
+                    }
+                }
+            }
+
+            assertFlattenVerticallyMatchesReferenceG114(a, random.nextInt(rows * 3 + 2));
+        }
+
+        // rows * longest row == 4 * elements keeps the original walk; one more empty row switches to the compacted walk
+        final byte[][] boundary = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {} };
+        final byte[][] boundaryPlusOne = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {}, {} };
+        assertArrayEquals(new byte[] { 1, 5, 2, 6, 3, 7, 4, 8 }, ByteStream.flatten(boundary, true).toArray());
+        assertArrayEquals(new byte[] { 1, 5, 2, 6, 3, 7, 4, 8 }, ByteStream.flatten(boundaryPlusOne, true).toArray());
+
+        for (int skip = 0; skip <= 9; skip++) {
+            assertFlattenVerticallyMatchesReferenceG114(boundary, skip);
+            assertFlattenVerticallyMatchesReferenceG114(boundaryPlusOne, skip);
+        }
+
+        // sparse: rows drop out of the compacted walk at different columns
+        final byte[][] sparse = { null, {}, { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, {}, {}, { 10, 11 }, {}, null, {}, {}, { 12, 13, 14, 15 }, {} };
+        assertArrayEquals(new byte[] { 1, 10, 12, 2, 11, 13, 3, 14, 4, 15, 5, 6, 7, 8, 9 }, ByteStream.flatten(sparse, true).toArray());
+        assertFlattenVerticallyMatchesReferenceG114(sparse, 4);
+
+        // one long row among 999 null rows (first and last position)
+        final byte[][] oneLongRow = new byte[1000][];
+        oneLongRow[999] = new byte[5000];
+
+        for (int j = 0; j < 5000; j++) {
+            oneLongRow[999][j] = (byte) j;
+        }
+
+        assertArrayEquals(oneLongRow[999], ByteStream.flatten(oneLongRow, true).toArray());
+        oneLongRow[0] = oneLongRow[999];
+        oneLongRow[999] = null;
+        assertFlattenVerticallyMatchesReferenceG114(oneLongRow, 4999);
+        assertEquals(0, ByteStream.flatten(new byte[][] { null, {}, null, {} }, true).count());
+    }
+    // ---- perf review 2026-09-26 G114 end ----
 }

@@ -132,7 +132,8 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Constructs a {@code SingleValueType} using the canonical class name as the type name.
      *
      * @param typeClass the class of the type to handle
-     * @throws IllegalArgumentException if {@code typeClass} is {@code null}.
+     * @throws IllegalArgumentException if {@code typeClass} is {@code null}, or if its value/creator members are invalid
+     *         (see {@link #SingleValueType(String, Class)}).
      */
     protected SingleValueType(final Class<T> typeClass) throws IllegalArgumentException {
         this(ClassUtil.getCanonicalClassName(typeClass), typeClass);
@@ -151,7 +152,9 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @throws IllegalArgumentException if {@code typeName} or {@code typeClass} is {@code null}, or if only one side of the
      *         {@code @JsonXmlValue} /{@code @JsonXmlCreator} pair is
      *         present (a lone Jackson {@code @JsonValue} is tolerated on an enum only), if multiple annotated members
-     *         are present for either role, or if an annotated member violates its signature constraints.
+     *         are present for either role, if an annotated member violates its signature constraints, if
+     *         {@code typeName} is not a well-formed type declaration, or if the annotated or auto-detected creator's
+     *         parameter cannot accept the value type.
      */
     @SuppressWarnings("null")
     protected SingleValueType(final String typeName, final Class<T> typeClass) throws IllegalArgumentException {
@@ -181,6 +184,14 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         final Method[] methods = typeClass.getDeclaredMethods();
 
         for (final Method m : methods) {
+            // javac copies method annotations onto the synthetic bridge of an overriding member with a narrowed
+            // return type (e.g. "@JsonValue String get()" implementing Supplier<String>): count the real method only.
+            // A bridge without such a declared twin (the visibility bridge of a public method inherited from a
+            // package-private superclass) is the only declared copy of that member, so it still counts.
+            if (m.isBridge() && hasDeclaredNonBridgeTwin(methods, m)) {
+                continue;
+            }
+
             boolean isCreator = m.isAnnotationPresent(JsonXmlCreator.class);
             boolean isValue = m.isAnnotationPresent(JsonXmlValue.class);
 
@@ -381,12 +392,13 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *
      * @param x the object to convert
      * @return the string representation, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @MayReturnNull
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         if (x == null) {
             return null; // NOSONAR
         }
@@ -423,16 +435,17 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @param str the string to parse; may be {@code null}
      * @return an instance of type T, {@code null} when {@code str} is {@code null}, or the string itself
      *         (cast to {@code T}) if no creator is available
-     * @throws RuntimeException whatever the annotated creator throws, propagated unwrapped (an
-     *         {@code IllegalArgumentException} thrown by the creator surfaces as that exception)
      * @throws UnsupportedOperationException if a value member is annotated but no creator exists (only an
      *         enum can be in that state, and {@link EnumType} overrides this method)
+     * @throws RuntimeException whatever the annotated or auto-detected creator, or the parsing of {@code str} into the
+     *         creator's value type, throws, propagated unwrapped (an {@code IllegalArgumentException} thrown by the
+     *         creator surfaces as that exception)
      * @see #valueOf(Object)
      * @see #stringOf(Object)
      */
     @MayReturnNull
     @Override
-    public T valueOf(final String str) throws RuntimeException, UnsupportedOperationException {
+    public T valueOf(final String str) throws UnsupportedOperationException, RuntimeException {
         // throw new UnsupportedOperationException();
 
         if (str == null) {
@@ -466,9 +479,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *         enum can be in that state, and {@link EnumType} overrides this method)
      * @throws NullPointerException if {@code rs} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs
+     * @throws RuntimeException if the annotated or auto-detected creator throws (propagated unwrapped), or the column value
+     *         cannot be converted to the target type
      */
     @Override
-    public T get(final ResultSet rs, final int columnIndex) throws UnsupportedOperationException, NullPointerException, SQLException {
+    public T get(final ResultSet rs, final int columnIndex) throws UnsupportedOperationException, NullPointerException, SQLException, RuntimeException {
         if (jsonValueType != null) {
             checkCreatorAvailable();
 
@@ -502,9 +517,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      *         enum can be in that state, and {@link EnumType} overrides this method)
      * @throws NullPointerException if {@code rs} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs
+     * @throws RuntimeException if the annotated or auto-detected creator throws (propagated unwrapped), or the column value
+     *         cannot be converted to the target type
      */
     @Override
-    public T get(final ResultSet rs, final String columnName) throws UnsupportedOperationException, NullPointerException, SQLException {
+    public T get(final ResultSet rs, final String columnName) throws UnsupportedOperationException, NullPointerException, SQLException, RuntimeException {
         if (jsonValueType != null) {
             checkCreatorAvailable();
 
@@ -531,31 +548,32 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Sets a value of type T at the specified parameter index in the PreparedStatement.
      * Extracts the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the value to set, may be null
-     * @throws NullPointerException if {@code stmt} is null when this method or the selected value type accesses the JDBC resource
+     * @throws NullPointerException if {@code statement} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final T x) throws NullPointerException, SQLException, RuntimeException {
         if (x == null) {
-            stmt.setObject(columnIndex, null);
+            statement.setObject(columnIndex, null);
         } else if (jsonValueType != null) {
             try {
                 if (jsonValueField != null) {
-                    jsonValueType.set(stmt, columnIndex, jsonValueField.get(x));
+                    jsonValueType.set(statement, columnIndex, jsonValueField.get(x));
                 } else {
-                    jsonValueType.set(stmt, columnIndex, jsonValueMethod.invoke(x));
+                    jsonValueType.set(statement, columnIndex, jsonValueMethod.invoke(x));
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 // Unwrap the reflective wrapper so the creator's/accessor's own exception (e.g. IAE) reaches the caller.
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else if (valueType != null && valueExtractor != null) {
-            valueType.set(stmt, columnIndex, valueExtractor.apply(x));
+            valueType.set(statement, columnIndex, valueExtractor.apply(x));
         } else {
-            stmt.setObject(columnIndex, x);
+            statement.setObject(columnIndex, x);
         }
     }
 
@@ -563,31 +581,32 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Sets a value of type T for the specified parameter name in the CallableStatement.
      * Extracts the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the value to set, may be null
-     * @throws NullPointerException if {@code stmt} is null when this method or the selected value type accesses the JDBC resource
+     * @throws NullPointerException if {@code statement} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final T x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final T x) throws NullPointerException, SQLException, RuntimeException {
         if (x == null) {
-            stmt.setObject(parameterName, null);
+            statement.setObject(parameterName, null);
         } else if (jsonValueType != null) {
             try {
                 if (jsonValueField != null) {
-                    jsonValueType.set(stmt, parameterName, jsonValueField.get(x));
+                    jsonValueType.set(statement, parameterName, jsonValueField.get(x));
                 } else {
-                    jsonValueType.set(stmt, parameterName, jsonValueMethod.invoke(x));
+                    jsonValueType.set(statement, parameterName, jsonValueMethod.invoke(x));
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 // Unwrap the reflective wrapper so the creator's/accessor's own exception (e.g. IAE) reaches the caller.
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else if (valueType != null && valueExtractor != null) {
-            valueType.set(stmt, parameterName, valueExtractor.apply(x));
+            valueType.set(statement, parameterName, valueExtractor.apply(x));
         } else {
-            stmt.setObject(parameterName, x);
+            statement.setObject(parameterName, x);
         }
     }
 
@@ -595,32 +614,34 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Sets a value of type T at the specified parameter index in the PreparedStatement with SQL type information.
      * Extracts the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the value to set, may be null
      * @param sqlTypeOrLength the SQL type code or length information
-     * @throws NullPointerException if {@code stmt} is null when this method or the selected value type accesses the JDBC resource
+     * @throws NullPointerException if {@code statement} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final T x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final T x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException, RuntimeException {
         if (x == null) {
-            stmt.setObject(columnIndex, null, sqlTypeOrLength);
+            statement.setObject(columnIndex, null, sqlTypeOrLength);
         } else if (jsonValueType != null) {
             try {
                 if (jsonValueField != null) {
-                    jsonValueType.set(stmt, columnIndex, jsonValueField.get(x), sqlTypeOrLength);
+                    jsonValueType.set(statement, columnIndex, jsonValueField.get(x), sqlTypeOrLength);
                 } else {
-                    jsonValueType.set(stmt, columnIndex, jsonValueMethod.invoke(x), sqlTypeOrLength);
+                    jsonValueType.set(statement, columnIndex, jsonValueMethod.invoke(x), sqlTypeOrLength);
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 // Unwrap the reflective wrapper so the creator's/accessor's own exception (e.g. IAE) reaches the caller.
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else if (valueType != null && valueExtractor != null) {
-            valueType.set(stmt, columnIndex, valueExtractor.apply(x), sqlTypeOrLength);
+            valueType.set(statement, columnIndex, valueExtractor.apply(x), sqlTypeOrLength);
         } else {
-            stmt.setObject(columnIndex, x, sqlTypeOrLength);
+            statement.setObject(columnIndex, x, sqlTypeOrLength);
         }
     }
 
@@ -628,32 +649,34 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * Sets a value of type T for the specified parameter name in the CallableStatement with SQL type information.
      * Extracts the wrapped value if JSON annotations or value extractors are available.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the value to set, may be null
      * @param sqlTypeOrLength the SQL type code or length information
-     * @throws NullPointerException if {@code stmt} is null when this method or the selected value type accesses the JDBC resource
+     * @throws NullPointerException if {@code statement} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final T x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final T x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException, RuntimeException {
         if (x == null) {
-            stmt.setObject(parameterName, null, sqlTypeOrLength);
+            statement.setObject(parameterName, null, sqlTypeOrLength);
         } else if (jsonValueType != null) {
             try {
                 if (jsonValueField != null) {
-                    jsonValueType.set(stmt, parameterName, jsonValueField.get(x), sqlTypeOrLength);
+                    jsonValueType.set(statement, parameterName, jsonValueField.get(x), sqlTypeOrLength);
                 } else {
-                    jsonValueType.set(stmt, parameterName, jsonValueMethod.invoke(x), sqlTypeOrLength);
+                    jsonValueType.set(statement, parameterName, jsonValueMethod.invoke(x), sqlTypeOrLength);
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 // Unwrap the reflective wrapper so the creator's/accessor's own exception (e.g. IAE) reaches the caller.
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
         } else if (valueType != null && valueExtractor != null) {
-            valueType.set(stmt, parameterName, valueExtractor.apply(x), sqlTypeOrLength);
+            valueType.set(statement, parameterName, valueExtractor.apply(x), sqlTypeOrLength);
         } else {
-            stmt.setObject(parameterName, x, sqlTypeOrLength);
+            statement.setObject(parameterName, x, sqlTypeOrLength);
         }
     }
 
@@ -688,9 +711,11 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @param config the serialization configuration for formatting options
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the null literal or the selected wrapped/runtime value representation to {@code writer} fails
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -761,6 +786,16 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
         }
     }
 
+    private static boolean hasDeclaredNonBridgeTwin(final Method[] declaredMethods, final Method bridge) {
+        for (final Method m : declaredMethods) {
+            if (!m.isBridge() && m.getName().equals(bridge.getName()) && m.getParameterCount() == bridge.getParameterCount()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Analyzes a class to extract creator and value extractor functions for single-value types.
      * Searches for factory methods, constructors, and getter methods following common naming patterns.
@@ -774,9 +809,12 @@ abstract class SingleValueType<T> extends AbstractType<T> { //NOSONAR
      * @param typeClass the class to analyze for value extraction patterns
      * @return a tuple containing the value type, creator function, and value extractor function,
      *         or a tuple of {@code (null, null, null)} if no suitable pattern is found
+     * @throws IllegalArgumentException if the detected creator's parameter cannot accept the value field's type, or its
+     *         return type contradicts the wrapper's type arguments
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    static <T> Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> getCreatorAndValueExtractor(final Class<T> typeClass) {
+    static <T> Tuple3<Type<Object>, Function<String, T>, Function<T, Object>> getCreatorAndValueExtractor(final Class<T> typeClass)
+            throws IllegalArgumentException {
         return getCreatorAndValueExtractor(typeClass, new ValueTypeResolver(typeClass, List.of()));
     }
 

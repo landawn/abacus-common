@@ -97,19 +97,20 @@ public class MillisCalendarType extends CalendarType {
      * The {@code Calendar}'s time-in-milliseconds is stored as a {@code BIGINT} value.
      * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BIGINT}) is set.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Calendar} value to set, or {@code null} to set SQL {@code NULL}
      * @throws IllegalArgumentException if {@code x} is a non-lenient calendar containing invalid field values.
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws IllegalArgumentException, NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Calendar x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.BIGINT);
+            statement.setNull(columnIndex, Types.BIGINT);
         } else {
-            stmt.setLong(columnIndex, x.getTimeInMillis());
+            statement.setLong(columnIndex, x.getTimeInMillis());
         }
     }
 
@@ -118,20 +119,20 @@ public class MillisCalendarType extends CalendarType {
      * The {@code Calendar}'s time-in-milliseconds is stored as a {@code BIGINT} value.
      * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BIGINT}) is set.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Calendar} value to set, or {@code null} to set SQL {@code NULL}
      * @throws IllegalArgumentException if {@code x} is a non-lenient calendar containing invalid field values.
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Calendar x)
+    public void set(final CallableStatement statement, final String parameterName, final Calendar x)
             throws IllegalArgumentException, NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.BIGINT);
+            statement.setNull(parameterName, Types.BIGINT);
         } else {
-            stmt.setLong(parameterName, x.getTimeInMillis());
+            statement.setLong(parameterName, x.getTimeInMillis());
         }
     }
 }

@@ -156,8 +156,8 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ZonedDateTime zdt1 = type.valueOf(1697364600000L);           // From epoch milliseconds
-     * ZonedDateTime zdt2 = type.valueOf("2023-10-15T10:30:00Z");   // From string
+     * ZonedDateTime zdt1 = type.valueOf(1697364600000L);          // From epoch milliseconds
+     * ZonedDateTime zdt2 = type.valueOf("2023-10-15T10:30:00Z");  // From string
      * }</pre>
      *
      * <p>SQL Timestamp inputs preserve nanoseconds in the default zone.</p>
@@ -222,8 +222,8 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ZonedDateTime zdt1 = type.valueOf("2023-10-15T10:30:00Z");   // ISO 8601 format
-     * ZonedDateTime zdt2 = type.valueOf("SYS_TIME");               // Current time
+     * ZonedDateTime zdt1 = type.valueOf("2023-10-15T10:30:00Z");  // ISO 8601 format
+     * ZonedDateTime zdt2 = type.valueOf("SYS_TIME");              // Current time
      *
      * // Round-trips the output of ZonedDateTime.toString(), region zone included
      * ZonedDateTime src = ZonedDateTime.now(ZoneId.of("America/Los_Angeles"));
@@ -299,7 +299,7 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      *
      * @param cbuf the character array containing the date/time representation
      * @param offset the starting position in the character array
-     * @param len the number of characters to process
+     * @param length the number of characters to process
      * @return a ZonedDateTime instance, or {@code null} if the input is {@code null} or empty
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws DateTimeParseException if the text is neither a millisecond number nor a valid ISO-8601 representation
@@ -307,23 +307,23 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      */
     @MayReturnNull
     @Override
-    public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, DateTimeParseException {
-        if ((cbuf == null) || (len == 0)) {
+    public ZonedDateTime valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, DateTimeParseException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
+                return ZonedDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, length)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -391,17 +391,17 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * type.set(preparedStatement, 1, zdt);   // Sets timestamp at first parameter
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the value in
+     * @param statement the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the value
      * @param x the ZonedDateTime value to set, or {@code null} for SQL NULL
      * @throws IllegalArgumentException if a non-null value cannot be converted to a {@code Timestamp} because its epoch-millisecond value overflows
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final ZonedDateTime x)
+    public void set(final PreparedStatement statement, final int columnIndex, final ZonedDateTime x)
             throws IllegalArgumentException, NullPointerException, SQLException {
-        stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.from(x.toInstant()));
+        statement.setTimestamp(columnIndex, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
     /**
@@ -417,17 +417,17 @@ public class ZonedDateTimeType extends AbstractTemporalType<ZonedDateTime> {
      * type.set(callableStatement, "created_date", zdt);   // Sets timestamp parameter
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the value in
+     * @param statement the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the value
      * @param x the ZonedDateTime value to set, or {@code null} for SQL NULL
      * @throws IllegalArgumentException if a non-null value cannot be converted to a {@code Timestamp} because its epoch-millisecond value overflows
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final ZonedDateTime x)
+    public void set(final CallableStatement statement, final String parameterName, final ZonedDateTime x)
             throws IllegalArgumentException, NullPointerException, SQLException {
-        stmt.setTimestamp(parameterName, x == null ? null : Timestamp.from(x.toInstant()));
+        statement.setTimestamp(parameterName, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
     /**

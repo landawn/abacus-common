@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -38,8 +40,11 @@ public interface ByteSupplier extends Throwables.ByteSupplier<RuntimeException> 
      * A supplier that returns random byte values.
      * Each invocation draws a random byte value in the range [-128, 127] (inclusive).
      * As with any random sampling, successive values may be equal.
+     * Values come from the calling thread's {@link ThreadLocalRandom#current()} and are <b>not</b>
+     * cryptographically secure; use {@link java.security.SecureRandom} directly when unpredictable values are
+     * required.
      */
-    ByteSupplier RANDOM = () -> (byte) Util.RAND_BYTE.nextInt();
+    ByteSupplier RANDOM = () -> (byte) ThreadLocalRandom.current().nextInt();
 
     /**
      * Gets a byte result.

@@ -37,8 +37,8 @@ public interface ToBooleanBiFunction<T, U> extends Throwables.ToBooleanBiFunctio
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToBooleanBiFunction<String, String> equals = String::equals;
-     * boolean result1 = equals.applyAsBoolean("hello", "hello");   // returns true
-     * boolean result2 = equals.applyAsBoolean("hello", "world");   // returns false
+     * boolean result1 = equals.applyAsBoolean("hello", "hello");  // returns true
+     * boolean result2 = equals.applyAsBoolean("hello", "world");  // returns false
      *
      * ToBooleanBiFunction<Integer, Integer> greaterThan = (a, b) -> a > b;
      * boolean result3 = greaterThan.applyAsBoolean(10, 5);   // returns true

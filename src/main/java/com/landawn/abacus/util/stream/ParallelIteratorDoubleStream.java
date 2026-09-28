@@ -40,6 +40,7 @@ import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.MutableBoolean;
 import com.landawn.abacus.util.MutableLong;
+import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Pair;
 import com.landawn.abacus.util.Throwables;
 import com.landawn.abacus.util.cs;
@@ -75,6 +76,16 @@ import com.landawn.abacus.util.function.DoubleToFloatFunction;
  * <p><b>Failure Handling:</b> Terminal operations wait for every submitted worker before closing
  * the stream or a temporary executor. Partial results are finished before cleanup; the primary
  * failure is rethrown and additional failures are suppressed.
+ *
+ * <p><b>Reduction and collection:</b> worker threads take elements one at a time from the shared
+ * iterator, so each partial result of {@code reduce} or container of {@code collect} covers an
+ * interleaved subset of the elements. A {@code reduce} accumulator must therefore be commutative as
+ * well as associative, and an order-sensitive {@code collect} result (for example a {@code List})
+ * may not follow the encounter order. The same holds for the per-thread partial maps of {@code toMap} and
+ * {@code groupTo}: colliding values reach a {@code toMap} merge function in no particular order, so it must
+ * also be commutative (for example {@code (a, b) -> a} does not reliably keep the first element), and an
+ * order-sensitive {@code groupTo} downstream result (for example {@code Collectors.toList()}) may not follow
+ * the encounter order.
  *
  * @see IteratorDoubleStream
  * @see DoubleStream#parallel()
@@ -471,7 +482,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.DoubleFunction<? extends K, E> keyMapper,
             final Throwables.DoubleFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -494,7 +505,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.DoubleFunction<? extends K, E> keyMapper,
             final Collector<? super Double, ?, D> downstream, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -624,7 +635,7 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjDoubleConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -641,7 +652,10 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final R container = supplier.get();
+                // A null container is recorded like any other worker failure: execute(..) runs this worker under
+                // callWithErrorCapture, so it stops the other workers and is rethrown as the NullPointerException
+                // itself (the object streams make the same check inside their try block).
+                final R container = N.requireNonNull(supplier.get(), "supplier returned null");
                 double next = 0;
 
                 try {
@@ -827,23 +841,25 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final Pair<Long, Double> pair = new Pair<>();
+                // Primitive locals: no boxed index/element per taken element (inside the lock); a Pair is created only on a match.
+                long nextIndex = 0;
+                double next = 0;
 
                 try {
                     while (resultHolder.value() == null && eHolder.value() == null) {
                         synchronized (elements) {
                             if (elements.hasNext()) {
-                                pair.setLeft(index.getAndIncrement());
-                                pair.setRight(elements.nextDouble());
+                                nextIndex = index.getAndIncrement();
+                                next = elements.nextDouble();
                             } else {
                                 break;
                             }
                         }
 
-                        if (predicate.test(pair.right())) {
+                        if (predicate.test(next)) {
                             synchronized (resultHolder) {
-                                if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
-                                    resultHolder.setValue(pair.copy());
+                                if (resultHolder.value() == null || nextIndex < resultHolder.value().left()) {
+                                    resultHolder.setValue(Pair.of(nextIndex, next));
                                 }
                             }
 
@@ -931,23 +947,25 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final Pair<Long, Double> pair = new Pair<>();
+                // Primitive locals: no boxed index/element per taken element (inside the lock); a Pair is created only on a match.
+                long nextIndex = 0;
+                double next = 0;
 
                 try {
                     while (eHolder.value() == null) {
                         synchronized (elements) {
                             if (elements.hasNext()) {
-                                pair.setLeft(index.getAndIncrement());
-                                pair.setRight(elements.nextDouble());
+                                nextIndex = index.getAndIncrement();
+                                next = elements.nextDouble();
                             } else {
                                 break;
                             }
                         }
 
-                        if (predicate.test(pair.right())) {
+                        if (predicate.test(next)) {
                             synchronized (resultHolder) {
-                                if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
-                                    resultHolder.setValue(pair.copy());
+                                if (resultHolder.value() == null || nextIndex > resultHolder.value().left()) {
+                                    resultHolder.setValue(Pair.of(nextIndex, next));
                                 }
                             }
                         }
@@ -981,8 +999,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, this::boxed, b::boxed,
+                (boxedA, boxedB) -> new ParallelIteratorDoubleStream(
+                        Stream.parallelZip(boxedA, boxedB, zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy,
+                        asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1005,8 +1026,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                     cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), zipFunction::applyAsDouble, maxThreadNum, asyncExecutor),
-                false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, c, this::boxed, b::boxed, c::boxed,
+                (boxedA, boxedB, boxedC) -> new ParallelIteratorDoubleStream(
+                        Stream.parallelZip(boxedA, boxedB, boxedC, zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy,
+                        asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1028,9 +1052,11 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                     asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorDoubleStream(
-                Stream.parallelZip(boxed(), b.boxed(), valueForNoneA, valueForNoneB, zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false,
-                maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, this::boxed, b::boxed,
+                (boxedA, boxedB) -> new ParallelIteratorDoubleStream(
+                        Stream.parallelZip(boxedA, boxedB, valueForNoneA, valueForNoneB, zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false,
+                        maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null));
     }
 
     /**
@@ -1053,8 +1079,12 @@ final class ParallelIteratorDoubleStream extends IteratorDoubleStream {
                     splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
         }
 
-        return new ParallelIteratorDoubleStream(Stream.parallelZip(boxed(), b.boxed(), c.boxed(), valueForNoneA, valueForNoneB, valueForNoneC,
-                zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads, null);
+        // If boxing b (or c) fails, e.g. because it is already closed, close this stream too, as the sequential zip path does.
+        return closingOpenedSources(this, b, c, this::boxed, b::boxed, c::boxed,
+                (boxedA, boxedB,
+                        boxedC) -> new ParallelIteratorDoubleStream(Stream.parallelZip(boxedA, boxedB, boxedC, valueForNoneA, valueForNoneB, valueForNoneC,
+                                zipFunction::applyAsDouble, maxThreadNum, asyncExecutor), false, maxThreadNum, splitStrategy, asyncExecutor,
+                                cancelUncompletedThreads, null));
     }
 
     @Override

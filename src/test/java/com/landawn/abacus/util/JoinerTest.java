@@ -532,4 +532,76 @@ public class JoinerTest extends JoinerTestSupport {
             throw new IllegalStateException(e);
         }
     }
+
+    @Test
+    public void testAppendEntryObjectValueIsTrimmedAndStrippedLikeTheKey() {
+        assertEquals("k=v", Joiner.with(", ").trimBeforeAppend().appendEntry(" k ", (Object) "  v  ").toString());
+        assertEquals("k=v", Joiner.with(", ").stripBeforeAppend().appendEntry("\u2003k", (Object) "v\u2003").toString());
+        assertEquals("k=  v  ", Joiner.with(", ").appendEntry("k", (Object) "  v  ").toString());
+        assertEquals("k=N/A", Joiner.with(", ").useForNull("N/A").trimBeforeAppend().appendEntry("k", (Object) null).toString());
+    }
+
+    // ---- perf review 2026-09-26 G113 begin ----
+
+    // G113-01: merge bulk-copies the other Joiner's content (empty prefix, non-empty prefix, self-merge).
+    @Test
+    public void testMerge_bulkCopyPrefixSuffixAndOtherState() {
+        // empty prefix on the other side
+        final Joiner other1 = Joiner.with(";").append("b").append("c");
+        assertEquals("a, b;c", Joiner.with(", ").append("a").merge(other1).toString());
+        assertEquals("b;c", other1.toString());
+        assertEquals(3, other1.length());
+        assertEquals("b;c;d", other1.append("d").toString());
+
+        // non-empty (multi-char) prefix and suffix on both sides
+        final Joiner other2 = Joiner.with("-", "{{", "}").append("x").append("y");
+        final Joiner receiver2 = Joiner.with(", ", "[", "]").append("a");
+        assertEquals("[a, x-y]", receiver2.merge(other2).toString());
+        assertEquals("{{x-y}", other2.toString());
+        assertEquals(6, other2.length());
+        assertEquals("{{x-y-z}", other2.append("z").toString());
+        assertEquals("[a, x-y, q]", receiver2.append("q").toString());
+
+        // receiver never appended to: its own prefix, then the other's content without its prefix
+        assertEquals("<p|q>", Joiner.with(",", "<", ">").merge(Joiner.with("|", "(", ")").append("p").append("q")).toString());
+
+        // other never appended to contributes nothing; other holding one empty element contributes a separator
+        assertEquals("[a]", Joiner.with(", ", "[", "]").append("a").merge(Joiner.with(", ", "(", ")").setEmptyValue("E")).toString());
+        assertEquals("[a, ]", Joiner.with(", ", "[", "]").append("a").merge(Joiner.with(", ", "(", ")").append("")).toString());
+        assertEquals("E", Joiner.with(", ").setEmptyValue("E").merge(Joiner.with(",")).toString());
+
+        // self-merge appends the content before the merge exactly once
+        final Joiner self = Joiner.with(", ", "[", "]").append("a").append("b");
+        assertEquals("[a, b, a, b]", self.merge(self).toString());
+        final Joiner selfNoPrefix = Joiner.with("").append("a").append("b");
+        assertEquals("abab", selfNoPrefix.merge(selfNoPrefix).toString());
+
+        // non-Latin-1 text on either side, and a Latin-1 receiver merging a UTF-16 other (and vice versa)
+        assertEquals("[a, \u4e2d-\u00e9]",
+                Joiner.with(", ", "[", "]").append("a").merge(Joiner.with("-", "\u6587", "!").append("\u4e2d").append("\u00e9")).toString());
+        assertEquals("\u4e2d,x-y", Joiner.with(",").append("\u4e2d").merge(Joiner.with("-", "\u00e9", "").append("x").append("y")).toString());
+
+        // pooled (reuseBuffer) other: merged live, after its toString() and after close()
+        final Joiner pooled = Joiner.with(",", "(", ")").reuseBuffer().append("m").append("n");
+        assertEquals("[k, m,n]", Joiner.with(", ", "[", "]").append("k").merge(pooled).toString());
+        assertEquals("(m,n)", pooled.toString());
+        assertEquals("[k, m,n]", Joiner.with(", ", "[", "]").append("k").merge(pooled).toString());
+        final Joiner closed = Joiner.with(",", "((", ")").reuseBuffer().append("c1").append("c2");
+        closed.close();
+        assertEquals("[k, c1,c2]", Joiner.with(", ", "[", "]").append("k").merge(closed).toString());
+
+        // large content keeps every character in order
+        final Joiner big = Joiner.with(",", "#", "$");
+        final StringBuilder expected = new StringBuilder("head");
+
+        for (int i = 0; i < 5000; i++) {
+            big.append(i);
+            expected.append(',').append(i);
+        }
+
+        assertEquals(expected.toString(), Joiner.with(",").append("head").merge(big).toString());
+        assertEquals("#" + expected.substring(5) + "$", big.toString());
+    }
+
+    // ---- perf review 2026-09-26 G113 end ----
 }

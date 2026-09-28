@@ -135,9 +135,10 @@ public final class AddrUtil {
      *
      * @param servers the string containing server addresses to parse; must not be {@code null} or empty
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the parsed addresses
-     * @throws IllegalArgumentException if the servers string is {@code null}, empty, or contains invalid addresses
-     *         (missing colon, an unbracketed multi-colon address that is itself a valid IPv6 literal or whose host
-     *         part is not one, invalid port number, empty host or port, or port out of valid range 0-65535).
+     * @throws IllegalArgumentException if the servers string is {@code null} or empty, contains no address after
+     *         splitting and trimming, or contains invalid addresses (missing colon, an unbracketed multi-colon address
+     *         that is itself a valid IPv6 literal or whose host part is not one, invalid port number, empty host or
+     *         port, or port out of valid range 0-65535).
      * @see #getAddressList(Collection)
      * @see #getServerList(String)
      */
@@ -199,10 +200,10 @@ public final class AddrUtil {
      *
      * @param servers a collection of server addresses where each string is in the format {@code "host:port"}; must not be {@code null}
      * @return a non-empty list of {@link InetSocketAddress} instances corresponding to the server addresses
-     * @throws IllegalArgumentException if {@code servers} is {@code null}, any server address is invalid (missing
-     *         colon, an unbracketed multi-colon address that is itself a valid IPv6 literal or whose host part is
-     *         not one, invalid port number, empty host or port, or port out of valid range 0-65535), or if the
-     *         collection results in an empty address list.
+     * @throws IllegalArgumentException if {@code servers} is {@code null} or empty, contains a {@code null}
+     *         element, or any server address is invalid (missing colon, an unbracketed multi-colon address that is
+     *         itself a valid IPv6 literal or whose host part is not one, invalid port number, empty host or port, or
+     *         port out of valid range 0-65535).
      * @see #getAddressList(String)
      * @see #getServerList(String)
      */

@@ -15,7 +15,6 @@
 package com.landawn.abacus.util.stream;
 
 import java.nio.IntBuffer;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -123,32 +122,32 @@ import com.landawn.abacus.util.function.ToIntFunction;
  * <pre>{@code
  * // Basic integer stream operations
  * IntStream.of(1, 2, 3, 4, 5)
- *     .filter(i -> i > 2)   // keeps values > 2
- *     .map(i -> i * 2)      // doubles each value
- *     .sum();               // sum is 24
+ *     .filter(i -> i > 2)  // keeps values > 2
+ *     .map(i -> i * 2)     // doubles each value
+ *     .sum();              // sum is 24
  *
  * // Range-based operations
- * IntStream.range(1, 101)        // creates numbers 1 to 100
- *     .filter(i -> i % 2 == 0)   // keeps even numbers only
- *     .limit(10)                 // keeps first 10 even numbers
- *     .toArray();                // [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+ * IntStream.range(1, 101)       // creates numbers 1 to 100
+ *     .filter(i -> i % 2 == 0)  // keeps even numbers only
+ *     .limit(10)                // keeps first 10 even numbers
+ *     .toArray();               // [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
  *
  * // Statistical operations
  * IntSummaryStatistics stats = IntStream.of(scores)
- *     .filter(score -> score >= 0)   // filters valid scores
- *     .summaryStatistics();          // gets min, max, avg, count
+ *     .filter(score -> score >= 0)  // filters valid scores
+ *     .summaryStatistics();         // gets min, max, avg, count
  *
  * // Parallel processing for large datasets
  * long result = IntStream.range(1, 1_000_000)
- *     .parallel()                   // uses parallel processing
- *     .filter(this::isPrime)        // filters prime numbers
- *     .mapToLong(i -> (long) i * i) // squares in long precision
- *     .sum();                       // sums the squares
+ *     .parallel()                    // uses parallel processing
+ *     .filter(this::isPrime)         // filters prime numbers
+ *     .mapToLong(i -> (long) i * i)  // squares in long precision
+ *     .sum();                        // sums the squares
  *
  * // Integration with other stream types
  * DoubleStream averages = IntStream.of(data)
- *     .mapToDouble(i -> i / 100.0)   // maps to percentages
- *     .filter(d -> d > 0.5);         // keeps values > 50%
+ *     .mapToDouble(i -> i / 100.0)  // maps to percentages
+ *     .filter(d -> d > 0.5);        // keeps values > 50%
  * }</pre>
  *
  * <p><b>Integer-Specific Operations:</b>
@@ -226,6 +225,22 @@ import com.landawn.abacus.util.function.ToIntFunction;
  *           parameter, whether or not the individual method's javadoc repeats it.</td>
  *     </tr>
  *     <tr>
+ *       <td>parallel streams ({@link #parallel()} and its overloads)</td>
+ *       <td><b><i>abacus</i></b>: parallel stages such as {@code map}/{@code filter}/{@code flatMap}/{@code onEach}
+ *           emit results in completion order, so encounter order is <b>not</b> guaranteed after them (for example
+ *           {@code IntStream.of(array).parallel(4).map(x -> x).toArray()} may return the elements in a different order),
+ *           and parallel {@code collect}/{@code reduce} need commutative functions; sort the result or stay sequential
+ *           when order matters &middot; &#9888;&#65039; <b><i>JDK</i></b>: ordered parallel streams preserve encounter
+ *           order for such operations.</td>
+ *     </tr>
+ *     <tr>
+ *       <td>{@code sum()}</td>
+ *       <td><b><i>abacus</i></b>: accumulates in a {@code long} and throws {@link ArithmeticException} if the total
+ *           does not fit an {@code int}: {@code IntStream.of(Integer.MAX_VALUE, 1).sum()} throws &middot; &#9888;&#65039;
+ *           <b><i>JDK</i></b>: {@code IntStream.sum()} wraps around silently and returns {@code -2147483648} for the
+ *           same input. Use {@code asLongStream().sum()} when the total may exceed the {@code int} range.</td>
+ *     </tr>
+ *     <tr>
  *       <td>{@code count()}</td>
  *       <td><b><i>abacus</i></b>: traverses the pipeline, so an upstream {@code peek}/{@code filter} still runs. The one exception is a stream created by {@code from(java.util.stream.*)} with no abacus operation after it: that delegates {@code count()} straight to the wrapped JDK stream, which may skip its own {@code peek} &middot; &#9888;&#65039; <b><i>JDK</i></b> (9+): may return the count without traversal when the element count is already known</td>
  *     </tr>
@@ -252,6 +267,10 @@ import com.landawn.abacus.util.function.ToIntFunction;
  * {@link #toJdkStream()} returns one, while {@link #boxed()}, {@link #asLongStream()} and
  * {@link #asDoubleStream()} bridge to the object and wider primitive streams.
  *
+ * <p><b>Set operations:</b> {@code intersection(Collection)} and {@code difference(Collection)} accept any
+ * {@code Collection<?>} and compare each element as a boxed {@code Integer} using {@code equals}, so a collection of
+ * another box type silently matches nothing: {@code IntStream.of(1, 2).intersection(List.of(1L, 2L))} (a {@code List<Long>}) is empty.
+ *
  * @see StreamBase
  * @see LongStream
  * @see DoubleStream
@@ -269,7 +288,9 @@ import com.landawn.abacus.util.function.ToIntFunction;
 @LazyEvaluation
 public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate, IntConsumer, OptionalInt, IndexedInt, IntIterator, IntStream> {
 
-    static final Random RAND = new SecureRandom();
+    // Unboxes the result of an N-ary zip function; a null result is a bug in the function, not a 0 value,
+    // so it is rejected (house rule: a function returning null -> NullPointerException).
+    private static final ToIntFunction<Integer> UNBOX_ZIP_RESULT = r -> N.requireNonNull(r, "zipFunction returned null");
 
     IntStream(final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
         super(sorted, null, closeHandlers);
@@ -895,7 +916,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped JDK stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped JDK stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a JDK IntStream
@@ -969,7 +990,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a CharStream
@@ -998,7 +1019,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a ByteStream
@@ -1027,7 +1048,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a ShortStream
@@ -1056,7 +1077,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a LongStream
@@ -1085,7 +1106,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a FloatStream
@@ -1114,7 +1135,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a DoubleStream
@@ -1129,7 +1150,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
      * with the contents of a mapped stream produced by applying the provided mapping function to each element.
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * <p>This operation is stateless and can be parallelized if the stream supports parallel processing.
@@ -1269,6 +1290,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p>Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License 2.0 and may be modified.
      *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result; a {@code null}
+     * return fails with a {@link NullPointerException} when the element is reached.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to an OptionalInt
@@ -1296,6 +1320,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p>This is an intermediate operation.
      *
      * <p>Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License 2.0 and may be modified.
+     *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result; a {@code null}
+     * return fails with a {@link NullPointerException} when the element is reached.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -1863,6 +1890,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, Supplier)
@@ -1871,7 +1899,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.IntFunction<? extends K, E> keyMapper,
             Throwables.IntFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2;
 
     /**
      * Returns a Map containing the results of applying the given functions to the elements of this stream.
@@ -1961,6 +1989,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return a Map whose keys and values are the result of applying the mapper functions to the input elements
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1969,7 +1998,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.IntFunction<? extends K, E> keyMapper,
             Throwables.IntFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2;
 
     /**
      * Groups the elements of this stream according to a classification function and performs a reduction
@@ -1998,13 +2027,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
-     * @throws E if the classifier throws an exception
+     * @throws NullPointerException if {@code keyMapper} returns a {@code null} key
+     * @throws E if the keyMapper throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.IntFunction<? extends K, E> keyMapper,
-            final Collector<? super Integer, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
+            final Collector<? super Integer, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, NullPointerException, E;
 
     /**
      * Groups the elements of this stream according to a classification function and performs a reduction
@@ -2046,14 +2076,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
-     * @throws E if the classifier throws an exception
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}, or if {@code keyMapper} returns a {@code null} key
+     * @throws E if the keyMapper throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.IntFunction<? extends K, E> keyMapper,
             final Collector<? super Integer, ?, D> downstream, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided identity value and an
@@ -2169,6 +2200,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
@@ -2176,7 +2209,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, ObjIntConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using explicit supplier
@@ -2212,9 +2245,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
-     * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of:
-     *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
-     *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
+     * @throws IllegalArgumentException if this stream is parallel and the container type cannot be combined by default
+     *         (the result type {@code R} is not one of
+     *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}; message
+     *         "... cannot be combined by default ..."), and two per-thread containers actually have to be combined.
+     *         The check is made by the default combiner, so it fails only <i>after</i> the workers have accumulated their
+     *         elements, and whether containers have to be combined depends on the source and the number of workers:
+     *         a very small parallel stream can succeed while a larger one fails.
+     *         Sequential streams never combine and perform no such check. For any other result type, call
+     *         {@link #collect(Supplier, ObjIntConsumer, BiConsumer)} with an explicit combiner.
      * @see #collect(Supplier, ObjIntConsumer, BiConsumer)
      * @see Stream#collect(Supplier, BiConsumer)
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
@@ -2222,7 +2263,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, ObjIntConsumer<? super R> accumulator)
-            throws IllegalStateException, IllegalArgumentException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException;
 
     /**
      * Performs an action for each element of this stream.
@@ -2446,8 +2487,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalInt first = IntStream.of(1, 2, 3, 4, 5).findFirst();   // returns OptionalInt.of(1)
-     * OptionalInt none = IntStream.empty().findFirst();   // returns OptionalInt.empty()
+     * OptionalInt first = IntStream.of(1, 2, 3, 4, 5).findFirst();  // returns OptionalInt.of(1)
+     * OptionalInt none = IntStream.empty().findFirst();             // returns OptionalInt.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2480,8 +2521,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalInt any = IntStream.of(1, 2, 3, 4, 5).findAny();   // returns OptionalInt.of(1)
-     * OptionalInt none = IntStream.empty().findAny();   // returns OptionalInt.empty()
+     * OptionalInt any = IntStream.of(1, 2, 3, 4, 5).findAny();  // returns OptionalInt.of(1)
+     * OptionalInt none = IntStream.empty().findAny();           // returns OptionalInt.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2514,8 +2555,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalInt firstEven = IntStream.of(1, 3, 4, 6, 8).findFirst(x -> x % 2 == 0);   // returns OptionalInt.of(4)
-     * OptionalInt none = IntStream.of(1, 3, 5).findFirst(x -> x % 2 == 0);   // returns OptionalInt.empty()
+     * OptionalInt firstEven = IntStream.of(1, 3, 4, 6, 8).findFirst(x -> x % 2 == 0);  // returns OptionalInt.of(4)
+     * OptionalInt none = IntStream.of(1, 3, 5).findFirst(x -> x % 2 == 0);             // returns OptionalInt.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2548,8 +2589,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalInt anyEven = IntStream.of(1, 3, 4, 6, 8).findAny(x -> x % 2 == 0);   // returns a matching element, e.g. OptionalInt.of(4)
-     * OptionalInt none = IntStream.of(1, 3, 5).findAny(x -> x % 2 == 0);   // returns OptionalInt.empty()
+     * OptionalInt anyEven = IntStream.of(1, 3, 4, 6, 8).findAny(x -> x % 2 == 0);  // returns a matching element, e.g. OptionalInt.of(4)
+     * OptionalInt none = IntStream.of(1, 3, 5).findAny(x -> x % 2 == 0);           // returns OptionalInt.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2581,8 +2622,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalInt lastEven = IntStream.of(1, 3, 4, 6, 8).findLast(x -> x % 2 == 0);   // returns OptionalInt.of(8)
-     * OptionalInt none = IntStream.of(1, 3, 5).findLast(x -> x % 2 == 0);   // returns OptionalInt.empty()
+     * OptionalInt lastEven = IntStream.of(1, 3, 4, 6, 8).findLast(x -> x % 2 == 0);  // returns OptionalInt.of(8)
+     * OptionalInt none = IntStream.of(1, 3, 5).findLast(x -> x % 2 == 0);            // returns OptionalInt.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2690,7 +2731,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p>This is a terminal operation.
      *
      * <p><b>Note on overflow:</b> The sum is accumulated in a {@code long}, and an {@code ArithmeticException}
-     * is thrown if the result overflows the {@code int} range. For large datasets or when overflow is a concern,
+     * is thrown if the exact total is outside the {@code int} range. The check stays exact for streams of more than
+     * 2<sup>32</sup> elements (such as {@code repeat}, {@code generate} or iterator sources), where the {@code long}
+     * accumulator itself can wrap: the wraps are tracked, so the result is never silently wrapped, and a total that
+     * fits an {@code int} is returned even when an intermediate total left the {@code long} range. For large datasets or when overflow is a concern,
      * consider using {@link #mapToLong(IntToLongFunction)} followed by {@link LongStream#sum()}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -2720,6 +2764,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * or an empty optional if this stream is empty.
      *
      * <p>This is a terminal operation.
+     *
+     * <p>The mean is computed from the exact sum, so it does not overflow even for streams of more than
+     * 2<sup>32</sup> elements (unlike {@code java.util.stream.IntStream.average()}, whose {@code long} sum wraps).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2752,12 +2799,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntSummaryStatistics stats = IntStream.of(1, 2, 3, 4, 5).summaryStatistics();
-     * System.out.println("Count: " + stats.getCount());       // prints Count: 5
-     * System.out.println("Sum: " + stats.getSum());           // prints Sum: 15
-     * System.out.println("Min: " + stats.getMin());           // prints Min: 1
-     * System.out.println("Max: " + stats.getMax());           // prints Max: 5
-     * System.out.println("Average: " + stats.getAverage());   // prints Average: 3.0
+     * System.out.println("Count: " + stats.getCount());      // prints Count: 5
+     * System.out.println("Sum: " + stats.getSum());          // prints Sum: 15
+     * System.out.println("Min: " + stats.getMin());          // prints Min: 1
+     * System.out.println("Max: " + stats.getMax());          // prints Max: 5
+     * System.out.println("Average: " + stats.getAverage());  // prints Average: 3.0
      * }</pre>
+     *
+     * <p><b>Note on overflow:</b> {@link IntSummaryStatistics} keeps its sum in a {@code long} and never checks it, so
+     * {@code getSum()} and {@code getAverage()} silently wrap when the true sum leaves the {@code long} range. That can
+     * happen only for streams of more than 2<sup>32</sup> elements (for example {@code repeat}, {@code generate} or iterator
+     * sources): {@code IntStream.repeat(Integer.MAX_VALUE, (1L << 32) + 4).summaryStatistics()} reports a negative sum and
+     * an average of {@code -2.147483645E9}. Unlike this method, {@link #sum()} throws {@code ArithmeticException} instead
+     * of wrapping, and {@link #average()} returns the exact mean ({@code 2.147483647E9} for the same data).
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
@@ -2783,16 +2837,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *         .summaryStatisticsAndPercentiles();
      *
      * IntSummaryStatistics stats = result.left();
-     * System.out.println("Count: " + stats.getCount());       // 10
-     * System.out.println("Sum: " + stats.getSum());           // 55
-     * System.out.println("Min: " + stats.getMin());           // 1
-     * System.out.println("Max: " + stats.getMax());           // 10
-     * System.out.println("Average: " + stats.getAverage());   // 5.5
+     * System.out.println("Count: " + stats.getCount());      // 10
+     * System.out.println("Sum: " + stats.getSum());          // 55
+     * System.out.println("Min: " + stats.getMin());          // 1
+     * System.out.println("Max: " + stats.getMax());          // 10
+     * System.out.println("Average: " + stats.getAverage());  // 5.5
      *
-     * // Access percentiles (25th, 50th, 75th)
+     * // Access individual percentiles (the map covers a fixed set of Percentage keys, 0.0001% through 99.9999%)
      * result.right().ifPresent(percentiles -> {
-     *     percentiles.forEach((pct, value) ->
-     *         System.out.println(pct + ": " + value));
+     *     System.out.println("25th: " + percentiles.get(Percentage._25));  // 3
+     *     System.out.println("50th: " + percentiles.get(Percentage._50));  // 6
+     *     System.out.println("75th: " + percentiles.get(Percentage._75));  // 8
      * });
      *
      * // Empty stream returns empty percentiles
@@ -2843,7 +2898,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned,
      *                     otherwise the second parameter is selected.
      * @return the merged stream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
@@ -2872,7 +2927,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param b the IntStream to be combined with the current IntStream. Must be {@code non-null}. Will be closed along with this stream.
      * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(IntStream, int, int, IntBinaryOperator)
      */
@@ -2901,7 +2956,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param c the third IntStream to be combined with the current IntStream. Will be closed along with this IntStream.
      * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStreams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(IntStream, IntStream, int, int, int, IntTernaryOperator)
      */
@@ -2930,7 +2985,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueForNoneB the default value to use for the given IntStream when it runs out of elements
      * @param zipFunction an IntBinaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
@@ -2963,7 +3018,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param valueForNoneC the default value to use for the third IntStream when it runs out of elements
      * @param zipFunction an IntTernaryOperator that determines the combination of elements in the combined IntStream.
      * @return a new IntStream that is the result of combining the current IntStream with the given IntStreams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
@@ -2989,8 +3044,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * // Avoid overflow in calculations
      * long sum = IntStream.of(1_000_000, 1_000_000)
      *     .asLongStream()
-     *     .map(l -> l * l)      // maps each value to its square as long
-     *     .sum();               // returns 2_000_000_000_000L
+     *     .map(l -> l * l)  // maps each value to its square as long
+     *     .sum();           // returns 2_000_000_000_000L
      *
      * // Combine with long stream
      * LongStream combined = IntStream.range(1, 5)
@@ -3078,8 +3133,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * // Perform mathematical operations with high precision
      * DoubleStream results = IntStream.range(1, 11)
      *     .asDoubleStream()
-     *     .map(Math::sqrt)      // maps each value to its square root
-     *     .map(d -> d * 2);     // maps each result to double
+     *     .map(Math::sqrt)   // maps each value to its square root
+     *     .map(d -> d * 2);  // maps each result to double
      *
      * // Useful for statistical calculations
      * double stdDev = IntStream.of(scores)
@@ -3157,6 +3212,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <p>If this stream has close handlers, closing the returned JDK stream closes this stream and
      * invokes those handlers exactly once.</p>
      *
+     * <p>JDK terminal operations never close a stream, so the abacus "closed after a terminal operation" guarantee
+     * does not carry over: when this stream holds resources (files, readers, close handlers), close the returned
+     * JDK stream explicitly, e.g. with try-with-resources.</p>
+     *
      * <p>The returned JDK stream preserves this stream's parallel or sequential execution mode.</p>
      *
      * @return a java.util.stream.IntStream containing the elements of this stream
@@ -3172,7 +3231,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * The transformation is applied immediately (not deferred).
      *
      * <p>The function receives a JDK stream with this stream's current execution mode. The result adopts
-     * the execution mode of the JDK stream returned by the function. Closing the result also closes this stream.
+     * the execution mode of the JDK stream returned by the function; when both this stream and that JDK stream are
+     * parallel, the result also keeps this stream's parallel settings (maximum thread count, split strategy and
+     * executor). Closing the result also closes this stream.
+     * If the transfer function throws, this stream is closed before the exception propagates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3212,8 +3274,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * This method allows applying standard Java Stream API operations and converting back to IntStream.
      *
      * <p>The function receives a JDK stream with this stream's current execution mode. Without deferral,
-     * the result adopts the returned JDK pipeline's mode; with deferral, the outer stream starts sequential.
-     * Closing the result also closes this stream.
+     * the result adopts the returned JDK pipeline's mode, and when both this stream and that pipeline are parallel
+     * it also keeps this stream's parallel settings (maximum thread count, split strategy and executor); with
+     * deferral, the outer stream starts sequential.
+     * Closing the result also closes this stream. If the transfer function throws while applied immediately
+     * ({@code deferred == false}), this stream is closed before the exception propagates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3252,7 +3317,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             final Supplier<IntStream> delayInitializer = () -> IntStream.from(transfer.apply(toJdkStream()));
             return IntStream.defer(delayInitializer).onClose(this::close);
         } else {
-            return IntStream.from(transfer.apply(toJdkStream())).onClose(this::close);
+            // The transfer runs eagerly here, so a failure must close this stream (and its source) before propagating,
+            // like transform/sps/psp; linkCloseToThisAfter does that and then links close on success.
+            return linkCloseToThisAfter(() -> {
+                final IntStream result = IntStream.from(transfer.apply(toJdkStream()));
+
+                // from(jdk) switches to parallel() with the DEFAULT settings when the JDK stream is parallel. Carry this
+                // stream's maxThreadNum/splitStrategy/executor/cancel flag over instead, as every other conversion does,
+                // so a bounded or custom-executor pipeline is not silently moved to the shared default pool.
+                return isParallel() && result.isParallel() ? result.parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads())
+                        : result;
+            });
         }
     }
 
@@ -3615,11 +3690,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *     .sum();   // returns 20
      * }</pre>
      *
-     * @param op the OptionalInt containing the value
+     * @param optional the OptionalInt containing the value
      * @return an IntStream containing the value if present, otherwise empty stream
      */
-    public static IntStream of(final OptionalInt op) {
-        return op == null || op.isEmpty() ? IntStream.empty() : IntStream.of(op.get());
+    public static IntStream of(final OptionalInt optional) {
+        return optional == null || optional.isEmpty() ? IntStream.empty() : IntStream.of(optional.get());
     }
 
     /**
@@ -3637,11 +3712,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * IntStream.of(empty).count();   // returns 0
      * }</pre>
      *
-     * @param op the java.util.OptionalInt containing the value
+     * @param operator the java.util.OptionalInt containing the value
      * @return an IntStream containing the value if present, otherwise empty stream
      */
-    public static IntStream of(final java.util.OptionalInt op) {
-        return op == null || op.isEmpty() ? IntStream.empty() : IntStream.of(op.getAsInt());
+    public static IntStream of(final java.util.OptionalInt operator) {
+        return operator == null || operator.isEmpty() ? IntStream.empty() : IntStream.of(operator.getAsInt());
     }
 
     /**
@@ -3650,22 +3725,26 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * {@link IntBuffer#limit() limit} (exclusive). Returns an empty stream if {@code buf}
      * is {@code null}.
      *
-     * <p>The buffer's position is <b>not</b> advanced by stream consumption — the stream
-     * reads via absolute indexed {@code get(int)} access, so the buffer remains usable
-     * afterwards.
+     * <p>The window {@code [position, limit)} is fixed when this method is called. The elements are read from the
+     * buffer when the stream is traversed (directly from its backing array when {@link IntBuffer#hasArray()} is
+     * {@code true}, otherwise by absolute {@code get(int)} on a {@link IntBuffer#duplicate() duplicate} taken when this
+     * method is called), so the stream is a live view of that window: a write to the buffer is seen by elements not
+     * yet read. This method never changes the buffer's position or limit, and changing them afterwards (for example
+     * with {@code limit(n)}, {@code flip()} or {@code clear()}) does not affect the stream, so the buffer remains
+     * usable right away.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // From IntBuffer
      * IntBuffer buffer = IntBuffer.allocate(5);
      * buffer.put(new int[]{1, 2, 3, 4, 5});
-     * buffer.flip();                // position is reset to 0
-     * IntStream.of(buffer).sum();   // returns 15
+     * buffer.flip();               // position is reset to 0
+     * IntStream.of(buffer).sum();  // returns 15
      *
      * // With positioned buffer
      * IntBuffer positioned = IntBuffer.wrap(new int[]{10, 20, 30, 40, 50});
-     * positioned.position(2);               // starts from index 2
-     * IntStream.of(positioned).toArray();   // returns [30, 40, 50]
+     * positioned.position(2);              // starts from index 2
+     * IntStream.of(positioned).toArray();  // returns [30, 40, 50]
      * }</pre>
      *
      * @param buf the IntBuffer to read from (may be {@code null})
@@ -3677,14 +3756,36 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             return empty();
         }
 
+        if (buf.hasArray()) {
+            // Same live view of the same backing array, but array-backed: O(1) count/skip and the array fast paths.
+            final int offset = buf.arrayOffset();
+
+            return of(buf.array(), offset + buf.position(), offset + buf.limit());
+        }
+
+        // Read through a duplicate taken now: it shares the content (so the stream stays a live view) but has its own
+        // position and limit, so a later limit(n)/flip()/clear() on the caller's buffer cannot shrink the window under
+        // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
+        final IntBuffer view = buf.duplicate();
+
         //noinspection resource
-        return range(buf.position(), buf.limit()).map(buf::get);
+        return range(view.position(), view.limit()).map(view::get);
     }
 
     /**
      * Creates an IntStream of Unicode code points from a CharSequence.
      * Surrogate pairs are properly handled and converted to their code point values.
+     * An unpaired (malformed) surrogate is neither rejected nor replaced: it is returned as its own {@code char} value,
+     * as {@link CharSequence#codePoints()} does (for example, a lone high surrogate U+D83D after {@code 'a'} produces
+     * {@code [97, 55357]}).
      * A {@code null} or empty input produces an empty stream.
+     *
+     * <p>The content is captured when this method is called ({@code str.toString()}, which for a {@code String} is
+     * the string itself), so later changes to a mutable sequence such as a {@code StringBuilder} are not reflected.
+     * For a non-{@code String} sequence that copy costs O(length) time and memory when this method is called, even if
+     * the stream is short-circuited or never traversed. For a very large or computed {@code CharSequence}, use
+     * {@code cs.codePoints()} with {@link #from(java.util.stream.IntStream)} instead, which reads lazily (the sequence
+     * must then not change while that stream is in use).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3710,7 +3811,30 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             return empty();
         }
 
-        return from(str.codePoints());
+        // Snapshot now, so emptiness and content are bound at the same moment (CharSequence.codePoints() on a
+        // StringBuilder binds late), and walk the immutable copy directly instead of bridging a JDK pipeline.
+        final String s = str.toString();
+        final int len = s.length();
+
+        return new IteratorIntStream(new IntIteratorEx() {
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < len;
+            }
+
+            @Override
+            public int nextInt() throws NoSuchElementException {
+                if (cursor >= len) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final int cp = s.codePointAt(cursor);
+                cursor += Character.charCount(cp);
+                return cp;
+            }
+        });
     }
 
     private static final Function<int[], IntStream> flatMapper = IntStream::of;
@@ -3936,9 +4060,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         }
 
         long n = 0;
+        int maxLen = 0;
 
         for (final int[] e : a) {
-            n += N.len(e);
+            final int len = N.len(e);
+            n += len;
+
+            if (len > maxLen) {
+                maxLen = len;
+            }
         }
 
         if (n == 0) {
@@ -3947,6 +4077,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
         final int rows = N.len(a);
         final long count = n;
+
+        // The walk below checks about rows * maxLen positions, rescanning null or too short rows in every later column.
+        // It is the fastest per element, so it is kept unless most of those positions are empty (jagged input such as
+        // one long row among many short ones), where it would be up to 'rows' times slower than the elements it returns.
+        if ((long) rows * maxLen > 4 * n) {
+            return of(flattenJaggedVertically(a, count));
+        }
 
         final IntIterator iter = new IntIteratorEx() {
             private int rowNum = 0;
@@ -3983,6 +4120,67 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         };
 
         return of(iter);
+    }
+
+    /**
+     * Column-major iterator over a jagged {@code int[][]} (rows of different lengths, or {@code null} rows) holding
+     * {@code count > 0} elements in total. It keeps the indices (in row order) of the rows that have an element in the
+     * current column. A row that is too short for one column is too short for every later one, so it is dropped once
+     * instead of being rescanned for every column: O(count + rows) in total instead of O(rows * longest row).
+     */
+    private static IntIterator flattenJaggedVertically(final int[][] a, final long count) {
+        return new IntIteratorEx() {
+            private int[] activeRows = null;
+            private int activeCount = 0;
+            private int activeIndex = 0;
+            private int colNum = 0;
+            private long cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cnt < count;
+            }
+
+            @Override
+            public int nextInt() throws NoSuchElementException {
+                if (cnt++ >= count) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                if (activeIndex == activeCount) {
+                    nextColumn();
+                }
+
+                return a[activeRows[activeIndex++]][colNum];
+            }
+
+            // Moves to the next column (the first one on the first call), keeping only the rows that have an element in it.
+            private void nextColumn() {
+                if (activeRows == null) {
+                    activeRows = new int[a.length];
+
+                    for (int rowNum = 0; rowNum < a.length; rowNum++) {
+                        if (a[rowNum] != null && a[rowNum].length > 0) {
+                            activeRows[activeCount++] = rowNum;
+                        }
+                    }
+                } else {
+                    colNum++;
+
+                    int kept = 0;
+
+                    for (int i = 0; i < activeCount; i++) {
+                        if (colNum < a[activeRows[i]].length) {
+                            activeRows[kept++] = activeRows[i];
+                        }
+                    }
+
+                    activeCount = kept;
+                }
+
+                activeIndex = 0;
+            }
+        };
     }
 
     /**
@@ -4128,6 +4326,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * Creates an IntStream of sequential integers from startInclusive (inclusive) to endExclusive (exclusive).
      * If startInclusive &gt;= endExclusive, an empty stream is returned.
      *
+     * <p>Like the JDK's {@code IntStream.range}, the returned stream is known to be sorted, so {@code sorted()} returns it as is
+     * and {@code distinct()}, {@code min()} and {@code top(n)} use their streaming sorted paths instead of buffering or hashing.
+     * The same holds for {@link #rangeClosed(int, int)}, the ascending ({@code by > 0}) {@code range}/{@code rangeClosed}
+     * overloads, {@link #ofIndices(int)} and {@link #ofIndices(int, int)} with a positive {@code step} (the {@code ofIndices}
+     * overloads that take an {@code indexFunction} are not flagged, since the index function need not be monotone).
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate numbers from 0 to 9
@@ -4137,8 +4341,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * IntStream.range(1, 6).forEach(i -> System.out.println("Item " + i));
      *
      * // Empty stream when start >= end
-     * IntStream.range(5, 5).count();    // returns 0
-     * IntStream.range(10, 5).count();   // returns 0
+     * IntStream.range(5, 5).count();   // returns 0
+     * IntStream.range(10, 5).count();  // returns 0
      * }</pre>
      *
      * @param startInclusive the starting value (inclusive)
@@ -4150,6 +4354,8 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             return empty();
         }
 
+        // Flagged sorted (strictly ascending, distinct): sorted()/distinct()/min()/top() take their sorted fast paths,
+        // as JDK IntStream.range reports SORTED.
         return new IteratorIntStream(new IntIteratorEx() {
             private int next = startInclusive;
             private long cnt = (long) endExclusive - startInclusive;
@@ -4215,7 +4421,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return result;
             }
-        });
+        }, true, null);
     }
 
     /**
@@ -4238,7 +4444,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param endExclusive the ending value (exclusive)
      * @param by the step value
      * @return an IntStream of integers with the specified step
-     * @throws IllegalArgumentException if by is zero.
+     * @throws IllegalArgumentException if {@code by} is zero.
      */
     public static IntStream range(final int startInclusive, final int endExclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
@@ -4253,6 +4459,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             return empty();
         }
 
+        // An ascending range (by > 0) is flagged sorted so the sorted fast paths apply; a descending one is not.
         return new IteratorIntStream(new IntIteratorEx() {
             private int next = startInclusive;
             private long cnt = ((long) endExclusive - startInclusive) / by + (((long) endExclusive - startInclusive) % by == 0 ? 0 : 1);
@@ -4320,7 +4527,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return result;
             }
-        });
+        }, by > 0, null);
     }
 
     /**
@@ -4347,9 +4554,10 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         if (startInclusive > endInclusive) {
             return empty();
         } else if (startInclusive == endInclusive) {
-            return of(startInclusive);
+            return new ArrayIntStream(new int[] { startInclusive }, true, null); // one element: trivially sorted
         }
 
+        // Flagged sorted (strictly ascending, distinct); see range(int, int).
         return new IteratorIntStream(new IntIteratorEx() {
             private int next = startInclusive;
             private long cnt = (long) endInclusive - startInclusive + 1;
@@ -4415,7 +4623,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return result;
             }
-        });
+        }, true, null);
     }
 
     /**
@@ -4438,7 +4646,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param endInclusive the ending value (inclusive)
      * @param by the step value
      * @return an IntStream of integers with the specified step
-     * @throws IllegalArgumentException if by is zero.
+     * @throws IllegalArgumentException if {@code by} is zero.
      */
     public static IntStream rangeClosed(final int startInclusive, final int endInclusive, final int by) throws IllegalArgumentException {
         if (by == 0) {
@@ -4446,13 +4654,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
         }
 
         if (endInclusive == startInclusive) {
-            return of(startInclusive);
+            return new ArrayIntStream(new int[] { startInclusive }, true, null); // one element: trivially sorted
         }
 
         if ((endInclusive > startInclusive && by < 0) || (endInclusive < startInclusive && by > 0)) {
             return empty();
         }
 
+        // An ascending range (by > 0) is flagged sorted so the sorted fast paths apply; a descending one is not.
         return new IteratorIntStream(new IntIteratorEx() {
             private int next = startInclusive;
             private long cnt = ((long) endInclusive - startInclusive) / by + 1;
@@ -4520,7 +4729,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return result;
             }
-        });
+        }, by > 0, null);
     }
 
     /**
@@ -4541,7 +4750,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param element the int value to repeat
      * @param n the number of times to repeat the element
      * @return an IntStream containing n copies of the element
-     * @throws IllegalArgumentException if n is negative.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static IntStream repeat(final int element, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -4613,7 +4822,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
     /**
      * Creates an infinite IntStream of random integers.
-     * Values are generated using a {@link SecureRandom} instance.
+     *
+     * <p><b>Source of randomness:</b> each value is drawn from
+     * {@link java.util.concurrent.ThreadLocalRandom#current()} of the thread that pulls it, so the stream is fast
+     * and does not contend across threads. The values are <b>not</b> cryptographically secure and cannot be
+     * seeded; callers that need unpredictable values should use {@link java.security.SecureRandom} directly, and
+     * callers that need a reproducible sequence can pass their own generator to {@link #generate(IntSupplier)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4631,11 +4845,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @return an infinite IntStream of random integers
      */
     public static IntStream random() {
-        return generate(RAND::nextInt);
+        return generate(() -> ThreadLocalRandom.current().nextInt());
     }
 
     /**
      * Creates an infinite IntStream of uniformly distributed random integers within the specified range.
+     *
+     * <p><b>Source of randomness:</b> each value is drawn from
+     * {@link java.util.concurrent.ThreadLocalRandom#current()} of the thread that pulls it, so the stream is fast
+     * and does not contend across threads. The values are <b>not</b> cryptographically secure and cannot be
+     * seeded; callers that need unpredictable values should use {@link java.security.SecureRandom} directly, and
+     * callers that need a reproducible sequence can pass their own generator to {@link #generate(IntSupplier)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4652,14 +4872,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param startInclusive the lower bound (inclusive)
      * @param endExclusive the upper bound (exclusive)
      * @return an infinite IntStream of random integers in the range [startInclusive, endExclusive)
-     * @throws IllegalArgumentException if startInclusive &gt;= endExclusive.
+     * @throws IllegalArgumentException if {@code startInclusive >= endExclusive}.
      */
     public static IntStream random(final int startInclusive, final int endExclusive) throws IllegalArgumentException {
         if (startInclusive >= endExclusive) {
             throw new IllegalArgumentException("'startInclusive' (" + startInclusive + ") must be less than 'endExclusive' (" + endExclusive + ")");
         }
 
-        return generate(() -> RAND.nextInt(startInclusive, endExclusive));
+        return generate(() -> ThreadLocalRandom.current().nextInt(startInclusive, endExclusive));
     }
 
     /**
@@ -4677,9 +4897,9 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * IntStream.ofIndices(list.size()).toArray();   // returns [0, 1, 2]
      * }</pre>
      *
-     * @param lenOrSize the length or size of a collection, map, array, CharSequence, etc.
+     * @param lengthOrSize the length or size of a collection, map, array, CharSequence, etc.
      * @return an IntStream of indices from 0 to lenOrSize (exclusive)
-     * @throws IllegalArgumentException if lenOrSize is negative.
+     * @throws IllegalArgumentException if {@code lengthOrSize} is negative.
      * @see N#len(CharSequence)
      * @see N#len(int[])
      * @see N#len(Object[])
@@ -4688,15 +4908,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @see N#forEach(int, int, Throwables.IntConsumer)
      */
     @Beta
-    public static IntStream ofIndices(final int lenOrSize) throws IllegalArgumentException {
-        N.checkArgNotNegative(lenOrSize, cs.lenOrSize);
+    public static IntStream ofIndices(final int lengthOrSize) throws IllegalArgumentException {
+        N.checkArgNotNegative(lengthOrSize, cs.lengthOrSize);
 
-        return range(0, lenOrSize);
+        return range(0, lengthOrSize);
     }
 
     /**
-     * Creates an IntStream of indices from 0 to {@code lenOrSize} (exclusive) with the specified step when {@code step} is positive,
-     * or from {@code lenOrSize} - 1 to 0 (inclusive) with the specified {@code step} when step is negative.
+     * Creates an IntStream of indices from 0 to {@code lengthOrSize} (exclusive) with the specified step when {@code step} is positive,
+     * or from {@code lengthOrSize} - 1 to 0 (inclusive) with the specified {@code step} when step is negative.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4712,11 +4932,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *     .forEach(i -> System.out.println(array[i]));   // prints 1, 4, 7
      * }</pre>
      *
-     * @param lenOrSize the length or size of a collection, map, array, CharSequence, etc.
+     * @param lengthOrSize the length or size of a collection, map, array, CharSequence, etc.
      * @param step the increment value for each iteration in the range. It can be positive or negative but not zero.
      * @return an IntStream of indices from 0 to lenOrSize (exclusive) with the specified step when it is positive,
      * or from lenOrSize - 1 to 0 (inclusive) with the specified step when it is negative.
-     * @throws IllegalArgumentException if lenOrSize is negative, or if step is zero.
+     * @throws IllegalArgumentException if {@code lengthOrSize} is negative, or if {@code step} is zero.
      * @see N#len(CharSequence)
      * @see N#len(int[])
      * @see N#len(Object[])
@@ -4725,16 +4945,16 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @see N#forEach(int, int, int, Throwables.IntConsumer)
      */
     @Beta
-    public static IntStream ofIndices(final int lenOrSize, final int step) throws IllegalArgumentException {
-        N.checkArgNotNegative(lenOrSize, cs.lenOrSize);
+    public static IntStream ofIndices(final int lengthOrSize, final int step) throws IllegalArgumentException {
+        N.checkArgNotNegative(lengthOrSize, cs.lengthOrSize);
         N.checkArgument(step != 0, "The input parameter 'step' cannot be zero");
 
         if (step == 1) {
-            return range(0, lenOrSize);
+            return range(0, lengthOrSize);
         } else if (step < 0) {
-            return range(lenOrSize - 1, -1, step);
+            return range(lengthOrSize - 1, -1, step);
         } else {
-            return range(0, lenOrSize, step);
+            return range(0, lengthOrSize, step);
         }
     }
 
@@ -4758,15 +4978,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param <AC> the type of the source. It should be {@code array}, {@code Collection} or {@code CharSequence}.
      * @param source the source from which indices are generated
-     * @param indexFunc the function to generate indices from the source
+     * @param indexFunction the function to generate indices from the source
      * @return an IntStream of indices
-     * @throws IllegalArgumentException if {@code indexFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code indexFunction} is {@code null}.
      */
     @Beta
-    public static <AC> IntStream ofIndices(final AC source, final ObjIntFunction<? super AC, Integer> indexFunc) throws IllegalArgumentException {
-        N.checkArgNotNull(indexFunc, cs.indexFunc);
+    public static <AC> IntStream ofIndices(final AC source, final ObjIntFunction<? super AC, Integer> indexFunction) throws IllegalArgumentException {
+        N.checkArgNotNull(indexFunction, cs.indexFunction);
 
-        return ofIndices(source, 0, indexFunc);
+        return ofIndices(source, 0, indexFunction);
     }
 
     /**
@@ -4790,17 +5010,17 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param <AC> the type of the source. It should be {@code array}, {@code Collection} or {@code CharSequence}.
      * @param source the source from which indices are generated
      * @param fromIndex the starting index from which to generate indices
-     * @param indexFunc the function to generate indices from the source
+     * @param indexFunction the function to generate indices from the source
      * @return an IntStream of indices
-     * @throws IllegalArgumentException if fromIndex is negative, or if {@code indexFunc} is {@code null}.
+     * @throws IllegalArgumentException if {@code fromIndex} is negative, or if {@code indexFunction} is {@code null}.
      */
     @Beta
-    public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final ObjIntFunction<? super AC, Integer> indexFunc)
+    public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final ObjIntFunction<? super AC, Integer> indexFunction)
             throws IllegalArgumentException {
         N.checkArgNotNegative(fromIndex, cs.fromIndex);
-        N.checkArgNotNull(indexFunc, cs.indexFunc);
+        N.checkArgNotNull(indexFunction, cs.indexFunction);
 
-        return ofIndices(source, fromIndex, 1, indexFunc);
+        return ofIndices(source, fromIndex, 1, indexFunction);
     }
 
     /**
@@ -4813,32 +5033,43 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * <pre>{@code
      * // Forwards:
      * int[] source = { 1, 2, 3, 1, 5, 1};
-     * IntStream.ofIndices(source, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();              // [0, 3, 5]
-     * IntStream.ofIndices(source, 1, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();           // [3, 5]
+     * IntStream.ofIndices(source, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();     // [0, 3, 5]
+     * IntStream.ofIndices(source, 1, (a, fromIndex) -> N.indexOf(a, 1, fromIndex)).println();  // [3, 5]
      *
      * // Backwards
-     * IntStream.ofIndices(source, 5, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();   // [5, 3, 0]
-     * IntStream.ofIndices(source, 4, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();   // [3, 0]
+     * IntStream.ofIndices(source, 5, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();  // [5, 3, 0]
+     * IntStream.ofIndices(source, 4, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();  // [3, 0]
      *
+     * // Backwards from length - 1 over an empty source: empty, not an exception
+     * int[] empty = {};
+     * IntStream.ofIndices(empty, empty.length - 1, -1, (a, fromIndex) -> N.lastIndexOf(a, 1, fromIndex)).println();   // []
      * }</pre>
+     *
+     * <p>With a negative {@code increment}, a negative {@code fromIndex} returns an empty stream without calling {@code indexFunction};
+     * with a positive {@code increment}, a negative {@code fromIndex} is rejected.
      *
      * @param <AC> the type of the source. It should be {@code array}, {@code Collection} or {@code CharSequence}.
      * @param source the source from which indices are generated
      * @param fromIndex the starting index from which to generate indices
      * @param increment the increment value for generating indices (can be positive or negative but not zero)
-     * @param indexFunc the function to generate indices from the source
+     * @param indexFunction the function to generate indices from the source
      * @return an IntStream of indices
-     * @throws IllegalArgumentException if fromIndex is negative or if increment is zero, or if {@code indexFunc} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if {@code fromIndex} is negative and {@code increment} is not negative, or if {@code increment} is zero,
+     *         or if {@code indexFunction} is {@code null}.
      */
     @Beta
-    public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final int increment, final ObjIntFunction<? super AC, Integer> indexFunc)
+    public static <AC> IntStream ofIndices(final AC source, final int fromIndex, final int increment, final ObjIntFunction<? super AC, Integer> indexFunction)
             throws IllegalArgumentException {
-        N.checkArgNotNegative(fromIndex, cs.fromIndex);
-        N.checkArgument(increment != 0, "'increment' cannot be zero");
-        N.checkArgNotNull(indexFunc, cs.indexFunc);
+        if (increment >= 0) {
+            N.checkArgNotNegative(fromIndex, cs.fromIndex);
+        }
 
-        if (source == null) {
+        N.checkArgument(increment != 0, "'increment' cannot be zero");
+        N.checkArgNotNull(indexFunction, cs.indexFunction);
+
+        // A backward search starting before index 0 - typically fromIndex = length - 1 over an empty source - has
+        // nothing to find, like N.lastIndexOf(a, x, -1) and ofIndices(0, -1); return empty instead of rejecting it.
+        if (source == null || fromIndex < 0) {
             return IntStream.empty();
         }
 
@@ -4847,7 +5078,7 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
                 : (source instanceof Collection ? ((Collection) source).size()
                         : (source instanceof CharSequence ? ((CharSequence) source).length() : Integer.MAX_VALUE));
 
-        return ofIndices(source, fromIndex, increment, sourceLen, indexFunc);
+        return ofIndices(source, fromIndex, increment, sourceLen, indexFunction);
     }
 
     /**
@@ -4858,13 +5089,13 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param fromIndex the starting index from which to generate indices
      * @param increment the increment value for generating indices (must not be zero)
      * @param sourceLen the length of the source
-     * @param indexFunc the function to generate indices from the source
+     * @param indexFunction the function to generate indices from the source
      * @return an IntStream of indices, or empty stream if source is null
-     * @throws IllegalArgumentException if fromIndex is negative or if increment is zero.
+     * @throws IllegalArgumentException if {@code fromIndex} is negative, or if {@code increment} is zero.
      */
     @Beta
     private static <AC> IntStream ofIndices(final AC source, final int fromIndex, final int increment, final int sourceLen,
-            final ObjIntFunction<? super AC, Integer> indexFunc) throws IllegalArgumentException {
+            final ObjIntFunction<? super AC, Integer> indexFunction) throws IllegalArgumentException {
         N.checkArgNotNegative(fromIndex, cs.fromIndex);
         N.checkArgument(increment != 0, "'increment' cannot be zero");
 
@@ -4883,14 +5114,14 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             public boolean hasNext() {
                 if (!hasNextVal) {
                     if (!started) {
-                        final Integer idx = indexFunc.apply(source, fromIndex);
+                        final Integer idx = indexFunction.apply(source, fromIndex);
                         cur = idx == null ? N.INDEX_NOT_FOUND : idx;
                         started = true;
                     } else if (cur >= 0) {
                         if ((increment > 0 && cur >= sourceLen - increment) || (increment < 0 && cur + increment < 0)) {
                             cur = N.INDEX_NOT_FOUND;
                         } else {
-                            final Integer idx = indexFunc.apply(source, cur + increment);
+                            final Integer idx = indexFunction.apply(source, cur + increment);
                             cur = idx == null ? N.INDEX_NOT_FOUND : idx;
                         }
                     }
@@ -5278,6 +5509,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
     /**
      * Concatenates multiple IntStreams into a single IntStream.
      *
+     * <p>The resulting stream will automatically close all input streams when it is closed.
+     * As each input stream is exhausted during iteration, it is immediately closed before moving to the next stream
+     * (the last one is closed when the resulting stream is closed). A failure thrown while closing an exhausted input
+     * therefore ends the traversal: it is thrown by the resulting stream's iteration, and the elements of the remaining
+     * inputs are not delivered.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Concatenate multiple IntStreams
@@ -5356,6 +5593,57 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
 
                 return cur[cursor++];
             }
+
+            /*
+             * count() and toList() (which the inherited toArray() uses) read the remaining array segments directly
+             * instead of pulling every element through hasNext()/nextInt(). The list iterator is consumed in the
+             * same order and no caller-supplied code runs per element, so the results are identical. Short segments,
+             * and any segment that would push the list past the maximum array size, are still added element by element
+             * (bulk copying does not pay off for a few elements; the size limit keeps the same OutOfMemoryError).
+             */
+            @Override
+            public long count() {
+                long result = cur == null ? 0 : cur.length - cursor;
+
+                while (iter.hasNext()) {
+                    cur = iter.next();
+                    result += N.len(cur);
+                }
+
+                cursor = N.len(cur);
+
+                return result;
+            }
+
+            @Override
+            public IntList toList() {
+                final IntList result = new IntList();
+
+                while (true) {
+                    final int len = N.len(cur);
+
+                    if (cursor < len) {
+                        if (len - cursor < 16 || len - cursor > Integer.MAX_VALUE - 8 - result.size()) {
+                            for (int i = cursor; i < len; i++) {
+                                result.add(cur[i]);
+                            }
+                        } else {
+                            result.addAll(cursor == 0 ? cur : N.copyOfRange(cur, cursor, len));
+                        }
+
+                        cursor = len;
+                    }
+
+                    if (!iter.hasNext()) {
+                        break;
+                    }
+
+                    cur = iter.next();
+                    cursor = 0;
+                }
+
+                return result;
+            }
         });
     }
 
@@ -5363,6 +5651,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * Concatenates a collection of IntStreams into a single IntStream.
      * The collection's membership and encounter order are snapshotted when this method is called.
      * Closing the returned stream closes every snapshotted input stream.
+     *
+     * <p>As each input stream is exhausted during iteration, it is immediately closed before moving to the next stream
+     * (the last one is closed when the resulting stream is closed). A failure thrown while closing an exhausted input
+     * therefore ends the traversal: it is thrown by the resulting stream's iteration, and the elements of the remaining
+     * inputs are not delivered.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5682,9 +5975,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see #zip(IntStream, IntStream, int, int, IntBinaryOperator)
      */
-    public static IntStream zip(final IntStream a, final IntStream b, final IntBinaryOperator zipFunction) throws IllegalArgumentException {
+    public static IntStream zip(final IntStream a, final IntStream b, final IntBinaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
@@ -5712,9 +6007,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see #zip(IntStream, IntStream, IntStream, int, int, int, IntTernaryOperator)
      */
-    public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final IntTernaryOperator zipFunction) throws IllegalArgumentException {
+    public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final IntTernaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
@@ -5746,16 +6043,19 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * {@link IntTernaryOperator} and avoid boxing).
      *
      * @param streams the collection of int streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine arrays of values from the streams; a {@code null} result is unboxed as {@code 0}
+     * @param zipFunction the function to combine arrays of values from the streams; it must not return {@code null}
      * @return a stream of combined values. Empty if the collection is empty
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws NullPointerException if {@code zipFunction} returns {@code null} (thrown lazily, when that element is reached).
+     * @throws IllegalStateException if any stream in {@code streams} is already closed
      * @see #zip(Collection, int[], IntNFunction)
      */
-    public static IntStream zip(final Collection<? extends IntStream> streams, final IntNFunction<Integer> zipFunction) throws IllegalArgumentException {
+    public static IntStream zip(final Collection<? extends IntStream> streams, final IntNFunction<Integer> zipFunction)
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         //noinspection resource
-        return Stream.zip(streams, zipFunction).mapToInt(ToIntFunction.UNBOX);
+        return Stream.zip(streams, zipFunction).mapToInt(UNBOX_ZIP_RESULT);
     }
 
     /**
@@ -6000,10 +6300,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param zipFunction the function to combine pairs of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see #zip(IntStream, IntStream, IntBinaryOperator)
      */
     public static IntStream zip(final IntStream a, final IntStream b, final int valueForNoneA, final int valueForNoneB, final IntBinaryOperator zipFunction)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
@@ -6036,10 +6337,11 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param zipFunction the function to combine triples of values from the streams.
      * @return a stream of combined values that will close the input streams when closed
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see #zip(IntStream, IntStream, IntStream, IntTernaryOperator)
      */
     public static IntStream zip(final IntStream a, final IntStream b, final IntStream c, final int valueForNoneA, final int valueForNoneB,
-            final int valueForNoneC, final IntTernaryOperator zipFunction) throws IllegalArgumentException {
+            final int valueForNoneC, final IntTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
@@ -6074,18 +6376,18 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *
      * @param streams the collection of int streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values, must have same size as streams collection
-     * @param zipFunction the function to combine arrays of values from the streams; a {@code null} result is unboxed as {@code 0}
+     * @param zipFunction the function to combine arrays of values from the streams; it must not return {@code null}
      * @return a stream of combined values that will close all input streams when closed
-     * @throws IllegalArgumentException if the size of valuesForNone doesn't match the size of streams collection, or
-     *         if {@code zipFunction} is {@code null}.
+     * @throws IllegalArgumentException if the size of {@code valuesForNone} doesn't match the size of {@code streams},
+     *         or if {@code zipFunction} is {@code null}.
+     * @throws NullPointerException if {@code zipFunction} returns {@code null} (thrown lazily, when that element is reached).
+     * @throws IllegalStateException if any stream in {@code streams} is already closed
      * @see #zip(Collection, IntNFunction)
      */
     public static IntStream zip(final Collection<? extends IntStream> streams, final int[] valuesForNone, final IntNFunction<Integer> zipFunction)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.zipFunction);
-
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         //noinspection resource
-        return Stream.zip(streams, valuesForNone, zipFunction).mapToInt(ToIntFunction.UNBOX);
+        return Stream.zip(streams, valuesForNone, zipFunction).mapToInt(UNBOX_ZIP_RESULT);
     }
 
     /**
@@ -6346,10 +6648,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      *                     the second
      * @return a new IntStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see #merge(IntStream, IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
+    public static IntStream merge(final IntStream a, final IntStream b, final IntBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
@@ -6387,11 +6691,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector a function that determines which element to select next from pairs of elements
      * @return a new IntStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see #merge(IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static IntStream merge(final IntStream a, final IntStream b, final IntStream c, final IntBiFunction<MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(merge(a, b, nextSelector), c, nextSelector);
@@ -6401,11 +6706,15 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * Merges multiple IntStreams into a single IntStream by selecting elements based on the provided selector function.
      * The selector function determines which element to take next from pairs of elements.
      *
-     * <p>All input streams will be automatically closed when the returned stream is closed. This ensures
-     * proper resource management when working with streams that hold resources.</p>
-     *
-     * <p>The streams are merged pairwise: first two streams are merged, then the result is merged with the
-     * third stream, and so on. The selector is applied at each merge step.</p>
+     * <p>The streams are merged lazily as a balanced tree of pairwise merges of <i>adjacent</i> streams, so each
+     * element passes through about {@code log2(k)} selector calls for {@code k} streams (the tree is built, and every
+     * stream is opened, when this method is called). All streams should provide elements in pre-sorted order
+     * according to the same ordering that the nextSelector function expects; for a {@code nextSelector} that returns
+     * {@code TAKE_FIRST} on ties, elements it treats as equal keep their source order, and the result is the same as
+     * merging the streams one after another from left to right.
+     * The returned stream will automatically close all input streams when it is closed. If an input stream is found
+     * to be already closed, the streams that precede it in the collection are closed, the ones after it are left
+     * untouched, and the exception is rethrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6430,11 +6739,12 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
      * @param nextSelector a function that determines which element to select next from pairs of elements
      * @return a new IntStream containing the merged elements, or an empty stream if the collection is empty
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code streams} contains more than one stream and any of them is already closed
      * @see #merge(IntStream, IntStream, IntBiFunction)
      * @see Stream#merge(Collection, BiFunction)
      */
     public static IntStream merge(final Collection<? extends IntStream> streams, final IntBiFunction<MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {
@@ -6447,14 +6757,43 @@ public abstract class IntStream extends StreamBase<Integer, int[], IntPredicate,
             return merge(iter.next(), iter.next(), nextSelector);
         }
 
-        final Iterator<? extends IntStream> iter = streams.iterator();
-        IntStream result = merge(iter.next(), iter.next(), nextSelector);
+        // Merge adjacent pairs level by level - a balanced tree, as Stream.merge(Collection) does (C-104) - instead of
+        // folding left. The left fold merge(merge(merge(s1, s2), s3), ...) is k - 1 merges deep: an element of an early
+        // source passed through up to k - 1 selector calls (O(n * k) in total), and every hasNext()/next()/close()
+        // recursed through all levels (StackOverflowError, with sources left open, at about 2,000 sources). The tree is
+        // ceil(log2(k)) deep. Merging adjacent runs keeps elements that a TAKE_FIRST-on-ties selector treats as equal in
+        // source order, so for such a selector the result is exactly the left fold's.
+        List<IntStream> level = new ArrayList<>(streams);
+        final List<IntStream> created = new ArrayList<>(level.size() - 1);
 
-        while (iter.hasNext()) {
-            result = merge(result, iter.next(), nextSelector);
+        try {
+            while (level.size() > 1) {
+                final int size = level.size();
+                final List<IntStream> nextLevel = new ArrayList<>((size + 1) / 2);
+
+                for (int i = 0; i + 1 < size; i += 2) {
+                    final IntStream merged = merge(level.get(i), level.get(i + 1), nextSelector);
+                    created.add(merged);
+                    nextLevel.add(merged);
+                }
+
+                if (size % 2 == 1) {
+                    nextLevel.add(level.get(size - 1));
+                }
+
+                level = nextLevel;
+            }
+        } catch (final RuntimeException | Error e) {
+            // As in each pairwise merge, close only what has been opened: every merge created so far (which closes
+            // the sources it consumed; closing twice is a no-op). Sources not reached yet are left untouched.
+            for (int i = created.size() - 1; i >= 0; i--) {
+                closeOpenedSource(created.get(i), e);
+            }
+
+            throw e;
         }
 
-        return result;
+        return level.get(0);
     }
 
     /**

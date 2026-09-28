@@ -77,7 +77,10 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
         declaringName = getTypeName(typeClass, parameterTypeName, true);
         elementType = TypeFactory.getType(parameterTypeName);
         parameterTypes = List.of(elementType);
-        isOrdered = LinkedHashMultiset.class.isAssignableFrom(typeClass) || SortedMultiset.class.isAssignableFrom(typeClass);
+        // ImmutableMultiset iterates in first-insertion order, and valueOf builds it in document order: keep that
+        // order when writing it back, as for LinkedHashMultiset.
+        isOrdered = LinkedHashMultiset.class.isAssignableFrom(typeClass) || SortedMultiset.class.isAssignableFrom(typeClass)
+                || ImmutableMultiset.class.isAssignableFrom(typeClass);
 
         // Linked/immutable targets can only keep the order they are given: the intermediate map must be linked too.
         jdc = JsonDeserConfig.create()
@@ -163,7 +166,8 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * Serializes a multiset to its JSON string representation.
      * The multiset is serialized as a JSON object where each element maps to its count
      * (e.g., {@code {"apple":3,"banana":2}}).
-     * For ordered multisets ({@link LinkedHashMultiset} and {@link SortedMultiset} implementations), insertion or sort order is preserved.
+     * For ordered multisets ({@link LinkedHashMultiset}, {@link ImmutableMultiset} and {@link SortedMultiset} implementations), insertion or
+     * sort order is preserved.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
@@ -173,12 +177,13 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      *
      * @param x the multiset to serialize; may be {@code null}
      * @return the JSON string representation, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if an element or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @MayReturnNull
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         if (x == null) {
             return null;
         }
@@ -214,17 +219,19 @@ public class GuavaMultisetType<E, T extends Multiset<E>> extends AbstractType<T>
      * @param str the JSON string to parse; may be {@code null} or empty
      * @return the deserialized multiset, or {@code null} if {@code str} is {@code null} or blank
      * @throws ParsingException if {@code str} is not a well-formed JSON object text
-     * @throws IllegalArgumentException if a count is negative
+     * @throws IllegalArgumentException if a count is negative, or the target is a custom multiset class with no no-arg or
+     *         {@code (int)} constructor and no public static {@code create()} or {@code create(int)} factory returning it
      * @throws NumberFormatException if a count cannot be converted to an integer; unquoted fractional numbers
      *         follow the JSON parser's truncation rules, while quoted fractions are rejected
      * @throws ArithmeticException if a count does not fit in an {@code int}
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Multiset)
      */
     @MayReturnNull
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public T valueOf(final String str) throws ParsingException, IllegalArgumentException, NumberFormatException, ArithmeticException {
+    public T valueOf(final String str) throws ParsingException, IllegalArgumentException, NumberFormatException, ArithmeticException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }

@@ -168,11 +168,15 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
      * {@code stringOf} back into a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the type's default). Strings produced by {@link Object#toString()} are not
      * guaranteed to be parseable in this way.</p>
      *
+     * <p>An element may also be enclosed in a matching pair of double or single quotes (for example
+     * {@code ["1", "2"]}), which is the form {@link #serializeTo(CharacterWriter, long[], JsonXmlSerConfig)} writes when
+     * {@link JsonXmlSerConfig#isWriteLongAsString()} is set; the quotes are removed before the element is parsed.</p>
+     *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed long array, or {@code null} if the input string is {@code null}, empty, or blank.
      *         Returns an empty array for "[]".
      * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
-     * @throws NumberFormatException if an element is not a valid integer literal
+     * @throws NumberFormatException if an element (after removing its enclosing quotes, if any) is not a valid integer literal
      * @throws ArithmeticException if an element is outside the {@code long} range
      * @see #valueOf(Object)
      * @see #stringOf(long[])
@@ -192,7 +196,16 @@ public final class PrimitiveLongArrayType extends AbstractPrimitiveArrayType<lon
 
         if (len > 0) {
             for (int i = 0; i < len; i++) {
-                a[i] = elementType.valueOf(strs[i]);
+                String element = strs[i];
+                final int elementLength = element.length();
+
+                // serializeTo quotes every value under writeLongAsString; read that form back. An empty quoted
+                // element is left as is so it fails as a malformed number instead of becoming the default 0.
+                if (elementLength > 2 && (element.charAt(0) == '"' || element.charAt(0) == '\'') && element.charAt(elementLength - 1) == element.charAt(0)) {
+                    element = element.substring(1, elementLength - 1);
+                }
+
+                a[i] = elementType.valueOf(element);
             }
         }
 

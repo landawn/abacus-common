@@ -48,16 +48,16 @@ public final class BeanType<T> extends AbstractType<T> {
      * Package-private constructor for {@code BeanType}.
      * Instances are created by {@link TypeFactory}; do not instantiate directly.
      *
-     * @param clazz the {@code Class} object representing the concrete bean type
+     * @param targetClass the {@code Class} object representing the concrete bean type
      * @param javaType the Java reflection {@code Type} for the bean (may be {@code null} for non-generic classes,
-     *                 in which case {@code clazz} is used as the reflection type)
-     * @throws IllegalArgumentException if both {@code javaType} and {@code clazz} are {@code null},
+     *                 in which case {@code targetClass} is used as the reflection type)
+     * @throws IllegalArgumentException if both {@code javaType} and {@code targetClass} are {@code null},
      *         or a reflected generic argument cannot be resolved as a supported type.
      */
-    BeanType(final Class<T> clazz, final java.lang.reflect.Type javaType) throws IllegalArgumentException {
-        super(javaType == null ? TypeFactory.getClassName(clazz) : TypeFactory.getJavaTypeName(javaType));
-        this.typeClass = clazz;
-        this.javaType = javaType == null ? clazz : javaType;
+    BeanType(final Class<T> targetClass, final java.lang.reflect.Type javaType) throws IllegalArgumentException {
+        super(javaType == null ? TypeFactory.getClassName(targetClass) : TypeFactory.getJavaTypeName(javaType));
+        this.typeClass = targetClass;
+        this.javaType = javaType == null ? targetClass : javaType;
         this.xmlName = TypeFactory.getJavaTypeName(this.javaType).replace("<", "&lt;").replace(">", "&gt;"); //NOSONAR
 
         if (this.javaType instanceof ParameterizedType parameterizedType) {

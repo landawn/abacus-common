@@ -482,4 +482,10 @@ public class CommonUtilToTest extends CommonUtilTestSupport {
         assertEquals("[[...]]", CommonUtil.deepToString(self));
     }
 
+
+    @Test
+    public void testToDoubleArray_floatElementWidenedViaDecimalSpelling() {
+        assertArrayEquals(new double[] { 1.21, 0.1, 2.5 }, CommonUtil.toDoubleArray(Arrays.<Number> asList(1.21f, 0.1f, 2.5d)), 0.0);
+        assertArrayEquals(new double[] { 1.21 }, CommonUtil.toDoubleArray(new LinkedList<Number>(Arrays.asList(0.5d, 1.21f)), 1, 2), 0.0);
+    }
 }

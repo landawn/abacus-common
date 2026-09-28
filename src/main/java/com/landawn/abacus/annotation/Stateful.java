@@ -31,8 +31,9 @@ import java.lang.annotation.Target;
  * {@code MergeResult} and {@code NoCachingNoUpdating}: any factory method that returns a
  * function/predicate/consumer holding internal state (e.g., {@code distinctBy}, {@code limit},
  * a rate-limited wrapper) is annotated {@code @Stateful}. The {@code Fn} class-level Javadoc
- * calls out this convention explicitly and warns against using such functions in
- * {@code parallelStream()} or sharing them across threads without external synchronization.</p>
+ * calls out this convention explicitly: {@code @Stateful} indicates retained state, not necessarily a
+ * lack of thread safety; each such method documents its own concurrency policy, and a fresh stateful
+ * function should be created for each independent operation unless shared state is intentional.</p>
  *
  * <p>The marker is also frequently combined with {@link SequentialOnly} on pipeline operations
  * whose correctness depends on encounter-order processing.</p>

@@ -162,4 +162,22 @@ public class BeansSetTest extends BeansTestSupport {
         assertEquals(42, Beans.setPropValue(bean, setAge, "42"));
         assertEquals(42, bean.getAge());
     }
+
+
+    /**
+     * When the setter rejects the value's type, {@code setPropValue(Object, Method, Object)} converts the value and
+     * retries. If the setter itself then throws, that failure - not the first attempt's "argument type mismatch" -
+     * is what the caller must see.
+     */
+    @Test
+    public void testSetPropValue_SetterFailureOnTypeConvertingRetryIsPropagated() throws Exception {
+        final Method setX = BeansSetTest.ThrowingSetterBean.class.getMethod("setX", String.class);
+
+        BeansSetTest.ThrowingSetterBean.calls = 0;
+        final IllegalStateException e = assertThrows(IllegalStateException.class,
+                () -> Beans.setPropValue(new BeansSetTest.ThrowingSetterBean(), setX, 5));
+        assertEquals("boom", e.getMessage());
+        // The first attempt never reaches the setter (the reflective call rejects the Integer), the retry does.
+        assertEquals(1, BeansSetTest.ThrowingSetterBean.calls);
+    }
 }

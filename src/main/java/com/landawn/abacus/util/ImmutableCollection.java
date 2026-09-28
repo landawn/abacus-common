@@ -117,8 +117,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * List<String> mutableList = new ArrayList<>();
      * mutableList.add("hello");
      * ImmutableCollection<String> wrapped = ImmutableCollection.wrap(mutableList);
-     * mutableList.add("world");             // this change is visible in wrapped!
-     * System.out.println(wrapped.size());   // prints 2
+     * mutableList.add("world");            // this change is visible in wrapped!
+     * System.out.println(wrapped.size());  // prints 2
      * }</pre>
      *
      * <p><b>Note:</b> when {@code c} is a non-{@code null} collection that is not already an
@@ -261,8 +261,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableCollection<String> collection = ImmutableList.of("a", "b", "c");
-     * System.out.println(collection.contains("b"));   // returns true
-     * System.out.println(collection.contains("d"));   // returns false
+     * System.out.println(collection.contains("b"));  // returns true
+     * System.out.println(collection.contains("d"));  // returns false
      * }</pre>
      *
      * @param valueToFind element whose presence in this collection is to be tested
@@ -417,8 +417,8 @@ public class ImmutableCollection<E> extends AbstractCollection<E> implements Imm
      * // A plain ImmutableCollection compares by identity:
      * ImmutableCollection<Integer> base1 = ImmutableCollection.wrap(source);
      * ImmutableCollection<Integer> base2 = ImmutableCollection.wrap(source);
-     * System.out.println(base1.equals(base1));   // returns true
-     * System.out.println(base1.equals(base2));   // returns false
+     * System.out.println(base1.equals(base1));  // returns true
+     * System.out.println(base1.equals(base2));  // returns false
      *
      * // A List or Set implementation compares by value:
      * ImmutableCollection<Integer> list1 = ImmutableList.of(1, 2, 3);

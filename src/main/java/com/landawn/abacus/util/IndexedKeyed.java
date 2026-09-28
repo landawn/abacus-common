@@ -26,9 +26,9 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedKeyed<String, Integer> indexed = IndexedKeyed.of("user123", 42, 0);
- * System.out.println(indexed.index()); // prints 0
- * System.out.println(indexed.key());   // prints user123
- * System.out.println(indexed.val());   // prints 42
+ * System.out.println(indexed.index());  // prints 0
+ * System.out.println(indexed.key());    // prints user123
+ * System.out.println(indexed.val());    // prints 42
  *
  * // val is excluded from equality: these two are equal
  * IndexedKeyed.of("user123", 42, 0).equals(IndexedKeyed.of("user123", 99, 0)); // true
@@ -51,11 +51,11 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * This constructor has package-private visibility; use {@link #of(Object, Object, int)} to create instances.
      *
      * @param key the key component (can be {@code null})
-     * @param val the value component (can be {@code null})
+     * @param value the value component (can be {@code null})
      * @param index the index component
      */
-    IndexedKeyed(final K key, final T val, final int index) {
-        super(key, val);
+    IndexedKeyed(final K key, final T value, final int index) {
+        super(key, value);
         this.index = index;
     }
 
@@ -65,23 +65,23 @@ public final class IndexedKeyed<K, T> extends Keyed<K, T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedKeyed<String, Integer> ik = IndexedKeyed.of("user123", 42, 5);
-     * ik.key();     // returns "user123"
-     * ik.val();     // returns 42
-     * ik.index();   // returns 5
+     * ik.key();    // returns "user123"
+     * ik.val();    // returns 42
+     * ik.index();  // returns 5
      * }</pre>
      *
      * @param <K> the type of the key component
      * @param <T> the type of the value component
      * @param key the key component (can be {@code null})
-     * @param val the value component (can be {@code null})
+     * @param value the value component (can be {@code null})
      * @param index the index component; must not be negative
      * @return a new immutable {@code IndexedKeyed} containing the specified key, value, and index
      * @throws IllegalArgumentException if {@code index} is negative
      */
-    public static <K, T> IndexedKeyed<K, T> of(final K key, final T val, final int index) throws IllegalArgumentException {
+    public static <K, T> IndexedKeyed<K, T> of(final K key, final T value, final int index) throws IllegalArgumentException {
         N.checkArgNotNegative(index, cs.index);
 
-        return new IndexedKeyed<>(key, val, index);
+        return new IndexedKeyed<>(key, value, index);
     }
 
     /**

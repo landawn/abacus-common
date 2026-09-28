@@ -84,7 +84,7 @@ public class RangeTest extends TestBase {
         assertTrue(Range.openClosed(1, 5).map(Integer::longValue).contains(5L));
         assertTrue(Range.closedOpen(1, 5).map(Integer::longValue).contains(1L));
         assertFalse(Range.closedOpen(1, 5).map(Integer::longValue).contains(5L));
-        assertThrows(IllegalArgumentException.class, () -> Range.closed(1, 2).map(v -> v == 1 ? new NullTolerantComparable(v) : null));
+        assertThrows(NullPointerException.class, () -> Range.closed(1, 2).map(v -> v == 1 ? new NullTolerantComparable(v) : null));
     }
 
     @Test
@@ -244,6 +244,15 @@ public class RangeTest extends TestBase {
         @Override
         public int compareTo(final NullTolerantComparable other) {
             return other == null ? -1 : Integer.compare(value, other.value);
+        }
+    }
+
+    @Test
+    public void testElementCompareToThrowsIllegalStateForEveryEmptyBoundType() {
+        for (final Range<Integer> empty : java.util.List.of(Range.open(5, 5), Range.closedOpen(5, 5), Range.openClosed(5, 5))) {
+            for (final int element : new int[] { 4, 5, 6 }) {
+                assertThrows(IllegalStateException.class, () -> empty.elementCompareTo(element));
+            }
         }
     }
 }

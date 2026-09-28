@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class BeansMergeTest extends BeansTestSupport {
 
@@ -251,5 +252,28 @@ public class BeansMergeTest extends BeansTestSupport {
         t2.setA("keep");
         Beans.mergeInto(new BeansMutableFixture(), t2);
         assertEquals("keep", t2.getA());
+    }
+
+
+    /**
+     * A {@code null} source is a no-op for every {@code mergeInto}/{@code mergeIntoIf} overload: the target is
+     * returned unchanged and its class is not inspected, so a non-bean target is not rejected either.
+     */
+    @Test
+    public void testMergeInto_NullSourceWithNonBeanTargetReturnsTargetUnchanged() {
+        final String target = "not a bean";
+
+        assertSame(target, Beans.mergeInto(null, target));
+        assertSame(target, Beans.mergeInto(null, target, (a, b) -> a));
+        assertSame(target, Beans.mergeInto(null, target, name -> name, (a, b) -> a));
+        assertSame(target, Beans.mergeInto(null, target, true, null));
+        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x")));
+        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), (a, b) -> a));
+        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), name -> name));
+        assertSame(target, Beans.mergeInto(null, target, Arrays.asList("x"), name -> name, (a, b) -> a));
+        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true));
+        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, (a, b) -> a));
+        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, name -> name));
+        assertSame(target, Beans.mergeIntoIf(null, target, (name, value) -> true, name -> name, (a, b) -> a));
     }
 }

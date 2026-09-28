@@ -396,4 +396,120 @@ public class IndexTest extends IndexTestSupport {
         assertEquals(1, Index.lastOfSubArray(src, 1, new int[0]).orElseThrow());
         assertTrue(Index.lastOfSubArray(src, -1, new int[0]).isEmpty());
     }
+
+    // ---- perf review 2026-09-26 G046 begin ----
+
+    // G046-01: RandomAccess source + sequential pattern (and the reverse) must agree with the all-RandomAccess path.
+    @Test
+    public void testOfSubList_mixedRandomAccessAgreesWithRandomAccess() {
+        final java.util.Random rnd = new java.util.Random(20260926L);
+
+        for (int it = 0; it < 20000; it++) {
+            final List<Integer> source = new ArrayList<>();
+            final List<Integer> pattern = new ArrayList<>();
+
+            for (int j = 0, n = rnd.nextInt(8); j < n; j++) {
+                source.add(rnd.nextInt(4) == 0 ? null : rnd.nextInt(3));
+            }
+            for (int j = 0, m = rnd.nextInt(5); j < m; j++) {
+                pattern.add(rnd.nextInt(4) == 0 ? null : rnd.nextInt(3));
+            }
+
+            final int from = rnd.nextInt(12) - 3;
+            final int startIndexOfSubList = pattern.isEmpty() ? 0 : rnd.nextInt(pattern.size() + 1);
+            final int sizeToMatch = rnd.nextInt(pattern.size() - startIndexOfSubList + 1);
+            final List<Integer> llSource = new LinkedList<>(source);
+            final List<Integer> llPattern = new LinkedList<>(pattern);
+            final java.util.function.Supplier<String> msg = () -> source + " / " + pattern + " @" + from + " [" + startIndexOfSubList + ", +" + sizeToMatch
+                    + "]";
+
+            final OptionalInt expectedFirst = Index.ofSubList(source, from, pattern, startIndexOfSubList, sizeToMatch);
+            assertEquals(expectedFirst, Index.ofSubList(source, from, llPattern, startIndexOfSubList, sizeToMatch), msg);
+            assertEquals(expectedFirst, Index.ofSubList(llSource, from, pattern, startIndexOfSubList, sizeToMatch), msg);
+            assertEquals(expectedFirst, Index.ofSubList(llSource, from, llPattern, startIndexOfSubList, sizeToMatch), msg);
+
+            final OptionalInt expectedLast = Index.lastOfSubList(source, from, pattern, startIndexOfSubList, sizeToMatch);
+            assertEquals(expectedLast, Index.lastOfSubList(source, from, llPattern, startIndexOfSubList, sizeToMatch), msg);
+            assertEquals(expectedLast, Index.lastOfSubList(llSource, from, pattern, startIndexOfSubList, sizeToMatch), msg);
+            assertEquals(expectedLast, Index.lastOfSubList(llSource, from, llPattern, startIndexOfSubList, sizeToMatch), msg);
+
+            assertEquals(Index.ofSubList(source, from, pattern), Index.ofSubList(source, from, llPattern), msg);
+            assertEquals(Index.lastOfSubList(source, from, pattern), Index.lastOfSubList(source, from, llPattern), msg);
+            assertEquals(Collections.indexOfSubList(source, pattern), Index.ofSubList(source, llPattern).orElse(-1), msg);
+            assertEquals(Collections.lastIndexOfSubList(source, pattern), Index.lastOfSubList(source, llPattern).orElse(-1), msg);
+        }
+    }
+
+    // G046-01: the sequence of element equals(...) calls (receiver and argument) is the same for every list kind.
+    @Test
+    public void testOfSubList_mixedRandomAccessSameEqualsCallSequence() {
+        final List<String> calls = new ArrayList<>();
+
+        final class Element {
+            final String name;
+
+            Element(final String name) {
+                this.name = name;
+            }
+
+            @Override
+            public boolean equals(final Object obj) {
+                calls.add(name + "=" + (obj instanceof Element e ? e.name : String.valueOf(obj)));
+                return obj instanceof Element e && name.charAt(0) == e.name.charAt(0);
+            }
+
+            @Override
+            public int hashCode() {
+                return name.charAt(0);
+            }
+        }
+
+        final List<Element> source = new ArrayList<>();
+        for (final String name : new String[] { "a0", "b1", "a2", "b3", "c4", "a5", "b6", "c7" }) {
+            source.add(new Element(name));
+        }
+        final List<Element> pattern = Arrays.asList(new Element("a_"), new Element("b_"), new Element("c_"));
+        final List<Element> llPattern = new LinkedList<>(pattern);
+
+        for (int from = -1; from <= 9; from++) {
+            calls.clear();
+            final OptionalInt first = Index.ofSubList(source, from, pattern, 0, 3);
+            final List<String> firstCalls = new ArrayList<>(calls);
+            calls.clear();
+            assertEquals(first, Index.ofSubList(source, from, llPattern, 0, 3));
+            assertEquals(firstCalls, calls);
+
+            calls.clear();
+            final OptionalInt last = Index.lastOfSubList(source, from, pattern, 1, 2);
+            final List<String> lastCalls = new ArrayList<>(calls);
+            calls.clear();
+            assertEquals(last, Index.lastOfSubList(source, from, llPattern, 1, 2));
+            assertEquals(lastCalls, calls);
+        }
+
+        assertEquals(OptionalInt.of(2), Index.ofSubList(source, 0, llPattern, 0, 3));
+        assertEquals(OptionalInt.of(5), Index.ofSubList(source, 3, llPattern, 0, 3));
+        assertEquals(OptionalInt.of(5), Index.lastOfSubList(source, 8, llPattern, 0, 3));
+        assertEquals(OptionalInt.of(6), Index.lastOfSubList(source, 8, llPattern, 1, 2));
+    }
+
+    // G046-01: argument validation of the pattern slice is unchanged when the pattern is sequential.
+    @Test
+    public void testOfSubList_mixedRandomAccessValidation() {
+        final List<Integer> source = new ArrayList<>(Arrays.asList(1, 2, 3, 1, 2));
+        final List<Integer> llPattern = new LinkedList<>(Arrays.asList(1, 2));
+
+        assertThrows(IndexOutOfBoundsException.class, () -> Index.ofSubList(source, 0, llPattern, 1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> Index.lastOfSubList(source, 5, llPattern, 1, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> Index.ofSubList(source, 0, llPattern, -1, 1));
+        assertEquals(OptionalInt.of(3), Index.ofSubList(source, 1, llPattern, 0, 2));
+        assertEquals(OptionalInt.of(3), Index.lastOfSubList(source, 10, llPattern, 0, 2));
+        assertEquals(OptionalInt.of(0), Index.lastOfSubList(source, 2, llPattern, 0, 2));
+        assertEquals(OptionalInt.of(4), Index.ofSubList(source, 2, llPattern, 1, 1));
+        assertFalse(Index.ofSubList(source, 4, llPattern, 0, 2).isPresent());
+        assertFalse(Index.lastOfSubList(source, -1, llPattern, 0, 2).isPresent());
+        assertFalse(Index.ofSubList(source, 0, (List<Integer>) null, 0, 0).isPresent());
+    }
+
+    // ---- perf review 2026-09-26 G046 end ----
 }

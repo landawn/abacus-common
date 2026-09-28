@@ -29,6 +29,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import com.landawn.abacus.annotation.Beta;
 import com.landawn.abacus.exception.HttpResponseException;
+import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.exception.UncheckedIOException;
 import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.N;
@@ -185,7 +186,7 @@ public final class HttpRequest {
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return a new HttpRequest instance
      * @throws IllegalArgumentException if {@code url} is {@code null}, empty, relative, or has malformed URI syntax, or its
-     *         recognized protocol is neither HTTP nor HTTPS, or a supplied connection limit or timeout is negative.
+     *         recognized protocol is neither HTTP nor HTTPS, or either timeout is negative.
      * @throws UncheckedIOException if converting the URL text to a URL fails, including when its protocol has no installed handler
      */
     public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis)
@@ -210,7 +211,7 @@ public final class HttpRequest {
      *
      * @param url The target URL for the request
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null}, or its scheme is not {@code http} or
+     * @throws IllegalArgumentException if {@code url} is {@code null}, is not valid URI syntax, or its scheme is not {@code http} or
      *         {@code https}.
      */
     public static HttpRequest url(final URL url) throws IllegalArgumentException {
@@ -236,7 +237,7 @@ public final class HttpRequest {
      * @param connectTimeoutInMillis Connection timeout in milliseconds
      * @param readTimeoutInMillis Read timeout in milliseconds
      * @return a new HttpRequest instance
-     * @throws IllegalArgumentException if {@code url} is {@code null}, its scheme is not {@code http} or
+     * @throws IllegalArgumentException if {@code url} is {@code null}, is not valid URI syntax, its scheme is not {@code http} or
      *         {@code https}, or either timeout is negative.
      */
     public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
@@ -484,12 +485,14 @@ public final class HttpRequest {
      *
      * @param headers The HttpHeaders instance to set; {@code null} clears all headers
      * @return This HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code headers} contains a {@code null} header name (possible for an instance created by
+     *         {@link HttpHeaders#wrap(Map)}).
      * @see #headers(Map)
      * @see HttpHeaders
      * @see HttpHeaders.Names
      * @see HttpHeaders.Values
      */
-    public HttpRequest setHeaders(final HttpHeaders headers) {
+    public HttpRequest setHeaders(final HttpHeaders headers) throws IllegalArgumentException {
         checkSettings();
 
         settings.setHeaders(headers);
@@ -536,14 +539,16 @@ public final class HttpRequest {
      *        not be negative. Sub-millisecond precision is truncated.
      * @return This HttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code connectTimeout} is {@code null} or negative.
+     * @throws ArithmeticException if {@code connectTimeout} is too large to be expressed as a {@code long} number of milliseconds
      */
-    public HttpRequest connectTimeout(final Duration connectTimeout) throws IllegalArgumentException {
+    public HttpRequest connectTimeout(final Duration connectTimeout) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(connectTimeout, cs.connectTimeout);
-        checkSettings();
 
         if (connectTimeout.isNegative()) {
             throw new IllegalArgumentException("'connectTimeout' must not be negative: " + connectTimeout);
         }
+
+        checkSettings();
 
         settings.setConnectTimeout(connectTimeout.toMillis());
 
@@ -589,14 +594,16 @@ public final class HttpRequest {
      *        negative. Sub-millisecond precision is truncated.
      * @return This HttpRequest instance for method chaining
      * @throws IllegalArgumentException if {@code readTimeout} is {@code null} or negative.
+     * @throws ArithmeticException if {@code readTimeout} is too large to be expressed as a {@code long} number of milliseconds
      */
-    public HttpRequest readTimeout(final Duration readTimeout) throws IllegalArgumentException {
+    public HttpRequest readTimeout(final Duration readTimeout) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(readTimeout, cs.readTimeout);
-        checkSettings();
 
         if (readTimeout.isNegative()) {
             throw new IllegalArgumentException("'readTimeout' must not be negative: " + readTimeout);
         }
+
+        checkSettings();
 
         settings.setReadTimeout(readTimeout.toMillis());
 
@@ -754,6 +761,7 @@ public final class HttpRequest {
 
     /**
      * Sets the request body as JSON by serializing the specified object and sets the Content-Type header to application/json.
+     * If serialization fails, neither the body nor the Content-Type header of this request is changed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -765,11 +773,17 @@ public final class HttpRequest {
      *
      * @param obj The object to serialize as JSON
      * @return This HttpRequest instance for method chaining
+     * @throws ParsingException if serializing {@code obj} to JSON fails because of unsupported or cyclic content
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while serializing {@code obj}
      */
-    public HttpRequest jsonBody(final Object obj) {
+    public HttpRequest jsonBody(final Object obj) throws ParsingException, UncheckedIOException {
+        // Serialized before the Content-Type is touched, so a failure leaves the request unchanged
+        // instead of relabelling a previously configured body.
+        final String json = N.toJson(obj);
+
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        request = N.toJson(obj);
+        request = json;
         requestTarget = RequestTarget.BODY;
 
         return this;
@@ -800,7 +814,8 @@ public final class HttpRequest {
 
     /**
      * Sets the request body as XML by serializing the specified object and sets the Content-Type header to application/xml.
-     * The object is serialized using the internal XML serialization mechanism.
+     * The object is serialized using the internal XML serialization mechanism. If serialization fails, neither the body nor
+     * the Content-Type header of this request is changed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -812,11 +827,16 @@ public final class HttpRequest {
      *
      * @param obj The object to serialize as XML through {@link N#toXml(Object)}; may be {@code null}.
      * @return This HttpRequest instance for method chaining
+     * @throws ParsingException if serializing {@code obj} to XML fails because of unsupported or cyclic content
+     * @throws UncheckedIOException if a value serializer cannot read an underlying stream or reader while serializing {@code obj}
      */
-    public HttpRequest xmlBody(final Object obj) {
+    public HttpRequest xmlBody(final Object obj) throws ParsingException, UncheckedIOException {
+        // Serialized before the Content-Type is touched, so a failure leaves the request unchanged.
+        final String xml = N.toXml(obj);
+
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        request = N.toXml(obj);
+        request = xml;
         requestTarget = RequestTarget.BODY;
 
         return this;
@@ -917,9 +937,12 @@ public final class HttpRequest {
      *
      * @return The HttpResponse object containing status, headers, and body
      * @throws IllegalStateException if a request body was configured for a method that does not permit one
+     * @throws IllegalArgumentException if the configured query cannot be encoded into the URL (a pre-encoded {@code String} that is not valid
+     *         URI syntax, or a {@code Map} with a {@code null} key)
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
      */
-    public HttpResponse get() throws IllegalStateException, UncheckedIOException {
+    public HttpResponse get() throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, UncheckedIOException {
         return get(HttpResponse.class);
     }
 
@@ -936,9 +959,14 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
      * @throws IllegalStateException if a request body was configured for a method that does not permit one
+     * @throws IllegalArgumentException if the configured query cannot be encoded into the URL (a pre-encoded {@code String} that is not valid
+     *         URI syntax, or a {@code Map} with a {@code null} key)
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass} is not {@link HttpResponse}
      */
-    public <T> T get(final Class<T> resultClass) throws IllegalStateException, UncheckedIOException {
+    public <T> T get(final Class<T> resultClass)
+            throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.GET, resultClass);
     }
 
@@ -955,9 +983,12 @@ public final class HttpRequest {
      *
      * @return The HttpResponse object containing status code, headers, and response body
      * @throws IllegalStateException if query parameters were configured for this body-based request
+     * @throws IllegalArgumentException if a {@code Content-Encoding} configured for this request conflicts with the compression the active
+     *         content format applies to the body
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
-    public HttpResponse post() throws IllegalStateException, UncheckedIOException {
+    public HttpResponse post() throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, UncheckedIOException {
         return post(HttpResponse.class);
     }
 
@@ -976,9 +1007,14 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
      * @throws IllegalStateException if query parameters were configured for this body-based request
+     * @throws IllegalArgumentException if a {@code Content-Encoding} configured for this request conflicts with the compression the active
+     *         content format applies to the body
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass} is not {@link HttpResponse}
      */
-    public <T> T post(final Class<T> resultClass) throws IllegalStateException, UncheckedIOException {
+    public <T> T post(final Class<T> resultClass)
+            throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.POST, resultClass);
     }
 
@@ -995,9 +1031,12 @@ public final class HttpRequest {
      *
      * @return The HttpResponse object containing status code, headers, and response body
      * @throws IllegalStateException if query parameters were configured for this body-based request
+     * @throws IllegalArgumentException if a {@code Content-Encoding} configured for this request conflicts with the compression the active
+     *         content format applies to the body
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
-    public HttpResponse put() throws IllegalStateException, UncheckedIOException {
+    public HttpResponse put() throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, UncheckedIOException {
         return put(HttpResponse.class);
     }
 
@@ -1016,9 +1055,14 @@ public final class HttpRequest {
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response object
      * @throws IllegalStateException if query parameters were configured for this body-based request
+     * @throws IllegalArgumentException if a {@code Content-Encoding} configured for this request conflicts with the compression the active
+     *         content format applies to the body
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass} is not {@link HttpResponse}
      */
-    public <T> T put(final Class<T> resultClass) throws IllegalStateException, UncheckedIOException {
+    public <T> T put(final Class<T> resultClass)
+            throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.PUT, resultClass);
     }
 
@@ -1033,9 +1077,13 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return The HttpResponse object containing status code, headers, and response body
+     * @throws IllegalArgumentException if the configured query cannot be encoded into the URL (a pre-encoded {@code String} that is not valid
+     *         URI syntax, or a {@code Map} with a {@code null} key), or a {@code Content-Encoding} configured for this request conflicts with the
+     *         compression the active content format applies to the body
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
-    public HttpResponse delete() throws UncheckedIOException {
+    public HttpResponse delete() throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException {
         return delete(HttpResponse.class);
     }
 
@@ -1052,9 +1100,14 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response object
+     * @throws IllegalArgumentException if the configured query cannot be encoded into the URL (a pre-encoded {@code String} that is not valid
+     *         URI syntax, or a {@code Map} with a {@code null} key), or a {@code Content-Encoding} configured for this request conflicts with the
+     *         compression the active content format applies to the body
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass} is not {@link HttpResponse}
      */
-    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T delete(final Class<T> resultClass) throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.DELETE, resultClass);
     }
 
@@ -1072,9 +1125,12 @@ public final class HttpRequest {
      *
      * @return The HttpResponse object containing status code and headers (body will be empty)
      * @throws IllegalStateException if a request body was configured for a method that does not permit one
+     * @throws IllegalArgumentException if the configured query cannot be encoded into the URL (a pre-encoded {@code String} that is not valid
+     *         URI syntax, or a {@code Map} with a {@code null} key)
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
-    public HttpResponse head() throws IllegalStateException, UncheckedIOException {
+    public HttpResponse head() throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, UncheckedIOException {
         return head(HttpResponse.class);
     }
 
@@ -1089,9 +1145,14 @@ public final class HttpRequest {
      * @return The response object — a populated {@link HttpResponse} when {@code resultClass} is {@link HttpResponse},
      *         otherwise the result of deserializing the empty body (e.g. an empty string for {@code String.class})
      * @throws IllegalStateException if a request body was configured for a method that does not permit one
+     * @throws IllegalArgumentException if the configured query cannot be encoded into the URL (a pre-encoded {@code String} that is not valid
+     *         URI syntax, or a {@code Map} with a {@code null} key)
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass} is not {@link HttpResponse}
      */
-    public <T> T head(final Class<T> resultClass) throws IllegalStateException, UncheckedIOException {
+    public <T> T head(final Class<T> resultClass)
+            throws IllegalStateException, IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.HEAD, resultClass);
     }
 
@@ -1107,14 +1168,17 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @return The HttpResponse object containing status code, headers, and response body
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, the configured query cannot be encoded into the URL (a
+     *         pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a {@code null} key), or a {@code Content-Encoding}
+     *         configured for this request conflicts with the compression the active content format applies to the body
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if the configured query or body is incompatible with {@code httpMethod}; see {@link #execute(HttpMethod, Class)}
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if opening the connection, transmitting the HTTP request or reading its response fails
      */
     @Beta
     public HttpResponse execute(final HttpMethod httpMethod)
-            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, RejectedExecutionException, UncheckedIOException {
         return execute(httpMethod, HttpResponse.class);
     }
 
@@ -1132,15 +1196,19 @@ public final class HttpRequest {
      * @param httpMethod The HTTP method to use
      * @param resultClass The class of the expected response object
      * @return The deserialized response object
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, the configured query cannot be encoded into the URL (a
+     *         pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a {@code null} key), or a {@code Content-Encoding}
+     *         configured for this request conflicts with the compression the active content format applies to the body
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS}
      *         (a body method), or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if sending the request or reading the response fails with an I/O exception
+     * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass} is not {@link HttpResponse}
      */
     @Beta
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass)
-            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UnsupportedOperationException,
+            IllegalStateException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         checkSupportedMethod(httpMethod);
 
@@ -1163,16 +1231,20 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The file to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}, the configured query cannot be encoded into
+     *         the URL (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a {@code null} key), or a
+     *         {@code Content-Encoding} configured for this request conflicts with the compression the active content format applies to the body
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS}
      *         (a body method), or {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if sending the HTTP request, reading its response, or opening, writing or closing {@code output}
      *         fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final File output)
-            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final File output) throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException,
+            RejectedExecutionException, UncheckedIOException, HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(output, cs.output);
         checkSupportedMethod(httpMethod);
@@ -1200,17 +1272,21 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The output stream to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}, the configured query cannot be encoded into
+     *         the URL (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a {@code null} key), or a
+     *         {@code Content-Encoding} configured for this request conflicts with the compression the active content format applies to the body
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is
      *         {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS} (a body method), or
      *         {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
      *         {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if sending the HTTP request, reading its response or writing the response to {@code output} fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final OutputStream output)
-            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final OutputStream output) throws IllegalArgumentException, UnsupportedOperationException,
+            IllegalStateException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(output, cs.output);
         checkSupportedMethod(httpMethod);
@@ -1238,17 +1314,21 @@ public final class HttpRequest {
      *
      * @param httpMethod The HTTP method to use (GET, POST, PUT, DELETE, HEAD, etc.). Must not be {@code null}.
      * @param output The writer to write the response body to. Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code output} is {@code null}, the configured query cannot be encoded into
+     *         the URL (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a {@code null} key), or a
+     *         {@code Content-Encoding} configured for this request conflicts with the compression the active content format applies to the body
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or {@link HttpMethod#CONNECT}
      * @throws IllegalStateException if {@link #query(String)}/{@link #query(Map)} was set but the method is
      *         {@code POST}/{@code PUT}/{@code PATCH}/{@code OPTIONS} (a body method), or
      *         {@link #body(Object)}/{@code jsonBody}/{@code xmlBody}/{@code formBody} was set but the method is not
      *         {@code POST}/{@code PUT}/{@code DELETE}/{@code OPTIONS}
+     * @throws RejectedExecutionException if the underlying {@link HttpClient} already has its {@code maxConnection} requests in flight
      * @throws UncheckedIOException if sending the HTTP request, reading its response or writing the response to {@code output} fails
+     * @throws HttpResponseException if the response status code is not 2xx
      */
     @Beta
-    public void execute(final HttpMethod httpMethod, final Writer output)
-            throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException, UncheckedIOException {
+    public void execute(final HttpMethod httpMethod, final Writer output) throws IllegalArgumentException, UnsupportedOperationException, IllegalStateException,
+            RejectedExecutionException, UncheckedIOException, HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(output, cs.output);
         checkSupportedMethod(httpMethod);
@@ -1311,8 +1391,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncGet() {
+    public ContinuableFuture<HttpResponse> asyncGet() throws RejectedExecutionException {
         return asyncGet(HttpResponse.class);
     }
 
@@ -1331,8 +1413,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncGet(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<HttpResponse> asyncGet(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncGet(HttpResponse.class, executor);
@@ -1351,8 +1435,10 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncExecute(HttpMethod.GET, resultClass);
     }
 
@@ -1373,8 +1459,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncExecute(HttpMethod.GET, resultClass, executor);
@@ -1393,8 +1481,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncPost() {
+    public ContinuableFuture<HttpResponse> asyncPost() throws RejectedExecutionException {
         return asyncPost(HttpResponse.class);
     }
 
@@ -1414,8 +1504,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncPost(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<HttpResponse> asyncPost(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncPost(HttpResponse.class, executor);
@@ -1436,8 +1528,10 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncExecute(HttpMethod.POST, resultClass);
     }
 
@@ -1459,8 +1553,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncPost(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncExecute(HttpMethod.POST, resultClass, executor);
@@ -1479,8 +1575,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncPut() {
+    public ContinuableFuture<HttpResponse> asyncPut() throws RejectedExecutionException {
         return asyncPut(HttpResponse.class);
     }
 
@@ -1500,8 +1598,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncPut(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<HttpResponse> asyncPut(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncPut(HttpResponse.class, executor);
@@ -1522,8 +1622,10 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncExecute(HttpMethod.PUT, resultClass);
     }
 
@@ -1545,8 +1647,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncPut(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncExecute(HttpMethod.PUT, resultClass, executor);
@@ -1564,8 +1668,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncDelete() {
+    public ContinuableFuture<HttpResponse> asyncDelete() throws RejectedExecutionException {
         return asyncDelete(HttpResponse.class);
     }
 
@@ -1584,8 +1690,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncDelete(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<HttpResponse> asyncDelete(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncDelete(HttpResponse.class, executor);
@@ -1605,8 +1713,10 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncExecute(HttpMethod.DELETE, resultClass);
     }
 
@@ -1627,8 +1737,11 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncExecute(HttpMethod.DELETE, resultClass, executor);
@@ -1646,8 +1759,10 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the HttpResponse
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncHead() {
+    public ContinuableFuture<HttpResponse> asyncHead() throws RejectedExecutionException {
         return asyncHead(HttpResponse.class);
     }
 
@@ -1666,8 +1781,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncHead(final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<HttpResponse> asyncHead(final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncHead(HttpResponse.class, executor);
@@ -1682,8 +1799,10 @@ public final class HttpRequest {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object
      * @return A ContinuableFuture that will complete with the response
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncExecute(HttpMethod.HEAD, resultClass);
     }
 
@@ -1706,8 +1825,10 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the response
      * @throws IllegalArgumentException if {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncHead(final Class<T> resultClass, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncExecute(HttpMethod.HEAD, resultClass, executor);
@@ -1729,9 +1850,11 @@ public final class HttpRequest {
      *         {@link HttpMethod#PATCH} ({@link UnsupportedOperationException}) or a payload/method
      *         mismatch ({@link IllegalStateException}) fails the future instead of throwing here
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
     @Beta
-    public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod) throws IllegalArgumentException {
+    public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod) throws IllegalArgumentException, RejectedExecutionException {
         return asyncExecute(httpMethod, HttpResponse.class);
     }
 
@@ -1751,9 +1874,12 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the HttpResponse
      * @throws IllegalArgumentException if {@code executor} is {@code null}, or {@code httpMethod} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
     @Beta
-    public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod, final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<HttpResponse> asyncExecute(final HttpMethod httpMethod, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
         return asyncExecute(httpMethod, HttpResponse.class, executor);
@@ -1777,9 +1903,12 @@ public final class HttpRequest {
      *         {@link HttpMethod#PATCH} ({@link UnsupportedOperationException}) or a payload/method
      *         mismatch ({@link IllegalStateException}) fails the future instead of throwing here
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
     @Beta
-    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
 
         final Callable<T> cmd = () -> execute(httpMethod, resultClass);
@@ -1805,10 +1934,12 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return A ContinuableFuture that will complete with the deserialized response
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
     @Beta
     public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass, final Executor executor)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(executor, cs.executor);
 
@@ -1834,9 +1965,11 @@ public final class HttpRequest {
      *         a {@code null} output, an unsupported {@link HttpMethod#PATCH} or a payload/method
      *         mismatch fails the future instead of throwing here
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output) throws IllegalArgumentException {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
 
         final Callable<Void> cmd = () -> {
@@ -1866,9 +1999,12 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the file
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final File output, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(executor, cs.executor);
 
@@ -1899,9 +2035,12 @@ public final class HttpRequest {
      *         a {@code null} output, an unsupported {@link HttpMethod#PATCH} or a payload/method
      *         mismatch fails the future instead of throwing here
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output) throws IllegalArgumentException {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
 
         final Callable<Void> cmd = () -> {
@@ -1931,10 +2070,12 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the stream
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
     @Beta
     public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final OutputStream output, final Executor executor)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(executor, cs.executor);
 
@@ -1965,9 +2106,11 @@ public final class HttpRequest {
      *         a {@code null} output, an unsupported {@link HttpMethod#PATCH} or a payload/method
      *         mismatch fails the future instead of throwing here
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws RejectedExecutionException if the executor of the underlying {@link HttpClient} refuses the task, for example a bounded executor whose
+     *         queue is full; exceeding the client's in-flight limit is instead reported through the returned future
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output) throws IllegalArgumentException {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
 
         final Callable<Void> cmd = () -> {
@@ -1997,9 +2140,12 @@ public final class HttpRequest {
      * @param executor The executor to use for the asynchronous operation. Must not be {@code null}.
      * @return a ContinuableFuture that completes after the response has been written to the writer
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code executor} is {@code null}.
+     * @throws RejectedExecutionException if {@code executor} refuses the task, for example a bounded executor whose queue is full; exceeding the
+     *         client's in-flight limit is instead reported through the returned future
      */
     @Beta
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Executor executor) throws IllegalArgumentException {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Writer output, final Executor executor)
+            throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(executor, cs.executor);
 
@@ -2016,16 +2162,16 @@ public final class HttpRequest {
      * Executes a callable command using the specified executor.
      *
      * @param <R> The result type of the callable
-     * @param cmd The callable command to execute
+     * @param command The callable command to execute
      * @param executor The executor to use
      * @return A ContinuableFuture that will complete with the result of the callable
-     * @throws IllegalArgumentException if {@code cmd} or {@code executor} is {@code null}
+     * @throws IllegalArgumentException if {@code command} or {@code executor} is {@code null}
      * @throws RejectedExecutionException if the executor refuses to accept the task
      */
-    <R> ContinuableFuture<R> execute(final Callable<? extends R> cmd, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
+    <R> ContinuableFuture<R> execute(final Callable<? extends R> command, final Executor executor) throws IllegalArgumentException, RejectedExecutionException {
         N.checkArgNotNull(executor, cs.executor);
 
-        return N.asyncExecute(cmd, executor);
+        return N.asyncExecute(command, executor);
     }
 
     HttpSettings checkSettings() {

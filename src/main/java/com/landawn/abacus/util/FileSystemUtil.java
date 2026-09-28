@@ -259,8 +259,8 @@ final class FileSystemUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * FileSystemUtil.freeSpaceKb("C:");        // uses a Windows path
-     * FileSystemUtil.freeSpaceKb("/volume");   // uses a *nix path
+     * FileSystemUtil.freeSpaceKb("C:");       // uses a Windows path
+     * FileSystemUtil.freeSpaceKb("/volume");  // uses a *nix path
      * }</pre>
      *
      * <p>The free space is calculated via the command line.
@@ -326,8 +326,8 @@ final class FileSystemUtil {
         // Expand one child-process variable inside quotes. Its value is not recursively expanded by cmd.
         final String[] cmdAttrs = { "cmd.exe", "/d", "/v:off", "/C", path.isEmpty() ? "dir /a /-c" : "dir /a /-c \"%ABACUS_FREE_SPACE_PATH%\"" };
 
-        // read in the output of the command to an ArrayList
-        final List<String> lines = performCommand(cmdAttrs, Integer.MAX_VALUE, timeout, java.util.Map.of("ABACUS_FREE_SPACE_PATH", path));
+        // Drain the directory listing but retain only the final nonblank free-space summary.
+        final List<String> lines = performCommand(cmdAttrs, 1, timeout, java.util.Map.of("ABACUS_FREE_SPACE_PATH", path), true);
 
         // now iterate over the lines we just read and find the LAST
         // non-empty line (the free space bytes should be in the last element
@@ -503,15 +503,19 @@ final class FileSystemUtil {
      *         the wait is interrupted, or a positive {@code timeout} expires before the process and output readers finish
      */
     List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout) throws IOException {
-        return performCommand(cmdAttrs, max, timeout, null);
+        return performCommand(cmdAttrs, max, timeout, null, false);
     }
 
     /**
+     * Collects the first {@code max} normalized lines, or only the last nonblank line in tail mode.
+     * In tail mode, all-blank output is represented by one empty string so the caller can distinguish it from no output.
+     * Both output pipes are fully drained in either mode to avoid blocking the subprocess.
+     *
      * @throws IOException if the process cannot start, standard output cannot be read or is empty, the exit status is nonzero, waiting is interrupted, or
      *         the process/output-reader deadline expires
      */
-    private List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout, final java.util.Map<String, String> environment)
-            throws IOException {
+    private List<String> performCommand(final String[] cmdAttrs, final int max, final long timeout, final java.util.Map<String, String> environment,
+            final boolean lastNonBlankLineOnly) throws IOException {
 
         final long startNanos = System.nanoTime();
         final long timeoutNanos = timeout > 0 ? TimeUnit.MILLISECONDS.toNanos(timeout) : 0;
@@ -543,7 +547,17 @@ final class FileSystemUtil {
                     String line;
 
                     while ((line = reader.readLine()) != null) {
-                        if (lines.size() < max) {
+                        if (lastNonBlankLineOnly) {
+                            final String normalized = line.toLowerCase(Locale.ENGLISH).trim();
+                            // Keep an initial blank marker for freeSpaceWindows' existing all-blank diagnostic.
+                            if (!normalized.isEmpty() || lines.isEmpty()) {
+                                if (lines.isEmpty()) {
+                                    lines.add(normalized);
+                                } else {
+                                    lines.set(0, normalized);
+                                }
+                            }
+                        } else if (lines.size() < max) {
                             lines.add(line.toLowerCase(Locale.ENGLISH).trim());
                         }
                     }

@@ -938,10 +938,13 @@ public final class HttpClient implements AutoCloseable {
      *         (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a
      *         {@code null} key); the in-flight slot is not consumed
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String get(final Object queryParameters) throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+    public String get(final Object queryParameters)
+            throws IllegalArgumentException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return get(queryParameters, String.class);
     }
 
@@ -963,11 +966,13 @@ public final class HttpClient implements AutoCloseable {
      *         (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a
      *         {@code null} key); the in-flight slot is not consumed
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
     public String get(final Object queryParameters, final HttpSettings settings)
-            throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return get(queryParameters, settings, String.class);
     }
 
@@ -1031,12 +1036,14 @@ public final class HttpClient implements AutoCloseable {
      *         (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a
      *         {@code null} key); the in-flight slot is not consumed
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
      *         is not {@link HttpResponse}
      */
     public <T> T get(final Object queryParameters, final Class<T> resultClass)
-            throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return get(queryParameters, _settings, resultClass);
     }
 
@@ -1060,12 +1067,14 @@ public final class HttpClient implements AutoCloseable {
      *         (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a
      *         {@code null} key); the in-flight slot is not consumed
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
      *         is not {@link HttpResponse}
      */
     public <T> T get(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass)
-            throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.GET, queryParameters, settings, resultClass);
     }
 
@@ -1121,11 +1130,13 @@ public final class HttpClient implements AutoCloseable {
      *         (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a
      *         {@code null} key); the in-flight slot is not consumed
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
     public String delete(final Object queryParameters)
-            throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return delete(queryParameters, String.class);
     }
 
@@ -1147,11 +1158,13 @@ public final class HttpClient implements AutoCloseable {
      *         (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a
      *         {@code null} key); the in-flight slot is not consumed
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
     public String delete(final Object queryParameters, final HttpSettings settings)
-            throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return delete(queryParameters, settings, String.class);
     }
 
@@ -1216,12 +1229,14 @@ public final class HttpClient implements AutoCloseable {
      *         (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a
      *         {@code null} key); the in-flight slot is not consumed
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
      *         is not {@link HttpResponse}
      */
     public <T> T delete(final Object queryParameters, final Class<T> resultClass)
-            throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return delete(queryParameters, _settings, resultClass);
     }
 
@@ -1245,12 +1260,14 @@ public final class HttpClient implements AutoCloseable {
      *         (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a
      *         {@code null} key); the in-flight slot is not consumed
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
      *         is not {@link HttpResponse}
      */
     public <T> T delete(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass)
-            throws IllegalArgumentException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return execute(HttpMethod.DELETE, queryParameters, settings, resultClass);
     }
 
@@ -1520,11 +1537,13 @@ public final class HttpClient implements AutoCloseable {
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if the payload is routed to the URL as query parameters and is a {@code Map} with a non-{@code String}
+     *         key, or an {@code Object[]} with a non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String execute(final HttpMethod httpMethod, final Object request)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+    public String execute(final HttpMethod httpMethod, final Object request) throws IllegalArgumentException, UnsupportedOperationException,
+            RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return execute(httpMethod, request, String.class);
     }
 
@@ -1553,12 +1572,14 @@ public final class HttpClient implements AutoCloseable {
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if the payload is routed to the URL as query parameters and is a {@code Map} with a non-{@code String}
+     *         key, or an {@code Object[]} with a non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
      *         is not {@link HttpResponse}
      */
-    public <T> T execute(final HttpMethod httpMethod, final Object request, final Class<T> resultClass)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+    public <T> T execute(final HttpMethod httpMethod, final Object request, final Class<T> resultClass) throws IllegalArgumentException,
+            UnsupportedOperationException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return execute(httpMethod, request, _settings, resultClass);
     }
 
@@ -1587,11 +1608,13 @@ public final class HttpClient implements AutoCloseable {
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if the payload is routed to the URL as query parameters and is a {@code Map} with a non-{@code String}
+     *         key, or an {@code Object[]} with a non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
-    public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+    public String execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) throws IllegalArgumentException,
+            UnsupportedOperationException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         return execute(httpMethod, request, settings, String.class);
     }
 
@@ -1626,12 +1649,15 @@ public final class HttpClient implements AutoCloseable {
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if the payload is routed to the URL as query parameters and is a {@code Map} with a non-{@code String}
+     *         key, or an {@code Object[]} with a non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx and {@code resultClass}
      *         is not {@link HttpResponse}
      */
     public <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, ClassCastException, UncheckedIOException,
+            HttpResponseException {
         return execute(httpMethod, request, settings, resultClass, null, null, null, false);
     }
 
@@ -1675,11 +1701,13 @@ public final class HttpClient implements AutoCloseable {
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if the payload is routed to the URL as query parameters and is a {@code Map} with a non-{@code String}
+     *         key, or an {@code Object[]} with a non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
-    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final File output)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final File output) throws IllegalArgumentException,
+            UnsupportedOperationException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(output, cs.output);
 
@@ -1728,11 +1756,14 @@ public final class HttpClient implements AutoCloseable {
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if the payload is routed to the URL as query parameters and is a {@code Map} with a non-{@code String}
+     *         key, or an {@code Object[]} with a non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
     public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final OutputStream output)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, ClassCastException, UncheckedIOException,
+            HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(output, cs.output);
 
@@ -1781,11 +1812,13 @@ public final class HttpClient implements AutoCloseable {
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
      * @throws RejectedExecutionException if this client already has {@code maxConnection} requests in flight
+     * @throws ClassCastException if the payload is routed to the URL as query parameters and is a {@code Map} with a non-{@code String}
+     *         key, or an {@code Object[]} with a non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status code is not 2xx
      */
-    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Writer output)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+    public void execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Writer output) throws IllegalArgumentException,
+            UnsupportedOperationException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         N.checkArgNotNull(output, cs.output);
 
@@ -1825,12 +1858,13 @@ public final class HttpClient implements AutoCloseable {
      * @throws IllegalArgumentException if the HTTP method is null, query parameters cannot be encoded in the URL, or request content encoding conflicts with its content format
      * @throws UnsupportedOperationException if the method is PATCH or CONNECT, which HttpURLConnection does not support
      * @throws RejectedExecutionException if the maximum number of concurrent in-flight requests has been reached
+     * @throws ClassCastException if query parameters are a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a non-{@code String} name element
      * @throws UncheckedIOException if opening the connection, transmitting the request, or reading or writing the response fails
      * @throws HttpResponseException if the response status is not 2xx and the requested result type is not HttpResponse
      */
     private <T> T execute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass, final File outputFile,
-            final OutputStream outputStream, final Writer outputWriter, final boolean requestIsBody)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException, HttpResponseException {
+            final OutputStream outputStream, final Writer outputWriter, final boolean requestIsBody) throws IllegalArgumentException,
+            UnsupportedOperationException, RejectedExecutionException, ClassCastException, UncheckedIOException, HttpResponseException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
 
         // The payload is routed by HTTP method, not by argument type: body methods take it as a
@@ -1941,7 +1975,12 @@ public final class HttpClient implements AutoCloseable {
 
             // HEAD and these status codes have no response body, even when representation headers
             // describe compressed content. Opening a decompressor would fail on the empty stream.
-            is = HttpUtil.hasResponseBody(httpMethod.name(), statusCode) ? HttpUtil.getInputStream(connection, respContentFormat) : N.emptyInputStream();
+            // Only an HttpResponse result gets here with an error status. For a 4xx/5xx sent without a body,
+            // HttpURLConnection exposes no stream at all (getInputStream() throws, getErrorStream() is null):
+            // that is an empty body, not an I/O failure, so the response must still be returned for inspection.
+            is = HttpUtil.hasResponseBody(httpMethod.name(), statusCode) && (statusCode < 400 || connection.getErrorStream() != null)
+                    ? HttpUtil.getInputStream(connection, respContentFormat)
+                    : N.emptyInputStream();
 
             if (isOneWayRequest(settings, resultClass, outputFile, outputStream, outputWriter)) {
                 return null;
@@ -1970,7 +2009,7 @@ public final class HttpClient implements AutoCloseable {
                 return null;
             } else {
                 if (resultClass.equals(HttpResponse.class)) {
-                    return (T) new HttpResponse(connection.getURL().toString(), sentRequestAtMillis, System.currentTimeMillis(), statusCode,
+                    return (T) HttpResponse.withOwnedBody(connection.getURL().toString(), sentRequestAtMillis, System.currentTimeMillis(), statusCode,
                             connection.getResponseMessage(), respHeaders, IOUtil.readAllBytes(is), respContentFormat, respCharset);
                 } else {
                     if (resultClass.equals(String.class)) {
@@ -2279,10 +2318,12 @@ public final class HttpClient implements AutoCloseable {
      *         {@code get}/{@code delete}/{@code execute} overload that takes query parameters.
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if creating the connection or configuring its request method fails
      */
     public HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput)
-            throws IllegalArgumentException, UnsupportedOperationException, UncheckedIOException {
+            throws IllegalArgumentException, UnsupportedOperationException, ClassCastException, UncheckedIOException {
         return openConnection(httpMethod, queryParameters, settings, doOutput, false);
     }
 
@@ -2295,16 +2336,19 @@ public final class HttpClient implements AutoCloseable {
      * @param doOutput whether request-body output should be enabled
      * @param trackConnectionLimit whether to enforce/decrement the in-flight request counter
      * @return a configured HTTP connection
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, or {@code queryParameters} cannot be encoded as a
+     *         query (a pre-encoded {@code String} that is not valid URI syntax, or a {@code Map} with a {@code null} key).
      * @throws UnsupportedOperationException if {@code httpMethod} is {@link HttpMethod#PATCH} or
      *         {@link HttpMethod#CONNECT}, which {@link HttpURLConnection} cannot issue
      * @throws RejectedExecutionException if {@code trackConnectionLimit} is {@code true} and the
      *         in-flight request limit has been reached
+     * @throws ClassCastException if {@code queryParameters} is a {@code Map} with a non-{@code String} key, or an {@code Object[]} with a
+     *         non-{@code String} name element
      * @throws UncheckedIOException if creating the connection or configuring its request method fails
      */
     private HttpURLConnection openConnection(final HttpMethod httpMethod, final Object queryParameters, final HttpSettings settings, final boolean doOutput,
             final boolean trackConnectionLimit)
-            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, UncheckedIOException {
+            throws IllegalArgumentException, UnsupportedOperationException, RejectedExecutionException, ClassCastException, UncheckedIOException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
         // Validated before the in-flight slot is taken, so a method this client can never issue costs
         // neither a slot nor a socket. Every execute/asyncExecute route funnels through here.
@@ -2425,12 +2469,18 @@ public final class HttpClient implements AutoCloseable {
      * {@code Collection} on a field with its own list grammar - {@code Cookie}, whose cookie-pairs RFC 6265
      * &sect;5.4 separates with {@code "; "} - is not comma-joined into a malformed header line.</p>
      *
+     * <p>{@code settings} is only read: a settings object without headers is left without them.</p>
+     *
      * @param connection the HTTP URL connection to configure
      * @param settings the HTTP settings whose headers are to be applied
+     * @throws ArithmeticException if a header value is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      * @throws IllegalStateException if a request header is applied after the connection has already connected
      */
-    void setHttpProperties(final HttpURLConnection connection, final HttpSettings settings) throws IllegalStateException {
-        final HttpHeaders headers = settings.headers();
+    void setHttpProperties(final HttpURLConnection connection, final HttpSettings settings) throws ArithmeticException, IllegalStateException {
+        // Read-only access: headers() would create an empty HttpHeaders on a caller-supplied (possibly
+        // shared) settings object and flip its getContentFormat() from null to NONE, as settings(..) in
+        // HttpRequest already avoids.
+        final HttpHeaders headers = settings.headersOrNull();
 
         if (headers != null) {
             Object headerValue = null;
@@ -2487,8 +2537,10 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the response body
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncGet() {
+    public ContinuableFuture<String> asyncGet() throws RejectedExecutionException {
         return asyncGet(String.class);
     }
 
@@ -2506,8 +2558,10 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncGet(final HttpSettings settings) {
+    public ContinuableFuture<String> asyncGet(final HttpSettings settings) throws RejectedExecutionException {
         return asyncGet(settings, String.class);
     }
 
@@ -2525,8 +2579,10 @@ public final class HttpClient implements AutoCloseable {
      * @param queryParameters Query parameters appended to the URL: a pre-encoded query
      *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncGet(final Object queryParameters) {
+    public ContinuableFuture<String> asyncGet(final Object queryParameters) throws RejectedExecutionException {
         return asyncGet(queryParameters, String.class);
     }
 
@@ -2547,8 +2603,10 @@ public final class HttpClient implements AutoCloseable {
      *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncGet(final Object queryParameters, final HttpSettings settings) {
+    public ContinuableFuture<String> asyncGet(final Object queryParameters, final HttpSettings settings) throws RejectedExecutionException {
         return asyncGet(queryParameters, settings, String.class);
     }
 
@@ -2564,8 +2622,10 @@ public final class HttpClient implements AutoCloseable {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncGet(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncGet(null, _settings, resultClass);
     }
 
@@ -2585,8 +2645,10 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncGet(final HttpSettings settings, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncGet(final HttpSettings settings, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncGet(null, settings, resultClass);
     }
 
@@ -2605,8 +2667,10 @@ public final class HttpClient implements AutoCloseable {
      *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncGet(queryParameters, _settings, resultClass);
     }
 
@@ -2631,8 +2695,11 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncGet(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass)
+            throws RejectedExecutionException {
         return asyncExecute(HttpMethod.GET, queryParameters, settings, resultClass);
     }
 
@@ -2646,8 +2713,10 @@ public final class HttpClient implements AutoCloseable {
      * }</pre>
      *
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncDelete() {
+    public ContinuableFuture<String> asyncDelete() throws RejectedExecutionException {
         return asyncDelete(String.class);
     }
 
@@ -2664,8 +2733,10 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncDelete(final HttpSettings settings) {
+    public ContinuableFuture<String> asyncDelete(final HttpSettings settings) throws RejectedExecutionException {
         return asyncDelete(settings, String.class);
     }
 
@@ -2682,8 +2753,10 @@ public final class HttpClient implements AutoCloseable {
      * @param queryParameters Query parameters appended to the URL: a pre-encoded query
      *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncDelete(final Object queryParameters) {
+    public ContinuableFuture<String> asyncDelete(final Object queryParameters) throws RejectedExecutionException {
         return asyncDelete(queryParameters, String.class);
     }
 
@@ -2703,8 +2776,10 @@ public final class HttpClient implements AutoCloseable {
      *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param settings Additional HTTP settings for this request
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncDelete(final Object queryParameters, final HttpSettings settings) {
+    public ContinuableFuture<String> asyncDelete(final Object queryParameters, final HttpSettings settings) throws RejectedExecutionException {
         return asyncDelete(queryParameters, settings, String.class);
     }
 
@@ -2721,8 +2796,10 @@ public final class HttpClient implements AutoCloseable {
      * @param <T> The type of the response object
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncDelete(final Class<T> resultClass) throws RejectedExecutionException {
         return asyncDelete(null, _settings, resultClass);
     }
 
@@ -2741,8 +2818,10 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncDelete(final HttpSettings settings, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncDelete(final HttpSettings settings, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncDelete(null, settings, resultClass);
     }
 
@@ -2762,8 +2841,10 @@ public final class HttpClient implements AutoCloseable {
      *        {@code String}, a {@code Map}, or a bean. UTF-8 percent-encoded. May be {@code null}
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncDelete(queryParameters, _settings, resultClass);
     }
 
@@ -2785,8 +2866,11 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncDelete(final Object queryParameters, final HttpSettings settings, final Class<T> resultClass)
+            throws RejectedExecutionException {
         return asyncExecute(HttpMethod.DELETE, queryParameters, settings, resultClass);
     }
 
@@ -2802,8 +2886,10 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncPost(final Object request) {
+    public ContinuableFuture<String> asyncPost(final Object request) throws RejectedExecutionException {
         return asyncPost(request, String.class);
     }
 
@@ -2821,8 +2907,10 @@ public final class HttpClient implements AutoCloseable {
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncPost(final Object request, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPost(final Object request, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncPost(request, _settings, resultClass);
     }
 
@@ -2840,8 +2928,10 @@ public final class HttpClient implements AutoCloseable {
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncPost(final Object request, final HttpSettings settings) {
+    public ContinuableFuture<String> asyncPost(final Object request, final HttpSettings settings) throws RejectedExecutionException {
         return asyncPost(request, settings, String.class);
     }
 
@@ -2861,8 +2951,10 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncPost(final Object request, final HttpSettings settings, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPost(final Object request, final HttpSettings settings, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncExecute(HttpMethod.POST, request, settings, resultClass);
     }
 
@@ -2878,8 +2970,10 @@ public final class HttpClient implements AutoCloseable {
      *
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncPut(final Object request) {
+    public ContinuableFuture<String> asyncPut(final Object request) throws RejectedExecutionException {
         return asyncPut(request, String.class);
     }
 
@@ -2897,8 +2991,10 @@ public final class HttpClient implements AutoCloseable {
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncPut(final Object request, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPut(final Object request, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncPut(request, _settings, resultClass);
     }
 
@@ -2917,8 +3013,10 @@ public final class HttpClient implements AutoCloseable {
      * @param request The request body (can be String, byte[], File, InputStream, Reader, or any object for serialization)
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncPut(final Object request, final HttpSettings settings) {
+    public ContinuableFuture<String> asyncPut(final Object request, final HttpSettings settings) throws RejectedExecutionException {
         return asyncPut(request, settings, String.class);
     }
 
@@ -2946,8 +3044,10 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response object
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncPut(final Object request, final HttpSettings settings, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncPut(final Object request, final HttpSettings settings, final Class<T> resultClass) throws RejectedExecutionException {
         return asyncExecute(HttpMethod.PUT, request, settings, resultClass);
     }
 
@@ -2964,8 +3064,10 @@ public final class HttpClient implements AutoCloseable {
      * @return A ContinuableFuture that will complete with the {@link HttpResponse} containing the
      *         status code and headers (the body is empty for HEAD), or with {@code null} when the
      *         client-level settings mark requests as one-way ({@link HttpSettings#setOneWayRequest(boolean)})
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncHead() {
+    public ContinuableFuture<HttpResponse> asyncHead() throws RejectedExecutionException {
         return asyncHead(_settings);
     }
 
@@ -2984,8 +3086,10 @@ public final class HttpClient implements AutoCloseable {
      * @return A ContinuableFuture that will complete with the {@link HttpResponse} containing the
      *         status code and headers (the body is empty for HEAD), or with {@code null} when the
      *         effective settings mark the request as one-way ({@link HttpSettings#setOneWayRequest(boolean)})
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<HttpResponse> asyncHead(final HttpSettings settings) {
+    public ContinuableFuture<HttpResponse> asyncHead(final HttpSettings settings) throws RejectedExecutionException {
         return asyncExecute(HttpMethod.HEAD, null, settings, HttpResponse.class);
     }
 
@@ -3005,8 +3109,10 @@ public final class HttpClient implements AutoCloseable {
      *        parameters appended to the URL (pre-encoded {@code String}, {@code Map} or bean) for
      *        every other method. May be {@code null} for no payload
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request) {
+    public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request) throws RejectedExecutionException {
         return asyncExecute(httpMethod, request, String.class);
     }
 
@@ -3028,8 +3134,11 @@ public final class HttpClient implements AutoCloseable {
      *        every other method. May be {@code null} for no payload
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Object request, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Object request, final Class<T> resultClass)
+            throws RejectedExecutionException {
         return asyncExecute(httpMethod, request, _settings, resultClass);
     }
 
@@ -3052,8 +3161,11 @@ public final class HttpClient implements AutoCloseable {
      *        every other method. May be {@code null} for no payload
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @return A ContinuableFuture that will complete with the response body as a String
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings) {
+    public ContinuableFuture<String> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings)
+            throws RejectedExecutionException {
         return asyncExecute(httpMethod, request, settings, String.class);
     }
 
@@ -3078,8 +3190,11 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param resultClass The class of the expected response object (for deserialization)
      * @return A ContinuableFuture that will complete with the deserialized response
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass) {
+    public <T> ContinuableFuture<T> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Class<T> resultClass)
+            throws RejectedExecutionException {
         final Callable<T> cmd = () -> execute(httpMethod, request, settings, resultClass);
 
         return _asyncExecutor.execute(cmd);
@@ -3105,8 +3220,11 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The file to write the response to
      * @return a ContinuableFuture that completes after the response has been written to the file
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final File output) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final File output)
+            throws RejectedExecutionException {
         final Callable<Void> cmd = () -> {
             execute(httpMethod, request, settings, output);
 
@@ -3136,8 +3254,11 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The output stream to write the response to
      * @return a ContinuableFuture that completes after the response has been written to the stream
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final OutputStream output) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final OutputStream output)
+            throws RejectedExecutionException {
         final Callable<Void> cmd = () -> {
             execute(httpMethod, request, settings, output);
 
@@ -3166,8 +3287,11 @@ public final class HttpClient implements AutoCloseable {
      * @param settings Additional HTTP settings for this request (headers, timeouts, etc.)
      * @param output The writer to write the response to
      * @return a ContinuableFuture that completes after the response has been written to the writer
+     * @throws RejectedExecutionException if this client's asynchronous executor refuses the task, for example a bounded executor whose queue is
+     *         full; exceeding {@code maxConnection} is instead reported through the returned future
      */
-    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Writer output) {
+    public ContinuableFuture<Void> asyncExecute(final HttpMethod httpMethod, final Object request, final HttpSettings settings, final Writer output)
+            throws RejectedExecutionException {
         final Callable<Void> cmd = () -> {
             execute(httpMethod, request, settings, output);
 
@@ -3194,8 +3318,8 @@ public final class HttpClient implements AutoCloseable {
      * }   // close() is called automatically
      *
      * HttpClient client = HttpClient.create("https://example.com/api");
-     * client.close();   // releases owned resources; safe to call more than once
-     * client.close();   // idempotent: a second call is a no-op and never throws
+     * client.close();  // releases owned resources; safe to call more than once
+     * client.close();  // idempotent: a second call is a no-op and never throws
      * }</pre>
      *
      */

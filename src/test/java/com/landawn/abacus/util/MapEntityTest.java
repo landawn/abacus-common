@@ -580,4 +580,15 @@ public class MapEntityTest extends TestBase {
         assertNull(new MapEntity("U").get("absent", String.class));
     }
 
+    @Test
+    public void testGetWithNullTargetTypeNamesTargetTypeForAbsentProperty() {
+        final MapEntity entity = new MapEntity("User");
+
+        final IllegalArgumentException ex = Assertions.assertThrows(IllegalArgumentException.class, () -> entity.get("age", (Class<Object>) null));
+        assertTrue(ex.getMessage().contains("targetType"), ex.getMessage());
+
+        entity.set("age", 25);
+        final IllegalArgumentException ex2 = Assertions.assertThrows(IllegalArgumentException.class, () -> entity.get("age", (Class<Object>) null));
+        assertTrue(ex2.getMessage().contains("targetType"), ex2.getMessage());
+    }
 }

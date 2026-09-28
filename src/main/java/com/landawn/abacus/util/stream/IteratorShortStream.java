@@ -14,10 +14,11 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.math.BigInteger;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -134,8 +135,8 @@ class IteratorShortStream extends AbstractShortStream {
      *
      * IteratorShortStream stream = new IteratorShortStream(sortedIterator, true, closeHandlers);
      * try {
-     *     OptionalShort min = stream.min();           // returns the first element (optimized for sorted input)
-     *     System.out.println("Min: " + min.get());    // prints 1
+     *     OptionalShort min = stream.min();         // returns the first element (optimized for sorted input)
+     *     System.out.println("Min: " + min.get());  // prints 1
      * } finally {
      *     stream.close();
      * }
@@ -681,10 +682,22 @@ class IteratorShortStream extends AbstractShortStream {
                 }
             }, isSorted());
         } else {
-            final Set<Object> set = N.newHashSet();
+            // A short has only 65536 possible values: a BitSet indexed by the unsigned value (at most 8 KB, grown only up
+            // to the largest index seen) replaces a boxed HashSet, which cost a hash lookup and (outside -128..127) a Short
+            // allocation per element, plus a node per distinct value.
+            final BitSet seen = new BitSet();
 
             // noinspection resource
-            return newStream(sequential().filter(set::add).iteratorEx(), isSorted());
+            return newStream(sequential().filter(value -> {
+                final int index = value & 0xFFFF;
+
+                if (seen.get(index)) {
+                    return false;
+                }
+
+                seen.set(index);
+                return true;
+            }).iteratorEx(), isSorted());
         }
     }
 
@@ -834,7 +847,9 @@ class IteratorShortStream extends AbstractShortStream {
             private short[] aar;
             private int cursor = 0;
             private int to;
-            private LinkedList<Short> queue;
+            private ShortList window;
+            // Index of the oldest retained value once full; preserve it across failed source pulls.
+            private int windowCursor;
             private Queue<Short> heap;
 
             @Override
@@ -905,19 +920,30 @@ class IteratorShortStream extends AbstractShortStream {
                 if (!initialized) {
                     // Keep the window/heap across retries so a failed source read does not drop already-accepted candidates.
                     if (isSorted() && isSameComparator(comparator, comparator())) {
-                        if (queue == null) {
-                            queue = new LinkedList<>();
+                        if (window == null) {
+                            window = new ShortList(Math.min(n, 16));
                         }
 
                         while (elements.hasNext()) {
-                            if (queue.size() >= n) {
-                                queue.poll();
+                            final short next = elements.nextShort();
+                            if (window.size() < n) {
+                                window.add(next);
+                            } else {
+                                window.set(windowCursor, next);
+                                if (++windowCursor == n) {
+                                    windowCursor = 0;
+                                }
                             }
-
-                            queue.offer(elements.nextShort());
                         }
 
-                        aar = Array.unbox(queue.toArray(N.EMPTY_SHORT_OBJ_ARRAY));
+                        aar = new short[window.size()];
+                        int outputIndex = 0;
+                        for (int i = windowCursor; i < window.size(); i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
+                        for (int i = 0; i < windowCursor; i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
                     } else {
                         final Comparator<? super Short> cmp = comparator;
                         if (heap == null) {
@@ -942,7 +968,7 @@ class IteratorShortStream extends AbstractShortStream {
                     }
 
                     to = aar.length;
-                    queue = null;
+                    window = null;
                     heap = null;
                     initialized = true;
                 }
@@ -982,6 +1008,9 @@ class IteratorShortStream extends AbstractShortStream {
             while (elements.hasNext()) {
                 action.accept(elements.nextShort());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -993,6 +1022,12 @@ class IteratorShortStream extends AbstractShortStream {
 
         try {
             return elements.toArray();
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1006,6 +1041,9 @@ class IteratorShortStream extends AbstractShortStream {
 
         try {
             return elements.toList();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1026,19 +1064,23 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public <C extends Collection<Short>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Short>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextShort());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1052,19 +1094,23 @@ class IteratorShortStream extends AbstractShortStream {
     }
 
     @Override
-    public Multiset<Short> toMultiset(final Supplier<? extends Multiset<Short>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Short> toMultiset(final Supplier<? extends Multiset<Short>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Short> result = supplier.get();
+            final Multiset<Short> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextShort());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1073,7 +1119,7 @@ class IteratorShortStream extends AbstractShortStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ShortFunction<? extends K, E> keyMapper,
             final Throwables.ShortFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1082,7 +1128,7 @@ class IteratorShortStream extends AbstractShortStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
             short next = 0;
 
             while (elements.hasNext()) {
@@ -1091,6 +1137,9 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1098,7 +1147,8 @@ class IteratorShortStream extends AbstractShortStream {
 
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.ShortFunction<? extends K, E> keyMapper,
-            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1106,7 +1156,7 @@ class IteratorShortStream extends AbstractShortStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Short> downstreamAccumulator = (BiConsumer<Object, ? super Short>) downstream.accumulator();
@@ -1119,7 +1169,7 @@ class IteratorShortStream extends AbstractShortStream {
 
             while (elements.hasNext()) {
                 next = elements.nextShort();
-                key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1134,6 +1184,9 @@ class IteratorShortStream extends AbstractShortStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1153,6 +1206,9 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1176,6 +1232,9 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1183,7 +1242,7 @@ class IteratorShortStream extends AbstractShortStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjShortConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1191,13 +1250,16 @@ class IteratorShortStream extends AbstractShortStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 accumulator.accept(result, elements.nextShort());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1226,6 +1288,9 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1260,6 +1325,9 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1290,7 +1358,10 @@ class IteratorShortStream extends AbstractShortStream {
                         window[size++] = v;
                     } else {
                         window[idx] = v;
-                        idx = (idx + 1) % k;
+                        // Wrap with a compare instead of a per-element integer division ('%' by a non-constant k).
+                        if (++idx == k) {
+                            idx = 0;
+                        }
                     }
                 }
                 if (size < k) {
@@ -1307,6 +1378,9 @@ class IteratorShortStream extends AbstractShortStream {
             final Optional<Short> optional = boxed().kthLargest(k, SHORT_COMPARATOR);
 
             return optional.isPresent() ? OptionalShort.of(optional.get()) : OptionalShort.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1317,13 +1391,37 @@ class IteratorShortStream extends AbstractShortStream {
         assertNotClosed();
 
         try {
-            long result = 0;
+            long sum = 0;
+            long carry = 0; // number of times 'sum' wrapped, in units of 2^64 (signed)
 
             while (elements.hasNext()) {
-                result += elements.nextShort();
+                // An iterator-backed stream can hold more than 2^48 elements, so the long accumulator itself can wrap.
+                // Math.addExact threw "long overflow" as soon as a PARTIAL sum left the long range,
+                // even when the exact total fits the documented int. Same wrap-safe accumulation as average(): detect the
+                // wrap with the addExact bit test (no exception, no allocation per element) and count it, so the exact
+                // total is carry * 2^64 + sum and the documented ArithmeticException is thrown only for a total outside
+                // the int range.
+                final short value = elements.nextShort();
+                final long r = sum + value;
+
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
+                }
+
+                sum = r;
             }
 
-            return Numbers.toIntExact(result);
+            if (carry != 0) {
+                // The exact total carry * 2^64 + sum (with sum in the long range) is at least 2^63 in magnitude, so it
+                // cannot fit an int; same message as Math.toIntExact below. Reaching this branch takes more than
+                // 2^48 elements, which no unit test can afford (see PrimitiveStreamsReview20260925Test).
+                throw new ArithmeticException("integer overflow");
+            }
+
+            return Numbers.toIntExact(sum);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1339,14 +1437,26 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             long sum = 0;
+            long carry = 0; // overflow of sum, in units of 2^64; stays 0 unless there are more than about 2^48 elements
             long count = 0;
 
             do {
-                sum += elements.nextShort();
+                final short value = elements.nextShort();
+                final long r = sum + value;
+
+                // Math.addExact's overflow test, inlined so that the carry is kept instead of throwing.
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
+                }
+
+                sum = r;
                 count++;
             } while (elements.hasNext());
 
-            return OptionalDouble.of(((double) sum) / count);
+            return OptionalDouble.of((carry == 0 ? (double) sum : BigInteger.valueOf(carry).shiftLeft(64).add(BigInteger.valueOf(sum)).doubleValue()) / count);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1358,6 +1468,9 @@ class IteratorShortStream extends AbstractShortStream {
 
         try {
             return elements.count();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1375,6 +1488,9 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1392,6 +1508,9 @@ class IteratorShortStream extends AbstractShortStream {
                     return true;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1411,6 +1530,9 @@ class IteratorShortStream extends AbstractShortStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1430,6 +1552,9 @@ class IteratorShortStream extends AbstractShortStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1452,6 +1577,9 @@ class IteratorShortStream extends AbstractShortStream {
                     return OptionalShort.of(e);
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1485,6 +1613,9 @@ class IteratorShortStream extends AbstractShortStream {
             }
 
             return hasResult ? OptionalShort.of(result) : OptionalShort.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

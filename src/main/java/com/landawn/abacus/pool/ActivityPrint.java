@@ -108,11 +108,11 @@ public final class ActivityPrint implements Cloneable, Serializable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ActivityPrint activity = new ActivityPrint(3600000, 600000);   // 1 hour live, 10 min idle
-     * activity.getMaxLiveTime();                                     // returns 3600000
-     * activity.getMaxIdleTime();                                     // returns 600000
-     * new ActivityPrint(0, 600000);                                  // throws IllegalArgumentException (maxLiveTime not positive)
-     * new ActivityPrint(3600000, -1);                                // throws IllegalArgumentException (maxIdleTime not positive)
+     * ActivityPrint activity = new ActivityPrint(3600000, 600000);  // 1 hour live, 10 min idle
+     * activity.getMaxLiveTime();                                    // returns 3600000
+     * activity.getMaxIdleTime();                                    // returns 600000
+     * new ActivityPrint(0, 600000);                                 // throws IllegalArgumentException (maxLiveTime not positive)
+     * new ActivityPrint(3600000, -1);                               // throws IllegalArgumentException (maxIdleTime not positive)
      * }</pre>
      *
      * @param maxLiveTime maximum lifetime in milliseconds (must be positive)

@@ -97,14 +97,14 @@ public final class LoggerFactory {
      * }
      * }</pre>
      *
-     * @param clazz the class for which to get the logger; must not be {@code null}
+     * @param targetClass the class for which to get the logger; must not be {@code null}
      * @return a Logger instance for the specified class
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      */
-    public static Logger getLogger(final Class<?> clazz) throws IllegalArgumentException {
-        N.checkArgNotNull(clazz, cs.clazz);
+    public static Logger getLogger(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return getLogger(clazz.getName());
+        return getLogger(targetClass.getName());
     }
 
     /**

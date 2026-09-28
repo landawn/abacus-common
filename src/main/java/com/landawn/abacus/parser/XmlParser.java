@@ -50,11 +50,15 @@ import com.landawn.abacus.type.Type;
  * An explicit {@code isNull="true"} marker bypasses scalar conversion.</p>
  *
  * <p>That rule covers array and collection element wrappers only. An empty <i>named</i> bean-property leaf
- * element is still read differently by the two backends: for {@code <name/>} (or {@code <name></name>}) the DOM
- * reader converts the element's empty text content through {@code valueOf("")}, while the StAX reader observes no
+ * element is still read differently by the two backends of the standard XML parser
+ * ({@link ParserFactory#createXmlParser()}): for {@code <name/>} (or {@code <name></name>}) its DOM
+ * reader converts the element's empty text content through {@code valueOf("")}, while its StAX reader observes no
  * character content and stores the property type's {@code defaultValue()}. The two agree wherever those two
  * answers agree - notably every numeric, boolean and character type, boxed or not - and differ for {@code String},
- * where DOM yields {@code ""} and StAX yields {@code null}. Write {@code isNull="true"} when a {@code null}
+ * where DOM yields {@code ""} and StAX yields {@code null}. The Abacus XML parser
+ * ({@link ParserFactory#createAbacusXmlParser()}) yields {@code ""} for such a {@code String} with every backend. For a property with a
+ * {@code numberFormat} the DOM and SAX readers pass the empty text to that format, which rejects it with a
+ * {@link ParsingException}, while the StAX readers store the type's default. Write {@code isNull="true"} when a {@code null}
  * property is intended, and a non-empty value otherwise.</p>
  *
  * <p><b>Usage Examples:</b></p>
@@ -117,8 +121,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @return the deserialized object of type {@code T}
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is null.
      * @throws ParsingException if the XML structure does not match the target type
+     * @throws UnsupportedOperationException if this parser does not support deserialization from a DOM {@code Node}
      */
-    <T> T deserialize(Node source, Type<? extends T> targetType) throws IllegalArgumentException, ParsingException;
+    <T> T deserialize(Node source, Type<? extends T> targetType) throws IllegalArgumentException, ParsingException, UnsupportedOperationException;
 
     /**
      * Deserializes an XML DOM node to an object of the specified type using default deserialization configuration.
@@ -143,8 +148,9 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @return the deserialized object of type {@code T}
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is null.
      * @throws ParsingException if the XML structure does not match the target type
+     * @throws UnsupportedOperationException if this parser does not support deserialization from a DOM {@code Node}
      */
-    <T> T deserialize(Node source, Class<? extends T> targetType) throws IllegalArgumentException, ParsingException;
+    <T> T deserialize(Node source, Class<? extends T> targetType) throws IllegalArgumentException, ParsingException, UnsupportedOperationException;
 
     /**
      * Deserializes an XML DOM node to an object of the specified type with custom deserialization configuration.
@@ -174,8 +180,10 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @return the deserialized object of type {@code T}
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is null.
      * @throws ParsingException if the XML structure does not match the target type
+     * @throws UnsupportedOperationException if this parser does not support deserialization from a DOM {@code Node}
      */
-    <T> T deserialize(Node source, XmlDeserConfig config, Type<? extends T> targetType) throws IllegalArgumentException, ParsingException;
+    <T> T deserialize(Node source, XmlDeserConfig config, Type<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException;
 
     /**
      * Deserializes an XML DOM node to an object of the specified type with custom deserialization configuration.
@@ -204,8 +212,10 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @return the deserialized object of type {@code T}
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is null.
      * @throws ParsingException if the XML structure does not match the target type
+     * @throws UnsupportedOperationException if this parser does not support deserialization from a DOM {@code Node}
      */
-    <T> T deserialize(Node source, XmlDeserConfig config, Class<? extends T> targetType) throws IllegalArgumentException, ParsingException;
+    <T> T deserialize(Node source, XmlDeserConfig config, Class<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException;
 
     /**
      * Deserializes XML from a file using node class mappings for dynamic type resolution.
@@ -240,9 +250,10 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @throws UncheckedIOException if opening {@code source} fails, or the selected XML backend reports an {@code IOException} while
      *         reading the XML file
      * @throws ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
+     * @throws UnsupportedOperationException if this parser does not support node-typed deserialization
      */
     <T> T deserialize(File source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes)
-            throws IllegalArgumentException, UncheckedIOException, ParsingException;
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException;
 
     /**
      * Deserializes XML from an input stream using node class mappings for dynamic type resolution.
@@ -274,10 +285,13 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
      * @throws UncheckedIOException if the selected XML backend reports an {@code IOException} while reading XML from {@code source}
+     * @throws UnsupportedOperationException if this parser does not support node-typed deserialization
      */
-    <T> T deserialize(InputStream source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes) throws ParsingException, UncheckedIOException;
+    <T> T deserialize(InputStream source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes)
+            throws IllegalArgumentException, ParsingException, UncheckedIOException, UnsupportedOperationException;
 
     /**
      * Deserializes XML from a reader using node class mappings for dynamic type resolution.
@@ -312,10 +326,14 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types (must not be {@code null})
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null} and the parser uses the StAX backend (a DOM or SAX
+     *         backend reports a {@code null} reader as an {@code UncheckedIOException})
      * @throws ParsingException if no matching type is found in {@code nodeTypes} or the XML is malformed
      * @throws UncheckedIOException if the selected XML backend reports an {@code IOException} while reading XML from {@code source}
+     * @throws UnsupportedOperationException if this parser does not support node-typed deserialization
      */
-    <T> T deserialize(Reader source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes) throws ParsingException, UncheckedIOException;
+    <T> T deserialize(Reader source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes)
+            throws ParsingException, UncheckedIOException, UnsupportedOperationException;
 
     /**
      * Deserializes an XML DOM node using node class mappings for dynamic type resolution.
@@ -355,6 +373,8 @@ public interface XmlParser extends Parser<XmlSerConfig, XmlDeserConfig> {
      * @return the deserialized object of type {@code T}
      * @throws IllegalArgumentException if {@code source} is null.
      * @throws ParsingException if no matching type is found in {@code nodeTypes} or the XML structure is invalid
+     * @throws UnsupportedOperationException if this parser does not support node-typed deserialization
      */
-    <T> T deserialize(Node source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes) throws IllegalArgumentException, ParsingException;
+    <T> T deserialize(Node source, XmlDeserConfig config, Map<String, Type<?>> nodeTypes)
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException;
 }

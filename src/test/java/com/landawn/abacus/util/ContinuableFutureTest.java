@@ -1168,4 +1168,92 @@ public class ContinuableFutureTest extends ContinuableFutureTestSupport {
             executor.shutdownNow();
         }
     }
+
+    @Test
+    @Timeout(20)
+    public void testThenRunAsyncBiConsumerInterruptedWorkerDoesNotFabricateUpstreamFailure() throws Exception {
+        final CompletableFuture<String> pending = new CompletableFuture<>();
+        final AtomicReference<Thread> worker = new AtomicReference<>();
+        final Executor threadPerTask = r -> {
+            final Thread t = new Thread(r);
+            t.setDaemon(true);
+            worker.set(t);
+            t.start();
+        };
+        final AtomicInteger calls = new AtomicInteger();
+
+        try {
+            final ContinuableFuture<Void> stage = ContinuableFuture.wrap(pending)
+                    .thenUse(threadPerTask)
+                    .thenRunAsync((value, error) -> calls.incrementAndGet());
+
+            final Thread t = worker.get();
+            final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (t.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+                Thread.sleep(5);
+            }
+            assertEquals(Thread.State.WAITING, t.getState());
+            t.interrupt();
+
+            final ExecutionException failure = assertThrows(ExecutionException.class, () -> stage.get(5, TimeUnit.SECONDS));
+            assertTrue(failure.getCause() instanceof InterruptedException);
+            assertEquals(0, calls.get());
+            assertFalse(pending.isDone());
+        } finally {
+            pending.complete("cleanup");
+        }
+    }
+
+    @Test
+    @Timeout(20)
+    public void testThenCallAsyncBiFunctionInterruptedWorkerDoesNotFabricateUpstreamFailure() throws Exception {
+        final CompletableFuture<String> pending = new CompletableFuture<>();
+        final AtomicReference<Thread> worker = new AtomicReference<>();
+        final Executor threadPerTask = r -> {
+            final Thread t = new Thread(r);
+            t.setDaemon(true);
+            worker.set(t);
+            t.start();
+        };
+        final AtomicInteger calls = new AtomicInteger();
+
+        try {
+            final ContinuableFuture<String> stage = ContinuableFuture.wrap(pending)
+                    .thenUse(threadPerTask)
+                    .thenCallAsync((value, error) -> {
+                        calls.incrementAndGet();
+                        return "recovered";
+                    });
+
+            final Thread t = worker.get();
+            final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+            while (t.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+                Thread.sleep(5);
+            }
+            assertEquals(Thread.State.WAITING, t.getState());
+            t.interrupt();
+
+            final ExecutionException failure = assertThrows(ExecutionException.class, () -> stage.get(5, TimeUnit.SECONDS));
+            assertTrue(failure.getCause() instanceof InterruptedException);
+            assertEquals(0, calls.get());
+            assertFalse(pending.isDone());
+        } finally {
+            pending.complete("cleanup");
+        }
+    }
+
+    @Test
+    @Timeout(20)
+    public void testThenCallAsyncBiFunctionStillReceivesGenuineUpstreamFailure() throws Exception {
+        final ContinuableFuture<String> failed = ContinuableFuture.call(() -> {
+            throw new IllegalStateException("boom");
+        });
+
+        assertEquals("recovered:boom", failed.thenCallAsync((value, error) -> "recovered:" + error.getMessage()).get(5, TimeUnit.SECONDS));
+
+        final AtomicReference<Exception> seen = new AtomicReference<>();
+        failed.thenRunAsync((value, error) -> seen.set(error)).get(5, TimeUnit.SECONDS);
+        assertTrue(seen.get() instanceof IllegalStateException);
+        assertEquals("ok!", ContinuableFuture.completed("ok").thenCallAsync((value, error) -> error == null ? value + "!" : "bad").get(5, TimeUnit.SECONDS));
+    }
 }

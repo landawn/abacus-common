@@ -274,15 +274,15 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template
-     * @param args the arguments to be substituted in the template
+     * @param arguments the arguments to be substituted in the template
      * @deprecated Prefer {@link #trace(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
     @Override
-    public final void trace(final String template, final Object... args) {
+    public final void trace(final String template, final Object... arguments) {
         if (isTraceEnabled()) {
-            log(LogLevel.TRACE, format(template, args));
+            log(LogLevel.TRACE, format(template, arguments));
         }
     }
 
@@ -616,15 +616,15 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template
-     * @param args the arguments to be substituted in the template
+     * @param arguments the arguments to be substituted in the template
      * @deprecated Prefer {@link #debug(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
     @Override
-    public final void debug(final String template, final Object... args) {
+    public final void debug(final String template, final Object... arguments) {
         if (isDebugEnabled()) {
-            log(LogLevel.DEBUG, format(template, args));
+            log(LogLevel.DEBUG, format(template, arguments));
         }
     }
 
@@ -959,15 +959,15 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template
-     * @param args the arguments to be substituted in the template
+     * @param arguments the arguments to be substituted in the template
      * @deprecated Prefer {@link #info(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
     @Override
-    public final void info(final String template, final Object... args) {
+    public final void info(final String template, final Object... arguments) {
         if (isInfoEnabled()) {
-            log(LogLevel.INFO, format(template, args));
+            log(LogLevel.INFO, format(template, arguments));
         }
     }
 
@@ -1302,15 +1302,15 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template
-     * @param args the arguments to be substituted in the template
+     * @param arguments the arguments to be substituted in the template
      * @deprecated Prefer {@link #warn(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
     @Override
-    public final void warn(final String template, final Object... args) {
+    public final void warn(final String template, final Object... arguments) {
         if (isWarnEnabled()) {
-            log(LogLevel.WARN, format(template, args));
+            log(LogLevel.WARN, format(template, arguments));
         }
     }
 
@@ -1645,15 +1645,15 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template
-     * @param args the arguments to be substituted in the template
+     * @param arguments the arguments to be substituted in the template
      * @deprecated Prefer {@link #error(Supplier)} to construct the message only when the level is enabled
      */
     @Deprecated
     @SafeVarargs
     @Override
-    public final void error(final String template, final Object... args) {
+    public final void error(final String template, final Object... arguments) {
         if (isErrorEnabled()) {
-            log(LogLevel.ERROR, format(template, args));
+            log(LogLevel.ERROR, format(template, arguments));
         }
     }
 
@@ -2085,13 +2085,13 @@ public abstract class AbstractLogger implements Logger {
      * Formats a message template with variable number of arguments.
      *
      * <p>Substitutes each {@code {}} or {@code %s} in the template with an argument. These are matched by
-     * position: the first placeholder gets {@code args[0]}, etc. If the template contains {@code {}},
+     * position: the first placeholder gets {@code arguments[0]}, etc. If the template contains {@code {}},
      * that style is used; otherwise {@code %s} is tried. The two styles cannot be mixed in a single
      * template. If there are more arguments than placeholders, the unmatched arguments will be
      * appended to the end of the formatted message in square brackets; if there are fewer, the unmatched
      * placeholders stay in the output verbatim. {@code %s} is matched literally (other printf conversions
      * are plain text), there is no escape sequence, and substituted arguments are never re-scanned for
-     * placeholders. An empty or {@code null} {@code args} array leaves the template unchanged.</p>
+     * placeholders. An empty or {@code null} {@code arguments} array leaves the template unchanged.</p>
      *
      * <p><b>Note:</b> calls with one, two or three individual arguments bind to the fixed-arity
      * {@code format} overloads. This overload accepts zero or four or more individual arguments,
@@ -2106,20 +2106,20 @@ public abstract class AbstractLogger implements Logger {
      * }</pre>
      *
      * @param template the message template containing 0 or more {@code {}} or {@code %s} placeholders, may be {@code null} (converted to "null")
-     * @param args the arguments to be substituted into the message template. Arguments
+     * @param arguments the arguments to be substituted into the message template. Arguments
      *     are converted to strings using {@code N.toString(Object)}; an argument whose {@code toString()} throws is
      *     rendered as a {@code [FAILED toString() of ...]} marker. Arguments can be {@code null}.
      * @return the formatted message
      */
-    static String format(String template, final Object... args) {
+    static String format(String template, final Object... arguments) {
         template = String.valueOf(template); // null -> "null"
 
-        if (N.isEmpty(args)) {
+        if (N.isEmpty(arguments)) {
             return template;
         }
 
         // start substituting the arguments into the '{}' or '%s' placeholders
-        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16 * args.length);
+        final StringBuilder sb = Objectory.createStringBuilder(template.length() + 16 * arguments.length);
 
         try {
             int templateStart = 0;
@@ -2133,9 +2133,9 @@ public abstract class AbstractLogger implements Logger {
                 placeholderStart = template.indexOf(placeholder);
             }
 
-            while (placeholderStart >= 0 && i < args.length) {
+            while (placeholderStart >= 0 && i < arguments.length) {
                 sb.append(template, templateStart, placeholderStart);
-                sb.append(toStringSafe(args[i++]));
+                sb.append(toStringSafe(arguments[i++]));
                 templateStart = placeholderStart + placeholder.length();
                 placeholderStart = template.indexOf(placeholder, templateStart);
             }
@@ -2143,12 +2143,12 @@ public abstract class AbstractLogger implements Logger {
             sb.append(template, templateStart, template.length());
 
             // if we run out of placeholders, append the extra args in square braces
-            if (i < args.length) {
+            if (i < arguments.length) {
                 sb.append(" [");
-                sb.append(toStringSafe(args[i++]));
-                while (i < args.length) {
+                sb.append(toStringSafe(arguments[i++]));
+                while (i < arguments.length) {
                     sb.append(", ");
-                    sb.append(toStringSafe(args[i++]));
+                    sb.append(toStringSafe(arguments[i++]));
                 }
                 sb.append(']');
             }

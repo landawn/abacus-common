@@ -29,6 +29,8 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.TreeMap;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -92,8 +94,8 @@ import com.landawn.abacus.annotation.Internal;
  *
  * // Bijective constraint enforcement
  * // userIdMap.put("david", 1001);   // Would throw IllegalArgumentException: value 1001 already exists
- * userIdMap.forcePut("david", 1001);   // forces mapping, removes "alice" -> 1001
- * userIdMap.forcePut("eve", 1002);     // forces mapping, removes conflicting entries
+ * userIdMap.forcePut("david", 1001);  // forces mapping, removes "alice" -> 1001
+ * userIdMap.forcePut("eve", 1002);    // forces mapping, removes conflicting entries
  *
  * // Builder pattern for complex construction
  * BiMap<String, String> countryMap = BiMap.<String, String>builder()
@@ -454,11 +456,12 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * @param keyMapType the Class object representing the type of Map to be used for storing keys; must not be {@code null}
      * @param valueMapType the Class object representing the type of Map to be used for storing values; must not be {@code null}
-     * @throws IllegalArgumentException if either map type is {@code null} or has no supported construction path, or the resulting suppliers return null, non-empty, or identical map instances
+     * @throws IllegalArgumentException if either map type is {@code null} or has no supported construction path, or the resulting suppliers return non-empty or identical map instances
+     * @throws NullPointerException if either resulting supplier returns {@code null}
      */
     @SuppressWarnings("rawtypes")
-    public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) throws IllegalArgumentException {
-        this(Suppliers.ofMap(keyMapType), Suppliers.ofMap(valueMapType));
+    public BiMap(final Class<? extends Map> keyMapType, final Class<? extends Map> valueMapType) throws IllegalArgumentException, NullPointerException {
+        this(Suppliers.ofMap(N.checkArgNotNull(keyMapType, cs.keyMapType)), Suppliers.ofMap(N.checkArgNotNull(valueMapType, cs.valueMapType)));
     }
 
     /**
@@ -474,15 +477,16 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param keyMapSupplier the supplier of the empty map used for key-to-value mappings; must not be {@code null}
      * @param valueMapSupplier the supplier of the empty map used for value-to-key mappings; must not be {@code null}
      * @throws IllegalArgumentException if {@code keyMapSupplier} or {@code valueMapSupplier} is {@code null}, or if
-     *         a map returned by either supplier is {@code null}, or if a returned map is nonempty or both suppliers
-     *         return the same map instance.
+     *         a returned map is nonempty or both suppliers return the same map instance.
+     * @throws NullPointerException if a map returned by either supplier is {@code null}.
      */
-    public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier) throws IllegalArgumentException {
+    public BiMap(final Supplier<? extends Map<K, V>> keyMapSupplier, final Supplier<? extends Map<V, K>> valueMapSupplier)
+            throws IllegalArgumentException, NullPointerException {
         N.checkArgNotNull(keyMapSupplier, cs.keyMapSupplier);
         N.checkArgNotNull(valueMapSupplier, cs.valueMapSupplier);
 
-        final Map<K, V> suppliedKeyMap = N.checkArgNotNull(keyMapSupplier.get(), "keyMapSupplier.get()");
-        final Map<V, K> suppliedValueMap = N.checkArgNotNull(valueMapSupplier.get(), "valueMapSupplier.get()");
+        final Map<K, V> suppliedKeyMap = N.requireNonNull(keyMapSupplier.get(), "keyMapSupplier.get()");
+        final Map<V, K> suppliedValueMap = N.requireNonNull(valueMapSupplier.get(), "valueMapSupplier.get()");
 
         if (suppliedKeyMap == suppliedValueMap) {
             throw new IllegalArgumentException("The suppliers must return distinct map instances");
@@ -1032,9 +1036,15 @@ public final class BiMap<K, V> implements Map<K, V> {
      *
      * <p><b>Iteration order is best-effort, not guaranteed.</b> For any other source this method mirrors the
      * source's runtime map class, so a {@link java.util.LinkedHashMap} or {@link java.util.SortedMap} source
-     * does keep its order (a {@code SortedMap}'s comparator included). A source whose class cannot be
-     * instantiated reflectively - {@code Collections.unmodifiableMap(aLinkedHashMap)}, for instance - falls
-     * back to a {@link HashMap}, and its order is then lost. Supply explicit map suppliers to
+     * does keep its order (a {@code SortedMap}'s comparator included; a
+     * {@link java.util.concurrent.ConcurrentNavigableMap} source yields a
+     * {@link java.util.concurrent.ConcurrentSkipListMap}, in the copy's key map and in every {@link #copy()}
+     * and {@link #inverse()} made from it). A source whose class cannot be instantiated reflectively
+     * through a no-argument constructor - {@code Collections.unmodifiableMap(aLinkedHashMap)}, for instance - is copied into a
+     * {@code LinkedHashMap} that keeps the source's encounter order; only key semantics hidden behind such a
+     * wrapper (a comparator, identity equivalence) are lost. The value-to-key map is a {@link HashMap} for a
+     * {@code HashMap} source and a {@code LinkedHashMap} otherwise: the source's key handling cannot apply to
+     * keys taken from its values. Supply explicit map suppliers to
      * {@link #BiMap(Supplier, Supplier)} and insert the entries yourself when a particular
      * iteration order must be guaranteed.</p>
      *
@@ -1045,9 +1055,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @throws IllegalArgumentException if {@code map}, any key, or any value is {@code null}; if a value is
      *         bound to more than one key; or if {@code map} is a {@code BiMap} whose map suppliers do not
      *         return a new, empty, distinct map on each call, as required by the delegated {@link #copy()} operation.
+     * @throws NullPointerException if {@code map} is a {@code BiMap} whose map suppliers return {@code null}.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws IllegalArgumentException {
+    public static <K, V> BiMap<K, V> copyOf(final Map<? extends K, ? extends V> map) throws IllegalArgumentException, NullPointerException {
         // Reject null up front, before allocating the
         // two backing maps and their suppliers.
         N.checkArgNotNull(map, cs.map);
@@ -1062,7 +1073,7 @@ public final class BiMap<K, V> implements Map<K, V> {
             return ((BiMap<K, V>) map).copy();
         }
 
-        final Map<K, V> keyMap = Maps.newTargetMap(map);
+        Map<K, V> keyMap = Maps.newTargetMap(map);
         final Map<V, K> valueMap = Maps.newOrderingMap(map);
 
         // Preserve a SortedMap's comparator in the key-map supplier: deriving the supplier from
@@ -1070,9 +1081,28 @@ public final class BiMap<K, V> implements Map<K, V> {
         // copied from a comparator-backed TreeMap would throw CCE for non-Comparable keys.
         // Capture the comparator itself rather than `map`: the supplier outlives this call (it is held by
         // the BiMap, its inverse and every copy), and capturing `map` would pin the whole source map.
+        // mirror Maps.newTargetMap's ConcurrentNavigableMap branch as well - the live key
+        // map handed back above is a ConcurrentSkipListMap for such a source, so copy()/inverse() must build
+        // the same kind rather than a TreeMap (a ConcurrentHashMap source already mirrors on both sides).
         final Comparator<?> sourceComparator = map instanceof SortedMap ? ((SortedMap<K, V>) map).comparator() : null;
-        final Supplier<? extends Map<K, V>> keyMapSupplier = map instanceof SortedMap ? () -> new TreeMap(sourceComparator)
-                : Suppliers.ofMap(keyMap.getClass());
+        Supplier<? extends Map<K, V>> keyMapSupplier;
+
+        if (map instanceof ConcurrentNavigableMap) {
+            keyMapSupplier = () -> new ConcurrentSkipListMap(sourceComparator);
+        } else if (map instanceof SortedMap) {
+            keyMapSupplier = () -> new TreeMap(sourceComparator);
+        } else {
+            try {
+                keyMapSupplier = Suppliers.ofMap(keyMap.getClass());
+            } catch (final IllegalArgumentException e) {
+                // Maps.newTargetMap can mirror a class through a sized constructor alone (an LRU-style
+                // subclass with only an int constructor, say), but copy(), inverse().copy() and replaceAll need a
+                // no-argument factory. Treat such a class like any other non-reproducible source.
+                keyMap = N.newLinkedHashMap(map.size());
+                keyMapSupplier = Suppliers.ofLinkedHashMap();
+            }
+        }
+
         final Supplier<? extends Map<V, K>> valueMapSupplier = Suppliers.ofMap(valueMap.getClass());
 
         final BiMap<K, V> biMap = new BiMap<>(keyMapSupplier, valueMapSupplier, keyMap, valueMap);
@@ -1112,8 +1142,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * map.getOrDefault("one", 0);   // returns 1
-     * map.getOrDefault("two", 0);   // returns 0
+     * map.getOrDefault("one", 0);  // returns 1
+     * map.getOrDefault("two", 0);  // returns 0
      * }</pre>
      *
      * @param key the key whose associated value is to be returned.
@@ -1182,8 +1212,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = new BiMap<>();
-     * map.put("one", 1);        // adds mapping: "one" -> 1
-     * map.put("one", 2);        // replaces value for "one": "one" -> 2
+     * map.put("one", 1);  // adds mapping: "one" -> 1
+     * map.put("one", 2);  // replaces value for "one": "one" -> 2
      *
      * // This throws IllegalArgumentException because 2 is already mapped to "one"
      * // map.put("two", 2);   // ERROR!
@@ -1510,8 +1540,8 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * map.putIfAbsent("one", 99);   // returns 1, mapping unchanged: "one" -> 1
-     * map.putIfAbsent("two", 2);    // returns null, adds: "two" -> 2
+     * map.putIfAbsent("one", 99);  // returns 1, mapping unchanged: "one" -> 1
+     * map.putIfAbsent("two", 2);   // returns null, adds: "two" -> 2
      * }</pre>
      *
      * @param key the key with which the specified value is to be associated.
@@ -1631,9 +1661,9 @@ public final class BiMap<K, V> implements Map<K, V> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiMap<String, Integer> map = BiMap.of("one", 1);
-     * map.containsEntry("one", 1);   // returns true
-     * map.containsEntry("one", 2);   // returns false
-     * map.containsEntry("two", 1);   // returns false
+     * map.containsEntry("one", 1);  // returns true
+     * map.containsEntry("one", 2);  // returns false
+     * map.containsEntry("two", 1);  // returns false
      * }</pre>
      *
      * @param key the key whose mapping is to be tested.
@@ -1696,10 +1726,10 @@ public final class BiMap<K, V> implements Map<K, V> {
      * BiMap<String, Integer> map = new BiMap<>(LinkedHashMap::new, LinkedHashMap::new);
      * map.put("a", 1);
      * map.put("b", 2);
-     * map.put("a", 3);                      // "a" keeps its position, its value becomes 3
-     * System.out.println(map.keySet());     // prints [a, b]
-     * System.out.println(map.values());     // prints [3, 2]  - aligned with keySet()
-     * System.out.println(map.entrySet());   // prints [a=3, b=2]
+     * map.put("a", 3);                     // "a" keeps its position, its value becomes 3
+     * System.out.println(map.keySet());    // prints [a, b]
+     * System.out.println(map.values());    // prints [3, 2]  - aligned with keySet()
+     * System.out.println(map.entrySet());  // prints [a=3, b=2]
      * }</pre>
      *
      * @return An immutable set of the values contained in this BiMap.
@@ -1859,8 +1889,9 @@ public final class BiMap<K, V> implements Map<K, V> {
      * </p>
      *
      * @param function the function to apply to each entry; must not be {@code null}
-     * @throws NullPointerException if {@code function} is {@code null}, as {@link Map#replaceAll} specifies
-     * @throws IllegalArgumentException if a replacement value is null or duplicated, the staging suppliers return null, non-empty, or identical maps, or the staging key map collapses keys that are distinct in the live map.
+     * @throws NullPointerException if {@code function} is {@code null}, as {@link Map#replaceAll} specifies, or if
+     *         {@code function} returns {@code null} (a replacement value) or the staging suppliers return {@code null}
+     * @throws IllegalArgumentException if a replacement value is duplicated, the staging suppliers return non-empty or identical maps, or the staging key map collapses keys that are distinct in the live map.
      */
     @Override
     public void replaceAll(final BiFunction<? super K, ? super V, ? extends V> function) throws NullPointerException, IllegalArgumentException {
@@ -1889,7 +1920,7 @@ public final class BiMap<K, V> implements Map<K, V> {
             final V newValue = function.apply(entry.getKey(), entry.getValue());
 
             if (newValue == null) {
-                throw new IllegalArgumentException("function returned null for key: " + entry.getKey());
+                throw new NullPointerException("function returned null for key: " + entry.getKey());
             }
 
             newValues.add(newValue);
@@ -1955,8 +1986,9 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @return a new BiMap containing the same entries as the current BiMap.
      * @throws IllegalArgumentException if this BiMap's map suppliers do not return a new, empty, distinct
      *         map on each call - a supplier that hands out one shared instance, for example.
+     * @throws NullPointerException if either of this BiMap's map suppliers returns {@code null}.
      */
-    public BiMap<K, V> copy() throws IllegalArgumentException {
+    public BiMap<K, V> copy() throws IllegalArgumentException, NullPointerException {
         final BiMap<K, V> copy = new BiMap<>(keyMapSupplier, valueMapSupplier);
 
         // The constructor can only check that the supplied maps are empty and differ from each other at
@@ -2111,9 +2143,11 @@ public final class BiMap<K, V> implements Map<K, V> {
      * @param map the map whose entries are to be placed into the new BiMap, must not be {@code null}.
      * @return a new Builder instance for a BiMap with the specified map as its initial data.
      * @throws IllegalArgumentException if {@code map} is {@code null}, or if any key or value in {@code map} is
-     *         {@code null}, or if {@code map} contains duplicate values.
+     *         {@code null}, or if {@code map} contains duplicate values, or if {@code map} is a {@code BiMap} whose
+     *         map suppliers do not return a new, empty, distinct map on each call.
+     * @throws NullPointerException if {@code map} is a {@code BiMap} whose map suppliers return {@code null}.
      */
-    public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException {
+    public static <K, V> Builder<K, V> builder(final Map<K, V> map) throws IllegalArgumentException, NullPointerException {
         N.checkArgNotNull(map, cs.map);
 
         return new Builder<>(map);
@@ -2141,11 +2175,13 @@ public final class BiMap<K, V> implements Map<K, V> {
          * Creates a Builder backed by a new BiMap pre-populated with the entries of {@code backedMap}.
          *
          * @param backedMap the map whose entries seed the BiMap being built; it is copied, not wrapped.
-         * @throws NullPointerException if {@code backedMap} is {@code null}.
-         * @throws IllegalArgumentException if any key or value in {@code backedMap} is {@code null}, or if
-         *         {@code backedMap} contains a duplicated value (bound to more than one key).
+         * @throws IllegalArgumentException if {@code backedMap} is {@code null}, if any key or value in
+         *         {@code backedMap} is {@code null}, if {@code backedMap} contains a duplicated value (bound to more
+         *         than one key), or if {@code backedMap} is a {@code BiMap} whose map suppliers do not return a new,
+         *         empty, distinct map on each call.
+         * @throws NullPointerException if {@code backedMap} is a {@code BiMap} whose map suppliers return {@code null}.
          */
-        Builder(final Map<K, V> backedMap) throws NullPointerException, IllegalArgumentException {
+        Builder(final Map<K, V> backedMap) throws IllegalArgumentException, NullPointerException {
             biMap = BiMap.copyOf(backedMap);
         }
 

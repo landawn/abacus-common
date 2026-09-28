@@ -273,4 +273,34 @@ public class IOCaseTest extends TestBase {
         assertEquals(IOCase.SYSTEM, IOCase.valueOf("SYSTEM"));
     }
 
+    // ---- perf review 2026-09-26 G042 begin ----
+    // G042-01: pins the case-sensitive checkIndexOf edge cases (empty search, start past the end, overlap, surrogates)
+    @Test
+    public void testCheckIndexOf_sensitiveEdgeCases() {
+        final IOCase sensitive = IOCase.SENSITIVE;
+
+        assertEquals(0, sensitive.checkIndexOf("", 0, ""));
+        assertEquals(0, sensitive.checkIndexOf("abc", -5, ""));
+        assertEquals(2, sensitive.checkIndexOf("abc", 2, ""));
+        assertEquals(3, sensitive.checkIndexOf("abc", 3, ""));
+        assertEquals(-1, sensitive.checkIndexOf("abc", 4, ""));
+        assertEquals(-1, sensitive.checkIndexOf("abc", Integer.MAX_VALUE, ""));
+        assertEquals(-1, sensitive.checkIndexOf("", 0, "a"));
+        assertEquals(-1, sensitive.checkIndexOf("ab", 0, "abc"));
+        assertEquals(0, sensitive.checkIndexOf("abc", Integer.MIN_VALUE, "abc"));
+        assertEquals(-1, sensitive.checkIndexOf("abc", 1, "abc"));
+        assertEquals(1, sensitive.checkIndexOf("aaaa", 1, "aa"));
+        assertEquals(2, sensitive.checkIndexOf("aaaa", 2, "aa"));
+        assertEquals(-1, sensitive.checkIndexOf("aaaa", 3, "aa"));
+        assertEquals(4, sensitive.checkIndexOf("abababx", 0, "abx"));
+        assertEquals(-1, sensitive.checkIndexOf("abcABC", 0, "Abc"));
+        assertEquals(3, sensitive.checkIndexOf("abcABC", 0, "ABC"));
+        assertEquals(1, sensitive.checkIndexOf("x\uD83D\uDE00y", 0, "\uD83D\uDE00"));
+        assertEquals(2, sensitive.checkIndexOf("x\uD83D\uDE00y", 0, "\uDE00y"));
+        assertEquals(2, sensitive.checkIndexOf("\u00E9A\u0100", 0, "\u0100"));
+        assertEquals(-1, sensitive.checkIndexOf("\u00E9A", 0, "\u00C9"));
+        assertEquals(-1, sensitive.checkIndexOf("ab", 0, "\u0100"));
+    }
+    // ---- perf review 2026-09-26 G042 end ----
+
 }

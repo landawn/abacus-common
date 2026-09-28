@@ -16,6 +16,8 @@ import java.util.Date;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import java.util.TimeZone;
+import javax.xml.datatype.DatatypeFactory;
 
 public class BufferedWriterTest extends TestBase {
 
@@ -599,5 +601,27 @@ public class BufferedWriterTest extends TestBase {
     @Test
     public void testClassStructure() {
         assertTrue(BufferedWriter.class.isSealed());
+    }
+
+
+    @Test
+    public void testWriteCalendarUsesZonedIsoDefaultWithZoneId() throws Exception {
+        BufferedWriter writer = new BufferedWriter();
+        Calendar cal = Dates.createCalendar(1736917245123L, TimeZone.getTimeZone("Asia/Kolkata"));
+        writer.write(cal);
+        writer.write('|');
+        writer.write((Calendar) null);
+        assertEquals("2025-01-15T10:30:45.123+05:30[Asia/Kolkata]|null", writer.toString());
+    }
+
+    @Test
+    public void testWriteXmlGregorianCalendarKeepsLexicalOffsetAndFraction() throws Exception {
+        BufferedWriter writer = new BufferedWriter();
+        writer.write(DatatypeFactory.newInstance().newXMLGregorianCalendar("2024-06-15T10:30:00Z"));
+        writer.write('|');
+        writer.write(DatatypeFactory.newInstance().newXMLGregorianCalendar("2024-06-15T10:30:00.123+09:00"));
+        writer.write('|');
+        writer.write((javax.xml.datatype.XMLGregorianCalendar) null);
+        assertEquals("2024-06-15T10:30:00Z|2024-06-15T10:30:00.123+09:00|null", writer.toString());
     }
 }

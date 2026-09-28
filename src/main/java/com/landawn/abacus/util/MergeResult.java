@@ -81,8 +81,8 @@ public enum MergeResult {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MergeResult result = MergeResult.minFirst(5, 10);       // returns TAKE_FIRST
-     * MergeResult result2 = MergeResult.minFirst("b", "a");   // returns TAKE_SECOND
+     * MergeResult result = MergeResult.minFirst(5, 10);      // returns TAKE_FIRST
+     * MergeResult result2 = MergeResult.minFirst("b", "a");  // returns TAKE_SECOND
      * }</pre>
      *
      * @param <T> the type of the values being compared (must be Comparable)
@@ -112,14 +112,14 @@ public enum MergeResult {
      * @param <T> the type of the values being compared
      * @param a the first value to compare
      * @param b the second value to compare
-     * @param cmp the comparator to use for comparison
+     * @param comparator the comparator to use for comparison
      * @return {@link #TAKE_FIRST} if a is less than or equal to b, {@link #TAKE_SECOND} otherwise
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> MergeResult minFirst(final T a, final T b, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> MergeResult minFirst(final T a, final T b, final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return cmp.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        return comparator.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
     }
 
     /**
@@ -133,8 +133,8 @@ public enum MergeResult {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * MergeResult result = MergeResult.maxFirst(5, 10);       // returns TAKE_SECOND
-     * MergeResult result2 = MergeResult.maxFirst("b", "a");   // returns TAKE_FIRST
+     * MergeResult result = MergeResult.maxFirst(5, 10);      // returns TAKE_SECOND
+     * MergeResult result2 = MergeResult.maxFirst("b", "a");  // returns TAKE_FIRST
      * }</pre>
      *
      * @param <T> the type of the values being compared (must be Comparable)
@@ -164,14 +164,14 @@ public enum MergeResult {
      * @param <T> the type of the values being compared
      * @param a the first value to compare
      * @param b the second value to compare
-     * @param cmp the comparator to use for comparison
+     * @param comparator the comparator to use for comparison
      * @return {@link #TAKE_FIRST} if a is greater than or equal to b, {@link #TAKE_SECOND} otherwise
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> MergeResult maxFirst(final T a, final T b, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> MergeResult maxFirst(final T a, final T b, final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return cmp.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        return comparator.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
     }
 
     @SuppressWarnings("rawtypes")
@@ -216,14 +216,14 @@ public enum MergeResult {
      * }</pre>
      *
      * @param <T> the type of the values being compared
-     * @param cmp the comparator to use for comparison
+     * @param comparator the comparator to use for comparison
      * @return a BiFunction that uses the comparator to determine merge results
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> BiFunction<T, T, MergeResult> minFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> BiFunction<T, T, MergeResult> minFirst(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return (a, b) -> cmp.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        return (a, b) -> comparator.compare(a, b) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
     }
 
     @SuppressWarnings("rawtypes")
@@ -268,14 +268,14 @@ public enum MergeResult {
      * }</pre>
      *
      * @param <T> the type of the values being compared
-     * @param cmp the comparator to use for comparison
+     * @param comparator the comparator to use for comparison
      * @return a BiFunction that uses the comparator to determine merge results
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> BiFunction<T, T, MergeResult> maxFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> BiFunction<T, T, MergeResult> maxFirst(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return (a, b) -> cmp.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
+        return (a, b) -> comparator.compare(a, b) >= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND;
     }
 
     /**
@@ -293,9 +293,9 @@ public enum MergeResult {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BiFunction<String, String, MergeResult> alternator = MergeResult.alternate();
-     * alternator.apply("a", "b");   // returns TAKE_FIRST
-     * alternator.apply("c", "d");   // returns TAKE_SECOND
-     * alternator.apply("e", "f");   // returns TAKE_FIRST
+     * alternator.apply("a", "b");  // returns TAKE_FIRST
+     * alternator.apply("c", "d");  // returns TAKE_SECOND
+     * alternator.apply("e", "f");  // returns TAKE_FIRST
      * }</pre>
      *
      * @param <T> the type of the values (not used in the decision)

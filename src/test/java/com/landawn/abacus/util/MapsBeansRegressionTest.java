@@ -942,7 +942,7 @@ public class MapsBeansRegressionTest extends TestBase {
 
     @Test
     public void testC024_getIgnoredPropNamesForDiffNamesTheActualReason() {
-        assertEquals("'cls' cannot be null", assertThrows(IllegalArgumentException.class, () -> Beans.getIgnoredPropNamesForDiff(null)).getMessage());
+        assertEquals("'targetClass' cannot be null", assertThrows(IllegalArgumentException.class, () -> Beans.getIgnoredPropNamesForDiff(null)).getMessage());
 
         assertTrue(assertThrows(IllegalArgumentException.class, () -> Beans.getIgnoredPropNamesForDiff(String.class)).getMessage().contains("CharSequence"));
         assertTrue(assertThrows(IllegalArgumentException.class, () -> Beans.getIgnoredPropNamesForDiff(Integer.class)).getMessage().contains("Number"));
@@ -971,10 +971,10 @@ public class MapsBeansRegressionTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> Maps.getAsFloat(map, "c"));
         assertThrows(NumberFormatException.class, () -> Maps.getAsDouble(map, "c"));
 
-        // getAs uses N.convert, which special-cases Character -> Integer only. Pinned so the asymmetry is
-        // noticed if N.convert ever changes.
+        // getAs uses N.convert, which (since 2026-09-24, C-171) maps a char to its code unit for every number type,
+        // while the getAsXxx numeric accessors above parse it as text. Pinned so the asymmetry is noticed if either side changes.
         assertEquals(65, Maps.getAs(map, "c", Integer.class).orElseThrow());
-        assertThrows(NumberFormatException.class, () -> Maps.getAs(map, "c", Long.class));
+        assertEquals(65L, Maps.getAs(map, "c", Long.class).orElseThrow());
 
         // Where the two families are documented to agree, they do.
         final Map<String, Object> empty = new HashMap<>();

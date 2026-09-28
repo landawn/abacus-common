@@ -171,17 +171,17 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
-     * @param len the number of characters to read
-     * @return the corresponding {@code Boolean} value, or the default value if {@code cbuf} is {@code null} or {@code len} is 0
+     * @param length the number of characters to read
+     * @return the corresponding {@code Boolean} value, or the default value if {@code cbuf} is {@code null} or {@code length} is 0
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      */
     @Override
-    public Boolean valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException {
-        if ((cbuf == null) || (len == 0)) {
+    public Boolean valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException {
+        if ((cbuf == null) || (length == 0)) {
             return defaultValue();
         }
 
-        if (len == 1) {
+        if (length == 1) {
             final char ch = cbuf[offset];
 
             if (ch == 'Y' || ch == 'y' || ch == '1') {
@@ -194,7 +194,7 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
             return isPadding(ch) ? valueOf(String.valueOf(ch)) : Boolean.FALSE;
         }
 
-        if ((len == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
+        if ((length == 4) && (((cbuf[offset] == 't') || (cbuf[offset] == 'T')) && ((cbuf[offset + 1] == 'r') || (cbuf[offset + 1] == 'R'))
                 && ((cbuf[offset + 2] == 'u') || (cbuf[offset + 2] == 'U')) && ((cbuf[offset + 3] == 'e') || (cbuf[offset + 3] == 'E')))) {
             return Boolean.TRUE;
         }
@@ -202,8 +202,8 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
         // Miss path only: a region padded with whitespace (" Y", " true ") is read by valueOf(String) so the JSON
         // (char[]) and XML (String) deserializers agree; the fast checks above keep the common case allocation-free.
         // isPadding covers both definitions (<= ' ' and Character.isWhitespace), as parseBoolean's strip does.
-        if (isPadding(cbuf[offset]) || isPadding(cbuf[offset + len - 1])) {
-            return valueOf(new String(cbuf, offset, len));
+        if (isPadding(cbuf[offset]) || isPadding(cbuf[offset + length - 1])) {
+            return valueOf(new String(cbuf, offset, length));
         }
 
         return Boolean.FALSE;
@@ -265,18 +265,18 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * Sets the specified boolean parameter in a {@code PreparedStatement} at the given position.
      * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the boolean value to set, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Boolean x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, java.sql.Types.BOOLEAN);
+            statement.setNull(columnIndex, java.sql.Types.BOOLEAN);
         } else {
-            stmt.setBoolean(columnIndex, x);
+            statement.setBoolean(columnIndex, x);
         }
     }
 
@@ -284,18 +284,18 @@ public abstract class AbstractBooleanType extends AbstractPrimaryType<Boolean> {
      * Sets the specified boolean parameter in a {@code CallableStatement} using the given parameter name.
      * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the boolean value to set, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Boolean x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, java.sql.Types.BOOLEAN);
+            statement.setNull(parameterName, java.sql.Types.BOOLEAN);
         } else {
-            stmt.setBoolean(parameterName, x);
+            statement.setBoolean(parameterName, x);
         }
     }
 

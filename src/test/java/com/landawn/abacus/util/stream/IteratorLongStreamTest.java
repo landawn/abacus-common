@@ -500,4 +500,73 @@ public class IteratorLongStreamTest extends TestBase {
     }
 
     // TODO: Remaining IteratorLongStream anonymous LongIteratorEx coverage is tied to internal iterator wrappers; exercise through public stream APIs when a stable external behavior gap appears.
+
+    // ---- perf review 2026-09-26 G099 begin ----
+
+    private static double g099ExactAverage(final long... values) {
+        java.math.BigInteger total = java.math.BigInteger.ZERO;
+
+        for (final long v : values) {
+            total = total.add(java.math.BigInteger.valueOf(v));
+        }
+
+        return total.doubleValue() / values.length;
+    }
+
+    // G099-05: average() counts long wraps instead of switching to a BigInteger accumulator - same double, bit for bit
+    @Test
+    public void testAverage_overflowCarryMatchesExactSum() {
+        final long max = Long.MAX_VALUE;
+        final long min = Long.MIN_VALUE;
+        final long[][] cases = { { max, 1 }, { max, 1, -2 }, { max, max, max, min, min, 5 }, { min, -1 }, { min, min, min, 7 }, { min, -1, 2 },
+                { max, max, min, min, min, max }, { max - 1, 1, 1, -3 }, { 1L << 62, 1L << 62, 1L << 62, -(1L << 62) }, { max, max, max, max, max, max, max },
+                { min, min, min, min, min, min, min }, { 0 }, { 5 }, { -5, 5 } };
+
+        for (final long[] values : cases) {
+            assertEquals(g099ExactAverage(values), iter(values).average().getAsDouble(), 0d, java.util.Arrays.toString(values));
+        }
+
+        final java.util.Random random = new java.util.Random(20260926L);
+
+        for (int round = 0; round < 200; round++) {
+            final long[] values = new long[1 + random.nextInt(300)];
+
+            for (int i = 0; i < values.length; i++) {
+                values[i] = round % 3 == 0 ? random.nextLong() : (random.nextBoolean() ? max - random.nextInt(1000) : min + random.nextInt(1000));
+            }
+
+            assertEquals(g099ExactAverage(values), iter(values).average().getAsDouble(), 0d, "round=" + round);
+        }
+
+        // many wraps in one direction: 10,000 x (MAX_VALUE / 2 + 12345)
+        final long[] many = new long[10_000];
+        java.util.Arrays.fill(many, max / 2 + 12345);
+        assertEquals(g099ExactAverage(many), iter(many).average().getAsDouble(), 0d);
+    }
+
+    // G099-07: kthLargest on a sorted stream - ring buffer wrap by compare instead of '%', every size around k
+    @Test
+    public void testKthLargest_sortedRingBufferWrap() {
+        for (final int k : new int[] { 1, 2, 3, 15, 16, 17, 33, Integer.MAX_VALUE }) {
+            for (int size = 0; size <= 40; size++) {
+                final long[] values = new long[size];
+                for (int i = 0; i < size; i++) {
+                    values[i] = (i * 7L) % 11 - 5;
+                }
+
+                final long[] sorted = values.clone();
+                java.util.Arrays.sort(sorted);
+
+                final OptionalLong result = iter(values).sorted().kthLargest(k);
+
+                if (k > size) {
+                    assertFalse(result.isPresent(), "k=" + k + ", size=" + size);
+                } else {
+                    assertEquals(sorted[size - k], result.get(), "k=" + k + ", size=" + size);
+                }
+            }
+        }
+    }
+
+    // ---- perf review 2026-09-26 G099 end ----
 }

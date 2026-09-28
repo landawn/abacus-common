@@ -813,4 +813,66 @@ public class ParallelIteratorByteStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    // ---- perf review 2026-09-26 G102 begin ----
+    // G102-01: findFirst/findLast track the candidate index in primitive locals; pins lowest/highest encounter-index results.
+    @Test
+    public void testFindFirstFindLast_primitiveCandidateTracking() {
+        final byte[] source = new byte[600];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = (byte) (i * 7);
+        }
+
+        final List<com.landawn.abacus.util.function.BytePredicate> predicates = Arrays.asList(value -> value % 5 == 0, value -> value > 120,
+                value -> value < -120, value -> value == source[599], value -> value == source[0], value -> value == source[300], value -> true,
+                value -> false);
+
+        for (final int threadNum : new int[] { 2, 3, 4, 7 }) {
+            for (final com.landawn.abacus.util.function.BytePredicate predicate : predicates) {
+                int first = -1;
+                int last = -1;
+
+                for (int i = 0; i < source.length; i++) {
+                    if (predicate.test(source[i])) {
+                        if (first < 0) {
+                            first = i;
+                        }
+
+                        last = i;
+                    }
+                }
+
+                final OptionalByte expectedFirst = first < 0 ? OptionalByte.empty() : OptionalByte.of(source[first]);
+                final OptionalByte expectedLast = last < 0 ? OptionalByte.empty() : OptionalByte.of(source[last]);
+
+                assertEquals(expectedFirst, new ParallelIteratorByteStream(com.landawn.abacus.util.ByteIterator.of(source), false, threadNum,
+                        SplitStrategy.ITERATOR, null, false, null).findFirst(predicate::test));
+                assertEquals(expectedLast, new ParallelIteratorByteStream(com.landawn.abacus.util.ByteIterator.of(source), false, threadNum,
+                        SplitStrategy.ITERATOR, null, false, null).findLast(predicate::test));
+            }
+        }
+
+        for (final boolean last : new boolean[] { false, true }) {
+            final AtomicInteger calls = new AtomicInteger();
+            final ByteStream stream = new ParallelIteratorByteStream(com.landawn.abacus.util.ByteIterator.of(source), false, 4, SplitStrategy.ITERATOR, null, false,
+                    null);
+
+            assertEquals(OptionalByte.empty(), last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
+            assertEquals(source.length, calls.get());
+        }
+
+        final RuntimeException failure = new RuntimeException("find failure");
+
+        org.junit.jupiter.api.Assertions.assertSame(failure, assertThrows(RuntimeException.class,
+                () -> new ParallelIteratorByteStream(com.landawn.abacus.util.ByteIterator.of(source), false, 4, SplitStrategy.ITERATOR, null, false, null)
+                        .findLast(value -> {
+                            if (value == source[400]) {
+                                throw failure;
+                            }
+
+                            return false;
+                        })));
+    }
+    // ---- perf review 2026-09-26 G102 end ----
 }

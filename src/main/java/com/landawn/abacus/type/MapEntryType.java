@@ -17,17 +17,23 @@ package com.landawn.abacus.type;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 import com.landawn.abacus.exception.ParsingException;
 import com.landawn.abacus.parser.JsonDeserConfig;
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
+import com.landawn.abacus.parser.ParserUtil;
+import com.landawn.abacus.util.BufferedJsonWriter;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.Clazz;
+import com.landawn.abacus.util.DateTimeFormat;
 import com.landawn.abacus.util.IOUtil;
+import com.landawn.abacus.util.MutableLong;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.SK;
@@ -64,8 +70,10 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * @param keyTypeName the name of the key type parameter
      * @param valueTypeName the name of the value type parameter
+     * @throws IllegalArgumentException if {@code keyTypeName} or {@code valueTypeName} is {@code null}, blank, or
+     *         structurally invalid.
      */
-    MapEntryType(final String keyTypeName, final String valueTypeName) {
+    MapEntryType(final String keyTypeName, final String valueTypeName) throws IllegalArgumentException {
         super(getTypeName(keyTypeName, valueTypeName, false));
 
         declaringName = getTypeName(keyTypeName, valueTypeName, true);
@@ -122,7 +130,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
 
     /**
      * Converts a {@link Map.Entry} object to its JSON string representation.
-     * The entry is serialized as a single-pair JSON object, e.g., {@code {"age":25}}.
+     * The entry is serialized as a single-pair JSON object, e.g., {@code {"age": 25}}.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
      * via {@link #valueOf(String)}. Non-null values of this type generally round-trip; {@code null}/empty handling is
@@ -132,11 +140,12 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      *
      * @param x the {@code Map.Entry} object to convert, may be {@code null}
      * @return the JSON string representation of the entry, or {@code null} if the input is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final Map.Entry<K, V> x) {
+    public String stringOf(final Map.Entry<K, V> x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(N.asMap(x.getKey(), x.getValue()), Utils.jsc);
     }
 
@@ -203,6 +212,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @param x the {@code Map.Entry} to append, may be {@code null}
      * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the entry delimiters, key, value or null literal fails, or flushing the temporary writer fails
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      * @implNote
      * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
      * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
@@ -214,7 +224,7 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
     @Override
-    public void appendTo(final Appendable appendable, final Map.Entry<K, V> x) throws NullPointerException, IOException {
+    public void appendTo(final Appendable appendable, final Map.Entry<K, V> x) throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -264,6 +274,10 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
      * {@code CharacterWriter}. Map-key quoting follows JSON key rules (string keys remain quoted even when
      * {@code config} is {@code null}); the value is delegated to its type handler with the supplied config.
+     * Under a {@code JsonSerConfig}, a key whose text depends on {@code writeLongAsString} (a long key),
+     * {@code writeBigDecimalAsPlain} (a {@code BigDecimal} key) or a {@code dateTimeFormat} other than
+     * {@code LONG} (a date/time key) is written with that configured text, exactly as the JSON map writer writes the
+     * same key of a {@code Map}.
      * It is the streaming counterpart of {@code stringOf}
      * and is invoked by the JSON/XML serializers.
      * <p>
@@ -285,9 +299,11 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
      * @param config the serialization configuration used when writing the key and value; may be {@code null}
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the entry delimiters, key, value or null literal to {@code writer} fails
+     * @throws RuntimeException if a contained value is incompatible with its declared type or its selected type handler fails while writing it.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
+    public void serializeTo(final CharacterWriter writer, final Map.Entry<K, V> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -319,7 +335,12 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
                 writer.write(NULL_CHAR_ARRAY);
             }
         } else if (keyType.isSerializable() && !(keyType.isArray() || keyType.isCollection() || keyType.javaType().isEnum())) {
-            if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
+            if (config instanceof JsonSerConfig jsonConfig && isConfigSensitiveKey(jsonConfig)) {
+                // Same rule as the JSON map writer: a key whose text depends on writeLongAsString, writeBigDecimalAsPlain
+                // or a textual dateTimeFormat is written with its value-side text, so a Map.Entry key agrees with the
+                // same key in a Map (stringOf would, for example, drop the milliseconds of a java.util.Date key).
+                serializeKeyWithConfig(writer, key, jsonConfig, isQuoteMapKey);
+            } else if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
                 writer.write(SK._DOUBLE_QUOTE);
                 writer.writeCharacter(keyType.stringOf(key));
                 writer.write(SK._DOUBLE_QUOTE);
@@ -328,6 +349,41 @@ public class MapEntryType<K, V> extends AbstractType<Map.Entry<K, V>> {
             }
         } else {
             keyType.serializeTo(writer, key, config);
+        }
+    }
+
+    private boolean isConfigSensitiveKey(final JsonSerConfig config) {
+        final Class<?> keyClass = keyType.javaType();
+
+        return (config.isWriteLongAsString() && (keyType.isLong() || AtomicLong.class.equals(keyClass) || MutableLong.class.equals(keyClass))) //
+                || (config.isWriteBigDecimalAsPlain() && BigDecimal.class.equals(keyClass)) //
+                || (config.getDateTimeFormat() != DateTimeFormat.LONG
+                        && (keyType.isDate() || keyType.isCalendar() || keyType.isTemporal() || keyType.isJodaDateTime()));
+    }
+
+    /**
+     * @throws IOException if writing the serialized key to the JSON writer fails
+     */
+    private void serializeKeyWithConfig(final CharacterWriter writer, final K key, final JsonSerConfig config, final boolean isQuoteMapKey) throws IOException {
+        final BufferedJsonWriter keyWriter = Objectory.createBufferedJsonWriter();
+        String keyText = null;
+
+        try {
+            keyType.serializeTo(keyWriter, key, config);
+            keyText = keyWriter.toString();
+        } finally {
+            Objectory.recycle(keyWriter);
+        }
+
+        if (ParserUtil.isQuoted(keyText, config)) {
+            // Already quoted and escaped by the key's type handler.
+            writer.write(keyText);
+        } else if (isQuoteMapKey || !(keyType.isNumber() || keyType.isBoolean())) {
+            writer.write(SK._DOUBLE_QUOTE);
+            writer.writeCharacter(keyText);
+            writer.write(SK._DOUBLE_QUOTE);
+        } else {
+            writer.writeCharacter(keyText);
         }
     }
 

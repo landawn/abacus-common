@@ -51,11 +51,11 @@ public interface CharNFunction<R> extends Throwables.CharNFunction<R, RuntimeExc
      * Integer total = sumValues.apply('a', 'b', 'c');   // Returns 294 (97+98+99)
      * }</pre>
      *
-     * @param args the char array input arguments. Can be empty but not {@code null}.
+     * @param arguments the char array input arguments. Can be empty but not {@code null}.
      * @return the function result of type R
      */
     @Override
-    R apply(char... args);
+    R apply(char... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input,

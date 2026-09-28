@@ -207,4 +207,22 @@ public class SeqToTest extends SeqTestSupport {
         assertEquals((Integer) 1, named.moveToRow(0).get("UserID"));
         assertNotNull(Seq.of(1, 2, 3).toDataset(Arrays.asList("value")));
     }
+
+    @Test
+    public void testToDatasetWithColumnNamesRejectsUnreadableRowsAfterClosing() throws Exception {
+        final AtomicInteger closed = new AtomicInteger();
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Seq.of(Arrays.asList(Arrays.asList(1, 2, 3))).onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "b")));
+        assertEquals(1, closed.get());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Seq.of(Arrays.asList(Arrays.asList(1, 2))).onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "a")));
+        assertEquals(2, closed.get());
+
+        assertThrows(IllegalArgumentException.class, () -> Seq.of("x", "y").onClose(closed::incrementAndGet).toDataset(Arrays.asList("a", "b")));
+        assertEquals(3, closed.get());
+
+        assertEquals(3, Seq.of("x", "y", "z").toDataset(Arrays.asList("value")).size());
+    }
 }

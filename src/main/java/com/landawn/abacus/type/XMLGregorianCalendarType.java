@@ -184,7 +184,7 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      *
      * @param cbuf the character array containing the date/time representation
      * @param offset the starting position in the character array
-     * @param len the number of characters to process
+     * @param length the number of characters to process
      * @return an XMLGregorianCalendar instance, or {@code null} if the input is {@code null} or empty
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see
@@ -193,23 +193,23 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      */
     @MayReturnNull
     @Override
-    public XMLGregorianCalendar valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
-        if ((cbuf == null) || (len == 0)) {
+    public XMLGregorianCalendar valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return Dates.createXMLGregorianCalendar(parseLong(cbuf, offset, len));
+                return Dates.createXMLGregorianCalendar(parseLong(cbuf, offset, length));
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -310,15 +310,15 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * type.set(preparedStatement, 1, cal);   // Sets timestamp at first parameter
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the value in
+     * @param statement the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the value
      * @param x the XMLGregorianCalendar value to set, or {@code null} for SQL NULL
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final XMLGregorianCalendar x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(columnIndex, (x == null) ? null : toTimestamp(x));
+    public void set(final PreparedStatement statement, final int columnIndex, final XMLGregorianCalendar x) throws NullPointerException, SQLException {
+        statement.setTimestamp(columnIndex, (x == null) ? null : toTimestamp(x));
     }
 
     /**
@@ -337,15 +337,15 @@ public class XMLGregorianCalendarType extends AbstractType<XMLGregorianCalendar>
      * type.set(callableStatement, "created_date", cal);   // Sets timestamp parameter
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the value in
+     * @param statement the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the value
      * @param x the XMLGregorianCalendar value to set, or {@code null} for SQL NULL
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final XMLGregorianCalendar x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(parameterName, (x == null) ? null : toTimestamp(x));
+    public void set(final CallableStatement statement, final String parameterName, final XMLGregorianCalendar x) throws NullPointerException, SQLException {
+        statement.setTimestamp(parameterName, (x == null) ? null : toTimestamp(x));
     }
 
     /**

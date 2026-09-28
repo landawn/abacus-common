@@ -477,7 +477,7 @@ public class IOUtilMissingZipSourceTest extends TestBase {
         assertTrue(e.getMessage().contains("is a directory"), e.getMessage());
 
         assertTrue(assertThrows(IllegalArgumentException.class, () -> IOUtil.copyFile(null, dir, false, LinkOption.NOFOLLOW_LINKS)).getMessage()
-                .contains("srcFile"));
+                .contains("sourceFile"));
     }
 
     // ------------------------------------------------------------------------------------------------

@@ -90,8 +90,8 @@ public final class BrotliInputStream extends InputStream {
      *
      * @param source the input stream containing Brotli-compressed data
      * @param byteReadBufferSize the size of the internal buffer for reading, in bytes
-     * @throws IllegalArgumentException if {@code byteReadBufferSize} is not positive, or if {@code source} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if {@code source} is {@code null}, or if {@code byteReadBufferSize} is not
+     *         positive.
      * @throws IOException if initializing the Brotli decoder cannot read a valid header from the source
      */
     public BrotliInputStream(final InputStream source, final int byteReadBufferSize) throws IllegalArgumentException, IOException {
@@ -168,7 +168,7 @@ public final class BrotliInputStream extends InputStream {
      *
      * @param b the buffer into which the data is read
      * @param off the start offset in array b at which the data is written
-     * @param len the maximum number of bytes to read
+     * @param length the maximum number of bytes to read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      * @throws NullPointerException if {@code b} is {@code null}
      * @throws IndexOutOfBoundsException if off is negative, len is negative, or len is greater than b.length - off
@@ -177,7 +177,8 @@ public final class BrotliInputStream extends InputStream {
      * @throws IOException if compressed input cannot be read or contains invalid Brotli data
      */
     @Override
-    public int read(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IllegalStateException, IOException {
+    public int read(final byte[] b, final int off, final int length)
+            throws NullPointerException, IndexOutOfBoundsException, IllegalStateException, IOException {
         // Checked before the range: InputStream.read(byte[], int, int) (and this method's own Javadoc)
         // require NullPointerException to win over IndexOutOfBoundsException, but the range check below
         // dereferences b.length last, so a null buffer combined with a negative off/len reported the
@@ -189,22 +190,22 @@ public final class BrotliInputStream extends InputStream {
         // Enforce InputStream.read(byte[], int, int) contract: bad offset/length must throw
         // IndexOutOfBoundsException. The underlying org.brotli.dec.BrotliInputStream throws
         // IllegalArgumentException, so we validate first to surface the correct exception type.
-        if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", b.length=" + b.length);
+        if (off < 0 || length < 0 || length > b.length - off) {
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + length + ", b.length=" + b.length);
         }
 
-        if (len == 0) {
+        if (length == 0) {
             return 0;
         }
 
         int copied = 0;
 
         if (bufOff < bufLen) {
-            copied = Math.min(bufLen - bufOff, len);
+            copied = Math.min(bufLen - bufOff, length);
             System.arraycopy(buf, bufOff, b, off, copied);
             bufOff += copied;
 
-            if (copied == len) {
+            if (copied == length) {
                 return copied;
             }
         }
@@ -213,7 +214,7 @@ public final class BrotliInputStream extends InputStream {
 
         if (copied > 0) {
             try {
-                n = in.read(b, off + copied, len - copied);
+                n = in.read(b, off + copied, length - copied);
             } catch (final IllegalStateException e) {
                 // The decoder rejects decoding after close with an IllegalStateException (BrotliRuntimeException,
                 // which signals corruption, is a plain RuntimeException and is deliberately NOT caught here). Bytes
@@ -223,7 +224,7 @@ public final class BrotliInputStream extends InputStream {
                 return copied;
             }
         } else {
-            n = in.read(b, off + copied, len - copied);
+            n = in.read(b, off + copied, length - copied);
         }
 
         // -1 only when no byte at all was transferred; bytes already copied out of buf must be reported.

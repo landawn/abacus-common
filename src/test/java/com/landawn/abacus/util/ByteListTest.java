@@ -2160,9 +2160,9 @@ public class ByteListTest extends ByteListTestSupport {
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
         assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
     }
 
     @Test
@@ -2318,4 +2318,237 @@ public class ByteListTest extends ByteListTestSupport {
         assertEquals(OptionalByte.of((byte) 2), list.lowerMedian(1, 4));
         assertEquals("[5, 2, 8, 1, 9]", list.toString());
     }
+
+    // ---- perf review 2026-09-26 G024 begin ----
+
+    private static byte[] g024RandomBytes(final Random random, final int length, final int distinct) {
+        final byte[] a = new byte[length];
+
+        for (int i = 0; i < length; i++) {
+            a[i] = distinct >= 256 ? (byte) random.nextInt(256) : (byte) (Byte.MIN_VALUE + random.nextInt(distinct) * (255 / Math.max(1, distinct - 1)));
+        }
+
+        return a;
+    }
+
+    private static java.util.Map<Byte, Integer> g024Counts(final byte[] a) {
+        final java.util.Map<Byte, Integer> counts = new java.util.HashMap<>();
+
+        for (final byte e : a) {
+            counts.merge(e, 1, Integer::sum);
+        }
+
+        return counts;
+    }
+
+    private static byte[] g024Intersection(final byte[] a, final byte[] b) {
+        final java.util.Map<Byte, Integer> counts = g024Counts(b);
+        final ByteList result = new ByteList();
+
+        for (final byte e : a) {
+            if (counts.getOrDefault(e, 0) > 0) {
+                counts.merge(e, -1, Integer::sum);
+                result.add(e);
+            }
+        }
+
+        return result.toArray();
+    }
+
+    private static byte[] g024Difference(final byte[] a, final byte[] b) {
+        final java.util.Map<Byte, Integer> counts = g024Counts(b);
+        final ByteList result = new ByteList();
+
+        for (final byte e : a) {
+            if (counts.getOrDefault(e, 0) > 0) {
+                counts.merge(e, -1, Integer::sum);
+            } else {
+                result.add(e);
+            }
+        }
+
+        return result.toArray();
+    }
+
+    private static byte[] g024SymmetricDifference(final byte[] a, final byte[] b) {
+        final java.util.Map<Byte, Integer> counts = g024Counts(b);
+        final ByteList result = new ByteList();
+
+        for (final byte e : a) {
+            if (counts.getOrDefault(e, 0) > 0) {
+                counts.merge(e, -1, Integer::sum);
+            } else {
+                result.add(e);
+            }
+        }
+
+        for (final byte e : b) {
+            if (counts.getOrDefault(e, 0) > 0) {
+                counts.merge(e, -1, Integer::sum);
+                result.add(e);
+            }
+        }
+
+        return result.toArray();
+    }
+
+    private static java.util.Set<Byte> g024Set(final byte[] a) {
+        final java.util.Set<Byte> set = new java.util.HashSet<>();
+
+        for (final byte e : a) {
+            set.add(e);
+        }
+
+        return set;
+    }
+
+    private static byte[] g024Filter(final byte[] a, final java.util.Set<Byte> set, final boolean keepMembers) {
+        final ByteList result = new ByteList();
+
+        for (final byte e : a) {
+            if (set.contains(e) == keepMembers) {
+                result.add(e);
+            }
+        }
+
+        return result.toArray();
+    }
+
+    // G024-01: removeDuplicates (unsorted path) keeps the first occurrence of each value, in order, and zeroes the vacated tail.
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testRemoveDuplicates_unsortedMatchesBoxedReference() {
+        final Random random = new Random(20260926L);
+
+        for (int round = 0; round < 3000; round++) {
+            final int length = round < 2000 ? random.nextInt(12) : random.nextInt(2000);
+            final byte[] a = g024RandomBytes(random, length, round % 3 == 0 ? 256 : 1 + random.nextInt(8));
+            final java.util.LinkedHashSet<Byte> expected = new java.util.LinkedHashSet<>();
+
+            for (final byte e : a) {
+                expected.add(e);
+            }
+
+            final ByteList list = ByteList.of(a.clone());
+            final boolean changed = list.removeDuplicates();
+
+            assertEquals(expected.size() != a.length, changed);
+            assertEquals(expected.size(), list.size());
+
+            int i = 0;
+
+            for (final Byte e : expected) {
+                assertEquals(e.byteValue(), list.get(i++));
+            }
+
+            for (int j = list.size(); j < a.length; j++) {
+                assertEquals(0, list.internalArray()[j]);
+            }
+        }
+
+        final ByteList extremes = ByteList.of(Byte.MAX_VALUE, Byte.MIN_VALUE, (byte) 0, Byte.MIN_VALUE, (byte) -1, Byte.MAX_VALUE, (byte) 0);
+        assertTrue(extremes.removeDuplicates());
+        assertArrayEquals(new byte[] { Byte.MAX_VALUE, Byte.MIN_VALUE, 0, -1 }, extremes.toArray());
+    }
+
+    // G024-02: removeAll/retainAll/containsAll/disjoint/containsAny match a boxed-set reference on both the linear and the set path.
+    @Test
+    public void testBulkMembershipOps_matchBoxedReference() {
+        final Random random = new Random(926L);
+
+        for (int round = 0; round < 4000; round++) {
+            final int distinct = round % 4 == 0 ? 256 : 1 + random.nextInt(10);
+            final byte[] a = g024RandomBytes(random, round < 3000 ? random.nextInt(14) : random.nextInt(600), distinct);
+            final byte[] b = g024RandomBytes(random, round < 3000 ? random.nextInt(14) : random.nextInt(600), distinct);
+            final java.util.Set<Byte> aSet = g024Set(a);
+            final java.util.Set<Byte> bSet = g024Set(b);
+
+            final ByteList removeAll = ByteList.of(a.clone());
+            final byte[] expectedRemoveAll = g024Filter(a, bSet, false);
+            assertEquals(b.length > 0 && expectedRemoveAll.length != a.length, removeAll.removeAll(ByteList.of(b)));
+            assertArrayEquals(expectedRemoveAll, removeAll.toArray());
+
+            final ByteList retainAll = ByteList.of(a.clone());
+            final byte[] expectedRetainAll = b.length == 0 ? new byte[0] : g024Filter(a, bSet, true);
+            assertEquals(expectedRetainAll.length != a.length, retainAll.retainAll(ByteList.of(b)));
+            assertArrayEquals(expectedRetainAll, retainAll.toArray());
+
+            assertEquals(aSet.containsAll(bSet), ByteList.of(a).containsAll(ByteList.of(b)));
+            assertEquals(java.util.Collections.disjoint(aSet, bSet), ByteList.of(a).disjoint(ByteList.of(b)));
+            assertEquals(!java.util.Collections.disjoint(aSet, bSet), ByteList.of(a).containsAny(b));
+        }
+    }
+
+    // G024-02: a list that shares its backing array with the argument (self or a window) is compacted against the original membership.
+    @Test
+    public void testBulkMembershipOps_selfAndSharedArray() {
+        final byte[] backing = { 5, -3, 5, 7, 7, 1, 1, 9, 9, 9, -128, 127, 0, 0 };
+
+        final ByteList self = ByteList.of(backing.clone());
+        assertTrue(self.removeAll(self));
+        assertEquals(0, self.size());
+
+        final ByteList selfRetain = ByteList.of(backing.clone());
+        assertFalse(selfRetain.retainAll(selfRetain));
+        assertArrayEquals(backing, selfRetain.toArray());
+        assertTrue(selfRetain.containsAll(selfRetain));
+        assertFalse(selfRetain.disjoint(selfRetain));
+
+        final byte[] shared = backing.clone();
+        final ByteList full = ByteList.of(shared);
+        final ByteList window = ByteList.of(shared, 4);
+        assertTrue(full.removeAll(window));
+        assertArrayEquals(new byte[] { 1, 1, 9, 9, 9, -128, 127, 0, 0 }, full.toArray());
+
+        final byte[] shared2 = backing.clone();
+        final ByteList full2 = ByteList.of(shared2);
+        assertTrue(full2.retainAll(ByteList.of(shared2, 4)));
+        assertArrayEquals(new byte[] { 5, -3, 5, 7, 7 }, full2.toArray());
+    }
+
+    // G024-03: intersection/difference/symmetricDifference keep multiplicity and encounter order of the boxed Multiset algorithm.
+    @Test
+    public void testMultisetOps_matchBoxedReference() {
+        final Random random = new Random(26L);
+
+        for (int round = 0; round < 4000; round++) {
+            final int distinct = round % 4 == 0 ? 256 : 1 + random.nextInt(6);
+            final byte[] a = g024RandomBytes(random, round < 3000 ? random.nextInt(10) : random.nextInt(800), distinct);
+            final byte[] b = g024RandomBytes(random, round < 3000 ? random.nextInt(10) : random.nextInt(800), distinct);
+
+            assertArrayEquals(g024Intersection(a, b), ByteList.of(a).intersection(ByteList.of(b)).toArray());
+            assertArrayEquals(g024Difference(a, b), ByteList.of(a).difference(ByteList.of(b)).toArray());
+            assertArrayEquals(g024SymmetricDifference(a, b), ByteList.of(a).symmetricDifference(ByteList.of(b)).toArray());
+            assertArrayEquals(g024Intersection(a, b), ByteList.of(a).intersection(b).toArray());
+            assertArrayEquals(g024Difference(a, b), ByteList.of(a).difference(b).toArray());
+            assertArrayEquals(g024SymmetricDifference(a, b), ByteList.of(a).symmetricDifference(b).toArray());
+        }
+
+        final ByteList self = ByteList.of((byte) 2, (byte) -128, (byte) 2, (byte) 127);
+        assertArrayEquals(self.toArray(), self.intersection(self).toArray());
+        assertEquals(0, self.difference(self).size());
+        assertEquals(0, self.symmetricDifference(self).size());
+        assertArrayEquals(new byte[] { 2, 1 }, ByteList.of((byte) 2).symmetricDifference(ByteList.of((byte) 2, (byte) 1, (byte) 2)).toArray());
+    }
+
+    // G024-04: toMultiset still counts every occurrence when the list is larger than the 256 distinct byte values.
+    @Test
+    public void testToMultiset_largeListCountsEveryOccurrence() {
+        final byte[] a = new byte[5000];
+
+        for (int i = 0; i < a.length; i++) {
+            a[i] = (byte) (i % 300);
+        }
+
+        final Multiset<Byte> multiset = ByteList.of(a).toMultiset();
+        final java.util.Map<Byte, Integer> expected = g024Counts(a);
+
+        assertEquals(expected.size(), multiset.countOfDistinctElements());
+
+        for (final java.util.Map.Entry<Byte, Integer> entry : expected.entrySet()) {
+            assertEquals(entry.getValue().intValue(), multiset.getCount(entry.getKey()));
+        }
+    }
+
+    // ---- perf review 2026-09-26 G024 end ----
 }

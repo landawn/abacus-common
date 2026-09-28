@@ -1400,10 +1400,10 @@ public class SuppliersTest extends TestBase {
 
     @Test
     public void testCustomBackingSuppliersRejectNullResults() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.<Object> ofMultiset(() -> null).get());
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.<String, Integer> ofListMultimap(() -> null, ArrayList::new).get());
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.<String, Integer> ofSetMultimap(() -> null, HashSet::new).get());
-        Assertions.assertThrows(IllegalArgumentException.class,
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<Object> ofMultiset(() -> null).get());
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofListMultimap(() -> null, ArrayList::new).get());
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofSetMultimap(() -> null, HashSet::new).get());
+        Assertions.assertThrows(NullPointerException.class,
                 () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(() -> null, ArrayList::new).get());
 
         final ListMultimap<String, Integer> listMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap::new, () -> null).get();
@@ -1411,9 +1411,9 @@ public class SuppliersTest extends TestBase {
         final Multimap<String, Integer, Collection<Integer>> multimap = Suppliers.<String, Integer, Collection<Integer>> ofMultimap(HashMap::new, () -> null)
                 .get();
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> listMultimap.put("key", 1));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> setMultimap.put("key", 1));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> multimap.put("key", 1));
+        Assertions.assertThrows(NullPointerException.class, () -> listMultimap.put("key", 1));
+        Assertions.assertThrows(NullPointerException.class, () -> setMultimap.put("key", 1));
+        Assertions.assertThrows(NullPointerException.class, () -> multimap.put("key", 1));
     }
 
     @Test
@@ -1502,8 +1502,8 @@ public class SuppliersTest extends TestBase {
 
         Assertions.assertTrue(Suppliers.registerForCollection((Class) collectionType, () -> null));
         Assertions.assertTrue(Suppliers.registerForMap((Class) mapType, () -> null));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(collectionType).get());
-        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap(mapType).get());
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.ofCollection(collectionType).get());
+        Assertions.assertThrows(NullPointerException.class, () -> Suppliers.ofMap(mapType).get());
     }
 
     @Test
@@ -1618,4 +1618,131 @@ public class SuppliersTest extends TestBase {
         Assertions.assertTrue(Assertions.assertThrows(UnsupportedOperationException.class, Suppliers::ofImmutableSet).getMessage().contains("ImmutableSet"));
         Assertions.assertTrue(Assertions.assertThrows(UnsupportedOperationException.class, Suppliers::ofImmutableMap).getMessage().contains("ImmutableMap"));
     }
+
+    @Test
+    public void testOfMultisetNullValueMapTypeMessageNamesValueMapType() {
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.ofMultiset((Class<? extends Map>) null));
+        Assertions.assertEquals("'valueMapType' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testOfListMultimapNullMapTypeMessageNamesMapType() {
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.ofListMultimap((Class<? extends Map>) null));
+        Assertions.assertEquals("'mapType' cannot be null", e.getMessage());
+
+        e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((Class<? extends Map>) null, ArrayList.class));
+        Assertions.assertEquals("'mapType' cannot be null", e.getMessage());
+
+        e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofListMultimap((Class<? extends Map>) null, (Class<? extends List>) null));
+        Assertions.assertEquals("'mapType' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testOfSetMultimapNullMapTypeMessageNamesMapType() {
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.ofSetMultimap((Class<? extends Map>) null));
+        Assertions.assertEquals("'mapType' cannot be null", e.getMessage());
+
+        e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap((Class<? extends Map>) null, HashSet.class));
+        Assertions.assertEquals("'mapType' cannot be null", e.getMessage());
+
+        e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofSetMultimap((Class<? extends Map>) null, (Class<? extends Set>) null));
+        Assertions.assertEquals("'mapType' cannot be null", e.getMessage());
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testOfCollectionRejectsUnlistedImmutableCollectionAndSequencedCollection() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(ImmutableCollection.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(java.util.SequencedCollection.class));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.registerForCollection((Class) ImmutableCollection.class, (java.util.function.Supplier) ArrayList::new));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.registerForCollection((Class) java.util.SequencedCollection.class, (java.util.function.Supplier) ArrayList::new));
+        // Still rejected after the failed registration attempts: nothing was cached.
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofCollection(ImmutableCollection.class));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testOfMapRejectsImmutableBiMapAndSequencedMap() {
+        Assertions.assertFalse(ImmutableMap.class.isAssignableFrom(ImmutableBiMap.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap(ImmutableBiMap.class));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMap(java.util.SequencedMap.class));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.registerForMap((Class) ImmutableBiMap.class, (java.util.function.Supplier) HashMap::new));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> Suppliers.registerForMap((Class) java.util.SequencedMap.class, (java.util.function.Supplier) HashMap::new));
+        Assertions.assertEquals(HashMap.class, Suppliers.ofMap(ImmutableMap.class).get().getClass());
+    }
+
+    // ---- deep review 2026-09-25 G076 begin ----
+    // G076-01: ofMultiset(Class) must reject a BiMap value-map type eagerly, like new Multiset(Class), instead of
+    // returning a supplier whose every get() throws.
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testOfMultiset_biMapValueMapType_rejectedEagerly() {
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> Suppliers.ofMultiset((Class) BiMap.class));
+        Assertions.assertTrue(e.getMessage().contains("BiMap"), e.getMessage());
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new Multiset<>((Class) BiMap.class));
+        // Non-BiMap types are unaffected.
+        Assertions.assertEquals(0, Suppliers.<String> ofMultiset(LinkedHashMap.class).get().size());
+    }
+    // ---- deep review 2026-09-25 G076 end ----
+
+    // ---- perf review 2026-09-26 G076 begin ----
+    // G076-01: the null-result message of the checked backing suppliers is built once; pin the exact messages and the happy path.
+    @Test
+    public void testOfMultimapFamily_nullResultMessagesAndReuse() {
+        Assertions.assertEquals("'mapSupplier' returned null",
+                Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<Object> ofMultiset(() -> null).get()).getMessage());
+        Assertions.assertEquals("'mapSupplier' returned null",
+                Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofListMultimap(() -> null, ArrayList::new).get())
+                        .getMessage());
+        Assertions.assertEquals("'mapSupplier' returned null",
+                Assertions.assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofSetMultimap(() -> null, HashSet::new).get())
+                        .getMessage());
+        Assertions.assertEquals("'mapSupplier' returned null", Assertions
+                .assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(() -> null, ArrayList::new).get())
+                .getMessage());
+
+        final AtomicInteger valueCalls = new AtomicInteger();
+        final ListMultimap<String, Integer> listMultimap = Suppliers.<String, Integer> ofListMultimap(HashMap::new, () -> {
+            final int call = valueCalls.incrementAndGet();
+            return call <= 2 ? new ArrayList<>() : null;
+        }).get();
+
+        listMultimap.put("a", 1);
+        listMultimap.put("a", 2);
+        listMultimap.put("b", 3);
+        Assertions.assertEquals(2, valueCalls.get());
+        Assertions.assertEquals(List.of(1, 2), listMultimap.get("a"));
+        Assertions.assertEquals(List.of(3), listMultimap.get("b"));
+
+        // The same checked supplier instance keeps reporting the same message on every failing call.
+        for (int i = 0; i < 2; i++) {
+            final String key = "c" + i;
+            Assertions.assertEquals("'valueSupplier' returned null",
+                    Assertions.assertThrows(NullPointerException.class, () -> listMultimap.put(key, 4)).getMessage());
+        }
+
+        Assertions.assertEquals("'valueSupplier' returned null", Assertions
+                .assertThrows(NullPointerException.class, () -> Suppliers.<String, Integer> ofSetMultimap(HashMap::new, () -> null).get().put("k", 1))
+                .getMessage());
+        Assertions.assertEquals("'valueSupplier' returned null",
+                Assertions.assertThrows(NullPointerException.class,
+                        () -> Suppliers.<String, Integer, Collection<Integer>> ofMultimap(HashMap::new, () -> null).get().put("k", 1))
+                        .getMessage());
+
+        final com.landawn.abacus.util.function.Supplier<Multiset<String>> multisetSupplier = Suppliers.ofMultiset(LinkedHashMap::new);
+        final Multiset<String> first = multisetSupplier.get();
+        final Multiset<String> second = multisetSupplier.get();
+        Assertions.assertNotSame(first, second);
+        first.add("x");
+        Assertions.assertEquals(1, first.count("x"));
+        Assertions.assertEquals(0, second.count("x"));
+    }
+    // ---- perf review 2026-09-26 G076 end ----
 }

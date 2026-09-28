@@ -96,8 +96,8 @@ public interface ShortFunction<R> extends Throwables.ShortFunction<R, RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortFunction<Short> identity = ShortFunction.identity();
-     * Short result1 = identity.apply((short) 42);     // returns 42
-     * Short result2 = identity.apply((short) -100);   // returns -100
+     * Short result1 = identity.apply((short) 42);    // returns 42
+     * Short result2 = identity.apply((short) -100);  // returns -100
      * }</pre>
      *
      * @return a function that always returns its input argument as a Short object

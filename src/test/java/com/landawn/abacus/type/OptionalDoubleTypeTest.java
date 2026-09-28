@@ -24,6 +24,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
 import com.landawn.abacus.util.u.OptionalDouble;
+import java.math.BigDecimal;
 
 public class OptionalDoubleTypeTest extends TestBase {
 
@@ -287,5 +288,24 @@ public class OptionalDoubleTypeTest extends TestBase {
         assertTrue(optionalDoubleType.valueOf("").isEmpty());
         assertTrue(optionalDoubleType.valueOf((String) null).isEmpty());
         assertEquals(7.0d, optionalDoubleType.valueOf("7").get());
+    }
+
+
+    @Test
+    public void testGetFloatColumnWidensThroughDecimalSpellingLikeDoubleType() throws SQLException {
+        final Type<OptionalDouble> type = TypeFactory.getType(OptionalDouble.class);
+        final Type<Double> doubleType = TypeFactory.getType(Double.class);
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(1)).thenReturn(0.1f);
+        when(rs.getObject("real_col")).thenReturn(1.21f);
+        when(rs.getObject(2)).thenReturn(new BigDecimal("2.5"));
+        when(rs.getObject(3)).thenReturn(7L);
+
+        assertEquals(0.1d, type.get(rs, 1).get());
+        assertEquals(doubleType.get(rs, 1), type.get(rs, 1).get());
+        assertEquals(1.21d, type.get(rs, "real_col").get());
+        assertEquals(doubleType.get(rs, "real_col"), type.get(rs, "real_col").get());
+        assertEquals(2.5d, type.get(rs, 2).get());
+        assertEquals(7.0d, type.get(rs, 3).get());
     }
 }

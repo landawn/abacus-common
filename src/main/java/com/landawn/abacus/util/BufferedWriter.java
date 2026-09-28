@@ -177,8 +177,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(true);    // "true" is written
-     * writer.write(false);   // "false" is written
+     * writer.write(true);   // "true" is written
+     * writer.write(false);  // "false" is written
      * }</pre>
      *
      * @param b the boolean value to write
@@ -193,8 +193,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write((byte) 127);   // "127" is written
-     * writer.write((byte) -1);    // "-1" is written
+     * writer.write((byte) 127);  // "127" is written
+     * writer.write((byte) -1);   // "-1" is written
      * }</pre>
      *
      * @param b the byte value to write
@@ -238,8 +238,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.writeInt(12345);   // "12345" is written
-     * writer.writeInt(-999);    // "-999" is written
+     * writer.writeInt(12345);  // "12345" is written
+     * writer.writeInt(-999);   // "-999" is written
      * }</pre>
      *
      * @param i the integer value to write
@@ -271,8 +271,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(3.14f);       // "3.14" is written
-     * writer.write(1.0f/3.0f);   // "0.33333334" is written
+     * writer.write(3.14f);      // "3.14" is written
+     * writer.write(1.0f/3.0f);  // "0.33333334" is written
      * }</pre>
      *
      * @param f the float value to write
@@ -289,8 +289,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(3.14159);   // "3.14159" is written
-     * writer.write(1.0/3.0);   // "0.3333333333333333" is written
+     * writer.write(3.14159);  // "3.14159" is written
+     * writer.write(1.0/3.0);  // "0.3333333333333333" is written
      * }</pre>
      *
      * @param d the double value to write
@@ -308,53 +308,62 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(new Date());    // "2024-06-15T10:30:00Z" is written (example value)
-     * writer.write((Date) null);   // "null" is written
+     * writer.write(new Date());   // "2024-06-15T10:30:00Z" is written (example value)
+     * writer.write((Date) null);  // "null" is written
      * }</pre>
      *
      * @param date the date to write; if {@code null}, {@code "null"} is written
+     * @throws IllegalArgumentException if {@code date} is outside the Common Era year range {@code 0001} through
+     *         {@code 9999} required by the default format
      * @throws UncheckedIOException if this writer is closed, or writing characters to the underlying writer fails
      */
-    public void write(final Date date) throws UncheckedIOException {
+    public void write(final Date date) throws IllegalArgumentException, UncheckedIOException {
         Dates.formatTo(date, null, null, this);
     }
 
     /**
-     * Writes a {@link Calendar} using the default ISO-8601 date format
-     * ({@code yyyy-MM-dd'T'HH:mm:ss'Z'}). If {@code c} is {@code null},
-     * the string {@code "null"} is written.
+     * Writes a {@link Calendar} using the ISO zoned date-time default of {@link Dates#format(Calendar)}:
+     * the calendar's own time zone, a fractional part when milliseconds are non-zero, the offset and the
+     * zone ID (not the UTC {@code yyyy-MM-dd'T'HH:mm:ss'Z'} form used for a {@link Date}). If {@code c} is
+     * {@code null}, the string {@code "null"} is written.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Calendar cal = Calendar.getInstance();
-     * writer.write(cal);               // "2024-06-15T10:30:00Z" is written (example value)
-     * writer.write((Calendar) null);   // "null" is written
+     * Calendar cal = Dates.createCalendar(1736917245123L, TimeZone.getTimeZone("Asia/Kolkata"));
+     * writer.write(cal);              // "2025-01-15T10:30:45.123+05:30[Asia/Kolkata]" is written
+     * writer.write((Calendar) null);  // "null" is written
      * }</pre>
      *
      * @param c the calendar to write; if {@code null}, {@code "null"} is written
+     * @throws IllegalArgumentException if {@code c} is outside the Common Era year range {@code 0001} through
+     *         {@code 9999} required by the default format, or its time zone carries rules no {@link java.time.ZoneId} can express
      * @throws UncheckedIOException if this writer is closed, or writing characters to the underlying writer fails
      */
-    public void write(final Calendar c) throws UncheckedIOException {
+    public void write(final Calendar c) throws IllegalArgumentException, UncheckedIOException {
         Dates.formatTo(c, null, null, this);
     }
 
     /**
-     * Writes an {@link XMLGregorianCalendar} using the default ISO-8601 date format
-     * ({@code yyyy-MM-dd'T'HH:mm:ss'Z'}). If {@code c} is {@code null},
-     * the string {@code "null"} is written.
+     * Writes an {@link XMLGregorianCalendar} using its XML Schema lexical representation, as
+     * {@link Dates#format(XMLGregorianCalendar)} does: the civil fields, fractional-second scale and numeric
+     * timezone are written exactly as held, and an undefined timezone stays absent (the value is not
+     * converted to UTC). If {@code c} is {@code null}, the string {@code "null"} is written.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance()
      *         .newXMLGregorianCalendar("2024-06-15T10:30:00Z");
      * writer.write(xmlCal);                        // "2024-06-15T10:30:00Z" is written
-     * writer.write((XMLGregorianCalendar) null);   // "null" is written
+     * writer.write(DatatypeFactory.newInstance()
+     *         .newXMLGregorianCalendar("2024-06-15T10:30:00.123+09:00"));  // "2024-06-15T10:30:00.123+09:00" is written
+     * writer.write((XMLGregorianCalendar) null);                           // "null" is written
      * }</pre>
      *
      * @param c the XMLGregorianCalendar to write; if {@code null}, {@code "null"} is written
+     * @throws IllegalStateException if the fields of {@code c} do not form a valid XML Schema built-in date/time type
      * @throws UncheckedIOException if this writer is closed, or writing characters to the underlying writer fails
      */
-    public void write(final XMLGregorianCalendar c) throws UncheckedIOException {
+    public void write(final XMLGregorianCalendar c) throws IllegalStateException, UncheckedIOException {
         Dates.formatTo(c, null, null, this);
     }
 
@@ -363,8 +372,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write('A');    // "A" is written
-     * writer.write('\n');   // newline is written
+     * writer.write('A');   // "A" is written
+     * writer.write('\n');  // newline is written
      * }</pre>
      *
      * @param c the character to write
@@ -398,8 +407,8 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write("Hello");         // "Hello" is written
-     * writer.write((String) null);   // "null" is written
+     * writer.write("Hello");        // "Hello" is written
+     * writer.write((String) null);  // "null" is written
      * }</pre>
      *
      * @param str the string to write
@@ -426,17 +435,17 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * @param str the string to write; if {@code null}, {@code "null"} is written
      * @param off the offset from which to start writing; bounds are checked against {@code str},
      *        or against the four-character string {@code "null"} when {@code str} is {@code null}
-     * @param len the number of characters to write; bounds are checked against the same effective source string
+     * @param length the number of characters to write; bounds are checked against the same effective source string
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
-     * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
+     * @throws IndexOutOfBoundsException if {@code off < 0}, {@code length < 0},
      *         or the requested range exceeds the effective source string
      */
     @Override
-    public void write(final String str, final int off, final int len) throws IOException, IndexOutOfBoundsException {
+    public void write(final String str, final int off, final int length) throws IOException, IndexOutOfBoundsException {
         if (str == null) {
-            write(Strings.NULL_CHAR_ARRAY, off, len);
+            write(Strings.NULL_CHAR_ARRAY, off, length);
         } else {
-            writeNonNull(str, off, len);
+            writeNonNull(str, off, length);
         }
     }
 
@@ -459,49 +468,49 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * @param str the string to write; must not be {@code null}
      * @param off the offset from which to start writing; must be {@code >= 0} and {@code <= str.length()}
-     * @param len the number of characters to write; must be {@code >= 0} and {@code <= str.length() - off}
+     * @param length the number of characters to write; must be {@code >= 0} and {@code <= str.length() - off}
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      * @throws NullPointerException if {@code str} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
-     *         {@code off > str.length()}, or {@code len > str.length() - off}
+     * @throws IndexOutOfBoundsException if {@code off < 0}, {@code length < 0},
+     *         {@code off > str.length()}, or {@code length > str.length() - off}
      */
     @Internal
-    void writeNonNull(final String str, final int off, int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
+    void writeNonNull(final String str, final int off, int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
         N.requireNonNull(str, cs.str);
 
-        if ((off < 0) || (len < 0) || (off > str.length()) || (len > str.length() - off)) {
+        if ((off < 0) || (length < 0) || (off > str.length()) || (length > str.length() - off)) {
             throw new IndexOutOfBoundsException();
-        } else if (len == 0) {
+        } else if (length == 0) {
             return;
         }
 
         // write(InternalUtil.getCharsForReadOnly(str), off, len);
 
         if (value == null) {
-            if (len > (Objectory.BUFFER_SIZE - nextChar)) {
+            if (length > (Objectory.BUFFER_SIZE - nextChar)) {
                 if (nextChar > 0) {
                     flushBufferToWriter();
                 }
 
-                out.write(str, off, len);
+                out.write(str, off, length);
                 destinationDirty = true;
             } else {
                 if (_cbuf == null) {
                     _cbuf = Objectory.createCharArrayBuffer();
                 }
 
-                str.getChars(off, off + len, _cbuf, nextChar);
-                nextChar += len;
+                str.getChars(off, off + length, _cbuf, nextChar);
+                nextChar += length;
                 destinationDirty = true;
             }
         } else {
-            if (len > (value.length - count)) {
-                expandCapacity(count + len);
+            if (length > (value.length - count)) {
+                expandCapacity(count + length);
             }
 
-            str.getChars(off, off + len, value, count);
-            count += len;
+            str.getChars(off, off + length, value, count);
+            count += length;
         }
     }
 
@@ -562,47 +571,47 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      *
      * @param cbuf the character array; must not be {@code null}
      * @param off the offset from which to start writing; must be {@code >= 0} and {@code <= cbuf.length}
-     * @param len the number of characters to write; must be {@code >= 0} and {@code <= cbuf.length - off}
+     * @param length the number of characters to write; must be {@code >= 0} and {@code <= cbuf.length - off}
      * @throws IOException if this writer is closed, or writing characters to the underlying writer fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off < 0}, {@code len < 0},
-     *         {@code off > cbuf.length}, or {@code len > cbuf.length - off}
+     * @throws IndexOutOfBoundsException if {@code off < 0}, {@code length < 0},
+     *         {@code off > cbuf.length}, or {@code length > cbuf.length - off}
      */
     @Override
-    public void write(final char[] cbuf, final int off, int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
+    public void write(final char[] cbuf, final int off, int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
         N.requireNonNull(cbuf, cs.cbuf);
 
-        if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
+        if ((off < 0) || (length < 0) || (off > cbuf.length) || (length > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
-        } else if (len == 0) {
+        } else if (length == 0) {
             return;
         }
 
         if (value == null) {
-            if (len > (Objectory.BUFFER_SIZE - nextChar)) {
+            if (length > (Objectory.BUFFER_SIZE - nextChar)) {
                 if (nextChar > 0) {
                     flushBufferToWriter();
                 }
 
-                out.write(cbuf, off, len);
+                out.write(cbuf, off, length);
                 destinationDirty = true;
             } else {
                 if (_cbuf == null) {
                     _cbuf = Objectory.createCharArrayBuffer();
                 }
 
-                N.copy(cbuf, off, _cbuf, nextChar, len);
-                nextChar += len;
+                N.copy(cbuf, off, _cbuf, nextChar, length);
+                nextChar += length;
                 destinationDirty = true;
             }
         } else {
-            if (len > (value.length - count)) {
-                expandCapacity(count + len);
+            if (length > (value.length - count)) {
+                expandCapacity(count + length);
             }
 
-            N.copy(cbuf, off, value, count, len);
-            count += len;
+            N.copy(cbuf, off, value, count, length);
+            count += length;
         }
     }
 
@@ -859,7 +868,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @return the string representation of the written content
-     * @throws UncheckedIOException if this writer is closed in external writer mode, or writing or flushing buffered characters to the underlying writer fails
+     * @throws UncheckedIOException if this writer has been closed (in either mode), or writing or flushing buffered characters to the underlying writer fails
      */
     @Override
     public String toString() throws UncheckedIOException {
@@ -931,8 +940,9 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
      * }</pre>
      *
      * @param os the new OutputStream to write to; must not be {@code null}
+     * @throws IllegalArgumentException if {@code os} is {@code null}
      */
-    void reinit(final OutputStream os) {
+    void reinit(final OutputStream os) throws IllegalArgumentException {
         reinit(IOUtil.newOutputStreamWriter(os)); // NOSONAR
     }
 
@@ -1038,7 +1048,7 @@ sealed class BufferedWriter extends java.io.BufferedWriter permits CharacterWrit
          * @throws UnsupportedOperationException always; this sentinel writer does not support I/O operations.
          */
         @Override
-        public void write(final char[] cbuf, final int off, final int len) throws UnsupportedOperationException {
+        public void write(final char[] cbuf, final int off, final int length) throws UnsupportedOperationException {
             throw new UnsupportedOperationException();
         }
 

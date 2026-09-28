@@ -444,16 +444,16 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
 
     @Test
     public void testRowSuppliersRejectNullAndShortResults() {
-        assertThrows(IllegalArgumentException.class, () -> dataset.getRow(0, (IntFunction<Object[]>) columnCount -> null));
+        assertThrows(NullPointerException.class, () -> dataset.getRow(0, (IntFunction<Object[]>) columnCount -> null));
         assertThrows(IllegalArgumentException.class, () -> dataset.getRow(0, (IntFunction<Object[]>) columnCount -> new Object[columnCount - 1]));
 
         final int[] listSupplierCalls = { 0 };
         final IntFunction<Object[]> listRowSupplier = columnCount -> listSupplierCalls[0]++ == 0 ? new Object[columnCount] : null;
-        assertThrows(IllegalArgumentException.class, () -> dataset.toList(listRowSupplier));
+        assertThrows(NullPointerException.class, () -> dataset.toList(listRowSupplier));
 
         final int[] streamSupplierCalls = { 0 };
         final IntFunction<Object[]> streamRowSupplier = columnCount -> streamSupplierCalls[0]++ == 0 ? new Object[columnCount] : null;
-        assertThrows(IllegalArgumentException.class, () -> dataset.stream(streamRowSupplier).toList());
+        assertThrows(NullPointerException.class, () -> dataset.stream(streamRowSupplier).toList());
     }
 
     @Test
@@ -1915,8 +1915,8 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         final IntFunction<Map<Integer, String>> nullMapSupplier = ignored -> null;
         final IntFunction<ListMultimap<Integer, String>> nullMultimapSupplier = ignored -> null;
 
-        assertThrows(IllegalArgumentException.class, () -> dataset.toMap("id", "name", nullMapSupplier));
-        assertThrows(IllegalArgumentException.class, () -> dataset.toMultimap("id", "name", nullMultimapSupplier));
+        assertThrows(NullPointerException.class, () -> dataset.toMap("id", "name", nullMapSupplier));
+        assertThrows(NullPointerException.class, () -> dataset.toMultimap("id", "name", nullMultimapSupplier));
     }
 
     @Test
@@ -1927,9 +1927,9 @@ public class RowDatasetFullTest extends RowDatasetTestSupport {
         final Map<String, String> joinColumns = CommonUtil.asMap("id", "rid");
         final IntFunction<Collection> nullCollectionSupplier = ignored -> null;
 
-        assertThrows(IllegalArgumentException.class, () -> left.innerJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
-        assertThrows(IllegalArgumentException.class, () -> left.rightJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
-        assertThrows(IllegalArgumentException.class, () -> left.fullJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
+        assertThrows(NullPointerException.class, () -> left.innerJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
+        assertThrows(NullPointerException.class, () -> left.rightJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
+        assertThrows(NullPointerException.class, () -> left.fullJoin(right, joinColumns, "matches", Object[].class, nullCollectionSupplier));
     }
 
     @Test

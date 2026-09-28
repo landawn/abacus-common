@@ -382,4 +382,33 @@ public class IteratorFloatStreamTest extends TestBase {
         assertEquals(3, seen[0]);
         stream.close();
     }
+
+    // ---- perf review 2026-09-26 G098 begin ----
+
+    // G098-02: sorted kthLargest ring buffer wraps with a compare; pins every k against the sorted reference.
+    @Test
+    public void testKthLargest_sortedRingWrapAllK() {
+        final float[] data = new float[37];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (i % 5 == 0) ? -0.0f : (i % 11 == 0 ? Float.NaN : ((i * 7) % 23 - 11) * 0.5f);
+        }
+        final float[] sortedData = data.clone();
+        java.util.Arrays.sort(sortedData);
+
+        for (int k = 1; k <= data.length + 2; k++) {
+            final OptionalFloat result = iter(data).sorted().kthLargest(k);
+            if (k <= data.length) {
+                assertEquals(sortedData[data.length - k], result.get(), 0f);
+            } else {
+                assertFalse(result.isPresent());
+            }
+        }
+
+        for (int k = 1; k <= 20; k++) {
+            final OptionalFloat result = iter(sortedData).sorted().kthLargest(k);
+            assertEquals(sortedData[data.length - k], result.get(), 0f);
+        }
+    }
+
+    // ---- perf review 2026-09-26 G098 end ----
 }

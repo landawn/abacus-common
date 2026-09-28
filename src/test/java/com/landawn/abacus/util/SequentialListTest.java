@@ -37,7 +37,8 @@ public class SequentialListTest extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.fill(gap, 2, 1, null));
         List<String> fixed = Arrays.asList("a", "b");
         assertThrows(UnsupportedOperationException.class, () -> CommonUtil.fill(fixed, 0, 3, "x"));
-        assertEquals(List.of("x", "x"), fixed);
+        // C-119 (2026-09-24): the list grows before any existing element is overwritten, so a failed grow leaves it unchanged
+        assertEquals(List.of("a", "b"), fixed);
     }
 
     @Test

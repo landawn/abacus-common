@@ -113,27 +113,27 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
-     * @param len the number of characters to read
-     * @return the {@code Character} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
-     * @throws IndexOutOfBoundsException if {@code cbuf} is nonempty, {@code len} is nonzero, and the requested region is outside the buffer.
+     * @param length the number of characters to read
+     * @return the {@code Character} value, or the default value if {@code cbuf} is {@code null} or {@code length} is {@code 0}
+     * @throws IndexOutOfBoundsException if {@code cbuf} is nonempty, {@code length} is nonzero, and the requested region is outside the buffer.
      * @throws NumberFormatException if a multi-character region cannot be parsed as a numeric character code
      * @throws IllegalArgumentException if a multi-character region parses to a numeric value outside the {@code char} range.
      */
     @Override
-    public Character valueOf(final char[] cbuf, final int offset, final int len)
+    public Character valueOf(final char[] cbuf, final int offset, final int length)
             throws IndexOutOfBoundsException, NumberFormatException, IllegalArgumentException {
-        if (N.isEmpty(cbuf) || (len == 0)) {
+        if (N.isEmpty(cbuf) || (length == 0)) {
             return defaultValue();
         }
 
-        if (len == 1) {
+        if (length == 1) {
             return cbuf[offset];
         }
 
         // One grammar for both overloads: parseInt(char[]) tolerates a type suffix ("1L" -> U+0001, a silent wrong
         // value) and rejects non-ASCII digits, so a JSON (char[]) and an XML (String) document parsed differently.
         // parseChar also applies the char-range check (IllegalArgumentException).
-        return parseChar(new String(cbuf, offset, len));
+        return parseChar(new String(cbuf, offset, length));
     }
 
     /**
@@ -195,18 +195,18 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * <p>The character is stored as a {@code VARCHAR} in the database.</p>
      * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Character} value to set, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Character x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Character x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.VARCHAR);
+            statement.setNull(columnIndex, Types.VARCHAR);
         } else {
-            stmt.setString(columnIndex, x.toString());
+            statement.setString(columnIndex, x.toString());
         }
     }
 
@@ -215,18 +215,18 @@ public abstract class AbstractCharacterType extends AbstractPrimaryType<Characte
      * <p>The character is stored as a {@code VARCHAR} in the database.</p>
      * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Character} value to set, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Character x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Character x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.VARCHAR);
+            statement.setNull(parameterName, Types.VARCHAR);
         } else {
-            stmt.setString(parameterName, x.toString());
+            statement.setString(parameterName, x.toString());
         }
     }
 

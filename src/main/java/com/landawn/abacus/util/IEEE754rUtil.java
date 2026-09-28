@@ -70,10 +70,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0f, 5.0f);             // returns 3.0f
-     * IEEE754rUtil.min(Float.NaN, 5.0f);        // returns 5.0f
-     * IEEE754rUtil.min(3.0f, Float.NaN);        // returns 3.0f
-     * IEEE754rUtil.min(Float.NaN, Float.NaN);   // returns Float.NaN
+     * IEEE754rUtil.min(3.0f, 5.0f);            // returns 3.0f
+     * IEEE754rUtil.min(Float.NaN, 5.0f);       // returns 5.0f
+     * IEEE754rUtil.min(3.0f, Float.NaN);       // returns 3.0f
+     * IEEE754rUtil.min(Float.NaN, Float.NaN);  // returns Float.NaN
      * }</pre>
      *
      * @param a the first value
@@ -103,10 +103,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0f, 5.0f, 1.0f);                  // returns 1.0f
-     * IEEE754rUtil.min(Float.NaN, 5.0f, 1.0f);             // returns 1.0f
-     * IEEE754rUtil.min(3.0f, Float.NaN, 1.0f);             // returns 1.0f
-     * IEEE754rUtil.min(Float.NaN, Float.NaN, Float.NaN);   // returns Float.NaN
+     * IEEE754rUtil.min(3.0f, 5.0f, 1.0f);                 // returns 1.0f
+     * IEEE754rUtil.min(Float.NaN, 5.0f, 1.0f);            // returns 1.0f
+     * IEEE754rUtil.min(3.0f, Float.NaN, 1.0f);            // returns 1.0f
+     * IEEE754rUtil.min(Float.NaN, Float.NaN, Float.NaN);  // returns Float.NaN
      * }</pre>
      *
      * @param a the first value
@@ -161,10 +161,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0, 5.0);                 // returns 3.0
-     * IEEE754rUtil.min(Double.NaN, 5.0);          // returns 5.0
-     * IEEE754rUtil.min(3.0, Double.NaN);          // returns 3.0
-     * IEEE754rUtil.min(Double.NaN, Double.NaN);   // returns Double.NaN
+     * IEEE754rUtil.min(3.0, 5.0);                // returns 3.0
+     * IEEE754rUtil.min(Double.NaN, 5.0);         // returns 5.0
+     * IEEE754rUtil.min(3.0, Double.NaN);         // returns 3.0
+     * IEEE754rUtil.min(Double.NaN, Double.NaN);  // returns Double.NaN
      * }</pre>
      *
      * @param a the first value
@@ -194,10 +194,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.min(3.0, 5.0, 1.0);                        // returns 1.0
-     * IEEE754rUtil.min(Double.NaN, 5.0, 1.0);                 // returns 1.0
-     * IEEE754rUtil.min(3.0, Double.NaN, 1.0);                 // returns 1.0
-     * IEEE754rUtil.min(Double.NaN, Double.NaN, Double.NaN);   // returns Double.NaN
+     * IEEE754rUtil.min(3.0, 5.0, 1.0);                       // returns 1.0
+     * IEEE754rUtil.min(Double.NaN, 5.0, 1.0);                // returns 1.0
+     * IEEE754rUtil.min(3.0, Double.NaN, 1.0);                // returns 1.0
+     * IEEE754rUtil.min(Double.NaN, Double.NaN, Double.NaN);  // returns Double.NaN
      * }</pre>
      *
      * @param a the first value
@@ -252,10 +252,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0f, 5.0f);             // returns 5.0f
-     * IEEE754rUtil.max(Float.NaN, 5.0f);        // returns 5.0f
-     * IEEE754rUtil.max(3.0f, Float.NaN);        // returns 3.0f
-     * IEEE754rUtil.max(Float.NaN, Float.NaN);   // returns Float.NaN
+     * IEEE754rUtil.max(3.0f, 5.0f);            // returns 5.0f
+     * IEEE754rUtil.max(Float.NaN, 5.0f);       // returns 5.0f
+     * IEEE754rUtil.max(3.0f, Float.NaN);       // returns 3.0f
+     * IEEE754rUtil.max(Float.NaN, Float.NaN);  // returns Float.NaN
      * }</pre>
      *
      * @param a the first value
@@ -285,10 +285,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0f, 5.0f, 1.0f);                  // returns 5.0f
-     * IEEE754rUtil.max(Float.NaN, 5.0f, 1.0f);             // returns 5.0f
-     * IEEE754rUtil.max(3.0f, Float.NaN, 5.0f);             // returns 5.0f
-     * IEEE754rUtil.max(Float.NaN, Float.NaN, Float.NaN);   // returns Float.NaN
+     * IEEE754rUtil.max(3.0f, 5.0f, 1.0f);                 // returns 5.0f
+     * IEEE754rUtil.max(Float.NaN, 5.0f, 1.0f);            // returns 5.0f
+     * IEEE754rUtil.max(3.0f, Float.NaN, 5.0f);            // returns 5.0f
+     * IEEE754rUtil.max(Float.NaN, Float.NaN, Float.NaN);  // returns Float.NaN
      * }</pre>
      *
      * @param a the first value
@@ -343,10 +343,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0, 5.0);                 // returns 5.0
-     * IEEE754rUtil.max(Double.NaN, 5.0);          // returns 5.0
-     * IEEE754rUtil.max(3.0, Double.NaN);          // returns 3.0
-     * IEEE754rUtil.max(Double.NaN, Double.NaN);   // returns Double.NaN
+     * IEEE754rUtil.max(3.0, 5.0);                // returns 5.0
+     * IEEE754rUtil.max(Double.NaN, 5.0);         // returns 5.0
+     * IEEE754rUtil.max(3.0, Double.NaN);         // returns 3.0
+     * IEEE754rUtil.max(Double.NaN, Double.NaN);  // returns Double.NaN
      * }</pre>
      *
      * @param a the first value
@@ -376,10 +376,10 @@ public final class IEEE754rUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * IEEE754rUtil.max(3.0, 5.0, 1.0);                        // returns 5.0
-     * IEEE754rUtil.max(Double.NaN, 5.0, 1.0);                 // returns 5.0
-     * IEEE754rUtil.max(3.0, Double.NaN, 5.0);                 // returns 5.0
-     * IEEE754rUtil.max(Double.NaN, Double.NaN, Double.NaN);   // returns Double.NaN
+     * IEEE754rUtil.max(3.0, 5.0, 1.0);                       // returns 5.0
+     * IEEE754rUtil.max(Double.NaN, 5.0, 1.0);                // returns 5.0
+     * IEEE754rUtil.max(3.0, Double.NaN, 5.0);                // returns 5.0
+     * IEEE754rUtil.max(Double.NaN, Double.NaN, Double.NaN);  // returns Double.NaN
      * }</pre>
      *
      * @param a the first value

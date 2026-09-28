@@ -27,8 +27,8 @@ package com.landawn.abacus.util;
  * Gender gender = Gender.of(1);   // returns FEMALE
  *
  * // Get integer value from gender
- * int maleValue = Gender.MALE.intValue();   // returns 2
- * int xValue = Gender.X.intValue();         // returns 3
+ * int maleValue = Gender.MALE.intValue();  // returns 2
+ * int xValue = Gender.X.intValue();        // returns 3
  *
  * // Use in switch statements
  * switch(gender) {
@@ -79,9 +79,9 @@ public enum Gender {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int femaleCode = Gender.FEMALE.intValue();   // returns 1
-     * int maleCode = Gender.MALE.intValue();       // returns 2
-     * int blankCode = Gender.BLANK.intValue();     // returns 0
+     * int femaleCode = Gender.FEMALE.intValue();  // returns 1
+     * int maleCode = Gender.MALE.intValue();      // returns 2
+     * int blankCode = Gender.BLANK.intValue();    // returns 0
      * }</pre>
      *
      * @return the integer value of this gender (0 for BLANK, 1 for FEMALE, 2 for MALE, 3 for X)
@@ -95,10 +95,10 @@ public enum Gender {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Gender female = Gender.of(1);   // returns FEMALE
-     * Gender male = Gender.of(2);     // returns MALE
-     * Gender x = Gender.of(3);        // returns X
-     * Gender blank = Gender.of(0);    // returns BLANK
+     * Gender female = Gender.of(1);  // returns FEMALE
+     * Gender male = Gender.of(2);    // returns MALE
+     * Gender x = Gender.of(3);       // returns X
+     * Gender blank = Gender.of(0);   // returns BLANK
      * }</pre>
      *
      * @param intValue the integer value to convert to Gender (0, 1, 2 or 3)

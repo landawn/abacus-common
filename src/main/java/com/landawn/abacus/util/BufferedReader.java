@@ -37,8 +37,8 @@ import com.landawn.abacus.annotation.SuppressFBWarnings;
  * <pre>{@code
  * // Reading from a string
  * BufferedReader reader = new BufferedReader("Hello\nWorld");
- * String line1 = reader.readLine();   // "Hello"
- * String line2 = reader.readLine();   // "World"
+ * String line1 = reader.readLine();  // "Hello"
+ * String line2 = reader.readLine();  // "World"
  *
  * // Reading from an InputStream
  * try (BufferedReader reader2 = new BufferedReader(new FileInputStream("file.txt"))) {
@@ -181,10 +181,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("ABC");
-     * int ch1 = reader.read();   // 65 ('A')
-     * int ch2 = reader.read();   // 66 ('B')
-     * int ch3 = reader.read();   // 67 ('C')
-     * int ch4 = reader.read();   // -1 (end of stream)
+     * int ch1 = reader.read();  // 65 ('A')
+     * int ch2 = reader.read();  // 66 ('B')
+     * int ch3 = reader.read();  // 67 ('C')
+     * int ch4 = reader.read();  // -1 (end of stream)
      * }</pre>
      *
      * @return the character read, as an integer in the range 0 to 65535,
@@ -231,20 +231,20 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *
      * @param cbuf destination buffer
      * @param off offset at which to start storing characters
-     * @param len maximum number of characters to read
+     * @param length maximum number of characters to read
      * @return the number of characters read, or -1 if the end of the stream
      *         has been reached
      * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      */
-    private int read1(final char[] cbuf, final int off, final int len) throws IOException { // NOSONAR
+    private int read1(final char[] cbuf, final int off, final int length) throws IOException { // NOSONAR
         if (nextChar >= nChars) {
             /*
              * If the requested length is at least as large as the buffer, and if there is no mark/reset activity, and
              * if line feeds are not being skipped, do not bother to copy the characters into the local buffer. In this
              *  way, buffered streams will cascade harmlessly.
             */
-            if ((len >= Objectory.BUFFER_SIZE) && !skipLF) {
-                return in.read(cbuf, off, len);
+            if ((length >= Objectory.BUFFER_SIZE) && !skipLF) {
+                return in.read(cbuf, off, length);
             }
 
             fill();
@@ -270,7 +270,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
             }
         }
 
-        final int n = Math.min(len, nChars - nextChar);
+        final int n = Math.min(length, nChars - nextChar);
         N.copy(_cbuf, nextChar, cbuf, off, n);
         nextChar += n;
 
@@ -280,47 +280,47 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
     /**
      * Reads characters into a portion of an array.
      *
-     * <p>This method attempts to read up to {@code len} characters from the input,
+     * <p>This method attempts to read up to {@code length} characters from the input,
      * storing them into the array {@code cbuf} starting at offset {@code off}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Hello World");
      * char[] buffer = new char[5];
-     * int count = reader.read(buffer, 0, 5);              // "Hello"
-     * System.out.println(new String(buffer, 0, count));   // "Hello"
+     * int count = reader.read(buffer, 0, 5);             // "Hello"
+     * System.out.println(new String(buffer, 0, count));  // "Hello"
      * }</pre>
      *
      * @param cbuf destination buffer
      * @param off offset at which to start storing characters
-     * @param len maximum number of characters to read
+     * @param length maximum number of characters to read
      * @return the number of characters read, or -1 if the end of the stream
-     *         has been reached. Returns 0 if {@code len} is 0
+     *         has been reached. Returns 0 if {@code length} is 0
      * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is
-     *         negative, or {@code len} is greater than {@code cbuf.length - off}
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is
+     *         negative, or {@code length} is greater than {@code cbuf.length - off}
      */
     @Override
-    public int read(final char[] cbuf, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
+    public int read(final char[] cbuf, final int off, final int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
         N.requireNonNull(cbuf, cs.cbuf);
 
-        if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
+        if ((off < 0) || (length < 0) || (off > cbuf.length) || (length > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
-        } else if (len == 0) {
+        } else if (length == 0) {
             return 0;
         }
 
         if (str == null) {
-            int n = read1(cbuf, off, len);
+            int n = read1(cbuf, off, length);
 
             if (n <= 0) {
                 return n;
             }
 
-            while ((n < len) && in.ready()) {
-                final int n1 = read1(cbuf, off + n, len - n);
+            while ((n < length) && in.ready()) {
+                final int n1 = read1(cbuf, off + n, length - n);
 
                 if (n1 <= 0) {
                     break;
@@ -335,7 +335,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
                 return -1;
             }
 
-            final int n = Math.min(strLength - nextChar, len);
+            final int n = Math.min(strLength - nextChar, length);
             str.getChars(nextChar, nextChar + n, cbuf, off);
             nextChar += n;
 
@@ -443,10 +443,10 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("Line 1\nLine 2\nLine 3");
-     * System.out.println(reader.readLine());   // "Line 1"
-     * System.out.println(reader.readLine());   // "Line 2"
-     * System.out.println(reader.readLine());   // "Line 3"
-     * System.out.println(reader.readLine());   // null
+     * System.out.println(reader.readLine());  // "Line 1"
+     * System.out.println(reader.readLine());  // "Line 2"
+     * System.out.println(reader.readLine());  // "Line 3"
+     * System.out.println(reader.readLine());  // null
      * }</pre>
      *
      * @return a String containing the contents of the line, not including
@@ -505,8 +505,8 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * <pre>{@code
      * BufferedReader reader = new BufferedReader("1234567890");
      * long skipped = reader.skip(5);
-     * System.out.println(skipped);   // 5
-     * int ch = reader.read();        // '6' (the 6th character)
+     * System.out.println(skipped);  // 5
+     * int ch = reader.read();       // '6' (the 6th character)
      * }</pre>
      *
      * @param n the number of characters to skip
@@ -736,13 +736,14 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      *     System.out.println(reader.readLine());   // "Initial"
      *
      *     reader.reinit(new FileInputStream("another.txt"));
-     *     System.out.println(reader.readLine()); // first line of another.txt
-     * }                                          // closes the current source (another.txt)
+     *     System.out.println(reader.readLine());  // first line of another.txt
+     * }                                           // closes the current source (another.txt)
      * }</pre>
      *
-     * @param is the new input stream to read from
+     * @param is the new input stream to read from; must not be {@code null}
+     * @throws IllegalArgumentException if {@code is} is {@code null}
      */
-    void reinit(final InputStream is) {
+    void reinit(final InputStream is) throws IllegalArgumentException {
         reinit(IOUtil.newInputStreamReader(is));
     }
 
@@ -803,6 +804,7 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
      * Fills the internal buffer with one read from the underlying reader. A single fill
      * deliberately does not try to fill the entire buffer: doing so could block after some
      * characters are already available, contrary to the {@link Reader} read contract.
+     * A read that returns 0 is retried once; a second consecutive 0 leaves the buffer empty (end of input).
      *
      * @throws IOException if this reader is closed, or reading characters from the underlying reader fails
      */
@@ -822,7 +824,14 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
         nextChar = 0;
         nChars = len;
 
-        final int n = in.read(_cbuf, len, _cbuf.length - len);
+        int n = in.read(_cbuf, len, _cbuf.length - len);
+
+        if (n == 0) {
+            // A non-blocking style reader may return 0 once before its data. Taken as end of input it dropped
+            // everything after it (readAllLines answered [] where readAllToString had the text), so it is retried
+            // once; a second consecutive zero is end of input, so an always-zero source cannot make this spin.
+            n = in.read(_cbuf, len, _cbuf.length - len);
+        }
 
         if (n > 0) {
             nChars += n;
@@ -852,12 +861,12 @@ final class BufferedReader extends java.io.BufferedReader { // NOSONAR
          *
          * @param cbuf ignored
          * @param off ignored
-         * @param len ignored
+         * @param length ignored
          * @return never returns normally
          * @throws UnsupportedOperationException always
          */
         @Override
-        public int read(final char[] cbuf, final int off, final int len) throws UnsupportedOperationException {
+        public int read(final char[] cbuf, final int off, final int length) throws UnsupportedOperationException {
             throw new UnsupportedOperationException();
         }
 

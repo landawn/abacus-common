@@ -256,17 +256,25 @@ public class SeqOfTest extends SeqTestSupport {
         assertEquals(CommonUtil.asList("b"), Seq.<String, Exception> ofReversed(new LinkedList<>(CommonUtil.asList("a", "b", "c"))).skip(1).limit(1).toList());
     }
 
+    // C-128 (2026-09-24 review, cycle 3): the list iterator is created by the factory, so a structural change made
+    // afterwards is handled by that iterator - fail-fast, like Seq.of(list) - instead of being silently dropped.
     @Test
-    public void testOfReversed_anchorsOnTheFactoryTimeSize() throws Exception {
+    public void testOfReversed_structuralChangeAfterCreationFailsFast() throws Exception {
         final LinkedList<String> linked = new LinkedList<>(CommonUtil.asList("a", "b", "c"));
         final Seq<String, Exception> fromLinked = Seq.ofReversed(linked);
         linked.add("d");
-        assertEquals(CommonUtil.asList("c", "b", "a"), fromLinked.toList());
+        assertThrows(java.util.ConcurrentModificationException.class, fromLinked::toList);
 
         final ArrayList<String> indexed = new ArrayList<>(CommonUtil.asList("a", "b", "c"));
         final Seq<String, Exception> fromIndexed = Seq.ofReversed(indexed);
         indexed.add("d");
-        assertEquals(CommonUtil.asList("c", "b", "a"), fromIndexed.toList());
+        assertThrows(java.util.ConcurrentModificationException.class, fromIndexed::toList);
+
+        // a snapshot list keeps the elements (and size) it had at the call
+        final java.util.concurrent.CopyOnWriteArrayList<String> cow = new java.util.concurrent.CopyOnWriteArrayList<>(CommonUtil.asList("a", "b", "c"));
+        final Seq<String, Exception> fromCow = Seq.ofReversed(cow);
+        cow.add("d");
+        assertEquals(CommonUtil.asList("c", "b", "a"), fromCow.toList());
     }
 
     @Test
@@ -354,4 +362,47 @@ public class SeqOfTest extends SeqTestSupport {
         final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> Seq.ofLines((Reader) null, true));
         assertTrue(ex.getMessage().contains("reader"), ex.getMessage());
     }
+
+    // ---- perf review 2026-09-26 G068 begin ----
+    // G068-01: ofReversed(T[]) walks the array directly; pins traversal, skip/limit/step/count, nulls, lazy element reads and exhaustion.
+    @Test
+    public void testOfReversedArray_directWalkEdgeCases() throws Exception {
+        assertTrue(Seq.<String, Exception> ofReversed((String[]) null).toList().isEmpty());
+        assertEquals(0, Seq.<String, Exception> ofReversed((String[]) null).count());
+        assertEquals(0, Seq.<String, Exception> ofReversed(new String[0]).count());
+        assertEquals(Arrays.asList("a"), Seq.<String, Exception> ofReversed(new String[] { "a" }).toList());
+        assertEquals(Arrays.asList(null, "b", null), Seq.<String, Exception> ofReversed(new String[] { null, "b", null }).toList());
+
+        final Integer[] a = { 1, 2, 3, 4, 5 };
+        assertEquals(5, Seq.<Integer, Exception> ofReversed(a).count());
+        assertEquals(3, Seq.<Integer, Exception> ofReversed(a).skip(2).count());
+        assertEquals(0, Seq.<Integer, Exception> ofReversed(a).skip(5).count());
+        assertEquals(0, Seq.<Integer, Exception> ofReversed(a).skip(Long.MAX_VALUE).count());
+        assertEquals(Arrays.asList(3, 2), Seq.<Integer, Exception> ofReversed(a).skip(2).limit(2).toList());
+        assertEquals(Arrays.asList(1), Seq.<Integer, Exception> ofReversed(a).skip(4).toList());
+        assertTrue(Seq.<Integer, Exception> ofReversed(a).skip(6).toList().isEmpty());
+        assertEquals(Arrays.asList(5, 3, 1), Seq.<Integer, Exception> ofReversed(a).step(2).toList());
+        assertEquals(Arrays.asList(4, 1), Seq.<Integer, Exception> ofReversed(a).skip(1).step(3).toList());
+        assertEquals(Nullable.of(2), Seq.<Integer, Exception> ofReversed(a).elementAt(3));
+        assertFalse(Seq.<Integer, Exception> ofReversed(a).elementAt(5).isPresent());
+        assertEquals(Nullable.of(1), Seq.<Integer, Exception> ofReversed(a).last());
+        assertEquals(Arrays.asList(5, 4, 3, 2, 1), Seq.<Integer, Exception> ofReversed(a).toList());
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), Arrays.asList(a));
+
+        // elements are read lazily: a write made after the call but before traversal is visible
+        final String[] b = { "x", "y", "z" };
+        final Seq<String, Exception> reversed = Seq.ofReversed(b);
+        b[0] = "w";
+        assertEquals(Arrays.asList("z", "y", "w"), reversed.toList());
+
+        // exhaustion of the underlying iterator reports NoSuchElementException
+        final Seq<String, Exception> single = Seq.ofReversed(new String[] { "only" });
+        final Throwables.Iterator<String, Exception> iter = single.iteratorEx();
+        assertTrue(iter.hasNext());
+        assertEquals("only", iter.next());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        single.close();
+    }
+    // ---- perf review 2026-09-26 G068 end ----
 }

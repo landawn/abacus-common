@@ -34,8 +34,8 @@ public interface ToLongFunction<T> extends Throwables.ToLongFunction<T, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Long boxed = 42L;
-     * long primitive = ToLongFunction.UNBOX.applyAsLong(boxed);     // returns 42L
-     * long defaultValue = ToLongFunction.UNBOX.applyAsLong(null);   // returns 0L
+     * long primitive = ToLongFunction.UNBOX.applyAsLong(boxed);    // returns 42L
+     * long defaultValue = ToLongFunction.UNBOX.applyAsLong(null);  // returns 0L
      * }</pre>
      *
      */

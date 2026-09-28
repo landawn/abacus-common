@@ -77,15 +77,15 @@ public final class ByteArrayOutputStream extends OutputStream {
      * // Creates a stream with 1KB initial buffer
      * }</pre>
      *
-     * @param initCapacity the initial capacity of the buffer
-     * @throws IllegalArgumentException if initCapacity is negative.
+     * @param initialCapacity the initial capacity of the buffer
+     * @throws IllegalArgumentException if {@code initialCapacity} is negative.
      */
-    public ByteArrayOutputStream(final int initCapacity) throws IllegalArgumentException {
-        if (initCapacity < 0) {
-            throw new IllegalArgumentException("Negative initial size: " + initCapacity);
+    public ByteArrayOutputStream(final int initialCapacity) throws IllegalArgumentException {
+        if (initialCapacity < 0) {
+            throw new IllegalArgumentException("Negative initial size: " + initialCapacity);
         }
 
-        buf = new byte[initCapacity];
+        buf = new byte[initialCapacity];
     }
 
     /**
@@ -97,8 +97,8 @@ public final class ByteArrayOutputStream extends OutputStream {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteArrayOutputStream baos = new ByteArrayOutputStream();
-     * baos.write(65);     // Writes 'A'
-     * baos.write(0x42);   // Writes 'B'
+     * baos.write(65);    // Writes 'A'
+     * baos.write(0x42);  // Writes 'B'
      * }</pre>
      *
      * @param b the byte to write (as an int)
@@ -123,30 +123,31 @@ public final class ByteArrayOutputStream extends OutputStream {
      *
      * @param b the byte array containing data to write
      * @param off the start offset in the data
-     * @param len the number of bytes to write
+     * @param length the number of bytes to write
      * @throws IllegalArgumentException if {@code b} is {@code null}. Note that this deliberately departs from
      *         {@link java.io.OutputStream#write(byte[], int, int)}, which specifies
      *         {@code NullPointerException} for a null buffer: argument validation in this library is reported
      *         as {@code IllegalArgumentException}, the same way {@code N.checkArgNotNull} reports it everywhere
-     *         else.
-     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
-     *         or {@code off + len} is greater than the length of the array {@code b}
+     *         else. The one-argument {@code write(byte[])} is inherited from {@link OutputStream} and not
+     *         overridden, so {@code write((byte[]) null)} still throws {@code NullPointerException}.
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is negative,
+     *         or {@code off + length} is greater than the length of the array {@code b}
      * @throws OutOfMemoryError if the required capacity exceeds the maximum supported array size or an enlarged buffer cannot be allocated
      */
     @Override
-    public void write(final byte[] b, final int off, final int len) throws IllegalArgumentException, IndexOutOfBoundsException, OutOfMemoryError {
+    public void write(final byte[] b, final int off, final int length) throws IllegalArgumentException, IndexOutOfBoundsException, OutOfMemoryError {
         // Checked before the range: the null argument must win over IndexOutOfBoundsException, but the range
         // check below short-circuits on (off < 0) before it ever dereferences b.length, so a null buffer
         // combined with a negative off would otherwise report the wrong exception type.
         N.checkArgNotNull(b, cs.b);
 
-        if ((off < 0) || (off > b.length) || (len < 0) || (len > b.length - off)) {
+        if ((off < 0) || (off > b.length) || (length < 0) || (length > b.length - off)) {
             throw new IndexOutOfBoundsException();
         }
 
-        ensureCapacity(count + len);
-        N.copy(b, off, buf, count, len);
-        count += len;
+        ensureCapacity(count + length);
+        N.copy(b, off, buf, count, length);
+        count += length;
     }
 
     /**

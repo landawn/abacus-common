@@ -27,8 +27,8 @@ package com.landawn.abacus.type;
  * Type<Short> type = TypeFactory.getType(short.class);
  *
  * // Convert string to short
- * Short value = type.valueOf("100");     // Returns (short) 100
- * Short value2 = type.valueOf("-128");   // Returns (short) -128
+ * Short value = type.valueOf("100");    // Returns (short) 100
+ * Short value2 = type.valueOf("-128");  // Returns (short) -128
  *
  * // Get default value
  * Short defaultVal = type.defaultValue();   // Returns 0
@@ -65,8 +65,8 @@ public final class PrimitiveShortType extends AbstractShortType {
      * <pre>{@code
      * Type<Short> type = TypeFactory.getType(short.class);
      * Class clazz = type.javaType();
-     * System.out.println(clazz.getName());       // Output: short
-     * System.out.println(clazz.isPrimitive());   // Output: true
+     * System.out.println(clazz.getName());      // Output: short
+     * System.out.println(clazz.isPrimitive());  // Output: true
      * }</pre>
      *
      * @return the Class object for short.class

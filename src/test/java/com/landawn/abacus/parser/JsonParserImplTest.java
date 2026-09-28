@@ -52,6 +52,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.io.InputStream;
 
 public class JsonParserImplTest extends TestBase {
 
@@ -3446,4 +3447,328 @@ public class JsonParserImplTest extends TestBase {
         Assertions.assertThrows(NumberFormatException.class, () -> parser.deserialize("[1.5, \"a\"]", Type.of("Indexed<String>")));
     }
 
+    @Test
+    public void testParseWithConfigNullTargetClassMessageNamesTargetClass() {
+        final JsonParserImpl impl = new JsonParserImpl();
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> impl.parse("{}", new JsonDeserConfig(), (Class<Map>) null));
+        assertTrue(e.getMessage().contains("targetClass"), e.getMessage());
+    }
+
+    @Test
+    public void testStreamNullFileSourceMessageNamesSource() {
+        final JsonParserImpl impl = new JsonParserImpl();
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> impl.stream((File) null, null, Type.of(Map.class)));
+        assertTrue(e.getMessage().contains("source"), e.getMessage());
+    }
+
+    @Test
+    public void testStreamNullInputStreamSourceMessageNamesSource() {
+        final JsonParserImpl impl = new JsonParserImpl();
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> impl.stream((InputStream) null, true, null, Type.of(Map.class)));
+        assertTrue(e.getMessage().contains("source"), e.getMessage());
+    }
+
+
+    @Test
+    public void testDeserializeRowOrientedDatasetRejectsMissingCommaOrColonInRow() {
+        final JsonParser jsonParser = ParserFactory.createJsonParser();
+
+        // Each row object is malformed exactly as a Map target rejects it; the row-oriented Dataset reader used
+        // to accept it and silently rebind the cell (e.g. [{"a":"x" "y"}] read a = "y").
+        for (final String json : new String[] { "[{\"a\":\"x\" \"y\"}]", "[{\"a\" \"b\":1}]", "[{\"a\":\"x\" 5}]", "[{\"a\":\"x\" 5,\"b\":1}]",
+                "[{\"a\":1 {\"b\":2}}]", "[{\"a\":\"x\" [1]}]", "[{\"a\":1,:2}]", "[{:1}]", "[{\"a\":{\"b\":2} \"c\"}]", "[{\"a\":[1] 3}]" }) {
+            Assertions.assertThrows(ParsingException.class, () -> jsonParser.deserialize(json, Type.of("List<Map<String, Object>>")), json);
+            Assertions.assertThrows(ParsingException.class, () -> jsonParser.deserialize(json, Dataset.class), json);
+        }
+
+        // well-formed rows are unaffected
+        final Dataset ds = jsonParser.deserialize("[{\"a\":1, \"b\":\"x\", \"c\":{\"d\":1}, \"e\":[1,2]}, {a:2, b:y}]", Dataset.class);
+        assertEquals(Arrays.asList("a", "b", "c", "e"), ds.columnNames());
+        assertEquals(Arrays.asList(1, 2), ds.getColumn("a"));
+        assertEquals(Arrays.asList("x", "y"), ds.getColumn("b"));
+        assertEquals(Arrays.asList(N.asMap("d", 1), null), ds.getColumn("c"));
+        assertEquals(Arrays.asList(Arrays.asList(1, 2), null), ds.getColumn("e"));
+    }
+
+    @Test
+    public void testParseIntoNonEmptyCollectionKeepsLeadingEmptyElement() {
+        final JsonParser jsonParser = ParserFactory.createJsonParser();
+
+        for (final String json : new String[] { "[,1]", "[ ,1]", "[,]" }) {
+            final List<Object> fresh = new ArrayList<>();
+            jsonParser.parseInto(json, null, fresh);
+
+            final List<Object> prePopulated = new ArrayList<>(Arrays.asList("x"));
+            jsonParser.parseInto(json, null, prePopulated);
+
+            // the elements appended to a non-empty target are the same as those read into an empty one
+            assertEquals(fresh, prePopulated.subList(1, prePopulated.size()), json);
+            assertEquals(jsonParser.deserialize(json, List.class), fresh, json);
+        }
+
+        final List<Object> prePopulated = new ArrayList<>(Arrays.asList("x"));
+        jsonParser.parseInto("[,1]", null, prePopulated);
+        assertEquals(Arrays.asList("x", "", 1), prePopulated);
+    }
+
+    @Test
+    public void testStreamRejectsUnquotedScalarRootWithParsingExceptionAndObjectOrQuotedRootWithUnsupportedOperation() {
+        final JsonParser jsonParser = ParserFactory.createJsonParser();
+        final Type<Map<String, Object>> elementType = Type.of("Map<String, Object>");
+
+        for (final String json : new String[] { "123", "null", "abc" }) {
+            Assertions.assertThrows(ParsingException.class, () -> jsonParser.stream(json, null, elementType), json);
+            Assertions.assertThrows(ParsingException.class, () -> jsonParser.stream(new StringReader(json), true, null, elementType), json);
+        }
+
+        for (final String json : new String[] { "{\"a\":1}", "\"abc\"" }) {
+            Assertions.assertThrows(UnsupportedOperationException.class, () -> jsonParser.stream(json, null, elementType), json);
+            Assertions.assertThrows(UnsupportedOperationException.class, () -> jsonParser.stream(new StringReader(json), true, null, elementType), json);
+        }
+    }
+
+    // ---- deep review 2026-09-25 G007 begin ----
+    public static class G007Bean {
+        private String firstName;
+        private int age;
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(final String firstName) {
+            this.firstName = firstName;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(final int age) {
+            this.age = age;
+        }
+    }
+
+    // G007-01: an ignored property must stay ignored when the JSON key reaches it through another spelling
+    @Test
+    public void testDeserialize_ignoredPropNames_nameVariants() {
+        final JsonDeserConfig config = new JsonDeserConfig().setIgnoredPropNames(G007Bean.class, N.asSet("firstName"));
+
+        for (final String json : new String[] { "{\"firstName\":\"x\",\"age\":1}", "{\"first_name\":\"x\",\"age\":1}", "{\"firstname\":\"x\",\"age\":1}",
+                "{firstName:\"x\",age:1}", "{first_name:\"x\",age:1}", "{firstname:\"x\",age:1}" }) {
+            final G007Bean bean = parser.deserialize(json, config, G007Bean.class);
+            Assertions.assertNull(bean.getFirstName(), json);
+            assertEquals(1, bean.getAge(), json);
+        }
+
+        // without the ignore list every spelling still binds
+        final G007Bean bean = parser.deserialize("{firstname:\"x\",age:1}", null, G007Bean.class);
+        assertEquals("x", bean.getFirstName());
+    }
+
+    // G007-03: 'columnTypes' shorter than the column list is an invalid document, not an IndexOutOfBoundsException
+    @Test
+    public void testDeserialize_datasetAndSheetColumnTypesTooShort() {
+        final ParsingException dsError = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(
+                "{\"columnNames\":[\"a\",\"b\"],\"columnTypes\":[\"String\"],\"columns\":{\"a\":[\"x\"],\"b\":[1]}}", Dataset.class));
+        assertTrue(dsError.getMessage().contains("columnTypes"), dsError.getMessage());
+
+        final ParsingException sheetError = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(
+                "{\"rowKeySet\":[\"r\"],\"columnKeySet\":[\"a\",\"b\"],\"columnTypes\":[\"String\"],\"columns\":{\"a\":[\"x\"],\"b\":[1]}}",
+                Sheet.class));
+        assertTrue(sheetError.getMessage().contains("columnTypes"), sheetError.getMessage());
+
+        // a complete columnTypes list still applies
+        final Dataset ds = parser.deserialize("{\"columnNames\":[\"a\",\"b\"],\"columnTypes\":[\"String\",\"Long\"],\"columns\":{\"a\":[\"x\"],\"b\":[1]}}",
+                Dataset.class);
+        assertEquals(Arrays.asList(1L), ds.getColumn("b"));
+    }
+    // ---- deep review 2026-09-25 G007 end ----
+
+    // ---- perf review 2026-09-26 G007 begin ----
+    // G007-01: the tuple slot config is now created only for nested slots; nested slots must still read with their declared types
+    @Test
+    public void testReadTupleValue_nestedSlotsKeepDeclaredTypes() {
+        final Type<List<com.landawn.abacus.util.Pair<List<Integer>, Map<String, Long>>>> type = Type.of("List<Pair<List<Integer>, Map<String, Long>>>");
+        final List<com.landawn.abacus.util.Pair<List<Integer>, Map<String, Long>>> result = parser
+                .deserialize("[[[1, 2], {\"a\": 3}], [[], {}], [null, null], [[7], {\"b\": null}]]", null, type);
+
+        assertEquals(4, result.size());
+        assertEquals(Arrays.asList(1, 2), result.get(0).left());
+        assertEquals(Integer.class, result.get(0).left().get(0).getClass());
+        assertEquals(Long.valueOf(3), result.get(0).right().get("a"));
+        assertEquals(Long.class, result.get(0).right().get("a").getClass());
+        assertTrue(result.get(1).left().isEmpty());
+        assertTrue(result.get(1).right().isEmpty());
+        assertNull(result.get(2).left());
+        assertNull(result.get(2).right());
+        assertEquals(Arrays.asList(7), result.get(3).left());
+        assertTrue(result.get(3).right().containsKey("b"));
+        assertNull(result.get(3).right().get("b"));
+    }
+
+    // G007-01: an enclosing element-type hint must still not leak into a nested tuple slot (slot config built on demand)
+    @Test
+    public void testReadTupleValue_elementHintDoesNotLeakIntoNestedSlot() {
+        final com.landawn.abacus.util.Pair<List<Object>, String> result = parser.deserialize("[[1, 2], \"x\"]",
+                JsonDeserConfig.create().setElementType(String.class), Type.of("Pair<List, String>"));
+
+        assertEquals(2, result.left().size());
+        assertFalse(result.left().get(0) instanceof String);
+        assertEquals("x", result.right());
+
+        final com.landawn.abacus.util.Triple<String, Integer, Boolean> triple = parser.deserialize("[\"a\", 1, true]",
+                JsonDeserConfig.create().setElementType(String.class), Type.of("Triple<String, Integer, Boolean>"));
+        assertEquals("a", triple.left());
+        assertEquals(Integer.valueOf(1), triple.middle());
+        assertEquals(Boolean.TRUE, triple.right());
+    }
+
+    // G007-01: the arity error message is now built lazily; pin the exact message on every failing branch
+    @Test
+    public void testReadTupleValue_arityErrorMessages() {
+        // A root-level Pair is read as a scalar; the tuple reader is used for nested tuples.
+        final Type<List<com.landawn.abacus.util.Pair<String, Integer>>> type = Type.of("List<Pair<String, Integer>>");
+        final String expected = "Invalid Pair<String, Integer> format: expected exactly 2 elements";
+
+        for (final String json : new String[] { "[[\"a\", 1, 2]]", "[[\"a\"]]", "[[\"a\", 1, [3]]]", "[[\"a\", 1, {}]]", "[[\"a\", 1, \"b\"]]",
+                "[[\"a\" 1]]", "[[,]]", "[[]]", "[[\"a\" \"b\"]]", "[[\"a\", 1], [1, 2, 3]]" }) {
+            final ParsingException e = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(json, null, type), json);
+            assertEquals(expected, e.getMessage(), json);
+        }
+
+        final Type<List<com.landawn.abacus.util.Tuple.Tuple3<String, Integer, Long>>> listType = Type.of("List<Tuple3<String, Integer, Long>>");
+        final ParsingException e = Assertions.assertThrows(ParsingException.class, () -> parser.deserialize("[[\"a\", 1, 2], [\"b\", 2]]", null, listType));
+        assertEquals("Invalid Tuple3<String, Integer, Long> format: expected exactly 3 elements", e.getMessage());
+    }
+    // ---- perf review 2026-09-26 G007 end ----
+
+
+    // ---- bug review 2026-09-27 G007 begin ----
+    // G007-01: stream() silently dropped unquoted text directly before a structured element ([1 {"a":1}] -> [{a=1}])
+    // while deserialize() of the same document rejects the missing comma.
+    @Test
+    public void testStream_textBeforeStructuredElementIsRejected() {
+        final Type<Object> mapType = Type.of(Map.class);
+        final Type<List<Object>> listOfMap = Type.of("List<Map<String, Object>>");
+
+        for (final String json : new String[] { "[1 {\"a\":1}]", "[{\"a\":1}, 2 {\"b\":2}]", "[x {\"a\":1}]", "[null {\"a\":1}]" }) {
+            Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(json, listOfMap), json);
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(json, mapType).toList(), json);
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(new StringReader(json), true, mapType).toList(), json);
+        }
+
+        Assertions.assertThrows(ParsingException.class, () -> parser.stream("[x [1]]", Type.of(List.class)).toList());
+
+        // well-formed documents are unaffected, including whitespace before an element
+        for (final String json : new String[] { "[ {\"a\":1} , {\"b\":2} ]", "[null, {\"a\":1}]", "[{\"a\":1},null,{\"b\":2}]", "[,{\"a\":1}]" }) {
+            assertEquals(parser.deserialize(json, listOfMap), parser.stream(json, mapType).toList(), json);
+            assertEquals(parser.deserialize(json, listOfMap), parser.stream(new StringReader(json), true, mapType).toList(), json);
+        }
+    }
+
+    // G007-02: with a single-quote stringQuotation, a config-sensitive map key (writeLongAsString / textual dateTimeFormat)
+    // quoted by its type was wrapped in a second pair of quotes ("'5'") and no longer read back as the key.
+    @Test
+    public void testSerialize_singleQuotedConfigSensitiveMapKeyRoundTrips() {
+        final JsonSerConfig longAsString = JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true);
+
+        final String json = parser.serialize(N.asMap(5L, 1), longAsString);
+        assertFalse(json.contains("\"'"), json);
+        assertEquals(N.asMap(5L, 1), parser.deserialize(json, Type.of("Map<Long, Integer>")));
+        assertEquals(N.asMap("5", 1), parser.deserialize(json, Type.of("Map<String, Integer>")));
+
+        final String mutableLongJson = parser.serialize(N.asMap(com.landawn.abacus.util.MutableLong.of(7), 1), longAsString);
+        assertFalse(mutableLongJson.contains("\"'"), mutableLongJson);
+        assertEquals(N.asMap("7", 1), parser.deserialize(mutableLongJson, Type.of("Map<String, Integer>")));
+
+        final java.util.Date date = new java.util.Date(0);
+        final JsonSerConfig isoDates = JsonSerConfig.create().setStringQuotation('\'').setDateTimeFormat(com.landawn.abacus.util.DateTimeFormat.ISO_8601_DATE_TIME);
+        final String dateJson = parser.serialize(N.asMap(date, 1), isoDates);
+        assertFalse(dateJson.contains("\"'"), dateJson);
+        assertEquals(N.asMap(date, 1), parser.deserialize(dateJson, Type.of("Map<Date, Integer>")));
+
+        // the default double quotation is unchanged
+        assertEquals("{\"5\": 1}", parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setWriteLongAsString(true)));
+    }
+    // ---- bug review 2026-09-27 G007 end ----
+
+    // ---- bug review 2026-09-27 verify G117 begin ----
+    // stream() rejects text between a structured element and the following comma ([{"a":1} x, {"b":2}]) like deserialize,
+    // for the String, Reader and InputStream sources and with ignoreNullOrEmpty; well-formed separators stream as before.
+    @Test
+    public void testStream_textAfterStructuredElementBeforeCommaIsRejected() {
+        final Type<Object> mapType = Type.of(Map.class);
+        final Type<List<Object>> listOfMap = Type.of("List<Map<String, Object>>");
+        final JsonDeserConfig ignoreNull = JsonDeserConfig.create().setIgnoreNullOrEmpty(true);
+
+        for (final String json : new String[] { "[{\"a\":1} x, {\"b\":2}]", "[{\"a\":1} null, {\"b\":2}]", "[{\"a\":1} 2 ,{\"b\":2}]" }) {
+            Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(json, listOfMap), json);
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(json, mapType).toList(), json);
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(json, ignoreNull, mapType).toList(), json);
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(new StringReader(json), true, mapType).toList(), json);
+            Assertions.assertThrows(ParsingException.class,
+                    () -> parser.stream(new ByteArrayInputStream(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)), true, mapType).toList(), json);
+        }
+
+        Assertions.assertThrows(ParsingException.class, () -> parser.stream("[[1] 2, [3]]", Type.of(List.class)).toList());
+
+        for (final String json : new String[] { "[{\"a\":1} , {\"b\":2}]", "[{\"a\":1}\n,\t{\"b\":2}]", "[{\"a\":1},null,{\"b\":2}]", "[{\"a\":1},,{\"b\":2}]" }) {
+            assertEquals(parser.deserialize(json, listOfMap), parser.stream(json, mapType).toList(), json);
+            assertEquals(parser.deserialize(json, listOfMap), parser.stream(new StringReader(json), true, mapType).toList(), json);
+            assertEquals(parser.deserialize(json, ignoreNull, listOfMap), parser.stream(json, ignoreNull, mapType).toList(), json);
+        }
+
+        assertEquals(Arrays.asList(Arrays.asList(1), Arrays.asList(3)), parser.stream("[[1] ,[3]]", Type.of("List<Integer>")).toList());
+    }
+
+    // Config-sensitive map keys under each stringQuotation: '\'' keeps the type's own quotes ({'5': 1}), '"' and none are
+    // unchanged, and a String key whose text is wrapped in quotes is still quoted as a String (not taken as type-quoted).
+    @Test
+    public void testSerialize_configSensitiveMapKeyUnderEachStringQuotation() {
+        final JsonSerConfig single = JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true);
+        assertEquals("{'5': 1}", parser.serialize(N.asMap(5L, 1), single));
+        assertEquals("{'7': 1}", parser.serialize(N.asMap(new java.util.concurrent.atomic.AtomicLong(7), 1), single));
+        assertEquals("{'5': 1}", parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true).setQuoteMapKey(false)));
+
+        assertEquals("{\"5\": 1}", parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setStringQuotation('"').setWriteLongAsString(true)));
+        assertEquals("{\"5\": 1}", parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setStringQuotation((char) 0).setWriteLongAsString(true)));
+        assertEquals("{5: 1}",
+                parser.serialize(N.asMap(5L, 1), JsonSerConfig.create().setStringQuotation((char) 0).setWriteLongAsString(true).setQuoteMapKey(false)));
+
+        // a String key is never config-sensitive: its quote-wrapped text stays a quoted String
+        assertEquals("{\"'x'\": 1}", parser.serialize(N.asMap("'x'", 1), single));
+        assertEquals(N.asMap("'x'", 1), parser.deserialize(parser.serialize(N.asMap("'x'", 1), single), Type.of("Map<String, Integer>")));
+
+        final java.time.LocalDateTime ldt = java.time.LocalDateTime.of(2020, 9, 13, 12, 26, 40, 123000000);
+        final JsonSerConfig singleIso = JsonSerConfig.create().setStringQuotation('\'').setDateTimeFormat(com.landawn.abacus.util.DateTimeFormat.ISO_8601_TIMESTAMP);
+        final String ldtJson = parser.serialize(N.asMap(ldt, 1), singleIso);
+        assertEquals("{'2020-09-13T12:26:40.123': 1}", ldtJson);
+        assertEquals(N.asMap(ldt, 1), parser.deserialize(ldtJson, Type.of("Map<LocalDateTime, Integer>")));
+    }
+    // ---- bug review 2026-09-27 verify G117 end ----
+    // ---- bug review 2026-09-27 verify G124 begin ----
+    // Text after an EMPTY structured element and before the comma ([{} 1,{}], [{} null,{}]) is rejected by every stream
+    // source like deserialize, instead of being dropped ([{}, {}]).
+    @Test
+    public void testStream_textAfterEmptyObjectBeforeCommaIsRejected() {
+        final Type<Object> mapType = Type.of(Map.class);
+        final Type<List<Object>> listOfMap = Type.of("List<Map<String, Object>>");
+
+        for (final String json : new String[] { "[{} 1,{}]", "[{} null,{}]", "[[] 1,[]]" }) {
+            Assertions.assertThrows(ParsingException.class, () -> parser.deserialize(json, List.class), json);
+            final Type<Object> elementType = json.startsWith("[[") ? Type.of(List.class) : mapType;
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(json, elementType).toList(), json);
+            Assertions.assertThrows(ParsingException.class, () -> parser.stream(new StringReader(json), true, elementType).toList(), json);
+            Assertions.assertThrows(ParsingException.class,
+                    () -> parser.stream(new ByteArrayInputStream(json.getBytes(java.nio.charset.StandardCharsets.UTF_8)), true, elementType).toList(), json);
+        }
+
+        assertEquals(parser.deserialize("[{} ,{}]", listOfMap), parser.stream("[{} ,{}]", mapType).toList());
+        assertEquals(parser.deserialize("[{},{}]", listOfMap), parser.stream(new StringReader("[{},{}]"), true, mapType).toList());
+    }
+    // ---- bug review 2026-09-27 verify G124 end ----
 }

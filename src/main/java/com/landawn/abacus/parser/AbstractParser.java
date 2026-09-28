@@ -22,6 +22,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -172,11 +173,13 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     /**
      * {@inheritDoc}
      *
+     * @throws UnsupportedOperationException if the parser does not support character-stream output (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UncheckedIOException if writing the serialized data to {@code output} or flushing buffered output fails
      */
     @Override
-    public void serialize(final Object obj, final Writer output) throws IllegalArgumentException, UncheckedIOException {
+    public void serialize(final Object obj, final Writer output) throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException {
         serialize(obj, null, output);
     }
 
@@ -253,22 +256,28 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     /**
      * {@inheritDoc}
      *
+     * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
      * @throws UncheckedIOException if reading the serialized data from {@code source} fails
      */
     @Override
-    public <T> T deserialize(final Reader source, final Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
+    public <T> T deserialize(final Reader source, final Type<? extends T> targetType)
+            throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException {
         return deserialize(source, null, targetType);
     }
 
     /**
      * {@inheritDoc}
      *
+     * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}.
      * @throws UncheckedIOException if reading the serialized data from {@code source} fails
      */
     @Override
-    public <T> T deserialize(final Reader source, final Class<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException {
+    public <T> T deserialize(final Reader source, final Class<? extends T> targetType)
+            throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException {
         return deserialize(source, null, targetType);
     }
 
@@ -296,6 +305,28 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
                 Tuple.of(t -> new TreeMap<>(), t -> ImmutableNavigableMap.wrap((NavigableMap<?, ?>) t)));
 
         mapOfCreatorAndConverterForTargetType.put(Object.class, Tuple.of(N::newInstance, t -> t));
+    }
+
+    /**
+     * Creates the map for an {@code EnumMap}-typed target. {@code EnumMap} has no no-arg constructor (the generic
+     * creator fails with "No default constructor found") and {@code N.newMap(EnumMap.class)} is documented to
+     * return a {@code HashMap}, which a caller that declared {@code EnumMap} cannot use.
+     *
+     * @param keyType the resolved key type (property type, {@code Type.of("java.util.EnumMap<K, V>")} or
+     *        {@code setMapKeyType} of the parser's deserialization config)
+     * @param configClass the deserialization config class of the calling parser ({@code JsonDeserConfig} or
+     *        {@code XmlDeserConfig}); its simple name tells the caller where to declare the key type
+     * @return an empty {@code EnumMap} keyed by that enum
+     * @throws ParsingException if the resolved key type is not an enum (e.g. a raw {@code EnumMap.class} target)
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    static Map<Object, Object> newEnumMap(final Type<?> keyType, final Class<?> configClass) throws ParsingException {
+        if (!keyType.javaType().isEnum()) {
+            throw new ParsingException("EnumMap requires an enum key type; declare it via the property type, Type.of(\"java.util.EnumMap<K, V>\") " + "or "
+                    + configClass.getSimpleName() + ".setMapKeyType (resolved key type: " + keyType.name() + ")");
+        }
+
+        return new EnumMap(keyType.javaType());
     }
 
     /**
@@ -369,11 +400,16 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * @param propClass the declared property class from the target bean (may be {@code null})
      * @param attributeTypeClass the type specified by a type attribute in the serialized data (may be {@code null})
      * @return a new instance of the appropriate type
+     * @throws IllegalArgumentException if the type attribute is not used and {@code propClass} is an unsupported abstract
+     *         type or has no usable no-argument (or enclosing-instance) constructor
+     * @throws RuntimeException if the type attribute is not used and constructing {@code propClass} reflectively is
+     *         inaccessible or its constructor throws
      * @throws ParsingException if no property class is available and the type-attribute class is missing, incompatible, or cannot be instantiated
      */
     @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE")
     @SuppressWarnings("unchecked")
-    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attributeTypeClass) throws ParsingException {
+    protected static <T> T newPropInstance(final Class<?> propClass, final Class<?> attributeTypeClass)
+            throws IllegalArgumentException, RuntimeException, ParsingException {
         if ((attributeTypeClass != null) && ((propClass == null) || propClass.isAssignableFrom(attributeTypeClass))) {
             try {
                 return (T) N.newInstance(attributeTypeClass);
@@ -434,17 +470,17 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
     private static final Map<Class<?>, Boolean> uninstantiableContainerClassPool = new java.util.concurrent.ConcurrentHashMap<>();
 
     /**
-     * Returns whether {@code cls} is a concrete {@code Map}/{@code Collection} implementation that the readers
+     * Returns whether {@code targetClass} is a concrete {@code Map}/{@code Collection} implementation that the readers
      * cannot create. Interfaces and abstract types are excluded: those are mapped to a default implementation when
      * the instance is created.
      */
-    private static boolean isUninstantiableContainerClass(final Class<?> cls) {
-        if (!(Map.class.isAssignableFrom(cls) || Collection.class.isAssignableFrom(cls)) || cls.isInterface()
-                || java.lang.reflect.Modifier.isAbstract(cls.getModifiers())) {
+    private static boolean isUninstantiableContainerClass(final Class<?> targetClass) {
+        if (!(Map.class.isAssignableFrom(targetClass) || Collection.class.isAssignableFrom(targetClass)) || targetClass.isInterface()
+                || java.lang.reflect.Modifier.isAbstract(targetClass.getModifiers())) {
             return false;
         }
 
-        return uninstantiableContainerClassPool.computeIfAbsent(cls, c -> {
+        return uninstantiableContainerClassPool.computeIfAbsent(targetClass, c -> {
             try {
                 N.newInstance(c);
                 return false;
@@ -524,9 +560,12 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      *
      * @param file the file to create if it doesn't exist (must not be {@code null})
      * @throws IllegalArgumentException if {@code file} is {@code null}.
-     * @throws IOException if the file cannot be created
+     * @throws UncheckedIOException if the filesystem reports an I/O error while creating {@code file} or its missing parent
+     *         directories
+     * @throws IOException if {@code file} did not exist but no new file was created at its path (for example because a dangling
+     *         symbolic link occupies it)
      */
-    protected static void createNewFileIfNotExists(final File file) throws IllegalArgumentException, IOException {
+    protected static void createNewFileIfNotExists(final File file) throws IllegalArgumentException, UncheckedIOException, IOException {
         N.checkArgNotNull(file, cs.file);
 
         if (!file.exists() && !IOUtil.createFileIfNotExists(file)) {
@@ -566,7 +605,10 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      * by writing {@code null} in its place).</p>
      *
      * <p>Only bean, map, collection, object-array, and {@code MapEntity} objects are tracked;
-     * primitive wrappers and simple value types are never considered circular.</p>
+     * primitive wrappers and simple value types are never considered circular. A tracked object that is
+     * not yet in {@code serializedObjects} is added to it (and {@code false} is returned), so the caller
+     * must remove it again once the object is fully written; otherwise a second, non-circular reference
+     * to the same object would be reported as circular.</p>
      *
      * @param obj the object currently being serialized; may be {@code null} (returns {@code false})
      * @param serializedObjects the set of objects already visited on the current serialization path;
@@ -581,20 +623,22 @@ abstract class AbstractParser<SC extends SerializationConfig<?>, DC extends Dese
      */
     protected static boolean hasCircularReference(final Object obj, final IdentityHashSet<Object> serializedObjects, final JsonXmlSerConfig<?> config,
             @SuppressWarnings("unused") final CharacterWriter bw) throws ParsingException {
-        final Type<?> type = obj == null ? null : Type.of(obj.getClass());
-        if (obj != null && serializedObjects != null //
-                && (type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity())) {
-            if (serializedObjects.contains(obj)) {
-                if (config == null || !config.isCircularReferenceSupported()) {
-                    throw new ParsingException("Self reference found in obj: " + ClassUtil.getClassName(obj.getClass()));
-                }
+        // Without an identity set (circular references not tracked) the type lookup below is not needed.
+        if (obj == null || serializedObjects == null) {
+            return false;
+        }
 
-                // bw.write("null");
+        final Type<?> type = Type.of(obj.getClass());
 
-                return true;
-            } else {
-                serializedObjects.add(obj);
+        // add() answers false when obj is already present, sparing a separate contains() lookup.
+        if ((type.isBean() || type.isMap() || type.isCollection() || type.isObjectArray() || type.isMapEntity()) && !serializedObjects.add(obj)) {
+            if (config == null || !config.isCircularReferenceSupported()) {
+                throw new ParsingException("Self reference found in obj: " + ClassUtil.getClassName(obj.getClass()));
             }
+
+            // bw.write("null");
+
+            return true;
         }
 
         return false;

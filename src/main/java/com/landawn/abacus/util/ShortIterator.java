@@ -219,6 +219,9 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
     public static ShortIterator defer(final Supplier<? extends ShortIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends ShortIterator>> supplierHolder = Holder.of(iteratorSupplier);
+
         return new ShortIterator() {
             private ShortIterator iter = null;
             private volatile boolean isInitialized = false;
@@ -257,7 +260,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                             isInitializing = true;
 
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == this) {
                                     throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
@@ -271,6 +274,7 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;
                             }
@@ -384,8 +388,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of((short)1, (short)2);
-     * Short boxed = iter.next();            // returns Short.valueOf((short)1) — avoid this
-     * short primitive = iter.nextShort();   // returns 2 — prefer this
+     * Short boxed = iter.next();           // returns Short.valueOf((short)1) — avoid this
+     * short primitive = iter.nextShort();  // returns 2 — prefer this
      * }</pre>
      *
      * @return the next {@code short} element as a boxed {@link Short} object
@@ -404,8 +408,8 @@ public abstract class ShortIterator extends ImmutableIterator<Short> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIterator iter = ShortIterator.of((short)1, (short)2, (short)3);
-     * short first = iter.nextShort();    // returns 1
-     * short second = iter.nextShort();   // returns 2
+     * short first = iter.nextShort();   // returns 1
+     * short second = iter.nextShort();  // returns 2
      * }</pre>
      *
      * @return the next {@code short} value

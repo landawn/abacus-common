@@ -92,7 +92,9 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * This constructor is called by the TypeFactory when no explicit representation is specified.
      *
      * @param enumClassName the fully qualified class name of the enum type
-     * @throws IllegalArgumentException if {@code enumClassName} is {@code null}, or the named class cannot be loaded.
+     * @throws IllegalArgumentException if {@code enumClassName} is {@code null}, names no loadable class, or names a class that
+     *         is neither an enum nor enclosed by an enum; if the enum's value/creator annotations are invalid; or if
+     *         JSON/XML names or creator-less {@code @JsonValue} values are ambiguous between constants.
      */
     EnumType(final String enumClassName) throws IllegalArgumentException {
         this(enumClassName, com.landawn.abacus.util.EnumType.NAME);
@@ -106,13 +108,14 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *                  resolves to, and is named after, its enclosing enum)
      * @param enumRepresentation the representation strategy to use ({@code NAME}, {@code ORDINAL}, or {@code CODE});
      *                           if {@code null}, defaults to {@code NAME}
+     * @throws IllegalArgumentException if {@code className} is {@code null}, names no loadable class, or names a class that is
+     *         neither an enum nor enclosed by an enum; if the enum's value/creator annotations are invalid; or if numeric codes,
+     *         JSON/XML names or creator-less {@code @JsonValue} values are ambiguous between constants.
      * @throws RuntimeException if {@code CODE} representation is configured but the enum class has no
      *         public {@code int code()} or {@code int intValue()} method.
-     * @throws IllegalArgumentException if numeric codes, JSON/XML names or creator-less {@code @JsonValue} values
-     *         are ambiguous between constants.
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE")
-    EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) throws RuntimeException, IllegalArgumentException {
+    EnumType(final String className, final com.landawn.abacus.util.EnumType enumRepresentation) throws IllegalArgumentException, RuntimeException {
         super(enumTypeName(className, enumRepresentation), (Class<T>) getEnumClass(ClassUtil.forName(className)));
 
         enumJsonXmlNameMap = new EnumMap<>(typeClass);
@@ -249,11 +252,12 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @param x the enum value to convert; may be {@code null}
      * @return the enum constant name (or, when a JSON value accessor is configured, that accessor's
      *         string form), or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         return (jsonValueType == null) ? (x == null ? null : x.name()) : super.stringOf(x);
     }
 
@@ -361,9 +365,9 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EnumType<TimeUnit> t = (EnumType<TimeUnit>) (Type) TypeFactory.getType("java.util.concurrent.TimeUnit(ORDINAL)");
-     * t.valueOf(0);    // returns TimeUnit.NANOSECONDS
-     * t.valueOf(2);    // returns TimeUnit.MILLISECONDS
-     * t.valueOf(99);   // throws IllegalArgumentException
+     * t.valueOf(0);   // returns TimeUnit.NANOSECONDS
+     * t.valueOf(2);   // returns TimeUnit.MILLISECONDS
+     * t.valueOf(99);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param value the ordinal or code value
@@ -397,12 +401,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @throws NullPointerException if {@code rs} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs or the column index is invalid
      * @throws NumberFormatException if an ORDINAL or CODE column value cannot be parsed as an integer
-     * @throws ArithmeticException if an ORDINAL or CODE column value cannot be represented exactly as an int
+     * @throws ArithmeticException if an ORDINAL or CODE column value is {@code NaN}, infinite, or has an integer part outside the
+     *         {@code int} range; a fractional numeric value (for example a {@code DECIMAL} {@code 1.5}) is truncated toward zero
+     *         rather than rejected
      * @throws IllegalArgumentException if the stored name, ordinal, code or annotated value has no matching enum constant
+     * @throws RuntimeException if the annotated creator throws (propagated unwrapped), or the column value cannot be converted
+     *         to the target type
      */
     @Override
     public T get(final ResultSet rs, final int columnIndex)
-            throws NullPointerException, SQLException, NumberFormatException, ArithmeticException, IllegalArgumentException {
+            throws NullPointerException, SQLException, NumberFormatException, ArithmeticException, IllegalArgumentException, RuntimeException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 final Object intValue = rs.getObject(columnIndex);
@@ -434,12 +442,16 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @throws NullPointerException if {@code rs} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs or the column label is not found
      * @throws NumberFormatException if an ORDINAL or CODE column value cannot be parsed as an integer
-     * @throws ArithmeticException if an ORDINAL or CODE column value cannot be represented exactly as an int
+     * @throws ArithmeticException if an ORDINAL or CODE column value is {@code NaN}, infinite, or has an integer part outside the
+     *         {@code int} range; a fractional numeric value (for example a {@code DECIMAL} {@code 1.5}) is truncated toward zero
+     *         rather than rejected
      * @throws IllegalArgumentException if the stored name, ordinal, code or annotated value has no matching enum constant
+     * @throws RuntimeException if the annotated creator throws (propagated unwrapped), or the column value cannot be converted
+     *         to the target type
      */
     @Override
     public T get(final ResultSet rs, final String columnName)
-            throws NullPointerException, SQLException, NumberFormatException, ArithmeticException, IllegalArgumentException {
+            throws NullPointerException, SQLException, NumberFormatException, ArithmeticException, IllegalArgumentException, RuntimeException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 final Object intValue = rs.getObject(columnName);
@@ -463,26 +475,27 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *   <li>Annotated value member: takes precedence and binds through the annotated value's type handler</li>
      * </ul>
      *
-     * @param stmt        the {@link PreparedStatement} in which to set the parameter
+     * @param statement        the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the enum value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when this method or the selected value type accesses the JDBC resource
+     * @throws NullPointerException if {@code statement} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs or the parameter index is invalid
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final T x) throws NullPointerException, SQLException, RuntimeException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 if (x == null) {
-                    stmt.setNull(columnIndex, Types.INTEGER);
+                    statement.setNull(columnIndex, Types.INTEGER);
                 } else {
-                    stmt.setInt(columnIndex, numberEnum.getByValue(x).intValue());
+                    statement.setInt(columnIndex, numberEnum.getByValue(x).intValue());
                 }
             } else {
-                stmt.setString(columnIndex, (x == null) ? null : x.name());
+                statement.setString(columnIndex, (x == null) ? null : x.name());
             }
         } else {
-            super.set(stmt, columnIndex, x);
+            super.set(statement, columnIndex, x);
         }
     }
 
@@ -495,26 +508,27 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      *   <li>Annotated value member: takes precedence and binds through the annotated value's type handler</li>
      * </ul>
      *
-     * @param stmt          the {@link CallableStatement} in which to set the parameter
+     * @param statement          the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the enum value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when this method or the selected value type accesses the JDBC resource
+     * @throws NullPointerException if {@code statement} is null when this method or the selected value type accesses the JDBC resource
      * @throws SQLException if a database access error occurs or the parameter name is not found
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final T x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final T x) throws NullPointerException, SQLException, RuntimeException {
         if (jsonValueType == null) {
             if (enumRepresentation == com.landawn.abacus.util.EnumType.ORDINAL || enumRepresentation == com.landawn.abacus.util.EnumType.CODE) {
                 if (x == null) {
-                    stmt.setNull(parameterName, Types.INTEGER);
+                    statement.setNull(parameterName, Types.INTEGER);
                 } else {
-                    stmt.setInt(parameterName, numberEnum.getByValue(x).intValue());
+                    statement.setInt(parameterName, numberEnum.getByValue(x).intValue());
                 }
             } else {
-                stmt.setString(parameterName, (x == null) ? null : x.name());
+                statement.setString(parameterName, (x == null) ? null : x.name());
             }
         } else {
-            super.set(stmt, parameterName, x);
+            super.set(statement, parameterName, x);
         }
     }
 
@@ -543,9 +557,11 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the enum name, ordinal, code, annotated value, quotation marks or null literal to {@code writer}
      *         fails
+     * @throws RuntimeException if the annotated or auto-detected value accessor throws, propagated unwrapped
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
+    public void serializeTo(final CharacterWriter writer, final T x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
@@ -660,21 +676,21 @@ public final class EnumType<T extends Enum<T>> extends SingleValueType<T> {
      * whose enclosing class is an enum (e.g., an anonymous subclass of an enum constant),
      * the enclosing class is returned. Otherwise an exception is thrown.
      *
-     * @param clazz the class to resolve as an enum class
+     * @param targetClass the class to resolve as an enum class
      * @return the enum class
-     * @throws IllegalArgumentException if {@code clazz} is not an enum and has no enclosing enum class.
+     * @throws IllegalArgumentException if {@code targetClass} is not an enum and has no enclosing enum class.
      */
-    private static Class<?> getEnumClass(final Class<?> clazz) throws IllegalArgumentException {
-        if (clazz.isEnum()) {
-            return clazz;
+    private static Class<?> getEnumClass(final Class<?> targetClass) throws IllegalArgumentException {
+        if (targetClass.isEnum()) {
+            return targetClass;
         }
 
-        final Class<?> enclosing = clazz.getEnclosingClass();
+        final Class<?> enclosing = targetClass.getEnclosingClass();
 
         if (enclosing != null && enclosing.isEnum()) {
             return enclosing;
         }
 
-        throw new IllegalArgumentException("Not an enum class: " + clazz);
+        throw new IllegalArgumentException("Not an enum class: " + targetClass);
     }
 }

@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.CharBuffer;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -94,6 +93,19 @@ import com.landawn.abacus.util.function.ToCharFunction;
  * Note that supplementary characters (code points above U+FFFF) are represented as surrogate pairs and require
  * two {@code char} elements in the stream.
  *
+ * <p><b>Unicode:</b> every operation works on single UTF-16 code units, never on code points. Because a supplementary
+ * character (an emoji, a CJK Extension B ideograph, a mathematical letter, ...) is two surrogate elements,
+ * {@code reversed()}, {@code sorted()}, {@code shuffled()} and {@code distinct()} can separate or swap its halves and
+ * produce malformed UTF-16, {@code join(delimiter)} puts the delimiter between them, and {@code filter}/{@code map}
+ * with {@code Character} methods that take a {@code char} (such as {@code Character::isLetter} or
+ * {@code Character::toUpperCase}) see each surrogate alone, so a supplementary letter is dropped or left unchanged.
+ * Use {@link IntStream#ofCodePoints(CharSequence)} to process text by code point.
+ *
+ * <p><b>Parallel streams and order:</b> parallel stages such as {@code map}/{@code filter}/{@code flatMap}/{@code onEach}
+ * emit results in completion order, so encounter order is <b>not</b> guaranteed after them. Parallel {@code collect} and
+ * {@code reduce} need commutative functions, and the {@code mergeFunction} of {@code toMap} and the downstream collector of
+ * {@code groupTo} receive the values of a key in an unspecified order. Sort the result or stay sequential when order matters.
+ *
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Type Safety:</b> Strongly typed for character operations, preventing ClassCastException</li>
@@ -125,22 +137,22 @@ import com.landawn.abacus.util.function.ToCharFunction;
  * <pre>{@code
  * // Basic character stream operations
  * CharStream.of("Hello World")
- *     .filter(c -> c != ' ')         // removes spaces
- *     .map(Character::toUpperCase)   // maps to uppercase
- *     .toArray();                    // ['H','E','L','L','O','W','O','R','L','D']
+ *     .filter(c -> c != ' ')        // removes spaces
+ *     .map(Character::toUpperCase)  // maps to uppercase
+ *     .toArray();                   // ['H','E','L','L','O','W','O','R','L','D']
  *
  * // File processing with character streams
  * try (CharStream chars = CharStream.of(new File("text.txt"))) {
  *     chars.filter(Character::isLetter)  // keeps only letters
  *          .map(Character::toLowerCase)  // maps to lowercase
  *          .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
- *          .toString(); // collects to string
- * }                     // closes automatically
+ *          .toString();  // collects to string
+ * }                      // closes automatically
  *
  * // Statistical operations on characters
  * CharSummaryStatistics stats = CharStream.of("Programming")
- *     .filter(Character::isLetter)   // keeps only letters
- *     .summaryStatistics();          // gets min, max, count statistics
+ *     .filter(Character::isLetter)  // keeps only letters
+ *     .summaryStatistics();         // gets min, max, count statistics
  *
  * // Parallel processing for large text data
  * CharStream.of(largeTextContent)
@@ -151,10 +163,10 @@ import com.landawn.abacus.util.function.ToCharFunction;
  *
  * // Advanced text operations
  * String result = Stream.of("Hello", "World")
- *     .flatMapToChar(s -> CharStream.of(s))   // maps to individual chars
- *     .filter(c -> c != 'l')                  // removes 'l' characters
- *     .mapToObj(String::valueOf)              // maps each char to string
- *     .collect(Collectors.joining());         // collects back to string
+ *     .flatMapToChar(s -> CharStream.of(s))  // maps to individual chars
+ *     .filter(c -> c != 'l')                 // removes 'l' characters
+ *     .mapToObj(String::valueOf)             // maps each char to string
+ *     .collect(Collectors.joining());        // collects back to string
  * }</pre>
  *
  * <p><b>Character-Specific Operations:</b>
@@ -174,6 +186,10 @@ import com.landawn.abacus.util.function.ToCharFunction;
  *   <li>Most intermediate operations defer processing until traversal; consult each operation for eager evaluation or buffering</li>
  * </ul>
  *
+ * <p><b>Set operations:</b> {@code intersection(Collection)} and {@code difference(Collection)} accept any
+ * {@code Collection<?>} and compare each element as a boxed {@code Character} using {@code equals}, so a collection of
+ * another box type silently matches nothing: {@code CharStream.of('a').intersection(List.of(97))} (a {@code List<Integer>}) is empty.
+ *
  * @see StreamBase
  * @see IntStream
  * @see LongStream
@@ -191,7 +207,9 @@ import com.landawn.abacus.util.function.ToCharFunction;
 @LazyEvaluation
 public abstract class CharStream extends StreamBase<Character, char[], CharPredicate, CharConsumer, OptionalChar, IndexedChar, CharIterator, CharStream> {
 
-    static final Random RAND = new SecureRandom();
+    // Unboxes the result of an N-ary zip function; a null result is a bug in the function, not a 0 value,
+    // so it is rejected (house rule: a function returning null -> NullPointerException).
+    private static final ToCharFunction<Character> UNBOX_ZIP_RESULT = r -> N.requireNonNull(r, "zipFunction returned null");
 
     CharStream(final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
         super(sorted, null, closeHandlers);
@@ -213,11 +231,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
+     * <p>The predicate sees one UTF-16 code unit at a time, so each half of a surrogate pair is tested on its own
+     * (for example {@code Character::isLetter} rejects both halves of a supplementary letter); see the class documentation.
+     *
      * @param predicate a non-interfering, stateless predicate that tests each element to determine if it should be included
      * @return a new stream consisting of the elements that match the given predicate
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}
      * @see Stream#filter(Predicate)
+     * @see IntStream#ofCodePoints(CharSequence)
      */
     @ParallelSupported
     @IntermediateOp
@@ -346,6 +368,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
+     * <p>The mapper sees one UTF-16 code unit at a time, so it cannot map a supplementary character as a whole (for
+     * example {@code Character::toUpperCase} leaves both halves of a supplementary lowercase letter unchanged); see the
+     * class documentation and {@link IntStream#ofCodePoints(CharSequence)}.
+     *
      * @param mapper a non-interfering, stateless function that transforms each element from char to char
      * @return a new CharStream consisting of the results of applying the mapper function to the elements of this stream
      * @throws IllegalStateException if the stream is already closed
@@ -452,7 +478,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to a CharStream
@@ -579,7 +605,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * @param mapper a non-interfering, stateless function that transforms each element to an IntStream
@@ -712,6 +738,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *       .mapPartial(c -> Character.isUpperCase(c) ? OptionalChar.of(Character.toLowerCase(c)) : OptionalChar.empty())
      *       .toArray();   // returns ['b', 'd']
      * }</pre>
+     *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result; a {@code null}
+     * return fails with a {@link NullPointerException} when the element is reached.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -1121,8 +1150,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharStream.empty().appendIfEmpty('x', 'y').toArray();   // returns ['x', 'y']
-     * CharStream.of('a').appendIfEmpty('x', 'y').toArray();   // returns ['a']
+     * CharStream.empty().appendIfEmpty('x', 'y').toArray();  // returns ['x', 'y']
+     * CharStream.of('a').appendIfEmpty('x', 'y').toArray();  // returns ['a']
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
@@ -1246,6 +1275,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @return a Map whose keys and values are the result of applying mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, Supplier)
@@ -1254,7 +1284,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.CharFunction<? extends K, E> keyMapper,
             Throwables.CharFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2;
 
     /**
      * Returns a Map whose keys and values are the result of applying the provided
@@ -1339,6 +1369,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @return a Map whose keys and values are the result of applying mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}
      * @throws E if the key mapping function throws an exception
      * @throws E2 if the value mapping function throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1347,7 +1378,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.CharFunction<? extends K, E> keyMapper,
             Throwables.CharFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2;
 
     /**
      * Groups the elements of this stream according to a classification function and
@@ -1359,7 +1390,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * // Group characters by type (letter vs digit)
      * Map<String, List<Character>> map1 = CharStream.of("a1b2c3")
      *     .groupTo(c -> Character.isDigit(c) ? "digit" : "letter", Collectors.toList());
-     * // Result: {"letter"=['a','b','c'], "digit"=['1','2','3']}
+     * // Result: {"letter"=['a','b','c'], "digit"=['1','2','3']} (HashMap iteration order is unspecified)
      *
      * // Group and count characters by uppercase/lowercase
      * Map<String, Long> map2 = CharStream.of("AaBbCc")
@@ -1383,13 +1414,14 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
+     * @throws NullPointerException if {@code keyMapper} returns a {@code null} key
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.CharFunction<? extends K, E> keyMapper,
-            final Collector<? super Character, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
+            final Collector<? super Character, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, NullPointerException, E;
 
     /**
      * Groups the elements of this stream according to a classification function and
@@ -1425,6 +1457,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}, or if {@code keyMapper} returns a {@code null} key
      * @throws E if the classification function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
@@ -1432,7 +1465,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.CharFunction<? extends K, E> keyMapper,
             final Collector<? super Character, ?, D> downstream, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided identity value and
@@ -1552,6 +1585,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
@@ -1559,7 +1594,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     @ParallelSupported
     @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, ObjCharConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using only
@@ -1602,9 +1637,17 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
-     * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of:
-     *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
-     *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
+     * @throws IllegalArgumentException if this stream is parallel and the container type cannot be combined by default
+     *         (the result type {@code R} is not one of
+     *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}; message
+     *         "... cannot be combined by default ..."), and two per-thread containers actually have to be combined.
+     *         The check is made by the default combiner, so it fails only <i>after</i> the workers have accumulated their
+     *         elements, and whether containers have to be combined depends on the source and the number of workers:
+     *         a very small parallel stream can succeed while a larger one fails.
+     *         Sequential streams never combine and perform no such check. For any other result type, call
+     *         {@link #collect(Supplier, ObjCharConsumer, BiConsumer)} with an explicit combiner.
      * @see #collect(Supplier, ObjCharConsumer, BiConsumer)
      * @see Stream#collect(Supplier, BiConsumer)
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
@@ -1612,7 +1655,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     @ParallelSupported
     @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, ObjCharConsumer<? super R> accumulator)
-            throws IllegalStateException, IllegalArgumentException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException;
 
     /**
      * Performs an action for each element of this stream.
@@ -1809,8 +1852,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar first = CharStream.of('a', 'b', 'c').findFirst();   // returns OptionalChar.of('a')
-     * OptionalChar none = CharStream.empty().findFirst();   // returns OptionalChar.empty()
+     * OptionalChar first = CharStream.of('a', 'b', 'c').findFirst();  // returns OptionalChar.of('a')
+     * OptionalChar none = CharStream.empty().findFirst();             // returns OptionalChar.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1842,8 +1885,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar any = CharStream.of('a', 'b', 'c').findAny();   // returns OptionalChar.of('a')
-     * OptionalChar none = CharStream.empty().findAny();   // returns OptionalChar.empty()
+     * OptionalChar any = CharStream.of('a', 'b', 'c').findAny();  // returns OptionalChar.of('a')
+     * OptionalChar none = CharStream.empty().findAny();           // returns OptionalChar.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1876,8 +1919,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar firstUpper = CharStream.of('a', 'B', 'c', 'D').findFirst(Character::isUpperCase);   // returns OptionalChar.of('B')
-     * OptionalChar none = CharStream.of('a', 'b', 'c').findFirst(Character::isUpperCase);   // returns OptionalChar.empty()
+     * OptionalChar firstUpper = CharStream.of('a', 'B', 'c', 'D').findFirst(Character::isUpperCase);  // returns OptionalChar.of('B')
+     * OptionalChar none = CharStream.of('a', 'b', 'c').findFirst(Character::isUpperCase);             // returns OptionalChar.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1910,8 +1953,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar anyUpper = CharStream.of('a', 'B', 'c', 'D').findAny(Character::isUpperCase);   // returns a matching element, e.g. OptionalChar.of('B')
-     * OptionalChar none = CharStream.of('a', 'b', 'c').findAny(Character::isUpperCase);   // returns OptionalChar.empty()
+     * OptionalChar anyUpper = CharStream.of('a', 'B', 'c', 'D').findAny(Character::isUpperCase);  // returns a matching element, e.g. OptionalChar.of('B')
+     * OptionalChar none = CharStream.of('a', 'b', 'c').findAny(Character::isUpperCase);           // returns OptionalChar.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1943,8 +1986,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalChar lastUpper = CharStream.of('a', 'B', 'c', 'D').findLast(Character::isUpperCase);   // returns OptionalChar.of('D')
-     * OptionalChar none = CharStream.of('a', 'b', 'c').findLast(Character::isUpperCase);   // returns OptionalChar.empty()
+     * OptionalChar lastUpper = CharStream.of('a', 'B', 'c', 'D').findLast(Character::isUpperCase);  // returns OptionalChar.of('D')
+     * OptionalChar none = CharStream.of('a', 'b', 'c').findLast(Character::isUpperCase);            // returns OptionalChar.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2069,8 +2112,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>This is a terminal operation.
      *
-     * <p><b>Note:</b> if the total sum exceeds {@link Integer#MAX_VALUE} (possible for very large
-     * streams), an {@link ArithmeticException} is thrown rather than silently overflowing.
+     * <p><b>Note:</b> if the total sum exceeds {@link Integer#MAX_VALUE}, an {@link ArithmeticException} is thrown
+     * rather than silently overflowing. That happens at modest sizes: 32,769 elements of U+FFFF are enough,
+     * and about 70,000 typical CJK characters. {@code summaryStatistics().getSum()} returns the same total as a
+     * {@code long} and cannot overflow in practice.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2137,11 +2182,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = CharStream.of('A', 'B', 'C', 'D', 'E').summaryStatistics();
-     * System.out.println("Count: " + stats.getCount());       // 5
-     * System.out.println("Sum: " + stats.getSum());           // 335
-     * System.out.println("Min: " + stats.getMin());           // 'A'
-     * System.out.println("Max: " + stats.getMax());           // 'E'
-     * System.out.println("Average: " + stats.getAverage());   // 67.0
+     * System.out.println("Count: " + stats.getCount());      // 5
+     * System.out.println("Sum: " + stats.getSum());          // 335
+     * System.out.println("Min: " + stats.getMin());          // 'A'
+     * System.out.println("Max: " + stats.getMax());          // 'E'
+     * System.out.println("Average: " + stats.getAverage());  // 67.0
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
@@ -2220,7 +2265,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *                     Takes elements from both streams and returns {@code MergeResult.TAKE_FIRST} to select
      *                     the element from this stream, or {@code MergeResult.TAKE_SECOND} to select from stream b
      * @return a new stream containing elements merged from both streams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
@@ -2250,7 +2295,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param b the CharStream to be combined with the current CharStream. Must be {@code non-null}.
      * @param zipFunction a CharBinaryOperator that determines the combination of elements in the combined CharStream.
      * @return a new CharStream that is the result of combining the current CharStream with the given CharStream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(CharStream, char, char, CharBinaryOperator)
      */
@@ -2280,7 +2325,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param c the third CharStream to be combined with the current CharStream. Will be closed along with this CharStream.
      * @param zipFunction a CharTernaryOperator that determines the combination of elements in the combined CharStream.
      * @return a new CharStream that is the result of combining the current CharStream with the given CharStreams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(CharStream, CharStream, char, char, char, CharTernaryOperator)
      */
@@ -2310,7 +2355,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param valueForNoneB the default value to use for the given CharStream when it runs out of elements
      * @param zipFunction a CharBinaryOperator that determines the combination of elements in the combined CharStream.
      * @return a new CharStream that is the result of combining the current CharStream with the given CharStream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
@@ -2344,7 +2389,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param valueForNoneC the default value to use for the third CharStream when it runs out of elements
      * @param zipFunction a CharTernaryOperator that determines the combination of elements in the combined CharStream.
      * @return a new CharStream that is the result of combining the current CharStream with the given CharStreams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
@@ -2420,9 +2465,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * }
      *
      * // Terminal operations on empty stream
-     * CharStream.empty().count();       // returns 0
-     * CharStream.empty().findFirst();   // returns OptionalChar.empty()
-     * CharStream.empty().toArray();     // returns empty char array
+     * CharStream.empty().count();      // returns 0
+     * CharStream.empty().findFirst();  // returns OptionalChar.empty()
+     * CharStream.empty().toArray();    // returns empty char array
      * }</pre>
      *
      * @return an empty sequential {@code CharStream}
@@ -2624,6 +2669,17 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * <p>If the {@code CharSequence} is {@code null} or empty, an empty stream is returned.
      *
+     * <p>The content is captured when this method is called: a {@code String} is immutable and is read in place, and
+     * any other {@code CharSequence} is copied, so later changes to a mutable sequence (for example a
+     * {@code StringBuilder}) are not reflected in the stream. The copy of a non-{@code String} sequence costs O(length)
+     * time and memory when this method is called, even if the stream is short-circuited or never traversed. For a very
+     * large or computed {@code CharSequence}, stream the indices instead:
+     * {@code IntStream.range(0, cs.length()).mapToChar(cs::charAt)} reads lazily (the sequence must then not change
+     * while that stream is in use).
+     *
+     * <p>Each element is one UTF-16 code unit, so a supplementary character (such as an emoji) appears as two
+     * surrogate elements. Use {@link IntStream#ofCodePoints(CharSequence)} to process code points.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Create stream from String
@@ -2658,6 +2714,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *         or an empty stream if the sequence is {@code null} or empty
      * @see #of(CharSequence, int, int)
      * @see #of(char...)
+     * @see IntStream#ofCodePoints(CharSequence)
      * @see CharSequence
      * @see String
      */
@@ -2669,11 +2726,17 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * Returns a sequential {@code CharStream} containing characters from a subsequence of the specified
      * {@code CharSequence} between {@code fromIndex} (inclusive) and {@code toIndex} (exclusive).
      *
-     * <p>This factory method creates a stream from a portion of a {@code CharSequence}, allowing you to
-     * process a substring or subsequence without creating intermediate string objects. The stream will
+     * <p>This factory method creates a stream from a portion of a {@code CharSequence}. The stream will
      * contain characters from {@code str.charAt(fromIndex)} up to but not including {@code str.charAt(toIndex)}.
      *
      * <p>If the {@code CharSequence} is {@code null} or empty, only the range {@code [0, 0)} is valid and returns an empty stream.
+     *
+     * <p>The range is captured when this method is called: a {@code String} is immutable and is read in place, and
+     * the range of any other {@code CharSequence} is copied, so later changes to a mutable sequence are not reflected
+     * in the stream. That copy costs O({@code toIndex - fromIndex}) time and memory when this method is called, even if
+     * the stream is short-circuited or never traversed; for a very large or computed {@code CharSequence}, use
+     * {@code IntStream.range(fromIndex, toIndex).mapToChar(cs::charAt)}, which reads lazily (the sequence must then not
+     * change while that stream is in use).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2720,9 +2783,29 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             return empty();
         }
 
-        //    if (str instanceof String && IOUtil.JAVA_VERSION.atMost(JavaVersion.JAVA_1_8)) {
-        //        return of(com.landawn.abacus.util.InternalUtil.getCharsForReadOnly((String) str), fromIndex, toIndex);
-        //    }
+        if (!(str instanceof String)) {
+            // Snapshot a mutable sequence (StringBuilder, StringBuffer, CharBuffer, ...) now: the range was validated
+            // against the current length, so reading it lazily would ignore later growth and fail mid-pipeline with
+            // an IndexOutOfBoundsException after it shrinks. A String is immutable and is read in place below.
+            final char[] a = new char[toIndex - fromIndex];
+
+            if (str instanceof StringBuilder) {
+                ((StringBuilder) str).getChars(fromIndex, toIndex, a, 0);
+            } else if (str instanceof StringBuffer) {
+                ((StringBuffer) str).getChars(fromIndex, toIndex, a, 0);
+            } else if (str instanceof final CharBuffer cb) {
+                // Bulk copy (still a snapshot, not the live view of of(CharBuffer)); CharBuffer.charAt is relative to
+                // the position, and a duplicate leaves the caller's position and limit untouched.
+                final int pos = cb.position();
+                cb.duplicate().limit(pos + toIndex).position(pos + fromIndex).get(a);
+            } else {
+                for (int i = fromIndex; i < toIndex; i++) {
+                    a[i - fromIndex] = str.charAt(i);
+                }
+            }
+
+            return new ArrayCharStream(a);
+        }
 
         final CharIteratorEx iter = new CharIteratorEx() {
             private int cursor = fromIndex;
@@ -2739,6 +2822,19 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
                 }
 
                 return str.charAt(cursor++);
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() {
+                // The validated immutable String range can be skipped without invoking user code.
+                return true;
+            }
+
+            @Override
+            public void advance(final long n) {
+                if (n > 0) {
+                    cursor = n >= toIndex - cursor ? toIndex : cursor + (int) n;
+                }
             }
 
             @Override
@@ -2951,14 +3047,18 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * from its current position to its limit.
      *
      * <p>This factory method creates a stream from a {@code CharBuffer}, reading characters from
-     * the buffer's current position up to (but not including) its limit. The buffer's position
-     * is not modified by creating the stream, but will be accessed during stream operations.
+     * the buffer's current position up to (but not including) its limit.
      *
      * <p>If the buffer is {@code null}, an empty stream is returned.
      *
-     * <p><b>Note:</b> The stream reads from the buffer using its {@code get(int)} method, which
-     * does not modify the buffer's position. However, the buffer should not be modified concurrently
-     * during stream processing to ensure consistent behavior.
+     * <p>The window {@code [position, limit)} is fixed when this method is called. The elements are read from the
+     * buffer when the stream is traversed (directly from its backing array when {@link CharBuffer#hasArray()} is
+     * {@code true}, otherwise by absolute {@code get(int)} on a {@link CharBuffer#duplicate() duplicate} taken when this
+     * method is called), so the stream is a live view of that window: a write to the buffer is seen by elements not
+     * yet read. This method never changes the buffer's position or limit, and changing them afterwards (for example
+     * with {@code limit(n)}, {@code flip()} or {@code clear()}) does not affect the stream, so the buffer remains
+     * usable right away.
+     * The buffer should not be modified concurrently during stream processing.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3005,8 +3105,20 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             return empty();
         }
 
+        if (buf.hasArray()) {
+            // Same live view of the same backing array, but array-backed: O(1) count/skip and the array fast paths.
+            final int offset = buf.arrayOffset();
+
+            return of(buf.array(), offset + buf.position(), offset + buf.limit());
+        }
+
+        // Read through a duplicate taken now: it shares the content (so the stream stays a live view) but has its own
+        // position and limit, so a later limit(n)/flip()/clear() on the caller's buffer cannot shrink the window under
+        // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
+        final CharBuffer view = buf.duplicate();
+
         //noinspection resource
-        return IntStream.range(buf.position(), buf.limit()).mapToChar(buf::get);
+        return IntStream.range(view.position(), view.limit()).mapToChar(view::get);
     }
 
     /**
@@ -3112,7 +3224,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .findAny();  // returns OptionalChar.empty()
      * }</pre>
      *
-     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the reader beyond the characters it emits; closing the stream discards unread buffered characters. Consumption throws {@link UncheckedIOException} if reading from {@code reader} fails.</p>
+     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the reader beyond the characters it emits; closing the stream discards unread buffered characters. Consumption throws {@link UncheckedIOException} if reading from {@code reader} fails.
+     * A {@code read} call that returns {@code 0} (which only a non-conforming or non-blocking {@code Reader} does) is treated as the
+     * end of the input, like {@code -1}.</p>
      *
      * @param reader the {@code Reader} to read from; may be null
      * @return a new sequential {@code CharStream} containing the characters from the reader,
@@ -3173,7 +3287,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * }
      * }</pre>
      *
-     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the reader beyond the characters it emits; closing the stream discards unread buffered characters. Consumption throws {@link UncheckedIOException} if reading from {@code reader} fails.</p>
+     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the reader beyond the characters it emits; closing the stream discards unread buffered characters. Consumption throws {@link UncheckedIOException} if reading from {@code reader} fails.
+     * A {@code read} call that returns {@code 0} (which only a non-conforming or non-blocking {@code Reader} does) is treated as the
+     * end of the input, like {@code -1}.</p>
      *
      * @param reader the {@code Reader} to read from; may be null
      * @param closeReaderWhenStreamIsClosed if {@code true}, the reader will be automatically closed
@@ -3189,7 +3305,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             return empty();
         }
 
-        final CharIterator iter = new CharIterator() {
+        final CharIterator iter = new CharIteratorEx() {
             private final char[] buf = new char[8192];
             private boolean isEnd = false;
             private int count = 0;
@@ -3213,13 +3329,63 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
                 return count > idx;
             }
 
+            /**
+             * @throws UncheckedIOException if reading from the source fails.
+             * @throws NoSuchElementException if there are no more elements to read.
+             */
             @Override
-            public char nextChar() throws NoSuchElementException {
+            public char nextChar() throws UncheckedIOException, NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return buf[idx++];
+            }
+
+            /*
+             * count() and toList() (which the inherited toArray() uses) consume the buffer a chunk at a time instead of
+             * element by element. They go through hasNext(), so they issue exactly the same read(buf) calls, in the same
+             * order, as iteration does. Short chunks, and any chunk that would push the list past the maximum array size,
+             * are still added element by element (the size limit keeps the same OutOfMemoryError).
+             */
+
+            /**
+             * @throws UncheckedIOException if reading from the source fails.
+             */
+            @Override
+            public long count() throws UncheckedIOException {
+                long result = 0;
+
+                while (hasNext()) {
+                    result += count - idx;
+                    idx = count;
+                }
+
+                return result;
+            }
+
+            /**
+             * @throws UncheckedIOException if reading from the source fails.
+             */
+            @Override
+            public CharList toList() throws UncheckedIOException {
+                final CharList result = new CharList();
+
+                while (hasNext()) {
+                    final int len = count - idx;
+
+                    if (len < 16 || len > Integer.MAX_VALUE - 8 - result.size()) {
+                        for (int i = idx; i < count; i++) {
+                            result.add(buf[i]);
+                        }
+                    } else {
+                        result.addAll(idx == 0 && count == buf.length ? buf : N.copyOfRange(buf, idx, count));
+                    }
+
+                    idx = count;
+                }
+
+                return result;
             }
         };
 
@@ -3366,9 +3532,15 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
         }
 
         long n = 0;
+        int maxLen = 0;
 
         for (final char[] e : a) {
-            n += N.len(e);
+            final int len = N.len(e);
+            n += len;
+
+            if (len > maxLen) {
+                maxLen = len;
+            }
         }
 
         if (n == 0) {
@@ -3377,6 +3549,13 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
 
         final int rows = N.len(a);
         final long count = n;
+
+        // The walk below checks about rows * maxLen positions, rescanning null or too short rows in every later column.
+        // It is the fastest per element, so it is kept unless most of those positions are empty (jagged input such as
+        // one long row among many short ones), where it would be up to 'rows' times slower than the elements it returns.
+        if ((long) rows * maxLen > 4 * n) {
+            return of(flattenJaggedVertically(a, count));
+        }
 
         final CharIterator iter = new CharIteratorEx() {
             private int rowNum = 0;
@@ -3413,6 +3592,67 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
         };
 
         return of(iter);
+    }
+
+    /**
+     * Column-major iterator over a jagged {@code char[][]} (rows of different lengths, or {@code null} rows) holding
+     * {@code count > 0} elements in total. It keeps the indices (in row order) of the rows that have an element in the
+     * current column. A row that is too short for one column is too short for every later one, so it is dropped once
+     * instead of being rescanned for every column: O(count + rows) in total instead of O(rows * longest row).
+     */
+    private static CharIterator flattenJaggedVertically(final char[][] a, final long count) {
+        return new CharIteratorEx() {
+            private int[] activeRows = null;
+            private int activeCount = 0;
+            private int activeIndex = 0;
+            private int colNum = 0;
+            private long cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cnt < count;
+            }
+
+            @Override
+            public char nextChar() throws NoSuchElementException {
+                if (cnt++ >= count) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                if (activeIndex == activeCount) {
+                    nextColumn();
+                }
+
+                return a[activeRows[activeIndex++]][colNum];
+            }
+
+            // Moves to the next column (the first one on the first call), keeping only the rows that have an element in it.
+            private void nextColumn() {
+                if (activeRows == null) {
+                    activeRows = new int[a.length];
+
+                    for (int rowNum = 0; rowNum < a.length; rowNum++) {
+                        if (a[rowNum] != null && a[rowNum].length > 0) {
+                            activeRows[activeCount++] = rowNum;
+                        }
+                    }
+                } else {
+                    colNum++;
+
+                    int kept = 0;
+
+                    for (int i = 0; i < activeCount; i++) {
+                        if (colNum < a[activeRows[i]].length) {
+                            activeRows[kept++] = activeRows[i];
+                        }
+                    }
+
+                    activeCount = kept;
+                }
+
+                activeIndex = 0;
+            }
+        };
     }
 
     /**
@@ -3682,6 +3922,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .forEach(System.out::print);  // prints ABCDE
      * }</pre>
      *
+     * <p>The returned stream is known to be sorted, so {@code sorted()} returns it as is and {@code distinct()},
+     * {@code min()}, {@code max()} and {@code kthLargest(k)} use their streaming sorted paths (as for
+     * {@link IntStream#range(int, int)}).
+     *
      * @param startInclusive the starting character (inclusive)
      * @param endExclusive the ending character (exclusive)
      * @return a sequential ordered {@code CharStream} from {@code startInclusive} to {@code endExclusive},
@@ -3695,6 +3939,8 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             return empty();
         }
 
+        // Flagged sorted (strictly ascending, distinct), like IntStream.range: sorted()/distinct()/min()/max()/kthLargest()
+        // take their sorted fast paths.
         return new IteratorCharStream(new CharIteratorEx() {
             private char next = startInclusive;
             private int cnt = endExclusive - startInclusive;
@@ -3748,22 +3994,29 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
 
                 return result;
             }
-        });
+        }, true, null);
     }
 
     /**
      * Creates a CharStream of characters from startInclusive (inclusive) to endExclusive (exclusive) by the specified incremental step.
+     * An empty stream is returned if {@code startInclusive} equals {@code endExclusive}, or if the direction of {@code by}
+     * does not match the direction of the range (e.g., a positive step with {@code startInclusive} greater than {@code endExclusive}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * CharStream.range('a', 'f', 2).toArray();    // returns ['a', 'c', 'e']
-     * CharStream.range('z', 'u', -2).toArray();   // returns ['z', 'x', 'v']
+     * CharStream.range('a', 'f', 2).toArray();   // returns ['a', 'c', 'e']
+     * CharStream.range('z', 'u', -2).toArray();  // returns ['z', 'x', 'v']
+     * CharStream.range('a', 'f', -1).toArray();  // returns [] (step direction does not match the range)
      * }</pre>
+     *
+     * <p>An ascending range ({@code by > 0}) is known to be sorted, so {@code sorted()} returns it as is;
+     * see {@link #range(char, char)}.
      *
      * @param startInclusive the starting character (inclusive)
      * @param endExclusive the ending character (exclusive)
-     * @param by the incremental step. Must not be zero.
-     * @return a CharStream of characters from startInclusive to endExclusive with the specified step
+     * @param by the incremental step; must not be zero; can be negative for descending sequences
+     * @return a CharStream of characters from startInclusive to endExclusive with the specified step,
+     *         or an empty stream if the range is empty or the direction of {@code by} is inconsistent with it
      * @throws IllegalArgumentException if {@code by} is zero.
      */
     public static CharStream range(final char startInclusive, final char endExclusive, final int by) throws IllegalArgumentException {
@@ -3775,6 +4028,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             return empty();
         }
 
+        // An ascending range (by > 0) is flagged sorted so the sorted fast paths apply; a descending one is not.
         return new IteratorCharStream(new CharIteratorEx() {
             private char next = startInclusive;
             private final int diff = endExclusive - startInclusive;
@@ -3836,7 +4090,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
 
                 return result;
             }
-        });
+        }, by > 0, null);
     }
 
     /**
@@ -3884,6 +4138,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .count();  // returns 26
      * }</pre>
      *
+     * <p>The returned stream is known to be sorted, so {@code sorted()} returns it as is and {@code distinct()},
+     * {@code min()}, {@code max()} and {@code kthLargest(k)} use their streaming sorted paths (as for
+     * {@link IntStream#range(int, int)}).
+     *
      * @param startInclusive the starting character (inclusive)
      * @param endInclusive the ending character (inclusive)
      * @return a sequential ordered {@code CharStream} from {@code startInclusive} to {@code endInclusive},
@@ -3896,9 +4154,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
         if (startInclusive > endInclusive) {
             return empty();
         } else if (startInclusive == endInclusive) {
-            return of(startInclusive);
+            return new ArrayCharStream(new char[] { startInclusive }, true, null); // one element: trivially sorted
         }
 
+        // Flagged sorted (strictly ascending, distinct), like IntStream.range: sorted()/distinct()/min()/max()/kthLargest()
+        // take their sorted fast paths.
         return new IteratorCharStream(new CharIteratorEx() {
             private char next = startInclusive;
             private int cnt = endInclusive - startInclusive + 1;
@@ -3952,7 +4212,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
 
                 return result;
             }
-        });
+        }, true, null);
     }
 
     /**
@@ -4000,6 +4260,9 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *     .toArray();  // returns ['a'] (only start is within range)
      * }</pre>
      *
+     * <p>An ascending range ({@code by > 0}) is known to be sorted, so {@code sorted()} returns it as is;
+     * see {@link #range(char, char)}.
+     *
      * @param startInclusive the starting character (inclusive)
      * @param endInclusive the ending character (inclusive)
      * @param by the incremental step; must not be zero; can be negative for descending sequences
@@ -4015,11 +4278,12 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
         }
 
         if (endInclusive == startInclusive) {
-            return of(startInclusive);
+            return new ArrayCharStream(new char[] { startInclusive }, true, null); // one element: trivially sorted
         } else if (endInclusive > startInclusive != by > 0) {
             return empty();
         }
 
+        // An ascending range (by > 0) is flagged sorted so the sorted fast paths apply; a descending one is not.
         return new IteratorCharStream(new CharIteratorEx() {
             private char next = startInclusive;
             private int cnt = Math.abs((endInclusive - startInclusive) / by) + 1;
@@ -4080,7 +4344,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
 
                 return result;
             }
-        });
+        }, by > 0, null);
     }
 
     /**
@@ -4184,6 +4448,12 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * generated stream may contain lone surrogates that do not form valid Unicode scalar values.
      * Use {@link #filter(CharPredicate)} to restrict the range if needed.
      *
+     * <p><b>Source of randomness:</b> each value is drawn from
+     * {@link java.util.concurrent.ThreadLocalRandom#current()} of the thread that pulls it, so the stream is fast
+     * and does not contend across threads. The values are <b>not</b> cryptographically secure and cannot be
+     * seeded; callers that need unpredictable values should use {@link java.security.SecureRandom} directly, and
+     * callers that need a reproducible sequence can pass their own generator to {@link #generate(CharSupplier)}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate 10 random characters
@@ -4205,11 +4475,17 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     public static CharStream random() {
         final int mod = Character.MAX_VALUE + 1;
 
-        return generate(() -> (char) RAND.nextInt(mod));
+        return generate(() -> (char) ThreadLocalRandom.current().nextInt(mod));
     }
 
     /**
      * Creates an infinite CharStream of random characters within the specified range.
+     *
+     * <p><b>Source of randomness:</b> each value is drawn from
+     * {@link java.util.concurrent.ThreadLocalRandom#current()} of the thread that pulls it, so the stream is fast
+     * and does not contend across threads. The values are <b>not</b> cryptographically secure and cannot be
+     * seeded; callers that need unpredictable values should use {@link java.security.SecureRandom} directly, and
+     * callers that need a reproducible sequence can pass their own generator to {@link #generate(CharSupplier)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4238,11 +4514,17 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
 
         final int mod = endExclusive - startInclusive;
 
-        return generate(() -> (char) (RAND.nextInt(mod) + startInclusive));
+        return generate(() -> (char) (ThreadLocalRandom.current().nextInt(mod) + startInclusive));
     }
 
     /**
      * Creates an infinite CharStream of random characters selected from the given candidates.
+     *
+     * <p><b>Source of randomness:</b> each value is drawn from
+     * {@link java.util.concurrent.ThreadLocalRandom#current()} of the thread that pulls it, so the stream is fast
+     * and does not contend across threads. The values are <b>not</b> cryptographically secure and cannot be
+     * seeded; callers that need unpredictable values should use {@link java.security.SecureRandom} directly, and
+     * callers that need a reproducible sequence can pass their own generator to {@link #generate(CharSupplier)}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4271,7 +4553,7 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
 
         final int n = candidates.length;
 
-        return generate(() -> candidates[RAND.nextInt(n)]);
+        return generate(() -> candidates[ThreadLocalRandom.current().nextInt(n)]);
     }
 
     /**
@@ -4637,6 +4919,12 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * Concatenates multiple CharStreams into a single CharStream.
      * The streams are processed in the order they appear in the input.
      *
+     * <p>The resulting stream will automatically close all input streams when it is closed.
+     * As each input stream is exhausted during iteration, it is immediately closed before moving to the next stream
+     * (the last one is closed when the resulting stream is closed). A failure thrown while closing an exhausted input
+     * therefore ends the traversal: it is thrown by the resulting stream's iteration, and the elements of the remaining
+     * inputs are not delivered.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Concatenate multiple CharStreams
@@ -4713,6 +5001,57 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
 
                 return cur[cursor++];
             }
+
+            /*
+             * count() and toList() (which the inherited toArray() uses) read the remaining array segments directly
+             * instead of pulling every element through hasNext()/nextChar(). The list iterator is consumed in the
+             * same order and no caller-supplied code runs per element, so the results are identical. Short segments,
+             * and any segment that would push the list past the maximum array size, are still added element by element
+             * (bulk copying does not pay off for a few elements; the size limit keeps the same OutOfMemoryError).
+             */
+            @Override
+            public long count() {
+                long result = cur == null ? 0 : cur.length - cursor;
+
+                while (iter.hasNext()) {
+                    cur = iter.next();
+                    result += N.len(cur);
+                }
+
+                cursor = N.len(cur);
+
+                return result;
+            }
+
+            @Override
+            public CharList toList() {
+                final CharList result = new CharList();
+
+                while (true) {
+                    final int len = N.len(cur);
+
+                    if (cursor < len) {
+                        if (len - cursor < 16 || len - cursor > Integer.MAX_VALUE - 8 - result.size()) {
+                            for (int i = cursor; i < len; i++) {
+                                result.add(cur[i]);
+                            }
+                        } else {
+                            result.addAll(cursor == 0 ? cur : N.copyOfRange(cur, cursor, len));
+                        }
+
+                        cursor = len;
+                    }
+
+                    if (!iter.hasNext()) {
+                        break;
+                    }
+
+                    cur = iter.next();
+                    cursor = 0;
+                }
+
+                return result;
+            }
         });
     }
 
@@ -4721,6 +5060,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * The streams are processed in the order they appear in the collection.
      * The collection's membership and encounter order are snapshotted when this method is called.
      * Closing the returned stream closes every snapshotted input stream.
+     *
+     * <p>As each input stream is exhausted during iteration, it is immediately closed before moving to the next stream
+     * (the last one is closed when the resulting stream is closed). A failure thrown while closing an exhausted input
+     * therefore ends the traversal: it is thrown by the resulting stream's iteration, and the elements of the remaining
+     * inputs are not delivered.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5029,9 +5373,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#zip(Stream, Stream, BiFunction)
      */
-    public static CharStream zip(final CharStream a, final CharStream b, final CharBinaryOperator zipFunction) throws IllegalArgumentException {
+    public static CharStream zip(final CharStream a, final CharStream b, final CharBinaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
@@ -5057,9 +5403,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      */
     public static CharStream zip(final CharStream a, final CharStream b, final CharStream c, final CharTernaryOperator zipFunction)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
@@ -5080,16 +5427,19 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * }</pre>
      *
      * @param streams the collection of character streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine elements from all streams.
+     * @param zipFunction the function to combine elements from all streams; it must not return {@code null}
      * @return a stream of combined values. Empty if the collection is {@code null} or empty
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws NullPointerException if {@code zipFunction} returns {@code null} (thrown lazily, when that element is reached).
+     * @throws IllegalStateException if any stream in {@code streams} is already closed
      * @see Stream#zip(Collection, Function)
      */
-    public static CharStream zip(final Collection<? extends CharStream> streams, final CharNFunction<Character> zipFunction) throws IllegalArgumentException {
+    public static CharStream zip(final Collection<? extends CharStream> streams, final CharNFunction<Character> zipFunction)
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         //noinspection resource
-        return Stream.zip(streams, zipFunction).mapToChar(ToCharFunction.UNBOX);
+        return Stream.zip(streams, zipFunction).mapToChar(UNBOX_ZIP_RESULT);
     }
 
     /**
@@ -5324,10 +5674,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#zip(Stream, Stream, Object, Object, BiFunction)
      */
     public static CharStream zip(final CharStream a, final CharStream b, final char valueForNoneA, final char valueForNoneB,
-            final CharBinaryOperator zipFunction) throws IllegalArgumentException {
+            final CharBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
@@ -5358,9 +5709,10 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      */
     public static CharStream zip(final CharStream a, final CharStream b, final CharStream c, final char valueForNoneA, final char valueForNoneB,
-            final char valueForNoneC, final CharTernaryOperator zipFunction) throws IllegalArgumentException {
+            final char valueForNoneC, final CharTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
@@ -5384,18 +5736,18 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *
      * @param streams the collection of character streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone array of default values to use when the corresponding stream runs out of values, must have the same size as the streams collection
-     * @param zipFunction the function to combine elements from all streams.
+     * @param zipFunction the function to combine elements from all streams; it must not return {@code null}
      * @return a stream of combined values. Empty if the collection is {@code null} or empty
      * @throws IllegalArgumentException if the size of {@code valuesForNone} doesn't match the size of the streams
      *         collection, or if {@code zipFunction} is {@code null}.
+     * @throws NullPointerException if {@code zipFunction} returns {@code null} (thrown lazily, when that element is reached).
+     * @throws IllegalStateException if any stream in {@code streams} is already closed
      * @see Stream#zip(Collection, char[], CharNFunction)
      */
     public static CharStream zip(final Collection<? extends CharStream> streams, final char[] valuesForNone, final CharNFunction<Character> zipFunction)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.zipFunction);
-
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         //noinspection resource
-        return Stream.zip(streams, valuesForNone, zipFunction).mapToChar(ToCharFunction.UNBOX);
+        return Stream.zip(streams, valuesForNone, zipFunction).mapToChar(UNBOX_ZIP_RESULT);
     }
 
     /**
@@ -5618,9 +5970,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *                     or MergeResult.TAKE_SECOND to select from the second stream.
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static CharStream merge(final CharStream a, final CharStream b, final CharBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
+    public static CharStream merge(final CharStream a, final CharStream b, final CharBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
@@ -5647,10 +6001,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      * @param nextSelector a function to determine which element should be selected next
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static CharStream merge(final CharStream a, final CharStream b, final CharStream c, final CharBiFunction<MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(merge(a, b, nextSelector), c, nextSelector);
@@ -5659,6 +6014,16 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
     /**
      * Merges a collection of CharStreams into a single CharStream based on a selector function.
      * The selector determines which element to choose when multiple streams have remaining elements.
+     *
+     * <p>The streams are merged lazily as a balanced tree of pairwise merges of <i>adjacent</i> streams, so each
+     * element passes through about {@code log2(k)} selector calls for {@code k} streams (the tree is built, and every
+     * stream is opened, when this method is called). All streams should provide elements in pre-sorted order
+     * according to the same ordering that the nextSelector function expects; for a {@code nextSelector} that returns
+     * {@code TAKE_FIRST} on ties, elements it treats as equal keep their source order, and the result is the same as
+     * merging the streams one after another from left to right.
+     * The returned stream will automatically close all input streams when it is closed. If an input stream is found
+     * to be already closed, the streams that precede it in the collection are closed, the ones after it are left
+     * untouched, and the exception is rethrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5687,10 +6052,11 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
      *                     to select the first element, or MergeResult.TAKE_SECOND to select the second.
      * @return a CharStream containing the merged elements
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code streams} contains more than one stream and any of them is already closed
      * @see Stream#merge(Collection, BiFunction)
      */
     public static CharStream merge(final Collection<? extends CharStream> streams, final CharBiFunction<MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {
@@ -5703,14 +6069,43 @@ public abstract class CharStream extends StreamBase<Character, char[], CharPredi
             return merge(iter.next(), iter.next(), nextSelector);
         }
 
-        final Iterator<? extends CharStream> iter = streams.iterator();
-        CharStream result = merge(iter.next(), iter.next(), nextSelector);
+        // Merge adjacent pairs level by level - a balanced tree, as Stream.merge(Collection) does (C-104) - instead of
+        // folding left. The left fold merge(merge(merge(s1, s2), s3), ...) is k - 1 merges deep: an element of an early
+        // source passed through up to k - 1 selector calls (O(n * k) in total), and every hasNext()/next()/close()
+        // recursed through all levels (StackOverflowError, with sources left open, at about 2,000 sources). The tree is
+        // ceil(log2(k)) deep. Merging adjacent runs keeps elements that a TAKE_FIRST-on-ties selector treats as equal in
+        // source order, so for such a selector the result is exactly the left fold's.
+        List<CharStream> level = new ArrayList<>(streams);
+        final List<CharStream> created = new ArrayList<>(level.size() - 1);
 
-        while (iter.hasNext()) {
-            result = merge(result, iter.next(), nextSelector);
+        try {
+            while (level.size() > 1) {
+                final int size = level.size();
+                final List<CharStream> nextLevel = new ArrayList<>((size + 1) / 2);
+
+                for (int i = 0; i + 1 < size; i += 2) {
+                    final CharStream merged = merge(level.get(i), level.get(i + 1), nextSelector);
+                    created.add(merged);
+                    nextLevel.add(merged);
+                }
+
+                if (size % 2 == 1) {
+                    nextLevel.add(level.get(size - 1));
+                }
+
+                level = nextLevel;
+            }
+        } catch (final RuntimeException | Error e) {
+            // As in each pairwise merge, close only what has been opened: every merge created so far (which closes
+            // the sources it consumed; closing twice is a no-op). Sources not reached yet are left untouched.
+            for (int i = created.size() - 1; i >= 0; i--) {
+                closeOpenedSource(created.get(i), e);
+            }
+
+            throw e;
         }
 
-        return result;
+        return level.get(0);
     }
 
     /**

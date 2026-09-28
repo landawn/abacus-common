@@ -293,4 +293,20 @@ public class StringsRegressionATest extends TestBase {
         assertEquals(null, Strings.stripToNull(IDEO_SP));
         assertEquals(NBSP, Strings.stripToEmpty(NBSP));
     }
+
+
+    @Test
+    public void testDelimitedCaseConvertersNotIdempotentForUnpairedCasedCodePoints() {
+        // U+211D DOUBLE-STRUCK CAPITAL R is uppercase but has no lowercase mapping
+        final String capitalR = String.valueOf((char) 0x211D);
+        assertEquals("x" + capitalR, Strings.toSnakeCase("X" + capitalR));
+        assertEquals("x_" + capitalR, Strings.toSnakeCase("x" + capitalR));
+        assertEquals("x" + capitalR, Strings.toKebabCase("X" + capitalR));
+        assertEquals("x-" + capitalR, Strings.toKebabCase("x" + capitalR));
+
+        // U+0138 LATIN SMALL LETTER KRA is lowercase but has no uppercase mapping
+        final String kra = String.valueOf((char) 0x0138);
+        assertEquals("AX" + kra, Strings.toScreamingSnakeCase("ax" + kra));
+        assertEquals("A_X" + kra, Strings.toScreamingSnakeCase("AX" + kra));
+    }
 }

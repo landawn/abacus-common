@@ -38,8 +38,8 @@ public interface ToShortFunction<T> extends Throwables.ToShortFunction<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Short boxed = 42;
-     * short primitive = ToShortFunction.UNBOX.applyAsShort(boxed);     // returns 42
-     * short defaultValue = ToShortFunction.UNBOX.applyAsShort(null);   // returns 0
+     * short primitive = ToShortFunction.UNBOX.applyAsShort(boxed);    // returns 42
+     * short defaultValue = ToShortFunction.UNBOX.applyAsShort(null);  // returns 0
      * }</pre>
      *
      */

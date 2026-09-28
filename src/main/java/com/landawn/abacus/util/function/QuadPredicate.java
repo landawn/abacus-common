@@ -55,8 +55,8 @@ public interface QuadPredicate<A, B, C, D> extends Throwables.QuadPredicate<A, B
      *         user.isVerified() &&
      *         discount <= user.getMaxDiscount();
      *
-     * boolean result1 = allPositive.test(1, 2, 3, 4);        // Returns true
-     * boolean result2 = allEqual.test("A", "A", "A", "B");   // Returns false
+     * boolean result1 = allPositive.test(1, 2, 3, 4);       // Returns true
+     * boolean result2 = allEqual.test("A", "A", "A", "B");  // Returns false
      * }</pre>
      *
      * @param a the first input argument

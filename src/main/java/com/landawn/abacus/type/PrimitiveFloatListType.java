@@ -97,7 +97,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
 
     /**
      * Converts a FloatList to its string representation.
-     * The list is first converted to a float array, then serialized using the array type handler.
+     * The logical elements use the built-in array format or a registered array type handler.
      * Returns {@code null} if the input list is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -119,9 +119,10 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public String stringOf(final FloatList x) {
-        return x == null ? null : arrayType.stringOf(x.toArray());
+        return x == null ? null : arrayType instanceof PrimitiveFloatArrayType ? stringOf(x.internalArray(), x.size()) : arrayType.stringOf(x.toArray());
     }
 
     /**
@@ -163,7 +164,7 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
 
     /**
      * Appends the string representation of a FloatList to an Appendable.
-     * Delegates to the array type handler after converting the list to an array.
+     * Writes the array-type representation, preserving a snapshot for application-controlled callbacks.
      * Appends "null" if the list is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -195,18 +196,23 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void appendTo(final Appendable appendable, final FloatList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            arrayType.appendTo(appendable, x.toArray());
+            if (arrayType instanceof PrimitiveFloatArrayType && canWriteDirectly(appendable)) {
+                appendTo(appendable, x.internalArray(), x.size());
+            } else {
+                arrayType.appendTo(appendable, x.toArray());
+            }
         }
     }
 
     /**
      * Writes the character representation of a FloatList to a CharacterWriter.
-     * Delegates to the array type handler after converting the list to an array.
+     * Writes the array-type representation, preserving a snapshot for application-controlled callbacks.
      * Writes "null" if the list is {@code null}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -238,12 +244,17 @@ public final class PrimitiveFloatListType extends AbstractPrimitiveListType<Floa
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void serializeTo(final CharacterWriter writer, final FloatList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            arrayType.serializeTo(writer, x.toArray(), config);
+            if (arrayType instanceof PrimitiveFloatArrayType && canWriteDirectly(writer, config)) {
+                serializeTo(writer, x.internalArray(), x.size());
+            } else {
+                arrayType.serializeTo(writer, x.toArray(), config);
+            }
         }
     }
 }

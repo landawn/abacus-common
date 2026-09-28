@@ -219,30 +219,30 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
      * IntIteratorEx iterEx = IntIteratorEx.of(iter);
      * }</pre>
      *
-     * @param iter the IntIterator to wrap (can be null)
-     * @return the same instance if {@code iter} is already an IntIteratorEx, an IntIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
+     * @param iterator the IntIterator to wrap (can be null)
+     * @return the same instance if {@code iterator} is already an IntIteratorEx, an IntIteratorEx wrapping the given iterator, or an empty iterator if {@code iterator} is null
      */
-    public static IntIteratorEx of(final IntIterator iter) {
-        if (iter == null) {
+    public static IntIteratorEx of(final IntIterator iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof IntIteratorEx) {
-            return ((IntIteratorEx) iter);
+        } else if (iterator instanceof IntIteratorEx) {
+            return ((IntIteratorEx) iterator);
         }
 
         return new IntIteratorEx() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public int nextInt() throws NoSuchElementException {
-                return iter.nextInt();
+                return iterator.nextInt();
             }
 
             @Override
             public void closeResource() {
-                ObjIteratorEx.closeResource(iter);
+                ObjIteratorEx.closeResource(iterator);
             }
         };
     }
@@ -260,13 +260,13 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
      * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
      * is unboxed by its next method.</p>
      *
-     * @param iter the Iterator of Integer objects (can be null)
+     * @param iterator the Iterator of Integer objects (can be null)
      * @return an IntIteratorEx unwrapping the given iterator, or empty iterator if iter is null
      */
-    public static IntIteratorEx from(final Iterator<Integer> iter) {
-        if (iter == null) {
+    public static IntIteratorEx from(final Iterator<Integer> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ObjIteratorEx<Integer> iteratorEx) {
+        } else if (iterator instanceof ObjIteratorEx<Integer> iteratorEx) {
 
             return new IntIteratorEx() {
                 @Override
@@ -313,7 +313,7 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
             return new IntIteratorEx() {
                 @Override
                 public boolean hasNext() {
-                    return iter.hasNext();
+                    return iterator.hasNext();
                 }
 
                 /**
@@ -324,12 +324,12 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
                  */
                 @Override
                 public int nextInt() throws NoSuchElementException, NullPointerException {
-                    return iter.next();
+                    return iterator.next();
                 }
 
                 @Override
                 public void closeResource() {
-                    ObjIteratorEx.closeResource(iter);
+                    ObjIteratorEx.closeResource(iterator);
                 }
             };
         }
@@ -410,8 +410,8 @@ public abstract class IntIteratorEx extends IntIterator implements IteratorEx<In
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIteratorEx iter = IntIteratorEx.of(1, 2);
-     * iter.closeResource();         // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
+     * iter.closeResource();        // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());  // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * IntIteratorEx iter2 = IntIteratorEx.of(3, 4);

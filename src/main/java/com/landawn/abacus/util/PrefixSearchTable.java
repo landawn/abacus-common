@@ -46,8 +46,8 @@ import com.landawn.abacus.util.stream.EntryStream;
  *         .add(Arrays.asList("a", "b"), "foo")
  *         .build();
  *
- * table.get(Arrays.asList("a", "b", "c"));   // returns Optional["foo"]
- * table.get(Arrays.asList("a"));             // returns Optional.empty()
+ * table.get(Arrays.asList("a", "b", "c"));  // returns Optional["foo"]
+ * table.get(Arrays.asList("a"));            // returns Optional.empty()
  * }</pre>
  *
  * <br />
@@ -66,6 +66,8 @@ public final class PrefixSearchTable<K, V> {
 
     /**
      * Searches the table for the longest prefix match of {@code compoundKey}.
+     * The entire key is validated before lookup, including elements beyond the last matching prefix.
+     * Only the selected value is returned; intermediate prefix lists are not constructed.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -74,9 +76,9 @@ public final class PrefixSearchTable<K, V> {
      *         .add(Arrays.asList("a"), "bar")
      *         .build();
      *
-     * table.get(Arrays.asList("a", "b", "c"));   // returns Optional["foo"] (longest match)
-     * table.get(Arrays.asList("a"));             // returns Optional["bar"]
-     * table.get(Arrays.asList("x"));             // returns Optional.empty()
+     * table.get(Arrays.asList("a", "b", "c"));  // returns Optional["foo"] (longest match)
+     * table.get(Arrays.asList("a"));            // returns Optional["bar"]
+     * table.get(Arrays.asList("x"));            // returns Optional.empty()
      * }</pre>
      *
      * @param compoundKey the non-empty compound key to search for; elements must not be {@code null}
@@ -87,7 +89,25 @@ public final class PrefixSearchTable<K, V> {
      * @see #getAll(List)
      */
     public Optional<V> get(List<? extends K> compoundKey) throws IllegalArgumentException, NullPointerException {
-        return getAll(compoundKey).values().reduce((shorter, longer) -> longer);
+        N.checkArgNotNull(compoundKey, cs.compoundKey);
+        N.checkArgument(compoundKey.size() > 0, "cannot search by empty key");
+        // Validate and snapshot the entire key before invoking key hashing, including any unmatched suffix.
+        final List<K> keySnapshot = List.copyOf(compoundKey);
+        Map<K, Node<K, V>> remaining = nodes;
+        V result = null;
+
+        for (final K key : keySnapshot) {
+            final Node<K, V> node = remaining.get(key);
+            if (node == null) {
+                break;
+            }
+            if (node.value != null) {
+                result = node.value;
+            }
+            remaining = node.children;
+        }
+
+        return Optional.ofNullable(result);
     }
 
     /**
@@ -306,8 +326,8 @@ public final class PrefixSearchTable<K, V> {
             N.checkArgument(size > 0, "empty key not allowed");
 
             final List<K> validatedKey = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                validatedKey.add(requireNonNull(compoundKey.get(i)));
+            for (final K key : compoundKey) {
+                validatedKey.add(requireNonNull(key));
             }
 
             N.checkArgNotNull(value, cs.value);

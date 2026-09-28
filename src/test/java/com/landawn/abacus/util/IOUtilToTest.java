@@ -188,11 +188,18 @@ public class IOUtilToTest extends IOUtilTestSupport {
         assertEquals(threeSlash, twoSlash, "the two-slash and three-slash forms must agree on every platform");
         assertEquals(new File("/C:/tmp/a.txt"), IOUtil.toFile(new java.net.URL("file://C:/tmp/a.txt")));
 
-        // A genuine host is still kept, which is what makes the UNC round trip work - and the result must be a
-        // path the platform can actually parse, not merely a string containing the host name.
-        final File unc = IOUtil.toFile(new java.net.URL("file://server/share/f.txt"));
-        assertTrue(unc.getPath().contains("server"));
-        assertDoesNotThrow(unc::toPath);
+        // C-641: a genuine host is kept only on Windows, where it is a UNC path the platform can parse and toUrl
+        // round-trips; elsewhere new File("//server/share/f.txt") collapses to the LOCAL "/server/share/f.txt"
+        // (UnixFileSystem.normalize), so the URL is rejected there instead.
+        if (IOUtil.IS_OS_WINDOWS) {
+            final File unc = IOUtil.toFile(new java.net.URL("file://server/share/f.txt"));
+            assertEquals("\\\\server\\share\\f.txt", unc.getPath());
+            assertDoesNotThrow(unc::toPath);
+            assertTrue(IOUtil.toUrl(unc).toString().contains("server"));
+            assertEquals(unc, IOUtil.toFile(IOUtil.toUrl(unc)));
+        } else {
+            assertThrows(IllegalArgumentException.class, () -> IOUtil.toFile(new java.net.URL("file://server/share/f.txt")));
+        }
 
         // A file URL has nowhere to put a port or credentials, and splicing them into a UNC name yields a path
         // the platform rejects outright (\\host:80\share -> InvalidPathException). Rejected as a bad argument.

@@ -1480,4 +1480,19 @@ public class FractionTest extends TestBase {
         assertEquals(4, Fraction.FOUR_FIFTHS.getNumerator());
         assertEquals(5, Fraction.FOUR_FIFTHS.getDenominator());
     }
+
+    @Test
+    public void testOfStringDecimalFormAcceptsDoubleParseLeniency() {
+        // The decimal form is delegated to Double.parseDouble as a whole, so unlike the integer and
+        // "X Y/Z" forms it tolerates surrounding whitespace and a floating-point type suffix.
+        final Fraction half = Fraction.of(1, 2);
+        assertEquals(half, Fraction.of(" 0.5"));
+        assertEquals(half, Fraction.of("0.5 "));
+        assertEquals(half, Fraction.of("0.5d"));
+        assertEquals(half, Fraction.of("0.5f"));
+
+        // The integer form keeps rejecting padding.
+        assertThrows(NumberFormatException.class, () -> Fraction.of(" 3"));
+        assertThrows(NumberFormatException.class, () -> Fraction.of("3 "));
+    }
 }

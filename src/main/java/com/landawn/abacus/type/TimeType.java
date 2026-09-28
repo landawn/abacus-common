@@ -102,8 +102,8 @@ public class TimeType extends AbstractDateType<Time> {
      * <pre>{@code
      * Type<Time> type = TypeFactory.getType(Time.class);
      * Time time1 = type.valueOf("12:30:45");
-     * Time time2 = type.valueOf("SYS_TIME");   // Returns current system time
-     * Time time3 = type.valueOf(null);         // Returns null
+     * Time time2 = type.valueOf("SYS_TIME");  // Returns current system time
+     * Time time3 = type.valueOf(null);        // Returns null
      * }</pre>
      *
      * <p>This method accepts the millisecond-precision UTC representation produced by {@code stringOf} and
@@ -149,7 +149,7 @@ public class TimeType extends AbstractDateType<Time> {
      *
      * @param cbuf the character buffer containing the value
      * @param offset the start offset in the character buffer
-     * @param len the number of characters to use
+     * @param length the number of characters to use
      * @return a Time object, or {@code null} if the input is {@code null} or empty
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      * @throws IllegalArgumentException if the text is not a recognized time or numeric form (see {@link #valueOf(String)}),
@@ -157,23 +157,23 @@ public class TimeType extends AbstractDateType<Time> {
      */
     @MayReturnNull
     @Override
-    public Time valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
-        if ((cbuf == null) || (len == 0)) {
+    public Time valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return Dates.createTime(parseLong(cbuf, offset, len));
+                return Dates.createTime(parseLong(cbuf, offset, length));
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -239,15 +239,15 @@ public class TimeType extends AbstractDateType<Time> {
      * }
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the Time value to set, may be null
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Time x) throws NullPointerException, SQLException {
-        stmt.setTime(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final Time x) throws NullPointerException, SQLException {
+        statement.setTime(columnIndex, x);
     }
 
     /**
@@ -263,14 +263,14 @@ public class TimeType extends AbstractDateType<Time> {
      * }
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Time value to set, may be null
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Time x) throws NullPointerException, SQLException {
-        stmt.setTime(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final Time x) throws NullPointerException, SQLException {
+        statement.setTime(parameterName, x);
     }
 }

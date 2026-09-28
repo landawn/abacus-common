@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.landawn.abacus.TestBase;
+import org.junit.jupiter.api.Assertions;
 
 public class GregorianCalendarTypeTest extends TestBase {
 
@@ -134,5 +135,21 @@ public class GregorianCalendarTypeTest extends TestBase {
 
         assertNull(gregorianCalendarType.valueOf((char[]) null, 0, 0));
         assertNull(gregorianCalendarType.valueOf(new char[0], 0, 0));
+    }
+
+    @Test
+    public void testValueOfShortNumericTextIsNotEpochMillis() {
+        final Type<Object> dateType = TypeFactory.getType("GregorianCalendar");
+
+        // more than four characters of an optional sign and ASCII digits: epoch milliseconds
+        Assertions.assertEquals(12345L, ((java.util.Calendar) dateType.valueOf("12345")).getTimeInMillis());
+        Assertions.assertEquals(-12345L, ((java.util.Calendar) dateType.valueOf("-12345")).getTimeInMillis());
+        Assertions.assertEquals(12345L, ((java.util.Calendar) dateType.valueOf("12345".toCharArray(), 0, 5)).getTimeInMillis());
+
+        // shorter numeric text is not epoch millis: the formatted parser rejects it as ambiguous
+        for (final String text : new String[] { "0", "-1", "99", "2024" }) {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(text), text);
+            Assertions.assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(text.toCharArray(), 0, text.length()), text);
+        }
     }
 }

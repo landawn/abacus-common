@@ -160,8 +160,8 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * TriIterator<String, Integer, Boolean> iter = TriIterator.empty();
-     * boolean has = iter.hasNext();                                  // returns false
-     * List<Triple<String, Integer, Boolean>> list = iter.toList();   // returns empty list
+     * boolean has = iter.hasNext();                                 // returns false
+     * List<Triple<String, Integer, Boolean>> list = iter.toList();  // returns empty list
      * }</pre>
      *
      * <p>This is a singleton instance that is reused for all empty TriIterator requests,
@@ -1035,9 +1035,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * List<String> data = Arrays.asList("John:Developer:5", "Jane:Manager:8", "Bob:Analyst:3");
      * TriIterator<String, String, Integer> iter = TriIterator.unzip(data.iterator(), (item, triple) -> {
      *     String[] parts = item.split(":");
-     *     triple.setLeft(parts[0]);                    // name
-     *     triple.setMiddle(parts[1]);                  // role
-     *     triple.setRight(Integer.parseInt(parts[2])); // years
+     *     triple.setLeft(parts[0]);                     // name
+     *     triple.setMiddle(parts[1]);                   // role
+     *     triple.setRight(Integer.parseInt(parts[2]));  // years
      * });
      * iter.forEachRemaining((name, role, years) ->
      *     System.out.println(name + " works as " + role + " for " + years + " years"));
@@ -1047,22 +1047,22 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <A> the type of elements in the first component of the triple
      * @param <B> the type of elements in the second component of the triple
      * @param <C> the type of elements in the third component of the triple
-     * @param iter the input iterator, may be {@code null}; returns an empty {@code TriIterator} when {@code null}
+     * @param iterator the input iterator, may be {@code null}; returns an empty {@code TriIterator} when {@code null}
      * @param unzipFunction a BiConsumer that accepts an element of type T and a Triple&lt;A, B, C&gt; and populates the triple with the unzipped values
      * @return a TriIterator that iterates over the unzipped elements
      * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}.
      */
-    public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction)
+    public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterator<? extends T> iterator, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(unzipFunction, cs.unzipFunction);
 
-        if (iter == null) {
+        if (iterator == null) {
             return TriIterator.empty();
         }
 
-        final BooleanSupplier booleanSupplier = iter::hasNext;
+        final BooleanSupplier booleanSupplier = iterator::hasNext;
 
-        final Consumer<Triple<A, B, C>> output = out -> unzipFunction.accept(iter.next(), out);
+        final Consumer<Triple<A, B, C>> output = out -> unzipFunction.accept(iterator.next(), out);
 
         return TriIterator.generate(booleanSupplier, output);
     }
@@ -1090,20 +1090,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <A> the type of elements in the first component of the triple
      * @param <B> the type of elements in the second component of the triple
      * @param <C> the type of elements in the third component of the triple
-     * @param iter the input iterable, may be {@code null}; returns an empty {@code TriIterator} when {@code null}
+     * @param iterable the input iterable, may be {@code null}; returns an empty {@code TriIterator} when {@code null}
      * @param unzipFunction a BiConsumer that accepts an element of type T and a {@code Triple<A, B, C>} and populates the triple with the unzipped values
      * @return a TriIterator that iterates over the unzipped elements
      * @throws IllegalArgumentException if {@code unzipFunction} is {@code null}.
      */
-    public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterable<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction)
+    public static <T, A, B, C> TriIterator<A, B, C> unzip(final Iterable<? extends T> iterable, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(unzipFunction, cs.unzipFunction);
 
-        if (iter == null) {
+        if (iterable == null) {
             return TriIterator.empty();
         }
 
-        return unzip(iter.iterator(), unzipFunction);
+        return unzip(iterable.iterator(), unzipFunction);
     }
 
     /**
@@ -1131,24 +1131,28 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <LC> the type of the first output collection
      * @param <MC> the type of the second output collection
      * @param <RC> the type of the third output collection
-     * @param iter the input iterator, may be {@code null}; returns empty output collections when {@code null}
+     * @param iterator the input iterator, may be {@code null}; returns empty output collections when {@code null}
      * @param unzipFunction a BiConsumer that accepts an element of type T and a {@code Triple<A, B, C>} and populates the triple with the unzipped values
      * @param leftSupplier a function that provides the first output collection; always called with a size hint of {@code 0}
      * @param middleSupplier a function that provides the second output collection; always called with a size hint of {@code 0}
      * @param rightSupplier a function that provides the third output collection; always called with a size hint of {@code 0}
      * @return a {@code Triple} containing the three output collections
      * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier},
-     *         {@code middleSupplier}, {@code rightSupplier} is {@code null}.
+     *         {@code middleSupplier}, {@code rightSupplier} is {@code null}, or if any two of the three returned
+     *         collections are the same instance.
+     * @throws NullPointerException if any of the three suppliers returns {@code null}.
+     * @throws UnsupportedOperationException if a triple remains and a supplied output collection does not support adding its component
      */
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip(
-            final Iterator<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction, final IntFunction<? extends LC> leftSupplier,
-            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier) throws IllegalArgumentException {
+            final Iterator<? extends T> iterator, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction, final IntFunction<? extends LC> leftSupplier,
+            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(unzipFunction, cs.unzipFunction);
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(middleSupplier, cs.middleSupplier);
         N.checkArgNotNull(rightSupplier, cs.rightSupplier);
 
-        return unzip(iter, unzipFunction).unzipToCollections(() -> leftSupplier.apply(0), () -> middleSupplier.apply(0), () -> rightSupplier.apply(0));
+        return unzip(iterator, unzipFunction).unzipToCollections(() -> leftSupplier.apply(0), () -> middleSupplier.apply(0), () -> rightSupplier.apply(0));
     }
 
     /**
@@ -1170,26 +1174,31 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param <LC> the type of the first output collection
      * @param <MC> the type of the second output collection
      * @param <RC> the type of the third output collection
-     * @param iter the input iterable, may be {@code null}; returns empty output collections when {@code null}
+     * @param iterable the input iterable, may be {@code null}; returns empty output collections when {@code null}
      * @param unzipFunction a BiConsumer that accepts an element of type T and a {@code Triple<A, B, C>} and populates the triple with the unzipped values
      * @param leftSupplier a function that provides the first output collection
      * @param middleSupplier a function that provides the second output collection
      * @param rightSupplier a function that provides the third output collection
      * @return a {@code Triple} containing the three output collections
      * @throws IllegalArgumentException if any of {@code unzipFunction}, {@code leftSupplier},
-     *         {@code middleSupplier}, {@code rightSupplier} is {@code null}.
+     *         {@code middleSupplier}, {@code rightSupplier} is {@code null}, or if any two of the three returned
+     *         collections are the same instance.
+     * @throws NullPointerException if any of the three suppliers returns {@code null}.
+     * @throws UnsupportedOperationException if a triple remains and a supplied output collection does not support adding its component
      */
     public static <T, A, B, C, LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzip(
-            final Iterable<? extends T> iter, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction, final IntFunction<? extends LC> leftSupplier,
-            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier) throws IllegalArgumentException {
+            final Iterable<? extends T> iterable, final BiConsumer<? super T, Triple<A, B, C>> unzipFunction, final IntFunction<? extends LC> leftSupplier,
+            final IntFunction<? extends MC> middleSupplier, final IntFunction<? extends RC> rightSupplier)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(unzipFunction, cs.unzipFunction);
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(middleSupplier, cs.middleSupplier);
         N.checkArgNotNull(rightSupplier, cs.rightSupplier);
 
-        final int len = iter instanceof Collection ? ((Collection<?>) iter).size() : 0;
+        final int len = iterable instanceof Collection ? ((Collection<?>) iterable).size() : 0;
 
-        return unzip(iter, unzipFunction).unzipToCollections(() -> leftSupplier.apply(len), () -> middleSupplier.apply(len), () -> rightSupplier.apply(len));
+        return unzip(iterable, unzipFunction).unzipToCollections(() -> leftSupplier.apply(len), () -> middleSupplier.apply(len),
+                () -> rightSupplier.apply(len));
     }
 
     /**
@@ -1800,9 +1809,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Boolean[] active = {true, false, true};
      * Triple<List<String>, List<Integer>, List<Boolean>> result =
      *     TriIterator.zip(names, ages, active).unzipToLists(ArrayList::new);
-     * List<String> nameList = result.left();       // returns [Alice, Bob, Charlie]
-     * List<Integer> ageList = result.middle();     // returns [25, 30, 35]
-     * List<Boolean> activeList = result.right();   // returns [true, false, true]
+     * List<String> nameList = result.left();      // returns [Alice, Bob, Charlie]
+     * List<Integer> ageList = result.middle();    // returns [25, 30, 35]
+     * List<Boolean> activeList = result.right();  // returns [true, false, true]
      * }</pre>
      *
      * <p><b>API Note:</b> one supplier produces all three lists, so its element type cannot be checked
@@ -1819,17 +1828,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param supplier a supplier invoked three times to create the left, middle, and right lists; each call must return a {@code non-null} {@code List}
      * @return a {@code Triple} whose left, middle, and right lists contain all first, second, and third components, respectively
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}, if any of the three calls to it returns
-     *         {@code null}, or if any two of the three returned lists are the same instance.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if any two of the three returned lists
+     *         are the same instance.
+     * @throws NullPointerException if any of the three calls to {@code supplier} returns {@code null}.
+     * @throws UnsupportedOperationException if a triple remains and a supplied output collection does not support adding its component
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Triple<List<A>, List<B>, List<C>> unzipToLists(final Supplier<? extends List> supplier) throws IllegalArgumentException {
+    public Triple<List<A>, List<B>, List<C>> unzipToLists(final Supplier<? extends List> supplier)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final List<A> listA = N.checkArgNotNull(supplier.get(), "supplier.get()");
-        final List<B> listB = N.checkArgNotNull(supplier.get(), "supplier.get()");
-        final List<C> listC = N.checkArgNotNull(supplier.get(), "supplier.get()");
+        final List<A> listA = N.requireNonNull(supplier.get(), "supplier.get()");
+        final List<B> listB = N.requireNonNull(supplier.get(), "supplier.get()");
+        final List<C> listC = N.requireNonNull(supplier.get(), "supplier.get()");
         N.checkArgument(listA != listB && listA != listC && listB != listC, "Output collections must be distinct instances");
 
         this.foreachRemaining((a, b, c) -> {
@@ -1869,21 +1881,23 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * @param rightSupplier a supplier that provides the collection for third components; must return a {@code non-null} collection
      * @return a {@code Triple} whose left, middle, and right collections contain all first, second, and third components, respectively
      * @throws IllegalArgumentException if any of {@code leftSupplier}, {@code middleSupplier}, {@code rightSupplier} is
-     *         {@code null}, if any of them returns {@code null}, or if any two of the three returned collections are the
-     *         same instance.
+     *         {@code null}, or if any two of the three returned collections are the same instance.
+     * @throws NullPointerException if any of {@code leftSupplier}, {@code middleSupplier}, {@code rightSupplier} returns
+     *         {@code null}.
+     * @throws UnsupportedOperationException if a triple remains and a supplied output collection does not support adding its component
      * @see #unzipToLists(Supplier)
      * @see #unzipToSets(Supplier)
      */
     public <LC extends Collection<A>, MC extends Collection<B>, RC extends Collection<C>> Triple<LC, MC, RC> unzipToCollections(
             final Supplier<? extends LC> leftSupplier, final Supplier<? extends MC> middleSupplier, final Supplier<? extends RC> rightSupplier)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(leftSupplier, cs.leftSupplier);
         N.checkArgNotNull(middleSupplier, cs.middleSupplier);
         N.checkArgNotNull(rightSupplier, cs.rightSupplier);
 
-        final LC collectionA = N.checkArgNotNull(leftSupplier.get(), "leftSupplier.get()");
-        final MC collectionB = N.checkArgNotNull(middleSupplier.get(), "middleSupplier.get()");
-        final RC collectionC = N.checkArgNotNull(rightSupplier.get(), "rightSupplier.get()");
+        final LC collectionA = N.requireNonNull(leftSupplier.get(), "leftSupplier.get()");
+        final MC collectionB = N.requireNonNull(middleSupplier.get(), "middleSupplier.get()");
+        final RC collectionC = N.requireNonNull(rightSupplier.get(), "rightSupplier.get()");
         N.checkArgument(collectionA != collectionB && collectionA != collectionC && collectionB != collectionC,
                 "Output collections must be distinct instances");
 
@@ -1912,9 +1926,9 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      * Boolean[] active = {true, false, true};
      * Triple<Set<String>, Set<Integer>, Set<Boolean>> result =
      *     TriIterator.zip(names, ages, active).unzipToSets(LinkedHashSet::new);
-     * Set<String> nameSet = result.left();       // returns [Alice, Bob] (duplicates removed, insertion order)
-     * Set<Integer> ageSet = result.middle();     // returns [25, 30]
-     * Set<Boolean> activeSet = result.right();   // returns [true, false]
+     * Set<String> nameSet = result.left();      // returns [Alice, Bob] (duplicates removed, insertion order)
+     * Set<Integer> ageSet = result.middle();    // returns [25, 30]
+     * Set<Boolean> activeSet = result.right();  // returns [true, false]
      * }</pre>
      *
      * <p><b>API Note:</b> one supplier produces all three sets, so its element type cannot be checked
@@ -1928,17 +1942,20 @@ public abstract class TriIterator<A, B, C> extends ImmutableIterator<Triple<A, B
      *
      * @param supplier a supplier invoked three times to create the left, middle, and right sets; each call must return a {@code non-null} {@code Set}
      * @return a {@code Triple} whose left, middle, and right sets contain the distinct first, second, and third components, respectively
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}, if any of the three calls to it returns
-     *         {@code null}, or if any two of the three returned sets are the same instance.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if any two of the three returned sets
+     *         are the same instance.
+     * @throws NullPointerException if any of the three calls to {@code supplier} returns {@code null}.
+     * @throws UnsupportedOperationException if a triple remains and a supplied output collection does not support adding its component
      * @see #unzipToCollections(Supplier, Supplier, Supplier)
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Triple<Set<A>, Set<B>, Set<C>> unzipToSets(final Supplier<? extends Set> supplier) throws IllegalArgumentException {
+    public Triple<Set<A>, Set<B>, Set<C>> unzipToSets(final Supplier<? extends Set> supplier)
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final Set<A> setA = N.checkArgNotNull(supplier.get(), "supplier.get()");
-        final Set<B> setB = N.checkArgNotNull(supplier.get(), "supplier.get()");
-        final Set<C> setC = N.checkArgNotNull(supplier.get(), "supplier.get()");
+        final Set<A> setA = N.requireNonNull(supplier.get(), "supplier.get()");
+        final Set<B> setB = N.requireNonNull(supplier.get(), "supplier.get()");
+        final Set<C> setC = N.requireNonNull(supplier.get(), "supplier.get()");
         N.checkArgument(setA != setB && setA != setC && setB != setC, "Output collections must be distinct instances");
 
         this.foreachRemaining((a, b, c) -> {

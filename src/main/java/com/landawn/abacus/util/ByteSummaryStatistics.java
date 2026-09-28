@@ -44,8 +44,8 @@ import com.landawn.abacus.util.function.ByteConsumer;
  * stats.accept((byte) 10);
  * stats.accept((byte) 20);
  * stats.accept((byte) 30);
- * System.out.println("Count: " + stats.getCount());       // prints Count: 3
- * System.out.println("Average: " + stats.getAverage());   // prints Average: 20.0
+ * System.out.println("Count: " + stats.getCount());      // prints Count: 3
+ * System.out.println("Average: " + stats.getAverage());  // prints Average: 20.0
  * }</pre>
  *
  * @see ByteConsumer
@@ -159,8 +159,8 @@ public class ByteSummaryStatistics implements ByteConsumer {
      * stats2.accept((byte) 40);
      *
      * stats1.combine(stats2);
-     * System.out.println(stats1.getCount());   // prints 4
-     * System.out.println(stats1.getSum());     // prints 100
+     * System.out.println(stats1.getCount());  // prints 4
+     * System.out.println(stats1.getSum());    // prints 100
      * }</pre>
      *
      * @param other another {@code ByteSummaryStatistics} to combine with this one; must not be {@code null}

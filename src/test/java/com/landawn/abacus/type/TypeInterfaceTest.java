@@ -339,7 +339,7 @@ public class TypeInterfaceTest extends TestBase {
         assertThrows(IllegalArgumentException.class, () -> Type.ofSetMultimap(null, String.class));
         assertThrows(IllegalArgumentException.class, () -> Type.ofSetMultimap(String.class, null));
         final IllegalArgumentException error = assertThrows(IllegalArgumentException.class, () -> Type.ofList(null));
-        assertTrue(error.getMessage().contains("eleClass"), error.getMessage());
+        assertTrue(error.getMessage().contains("elementClass"), error.getMessage());
         // the happy path is unchanged
         assertEquals(java.util.List.of("a"), Type.ofList(String.class).valueOf("[\"a\"]"));
         assertEquals(java.util.Map.of("k", 1), Type.ofMap(String.class, Integer.class).valueOf("{\"k\": 1}"));

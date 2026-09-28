@@ -53,11 +53,11 @@ public interface ShortNFunction<R> extends Throwables.ShortNFunction<R, RuntimeE
      * Short result2 = max.apply((short) 5, (short) 2, (short) 8, (short) 1);   // returns 8
      * }</pre>
      *
-     * @param args the function arguments as a variable-length array of short values
+     * @param arguments the function arguments as a variable-length array of short values
      * @return the function result
      */
     @Override
-    R apply(short... args);
+    R apply(short... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies

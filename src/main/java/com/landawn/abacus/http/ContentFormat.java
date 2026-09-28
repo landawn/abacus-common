@@ -34,8 +34,8 @@ package com.landawn.abacus.http;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * ContentFormat format = ContentFormat.JSON_GZIP;
- * String contentType = format.contentType();    // returns "application/json"
- * String encoding = format.contentEncoding();   // returns "gzip"
+ * String contentType = format.contentType();   // returns "application/json"
+ * String encoding = format.contentEncoding();  // returns "gzip"
  * }</pre>
  *
  * @see HttpUtil#getContentFormat(String, String)
@@ -94,9 +94,9 @@ public enum ContentFormat {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String json = ContentFormat.JSON_GZIP.contentType();   // returns "application/json"
-     * String xml = ContentFormat.XML.contentType();          // returns "application/xml"
-     * String none = ContentFormat.GZIP.contentType();        // returns "" (compression-only format)
+     * String json = ContentFormat.JSON_GZIP.contentType();  // returns "application/json"
+     * String xml = ContentFormat.XML.contentType();         // returns "application/xml"
+     * String none = ContentFormat.GZIP.contentType();       // returns "" (compression-only format)
      * }</pre>
      *
      * @return the content type string, or an empty string if not applicable
@@ -114,9 +114,9 @@ public enum ContentFormat {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String gzip = ContentFormat.JSON_GZIP.contentEncoding();   // returns "gzip"
-     * String br = ContentFormat.XML_BR.contentEncoding();        // returns "br"
-     * String none = ContentFormat.JSON.contentEncoding();        // returns "" (no compression)
+     * String gzip = ContentFormat.JSON_GZIP.contentEncoding();  // returns "gzip"
+     * String br = ContentFormat.XML_BR.contentEncoding();       // returns "br"
+     * String none = ContentFormat.JSON.contentEncoding();       // returns "" (no compression)
      * }</pre>
      *
      * @return the content encoding string, or an empty string if no compression is used

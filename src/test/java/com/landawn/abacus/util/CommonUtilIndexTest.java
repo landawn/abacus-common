@@ -426,4 +426,12 @@ public class CommonUtilIndexTest extends CommonUtilTestSupport {
         Assertions.assertEquals(4, CommonUtil.indexOfIgnoreCase(arr, "C", 3));
         Assertions.assertEquals(-1, CommonUtil.indexOfIgnoreCase(arr, "C", 10));
     }
+
+
+    @Test
+    public void testIndexOfIteratorTreatsNegativeFromIndexAsZero() {
+        assertEquals(1, CommonUtil.indexOf(Arrays.asList(1, 2, 3, 2).iterator(), 2, -3));
+        assertEquals(0, CommonUtil.indexOf(Arrays.asList(1, 2, 3, 2).iterator(), 1, Integer.MIN_VALUE));
+        assertEquals(3, CommonUtil.indexOf(Arrays.asList(1, 2, 3, 2).iterator(), 2, 2));
+    }
 }

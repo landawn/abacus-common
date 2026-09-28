@@ -275,7 +275,7 @@ public class EnumerationsTest extends TestBase {
         assertEquals(List.of("a", "b"), vector);
         assertEquals(List.of("only"), Enumerations.toCollection(Enumerations.just("only"), ArrayList::new));
         assertThrows(IllegalArgumentException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, null));
-        assertThrows(IllegalArgumentException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, () -> null));
+        assertThrows(NullPointerException.class, () -> Enumerations.<String, ArrayList<String>> toCollection(null, () -> null));
     }
 
     // Finding 134 (2026-09-08): "supplier result" contains a space and is longer than 9 characters, so
@@ -287,7 +287,7 @@ public class EnumerationsTest extends TestBase {
                 () -> Enumerations.<String, ArrayList<String>> toCollection(Enumerations.of("a"), null));
         assertEquals("'supplier' cannot be null", missingSupplier.getMessage());
 
-        final IllegalArgumentException nullCollection = assertThrows(IllegalArgumentException.class,
+        final NullPointerException nullCollection = assertThrows(NullPointerException.class,
                 () -> Enumerations.<String, ArrayList<String>> toCollection(Enumerations.of("a"), () -> null));
         assertEquals("supplier returned null", nullCollection.getMessage());
     }

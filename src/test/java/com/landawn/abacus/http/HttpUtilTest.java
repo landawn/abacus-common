@@ -1289,4 +1289,19 @@ public class HttpUtilTest extends TestBase {
         assertEquals(Charsets.UTF_8, HttpUtil.getCharset("text/plain; x-" + dottedI + "-charset=UTF-16", Charsets.UTF_8));
     }
 
+    @Test
+    public void testHeaderReadersOnSettingsDoNotCreateHeaders() {
+        final HttpSettings settings = HttpSettings.create();
+
+        assertNull(HttpUtil.getContentType(settings));
+        assertNull(HttpUtil.getContentEncoding(settings));
+        assertNull(HttpUtil.getAccept(settings));
+        assertNull(HttpUtil.getAcceptEncoding(settings));
+        assertNull(HttpUtil.getAcceptCharset(settings));
+
+        // A pure read must not install an empty headers object on the settings: that would flip
+        // getContentFormat() from null to NONE and change toString().
+        assertNull(settings.getContentFormat());
+        assertTrue(settings.toString().contains("headers=null"), settings.toString());
+    }
 }

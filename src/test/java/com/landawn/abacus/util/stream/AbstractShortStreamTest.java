@@ -973,4 +973,56 @@ public class AbstractShortStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
                 () -> createShortStream(new short[] { 1, 2, 3 }).debounce(com.landawn.abacus.util.Duration.ofMillis(-100)).toArray());
     }
+
+    // ---- perf review 2026-09-26 G086 begin ----
+    // G086-02: rotated() nextShort()/toArray() replaced the per-element modulo with a conditional subtraction and two bulk copies.
+    @Test
+    public void testRotated_nextAndToArrayMatchModuloOracle() {
+        final int[] distances = { 0, 1, 2, 3, 5, 7, 8, 13, -1, -2, -3, -7, -8, -13, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE + 1 };
+
+        for (int len = 0; len <= 8; len++) {
+            final int from = 2;
+            final short[] backing = new short[len + 5];
+
+            for (int i = 0; i < backing.length; i++) {
+                backing[i] = (short) (i * 10 - 7);
+            }
+
+            for (final int distance : distances) {
+                final short[] expected = new short[len];
+
+                for (int i = 0; i < len; i++) {
+                    expected[i] = backing[from + (int) Math.floorMod((long) i - distance, (long) len)];
+                }
+
+                for (int source = 0; source < 2; source++) {
+                    final String msg = "len=" + len + ", distance=" + distance + ", source=" + source;
+                    final short[] copy = Arrays.copyOfRange(backing, from, from + len);
+
+                    // full toArray()
+                    assertArrayEquals(expected,
+                            (source == 0 ? ShortStream.of(backing, from, from + len) : ShortStream.of(ShortIterator.of(copy))).rotated(distance).toArray(), msg);
+
+                    // nextShort() for the first k elements, then toArray(); advance(k), then toArray()
+                    for (int k = 0; k <= len + 1; k++) {
+                        final ShortIteratorEx byNext = (ShortIteratorEx) (source == 0 ? ShortStream.of(backing, from, from + len)
+                                : ShortStream.of(ShortIterator.of(copy))).rotated(distance).iteratorEx();
+
+                        for (int j = 0; j < Math.min(k, len); j++) {
+                            assertEquals(expected[j], byNext.nextShort(), msg + ", k=" + k + ", j=" + j);
+                        }
+
+                        assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byNext.toArray(), msg + ", k=" + k);
+                        assertFalse(byNext.hasNext(), msg);
+
+                        final ShortIteratorEx byAdvance = (ShortIteratorEx) (source == 0 ? ShortStream.of(backing, from, from + len)
+                                : ShortStream.of(ShortIterator.of(copy))).rotated(distance).iteratorEx();
+                        byAdvance.advance(k);
+                        assertArrayEquals(Arrays.copyOfRange(expected, Math.min(k, len), len), byAdvance.toArray(), msg + ", advance=" + k);
+                    }
+                }
+            }
+        }
+    }
+    // ---- perf review 2026-09-26 G086 end ----
 }

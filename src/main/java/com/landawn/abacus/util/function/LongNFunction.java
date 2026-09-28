@@ -68,13 +68,13 @@ public interface LongNFunction<R> extends Throwables.LongNFunction<R, RuntimeExc
      * Double avg = average.apply(10L, 20L, 30L, 40L);   // Returns 25.0
      * }</pre>
      *
-     * @param args the function arguments as a varargs array. Can be empty, contain
+     * @param arguments the function arguments as a varargs array. Can be empty, contain
      *             a single value, or multiple values. The array should not be
      *             modified by the implementation
      * @return the function result of type R
      */
     @Override
-    R apply(long... args);
+    R apply(long... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input,

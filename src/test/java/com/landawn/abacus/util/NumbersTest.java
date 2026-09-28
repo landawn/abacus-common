@@ -500,4 +500,56 @@ public class NumbersTest extends NumbersTestSupport {
         assertThrows(ArithmeticException.class, () -> Numbers.convert(Double.NaN, Type.of(BigDecimal.class)));
         assertTrue(Double.isNaN(Numbers.convert(Double.NaN, Type.of(Double.class))));
     }
+
+    // ---- perf review 2026-09-26 G060 begin ----
+
+    // G060-01: the integral-float fast path of the Float -> double decimal widening must equal the string round trip bit for bit.
+    @Test
+    public void testToDouble_floatIntegralFastPathMatchesDecimalRoundTrip() {
+        final List<Float> values = new ArrayList<>();
+        final float[] specials = { 0.0f, -0.0f, 1.0f, -1.0f, 7.0f, 100.0f, 1e7f, -1e7f, 9999999.0f, 12345678.0f, 0x1p24f - 1, 0x1p24f, -0x1p24f,
+                -(0x1p24f - 1), 0x1p24f + 2, -(0x1p24f + 2), 0x1p25f, 0x1p31f, -0x1p31f, 0x1p40f, 3.0e9f, Float.MAX_VALUE, -Float.MAX_VALUE,
+                Float.MIN_VALUE, -Float.MIN_VALUE, Float.MIN_NORMAL, 0.5f, -0.5f, 1.21f, 0.1f, -2.5f, 16777215.5f, 1234.5f, Float.NaN,
+                Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY };
+
+        for (final float f : specials) {
+            values.add(f);
+        }
+
+        for (int i = -(1 << 24) - 64; i <= -(1 << 24) + 64; i++) {
+            values.add((float) i);
+        }
+
+        for (int i = (1 << 24) - 64; i <= (1 << 24) + 64; i++) {
+            values.add((float) i);
+        }
+
+        final Random random = new Random(20260926L);
+
+        for (int i = 0; i < 20000; i++) {
+            values.add((float) (random.nextInt(1 << 26) - (1 << 25)));
+            values.add(Float.intBitsToFloat(random.nextInt()));
+        }
+
+        for (final Float boxed : values) {
+            final float f = boxed;
+            final long expected = Double.doubleToRawLongBits(Double.parseDouble(Float.toString(f)));
+            final String label = Float.toString(f);
+
+            assertEquals(expected, Double.doubleToRawLongBits(Numbers.toDouble(boxed)), label);
+            assertEquals(expected, Double.doubleToRawLongBits(Numbers.toDouble(boxed, 99.0d)), label);
+            assertEquals(expected, Double.doubleToRawLongBits(Numbers.convert(boxed, Double.class)), label);
+            assertEquals(expected, Double.doubleToRawLongBits(Numbers.convert(boxed, double.class)), label);
+            assertEquals(expected, Double.doubleToRawLongBits(Numbers.convert(boxed, Type.of(Double.class))), label);
+        }
+
+        // Spot checks with literal expectations.
+        assertEquals(Double.doubleToRawLongBits(-0.0d), Double.doubleToRawLongBits(Numbers.toDouble(Float.valueOf(-0.0f))));
+        assertEquals(16777216.0d, Numbers.toDouble(Float.valueOf(0x1p24f)), 0.0d);
+        assertEquals(1.21d, Numbers.toDouble(Float.valueOf(1.21f)), 0.0d);
+        assertEquals(3.4028235E38d, Numbers.toDouble(Float.valueOf(Float.MAX_VALUE)), 0.0d);
+        assertTrue(Double.isNaN(Numbers.toDouble(Float.valueOf(Float.NaN))));
+    }
+
+    // ---- perf review 2026-09-26 G060 end ----
 }

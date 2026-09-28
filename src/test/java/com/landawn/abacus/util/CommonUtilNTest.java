@@ -367,7 +367,7 @@ public class CommonUtilNTest extends TestBase {
         assertTrue(N.retainAll(subject, caseInsensitive));
         assertEquals(Arrays.asList("a"), subject, "a Set argument must keep deciding membership itself");
 
-        // small inputs (both sizes <= 9) still bypass the copy and behave identically
+        // small inputs are hashed too (C-237, 2026-09-24: no size seam any more) and behave identically
         final List<Integer> small = new ArrayList<>(Arrays.asList(1, 2, 3));
         assertTrue(N.retainAll(small, Arrays.asList(3)));
         assertEquals(Arrays.asList(3), small);
@@ -443,7 +443,8 @@ public class CommonUtilNTest extends TestBase {
         rowsOfA.add(new Object[] { "a", 1 });
 
         final Dataset a = CommonUtil.newDataset(columnNames, rowsOfA);
-        // Rows 0 and 1 land two buffers in the multiset; row 2 borrows a third and then explodes while being hashed.
+        // Rows 0 and 1 land two key arrays in the multiset (plain arrays: stored keys are not taken from the pool);
+        // row 2 then explodes while being hashed, and the finally block must still hand its scratch buffer back.
         final List<Object> rowsOfB = new ArrayList<>();
         rowsOfB.add(new Object[] { "x", 1 });
         rowsOfB.add(new Object[] { "y", 2 });
@@ -456,7 +457,7 @@ public class CommonUtilNTest extends TestBase {
 
         assertThrows(IllegalStateException.class, () -> N.difference(a, b, columnNames));
 
-        assertTrue(pooledObjectArrayCount(2) >= 3, "every borrowed Object[] should be back in the pool, found " + pooledObjectArrayCount(2));
+        assertTrue(pooledObjectArrayCount(2) >= 1, "the scratch Object[] should be back in the pool, found " + pooledObjectArrayCount(2));
     }
 
     @Test
@@ -479,8 +480,8 @@ public class CommonUtilNTest extends TestBase {
 
         assertThrows(IllegalStateException.class, () -> N.difference(a, b, columnNames));
 
-        // two arrays are held by the multiset snapshot, one is the scan-loop scratch buffer
-        assertTrue(pooledObjectArrayCount(2) >= 3, "every borrowed Object[] should be back in the pool, found " + pooledObjectArrayCount(2));
+        // the stored keys are plain arrays; the only pooled array is the scan-loop scratch buffer, which must come back
+        assertTrue(pooledObjectArrayCount(2) >= 1, "the scan-loop scratch Object[] should be back in the pool, found " + pooledObjectArrayCount(2));
     }
 
     @Test
@@ -891,5 +892,37 @@ public class CommonUtilNTest extends TestBase {
         } catch (final NoSuchElementException e) {
             org.junit.jupiter.api.Assertions.fail("skip loop must be guarded by hasNext(): " + e);
         }
+    }
+
+
+    @Test
+    public void testEnumListOfAndEnumSetOf_constantBodyClassResolvesToDeclaringEnum() {
+        enum Op {
+            PLUS {
+                @Override
+                int apply(final int x, final int y) {
+                    return x + y;
+                }
+            },
+            MINUS {
+                @Override
+                int apply(final int x, final int y) {
+                    return x - y;
+                }
+            };
+
+            abstract int apply(int x, int y);
+        }
+
+        final Class<? extends Op> bodyClass = Op.PLUS.getClass();
+        assertFalse(bodyClass.isEnum());
+
+        assertEquals(Arrays.asList(Op.PLUS, Op.MINUS), CommonUtil.enumListOf(bodyClass));
+        assertSame(CommonUtil.enumListOf(Op.class), CommonUtil.enumListOf(bodyClass));
+
+        assertEquals(2, CommonUtil.enumSetOf(bodyClass).size());
+        assertTrue(CommonUtil.enumSetOf(bodyClass).contains(Op.MINUS));
+        assertSame(CommonUtil.enumSetOf(Op.class), CommonUtil.enumSetOf(bodyClass));
+        assertEquals(3, Op.PLUS.apply(1, 2));
     }
 }

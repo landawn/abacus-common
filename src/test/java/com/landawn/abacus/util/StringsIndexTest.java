@@ -106,8 +106,8 @@ public class StringsIndexTest extends StringsTestSupport {
 
     @Test
     public void testIndexOf_WithDelimiterAndFromIndex_ExtendedCoverage() {
-        // empty delimiter falls back to simple indexOf
-        assertEquals(2, StrUtil.indexOfToken("a,b,c", "b", "", 0));
+        // C-538: an empty delimiter is rejected (a plain search is Strings.indexOf)
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfToken("a,b,c", "b", "", 0));
 
         // with delimiter, value found at start boundary
         assertEquals(2, StrUtil.indexOfToken("a,b,c", "b", ",", 0));
@@ -392,7 +392,7 @@ public class StringsIndexTest extends StringsTestSupport {
         Assertions.assertEquals(-1, StrUtil.indexOfTokenIgnoreCase(null, "test", ","));
         Assertions.assertEquals(-1, StrUtil.indexOfTokenIgnoreCase("test", null, ","));
 
-        Assertions.assertEquals(0, StrUtil.indexOfTokenIgnoreCase("test", "test", ""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfTokenIgnoreCase("test", "test", "")); // C-538
 
         Assertions.assertEquals(-1, StrUtil.indexOfTokenIgnoreCase("apple banana", "apple", ","));
     }
@@ -456,11 +456,11 @@ public class StringsIndexTest extends StringsTestSupport {
 
     @Test
     public void testIndexOfIgnoreCase_WithDelimiterAndFromIndex_FullCoverage() {
-        // null delimiter (delegates to no-delimiter version)
-        assertEquals(0, StrUtil.indexOfTokenIgnoreCase("apple,APPLE,banana", "APPLE", (String) null, 0));
+        // C-538: a null delimiter is rejected
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfTokenIgnoreCase("apple,APPLE,banana", "APPLE", (String) null, 0));
 
-        // empty delimiter
-        assertEquals(0, StrUtil.indexOfTokenIgnoreCase("apple,APPLE,banana", "APPLE", "", 0));
+        // C-538: an empty delimiter is rejected
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfTokenIgnoreCase("apple,APPLE,banana", "APPLE", "", 0));
 
         // with delimiter, found at start
         assertEquals(0, StrUtil.indexOfTokenIgnoreCase("apple,APPLE,banana", "apple", ",", 0));
@@ -636,11 +636,11 @@ public class StringsIndexTest extends StringsTestSupport {
         // a plain search does find it
         assertEquals(2, Strings.indexOf("x,a,b,y", "a,b"));
 
-        // the rule is scoped to a non-empty delimiter: an empty or null delimiter delegates to a plain search
-        assertEquals(2, StrUtil.indexOfToken("x,a,b,y", "a,b", ""));
-        assertEquals(2, StrUtil.indexOfToken("x,a,b,y", "a,b", null));
-        assertEquals(2, StrUtil.indexOfTokenIgnoreCase("x,a,b,y", "A,B", ""));
-        assertEquals(2, StrUtil.indexOfTokenIgnoreCase("x,a,b,y", "A,B", null));
+        // C-538: an empty or null delimiter is rejected instead of degrading to a plain search
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfToken("x,a,b,y", "a,b", ""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfToken("x,a,b,y", "a,b", null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfTokenIgnoreCase("x,a,b,y", "A,B", ""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfTokenIgnoreCase("x,a,b,y", "A,B", null));
 
         // the containment test of the IgnoreCase overloads is itself case-insensitive
         assertEquals(4, StrUtil.indexOfToken("pANDxandyANDq", "xandy", "AND"));

@@ -197,9 +197,10 @@ public class CommonUtilSortTest extends CommonUtilTestSupport {
     /**
      * A partial-range sort of a {@code CopyOnWriteArrayList} must not throw.
      *
-     * <p>{@code CopyOnWriteArrayList} supports {@code set(int, E)} but not {@code listIterator().set(E)}, so the
-     * write-back has to be index-based for a {@code RandomAccess} list. A full-range sort never reached the
-     * write-back (it delegates to {@code list.sort}), which is why only the partial range used to fail.</p>
+     * <p>{@code CopyOnWriteArrayList} does not support {@code listIterator().set(E)}, which an element-wise write-back once
+     * used. Since 2026-09-24 (C-108) a range is sorted through {@code list.subList(from, to).sort(cmp)}, a single bulk
+     * write (one array copy on a copy-on-write list) instead of one {@code set} per element; a full-range sort delegates to
+     * {@code list.sort}.</p>
      */
     @Test
     public void testSort_PartialRangeOfCopyOnWriteArrayList() {

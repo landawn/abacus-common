@@ -934,7 +934,7 @@ class ArrayCharStream extends AbstractCharStream {
 
     /**
      * Returns a stream consisting of the distinct elements of this stream.
-     * Uses an optimized adjacent-check for sorted streams, or a hash set otherwise.
+     * Uses an optimized adjacent-check for sorted streams, or a presence bitset of seen values otherwise.
      *
      * @return a new {@code CharStream} without duplicate elements
      * @throws IllegalStateException if the stream is already closed
@@ -971,10 +971,35 @@ class ArrayCharStream extends AbstractCharStream {
                 }
             }, isSorted());
         } else {
-            final Set<Object> set = N.newHashSet();
+            /*
+             * Tracks seen values in a presence bitset over the char domain instead of a HashSet of boxed
+             * Characters: no boxing or hashing per element, and at most 8 KB instead of up to 65536 set entries.
+             * The bitset starts at 128 bits and grows on demand, so ASCII-only input keeps it tiny.
+             */
+            final CharPredicate firstOccurrence = new CharPredicate() {
+                private long[] seen = new long[2];
+
+                @Override
+                public boolean test(final char value) {
+                    final int wordIndex = value >>> 6;
+
+                    if (wordIndex >= seen.length) {
+                        seen = N.copyOf(seen, Math.min(1024, Math.max(wordIndex + 1, seen.length * 2)));
+                    }
+
+                    final long bit = 1L << value;
+
+                    if ((seen[wordIndex] & bit) != 0) {
+                        return false;
+                    }
+
+                    seen[wordIndex] |= bit;
+                    return true;
+                }
+            };
 
             // noinspection resource
-            return newStream(sequential().filter(set::add).iteratorEx(), isSorted());
+            return newStream(sequential().filter(firstOccurrence).iteratorEx(), isSorted());
         }
     }
 
@@ -1090,6 +1115,9 @@ class ArrayCharStream extends AbstractCharStream {
             for (int i = fromIndex; i < toIndex; i++) {
                 action.accept(elements[i]);
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1108,6 +1136,12 @@ class ArrayCharStream extends AbstractCharStream {
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1127,6 +1161,9 @@ class ArrayCharStream extends AbstractCharStream {
 
         try {
             return CharList.of(N.copyOfRange(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1150,6 +1187,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1167,13 +1207,17 @@ class ArrayCharStream extends AbstractCharStream {
         assertNotClosed();
 
         try {
-            final Set<Character> result = N.newHashSet(toIndex - fromIndex);
+            // Repeated input values cannot exceed the primitive type's finite distinct-value domain.
+            final Set<Character> result = N.newHashSet(Math.min(toIndex - fromIndex, 65536));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1187,21 +1231,26 @@ class ArrayCharStream extends AbstractCharStream {
      * @return the collection populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public <C extends Collection<Character>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Character>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1225,6 +1274,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1237,21 +1289,26 @@ class ArrayCharStream extends AbstractCharStream {
      * @return the {@code Multiset<Character>} populated with all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
-    public Multiset<Character> toMultiset(final Supplier<? extends Multiset<Character>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Character> toMultiset(final Supplier<? extends Multiset<Character>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Character> result = supplier.get();
+            final Multiset<Character> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1274,13 +1331,14 @@ class ArrayCharStream extends AbstractCharStream {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if {@code keyMapper} throws
      * @throws E2 if {@code valueMapper} throws
      */
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.CharFunction<? extends K, E> keyMapper,
             final Throwables.CharFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1289,13 +1347,16 @@ class ArrayCharStream extends AbstractCharStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 Collectors.merge(result, keyMapper.apply(elements[i]), valueMapper.apply(elements[i]), mergeFunction);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1313,14 +1374,14 @@ class ArrayCharStream extends AbstractCharStream {
      * @param mapFactory supplier that creates a new, empty map of the desired type
      * @return a map from group key to downstream collection result
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}, or
-     *         {@code keyMapper} returns a {@code null} key.
+     * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream} or {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} or {@code keyMapper} returns a {@code null} key.
      * @throws E if {@code keyMapper} throws
      */
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.CharFunction<? extends K, E> keyMapper,
             final Collector<? super Character, ?, D> downstream, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1328,7 +1389,7 @@ class ArrayCharStream extends AbstractCharStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Character> downstreamAccumulator = (BiConsumer<Object, ? super Character>) downstream.accumulator();
@@ -1339,7 +1400,7 @@ class ArrayCharStream extends AbstractCharStream {
             Object v = null;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                key = checkArgNotNull(keyMapper.apply(elements[i]), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(elements[i]), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1354,6 +1415,9 @@ class ArrayCharStream extends AbstractCharStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1371,6 +1435,9 @@ class ArrayCharStream extends AbstractCharStream {
 
         try {
             return fromIndex < toIndex ? OptionalChar.of(elements[fromIndex]) : OptionalChar.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1388,6 +1455,9 @@ class ArrayCharStream extends AbstractCharStream {
 
         try {
             return fromIndex < toIndex ? OptionalChar.of(elements[toIndex - 1]) : OptionalChar.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1412,6 +1482,9 @@ class ArrayCharStream extends AbstractCharStream {
             } else {
                 return OptionalChar.empty();
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1440,6 +1513,9 @@ class ArrayCharStream extends AbstractCharStream {
             } else {
                 throw new TooManyElementsException("There are at least two elements: " + Strings.concat(elements[fromIndex], ", ", elements[fromIndex + 1]));
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1469,6 +1545,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1502,6 +1581,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1521,12 +1603,13 @@ class ArrayCharStream extends AbstractCharStream {
      * @param combiner a function that combines two partial containers (used in parallel; ignored here)
      * @return the populated result container
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
-     *         {@code null}.
+     * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjCharConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1534,13 +1617,16 @@ class ArrayCharStream extends AbstractCharStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 accumulator.accept(result, elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1566,6 +1652,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.of(N.min(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1591,6 +1680,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.of(N.max(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1620,6 +1712,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.of(N.kthLargest(elements, fromIndex, toIndex, k));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1639,6 +1734,9 @@ class ArrayCharStream extends AbstractCharStream {
 
         try {
             return sum(elements, fromIndex, toIndex);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1670,6 +1768,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return OptionalDouble.of(((double) sum) / (toIndex - fromIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1688,6 +1789,9 @@ class ArrayCharStream extends AbstractCharStream {
 
         try {
             return toIndex - fromIndex; //NOSONAR
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1712,6 +1816,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1742,6 +1849,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return false;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1773,6 +1883,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return true;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1804,6 +1917,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return true;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1835,6 +1951,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1866,6 +1985,9 @@ class ArrayCharStream extends AbstractCharStream {
             }
 
             return OptionalChar.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

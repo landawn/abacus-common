@@ -617,4 +617,39 @@ public class JsonStreamReaderTest extends TestBase {
         }
     }
 
+
+    @Test
+    public void testUnquotedTokenStartingWithEscapeSplitAcrossReadBufferBoundary() {
+        // An unquoted token that starts with an escape has no buffered text when the escape is decoded. When a
+        // refill split the escape, the raw, partially consumed escape was copied into the token text in front of
+        // the decoded character (or overran the token buffer). The string reader is the reference.
+        final String json = "[\\u0041, \\u00e9x, {\\u006b: \\u0031}, \"\\u0042\"]";
+        final List<String> expected = N.asList("A", String.valueOf((char) 0xe9) + "x", "k", "1", "B");
+
+        final JsonReader stringReader = JsonStringReader.parse(json, new char[1]);
+        final List<String> reference = new ArrayList<>();
+
+        for (int token = stringReader.nextToken(); token != JsonReader.EOF; token = stringReader.nextToken()) {
+            if (stringReader.hasText()) {
+                reference.add(stringReader.getText());
+            }
+        }
+
+        assertEquals(expected, reference);
+
+        for (int rbufSize = 1; rbufSize <= 12; rbufSize++) {
+            for (int cbufSize = 0; cbufSize <= 2; cbufSize++) {
+                final JsonReader streamReader = JsonStreamReader.parse(new StringReader(json), new char[rbufSize], new char[cbufSize]);
+                final List<String> texts = new ArrayList<>();
+
+                for (int token = streamReader.nextToken(); token != JsonReader.EOF; token = streamReader.nextToken()) {
+                    if (streamReader.hasText()) {
+                        texts.add(streamReader.getText());
+                    }
+                }
+
+                assertEquals(expected, texts, "rbuf=" + rbufSize + ", cbuf=" + cbufSize);
+            }
+        }
+    }
 }

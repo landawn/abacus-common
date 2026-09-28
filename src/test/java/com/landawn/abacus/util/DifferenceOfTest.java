@@ -182,4 +182,179 @@ public class DifferenceOfTest extends DifferenceTestSupport {
         assertEquals(Arrays.asList("a", "b"), Difference.of(objects, (String[]) null).onlyOnLeft());
         assertEquals(Arrays.asList("a", "b"), Difference.of((String[]) null, objects).onlyOnRight());
     }
+
+    // ---- perf review 2026-09-26 G032 begin ----
+    private static <T> void assertSameDifferenceAsCollections(final List<T> left, final List<T> right,
+            final Difference<? extends PrimitiveList<?, ?, ?>, ? extends PrimitiveList<?, ?, ?>> actual) {
+        final Difference<List<T>, List<T>> expected = Difference.of(left, right);
+        assertEquals(expected.common(), actual.common().boxed());
+        assertEquals(expected.onlyOnLeft(), actual.onlyOnLeft().boxed());
+        assertEquals(expected.onlyOnRight(), actual.onlyOnRight().boxed());
+        assertEquals(expected.areEqual(), actual.areEqual());
+    }
+
+    // G032-01: boolean occurrence counting without a Multiset - same partition as the Collection overload
+    @Test
+    public void testOfBooleanList_countingMatchesCollectionOverload() {
+        final boolean[][] samples = { {}, { true }, { false }, { true, true, true }, { false, false }, { true, false, true, false, false },
+                { false, true, true } };
+
+        for (final boolean[] x : samples) {
+            for (final boolean[] y : samples) {
+                final BooleanList a = BooleanList.of(x);
+                final BooleanList b = BooleanList.of(y);
+                assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
+            }
+        }
+
+        final java.util.Random random = new java.util.Random(32);
+
+        for (int round = 0; round < 200; round++) {
+            final BooleanList a = new BooleanList();
+            final BooleanList b = new BooleanList();
+
+            for (int i = random.nextInt(20); i > 0; i--) {
+                a.add(random.nextInt(4) == 0);
+            }
+
+            for (int i = random.nextInt(20); i > 0; i--) {
+                b.add(random.nextBoolean());
+            }
+
+            assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
+        }
+    }
+
+    // G032-01: byte occurrence counting indexed by the unsigned value - negative bytes and extremes included
+    @Test
+    public void testOfByteList_countingMatchesCollectionOverload() {
+        final ByteList extremes = ByteList.of(Byte.MIN_VALUE, (byte) -1, (byte) 0, (byte) 1, Byte.MAX_VALUE, (byte) -1, Byte.MIN_VALUE);
+        final ByteList other = ByteList.of((byte) -1, Byte.MAX_VALUE, (byte) 5, Byte.MIN_VALUE, (byte) -1, (byte) -1);
+        assertSameDifferenceAsCollections(extremes.boxed(), other.boxed(), Difference.of(extremes, other));
+        assertSameDifferenceAsCollections(other.boxed(), extremes.boxed(), Difference.of(other, extremes));
+        assertSameDifferenceAsCollections(extremes.boxed(), extremes.boxed(), Difference.of(extremes, extremes.copy()));
+
+        final Difference<ByteList, ByteList> diff = Difference.of(ByteList.of((byte) -128, (byte) 127, (byte) -128), ByteList.of((byte) 127, (byte) -128));
+        assertEquals(ByteList.of((byte) -128, (byte) 127), diff.common());
+        assertEquals(ByteList.of((byte) -128), diff.onlyOnLeft());
+        assertTrue(diff.onlyOnRight().isEmpty());
+
+        final java.util.Random random = new java.util.Random(33);
+
+        for (int round = 0; round < 200; round++) {
+            final ByteList a = new ByteList();
+            final ByteList b = new ByteList();
+            final int spread = 1 + random.nextInt(256);
+
+            for (int i = random.nextInt(30); i > 0; i--) {
+                a.add((byte) (random.nextInt(spread) - 128));
+            }
+
+            for (int i = random.nextInt(30); i > 0; i--) {
+                b.add((byte) (random.nextInt(spread) - 128));
+            }
+
+            assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
+        }
+    }
+
+    // G032-01: char counting-array path (dense range; left values below/above the right-hand range) and Multiset fallback (sparse range)
+    @Test
+    public void testOfCharList_countingMatchesCollectionOverload() {
+        final CharList dense = CharList.of('a', 'c', 'e', 'c', 'a');
+        final CharList probe = CharList.of('0', 'a', 'z', 'c', 'c', 'c', (char) 0, (char) 0xFFFF, 'e');
+        assertSameDifferenceAsCollections(probe.boxed(), dense.boxed(), Difference.of(probe, dense));
+        assertSameDifferenceAsCollections(dense.boxed(), probe.boxed(), Difference.of(dense, probe));
+
+        // two values 65535 apart in a two-element list: Multiset fallback
+        final CharList sparse = CharList.of((char) 0, (char) 0xFFFF);
+        final CharList sparseLeft = CharList.of((char) 0xFFFF, 'x', (char) 0, (char) 0);
+        final Difference<CharList, CharList> sparseDiff = Difference.of(sparseLeft, sparse);
+        assertEquals(CharList.of((char) 0xFFFF, (char) 0), sparseDiff.common());
+        assertEquals(CharList.of('x', (char) 0), sparseDiff.onlyOnLeft());
+        assertTrue(sparseDiff.onlyOnRight().isEmpty());
+        assertSameDifferenceAsCollections(sparseLeft.boxed(), sparse.boxed(), sparseDiff);
+        assertSameDifferenceAsCollections(sparse.boxed(), sparseLeft.boxed(), Difference.of(sparse, sparseLeft));
+
+        // threshold boundary for a small list: a range of exactly 256 values (counting array) and 257 values (Multiset)
+        final CharList range256 = CharList.of((char) 1000, (char) 1255, (char) 1000);
+        final CharList range257 = CharList.of((char) 1000, (char) 1256, (char) 1256);
+        final CharList mixed = CharList.of((char) 1256, (char) 1000, (char) 999, (char) 1255, (char) 1257, (char) 1000, (char) 1000);
+        assertSameDifferenceAsCollections(mixed.boxed(), range256.boxed(), Difference.of(mixed, range256));
+        assertSameDifferenceAsCollections(mixed.boxed(), range257.boxed(), Difference.of(mixed, range257));
+
+        final java.util.Random random = new java.util.Random(34);
+
+        for (int round = 0; round < 300; round++) {
+            final CharList a = new CharList();
+            final CharList b = new CharList();
+            final int spread = round % 3 == 0 ? 65536 : 1 + random.nextInt(round % 3 == 1 ? 40 : 600);
+            final int base = random.nextInt(65536 - spread + 1);
+
+            for (int i = random.nextInt(40); i > 0; i--) {
+                a.add((char) (base + random.nextInt(spread)));
+            }
+
+            for (int i = random.nextInt(40); i > 0; i--) {
+                b.add((char) (base + random.nextInt(spread)));
+            }
+
+            assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
+        }
+    }
+
+    // G032-01: short counting-array path (negative values, extremes, size-widened threshold) and Multiset fallback (sparse range)
+    @Test
+    public void testOfShortList_countingMatchesCollectionOverload() {
+        final ShortList dense = ShortList.of((short) -3, (short) 0, (short) 4, (short) -3, (short) 4, (short) 4);
+        final ShortList probe = ShortList.of((short) 4, (short) -4, (short) 5, (short) -3, (short) 4, Short.MIN_VALUE, Short.MAX_VALUE, (short) 4,
+                (short) 4);
+        assertSameDifferenceAsCollections(probe.boxed(), dense.boxed(), Difference.of(probe, dense));
+        assertSameDifferenceAsCollections(dense.boxed(), probe.boxed(), Difference.of(dense, probe));
+
+        final ShortList sparse = ShortList.of(Short.MAX_VALUE, Short.MIN_VALUE, Short.MAX_VALUE);
+        final ShortList sparseLeft = ShortList.of(Short.MIN_VALUE, Short.MIN_VALUE, (short) 0, Short.MAX_VALUE);
+        final Difference<ShortList, ShortList> sparseDiff = Difference.of(sparseLeft, sparse);
+        assertEquals(ShortList.of(Short.MIN_VALUE, Short.MAX_VALUE), sparseDiff.common());
+        assertEquals(ShortList.of(Short.MIN_VALUE, (short) 0), sparseDiff.onlyOnLeft());
+        assertEquals(ShortList.of(Short.MAX_VALUE), sparseDiff.onlyOnRight());
+        assertSameDifferenceAsCollections(sparseLeft.boxed(), sparse.boxed(), sparseDiff);
+        assertSameDifferenceAsCollections(sparse.boxed(), sparseLeft.boxed(), Difference.of(sparse, sparseLeft));
+
+        // a right-hand list larger than 256 elements widens the dense threshold to its size
+        final ShortList large = new ShortList();
+
+        for (int i = 0; i < 1000; i++) {
+            large.add((short) ((i * 7) % 900 - 450));
+        }
+
+        final ShortList largeLeft = new ShortList();
+
+        for (int i = 0; i < 1200; i++) {
+            largeLeft.add((short) ((i * 11) % 1000 - 500));
+        }
+
+        assertSameDifferenceAsCollections(largeLeft.boxed(), large.boxed(), Difference.of(largeLeft, large));
+        assertSameDifferenceAsCollections(large.boxed(), largeLeft.boxed(), Difference.of(large, largeLeft));
+
+        final java.util.Random random = new java.util.Random(35);
+
+        for (int round = 0; round < 300; round++) {
+            final ShortList a = new ShortList();
+            final ShortList b = new ShortList();
+            final int spread = round % 3 == 0 ? 65536 : 1 + random.nextInt(round % 3 == 1 ? 40 : 600);
+            final int base = Short.MIN_VALUE + random.nextInt(65536 - spread + 1);
+
+            for (int i = random.nextInt(40); i > 0; i--) {
+                a.add((short) (base + random.nextInt(spread)));
+            }
+
+            for (int i = random.nextInt(40); i > 0; i--) {
+                b.add((short) (base + random.nextInt(spread)));
+            }
+
+            assertSameDifferenceAsCollections(a.boxed(), b.boxed(), Difference.of(a, b));
+        }
+    }
+    // ---- perf review 2026-09-26 G032 end ----
 }

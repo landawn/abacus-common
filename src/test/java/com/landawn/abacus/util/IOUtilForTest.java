@@ -783,4 +783,15 @@ public class IOUtilForTest extends IOUtilTestSupport {
 
         assertFalse(captured.toString().contains("Remember to close"), "forEachLine must not log a stream close-handler warning; captured: " + captured);
     }
+
+    @Test
+    public void testForEachLineCollectionWithOptionsRejectsNullElement() {
+        final List<String> seen = new ArrayList<>();
+        final List<File> files = Arrays.asList((File) null);
+
+        assertThrows(IllegalArgumentException.class, () -> IOUtil.forEachLine(files, IOUtil.LineIterationOptions.builder().build(), seen::add));
+        assertThrows(IllegalArgumentException.class,
+                () -> IOUtil.forEachLine(files, IOUtil.LineIterationOptions.builder().build(), seen::add, () -> seen.add("done")));
+        assertTrue(seen.isEmpty());
+    }
 }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringsSplitTest extends StringsTestSupport {
 
@@ -273,5 +274,22 @@ public class StringsSplitTest extends StringsTestSupport {
         assertNotEquals(substrs[0], substrs[1]);
         assertEquals(0, Strings.splitToLines("", false, true).length);
         assertEquals(0, Strings.splitToLines(null, false, true).length);
+    }
+
+
+    @Test
+    public void testSplit_delimiterValidatedBeforeMax() {
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.split("a", "", 0)).getMessage().contains("delimiter"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.split("a", null, 0, true)).getMessage().contains("delimiter"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.splitPreserveAllTokens("a", "", 0)).getMessage().contains("delimiter"));
+        assertTrue(assertThrows(IllegalArgumentException.class, () -> Strings.splitPreserveAllTokens("a", null, 0, false)).getMessage().contains("delimiter"));
+    }
+
+    @Test
+    public void testSplitOnWhitespace_maxKeepsWhitespaceAfterLastToken() {
+        assertArrayEquals(new String[] { "a", "b " }, Strings.splitOnWhitespace("a b ", 2));
+        assertArrayEquals(new String[] { "a " }, Strings.splitOnWhitespace("a ", 1));
+        assertArrayEquals(new String[] { "a", "b" }, Strings.splitOnWhitespace("a b", 2));
+        assertArrayEquals(new String[] { "a", "b:" }, Strings.split("a:b:", ':', 2));
     }
 }

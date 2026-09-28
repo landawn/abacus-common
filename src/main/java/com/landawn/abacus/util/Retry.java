@@ -191,7 +191,7 @@ public final class Retry<R> {
      *
      * <p><b>Interruption:</b> the delay between attempts is interruptible. If the calling thread is
      * interrupted before or during a delay, no further attempt is started, the thread's interrupted
-     * status is left set, and the last exception thrown by {@code cmd} is rethrown with the
+     * status is left set, and the last exception thrown by {@code command} is rethrown with the
      * {@link InterruptedException} attached to it as a suppressed exception. A cancelled caller
      * therefore never has to wait out the remaining {@code retryTimes * retryIntervalInMillis}.</p>
      *
@@ -205,21 +205,21 @@ public final class Retry<R> {
      * retry.run(() -> performNetworkOperation());
      * }</pre>
      *
-     * @param cmd the runnable operation to execute
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @param command the runnable operation to execute
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @throws RuntimeException if a configured retry predicate throws a runtime exception; predicate
      *         failures are propagated immediately, with the operation's own exception attached to them as a
      *         suppressed exception so it is not lost
-     * @throws Exception the exception thrown by {@code cmd} if the retry condition is not satisfied,
+     * @throws Exception the exception thrown by {@code command} if the retry condition is not satisfied,
      *                   or the last exception thrown if all retry attempts are exhausted (or if the
      *                   thread was interrupted before the retries were exhausted).
      */
-    public void run(final Throwables.Runnable<? extends Exception> cmd) throws IllegalArgumentException, RuntimeException, Exception {
-        N.checkArgNotNull(cmd, cs.cmd);
+    public void run(final Throwables.Runnable<? extends Exception> command) throws IllegalArgumentException, RuntimeException, Exception {
+        N.checkArgNotNull(command, cs.command);
 
         if (retryTimes > 0) {
             try {
-                cmd.run();
+                command.run();
             } catch (final Exception e) {
                 int retriedTimes = 0;
                 Exception ex = e;
@@ -238,7 +238,7 @@ public final class Retry<R> {
                     try {
                         logger.debug("Starting retry attempt {} of {}", retriedTimes, retryTimes);
 
-                        cmd.run();
+                        command.run();
                         return;
                     } catch (final Exception e2) {
                         ex = e2;
@@ -248,7 +248,7 @@ public final class Retry<R> {
                 throw ex;
             }
         } else {
-            cmd.run();
+            command.run();
         }
     }
 

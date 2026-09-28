@@ -50,9 +50,13 @@ import java.lang.annotation.Target;
  *       {@link JsonXmlField#direction() @JsonXmlField(direction = Direction.DESERIALIZE_ONLY)}.
  *       {@code @JsonXmlField(ignore = true)} and {@code @JsonXmlConfig(ignoredFields = ...)} also omit the
  *       property from serialized output but, despite the name, do not block deserialization either: a
- *       matching value in JSON/XML input is still applied. {@code @Transient} (or the {@code transient}
- *       modifier) is the annotation-level way to keep a property out of both directions; alternatively
- *       configure the parser with {@code DeserializationConfig.setIgnoredPropNames(Class, Set)}.</li>
+ *       matching value in JSON/XML input is still applied.</li>
+ *   <li><b>Deserialization is not affected by {@code @Transient} either:</b> like the {@code transient}
+ *       modifier, it only keeps the property out of serialized output; a matching value in JSON/XML input
+ *       is still read and applied to the bean. To drop a property from input, use
+ *       {@link JsonXmlField#direction() @JsonXmlField(direction = Direction.SERIALIZE_ONLY)} (on a
+ *       non-transient field) or configure the parser with
+ *       {@code DeserializationConfig.setIgnoredPropNames(Class, Set)}.</li>
  *   <li>Any field annotation whose simple name is {@code Transient} - for example
  *       {@code jakarta.persistence.Transient}, {@code javax.persistence.Transient} or Spring Data's
  *       {@code org.springframework.data.annotation.Transient} - is treated exactly like this annotation

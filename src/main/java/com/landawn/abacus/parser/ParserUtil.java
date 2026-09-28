@@ -55,6 +55,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import com.landawn.abacus.annotation.AccessFieldByMethod;
 import com.landawn.abacus.annotation.Beta;
@@ -198,8 +199,10 @@ public final class ParserUtil {
      * @param field the field to check for serializability
      * @param jsonXmlConfig the JSON/XML configuration that may contain ignored field patterns
      * @return {@code true} if the field should be serialized, {@code false} otherwise
+     * @throws PatternSyntaxException if an entry of {@code jsonXmlConfig.ignoredFields()} that is not equal to the field name is not a
+     *         valid regular expression
      */
-    static boolean isJsonXmlSerializable(final Field field, final JsonXmlConfig jsonXmlConfig) {
+    static boolean isJsonXmlSerializable(final Field field, final JsonXmlConfig jsonXmlConfig) throws PatternSyntaxException {
         return isJsonXmlSerializable(field == null ? null : field.getName(), field, jsonXmlConfig);
     }
 
@@ -219,8 +222,10 @@ public final class ParserUtil {
      * @param field the backing field, or {@code null} for a method-only property
      * @param jsonXmlConfig the JSON/XML configuration that may contain ignored field patterns
      * @return {@code true} if the property should be serialized, {@code false} otherwise
+     * @throws PatternSyntaxException if an entry of {@code jsonXmlConfig.ignoredFields()} that is not equal to the property (or field)
+     *         name is not a valid regular expression
      */
-    static boolean isJsonXmlSerializable(final String propName, final Field field, final JsonXmlConfig jsonXmlConfig) {
+    static boolean isJsonXmlSerializable(final String propName, final Field field, final JsonXmlConfig jsonXmlConfig) throws PatternSyntaxException {
         if (field != null) {
             if (Modifier.isStatic(field.getModifiers())
                     || (field.isAnnotationPresent(JsonXmlField.class) && field.getAnnotation(JsonXmlField.class).ignore())) {
@@ -884,10 +889,16 @@ public final class ParserUtil {
      * @return a BeanInfo instance containing metadata about the class
      * @throws IllegalArgumentException if {@code beanType} is {@code null}, is neither a {@code Class} nor a
      *         {@code ParameterizedType} with a {@code Class} raw type (for example a {@code TypeVariable},
-     *         {@code WildcardType} or {@code GenericArrayType}), or is not a bean class (no properties).
+     *         {@code WildcardType} or {@code GenericArrayType}), or is not a bean class (no properties), or, when its
+     *         {@code BeanInfo} is first built, its metadata is invalid (conflicting aliases; a custom, type, column or table
+     *         name with surrounding whitespace; an empty {@code @Id}/{@code @ReadOnlyId} value list; an invalid date or number
+     *         format pattern or {@code ignoredFields} regular expression; or a declared exposure on a transient or
+     *         non-serializable field).
+     * @throws UnsupportedOperationException if, when the {@code BeanInfo} is first built, a {@code java.time.LocalDate} or
+     *         {@code java.time.LocalTime} property is annotated with the {@code "long"} date format
      * @see BeanInfo
      */
-    public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) throws IllegalArgumentException {
+    public static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType) throws IllegalArgumentException, UnsupportedOperationException {
         N.checkArgNotNull(beanType, cs.beanType);
 
         final Class<?> beanClass;
@@ -919,17 +930,27 @@ public final class ParserUtil {
      *
      * @param beanClass the class to get bean information for
      * @return a BeanInfo instance containing metadata about the class
-     * @throws IllegalArgumentException if the class is not a bean class (no properties).
+     * @throws IllegalArgumentException if {@code beanClass} is {@code null} or is not a bean class (no properties), or, when its
+     *         {@code BeanInfo} is first built, its metadata is invalid (conflicting aliases; a custom, type, column or table
+     *         name with surrounding whitespace; an empty {@code @Id}/{@code @ReadOnlyId} value list; an invalid date or number
+     *         format pattern or {@code ignoredFields} regular expression; or a declared exposure on a transient or
+     *         non-serializable field).
+     * @throws UnsupportedOperationException if, when the {@code BeanInfo} is first built, a {@code java.time.LocalDate} or
+     *         {@code java.time.LocalTime} property is annotated with the {@code "long"} date format
      * @see BeanInfo
      */
-    public static BeanInfo getBeanInfo(final Class<?> beanClass) throws IllegalArgumentException {
+    public static BeanInfo getBeanInfo(final Class<?> beanClass) throws IllegalArgumentException, UnsupportedOperationException {
+        N.checkArgNotNull(beanClass, cs.beanClass);
+
         return getBeanInfo(beanClass, beanClass);
     }
 
     /**
      * @throws IllegalArgumentException if the class has no bean properties or its property metadata contains conflicting aliases, invalid names, or incompatible field exposure
+     * @throws UnsupportedOperationException if a {@code LocalDate} or {@code LocalTime} property uses the {@code "long"} date format
      */
-    private static BeanInfo getBeanInfo(final Class<?> beanClass, java.lang.reflect.Type javaType) throws IllegalArgumentException {
+    private static BeanInfo getBeanInfo(final Class<?> beanClass, java.lang.reflect.Type javaType)
+            throws IllegalArgumentException, UnsupportedOperationException {
         if (!Beans.isBeanClass(beanClass)) {
             throw new IllegalArgumentException(
                     "No property getter/setter method or public field found in the specified bean: " + ClassUtil.getCanonicalClassName(beanClass));
@@ -964,12 +985,14 @@ public final class ParserUtil {
      * @param isASMSupported whether ASM support is enabled
      * @return a BeanInfo instance containing metadata about the class
      * @throws IllegalArgumentException if the class has no bean properties or its property metadata contains conflicting aliases, invalid names, or incompatible field exposure
+     * @throws UnsupportedOperationException if a {@code LocalDate} or {@code LocalTime} property uses the {@code "long"} date format
      * @see BeanInfo
      * @deprecated This overload is for internal tests only. Use {@link #getBeanInfo(java.lang.reflect.Type)} for normal bean metadata lookup.
      */
     @Deprecated
     @Internal
-    static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType, final boolean isASMSupported) throws IllegalArgumentException {
+    static BeanInfo getBeanInfo(final java.lang.reflect.Type beanType, final boolean isASMSupported)
+            throws IllegalArgumentException, UnsupportedOperationException {
         Class<?> beanClass = null;
 
         if (beanType instanceof ParameterizedType pt && pt.getRawType() instanceof Class cls) {
@@ -985,7 +1008,10 @@ public final class ParserUtil {
      * Refreshes the cached bean property information for the specified class.
      *
      * <p>This method removes the cached BeanInfo for the specified class, forcing
-     * it to be recreated on the next call to {@link #getBeanInfo(java.lang.reflect.Type)}.</p>
+     * it to be recreated on the next call to {@link #getBeanInfo(java.lang.reflect.Type)}. The nested-path chains
+     * memoized by the other cached {@code BeanInfo}s ({@link BeanInfo#getPropInfoChain(String)}, e.g.
+     * {@code "inner.city"} on an outer bean) are dropped as well, because they may hold properties of the evicted
+     * class.</p>
      *
      * <p>This method is primarily intended for internal framework use and testing scenarios
      * where bean definitions may change at runtime (e.g., through bytecode manipulation or
@@ -1013,7 +1039,51 @@ public final class ParserUtil {
     public static void refreshBeanPropInfo(final java.lang.reflect.Type beanType) {
         synchronized (beanInfoPool) {
             beanInfoPool.remove(beanType);
+
+            // Another bean's memoized nested-path chain (e.g. "inner.city" on Outer) holds PropInfos taken from the
+            // evicted BeanInfo, so it would keep resolving the old property model; drop those chains to have them
+            // re-resolved on the next lookup.
+            for (final BeanInfo cachedBeanInfo : beanInfoPool.values()) {
+                cachedBeanInfo.propInfoQueueMap.clear();
+            }
         }
+    }
+
+    /**
+     * Tells whether {@code str}, the text a type handler wrote for a value, is already enclosed in quotes, so that a
+     * map-key writer can emit it as-is instead of wrapping it in another pair of quotes.
+     *
+     * <p>The text counts as quoted if it is at least two characters long, its first character is either a double quote
+     * ({@code "}) or the non-zero {@link JsonXmlSerConfig#getStringQuotation() string quotation} of {@code config}
+     * (for example {@code '}), and its last character is the same as its first. A double quote is accepted whatever
+     * the configured quotation is. Only the first and last characters are inspected; the content in between is not
+     * checked for escaping.</p>
+     *
+     * <p><b>Usage Examples:</b></p>
+     * <pre>{@code
+     * JsonSerConfig config = JsonSerConfig.create();                          // stringQuotation = '"'
+     * ParserUtil.isQuoted("\"5\"", config);                                   // returns true
+     * ParserUtil.isQuoted("'5'", config);                                     // returns false
+     * ParserUtil.isQuoted("5", config);                                       // returns false
+     * ParserUtil.isQuoted("\"", config);                                      // returns false
+     *
+     * JsonSerConfig singleQuoted = JsonSerConfig.create().setStringQuotation('\'');
+     * ParserUtil.isQuoted("'5'", singleQuoted);                               // returns true
+     * ParserUtil.isQuoted("\"5\"", singleQuoted);                             // returns true
+     * ParserUtil.isQuoted("'5\"", singleQuoted);                              // returns false
+     * }</pre>
+     *
+     * @param str the serialized text to inspect; must not be {@code null}
+     * @param config the configuration supplying the string quotation; must not be {@code null}
+     * @return {@code true} if {@code str} starts and ends with the same quote character, being a double quote or the
+     *         configured string quotation; {@code false} otherwise
+     */
+    public static boolean isQuoted(String str, final JsonXmlSerConfig<?> config) {
+        final int len = str.length();
+        final char first = len >= 2 ? str.charAt(0) : 0;
+        // The type quotes with config.getStringQuotation(), which may be '\'' rather than '"': wrapping its
+        // '5' in another pair of quotes produced the key "'5'", which no longer reads back as the key.
+        return len >= 2 && (first == SK._DOUBLE_QUOTE || (first != 0 && first == config.getStringQuotation())) && str.charAt(len - 1) == first;
     }
 
     /**
@@ -1167,7 +1237,12 @@ public final class ParserUtil {
 
         private final PropInfo[] propInfoArray;
 
-        private final Map<Integer, PropInfo> hashPropInfoMap;
+        /**
+         * Properties sorted by their default JSON names. The companion of {@link #propInfoArray}: it lets
+         * {@link #readPropInfo(char[], int, int)} use an allocation-free binary search when several properties
+         * share a name length, without scanning the whole group or boxing a hash code for each key.
+         */
+        private final PropInfo[] sortedPropInfos;
 
         /**
          * {@code true} when some property's naming-policy tag or column name is bound in {@link #propInfoMap}
@@ -1201,9 +1276,13 @@ public final class ParserUtil {
          *
          * @param beanClass the class to analyze
          * @param beanType the Java type of the class
-         * @throws IllegalArgumentException if property aliases conflict, a table name has surrounding whitespace, or field exposure conflicts with a transient or non-serializable field
+         * @throws IllegalArgumentException if the class-level {@code @Id}/{@code @ReadOnlyId} value list is empty, a property's metadata
+         *         is invalid (a custom, type or column name with surrounding whitespace, an invalid date or number format pattern, or an
+         *         invalid {@code ignoredFields} regular expression), field exposure conflicts with a transient or non-serializable field,
+         *         property aliases conflict, or a table name has surrounding whitespace
+         * @throws UnsupportedOperationException if a {@code LocalDate} or {@code LocalTime} property uses the {@code "long"} date format
          */
-        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType) throws IllegalArgumentException {
+        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType) throws IllegalArgumentException, UnsupportedOperationException {
             this(beanClass, beanType, ASMUtil.isASMAvailable());
         }
 
@@ -1216,10 +1295,15 @@ public final class ParserUtil {
          * @param beanClass the class to analyze
          * @param beanType the Java type of the class
          * @param isASMSupported whether to enable ASM-based optimizations
-         * @throws IllegalArgumentException if property aliases conflict, a table name has surrounding whitespace, or field exposure conflicts with a transient or non-serializable field
+         * @throws IllegalArgumentException if the class-level {@code @Id}/{@code @ReadOnlyId} value list is empty, a property's metadata
+         *         is invalid (a custom, type or column name with surrounding whitespace, an invalid date or number format pattern, or an
+         *         invalid {@code ignoredFields} regular expression), field exposure conflicts with a transient or non-serializable field,
+         *         property aliases conflict, or a table name has surrounding whitespace
+         * @throws UnsupportedOperationException if a {@code LocalDate} or {@code LocalTime} property uses the {@code "long"} date format
          */
         @SuppressWarnings("deprecation")
-        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType, final boolean isASMSupported) throws IllegalArgumentException {
+        BeanInfo(final Class<?> beanClass, final java.lang.reflect.Type beanType, final boolean isASMSupported)
+                throws IllegalArgumentException, UnsupportedOperationException {
             annotations = ImmutableMap.wrap(getAnnotations(beanClass));
             simpleClassName = ClassUtil.getSimpleClassName(beanClass);
             canonicalClassName = ClassUtil.getCanonicalClassName(beanClass);
@@ -1304,7 +1388,6 @@ public final class ParserUtil {
             propInfos = new PropInfo[propNameList.size()];
             propInfoMap = new ConcurrentCacheMap<>((propNameList.size() + 1) * 2);
             propInfoQueueMap = new ConcurrentCacheMap<>((propNameList.size() + 1) * 2);
-            hashPropInfoMap = new ConcurrentCacheMap<>((propNameList.size() + 1) * 2);
 
             PropInfo propInfo = null;
             int idx = 0;
@@ -1429,13 +1512,14 @@ public final class ParserUtil {
             transientSeriPropInfos = transientSeriPropInfoList.toArray(new PropInfo[0]);
 
             propInfoArray = new PropInfo[maxLength + 1];
+            sortedPropInfos = propInfos.clone();
+            Arrays.sort(sortedPropInfos, (a, b) -> Arrays.compare(a.jsonNameTags[defaultNameIndex].name, b.jsonNameTags[defaultNameIndex].name));
             boolean sharedNameTags = false;
 
             for (final PropInfo e : propInfos) {
-                hashPropInfoMap.put(ParserUtil.hashCode(e.jsonNameTags[defaultNameIndex].name), e);
-
-                if (multiSet.getCount(e.jsonNameTags[defaultNameIndex].name.length) == 1) {
-                    propInfoArray[e.jsonNameTags[defaultNameIndex].name.length] = e;
+                final int nameLength = e.jsonNameTags[defaultNameIndex].name.length;
+                if (multiSet.getCount(nameLength) == 1) {
+                    propInfoArray[nameLength] = e;
                 }
 
                 // readPropInfo accepts a candidate through any of its tags/column; note whether one of those
@@ -1651,28 +1735,35 @@ public final class ParserUtil {
 
                 PropInfo propInfo = null;
 
-                final Method method = Beans.getPropGetter(clazz, propName);
+                // The ranked scan over this bean's own names runs FIRST, and Beans.getPropGetter is only the
+                // fallback: the getter map does not contain a property backed solely by a public field, so
+                // asking it first let a getter-backed `children` win "haschildren" over a field-only
+                // `hasChildren` through the has-prefix rule. propInfoMap holds bindings only (misses are kept
+                // apart in missedPropNames), so this scan is bounded by the bean's own vocabulary plus the
+                // capped fuzzy hits, not by the number of unknown keys ever seen.
+                propInfoOpt = resolveAlias(propName);
 
-                if (method != null) {
-                    propInfoOpt = propInfoMap.get(Beans.getPropNameByMethod(method));
+                if (propInfoOpt == null) {
+                    final Method method = Beans.getPropGetter(clazz, propName);
+
+                    if (method != null) {
+                        propInfoOpt = propInfoMap.get(Beans.getPropNameByMethod(method));
+                    }
                 }
 
                 if (propInfoOpt == null) {
-                    // propInfoMap holds bindings only (misses are kept apart in missedPropNames), so this scan
-                    // is bounded by the bean's own vocabulary plus the capped fuzzy hits, not by the number of
-                    // unknown keys ever seen. The isPresent() guard stays as a belt-and-braces check.
-                    for (final Map.Entry<String, Optional<PropInfo>> entry : propInfoMap.entrySet()) { //NOSONAR
-                        if (entry.getValue().isPresent() && isPropName(clazz, propName, entry.getKey())) {
-                            propInfoOpt = entry.getValue();
+                    // the normalized candidate is computed WITHOUT Beans.normalizePropName,
+                    // which memoizes every input into Beans' name pools and NameUtil's process-global pool. Here
+                    // the input is an unknown caller-supplied spelling - a JSON/XML key the bean lacks under
+                    // ignoreUnmatchedProperty, a foreign map key, a DataSet column - and a stream of them filled
+                    // those bounded pools with junk for the JVM's lifetime (NameUtil then refused every later
+                    // legitimate name). Real property names are memoized on the HIT path (propInfoMap).
+                    final String normalized = normalizePropNameUncached(propName);
 
-                            break;
-                        }
-                    }
-
-                    if ((propInfoOpt == null) && !propName.equalsIgnoreCase(Beans.normalizePropName(propName))) {
+                    if (!propName.equalsIgnoreCase(normalized)) {
                         // The recursive call memoizes its own outcome under the normalized spelling, through
                         // the same bounded caches.
-                        propInfo = getPropInfo(Beans.normalizePropName(propName));
+                        propInfo = getPropInfo(normalized);
 
                         if (propInfo != null) {
                             propInfoOpt = Optional.of(propInfo);
@@ -1690,9 +1781,6 @@ public final class ParserUtil {
 
                     return null;
                 }
-
-                propInfo = propInfoOpt.orElseThrow();
-                hashPropInfoMap.put(ParserUtil.hashCode(propInfo.jsonNameTags[defaultNameIndex].name), propInfo);
 
                 if (propInfoMap.size() < MAX_CACHED_PROP_NAMES) {
                     propInfoMap.put(propName, propInfoOpt);
@@ -1757,10 +1845,11 @@ public final class ParserUtil {
          * @param obj the object to get the property value from
          * @param propName the property name (supports nested paths)
          * @return the property value, or the type's default value if an intermediate object in a nested path is {@code null}
-         * @throws IllegalArgumentException if no getter method is found for the property.
+         * @throws IllegalArgumentException if {@code propName} is {@code null} or no getter method is found for the property.
+         * @throws RuntimeException if reading a property on the path fails (see {@link PropInfo#getPropValue(Object)})
          */
         @SuppressWarnings("unchecked")
-        public <T> T getPropValue(final Object obj, final String propName) throws IllegalArgumentException {
+        public <T> T getPropValue(final Object obj, final String propName) throws IllegalArgumentException, RuntimeException {
             final PropInfo propInfo = getPropInfo(propName);
 
             if (propInfo == null) {
@@ -1803,10 +1892,14 @@ public final class ParserUtil {
          * @param obj the object to set the property value on
          * @param propName the property name
          * @param propValue the value to set
-         * @throws IllegalArgumentException if no setter is found for {@code propName}, or the property is
-         *         read-only (a getter with no backing field and no setter).
+         * @throws IllegalArgumentException if {@code propName} is {@code null}, no setter is found for {@code propName}, or the
+         *         property is read-only (a getter with no backing field and no setter).
+         * @throws RuntimeException if reading an intermediate property on a nested path, creating a missing intermediate value, or storing
+         *         the value fails (see {@link PropInfo#setPropValue(Object, Object)})
+         * @throws UnsupportedOperationException if a property on a nested path is read-only and a value must be stored into it
          */
-        public void setPropValue(final Object obj, final String propName, final Object propValue) throws IllegalArgumentException {
+        public void setPropValue(final Object obj, final String propName, final Object propValue)
+                throws IllegalArgumentException, RuntimeException, UnsupportedOperationException {
             setPropValue(obj, propName, propValue, false);
         }
 
@@ -1829,12 +1922,15 @@ public final class ParserUtil {
          * @param ignoreUnmatchedProperty if {@code true}, silently ignore properties that don't exist or that are
          *        read-only (a getter with no backing field and no setter)
          * @return {@code true} if the property was set, {@code false} if it was ignored
-         * @throws IllegalArgumentException if no setter is found for {@code propName}, or the property is read-only,
-         *         and {@code ignoreUnmatchedProperty} is {@code false}.
+         * @throws IllegalArgumentException if {@code propName} is {@code null}, or if no setter is found for {@code propName} or the
+         *         property is read-only and {@code ignoreUnmatchedProperty} is {@code false}.
+         * @throws RuntimeException if reading an intermediate property on a nested path, creating a missing intermediate value, or storing
+         *         the value fails (see {@link PropInfo#setPropValue(Object, Object)})
+         * @throws UnsupportedOperationException if a property on a nested path is read-only and a value must be stored into it
          */
         @SuppressWarnings("rawtypes")
         public boolean setPropValue(final Object obj, final String propName, final Object propValue, final boolean ignoreUnmatchedProperty)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, RuntimeException, UnsupportedOperationException {
             PropInfo propInfo = getPropInfo(propName);
 
             if (propInfo != null && propInfo.isReadOnlyProperty) {
@@ -1923,8 +2019,12 @@ public final class ParserUtil {
          * @param propValue the value to set
          * @throws IllegalArgumentException if no writable property is found for the name or any of its aliases (a
          *         read-only property - a getter with no backing field and no setter - counts as no match).
+         * @throws RuntimeException if storing the value into the matched property fails (see
+         *         {@link #setPropValue(Object, String, Object, boolean)})
+         * @throws UnsupportedOperationException if the matched name is a nested path whose property is read-only
          */
-        public void setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue) throws IllegalArgumentException {
+        public void setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue)
+                throws IllegalArgumentException, RuntimeException, UnsupportedOperationException {
             setPropValue(obj, propInfoFromOtherBean, propValue, false);
         }
 
@@ -1950,9 +2050,12 @@ public final class ParserUtil {
          * @return {@code true} if the property was set, {@code false} if it was ignored
          * @throws IllegalArgumentException if no writable property is found for the name or any of its aliases and
          *         {@code ignoreUnmatchedProperty} is {@code false}.
+         * @throws RuntimeException if storing the value into the matched property fails (see
+         *         {@link #setPropValue(Object, String, Object, boolean)})
+         * @throws UnsupportedOperationException if the matched name is a nested path whose property is read-only
          */
         public boolean setPropValue(final Object obj, final PropInfo propInfoFromOtherBean, final Object propValue, final boolean ignoreUnmatchedProperty)
-                throws IllegalArgumentException {
+                throws IllegalArgumentException, RuntimeException, UnsupportedOperationException {
             if (propInfoFromOtherBean.aliases.isEmpty()) {
                 return setPropValue(obj, propInfoFromOtherBean.name, propValue, ignoreUnmatchedProperty);
             } else {
@@ -1976,38 +2079,128 @@ public final class ParserUtil {
         }
 
         /**
-         * Checks if the given input property name matches a method-based property name.
+         * {@code Beans.normalizePropName} without the memoization: {@link Strings#toCamelCase(String)} plus the
+         * single {@code "class" -> "clazz"} keyword remapping that method applies, computed fresh so an unknown
+         * spelling is never written into Beans' name pools or NameUtil's process-global pool. A copy of
+         * {@code Beans.normalizePropNameUncached} (package-private there, different package here) - keep the two
+         * in sync.
          *
-         * <p>This method handles various naming conventions and patterns including:</p>
-         * <ul>
-         *   <li>Case-insensitive matching</li>
-         *   <li>Underscore removal</li>
-         *   <li>Class name prefixing</li>
-         *   <li>Getter/setter method prefixes (get, set, is, has)</li>
-         * </ul>
-         *
-         * @param cls the class containing the property
-         * @param inputPropName the input property name to match
-         * @param propNameByMethod the actual property name derived from a method
-         * @return {@code true} if the names match according to any supported pattern
+         * @param propName the caller-supplied spelling; returned as-is if empty
+         * @return the normalized spelling
          */
-        private boolean isPropName(final Class<?> cls, String inputPropName, final String propNameByMethod) {
-            // A copy of Beans.isPropName (private there, different package here). Keep the two in sync - they
-            // diverged on exactly this length check once, with Beans' copy throwing where this one returns
-            // false, which turned every "ignore unmatched property" lookup into a hard failure.
-            // Trim before measuring: the cap is about the length of the name, not of the caller's padding.
-            inputPropName = inputPropName.trim();
-
-            if (inputPropName.length() > 128) {
-                return false;
+        private static String normalizePropNameUncached(final String propName) {
+            if (Strings.isEmpty(propName)) {
+                return propName;
             }
 
-            return inputPropName.equalsIgnoreCase(propNameByMethod) || inputPropName.replace(SK.UNDERSCORE, Strings.EMPTY).equalsIgnoreCase(propNameByMethod)
-                    || inputPropName.equalsIgnoreCase(ClassUtil.getSimpleClassName(cls) + SK._PERIOD + propNameByMethod)
-                    || (inputPropName.startsWith(GET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
-                    || (inputPropName.startsWith(SET) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod))
-                    || (inputPropName.startsWith(IS) && inputPropName.length() > 2 && inputPropName.substring(2).equalsIgnoreCase(propNameByMethod))
-                    || (inputPropName.startsWith(HAS) && inputPropName.length() > 3 && inputPropName.substring(3).equalsIgnoreCase(propNameByMethod));
+            final String camel = Strings.toCamelCase(propName);
+
+            return "class".equalsIgnoreCase(camel) ? "clazz" : camel;
+        }
+
+        /**
+         * Resolves a tolerant spelling against this bean's bound names by <b>best</b> match: the lowest
+         * {@link #aliasRank} wins and the first entry wins a tie, instead of the first entry any alias rule
+         * accepts (which made {@code "haschildren"} resolve to {@code children} whenever that was reached first).
+         *
+         * <p>Nested paths win over the class-qualified alias: when the best match is the qualified form
+         * ({@code "node.name"} read as {@code Node.name}) but the head segment names a property whose type is a bean
+         * class on which the remainder resolves, {@code null} is returned so {@link #getPropInfoChain(String)} can
+         * handle the path. Names longer than 128 characters (after trimming) never match.</p>
+         *
+         * <p>A copy of {@code Beans.resolveAlias} (private there, different package here; sharing one would need
+         * new public API). Keep the two in sync - they have diverged before. Both decide the nested-path override
+         * with {@code ParserUtil.getBeanInfo(headType).getPropInfo(tail)}, so a tail backed
+         * only by a public field is a nested path for both, and the {@code Beans.getPropGetter} fallback in
+         * {@link #getPropInfo(String)} can no longer re-resolve such a name to the outer property.</p>
+         *
+         * @param propName the caller-supplied spelling
+         * @return the best match, or {@code null}
+         */
+        private Optional<PropInfo> resolveAlias(final String propName) {
+            // Trim before measuring: the cap is about the length of the name, not of the caller's padding.
+            final String input = propName.trim();
+
+            if (input.length() > 128) {
+                return null;
+            }
+
+            final int dot = input.indexOf(SK._PERIOD);
+            final String head = dot > 0 ? input.substring(0, dot) : null;
+            // computed once per lookup rather than once per candidate inside aliasRank.
+            final String inputWithoutUnderscores = input.indexOf(SK._UNDERSCORE) >= 0 ? input.replace(SK.UNDERSCORE, Strings.EMPTY) : null;
+            PropInfo headProp = null;
+            Optional<PropInfo> best = null;
+            int bestRank = Integer.MAX_VALUE;
+
+            for (final Map.Entry<String, Optional<PropInfo>> entry : propInfoMap.entrySet()) { //NOSONAR
+                if (!entry.getValue().isPresent()) {
+                    continue;
+                }
+
+                if (head != null && headProp == null && head.equalsIgnoreCase(entry.getKey())) {
+                    headProp = entry.getValue().orElseThrow();
+                }
+
+                final int rank = aliasRank(clazz, input, inputWithoutUnderscores, entry.getKey());
+
+                if (rank != 0 && rank < bestRank) {
+                    best = entry.getValue();
+                    bestRank = rank;
+
+                    if (rank == 1) {
+                        break;
+                    }
+                }
+            }
+
+            if (bestRank == 3 && headProp != null && dot < input.length() - 1 && Beans.isBeanClass(headProp.clazz)
+                    && ParserUtil.getBeanInfo(headProp.clazz).getPropInfo(input.substring(dot + 1)) != null) {
+                return null;
+            }
+
+            return best;
+        }
+
+        /**
+         * How well the trimmed spelling {@code input} names the property {@code propNameByMethod}: {@code 1}
+         * case-insensitive equal, {@code 2} equal once underscores are removed, {@code 3} the class-qualified form
+         * {@code SimpleClassName.prop}, {@code 4} equal once a get/set/is/has prefix is removed; {@code 0} no match.
+         * A copy of {@code Beans.aliasRank} - keep the two in sync.
+         *
+         * @param targetClass the class containing the property
+         * @param input the trimmed caller-supplied spelling
+         * @param inputWithoutUnderscores {@code input} with every underscore removed, or {@code null} when it has
+         *        none; computed once per lookup by {@link #resolveAlias(String)}, not once per candidate
+         * @param propNameByMethod the bound property name
+         * @return the rank, {@code 0} for no match
+         */
+        private static int aliasRank(final Class<?> targetClass, final String input, final String inputWithoutUnderscores, final String propNameByMethod) {
+            if (input.equalsIgnoreCase(propNameByMethod)) {
+                return 1;
+            }
+
+            // the underscore-stripped spelling is computed once per lookup by resolveAlias,
+            // and the class-qualified form is only built when the lengths can match - exactly as Beans.aliasRank.
+            if (inputWithoutUnderscores != null && inputWithoutUnderscores.equalsIgnoreCase(propNameByMethod)) {
+                return 2;
+            }
+
+            final String simpleClassName = ClassUtil.getSimpleClassName(targetClass);
+
+            if (input.length() == (simpleClassName.length() + 1 + propNameByMethod.length())
+                    && input.equalsIgnoreCase(simpleClassName + SK._PERIOD + propNameByMethod)) {
+                return 3;
+            }
+
+            if ((input.startsWith(GET) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))
+                    || (input.startsWith(SET) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))
+                    || (input.startsWith(IS) && input.length() > 2 && input.substring(2).equalsIgnoreCase(propNameByMethod))
+                    || (input.startsWith(HAS) && input.length() > 3 && input.substring(3).equalsIgnoreCase(propNameByMethod))) {
+                return 4;
+            }
+
+            return 0;
         }
 
         /**
@@ -2087,12 +2280,14 @@ public final class ParserUtil {
          * Reads property information from a character buffer for efficient parsing.
          *
          * <p>This method is used internally by parsers for fast property lookup
-         * during deserialization. It uses hash-based lookup for optimal performance.</p>
+         * during deserialization. A unique name length selects its candidate directly; other default names are
+         * found by an allocation-free binary search. A key that matches neither shortcut (an alias, a column name,
+         * another naming-policy spelling or an unknown key) is then looked up by its text.</p>
          *
          * <p>The answer is the same one {@link #getPropInfo(String)} gives for the exact text: when two
          * properties share a naming-policy spelling or column name (for example {@code userName} and
          * {@code user_name} both spell {@code USER_NAME}), the explicit binding - {@code @Column}, alias, then
-         * declaration order - wins, whichever property the length/hash shortcut proposed.</p>
+         * declaration order - wins, whichever property the length shortcut proposed.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -2117,10 +2312,27 @@ public final class ParserUtil {
 
             if (len < propInfoArray.length) {
                 propInfo = propInfoArray[len];
-            }
 
-            if (propInfo == null) {
-                propInfo = hashPropInfoMap.get(ParserUtil.hashCode(cbuf, fromIndex, toIndex));
+                if (propInfo == null) {
+                    int low = 0;
+                    int high = sortedPropInfos.length - 1;
+
+                    while (low <= high) {
+                        final int mid = (low + high) >>> 1;
+                        final PropInfo candidate = sortedPropInfos[mid];
+                        final char[] name = candidate.jsonNameTags[defaultNameIndex].name;
+                        final int cmp = Arrays.compare(cbuf, fromIndex, toIndex, name, 0, name.length);
+
+                        if (cmp < 0) {
+                            high = mid - 1;
+                        } else if (cmp > 0) {
+                            low = mid + 1;
+                        } else {
+                            propInfo = candidate;
+                            break;
+                        }
+                    }
+                }
             }
 
             if (propInfo != null && !matches(cbuf, fromIndex, len, propInfo.name)) {
@@ -2147,26 +2359,26 @@ public final class ParserUtil {
             return propInfo;
         }
 
-        private boolean matchesNameTagOrColumn(final PropInfo propInfo, final char[] cbuf, final int fromIndex, final int len) {
+        private boolean matchesNameTagOrColumn(final PropInfo propInfo, final char[] cbuf, final int fromIndex, final int length) {
             for (final JsonNameTag nameTag : propInfo.jsonNameTags) {
-                if (matches(cbuf, fromIndex, len, nameTag.name)) {
+                if (matches(cbuf, fromIndex, length, nameTag.name)) {
                     return true;
                 }
             }
 
             if (propInfo.columnName.isPresent()) {
-                return matches(cbuf, fromIndex, len, propInfo.columnName.get());
+                return matches(cbuf, fromIndex, length, propInfo.columnName.get());
             }
 
             return false;
         }
 
-        private boolean matches(final char[] cbuf, final int fromIndex, final int len, final String propName) {
-            if (propName == null || propName.length() != len) {
+        private boolean matches(final char[] cbuf, final int fromIndex, final int length, final String propName) {
+            if (propName == null || propName.length() != length) {
                 return false;
             }
 
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < length; i++) {
                 if (cbuf[fromIndex + i] != propName.charAt(i)) {
                     return false;
                 }
@@ -2175,12 +2387,12 @@ public final class ParserUtil {
             return true;
         }
 
-        private boolean matches(final char[] cbuf, final int fromIndex, final int len, final char[] propName) {
-            if (propName == null || propName.length != len) {
+        private boolean matches(final char[] cbuf, final int fromIndex, final int length, final char[] propName) {
+            if (propName == null || propName.length != length) {
                 return false;
             }
 
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < length; i++) {
                 if (cbuf[fromIndex + i] != propName[i]) {
                     return false;
                 }
@@ -2235,15 +2447,15 @@ public final class ParserUtil {
          * <p>This method traverses the class hierarchy from superclasses to the target class,
          * collecting all annotations. Annotations on subclasses override those on superclasses.</p>
          *
-         * @param cls the class to collect annotations from
+         * @param targetClass the class to collect annotations from
          * @return a map of annotation types to annotation instances
          */
-        private Map<Class<? extends Annotation>, Annotation> getAnnotations(final Class<?> cls) {
+        private Map<Class<? extends Annotation>, Annotation> getAnnotations(final Class<?> targetClass) {
             final Map<Class<? extends Annotation>, Annotation> annos = new HashMap<>();
 
-            final Set<Class<?>> classes = ClassUtil.getAllSuperTypes(cls);
+            final Set<Class<?>> classes = ClassUtil.getAllSuperTypes(targetClass);
             N.reverse(classes);
-            classes.add(cls);
+            classes.add(targetClass);
 
             for (final Class<?> e : classes) {
                 if (N.notEmpty(e.getAnnotations())) {
@@ -2288,17 +2500,17 @@ public final class ParserUtil {
          * }</pre>
          *
          * @param <T> the type of the instance
-         * @param args constructor arguments
+         * @param arguments constructor arguments
          * @return a new instance of the bean class
          * @throws RuntimeException if the selected constructor is unavailable, its arguments are incompatible, or its invocation throws an exception
          */
         @Beta
-        <T> T newInstance(final Object... args) throws RuntimeException {
-            if (N.isEmpty(args)) {
+        <T> T newInstance(final Object... arguments) throws RuntimeException {
+            if (N.isEmpty(arguments)) {
                 return newInstance();
             }
 
-            return (T) ClassUtil.invokeConstructor(allArgsConstructor, args);
+            return (T) ClassUtil.invokeConstructor(allArgsConstructor, arguments);
         }
 
         /**
@@ -2717,14 +2929,16 @@ public final class ParserUtil {
          * @param idPropNames list of property names that are identifiers
          * @param readOnlyIdPropNames list of property names that are read-only identifiers
          * @param typeParamArgMap mapping of type variables to actual types for generic resolution
+         * @throws IllegalArgumentException if the {@code @Type} annotation names a type with surrounding whitespace or a type class without
+         *         a usable constructor, the custom name or the column name has surrounding whitespace, or the date or number format is not a
+         *         valid pattern
          * @throws UnsupportedOperationException if the long date format is selected for LocalDate or LocalTime
-         * @throws IllegalArgumentException if a column name has surrounding whitespace
          */
         @SuppressWarnings("deprecation")
         PropInfo(final String propName, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames,
-                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) throws UnsupportedOperationException, IllegalArgumentException {
+                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) throws IllegalArgumentException, UnsupportedOperationException {
             declaringClass = (Class<Object>) (field != null ? field.getDeclaringClass() : getMethod.getDeclaringClass());
             this.field = field;
             this.name = propName;
@@ -2776,7 +2990,12 @@ public final class ParserUtil {
             xmlNameTags = getXmlNameTags(propName, field, jsonXmlType.name(), false);
 
             final String timeZoneStr = Strings.trim(getTimeZone(field, jsonXmlConfig));
-            final String dateFormatStr = Strings.trim(getDateFormat(field, propFuncMap.containsKey(clazz) ? jsonXmlConfig : null));
+            // The class-level dateFormat applies to date/time properties only. propFuncMap also holds String/long/Long
+            // (for a FIELD-level dateFormat), but offering them the class-level pattern quoted every long ("id": "123")
+            // and shadowed a class-level numberFormat on long/Long properties.
+            final boolean isClassLevelDateFormatType = propFuncMap.containsKey(clazz) && !String.class.equals(clazz) && !long.class.equals(clazz)
+                    && !Long.class.equals(clazz);
+            final String dateFormatStr = Strings.trim(getDateFormat(field, isClassLevelDateFormatType ? jsonXmlConfig : null));
             dateFormat = Strings.isEmpty(dateFormatStr) ? null : dateFormatStr;
             timeZone = Strings.isEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
             zoneId = timeZone.toZoneId();
@@ -3823,9 +4042,11 @@ public final class ParserUtil {
          * @param propClass the property class
          * @param jsonXmlConfig the optional JSON/XML serialization configuration
          * @return the type name or {@code null} if not specified
+         * @throws IllegalArgumentException if the {@code @Type} annotation names a type with surrounding whitespace or a type class without a
+         *         usable constructor
          */
         @SuppressWarnings("unused")
-        private String getAnnoType(final Field field, final Class<?> propClass, final JsonXmlConfig jsonXmlConfig) {
+        private String getAnnoType(final Field field, final Class<?> propClass, final JsonXmlConfig jsonXmlConfig) throws IllegalArgumentException {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.SERIALIZATION)) {
@@ -3860,9 +4081,11 @@ public final class ParserUtil {
          * @param propClass the property class
          * @param jsonXmlConfig the optional JSON/XML serialization configuration
          * @return the type name or {@code null} if not specified
+         * @throws IllegalArgumentException if the {@code @Type} annotation names a type with surrounding whitespace or a type class without a
+         *         usable constructor
          */
         @SuppressWarnings("unused")
-        private String getJsonXmlAnnoType(final Field field, final Class<?> propClass, final JsonXmlConfig jsonXmlConfig) {
+        private String getJsonXmlAnnoType(final Field field, final Class<?> propClass, final JsonXmlConfig jsonXmlConfig) throws IllegalArgumentException {
             final JsonXmlField jsonXmlFieldAnno = getAnnotation(JsonXmlField.class);
 
             if (jsonXmlFieldAnno != null) {
@@ -3895,9 +4118,11 @@ public final class ParserUtil {
          *
          * @param propClass the property class
          * @return the type name or {@code null} if not specified
+         * @throws IllegalArgumentException if the {@code @Type} annotation names a type with surrounding whitespace or a type class without a
+         *         usable constructor
          */
         @SuppressWarnings("unused")
-        private String getDBAnnoType(final Class<?> propClass) {
+        private String getDBAnnoType(final Class<?> propClass) throws IllegalArgumentException {
             final com.landawn.abacus.annotation.Type typeAnno = getAnnotation(com.landawn.abacus.annotation.Type.class);
 
             if (typeAnno != null && (typeAnno.scope() == Scope.ALL || typeAnno.scope() == Scope.PERSISTENCE)) {
@@ -4354,11 +4579,15 @@ public final class ParserUtil {
          * @param idPropNames list of property names that are identifiers
          * @param readOnlyIdPropNames list of property names that are read-only identifiers
          * @param typeParamArgMap mapping of type variables to actual types for generic resolution
+         * @throws IllegalArgumentException if the {@code @Type} annotation names a type with surrounding whitespace or a type class without
+         *         a usable constructor, the custom name or the column name has surrounding whitespace, or the date or number format is not a
+         *         valid pattern
+         * @throws UnsupportedOperationException if the long date format is selected for LocalDate or LocalTime
          */
         ASMPropInfo(final String name, final Field field, final Method getMethod, final Method setMethod, final JsonXmlConfig jsonXmlConfig,
                 final ImmutableMap<Class<? extends Annotation>, Annotation> classAnnotations, final int fieldOrder, final boolean isImmutableBean,
                 final boolean isByBuilder, final List<String> idPropNames, final List<String> readOnlyIdPropNames,
-                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) {
+                final Map<TypeVariable<?>, java.lang.reflect.Type> typeParamArgMap) throws IllegalArgumentException, UnsupportedOperationException {
             super(name, field, getMethod, setMethod, jsonXmlConfig, classAnnotations, fieldOrder, isImmutableBean, isByBuilder, idPropNames,
                     readOnlyIdPropNames, typeParamArgMap);
 
@@ -4377,10 +4606,12 @@ public final class ParserUtil {
          *
          * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) for faster
          * property access than standard reflection.</p>
+         * @throws RuntimeException if the target is incompatible with this property, its array representation lacks the property slot,
+         *         or reading its field or invoking its getter throws an exception
          */
         @SuppressWarnings("unchecked")
         @Override
-        public <T> T getPropValue(final Object obj) {
+        public <T> T getPropValue(final Object obj) throws RuntimeException {
             if (isImmutableBean && obj instanceof Object[]) {
                 return (T) ((Object[]) obj)[fieldOrder];
             }
@@ -4394,12 +4625,21 @@ public final class ParserUtil {
          * <p>This override uses reflectasm ({@code FieldAccess}/{@code MethodAccess}) for faster
          * property access than standard reflection.</p>
          * @throws UnsupportedOperationException if this property is read-only and cannot accept {@code propValue}
+         * @throws RuntimeException if the target cannot accept the property value, conversion to the property type is unsupported,
+         *         or accessing the field or invoking its getter or setter throws an exception
          */
         @SuppressFBWarnings
         @Override
-        public void setPropValue(final Object obj, Object propValue) throws UnsupportedOperationException {
+        public void setPropValue(final Object obj, Object propValue) throws UnsupportedOperationException, RuntimeException {
             if (isReadOnlyProperty) {
                 throw new UnsupportedOperationException(readOnlyMessage());
+            }
+
+            // Same raw-JSON conversion as PropInfo.setPropValue. Without it a non-String value (an enum, say) fell
+            // through to N.convert(propValue, jsonXmlType), which is not JSON text: the unquoted ACTIVE instead of
+            // "ACTIVE", written verbatim by the raw-value serializer as invalid JSON.
+            if (isJsonRawValue && propValue != null && !clazz.isAssignableFrom(propValue.getClass())) {
+                propValue = N.toJson(propValue);
             }
 
             if (isImmutableBean) {
@@ -4473,7 +4713,16 @@ public final class ParserUtil {
                                 ClassUtil.getClassName(declaringClass), propValue == null ? "null" : ClassUtil.getClassName(propValue.getClass()));
                     }
 
-                    propValue = N.convert(propValue, jsonXmlType);
+                    final Object convertedValue = N.convert(propValue, jsonXmlType);
+
+                    // reflectasm invokes the setter directly, so an exception the setter itself throws lands here too
+                    // (the reflective PropInfo path sees it wrapped in InvocationTargetException and rethrows it).
+                    // When conversion leaves the value unchanged, the retry could only run the setter a second time.
+                    if (convertedValue == propValue) {
+                        throw ExceptionUtil.toRuntimeException(e, true);
+                    }
+
+                    propValue = convertedValue;
 
                     if (isFieldSettable && fieldAccessIndex > -1) {
                         fieldAccess.set(obj, fieldAccessIndex, propValue);
@@ -4700,12 +4949,12 @@ public final class ParserUtil {
      * wrappers. Floating-point targets keep {@code DecimalFormat}'s default parse mode so {@code -0.0} survives,
      * and {@code Number}/{@code Object} targets keep it so the runtime class they receive does not change.
      */
-    private static boolean isExactOrIntegralNumberType(final Class<?> cls) {
-        return cls == java.math.BigDecimal.class || cls == java.math.BigInteger.class //
-                || cls == int.class || cls == Integer.class //
-                || cls == long.class || cls == Long.class //
-                || cls == short.class || cls == Short.class //
-                || cls == byte.class || cls == Byte.class;
+    private static boolean isExactOrIntegralNumberType(final Class<?> targetClass) {
+        return targetClass == java.math.BigDecimal.class || targetClass == java.math.BigInteger.class //
+                || targetClass == int.class || targetClass == Integer.class //
+                || targetClass == long.class || targetClass == Long.class //
+                || targetClass == short.class || targetClass == Short.class //
+                || targetClass == byte.class || targetClass == Byte.class;
     }
 
     /**

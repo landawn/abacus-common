@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Percentage p = Percentage._95;
- * double value = p.doubleValue();   // returns 0.95
- * String str = p.toString();        // returns "95%"
+ * double value = p.doubleValue();  // returns 0.95
+ * String str = p.toString();       // returns "95%"
  *
  * // Get a range of percentages (end exclusive): contains _90 through _98
  * ImmutableSet<Percentage> highPercentages = Percentage.range(Percentage._90, Percentage._99);
@@ -136,9 +136,9 @@ public enum Percentage {
 
     private final double val;
 
-    Percentage(final String str, final double val) {
+    Percentage(final String str, final double value) {
         this.str = str;
-        this.val = val;
+        this.val = value;
     }
 
     /**
@@ -319,8 +319,8 @@ public enum Percentage {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * double value = Percentage._75.doubleValue();                // returns 0.75
-     * double calculation = 1000 * Percentage._10.doubleValue();   // returns 100.0
+     * double value = Percentage._75.doubleValue();               // returns 0.75
+     * double calculation = 1000 * Percentage._10.doubleValue();  // returns 100.0
      * }</pre>
      *
      * @return the decimal value of this percentage.

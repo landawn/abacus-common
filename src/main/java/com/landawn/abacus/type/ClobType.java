@@ -60,15 +60,15 @@ public class ClobType extends AbstractType<Clob> {
     /**
      * Package-private constructor for {@code ClobType} with a specific {@link Clob} implementation class.
      * Used when a concrete JDBC driver CLOB subtype needs to be registered. The handler name is
-     * derived from {@code clazz}, so the subtype remains distinguishable from the standard
+     * derived from {@code targetClass}, so the subtype remains distinguishable from the standard
      * {@code Clob} interface in type metadata.
      *
-     * @param clazz the specific {@link Clob} implementation class to handle
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
+     * @param targetClass the specific {@link Clob} implementation class to handle
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    ClobType(final Class<? extends Clob> clazz) throws IllegalArgumentException {
-        super(ClassUtil.getSimpleClassName(clazz));
-        this.clazz = (Class<Clob>) clazz;
+    ClobType(final Class<? extends Clob> targetClass) throws IllegalArgumentException {
+        super(ClassUtil.getSimpleClassName(targetClass));
+        this.clazz = (Class<Clob>) targetClass;
     }
 
     /**
@@ -90,13 +90,13 @@ public class ClobType extends AbstractType<Clob> {
      * @param x the {@link Clob} to read; may be {@code null}
      * @return the full character content of the CLOB, an empty string if the CLOB has zero length,
      *         or {@code null} if {@code x} is {@code null}
-     * @throws UnsupportedOperationException if the CLOB length exceeds {@link Integer#MAX_VALUE} characters
      * @throws UncheckedSQLException         if a {@link java.sql.SQLException} occurs while reading the CLOB
-     *                                       content or freeing its resources
+     *                                       length or content, or freeing its resources
+     * @throws UnsupportedOperationException if the CLOB length exceeds {@link Integer#MAX_VALUE} characters
      */
     @MayReturnNull
     @Override
-    public String stringOf(final Clob x) throws UnsupportedOperationException, UncheckedSQLException {
+    public String stringOf(final Clob x) throws UncheckedSQLException, UnsupportedOperationException {
         if (x == null) {
             return null;
         }
@@ -210,28 +210,28 @@ public class ClobType extends AbstractType<Clob> {
     /**
      * Sets a {@link Clob} value as a parameter in a {@link java.sql.PreparedStatement}.
      *
-     * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param statement        the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the {@link Clob} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Clob x) throws NullPointerException, SQLException {
-        stmt.setClob(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final Clob x) throws NullPointerException, SQLException {
+        statement.setClob(columnIndex, x);
     }
 
     /**
      * Sets a {@link Clob} value as a named parameter in a {@link java.sql.CallableStatement}.
      *
-     * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
+     * @param statement          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the {@link Clob} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Clob x) throws NullPointerException, SQLException {
-        stmt.setClob(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final Clob x) throws NullPointerException, SQLException {
+        statement.setClob(parameterName, x);
     }
 }

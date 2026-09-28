@@ -109,7 +109,10 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      * <ul>
      *   <li>{@code null}, empty, or the literal {@code "null"} string: returns {@code null}</li>
      *   <li>{@code "sysTime"} or {@code "SYS_TIME"} (case-insensitive): returns a {@link Calendar} for the current system time</li>
-     *   <li>Purely numeric values (possible epoch milliseconds): converted via the {@code Dates.create*} epoch factory</li>
+     *   <li>More than four characters of ASCII digits, optionally preceded by {@code +} or {@code -}: epoch milliseconds,
+     *       converted via the {@code Dates.create*} epoch factory. Shorter numeric text such as {@code "0"} or {@code "2024"}
+     *       is not read as epoch milliseconds; it goes to the formatted parser, which rejects it as ambiguous
+     *       ({@link IllegalArgumentException})</li>
      *   <li>All other values: parsed by {@link com.landawn.abacus.util.Dates#parseToCalendar(String)}</li>
      * </ul>
      *
@@ -155,30 +158,30 @@ public class CalendarType extends AbstractCalendarType<Calendar> {
      *
      * @param cbuf   the character array containing the value; may be {@code null}
      * @param offset the index of the first character to use
-     * @param len    the number of characters to use
-     * @return the parsed calendar value, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param length    the number of characters to use
+     * @return the parsed calendar value, or {@code null} if {@code cbuf} is {@code null} or {@code length} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public Calendar valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
-        if ((cbuf == null) || (len == 0)) {
+    public Calendar valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return Dates.createCalendar(parseLong(cbuf, offset, len));
+                return Dates.createCalendar(parseLong(cbuf, offset, length));
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**

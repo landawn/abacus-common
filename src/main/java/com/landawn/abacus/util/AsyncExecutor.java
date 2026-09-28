@@ -61,12 +61,18 @@ import com.landawn.abacus.logging.LoggerFactory;
  * which is read once when this class is initialized; {@code 0} makes the hook return without waiting. An
  * externally supplied {@code Executor} keeps whatever threads its own factory creates.</p>
  *
+ * <p><b>Calling {@code System.exit} from a task:</b> {@link System#exit(int)} blocks the calling thread until
+ * every shutdown hook has finished, so a task running on the internal pool that calls it can never complete
+ * while the hook waits for it. JVM exit is then delayed by the whole hook timeout (120 seconds by default).
+ * Call {@code System.exit} from a thread outside the pool, or lower the timeout with the system property
+ * above.</p>
+ *
  * <p><b>Executor ownership:</b> an instance created by one of the sizing constructors owns the pool it
  * creates lazily and shuts it down on {@link #shutdown()}. An instance created by
  * {@link #AsyncExecutor(Executor)} only <i>borrows</i> the supplied executor: {@code shutdown()} stops
  * this instance from accepting new work, but never shuts the
- * borrowed executor down - it may be shared with the rest of the application.</p>
- * Use {@link #shutdownAndAwait(long, TimeUnit)} to wait for tasks submitted through this instance.
+ * borrowed executor down - it may be shared with the rest of the application.
+ * Use {@link #shutdownAndAwait(long, TimeUnit)} to wait for tasks submitted through this instance.</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -241,8 +247,10 @@ public class AsyncExecutor {
     /**
      * Constructs an AsyncExecutor that wraps an existing Executor.
      *
-     * <p>If the provided executor is a ThreadPoolExecutor, its configuration
-     * parameters are extracted and used. Otherwise, default values are used.</p>
+     * <p>If the provided executor is a ThreadPoolExecutor, its configuration parameters (core and
+     * maximum pool size, keep-alive time) are captured once, at construction, and reported by
+     * {@link #toString()}; otherwise the default values are reported. They never change how the
+     * supplied executor runs tasks.</p>
      *
      * <p><b>This instance does not own {@code executor}.</b> {@link #shutdown()} and
      * {@link #shutdownAndAwait(long, TimeUnit)} stop this wrapper from accepting new work; only the latter waits for
@@ -335,9 +343,9 @@ public class AsyncExecutor {
      *
      * <p>Once the command starts, the final action is guaranteed to execute regardless of whether it
      * completes successfully or throws an exception, similar to a try-finally block.
-     * This is useful for cleanup operations such as releasing resources or updating state.</p>
+     * This is useful for cleanup operations such as releasing resources or updating state.
      * If both actions fail, the command's failure remains primary and the final-action failure is
-     * attached to it as a suppressed exception.
+     * attached to it as a suppressed exception.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -470,9 +478,9 @@ public class AsyncExecutor {
      *
      * <p>Once the command starts, the final action is guaranteed to execute regardless of whether it
      * completes successfully or throws an exception, similar to a try-finally block.
-     * This is useful for cleanup operations such as releasing resources or logging completion.</p>
+     * This is useful for cleanup operations such as releasing resources or logging completion.
      * If both actions fail, the command's failure remains primary and the final-action failure is
-     * attached to it as a suppressed exception.
+     * attached to it as a suppressed exception.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -592,8 +600,8 @@ public class AsyncExecutor {
      * @param retryCondition the predicate to determine whether to retry based on the caught exception;
      *                       receives the exception and returns {@code true} to retry, {@code false} to fail immediately
      * @return a ContinuableFuture representing the pending completion of this action (including retries)
-     * @throws IllegalArgumentException if any of {@code command}, {@code retryCondition} is {@code null},
-     *         or if {@code retryTimes} or {@code retryIntervalInMillis} is negative. All argument
+     * @throws IllegalArgumentException if {@code command} is {@code null}, if {@code retryTimes} or
+     *         {@code retryIntervalInMillis} is negative, or if {@code retryCondition} is {@code null}. All argument
      *         validation happens on the calling thread, before the task is submitted.
      * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      * @throws RejectedExecutionException if the underlying executor refuses the task - for
@@ -604,7 +612,6 @@ public class AsyncExecutor {
             final long retryIntervalInMillis, final Predicate<? super Exception> retryCondition)
             throws IllegalArgumentException, IllegalStateException, RejectedExecutionException {
         N.checkArgNotNull(command, cs.command);
-        N.checkArgNotNull(retryCondition, cs.retryCondition);
 
         // Build the policy on the calling thread so an invalid retryTimes/retryIntervalInMillis is reported
         // synchronously rather than from future.get() - matching executeWithRetry(Callable, ...) below.
@@ -623,7 +630,10 @@ public class AsyncExecutor {
      * evaluates to {@code true}. The retry condition can check both the result value and any exception thrown.
      * A delay is introduced between retry attempts.</p>
      *
-     * <p>The maximum number of execution attempts is retryTimes + 1 (initial attempt plus retries).</p>
+     * <p>The maximum number of execution attempts is retryTimes + 1 (initial attempt plus retries).
+     * If the final attempt throws, the returned future fails with that exception. If the final attempt
+     * returns a result that still satisfies {@code retryCondition}, that result is <i>not</i> delivered:
+     * the future fails with a {@link com.landawn.abacus.exception.RetryExhaustedException} instead (see {@link Retry#call(Callable)}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -642,8 +652,8 @@ public class AsyncExecutor {
      * @param retryCondition bi-predicate that receives the result (may be {@code null} on failure) and the exception
      *                       (may be {@code null} on success) and returns {@code true} to retry; must not be {@code null}
      * @return a ContinuableFuture representing the pending result of this computation (including retries)
-     * @throws IllegalArgumentException if any of {@code command}, {@code retryCondition} is {@code null},
-     *         or if {@code retryTimes} or {@code retryIntervalInMillis} is negative. All argument
+     * @throws IllegalArgumentException if {@code command} is {@code null}, if {@code retryTimes} or
+     *         {@code retryIntervalInMillis} is negative, or if {@code retryCondition} is {@code null}. All argument
      *         validation happens on the calling thread, before the task is submitted.
      * @throws IllegalStateException if this {@code AsyncExecutor} has already been shut down
      * @throws RejectedExecutionException if the underlying executor refuses the task - for
@@ -653,7 +663,6 @@ public class AsyncExecutor {
     public <R> ContinuableFuture<R> executeWithRetry(final Callable<? extends R> command, final int retryTimes, final long retryIntervalInMillis,
             final BiPredicate<? super R, ? super Exception> retryCondition) throws IllegalArgumentException, IllegalStateException, RejectedExecutionException {
         N.checkArgNotNull(command, cs.command);
-        N.checkArgNotNull(retryCondition, cs.retryCondition);
 
         // Build the policy on the calling thread so an invalid retryTimes/retryIntervalInMillis is reported
         // synchronously rather than from future.get() - matching executeWithRetry(Throwables.Runnable, ...) above.
@@ -1086,7 +1095,9 @@ public class AsyncExecutor {
      * <p>The returned string includes configuration parameters and current state information:
      * core pool size, maximum pool size, active thread count (if the executor is a
      * ThreadPoolExecutor, otherwise "?"), keep-alive time in milliseconds, and the
-     * underlying executor instance details.</p>
+     * underlying executor instance details. Before the internal pool is lazily created, and
+     * after {@link #shutdown()}, there is no current executor: the active count is "?" and the
+     * executor is shown as {@code null}.</p>
      *
      * <p>This method is useful for debugging and monitoring the executor's state.</p>
      *

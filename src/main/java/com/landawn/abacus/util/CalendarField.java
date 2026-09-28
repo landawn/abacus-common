@@ -40,8 +40,8 @@ import java.util.Map;
  * Calendar cal = Calendar.getInstance();
  *
  * // Using CalendarField enum
- * cal.add(CalendarField.DAY_OF_MONTH.value(), 5);   // adds 5 days
- * cal.set(CalendarField.HOUR_OF_DAY.value(), 14);   // hour is set to 14 (2 PM)
+ * cal.add(CalendarField.DAY_OF_MONTH.value(), 5);  // adds 5 days
+ * cal.set(CalendarField.HOUR_OF_DAY.value(), 14);  // hour is set to 14 (2 PM)
  *
  * // Converting from int to CalendarField
  * CalendarField field = CalendarField.of(Calendar.MONTH);
@@ -203,8 +203,8 @@ public enum CalendarField {
      * System.out.println(field);   // prints MONTH
      *
      * // Using numeric value directly
-     * CalendarField dayField = CalendarField.of(5);   // 5 is Calendar.DAY_OF_MONTH
-     * System.out.println(dayField);                   // prints DAY_OF_MONTH
+     * CalendarField dayField = CalendarField.of(5);  // 5 is Calendar.DAY_OF_MONTH
+     * System.out.println(dayField);                  // prints DAY_OF_MONTH
      *
      * // Dynamic conversion
      * Calendar cal = Calendar.getInstance();
@@ -274,8 +274,8 @@ public enum CalendarField {
      * CalendarField monthField = CalendarField.MONTH;
      *
      * // Setting values - these are equivalent:
-     * cal.set(monthField.value(), 5);   // uses CalendarField
-     * cal.set(Calendar.MONTH, 5);       // uses Calendar constant directly
+     * cal.set(monthField.value(), 5);  // uses CalendarField
+     * cal.set(Calendar.MONTH, 5);      // uses Calendar constant directly
      *
      * // Getting values
      * int currentMonth = cal.get(CalendarField.MONTH.value());

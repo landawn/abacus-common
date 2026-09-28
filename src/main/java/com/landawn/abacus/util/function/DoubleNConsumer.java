@@ -43,9 +43,9 @@ public interface DoubleNConsumer {
      * averager.accept(1.0, 2.0, 3.0);   // Prints: Average: 2.0
      * }</pre>
      *
-     * @param args the double input arguments as a varargs array
+     * @param arguments the double input arguments as a varargs array
      */
-    void accept(double... args);
+    void accept(double... arguments);
 
     /**
      * Returns a composed {@code DoubleNConsumer} that performs, in sequence, this operation followed by the {@code after} operation.

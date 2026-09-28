@@ -284,4 +284,28 @@ public class PrimitiveLongArrayTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> type.valueOf("[x]"));
         assertThrows(NumberFormatException.class, () -> type.valueOf("[1, null]"));
     }
+
+    // ---- deep review 2026-09-25 G016 begin ----
+    // G016-01: valueOf must read back the quoted elements serializeTo writes under writeLongAsString.
+    @Test
+    public void testValueOf_quotedElementsFromWriteLongAsString() throws IOException {
+        final com.landawn.abacus.parser.JsonSerConfig config = com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true);
+        final BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+        final String serialized;
+
+        try {
+            type.serializeTo(writer, new long[] { 9007199254740993L, -2L }, config);
+            serialized = writer.toString();
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(writer);
+        }
+
+        assertEquals("[\"9007199254740993\", \"-2\"]", serialized);
+        assertArrayEquals(new long[] { 9007199254740993L, -2L }, type.valueOf(serialized));
+        assertArrayEquals(new long[] { 1L, 2L, 3L }, type.valueOf("['1', \"2\", 3]"));
+        // an empty quoted element is still malformed (it must not silently become 0)
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"\"]"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("[\"x\"]"));
+    }
+    // ---- deep review 2026-09-25 G016 end ----
 }

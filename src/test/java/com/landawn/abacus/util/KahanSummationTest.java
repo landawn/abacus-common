@@ -221,4 +221,15 @@ public class KahanSummationTest extends TestBase {
         Assertions.assertTrue(str.contains("sum=3.000000"));
         Assertions.assertTrue(str.contains("average=1.500000"));
     }
+
+
+    @Test
+    public void testSumStaysInfiniteAfterIntermediateOverflowEvenWhenLaterValuesCancel() {
+        final KahanSummation overflowFirst = KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE);
+        Assertions.assertEquals(Double.POSITIVE_INFINITY, overflowFirst.sum());
+        Assertions.assertEquals(Double.MAX_VALUE / 3.0, overflowFirst.average().get(), 0.0);
+
+        final KahanSummation cancelFirst = KahanSummation.of(Double.MAX_VALUE, -Double.MAX_VALUE, Double.MAX_VALUE);
+        Assertions.assertEquals(Double.MAX_VALUE, cancelFirst.sum());
+    }
 }

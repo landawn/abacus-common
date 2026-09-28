@@ -69,9 +69,9 @@ public @interface JsonXmlConfig {
      * Values can be exact field names or regular expressions matched with {@link String#matches(String)}.
      *
      * <p><b>Serialization only:</b> a matching property is still populated when input containing it is
-     * deserialized (and is not reported as an unknown property). To drop a property from input, mark it
-     * {@link Transient @Transient} or configure the parser with
-     * {@code DeserializationConfig.setIgnoredPropNames(Class, Set)}. A matching field must keep
+     * deserialized (and is not reported as an unknown property). To drop a property from input, configure
+     * the parser with {@code DeserializationConfig.setIgnoredPropNames(Class, Set)};
+     * {@link Transient @Transient} is output-only as well and does not block input. A matching field must keep
      * {@link JsonXmlField#direction()} at its default; any other direction is rejected with an
      * {@code IllegalArgumentException} when the bean is first introspected.</p>
      *

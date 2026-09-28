@@ -143,10 +143,11 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param asyncExecutor the executor for running parallel tasks ({@code null} uses the default)
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers additional close handlers to execute when the stream is closed, may be {@code null}
+     * @throws IllegalStateException if {@code stream} is already closed
      */
     ParallelIteratorStream(final Stream<T> stream, final boolean sorted, final Comparator<? super T> comparator, final int maxThreadNum,
             final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads,
-            final Deque<LocalRunnable> closeHandlers) {
+            final Deque<LocalRunnable> closeHandlers) throws IllegalStateException {
         this(iterate(stream), sorted, comparator, maxThreadNum, splitStrategy, asyncExecutor, cancelUncompletedThreads,
                 mergeCloseHandlers(closeHandlers, stream));
     }
@@ -2586,6 +2587,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * via a shared synchronized cursor; each thread builds its own partial map, which are then merged
      * using {@code mergeFunction} to resolve key collisions.
      *
+     * <p>Because each thread takes an interleaved subset of the elements, {@code mergeFunction} does not
+     * see the values of a key in encounter order; an order-sensitive merge function (for example one
+     * that keeps the first value) can give a result that differs from a sequential run and from run to run.
+     *
      * @param <K> the type of map keys
      * @param <V> the type of map values
      * @param <M> the type of the resulting map
@@ -2599,6 +2604,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -2629,7 +2635,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final M map = mapFactory.get();
+                final M map = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
                 T next = null;
 
                 try {
@@ -2675,6 +2681,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * are then merged by combining per-key downstream containers using the downstream collector's
      * combiner. The downstream finisher is applied to each grouped container at the end.
      *
+     * <p>Because each thread takes an interleaved subset of the elements, the downstream collector does
+     * not receive the values of a key in encounter order: an order-sensitive downstream (for example
+     * {@code toList()}) yields an unspecified permutation.
+     *
      * @param <K> the type of grouping keys
      * @param <V> the type of values fed into the downstream collector
      * @param <D> the type of the downstream collector's result
@@ -2688,15 +2698,17 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map from keys to finished downstream results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the key mapper returns {@code null}, or if any of {@code keyMapper},
-     *         {@code valueMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code downstream}, or
+     *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if the key mapper returns {@code null}, or if {@code mapFactory} returns
+     *         {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -2726,7 +2738,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 @SuppressWarnings("rawtypes")
-                final Map<K, Object> map = (Map) mapFactory.get();
+                final Map<K, Object> map = (Map) N.requireNonNull(mapFactory.get(), "mapFactory returned null");
                 K key = null;
                 Object valueContainer = null;
                 T next = null;
@@ -2741,7 +2753,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             }
                         }
 
-                        key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                        // N.requireNonNull, not the inherited checkArgNotNull: the inherited one closes this stream from the
+                        // worker thread while sibling workers are still consuming it. completeAndFinishResults closes it
+                        // once every worker has finished.
+                        key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
                         valueContainer = map.get(key);
 
                         if (valueContainer == null) {
@@ -2797,6 +2812,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * map, and the partial maps are merged by combining per-key downstream containers. The downstream
      * finisher is applied at the end.
      *
+     * <p>Because each thread takes an interleaved subset of the elements, the downstream collector does
+     * not receive the values of a key in encounter order: an order-sensitive downstream (for example
+     * {@code toList()}) yields an unspecified permutation.
+     *
      * @param <K> the type of grouping keys
      * @param <V> the type of values fed into the downstream collector
      * @param <D> the type of the downstream collector's result
@@ -2810,8 +2829,9 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map from keys to finished downstream results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if a returned key is {@code null}, or if any of {@code flatKeyExtractor},
-     *         {@code valueMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code flatKeyExtractor}, {@code valueMapper}, {@code downstream}, or
+     *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if a returned key is {@code null}, or if {@code mapFactory} returns {@code null}.
      * @throws E if the flat key extractor throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -2819,7 +2839,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M flatGroupTo(
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor,
             final Throwables.BiFunction<? super K, ? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(flatKeyExtractor, cs.flatKeyExtractor);
@@ -2844,7 +2864,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
                 @SuppressWarnings("rawtypes")
-                final Map<K, Object> map = (Map) mapFactory.get();
+                final Map<K, Object> map = (Map) N.requireNonNull(mapFactory.get(), "mapFactory returned null");
                 Iterator<? extends K> keyIter = null;
                 K key = null;
                 Object valueContainer = null;
@@ -2866,7 +2886,8 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
                             keyIter = kc.iterator();
 
                             while (eHolder.value() == null && keyIter.hasNext()) {
-                                key = checkArgNotNull(keyIter.next(), "element cannot be mapped to a null key");
+                                // N.requireNonNull, not the inherited checkArgNotNull, which would close this stream under the sibling workers.
+                                key = N.requireNonNull(keyIter.next(), "element cannot be mapped to a null key");
                                 valueContainer = map.get(key);
 
                                 if (valueContainer == null) {
@@ -2923,6 +2944,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * multimap, which are then merged by putting all values from each partial result into the final
      * map.
      *
+     * <p>Because each thread takes an interleaved subset of the elements, the values of a key are not
+     * added in encounter order: an ordered value collection (for example a {@code List}) holds an
+     * unspecified permutation.
+     *
      * @param <K> the type of multimap keys
      * @param <V> the type of multimap values
      * @param <C> the type of the collection used to hold values for each key
@@ -2936,6 +2961,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is
      *         {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -2961,7 +2987,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final M map = mapFactory.get();
+                final M map = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
                 T next = null;
 
                 try {
@@ -3004,17 +3030,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * accumulator. Each thread independently reduces its share of elements into a partial result;
      * the partial results are then combined using the same accumulator. Because the accumulator
      * serves as both the per-thread reduction function and the cross-thread combiner, it must be
-     * associative.
+     * associative. Threads take elements one at a time from a shared cursor, so each share is an
+     * interleaved subset of the elements; the accumulator must therefore also be commutative,
+     * otherwise the result can differ from a sequential reduction and from run to run.
      *
-     * @param accumulator an associative, non-interfering, stateless function for combining two
+     * @param accumulator an associative and commutative, non-interfering, stateless function for combining two
      *        values; used both within a thread and to merge partial results across threads
      * @return an {@link Optional} describing the result, or an empty Optional if the stream is empty
-     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the result of the reduction is {@code null}
      */
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -3069,7 +3097,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * Performs a parallel reduction on the elements of this stream using an identity value,
      * an accumulator function, and a combiner. Each thread starts with {@code identity} and
      * accumulates its share of elements; the per-thread results are then combined pairwise using
-     * {@code combiner} to produce the final result.
+     * {@code combiner} to produce the final result. Threads take elements one at a time from a shared
+     * cursor, so each share is an interleaved subset of the elements; the result must therefore not
+     * depend on the order in which elements are accumulated, otherwise it can differ from a
+     * sequential reduction and from run to run.
      *
      * @param <U> the type of the result
      * @param identity the identity value for the combiner; also used as the initial value for each
@@ -3139,6 +3170,10 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * {@code accumulator}, and then all per-thread containers are merged into a single container
      * using {@code combiner}.
      *
+     * <p>Threads take elements one at a time from a shared cursor, so each container receives an
+     * interleaved subset of the elements; an order-sensitive result (for example a {@code List}) may
+     * not follow the encounter order.
+     *
      * @param <R> the type of the mutable result container
      * @param supplier a function that creates a new mutable result container for each thread
      * @param accumulator a non-interfering, stateless function to fold an element into a container
@@ -3148,10 +3183,12 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
      *         {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -3168,10 +3205,14 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final R container = supplier.get();
+                R container = null;
                 T next = null;
 
                 try {
+                    // Inside the try: a null container is recorded like any other worker failure, so it stops the
+                    // other workers and is rethrown as the NullPointerException itself.
+                    container = N.requireNonNull(supplier.get(), "supplier returned null");
+
                     while (eHolder.value() == null) {
                         synchronized (elements) {
                             if (elements.hasNext()) {
@@ -3200,7 +3241,9 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * and {@link java.util.stream.Collector.Characteristics#UNORDERED UNORDERED} characteristics,
      * a single shared container is created and all threads accumulate into it
      * directly. Otherwise, each thread accumulates into its own container and the per-thread
-     * containers are combined using the collector's combiner.
+     * containers are combined using the collector's combiner. Either way, threads take elements one
+     * at a time from a shared cursor, so an order-sensitive result (for example a {@code List}) may
+     * not follow the encounter order.
      *
      * @param <R> the type of the result
      * @param collector the {@code Collector} describing the reduction
@@ -3281,17 +3324,18 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * Returns the minimum element of this stream according to the given comparator. If the stream
      * is already sorted with a compatible comparator, the first element is returned immediately
      * without a full parallel scan. Otherwise, the minimum is found via a parallel reduction using
-     * a {@link Collectors#min(Comparator)} collector.
+     * a {@link Collectors#min(Comparator)} collector, and which of several minimal elements is returned
+     * is unspecified.
      *
      * @param comparator a comparator to compare elements
      * @return an {@link Optional} describing the minimum element, or an empty Optional if the stream
      *         is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
-    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3306,6 +3350,11 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
             } else {
                 isDone = false;
             }
+        } catch (final Throwable e) {
+            // Anything thrown above (an upstream hasNext()/next() failure, the sorted shortcut's documented NPE) ends
+            // the operation before isDone is cleared: it must win over a failing close handler.
+            closeAfterFailure(e);
+            throw e;
         } finally {
             if (isDone) {
                 close();
@@ -3316,20 +3365,19 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
     }
 
     /**
-     * Returns the maximum element of this stream according to the given comparator. If the stream
-     * is already sorted with a compatible comparator, the iterator is drained sequentially to
-     * return the last element without a full parallel scan. Otherwise, the maximum is found via a
-     * parallel reduction using a {@link Collectors#max(Comparator)} collector.
+     * Returns the maximum element of this stream according to the given comparator, found via a
+     * parallel reduction using a {@link Collectors#max(Comparator)} collector (there is no
+     * sorted-stream shortcut). Which of several maximal elements is returned is unspecified.
      *
      * @param comparator a comparator to compare elements
      * @return an {@link Optional} describing the maximum element, or an empty Optional if the stream
      *         is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
-    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3337,19 +3385,18 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
         boolean isDone = true;
 
         try {
+            // No sorted shortcut (see IteratorStream.max): draining to the last element returned the LAST of
+            // several equivalent maxima, while max resolves ties to the first.
             if (!elements.hasNext()) {
                 return Optional.empty();
-            } else if (isSorted() && isSameComparator(comparator, comparator())) {
-                T next = null;
-
-                while (elements.hasNext()) {
-                    next = elements.next();
-                }
-
-                return Optional.of(next);
             } else {
                 isDone = false;
             }
+        } catch (final Throwable e) {
+            // Anything thrown above (an upstream hasNext() failure in the empty check) ends the operation before isDone
+            // is cleared: it must win over a failing close handler.
+            closeAfterFailure(e);
+            throw e;
         } finally {
             if (isDone) {
                 close();
@@ -3621,14 +3668,14 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the first (lowest-index) matching element, or an empty
      *         Optional if no element matches
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3645,23 +3692,25 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final Pair<Long, T> pair = new Pair<>();
+                // Primitive position + element locals: a Pair<Long, T> scratch holder boxed every element's index.
+                long position = 0;
+                T element = null;
 
                 try {
                     while (resultHolder.value() == null && eHolder.value() == null) {
                         synchronized (elements) {
                             if (elements.hasNext()) {
-                                pair.setLeft(index.getAndIncrement());
-                                pair.setRight(elements.next());
+                                position = index.getAndIncrement();
+                                element = elements.next();
                             } else {
                                 break;
                             }
                         }
 
-                        if (predicate.test(pair.right())) {
+                        if (predicate.test(element)) {
                             synchronized (resultHolder) {
-                                if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
-                                    resultHolder.setValue(pair.copy());
+                                if (resultHolder.value() == null || position < resultHolder.value().left()) {
+                                    resultHolder.setValue(Pair.of(position, element));
                                 }
                             }
 
@@ -3690,14 +3739,14 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing some matching element, or an empty Optional if no
      *         element matches
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3757,14 +3806,14 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the last (highest-index) matching element, or an empty
      *         Optional if no element matches
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3781,24 +3830,38 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
 
         for (int i = 0; i < maxThreadNum; i++) {
             asyncExecutorToUse = execute(asyncExecutorToUse, maxThreadNum, i, futureList, eHolder, () -> {
-                final Pair<Long, T> pair = new Pair<>();
+                // Primitive position + element locals: a Pair<Long, T> scratch holder boxed every element's index.
+                long position = 0;
+                T element = null;
+
+                // A worker takes strictly increasing positions, so its latest match is its best candidate: it is
+                // tracked locally and published once, instead of locking and allocating a Pair for every match.
+                boolean found = false;
+                long lastMatchPosition = 0;
+                T lastMatch = null;
 
                 try {
                     while (eHolder.value() == null) {
                         synchronized (elements) {
                             if (elements.hasNext()) {
-                                pair.setLeft(index.getAndIncrement());
-                                pair.setRight(elements.next());
+                                position = index.getAndIncrement();
+                                element = elements.next();
                             } else {
                                 break;
                             }
                         }
 
-                        if (predicate.test(pair.right())) {
-                            synchronized (resultHolder) {
-                                if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
-                                    resultHolder.setValue(pair.copy());
-                                }
+                        if (predicate.test(element)) {
+                            found = true;
+                            lastMatchPosition = position;
+                            lastMatch = element;
+                        }
+                    }
+
+                    if (found) {
+                        synchronized (resultHolder) {
+                            if (resultHolder.value() == null || lastMatchPosition > resultHolder.value().left()) {
+                                resultHolder.setValue(Pair.of(lastMatchPosition, lastMatch));
                             }
                         }
                     }
@@ -3971,7 +4034,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      *        returns {@link MergeResult#TAKE_FIRST} to take from this stream, or
      *        {@link MergeResult#TAKE_SECOND} to take from {@code b}
      * @return a new parallel stream of merged elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     @Override
@@ -4106,7 +4169,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param b the stream to zip with this stream
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}.
      */
     @Override
@@ -4134,7 +4197,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param valueForNoneB the padding value used when {@code b} is exhausted
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}.
      */
     @Override
@@ -4161,7 +4224,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param c the third stream to zip with this stream
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}.
      */
     @Override
@@ -4193,7 +4256,7 @@ final class ParallelIteratorStream<T> extends IteratorStream<T> {
      * @param valueForNoneC the padding value used when {@code c} is exhausted
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}.
      */
     @Override

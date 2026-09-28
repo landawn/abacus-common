@@ -58,12 +58,12 @@ public interface DoubleNFunction<R> extends Throwables.DoubleNFunction<R, Runtim
      * Double avg = average.apply(1.5, 2.5, 3.5);   // Returns 2.5
      * }</pre>
      *
-     * @param args the double input arguments as a varargs array. Can be empty,
+     * @param arguments the double input arguments as a varargs array. Can be empty,
      *             contain a single value, or multiple values
      * @return the function result
      */
     @Override
-    R apply(double... args);
+    R apply(double... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input, and then applies the {@code after} function to the result.

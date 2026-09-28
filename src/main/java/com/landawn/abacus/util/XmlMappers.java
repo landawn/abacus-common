@@ -185,13 +185,13 @@ public final class XmlMappers {
     }
 
     /**
-     * @throws IllegalArgumentException if {@code xml} is null or {@code len} is negative
-     * @throws IndexOutOfBoundsException if {@code len} is nonnegative and {@code offset} is negative
+     * @throws IllegalArgumentException if {@code xml} is null or {@code length} is negative
+     * @throws IndexOutOfBoundsException if {@code length} is nonnegative and {@code offset} is negative
      *         or the range exceeds {@code xml.length}
      */
-    private static void checkByteRange(final byte[] xml, final int offset, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
+    private static void checkByteRange(final byte[] xml, final int offset, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(xml, cs.xml);
-        N.checkFromIndexSize(offset, len, xml.length);
+        N.checkFromIndexSize(offset, length, xml.length);
     }
 
     /**
@@ -490,8 +490,8 @@ public final class XmlMappers {
      * <pre>{@code
      * SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
      * ByteArrayOutputStream out = new ByteArrayOutputStream();
-     * XmlMappers.toXml(N.asMap("name", "Bob"), out, config);   // writes indented <ImmutableMap>...</ImmutableMap>
-     * String xml = out.toString(java.nio.charset.StandardCharsets.UTF_8);                             // contains "<name>Bob</name>"
+     * XmlMappers.toXml(N.asMap("name", "Bob"), out, config);               // writes indented <ImmutableMap>...</ImmutableMap>
+     * String xml = out.toString(java.nio.charset.StandardCharsets.UTF_8);  // contains "<name>Bob</name>"
      * }</pre>
      *
      * @param obj the object to serialize
@@ -548,8 +548,8 @@ public final class XmlMappers {
      * <pre>{@code
      * SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
      * StringWriter writer = new StringWriter();
-     * XmlMappers.toXml(N.asMap("name", "Bob"), writer, config);   // writes indented XML to the writer
-     * String xml = writer.toString();                             // contains "<name>Bob</name>"
+     * XmlMappers.toXml(N.asMap("name", "Bob"), writer, config);  // writes indented XML to the writer
+     * String xml = writer.toString();                            // contains "<name>Bob</name>"
      * }</pre>
      *
      * @param obj the object to serialize
@@ -578,8 +578,8 @@ public final class XmlMappers {
      * <pre>{@code
      * ByteArrayOutputStream bytes = new ByteArrayOutputStream();
      * DataOutput out = new DataOutputStream(bytes);
-     * XmlMappers.toXml(N.asMap("name", "Bob"), out);   // writes <ImmutableMap><name>Bob</name></ImmutableMap>
-     * String xml = bytes.toString(java.nio.charset.StandardCharsets.UTF_8);                   // contains "<name>Bob</name>"
+     * XmlMappers.toXml(N.asMap("name", "Bob"), out);                         // writes <ImmutableMap><name>Bob</name></ImmutableMap>
+     * String xml = bytes.toString(java.nio.charset.StandardCharsets.UTF_8);  // contains "<name>Bob</name>"
      * }</pre>
      *
      * @param obj the object to serialize
@@ -603,8 +603,8 @@ public final class XmlMappers {
      * SerializationConfig config = XmlMappers.createSerializationConfig().with(SerializationFeature.INDENT_OUTPUT);
      * ByteArrayOutputStream bytes = new ByteArrayOutputStream();
      * DataOutput out = new DataOutputStream(bytes);
-     * XmlMappers.toXml(N.asMap("name", "Bob"), out, config);   // writes indented XML
-     * String xml = bytes.toString(java.nio.charset.StandardCharsets.UTF_8);                           // contains "<name>Bob</name>"
+     * XmlMappers.toXml(N.asMap("name", "Bob"), out, config);                 // writes indented XML
+     * String xml = bytes.toString(java.nio.charset.StandardCharsets.UTF_8);  // contains "<name>Bob</name>"
      * }</pre>
      *
      * @param obj the object to serialize
@@ -663,20 +663,20 @@ public final class XmlMappers {
      * @param <T> the type of the object to return
      * @param xml the XML byte array containing the data
      * @param offset the start offset in the array
-     * @param len the number of bytes to read
+     * @param length the number of bytes to read
      * @param targetType the class of the object to deserialize to
      * @return the deserialized object
-     * @throws IllegalArgumentException if {@code xml} is {@code null} or {@code len} is negative.
+     * @throws IllegalArgumentException if {@code xml} is {@code null}, {@code length} is negative, or {@code targetType} is {@code null}.
      * @throws IndexOutOfBoundsException if the requested segment is outside {@code xml}
      * @throws RuntimeException if the XML cannot be parsed or its content cannot be converted to the requested target type
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
-    public static <T> T fromXml(final byte[] xml, final int offset, final int len, final Class<? extends T> targetType)
+    public static <T> T fromXml(final byte[] xml, final int offset, final int length, final Class<? extends T> targetType)
             throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
-        checkByteRange(xml, offset, len);
+        checkByteRange(xml, offset, length);
 
         try {
-            return defaultXmlMapper.readValue(xml, offset, len, targetType);
+            return defaultXmlMapper.readValue(xml, offset, length, targetType);
         } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -802,6 +802,8 @@ public final class XmlMappers {
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
     public static <T> T fromXml(final File xml, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         try {
             return defaultXmlMapper.readValue(xml, targetType);
         } catch (final IOException e) {
@@ -832,6 +834,8 @@ public final class XmlMappers {
      */
     public static <T> T fromXml(final File xml, final Class<? extends T> targetType, final DeserializationConfig config)
             throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final XmlMapper xmlMapper = getXmlMapper(config);
 
         try {
@@ -1151,22 +1155,22 @@ public final class XmlMappers {
      * @param <T> the type of the object to return
      * @param xml the XML byte array containing the data
      * @param offset the start offset in the array
-     * @param len the number of bytes to read
+     * @param length the number of bytes to read
      * @param targetType the type reference describing the target type
      * @return the deserialized object
-     * @throws IllegalArgumentException if {@code xml} or {@code targetType} is {@code null}, or {@code len} is negative.
+     * @throws IllegalArgumentException if {@code xml} is {@code null}, {@code length} is negative, or {@code targetType} is {@code null}.
      * @throws IndexOutOfBoundsException if the requested segment is outside {@code xml}
      * @throws RuntimeException if the XML cannot be parsed or its content cannot be converted to the requested target type
      * @see com.fasterxml.jackson.core.type.TypeReference
      */
-    public static <T> T fromXml(final byte[] xml, final int offset, final int len, final TypeReference<? extends T> targetType)
+    public static <T> T fromXml(final byte[] xml, final int offset, final int length, final TypeReference<? extends T> targetType)
             throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
+        checkByteRange(xml, offset, length);
+
         N.checkArgNotNull(targetType, cs.targetType);
 
-        checkByteRange(xml, offset, len);
-
         try {
-            return defaultXmlMapper.readValue(xml, offset, len, targetType);
+            return defaultXmlMapper.readValue(xml, offset, length, targetType);
         } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -1280,8 +1284,8 @@ public final class XmlMappers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * File xmlFile = new File("items.xml");                                                    // contains <List><item>a</item><item>b</item></List>
-     * List<String> list = XmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {});   // list -> [a, b]
+     * File xmlFile = new File("items.xml");                                                   // contains <List><item>a</item><item>b</item></List>
+     * List<String> list = XmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {});  // list -> [a, b]
      * }</pre>
      *
      * @param <T> the type of the object to return
@@ -1309,8 +1313,8 @@ public final class XmlMappers {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DeserializationConfig config = XmlMappers.createDeserializationConfig();
-     * File xmlFile = new File("items.xml");                                                            // contains <List><item>a</item><item>b</item></List>
-     * List<String> list = XmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {}, config);   // list -> [a, b]
+     * File xmlFile = new File("items.xml");                                                           // contains <List><item>a</item><item>b</item></List>
+     * List<String> list = XmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {}, config);  // list -> [a, b]
      * }</pre>
      *
      * @param <T> the type of the object to return
@@ -1484,8 +1488,8 @@ public final class XmlMappers {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * URL xmlUrl = new File("items.xml").toURI().toURL();                                     // file contains a <List> of items
-     * List<String> list = XmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {});   // list -> [a, b]
+     * URL xmlUrl = new File("items.xml").toURI().toURL();                                    // file contains a <List> of items
+     * List<String> list = XmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {});  // list -> [a, b]
      * }</pre>
      *
      * @param <T> the type of the object to return
@@ -1515,8 +1519,8 @@ public final class XmlMappers {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DeserializationConfig config = XmlMappers.createDeserializationConfig();
-     * URL xmlUrl = new File("items.xml").toURI().toURL();                                             // file contains a <List> of items
-     * List<String> list = XmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {}, config);   // list -> [a, b]
+     * URL xmlUrl = new File("items.xml").toURI().toURL();                                            // file contains a <List> of items
+     * List<String> list = XmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {}, config);  // list -> [a, b]
      * }</pre>
      *
      * @param <T> the type of the object to return
@@ -1855,8 +1859,8 @@ public final class XmlMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
-         * String compact = xmlMappers.toXml(N.asMap("name", "Bob"), false);   // <ImmutableMap><name>Bob</name></ImmutableMap>
-         * String pretty = xmlMappers.toXml(N.asMap("name", "Bob"), true);     // same content, indented across lines
+         * String compact = xmlMappers.toXml(N.asMap("name", "Bob"), false);  // <ImmutableMap><name>Bob</name></ImmutableMap>
+         * String pretty = xmlMappers.toXml(N.asMap("name", "Bob"), true);    // same content, indented across lines
          * }</pre>
          *
          * @param obj the object to serialize
@@ -2018,20 +2022,20 @@ public final class XmlMappers {
          * @param <T> the type of the object to return
          * @param xml the XML byte array containing the data
          * @param offset the start offset in the array
-         * @param len the number of bytes to read
+         * @param length the number of bytes to read
          * @param targetType the class of the object to deserialize to
          * @return the deserialized object
-         * @throws IllegalArgumentException if {@code xml} is {@code null} or {@code len} is negative.
+         * @throws IllegalArgumentException if {@code xml} is {@code null}, {@code length} is negative, or {@code targetType} is {@code null}.
          * @throws IndexOutOfBoundsException if the requested segment is outside {@code xml}
          * @throws RuntimeException if the XML cannot be parsed or its content cannot be converted to the requested target type
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
-        public <T> T fromXml(final byte[] xml, final int offset, final int len, final Class<? extends T> targetType)
+        public <T> T fromXml(final byte[] xml, final int offset, final int length, final Class<? extends T> targetType)
                 throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
-            checkByteRange(xml, offset, len);
+            checkByteRange(xml, offset, length);
 
             try {
-                return xmlMapper.readValue(xml, offset, len, targetType);
+                return xmlMapper.readValue(xml, offset, length, targetType);
             } catch (final IOException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -2084,6 +2088,8 @@ public final class XmlMappers {
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
         public <T> T fromXml(final File xml, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+            N.checkArgNotNull(targetType, cs.targetType);
+
             try {
                 return xmlMapper.readValue(xml, targetType);
             } catch (final IOException e) {
@@ -2259,22 +2265,22 @@ public final class XmlMappers {
          * @param <T> the type of the object to return
          * @param xml the XML byte array containing the data
          * @param offset the start offset in the array
-         * @param len the number of bytes to read
+         * @param length the number of bytes to read
          * @param targetType the type reference describing the target type
          * @return the deserialized object
-         * @throws IllegalArgumentException if {@code xml} or {@code targetType} is {@code null}, or {@code len} is negative.
+         * @throws IllegalArgumentException if {@code xml} is {@code null}, {@code length} is negative, or {@code targetType} is {@code null}.
          * @throws IndexOutOfBoundsException if the requested segment is outside {@code xml}
          * @throws RuntimeException if the XML cannot be parsed or its content cannot be converted to the requested target type
          * @see com.fasterxml.jackson.core.type.TypeReference
          */
-        public <T> T fromXml(final byte[] xml, final int offset, final int len, final TypeReference<? extends T> targetType)
+        public <T> T fromXml(final byte[] xml, final int offset, final int length, final TypeReference<? extends T> targetType)
                 throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
+            checkByteRange(xml, offset, length);
+
             N.checkArgNotNull(targetType, cs.targetType);
 
-            checkByteRange(xml, offset, len);
-
             try {
-                return xmlMapper.readValue(xml, offset, len, targetType);
+                return xmlMapper.readValue(xml, offset, length, targetType);
             } catch (final IOException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -2315,8 +2321,8 @@ public final class XmlMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
-         * File xmlFile = new File("items.xml");                                                    // contains <List><item>a</item><item>b</item></List>
-         * List<String> list = xmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {});   // list -> [a, b]
+         * File xmlFile = new File("items.xml");                                                   // contains <List><item>a</item><item>b</item></List>
+         * List<String> list = xmlMappers.fromXml(xmlFile, new TypeReference<List<String>>() {});  // list -> [a, b]
          * }</pre>
          *
          * @param <T> the type of the object to return
@@ -2412,8 +2418,8 @@ public final class XmlMappers {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * XmlMappers.One xmlMappers = XmlMappers.wrap(new XmlMapper());
-         * URL xmlUrl = new File("items.xml").toURI().toURL();                                     // file contains a <List> of items
-         * List<String> list = xmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {});   // list -> [a, b]
+         * URL xmlUrl = new File("items.xml").toURI().toURL();                                    // file contains a <List> of items
+         * List<String> list = xmlMappers.fromXml(xmlUrl, new TypeReference<List<String>>() {});  // list -> [a, b]
          * }</pre>
          *
          * @param <T> the type of the object to return

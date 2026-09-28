@@ -119,7 +119,7 @@ public final class SnappyInputStream extends InputStream {
     }
 
     /**
-     * Reads up to {@code len} bytes of decompressed data from this input stream
+     * Reads up to {@code length} bytes of decompressed data from this input stream
      * into an array of bytes, starting at the specified offset.
      *
      * <p><b>Usage Examples:</b></p>
@@ -130,16 +130,16 @@ public final class SnappyInputStream extends InputStream {
      *
      * @param b the buffer into which the data is read
      * @param off the start offset in the destination array {@code b}
-     * @param len the maximum number of bytes to read
+     * @param length the maximum number of bytes to read
      * @return the total number of bytes read into the buffer, or -1 if there is no more data
      *         because the end of the stream has been reached
      * @throws IOException if this stream is closed, the compressed data is invalid, or reading the underlying stream fails
      * @throws NullPointerException if {@code b} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
-     *         or {@code len} is greater than {@code b.length - off}
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is negative,
+     *         or {@code length} is greater than {@code b.length - off}
      */
     @Override
-    public int read(final byte[] b, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
+    public int read(final byte[] b, final int off, final int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
 
         // Checked before the range: InputStream.read(byte[], int, int) (and this method's own Javadoc)
@@ -152,11 +152,11 @@ public final class SnappyInputStream extends InputStream {
 
         // Enforce InputStream.read(byte[], int, int) contract: org.xerial.snappy.SnappyInputStream
         // does not validate bounds and silently returns 0 for negative len, so we validate here.
-        if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException("off=" + off + ", len=" + len + ", b.length=" + b.length);
+        if (off < 0 || length < 0 || length > b.length - off) {
+            throw new IndexOutOfBoundsException("off=" + off + ", len=" + length + ", b.length=" + b.length);
         }
 
-        return in.read(b, off, len);
+        return in.read(b, off, length);
     }
 
     /**

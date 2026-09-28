@@ -41,9 +41,9 @@ import java.io.Serializable;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * MutableChar letter = MutableChar.of('A');
- * letter.increment();               // value is now 'B'
- * letter.incrementAndGet();         // returns 'C', value is now 'C'
- * char old = letter.getAndSet('Z'); // returns 'C' (old value), value is now 'Z'
+ * letter.increment();                // value is now 'B'
+ * letter.incrementAndGet();          // returns 'C', value is now 'C'
+ * char old = letter.getAndSet('Z');  // returns 'C' (old value), value is now 'Z'
  * }</pre>
  *
  * <p>Note: This class is adapted from Apache Commons Lang.</p>
@@ -172,9 +172,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char old = ch.getAndSet('B');     // returns 'A', value is now 'B'
-     * System.out.println(old);          // prints 'A'
-     * System.out.println(ch.value());   // prints 'B'
+     * char old = ch.getAndSet('B');    // returns 'A', value is now 'B'
+     * System.out.println(old);         // prints 'A'
+     * System.out.println(ch.value());  // prints 'B'
      * }</pre>
      *
      * @param newValue the new value to set
@@ -193,8 +193,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char newVal = ch.setAndGet('B');   // returns 'B', value is now 'B'
-     * System.out.println(newVal);        // prints 'B'
+     * char newVal = ch.setAndGet('B');  // returns 'B', value is now 'B'
+     * System.out.println(newVal);       // prints 'B'
      * }</pre>
      *
      * @param newValue the new value to set
@@ -250,8 +250,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * ch.increment();   // value is now 'B'
-     * ch.increment();   // value is now 'C'
+     * ch.increment();  // value is now 'B'
+     * ch.increment();  // value is now 'C'
      * }</pre>
      *
      */
@@ -330,9 +330,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char old = ch.getAndIncrement();   // returns 'A', value is now 'B'
-     * System.out.println(old);           // prints 'A'
-     * System.out.println(ch.value());    // prints 'B'
+     * char old = ch.getAndIncrement();  // returns 'A', value is now 'B'
+     * System.out.println(old);          // prints 'A'
+     * System.out.println(ch.value());   // prints 'B'
      * }</pre>
      *
      * @return the value before incrementing
@@ -348,9 +348,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('B');
-     * char old = ch.getAndDecrement();   // returns 'B', value is now 'A'
-     * System.out.println(old);           // prints 'B'
-     * System.out.println(ch.value());    // prints 'A'
+     * char old = ch.getAndDecrement();  // returns 'B', value is now 'A'
+     * System.out.println(old);          // prints 'B'
+     * System.out.println(ch.value());   // prints 'A'
      * }</pre>
      *
      * @return the value before decrementing
@@ -366,8 +366,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('A');
-     * char newVal = ch.incrementAndGet();   // returns 'B', value is now 'B'
-     * System.out.println(newVal);           // prints 'B'
+     * char newVal = ch.incrementAndGet();  // returns 'B', value is now 'B'
+     * System.out.println(newVal);          // prints 'B'
      * }</pre>
      *
      * @return the value after incrementing
@@ -383,8 +383,8 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableChar ch = MutableChar.of('B');
-     * char newVal = ch.decrementAndGet();   // returns 'A', value is now 'A'
-     * System.out.println(newVal);           // prints 'A'
+     * char newVal = ch.decrementAndGet();  // returns 'A', value is now 'A'
+     * System.out.println(newVal);          // prints 'A'
      * }</pre>
      *
      * @return the value after decrementing
@@ -485,10 +485,10 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * MutableChar b = MutableChar.of('X');
      * MutableChar c = MutableChar.of('Y');
      *
-     * boolean equal = a.equals(b);                // returns true
-     * equal = a.equals(c);                        // returns false
-     * equal = a.equals(null);                     // returns false
-     * equal = a.equals(Character.valueOf('X'));   // returns false (different types)
+     * boolean equal = a.equals(b);               // returns true
+     * equal = a.equals(c);                       // returns false
+     * equal = a.equals(null);                    // returns false
+     * equal = a.equals(Character.valueOf('X'));  // returns false (different types)
      * }</pre>
      *
      * @param obj the object to compare with, may be {@code null}
@@ -517,9 +517,9 @@ public final class MutableChar implements Mutable, Serializable, Comparable<Muta
      * MutableChar a = MutableChar.of('A');
      * MutableChar b = MutableChar.of('A');
      *
-     * int hash1 = a.hashCode();   // returns 65 (Unicode value of 'A')
-     * int hash2 = b.hashCode();   // returns 65
-     * assert hash1 == hash2;      // passes — hash codes are equal
+     * int hash1 = a.hashCode();  // returns 65 (Unicode value of 'A')
+     * int hash2 = b.hashCode();  // returns 65
+     * assert hash1 == hash2;     // passes — hash codes are equal
      * }</pre>
      *
      * @return a hash code value for this object, equal to the char value

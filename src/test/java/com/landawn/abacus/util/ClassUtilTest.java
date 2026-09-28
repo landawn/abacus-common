@@ -34,6 +34,11 @@ import com.landawn.abacus.annotation.DiffIgnore;
 import com.landawn.abacus.annotation.Entity;
 import com.landawn.abacus.annotation.Record;
 import com.landawn.abacus.util.function.Predicate;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import javax.tools.ToolProvider;
 
 public class ClassUtilTest extends TestBase {
 
@@ -2138,4 +2143,118 @@ public class ClassUtilTest extends TestBase {
         assertFalse(ClassUtil.setAccessibleQuietly(field, true));
         assertFalse(field.isAccessible());
     }
+
+
+    @Test
+    public void testFindClassesInPackageSkipsPackageInfoInJar() {
+        // Guava (provided scope) annotates com.google.common.base in package-info.java, so its jar holds a
+        // package-info.class: a synthetic interface named "package-info", not a class declared in the package.
+        final List<Class<?>> classes = ClassUtil.findClassesInPackage("com.google.common.base", false, true);
+
+        assertTrue(classes.contains(com.google.common.base.Strings.class));
+        assertTrue(classes.stream().noneMatch(cls -> cls.getName().endsWith("package-info")), "package-info must not be reported as a class");
+    }
+
+    @Test
+    public void testFindClassesInPackageRecursiveIgnoresDottedDirectoriesAndPackageInfo() throws Exception {
+        // findClassesInPackage scans what ClassUtil's own loader sees, so the directory under test is put on the
+        // class path of an isolated loader that holds its own copy of ClassUtil.
+        final Path root = Files.createTempDirectory("classutil-scan");
+        final Path pkg = root.resolve("zzscan/pkg");
+        Files.createDirectories(pkg.resolve("v1.2"));
+        Files.createDirectories(pkg.resolve("sub"));
+        Files.writeString(pkg.resolve("package-info.java"), "@Deprecated\npackage zzscan.pkg;\n");
+        Files.writeString(pkg.resolve("sub/Keep.java"), "package zzscan.pkg.sub;\npublic class Keep {}\n");
+
+        try {
+            assertEquals(0, ToolProvider.getSystemJavaCompiler()
+                    .run(null, null, null, "-d", root.toString(), pkg.resolve("package-info.java").toString(), pkg.resolve("sub/Keep.java").toString()));
+            assertTrue(Files.exists(pkg.resolve("package-info.class")));
+
+            final List<URL> urls = new ArrayList<>();
+            urls.add(root.toUri().toURL());
+            urls.add(ClassUtil.class.getProtectionDomain().getCodeSource().getLocation());
+
+            for (final String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
+                if (!entry.isEmpty()) {
+                    urls.add(new File(entry).toURI().toURL());
+                }
+            }
+
+            try (URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getPlatformClassLoader())) {
+                final Class<?> isolatedClassUtil = Class.forName(ClassUtil.class.getName(), true, loader);
+                final Method find = isolatedClassUtil.getMethod("findClassesInPackage", String.class, boolean.class, boolean.class);
+
+                // Before the fix: IllegalArgumentException "No resource found for package: zzscan.pkg.v1.2".
+                final List<?> found = (List<?>) find.invoke(null, "zzscan.pkg", true, false);
+
+                assertEquals(1, found.size(), String.valueOf(found));
+                assertEquals("zzscan.pkg.sub.Keep", ((Class<?>) found.get(0)).getName());
+            }
+        } finally {
+            IOUtil.deleteRecursivelyIfExists(root.toFile());
+        }
+    }
+
+    @Test
+    public void testGetPackageOfArrayTypeIsNullAndNameIsEmpty() {
+        assertNull(ClassUtil.getPackage(String[].class));
+        assertNull(ClassUtil.getPackage(int[].class));
+        assertNull(ClassUtil.getPackage(void.class));
+        assertEquals("", ClassUtil.getPackageName(String[].class));
+        assertEquals("", ClassUtil.getPackageName(void.class));
+    }
+
+    @Test
+    public void testForNameDateAliasesResolveBuiltInTypes() {
+        assertEquals(java.sql.Date.class, ClassUtil.forName("Date"));
+        assertEquals(java.util.Date.class, ClassUtil.forName("JUDate"));
+        assertEquals(java.util.Date.class, ClassUtil.forName("java.util.Date"));
+    }
+
+    // ---- deep review 2026-09-25 G025 begin ----
+    // G025-01: a nested class whose outer class cannot be linked (missing superclass) must be skipped / reported as a
+    // load failure, not abort the scan with a raw NoClassDefFoundError from Class.getCanonicalName().
+    @Test
+    public void testFindClassesInPackage_nestedClassOfUnlinkableOuterIsSkipped(@org.junit.jupiter.api.io.TempDir final Path tempDir) throws Exception {
+        final Path root = tempDir.toAbsolutePath();
+        final Path pkg = root.resolve("g025probe");
+        Files.createDirectories(pkg);
+        Files.writeString(pkg.resolve("Missing.java"), "package g025probe;\npublic class Missing {}\n");
+        Files.writeString(pkg.resolve("Outer.java"), "package g025probe;\npublic class Outer extends Missing {\n    public static class Inner {}\n}\n");
+        Files.writeString(pkg.resolve("Plain.java"), "package g025probe;\npublic class Plain {}\n");
+
+        assertEquals(0, ToolProvider.getSystemJavaCompiler()
+                .run(null, null, null, "-proc:none", "-d", root.toString(), pkg.resolve("Missing.java").toString(), pkg.resolve("Outer.java").toString(),
+                        pkg.resolve("Plain.java").toString()));
+        assertTrue(Files.exists(pkg.resolve("Outer$Inner.class")));
+        Files.delete(pkg.resolve("Missing.class"));
+
+        // findClassesInPackage scans what ClassUtil's own loader sees, so the directory under test is put on the
+        // class path of an isolated loader that holds its own copy of ClassUtil.
+        final List<URL> urls = new ArrayList<>();
+        urls.add(root.toUri().toURL());
+        urls.add(ClassUtil.class.getProtectionDomain().getCodeSource().getLocation());
+
+        for (final String entry : System.getProperty("java.class.path").split(File.pathSeparator)) {
+            if (!entry.isEmpty()) {
+                urls.add(new File(entry).toURI().toURL());
+            }
+        }
+
+        try (URLClassLoader loader = new URLClassLoader(urls.toArray(new URL[0]), ClassLoader.getPlatformClassLoader())) {
+            final Class<?> isolatedClassUtil = Class.forName(ClassUtil.class.getName(), true, loader);
+            final Method find = isolatedClassUtil.getMethod("findClassesInPackage", String.class, boolean.class, boolean.class);
+
+            // Before the fix: NoClassDefFoundError: g025probe/Missing thrown out of Class.getCanonicalName().
+            final List<?> found = (List<?>) find.invoke(null, "g025probe", false, true);
+            assertEquals(1, found.size(), String.valueOf(found));
+            assertEquals("g025probe.Plain", ((Class<?>) found.get(0)).getName());
+
+            final java.lang.reflect.InvocationTargetException strict = assertThrows(java.lang.reflect.InvocationTargetException.class,
+                    () -> find.invoke(null, "g025probe", false, false));
+            assertEquals(IllegalStateException.class, strict.getCause().getClass(), String.valueOf(strict.getCause()));
+        }
+    }
+    // ---- deep review 2026-09-25 G025 end ----
 }

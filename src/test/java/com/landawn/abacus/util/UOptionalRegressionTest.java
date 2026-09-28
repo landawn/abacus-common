@@ -47,13 +47,13 @@ public class UOptionalRegressionTest extends TestBase {
     // ---------------------------------------------------------------- C-010
 
     @Test
-    @DisplayName("C-010: mapToNonNull/mapToNonNullIfNotNull name what was null and stay NPE, not IAE")
+    @DisplayName("C-010: mapToNonNull/mapToNonNullIfNotNull name what was null and stay NPE, like flatMap")
     public void c010_mapToNonNullNullResult_hasMessage() {
-        // The javadoc has always promised NPE here; only the message was missing. Guard the type so a
-        // future "make it consistent with flatMap's IAE" refactor cannot silently change the contract.
+        // The javadoc has always promised NPE here; only the message was missing. Since 2026-09-25 every
+        // callback-returned-null in u.java (flatMap included) is NPE, so all three agree.
         assertEquals(MAPPER_MSG, assertThrows(NullPointerException.class, () -> Nullable.of("x").mapToNonNull(v -> null)).getMessage());
         assertEquals(MAPPER_MSG, assertThrows(NullPointerException.class, () -> Nullable.of("x").mapToNonNullIfNotNull(v -> null)).getMessage());
-        assertThrows(IllegalArgumentException.class, () -> Nullable.of("x").flatMap(v -> null));
+        assertThrows(NullPointerException.class, () -> Nullable.of("x").flatMap(v -> null));
     }
 
     @Test

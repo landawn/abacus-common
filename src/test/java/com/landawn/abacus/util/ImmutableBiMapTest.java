@@ -772,23 +772,25 @@ public class ImmutableBiMapTest extends TestBase {
         assertEquals("one", wrapped.getByValue(1));
         assertThrows(NullPointerException.class, () -> wrapped.getByValue(null));
 
-        // copyOf(Map) derives the value map from the source: a non-empty Hashtable or ConcurrentHashMap
-        // source yields a null-hostile value map. An EMPTY one would short-circuit to empty() and not throw.
+        // copyOf(Map) derives the value map from the source with Maps.newOrderingMap, which (since the
+        // 2026-09-24 review, C-382) never mirrors the source's key handling onto the reverse map: a Hashtable
+        // or ConcurrentHashMap source yields a LinkedHashMap value map, which accepts a null lookup. It used to
+        // mirror the source class and throw NullPointerException here.
         final java.util.Hashtable<String, Integer> hashtable = new java.util.Hashtable<>();
         hashtable.put("one", 1);
         final ImmutableBiMap<String, Integer> fromHashtable = ImmutableBiMap.copyOf(hashtable);
         assertEquals("one", fromHashtable.getByValue(1));
-        assertThrows(NullPointerException.class, () -> fromHashtable.getByValue(null));
+        assertNull(fromHashtable.getByValue(null));
 
         final java.util.concurrent.ConcurrentHashMap<String, Integer> concurrent = new java.util.concurrent.ConcurrentHashMap<>();
         concurrent.put("one", 1);
-        assertThrows(NullPointerException.class, () -> ImmutableBiMap.copyOf(concurrent).getByValue(null));
+        assertNull(ImmutableBiMap.copyOf(concurrent).getByValue(null));
 
         // an ImmutableBiMap source that owns its backing storage is returned unchanged, so it keeps its own
-        // null-hostile value map; a wrap() view is rebuilt through the source BiMap's own suppliers
+        // value map; a wrap() view is rebuilt through the source BiMap's own suppliers
         final java.util.Map<String, Integer> asMap = fromHashtable;
         assertSame(fromHashtable, ImmutableBiMap.copyOf(asMap));
-        assertThrows(NullPointerException.class, () -> ImmutableBiMap.copyOf(asMap).getByValue(null));
+        assertNull(ImmutableBiMap.copyOf(asMap).getByValue(null));
         final java.util.Map<String, Integer> wrappedAsMap = wrapped;
         assertThrows(NullPointerException.class, () -> ImmutableBiMap.copyOf(wrappedAsMap).getByValue(null));
 

@@ -1261,4 +1261,41 @@ public class StringsSubstringTest extends StringsTestSupport {
         assertNull(Strings.substringAfterLast("hello", ".", 5));
         assertNull(Strings.substringAfterLast("test", ".", -1));
     }
+
+
+    @Test
+    public void testSubstringAfter_StringWithEndIndex_DelimiterEndBeyondEndIndex() {
+        // The delimiter starts before the end index but ends after it.
+        assertNull(Strings.substringAfter("test", "st", 3));
+        assertNull(Strings.substringAfter("abcdef", "cde", 4));
+        // Delimiter ending exactly at the end index yields "".
+        assertEquals("", Strings.substringAfter("abcdef", "cde", 5));
+        assertEquals("f", Strings.substringAfter("abcdef", "cde", 6));
+    }
+
+
+    @Test
+    public void testStrUtilSubstringBetween_delimiterAndEndFunction_receivesContentStart() {
+        final int[] received = new int[1];
+
+        assertEquals("b", StrUtil.substringBetween("a::bc", "::", i -> {
+            received[0] = i;
+            return i + 1;
+        }).orElseNull());
+        assertEquals(3, received[0]);
+
+        assertEquals("", StrUtil.substringBetween("a::b", "::", i -> i).orElseNull());
+        assertTrue(StrUtil.substringBetween("a::b", "::", i -> i - 1).isEmpty());
+    }
+
+    @Test
+    public void testStrUtilSubstringBetween_beginFunctionAndDelimiter_receivesDelimiterIndex() {
+        final int[] received = new int[1];
+
+        assertEquals("a", StrUtil.substringBetween("a::b", i -> {
+            received[0] = i;
+            return -1;
+        }, "::").orElseNull());
+        assertEquals(1, received[0]);
+    }
 }

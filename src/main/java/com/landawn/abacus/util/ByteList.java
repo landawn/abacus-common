@@ -21,7 +21,6 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serial;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.IntFunction;
 
 import com.landawn.abacus.annotation.Beta;
@@ -83,9 +83,9 @@ import com.landawn.abacus.util.stream.ByteStream;
  * ByteList range = ByteList.range(Byte.MIN_VALUE, Byte.MAX_VALUE);   // returns all byte values except Byte.MAX_VALUE (exclusive end)
  *
  * // Basic operations
- * data.add((byte)42);         // Append byte value
- * byte first = data.get(0);   // Access by index: 1
- * data.set(1, (byte)100);     // Modify existing value
+ * data.add((byte)42);        // Append byte value
+ * byte first = data.get(0);  // Access by index: 1
+ * data.set(1, (byte)100);    // Modify existing value
  *
  * // Binary data processing
  * byte[] bytes = {0x48, 0x65, 0x6C, 0x6C, 0x6F};
@@ -93,20 +93,20 @@ import com.landawn.abacus.util.stream.ByteStream;
  * message.addAll(new byte[]{0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64});   // " World"
  *
  * // Statistical operations
- * OptionalByte min = data.min();         // Find minimum value
- * OptionalByte max = data.max();         // Find maximum value
- * OptionalByte median = data.lowerMedian();   // Calculate lower median
+ * OptionalByte min = data.min();             // Find minimum value
+ * OptionalByte max = data.max();             // Find maximum value
+ * OptionalByte median = data.lowerMedian();  // Calculate lower median
  *
  * // Set operations for data analysis
  * ByteList set1 = ByteList.of((byte)1, (byte)2, (byte)3);
  * ByteList set2 = ByteList.of((byte)2, (byte)3, (byte)4);
- * ByteList intersection = set1.intersection(set2);   // returns [2, 3]
- * ByteList difference = set1.difference(set2);       // returns [1]
+ * ByteList intersection = set1.intersection(set2);  // returns [2, 3]
+ * ByteList difference = set1.difference(set2);      // returns [1]
  *
  * // Conversion operations
- * byte[] primitiveArray = data.toArray();   // To primitive array
- * IntList intData = data.toIntList();       // Convert to int values
- * List<Byte> boxedList = data.boxed();      // To boxed collection
+ * byte[] primitiveArray = data.toArray();  // To primitive array
+ * IntList intData = data.toIntList();      // Convert to int values
+ * List<Byte> boxedList = data.boxed();     // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -234,7 +234,8 @@ import com.landawn.abacus.util.stream.ByteStream;
  *   <li><b>Network Buffer:</b> {@code ByteList buffer = new ByteList(packetSize);}</li>
  *   <li><b>Binary Protocol:</b> {@code buffer.addAll(header); buffer.addAll(payload);}</li>
  *   <li><b>Image Data:</b> {@code ByteList pixels = ByteList.copyOf(imageBytes);}</li>
- *   <li><b>Crypto Keys:</b> {@code ByteList key = ByteList.random(keyLength);}</li>
+ *   <li><b>Random Test Data:</b> {@code ByteList sample = ByteList.random(length);} (not cryptographically secure;
+ *       fill an array from {@link java.security.SecureRandom} for keys)</li>
  * </ul>
  *
  * <p><b>Related Classes:</b>
@@ -285,8 +286,6 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     @Serial
     private static final long serialVersionUID = 6361439693114081075L;
 
-    /** Shared random number generator used by {@link #random(int)}. */
-    static final Random RAND = new SecureRandom();
     /** The number of distinct byte values; used to map a non-negative random int to the full byte range. */
     static final int BOUND = Byte.MAX_VALUE - Byte.MIN_VALUE + 1;
 
@@ -308,8 +307,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = new ByteList();
-     * list.size();      // returns 0
-     * list.isEmpty();   // returns true
+     * list.size();     // returns 0
+     * list.isEmpty();  // returns true
      * list.add((byte) 1);
      * list.size();      // returns 1
      * }</pre>
@@ -327,8 +326,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = new ByteList(100);
-     * list.size();      // returns 0 (capacity does not affect size)
-     * list.isEmpty();   // returns true
+     * list.size();     // returns 0 (capacity does not affect size)
+     * list.isEmpty();  // returns true
      *
      * ByteList empty = new ByteList(0);
      * empty.size();       // returns 0
@@ -356,9 +355,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * byte[] arr = {(byte) 1, (byte) 2, (byte) 3};
      * ByteList list = new ByteList(arr);
-     * list.size();         // returns 3
-     * list.get(0);         // returns (byte) 1
-     * arr[0] = (byte) 9;   // backing array shared: list.get(0) is now (byte) 9
+     * list.size();        // returns 3
+     * list.get(0);        // returns (byte) 1
+     * arr[0] = (byte) 9;  // backing array shared: list.get(0) is now (byte) 9
      *
      * ByteList empty = new ByteList(new byte[0]);
      * empty.size();                  // returns 0
@@ -383,8 +382,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * byte[] arr = {(byte) 1, (byte) 2, (byte) 3, (byte) 4};
      * ByteList list = new ByteList(arr, 2);
-     * list.size();   // returns 2
-     * list.get(1);   // returns (byte) 2 (only first 2 elements are used)
+     * list.size();  // returns 2
+     * list.get(1);  // returns (byte) 2 (only first 2 elements are used)
      *
      * ByteList full = new ByteList(arr, 4);
      * full.size();            // returns 4
@@ -415,8 +414,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-     * list.size();   // returns 3
-     * list.get(0);   // returns (byte) 1
+     * list.size();  // returns 3
+     * list.get(0);  // returns (byte) 1
      *
      * ByteList empty = ByteList.of();
      * empty.size();   // returns 0
@@ -441,8 +440,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * byte[] arr = {(byte) 1, (byte) 2, (byte) 3, (byte) 4};
      * ByteList list = ByteList.of(arr, 2);
-     * list.size();   // returns 2
-     * list.get(1);   // returns (byte) 2
+     * list.size();  // returns 2
+     * list.get(1);  // returns (byte) 2
      *
      * ByteList full = ByteList.of(arr, 4);
      * full.size();           // returns 4
@@ -475,8 +474,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * byte[] arr = {(byte) 1, (byte) 2, (byte) 3};
      * ByteList list = ByteList.copyOf(arr);
-     * list.size();          // returns 3
-     * arr[0] = (byte) 9;    // defensive copy: list.get(0) is still (byte) 1
+     * list.size();        // returns 3
+     * arr[0] = (byte) 9;  // defensive copy: list.get(0) is still (byte) 1
      *
      * ByteList fromNull = ByteList.copyOf(null);
      * fromNull.size();   // returns 0 (null treated as empty)
@@ -500,8 +499,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * byte[] arr = {(byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5};
      * ByteList list = ByteList.copyOf(arr, 1, 4);
-     * list.size();   // returns 3
-     * list.get(0);   // returns (byte) 2 (elements at indices 1, 2, 3)
+     * list.size();  // returns 3
+     * list.get(0);  // returns (byte) 2 (elements at indices 1, 2, 3)
      *
      * ByteList empty = ByteList.copyOf(arr, 2, 2);
      * empty.size();                 // returns 0
@@ -645,12 +644,12 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * }</pre>
      *
      * @param element the byte value to be repeated
-     * @param len the number of times to repeat the element. Must be non-negative.
-     * @return a new ByteList containing {@code len} copies of the specified element
-     * @throws IllegalArgumentException if {@code len} is negative.
+     * @param length the number of times to repeat the element. Must be non-negative.
+     * @return a new ByteList containing {@code length} copies of the specified element
+     * @throws IllegalArgumentException if {@code length} is negative.
      */
-    public static ByteList repeat(final byte element, final int len) throws IllegalArgumentException {
-        return of(Array.repeat(element, len));
+    public static ByteList repeat(final byte element, final int length) throws IllegalArgumentException {
+        return of(Array.repeat(element, length));
     }
 
     /**
@@ -670,22 +669,23 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * ByteList.random(-1);   // throws NegativeArraySizeException
      * }</pre>
      *
-     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
-     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
-     * and wrapping it with {@code of(..)}.</p>
+     * <p>Randomness comes from {@link java.util.concurrent.ThreadLocalRandom#current()}, the calling thread's
+     * generator, so concurrent callers do not contend. The values are <b>not</b> cryptographically secure;
+     * callers that need unpredictable values should use {@link java.security.SecureRandom} directly (for
+     * example, fill an array from it and wrap the array with {@code of(..)}).</p>
      *
-     * @param len the number of random byte values to generate. Must be non-negative.
-     * @return a new ByteList containing {@code len} random byte values
-     * @throws NegativeArraySizeException if {@code len} is negative
+     * @param length the number of random byte values to generate. Must be non-negative.
+     * @return a new ByteList containing {@code length} random byte values
+     * @throws NegativeArraySizeException if {@code length} is negative
      */
-    public static ByteList random(final int len) throws NegativeArraySizeException {
-        final byte[] a = new byte[len];
+    public static ByteList random(final int length) throws NegativeArraySizeException {
+        final byte[] a = new byte[length];
+        final ThreadLocalRandom random = ThreadLocalRandom.current();
 
         // Keep consistent with ByteStream/ShortList/ShortStream/CharList/CharStream.
-        // RAND.nextBytes(a);
-        for (int i = 0; i < len; i++) {
-            a[i] = (byte) (RAND.nextInt(BOUND) + Byte.MIN_VALUE);
+        // random.nextBytes(a);
+        for (int i = 0; i < length; i++) {
+            a[i] = (byte) (random.nextInt(BOUND) + Byte.MIN_VALUE);
         }
 
         return of(a);
@@ -720,9 +720,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-     * list.get(0);   // returns (byte) 10
-     * list.get(2);   // returns (byte) 30
-     * list.get(3);   // throws IndexOutOfBoundsException
+     * list.get(0);  // returns (byte) 10
+     * list.get(2);  // returns (byte) 30
+     * list.get(3);  // throws IndexOutOfBoundsException
      * }</pre>
      *
      * @param index the index of the element to return
@@ -741,8 +741,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-     * byte old = list.set(1, (byte) 99);   // returns (byte) 20 (the old value)
-     * list.get(1);                         // returns (byte) 99 (list is now [10, 99, 30])
+     * byte old = list.set(1, (byte) 99);  // returns (byte) 20 (the old value)
+     * list.get(1);                        // returns (byte) 99 (list is now [10, 99, 30])
      *
      * list.set(3, (byte) 5);               // throws IndexOutOfBoundsException
      * }</pre>
@@ -773,8 +773,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2);
-     * list.add((byte) 3);   // list is now [1, 2, 3]
-     * list.size();          // returns 3
+     * list.add((byte) 3);  // list is now [1, 2, 3]
+     * list.size();         // returns 3
      *
      * ByteList empty = new ByteList();
      * empty.add((byte) 7);   // empty is now [7]
@@ -801,8 +801,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-     * list.add(1, (byte) 9);             // list is now [1, 9, 2, 3]
-     * list.size();                       // returns 4
+     * list.add(1, (byte) 9);  // list is now [1, 9, 2, 3]
+     * list.size();            // returns 4
      *
      * list.add(list.size(), (byte) 5);   // appends at the end: [1, 9, 2, 3, 5]
      *
@@ -972,8 +972,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2);
-     * list.remove((byte) 2);             // returns true (list is now [1, 3, 2] - only first match removed)
-     * list.remove((byte) 9);             // returns false (value not present, list unchanged)
+     * list.remove((byte) 2);  // returns true (list is now [1, 3, 2] - only first match removed)
+     * list.remove((byte) 9);  // returns false (value not present, list unchanged)
      *
      * new ByteList().remove((byte) 1);   // returns false (empty list)
      * }</pre>
@@ -1003,8 +1003,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 2, (byte) 3, (byte) 2);
-     * list.removeAllOccurrences((byte) 2);             // returns true (list is now [1, 3])
-     * list.removeAllOccurrences((byte) 9);             // returns false (value not present, list unchanged)
+     * list.removeAllOccurrences((byte) 2);  // returns true (list is now [1, 3])
+     * list.removeAllOccurrences((byte) 9);  // returns false (value not present, list unchanged)
      *
      * new ByteList().removeAllOccurrences((byte) 1);   // returns false (empty list)
      * }</pre>
@@ -1169,11 +1169,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             }
 
         } else {
-            final Set<Byte> set = N.newLinkedHashSet(size);
-            set.add(elementData[0]);
+            // A byte has only BOUND (256) possible values, so a value-indexed table replaces a hash set presized to size().
+            final boolean[] seen = new boolean[BOUND];
+            seen[elementData[0] - Byte.MIN_VALUE] = true;
 
             for (int i = 1; i < size; i++) {
-                if (set.add(elementData[i])) {
+                final int key = elementData[i] - Byte.MIN_VALUE;
+
+                if (!seen[key]) {
+                    seen[key] = true;
                     elementData[++idx] = elementData[i];
                 }
             }
@@ -1254,10 +1258,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
 
         // Compaction must not change membership when another list wraps the same array.
         if (elementData == c.elementData || needToSet(size(), c.size())) {
-            final Set<Byte> set = c.toSet();
+            final boolean[] set = presenceTable(c);
 
             for (int i = 0; i < size; i++) {
-                if (set.contains(elementData[i]) == complement) {
+                if (set[elementData[i] - Byte.MIN_VALUE] == complement) {
                     elementData[w++] = elementData[i];
                 }
             }
@@ -1289,8 +1293,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-     * byte removed = list.removeAt(1);   // returns (byte) 20 (list is now [10, 30])
-     * list.size();                       // returns 2
+     * byte removed = list.removeAt(1);  // returns (byte) 20 (list is now [10, 30])
+     * list.size();                      // returns 2
      *
      * list.removeAt(5);                  // throws IndexOutOfBoundsException
      * }</pre>
@@ -1401,8 +1405,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param toIndex the ending index (exclusive) of the range to be moved
      * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if
-     *         newPositionAfterMove would cause elements to be moved outside the list
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}, or if
+     *         {@code newPositionAfterMove < 0} or {@code newPositionAfterMove > size() - (toIndex - fromIndex)}
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
@@ -1520,8 +1524,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 1, (byte) 3, (byte) 1);
-     * int count = list.replaceAll((byte) 1, (byte) 9);   // returns 3 (list is now [9, 2, 9, 3, 9])
-     * list.replaceAll((byte) 7, (byte) 0);               // returns 0 (no matches, list unchanged)
+     * int count = list.replaceAll((byte) 1, (byte) 9);  // returns 3 (list is now [9, 2, 9, 3, 9])
+     * list.replaceAll((byte) 7, (byte) 0);              // returns 0 (no matches, list unchanged)
      *
      * new ByteList().replaceAll((byte) 1, (byte) 2);     // returns 0 (empty list)
      * }</pre>
@@ -1622,10 +1626,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * empty.fill((byte) 7);   // empty stays [] (no elements to fill)
      * }</pre>
      *
-     * @param val the value to fill the list with
+     * @param value the value to fill the list with
      */
-    public void fill(final byte val) {
-        fill(0, size(), val);
+    public void fill(final byte value) {
+        fill(0, size(), value);
     }
 
     /**
@@ -1644,13 +1648,13 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * @param fromIndex the index of the first element (inclusive) to be filled
      * @param toIndex the index after the last element (exclusive) to be filled
-     * @param val the value to fill the range with
+     * @param value the value to fill the range with
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
-    public void fill(final int fromIndex, final int toIndex, final byte val) throws IndexOutOfBoundsException {
+    public void fill(final int fromIndex, final int toIndex, final byte value) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        N.fill(elementData, fromIndex, toIndex, val);
+        N.fill(elementData, fromIndex, toIndex, value);
     }
 
     /**
@@ -1663,8 +1667,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3);
-     * list.contains((byte) 2);             // returns true
-     * list.contains((byte) 9);             // returns false
+     * list.contains((byte) 2);  // returns true
+     * list.contains((byte) 9);  // returns false
      *
      * new ByteList().contains((byte) 1);   // returns false (empty list)
      * }</pre>
@@ -1733,10 +1737,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         }
 
         if (needToSet(size(), c.size())) {
-            final Set<Byte> set = this.toSet();
+            final boolean[] set = presenceTable(this);
 
             for (int i = 0, len = c.size(); i < len; i++) {
-                if (!set.contains(c.elementData[i])) {
+                if (!set[c.elementData[i] - Byte.MIN_VALUE]) {
                     return false;
                 }
             }
@@ -1790,10 +1794,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         }
 
         if (needToSet(size(), c.size())) {
-            final Set<Byte> set = this.toSet();
+            final boolean[] set = presenceTable(this);
 
             for (int i = 0, len = c.size(); i < len; i++) {
-                if (set.contains(c.elementData[i])) {
+                if (set[c.elementData[i] - Byte.MIN_VALUE]) {
                     return false;
                 }
             }
@@ -1847,16 +1851,23 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @Override
     public ByteList intersection(final ByteList b) {
+        if (isEmpty()) {
+            return new ByteList();
+        }
+
         if (N.isEmpty(b)) {
             return new ByteList();
         }
 
-        final Multiset<Byte> bOccurrences = b.toMultiset();
+        final int[] bOccurrences = occurrenceTable(b);
 
         final ByteList c = new ByteList(N.min(9, size(), b.size()));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (bOccurrences.remove(elementData[i])) {
+            final int key = elementData[i] - Byte.MIN_VALUE;
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
                 c.add(elementData[i]);
             }
         }
@@ -1885,6 +1896,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @Override
     public ByteList intersection(final byte[] b) {
+        if (isEmpty()) {
+            return new ByteList();
+        }
+
         if (N.isEmpty(b)) {
             return new ByteList();
         }
@@ -1913,16 +1928,24 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @Override
     public ByteList difference(final ByteList b) {
+        if (isEmpty()) {
+            return new ByteList();
+        }
+
         if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
-        final Multiset<Byte> bOccurrences = b.toMultiset();
+        final int[] bOccurrences = occurrenceTable(b);
 
         final ByteList c = new ByteList(N.min(size(), N.max(9, size() - b.size())));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (!bOccurrences.remove(elementData[i])) {
+            final int key = elementData[i] - Byte.MIN_VALUE;
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+            } else {
                 c.add(elementData[i]);
             }
         }
@@ -1951,6 +1974,10 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      */
     @Override
     public ByteList difference(final byte[] b) {
+        if (isEmpty()) {
+            return new ByteList();
+        }
+
         if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
@@ -1998,21 +2025,31 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
             return b.copy();
         }
 
-        final Multiset<Byte> bOccurrences = b.toMultiset();
+        final int[] bOccurrences = occurrenceTable(b);
+        int remainingOccurrences = b.size();
         final ByteList c = new ByteList(N.max(9, Math.abs(size() - b.size())));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (!bOccurrences.remove(elementData[i])) {
+            final int key = elementData[i] - Byte.MIN_VALUE;
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+                remainingOccurrences--;
+            } else {
                 c.add(elementData[i]);
             }
         }
 
         for (int i = 0, len = b.size(); i < len; i++) {
-            if (bOccurrences.remove(b.elementData[i])) {
+            final int key = b.elementData[i] - Byte.MIN_VALUE;
+
+            if (bOccurrences[key] > 0) {
+                bOccurrences[key]--;
+                remainingOccurrences--;
                 c.add(b.elementData[i]);
             }
 
-            if (bOccurrences.isEmpty()) {
+            if (remainingOccurrences == 0) {
                 break;
             }
         }
@@ -2099,8 +2136,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2);
-     * list.indexOf((byte) 2);             // returns 1 (first occurrence)
-     * list.indexOf((byte) 9);             // returns -1 (not found)
+     * list.indexOf((byte) 2);  // returns 1 (first occurrence)
+     * list.indexOf((byte) 9);  // returns -1 (not found)
      *
      * new ByteList().indexOf((byte) 1);   // returns -1 (empty list)
      * }</pre>
@@ -2121,9 +2158,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2);
-     * list.indexOf((byte) 2, 2);    // returns 3 (first occurrence at or after index 2)
-     * list.indexOf((byte) 2, 0);    // returns 1
-     * list.indexOf((byte) 2, 4);    // returns -1 (fromIndex >= size)
+     * list.indexOf((byte) 2, 2);  // returns 3 (first occurrence at or after index 2)
+     * list.indexOf((byte) 2, 0);  // returns 1
+     * list.indexOf((byte) 2, 4);  // returns -1 (fromIndex >= size)
      *
      * list.indexOf((byte) 1, -5);   // returns 0 (negative fromIndex treated as 0)
      * }</pre>
@@ -2155,8 +2192,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2);
-     * list.lastIndexOf((byte) 2);             // returns 3 (last occurrence)
-     * list.lastIndexOf((byte) 9);             // returns -1 (not found)
+     * list.lastIndexOf((byte) 2);  // returns 3 (last occurrence)
+     * list.lastIndexOf((byte) 9);  // returns -1 (not found)
      *
      * new ByteList().lastIndexOf((byte) 1);   // returns -1 (empty list)
      * }</pre>
@@ -2177,9 +2214,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 2);
-     * list.lastIndexOf((byte) 2, 2);    // returns 1 (last occurrence at or before index 2)
-     * list.lastIndexOf((byte) 2, 3);    // returns 3
-     * list.lastIndexOf((byte) 2, 99);   // returns 3 (clamped to size-1)
+     * list.lastIndexOf((byte) 2, 2);   // returns 1 (last occurrence at or before index 2)
+     * list.lastIndexOf((byte) 2, 3);   // returns 3
+     * list.lastIndexOf((byte) 2, 99);  // returns 3 (clamped to size-1)
      *
      * list.lastIndexOf((byte) 2, -1);   // returns -1 (negative start index)
      * }</pre>
@@ -2211,8 +2248,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)5, (byte)2, (byte)8, (byte)1, (byte)9);
-     * OptionalByte min = list.min();               // returns OptionalByte[1]
-     * OptionalByte empty = new ByteList().min();   // returns OptionalByte.empty
+     * OptionalByte min = list.min();              // returns OptionalByte[1]
+     * OptionalByte empty = new ByteList().min();  // returns OptionalByte.empty
      * }</pre>
      *
      * @return an OptionalByte containing the minimum value, or an empty OptionalByte if the list is empty
@@ -2251,8 +2288,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte)5, (byte)2, (byte)8, (byte)1, (byte)9);
-     * OptionalByte max = list.max();               // returns OptionalByte[9]
-     * OptionalByte empty = new ByteList().max();   // returns OptionalByte.empty
+     * OptionalByte max = list.max();              // returns OptionalByte[9]
+     * OptionalByte empty = new ByteList().max();  // returns OptionalByte.empty
      * }</pre>
      *
      * @return an OptionalByte containing the maximum value, or an empty OptionalByte if the list is empty
@@ -2367,9 +2404,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6);
      * ByteConsumer action = b -> System.out.print(b);
-     * list.forEach(0, 5, action);    // Forward: processes indices 0,1,2,3,4
-     * list.forEach(5, 0, action);    // Backward: processes indices 5,4,3,2,1
-     * list.forEach(5, -1, action);   // Backward: processes indices 5,4,3,2,1,0
+     * list.forEach(0, 5, action);   // Forward: processes indices 0,1,2,3,4
+     * list.forEach(5, 0, action);   // Backward: processes indices 5,4,3,2,1
+     * list.forEach(5, -1, action);  // Backward: processes indices 5,4,3,2,1,0
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive); for backward traversal, {@code size()} is
@@ -2470,9 +2507,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList list1 = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);   // containsDuplicates() returns false
-     * ByteList list2 = ByteList.of((byte) 1, (byte) 2, (byte) 2, (byte) 3);   // containsDuplicates() returns true
-     * ByteList list3 = ByteList.of();                                         // containsDuplicates() returns false
+     * ByteList list1 = ByteList.of((byte) 1, (byte) 2, (byte) 3, (byte) 4);  // containsDuplicates() returns false
+     * ByteList list2 = ByteList.of((byte) 1, (byte) 2, (byte) 2, (byte) 3);  // containsDuplicates() returns true
+     * ByteList list3 = ByteList.of();                                        // containsDuplicates() returns false
      * }</pre>
      *
      * @return {@code true} if this list contains at least one duplicate element, {@code false} otherwise
@@ -2494,9 +2531,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList.of((byte) -5, (byte) 0, (byte) 3, (byte) 10).isSorted();   // returns true
-     * ByteList.of((byte) 3, (byte) 1, (byte) 4, (byte) 2).isSorted();     // returns false
-     * ByteList.of((byte) 1, (byte) 1, (byte) 2, (byte) 2).isSorted();     // returns true (duplicates allowed)
+     * ByteList.of((byte) -5, (byte) 0, (byte) 3, (byte) 10).isSorted();  // returns true
+     * ByteList.of((byte) 3, (byte) 1, (byte) 4, (byte) 2).isSorted();    // returns false
+     * ByteList.of((byte) 1, (byte) 1, (byte) 2, (byte) 2).isSorted();    // returns true (duplicates allowed)
      * }</pre>
      *
      * @return {@code true} if the list is sorted in ascending order, {@code false} otherwise
@@ -2597,8 +2634,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 3, (byte) 5, (byte) 7, (byte) 9);
-     * list.binarySearch((byte)5);   // returns 2
-     * list.binarySearch((byte)6);   // returns -4 (insertion point would be 3)
+     * list.binarySearch((byte)5);  // returns 2
+     * list.binarySearch((byte)6);  // returns -4 (insertion point would be 3)
      * }</pre>
      *
      * @param valueToFind the byte value to search for
@@ -2616,7 +2653,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * calling this method, or the results are undefined.</p>
      *
      * <p>Like the full-list binary search, this returns the index if found, or {@code (-(insertion point) - 1)}
-     * if not found. The insertion point is relative to the entire list, not just the searched range.</p>
+     * if not found. The insertion point is an index into this whole list (not an offset within the
+     * searched range), and it always lies between {@code fromIndex} and {@code toIndex}, inclusive.</p>
      *
      * <p>This method is useful when you know the value you're searching for is likely to be in a
      * specific portion of a large sorted list.</p>
@@ -2624,8 +2662,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 3, (byte) 5, (byte) 7, (byte) 9);
-     * list.binarySearch(1, 4, (byte) 5);   // returns 2 (found at index 2 within range [1, 4))
-     * list.binarySearch(1, 4, (byte) 6);   // returns -4 (not found; insertion point would be index 3)
+     * list.binarySearch(1, 4, (byte) 5);  // returns 2 (found at index 2 within range [1, 4))
+     * list.binarySearch(1, 4, (byte) 6);  // returns -4 (not found; insertion point would be index 3)
      *
      * list.binarySearch(0, 6, (byte) 5);   // throws IndexOutOfBoundsException (6 > size())
      * }</pre>
@@ -2633,7 +2671,11 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param fromIndex the starting index (inclusive) of the range to search
      * @param toIndex the ending index (exclusive) of the range to search
      * @param valueToFind the byte value to search for
-     * @return the index of the search key if found; otherwise, {@code (-(insertion point) - 1)}
+     * @return the index of the search key if it is contained in the specified range;
+     *         otherwise, {@code (-(insertion point) - 1)}. The insertion point is an index into this
+     *         whole list (not an offset within the range): the index of the first element in the
+     *         range greater than the key, or {@code toIndex} if all elements in the range are less
+     *         than the specified key
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
     public int binarySearch(final int fromIndex, final int toIndex, final byte valueToFind) throws IndexOutOfBoundsException {
@@ -2718,9 +2760,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * Each possible permutation of the list has equal probability of being produced. The shuffle is
      * performed in-place using the Fisher-Yates algorithm, which runs in O(n) time.</p>
      *
-     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom}, which is <b>not</b>
-     * cryptographically secure. Note that this is a <i>different</i> generator from the one the
-     * {@code random(..)} factories use; call {@link #shuffle(Random)} with a
+     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom} (as for the {@code random(..)}
+     * factories), which is <b>not</b> cryptographically secure; call {@link #shuffle(Random)} with a
      * {@link java.security.SecureRandom} when the permutation must be unpredictable.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -2757,15 +2798,15 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * list.shuffle(rnd);                // Will always produce the same shuffle with this seed
      * }</pre>
      *
-     * @param rnd the random number generator to use for shuffling; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
+     * @param random the random number generator to use for shuffling; must not be {@code null}
+     * @throws IllegalArgumentException if {@code random} is {@code null}.
      */
     @Override
-    public void shuffle(final Random rnd) throws IllegalArgumentException {
-        N.checkArgNotNull(rnd, cs.rnd);
+    public void shuffle(final Random random) throws IllegalArgumentException {
+        N.checkArgNotNull(random, cs.random);
 
         if (size() > 1) {
-            N.shuffle(elementData, 0, size, rnd);
+            N.shuffle(elementData, 0, size, random);
         }
     }
 
@@ -2857,8 +2898,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 0, (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5);
-     * list.copy(0, 6, 2);     // returns [0, 2, 4] (every other element)
-     * list.copy(5, -1, -2);   // returns [5, 3, 1] (reverse, every other)
+     * list.copy(0, 6, 2);    // returns [0, 2, 4] (every other element)
+     * list.copy(5, -1, -2);  // returns [5, 3, 1] (reverse, every other)
      * }</pre>
      *
      * <p>If the sign of {@code step} contradicts the direction of the range — a positive step with
@@ -2871,7 +2912,7 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param step the step size (positive for forward, negative for backward)
      * @return a new ByteList containing the selected elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()}; {@code toIndex == -1} is permitted for reverse traversal.
-     * @throws IllegalArgumentException if step is 0.
+     * @throws IllegalArgumentException if {@code step} is zero.
      * @see N#copyOfRange(byte[], int, int, int)
      */
     @Override
@@ -3090,16 +3131,17 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param supplier a function that creates a new Collection instance given the required size
      * @return a new Collection containing boxed elements from the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     @Override
     public <C extends Collection<Byte>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -3118,15 +3160,16 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * @param supplier a function that creates a new Multiset instance given the required size
      * @return a new Multiset containing elements from the specified range with their counts
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
     public Multiset<Byte> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Byte>> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, NullPointerException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final Multiset<Byte> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Byte> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);
@@ -3290,8 +3333,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 2, (byte) 3);
-     * list.addFirst((byte) 1);   // list is now [1, 2, 3]
-     * list.getFirst();           // returns (byte) 1
+     * list.addFirst((byte) 1);  // list is now [1, 2, 3]
+     * list.getFirst();          // returns (byte) 1
      *
      * ByteList empty = new ByteList();
      * empty.addFirst((byte) 9);   // empty is now [9]
@@ -3317,8 +3360,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 1, (byte) 2);
-     * list.addLast((byte) 3);   // list is now [1, 2, 3]
-     * list.getLast();           // returns (byte) 3
+     * list.addLast((byte) 3);  // list is now [1, 2, 3]
+     * list.getLast();          // returns (byte) 3
      *
      * ByteList empty = new ByteList();
      * empty.addLast((byte) 9);   // empty is now [9]
@@ -3344,8 +3387,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-     * byte removed = list.removeFirst();   // returns (byte) 10 (list is now [20, 30])
-     * list.size();                         // returns 2
+     * byte removed = list.removeFirst();  // returns (byte) 10 (list is now [20, 30])
+     * list.size();                        // returns 2
      *
      * new ByteList().removeFirst();        // throws NoSuchElementException
      * }</pre>
@@ -3369,8 +3412,8 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteList list = ByteList.of((byte) 10, (byte) 20, (byte) 30);
-     * byte removed = list.removeLast();   // returns (byte) 30 (list is now [10, 20])
-     * list.size();                        // returns 2
+     * byte removed = list.removeLast();  // returns (byte) 30 (list is now [10, 20])
+     * list.size();                       // returns 2
      *
      * new ByteList().removeLast();        // throws NoSuchElementException
      * }</pre>
@@ -3438,9 +3481,9 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteList.of().toString();                               // returns "[]"
-     * ByteList.of((byte) 1).toString();                       // returns "[1]"
-     * ByteList.of((byte) 1, (byte) 2, (byte) 3).toString();   // returns "[1, 2, 3]"
+     * ByteList.of().toString();                              // returns "[]"
+     * ByteList.of((byte) 1).toString();                      // returns "[1]"
+     * ByteList.of((byte) 1, (byte) 2, (byte) 3).toString();  // returns "[1, 2, 3]"
      * }</pre>
      *
      * @return a string representation of this list
@@ -3448,6 +3491,42 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
     @Override
     public String toString() {
         return size == 0 ? Strings.STR_FOR_EMPTY_ARRAY : N.toString(elementData, 0, size);
+    }
+
+    /**
+     * Returns a table indexed by {@code value - Byte.MIN_VALUE} whose entry is {@code true} if that value occurs in the specified list.
+     * A byte has only {@link #BOUND} possible values, so this replaces a boxed hash set in the bulk membership operations.
+     *
+     * @param list the list whose values are recorded
+     * @return a new presence table of length {@link #BOUND}
+     */
+    private static boolean[] presenceTable(final ByteList list) {
+        final boolean[] table = new boolean[BOUND];
+        final byte[] a = list.elementData;
+
+        for (int i = 0, len = list.size; i < len; i++) {
+            table[a[i] - Byte.MIN_VALUE] = true;
+        }
+
+        return table;
+    }
+
+    /**
+     * Returns a table indexed by {@code value - Byte.MIN_VALUE} holding the number of occurrences of that value in the specified list.
+     * A byte has only {@link #BOUND} possible values, so this replaces a boxed {@link Multiset} in the multiset-style operations.
+     *
+     * @param list the list whose values are counted
+     * @return a new occurrence table of length {@link #BOUND}
+     */
+    private static int[] occurrenceTable(final ByteList list) {
+        final int[] table = new int[BOUND];
+        final byte[] a = list.elementData;
+
+        for (int i = 0, len = list.size; i < len; i++) {
+            table[a[i] - Byte.MIN_VALUE]++;
+        }
+
+        return table;
     }
 
     /**
@@ -3515,4 +3594,25 @@ public final class ByteList extends PrimitiveList<Byte, byte[], ByteList> {
         elementData = array;
         size = sz;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Caps the expected set size at the 256 distinct values representable by this primitive type.</p>
+     */
+    @Override
+    protected <T> IntFunction<Set<T>> createSetSupplier() {
+        return size -> N.newHashSet(Math.min(size, 256));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Caps the expected multiset size at the 256 distinct values representable by this primitive type.</p>
+     */
+    @Override
+    protected <T> IntFunction<Multiset<T>> createMultisetSupplier() {
+        return size -> N.newMultiset(Math.min(size, 256));
+    }
+
 }

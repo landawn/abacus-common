@@ -73,8 +73,8 @@ public interface IntPredicate extends Throwables.IntPredicate<RuntimeException>,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntPredicate isEven = value -> value % 2 == 0;
-     * boolean result1 = isEven.test(4);                                          // Returns true
-     * boolean result2 = isEven.test(3);                                          // Returns false
+     * boolean result1 = isEven.test(4);  // Returns true
+     * boolean result2 = isEven.test(3);  // Returns false
      *
      * IntStream.of(1, 2, 3, 4, 5).filter(isEven).forEach(System.out::println);   // Prints: 2 4
      * }</pre>

@@ -135,8 +135,20 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                     sb.append(ELEMENT_SEPARATOR);
                 }
 
+                final char ch = x[i];
+
                 sb.append(SK.SINGLE_QUOTE);
-                sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(x[i])));
+
+                /*
+                 * Printable ASCII other than the four characters escapeEcmaScript rewrites (' " \ /) is left unchanged by it,
+                 * so it is appended directly instead of paying for a String, a StringWriter and the translator chain per char.
+                 */
+                if (ch >= ' ' && ch <= 0x7f && ch != '\'' && ch != '"' && ch != '\\' && ch != '/') {
+                    sb.append(ch);
+                } else {
+                    sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(ch)));
+                }
+
                 sb.append(SK.SINGLE_QUOTE);
             }
 
@@ -192,7 +204,13 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
                 final char quoteChar = element.charAt(0);
 
                 if ((quoteChar == SK._SINGLE_QUOTE || quoteChar == SK._DOUBLE_QUOTE) && element.charAt(element.length() - 1) == quoteChar) {
-                    a[i] = elementType.valueOf(EscapeUtil.unescapeEcmaScript(element.substring(1, element.length() - 1)));
+                    if (element.length() == 3 && element.charAt(1) != '\\') {
+                        // A single quoted character other than a backslash unescapes to itself.
+                        a[i] = element.charAt(1);
+                    } else {
+                        a[i] = elementType.valueOf(EscapeUtil.unescapeEcmaScript(element.substring(1, element.length() - 1)));
+                    }
+
                     continue;
                 }
             }
@@ -214,11 +232,17 @@ public final class PrimitiveCharArrayType extends AbstractPrimitiveArrayType<cha
      * @throws UncheckedIOException if {@code obj} is a {@link Reader} and reading its remaining characters fails
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Clob
      * @throws UnsupportedOperationException if the Clob length exceeds {@link Integer#MAX_VALUE}
+     * @throws IllegalArgumentException if {@code obj} is of any other type and its string representation is rejected by
+     *         {@link #valueOf(String)} (an empty or whitespace-only unquoted element, a numeric character code outside the
+     *         char range, or a malformed Unicode escape)
+     * @throws NumberFormatException if {@code obj} is of any other type and an element of its string representation has
+     *         multiple characters after removing quotes and escapes and is not an integer character code
      */
     @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public char[] valueOf(final Object obj) throws UncheckedIOException, UncheckedSQLException, UnsupportedOperationException {
+    public char[] valueOf(final Object obj)
+            throws UncheckedIOException, UncheckedSQLException, UnsupportedOperationException, IllegalArgumentException, NumberFormatException {
         if (obj == null) {
             return null; // NOSONAR
         } else if (obj instanceof Reader reader) {

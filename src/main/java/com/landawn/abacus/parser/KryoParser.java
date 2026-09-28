@@ -198,8 +198,10 @@ import com.landawn.abacus.util.u.OptionalShort;
  * be deserialized or deep-copied unless a custom serializer is registered through {@link #register(Class, Serializer)}:
  * this includes the JDK's {@code Collections.unmodifiable*} wrappers, {@code EnumMap}, the comparator
  * singletons such as {@code Comparator.reverseOrder()} (so a {@code TreeMap} carrying one can be copied but not
- * serialized), and the {@code ImmutableList}/{@code ImmutableSet}/{@code ImmutableMap} types of this library;
- * such an object fails with {@code KryoException} ("Class cannot be created (missing no-arg constructor)").
+ * serialized - unless {@code java.base/java.util} is opened to Kryo with {@code --add-opens}, which makes their
+ * private constructors accessible), and the {@code ImmutableList}/{@code ImmutableSet}/{@code ImmutableMap} types
+ * of this library; such an object fails with {@code KryoException} ("Class cannot be created (missing no-arg
+ * constructor)").
  * {@code List.of}/{@code Set.of}/{@code Map.of}, {@code Arrays.asList}, {@code Collections.empty*}/{@code singleton*},
  * records, enums, arrays and the common JDK collections are supported.</p>
  *
@@ -252,6 +254,14 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     private long globalKryoRegistrationVersion = -1;
 
     /**
+     * Whether {@link #checkMergedKryoRegistrationIds()} has passed for the current registration state. The merged
+     * ID check is quadratic in the number of explicit-ID registrations, and its outcome can only change when this
+     * parser's registrations change or the global registration version moves; both reset this flag. A failed check
+     * leaves it {@code false}, so the conflict is reported again on every later call. Guarded by {@code kryoPool}.
+     */
+    private boolean mergedKryoRegistrationIdsChecked = false;
+
+    /**
      * Package-private constructor. Use {@link ParserFactory#createKryoParser()} to obtain instances.
      */
     KryoParser() {
@@ -275,11 +285,12 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @return the Base64 encoded string representation of the serialized object
+     * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if a configured serializer reports an I/O cause while encoding the object graph
      * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
     @Override
-    public String serialize(final Object obj, final KryoSerConfig config) throws UncheckedIOException, KryoException {
+    public String serialize(final Object obj, final KryoSerConfig config) throws IllegalArgumentException, UncheckedIOException, KryoException {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
 
         try {
@@ -309,7 +320,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output file to write to (must not be {@code null})
-     * @throws IllegalArgumentException if {@code output} is null, or {@code output} is a directory
+     * @throws IllegalArgumentException if {@code output} is null, or {@code output} is a directory,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if creating, opening, writing, flushing or closing {@code output} fails, including an I/O cause
      *         wrapped by Kryo
      * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
@@ -353,7 +365,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the output stream to write to (must not be {@code null})
-     * @throws IllegalArgumentException if {@code output} is null
+     * @throws IllegalArgumentException if {@code output} is null,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if writing Kryo bytes to {@code output} or flushing it fails, including an I/O cause wrapped by Kryo
      * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
@@ -380,7 +393,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the writer to write to (must not be {@code null})
-     * @throws IllegalArgumentException if {@code output} is null
+     * @throws IllegalArgumentException if {@code output} is null,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if writing the Base64-encoded Kryo bytes to {@code output} or flushing it fails
      * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
@@ -422,7 +436,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to write (may be {@code null})
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the output stream to write to
-     * @throws IllegalArgumentException if {@code output} is null
+     * @throws IllegalArgumentException if {@code output} is null,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if writing to or flushing {@code output} fails
      * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
@@ -474,9 +489,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param obj the object to write (may be {@code null})
      * @param config the serialization configuration (may be {@code null} for defaults)
      * @param output the Kryo output to write to
+     * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
-    private void write(final Object obj, final KryoSerConfig config, final Output output) throws KryoException {
+    private void write(final Object obj, final KryoSerConfig config, final Output output) throws IllegalArgumentException, KryoException {
         check(config);
 
         final Kryo kryo = createKryo();
@@ -514,7 +530,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or the source text is not valid Base64
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or the source text is not valid Base64,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
      */
@@ -544,7 +561,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class for object-only data, or {@code null} for class-and-object data (including serialized nulls)
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is null, or the source text is not valid Base64
+     * @throws IllegalArgumentException if {@code source} is null, or the source text is not valid Base64,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
      */
@@ -581,7 +599,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or {@code source} is a directory
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or {@code source} is a directory,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including a missing file or an I/O cause wrapped
      *         by Kryo
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
@@ -614,7 +633,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class for object-only data, or {@code null} for class-and-object data (including serialized nulls)
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is null, or {@code source} is a directory
+     * @throws IllegalArgumentException if {@code source} is null, or {@code source} is a directory,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if opening, reading or closing {@code source} fails, including a missing file or an I/O cause wrapped
      *         by Kryo
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
@@ -656,7 +676,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if reading the binary Kryo bytes from {@code source} fails
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
@@ -689,7 +710,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class for object-only data, or {@code null} for class-and-object data (including serialized nulls)
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is null
+     * @throws IllegalArgumentException if {@code source} is null,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if reading the binary Kryo bytes from {@code source} fails
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
@@ -720,7 +742,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or the source text is not valid Base64
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null, or the source text is not valid Base64,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if reading the Base64-encoded Kryo text from {@code source} fails
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
@@ -752,7 +775,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetClass the class for object-only data, or {@code null} for class-and-object data (including serialized nulls)
      * @return the deserialized object instance
-     * @throws IllegalArgumentException if {@code source} is null, or the source text is not valid Base64
+     * @throws IllegalArgumentException if {@code source} is null, or the source text is not valid Base64,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws UncheckedIOException if reading the Base64-encoded Kryo text from {@code source} fails
      * @throws KryoException if the decoded bytes are empty, truncated, incompatible with the target class, or cannot be materialized
      *         by the configured Kryo serializers
@@ -784,8 +808,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration (may be {@code null} for defaults)
      * @param targetClass the target class to deserialize to (may be {@code null} if class info is in stream)
      * @return the deserialized object
+     * @throws UncheckedIOException if reading all bytes from {@code source} fails
+     * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
+     * @throws KryoException if the bytes are empty, truncated, incompatible with {@code targetClass}, or cannot be materialized by the configured
+     *         Kryo serializers
      */
-    private <T> T read(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
+    private <T> T read(final InputStream source, final KryoDeserConfig config, final Class<? extends T> targetClass)
+            throws UncheckedIOException, IllegalArgumentException, KryoException {
         final Input input = createInput();
 
         try {
@@ -817,9 +846,12 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param config the deserialization configuration (may be {@code null} for defaults)
      * @param targetClass the target class to deserialize to (may be {@code null} to read class from stream)
      * @return the deserialized object
+     * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
+     * @throws KryoException if the bytes are empty, truncated, incompatible with {@code targetClass}, or cannot be materialized by the configured
+     *         Kryo serializers
      */
     @SuppressWarnings("unchecked")
-    private <T> T read(final Input source, final KryoDeserConfig config, final Class<? extends T> targetClass) {
+    private <T> T read(final Input source, final KryoDeserConfig config, final Class<? extends T> targetClass) throws IllegalArgumentException, KryoException {
         check(config);
 
         final Kryo kryo = createKryo();
@@ -910,9 +942,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param <T> the type of the object
      * @param source the object to shallow copy
      * @return a shallow copy of the source object
+     * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws KryoException if a copied object cannot be instantiated or copied by its registered serializer
      */
-    public <T> T shallowCopy(final T source) throws KryoException {
+    public <T> T shallowCopy(final T source) throws IllegalArgumentException, KryoException {
         final Kryo kryo = createKryo();
 
         try {
@@ -950,9 +983,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param <T> the type of the object
      * @param source the object to deep copy
      * @return a deep copy of the source object
+     * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws KryoException if a copied object cannot be instantiated or copied by its registered serializer
      */
-    public <T> T deepCopy(final T source) throws KryoException {
+    public <T> T deepCopy(final T source) throws IllegalArgumentException, KryoException {
         final Kryo kryo = createKryo();
 
         try {
@@ -978,9 +1012,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      *
      * @param source the object to encode (may be {@code null})
      * @return the encoded byte array
+     * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws KryoException if a serializer cannot encode the object graph, including an unsupported cyclic graph
      */
-    public byte[] encode(final Object source) throws KryoException {
+    public byte[] encode(final Object source) throws IllegalArgumentException, KryoException {
         final ByteArrayOutputStream os = Objectory.createByteArrayOutputStream();
         final Output output = createOutput();
         final Kryo kryo = createKryo();
@@ -1013,7 +1048,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * @param source the byte array to decode (must not be {@code null}); an empty array is not a valid Kryo
      *        payload and fails with {@code KryoException}
      * @return the decoded object
-     * @throws IllegalArgumentException if {@code source} is null
+     * @throws IllegalArgumentException if {@code source} is null,
+     *         or the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      * @throws KryoException if the encoded bytes are empty, truncated or cannot be materialized by the configured Kryo serializers
      */
     @SuppressWarnings("unchecked")
@@ -1214,6 +1250,7 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * were all replayed and the hard-coded replay order, rather than call order, chose the winner.
      */
     private void clearKryoRegistration(final Class<?> type) {
+        mergedKryoRegistrationIdsChecked = false;
         kryoClassSet.remove(type);
         kryoClassIdMap.remove(type);
         kryoClassSerializerMap.remove(type);
@@ -1450,8 +1487,9 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
      * }</pre>
      *
      * @return a configured Kryo instance ready for use
+     * @throws IllegalArgumentException if the merged global and per-parser Kryo registrations assign one registration ID to two different classes
      */
-    protected Kryo createKryo() {
+    protected Kryo createKryo() throws IllegalArgumentException {
         synchronized (kryoPool) {
             synchronized (ParserFactory._kryoRegistrationLock) {
                 final long currentGlobalRegistrationVersion = ParserFactory._kryoRegistrationVersion.get();
@@ -1460,9 +1498,13 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
                     xPool.clear();
                     kryoPool.clear();
                     globalKryoRegistrationVersion = currentGlobalRegistrationVersion;
+                    mergedKryoRegistrationIdsChecked = false;
                 }
 
-                checkMergedKryoRegistrationIds();
+                if (!mergedKryoRegistrationIdsChecked) {
+                    checkMergedKryoRegistrationIds();
+                    mergedKryoRegistrationIdsChecked = true;
+                }
 
                 // Keep the global lock through the pooled-instance decision. Otherwise a global
                 // registration could complete after the version check but before this removal,
@@ -1715,7 +1757,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Creates a new {@code Input} instance from the pool or creates a new one if the pool is empty.
      * This method uses object pooling to reduce allocation overhead and improve performance.
-     * The returned {@code Input} instance is configured with the default buffer size.
+     * A newly created {@code Input} has the default buffer size; a pooled one holds an empty buffer. Either way,
+     * install the data to read with {@code setBuffer} before use.
      *
      * <p><b>Note:</b> This method is package-private and not part of the public API.</p>
      *
@@ -1744,8 +1787,8 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
     /**
      * Recycles an {@code Input} instance back to the pool for reuse.
      * This method returns the {@code Input} to the object pool if it meets size constraints,
-     * allowing it to be reused by future operations. The input's stream is set to {@code null}
-     * before pooling to prevent resource leaks.
+     * allowing it to be reused by future operations. The input's stream is set to {@code null} and its
+     * buffer is replaced by an empty array before pooling, so the pool neither leaks a stream nor retains the last payload.
      *
      * <p>The input will not be recycled if:</p>
      * <ul>
@@ -1776,7 +1819,10 @@ public final class KryoParser extends AbstractParser<KryoSerConfig, KryoDeserCon
 
         synchronized (inputPool) {
             if (inputPool.size() < POOL_SIZE) {
-                input.setInputStream(null);
+                // Every caller installs its payload with setBuffer, so the buffer is the last (decoded or caller-owned)
+                // payload: release it rather than pinning it in the static pool. Like setInputStream(null), this also
+                // clears the stream and resets position, limit and total.
+                input.setBuffer(N.EMPTY_BYTE_ARRAY);
                 inputPool.add(input);
             }
         }

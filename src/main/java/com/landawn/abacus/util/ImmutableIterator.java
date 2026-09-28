@@ -115,8 +115,8 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      * @param <C> the type of the collection to create
      * @param supplier a {@link Supplier} that provides a new empty collection instance
      * @return a collection containing all remaining elements from this iterator
-     * @throws IllegalArgumentException if {@code supplier} is null or returns null, or a remaining element violates a destination restriction
-     * @throws NullPointerException if a remaining element is null and the destination rejects null elements
+     * @throws IllegalArgumentException if {@code supplier} is null, or a remaining element violates a destination restriction
+     * @throws NullPointerException if {@code supplier} returns null, or a remaining element is null and the destination rejects null elements
      * @throws ClassCastException if a remaining element is incompatible with the destination's type or comparison requirements
      * @throws UnsupportedOperationException if an element remains and the target collection does not support adding it
      * @throws RuntimeException if invoking {@code supplier} fails
@@ -125,7 +125,7 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
             throws IllegalArgumentException, NullPointerException, ClassCastException, UnsupportedOperationException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        return drainTo(N.checkArgNotNull(supplier.get(), "supplier.get()"));
+        return drainTo(N.requireNonNull(supplier.get(), "supplier.get()"));
     }
 
     /**
@@ -214,8 +214,8 @@ abstract class ImmutableIterator<T> implements java.util.Iterator<T> {
      * ObjIterator<String> iter = ObjIterator.of("a", "b", "c");
      * iter.next();   // element is skipped (the first one)
      * long remaining = iter.count();
-     * System.out.println(remaining);        // 2
-     * System.out.println(iter.hasNext());   // false (iterator exhausted)
+     * System.out.println(remaining);       // 2
+     * System.out.println(iter.hasNext());  // false (iterator exhausted)
      * }</pre>
      *
      * @return the number of remaining elements; {@code 0} if the iterator is already exhausted

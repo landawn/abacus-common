@@ -81,4 +81,12 @@ public class CommonUtilCheckStateTest extends CommonUtilTestSupport {
         }));
         assertTrue(called[0]);
     }
+
+
+    @Test
+    public void testCheckStateVarargsTemplateWithFiveArguments() {
+        assertDoesNotThrow(() -> CommonUtil.checkState(true, "{}, {}, {}, {}, {}", 1, 2, 3, 4, 5));
+        assertEquals("1, 2, 3, 4, 5",
+                assertThrows(IllegalStateException.class, () -> CommonUtil.checkState(false, "{}, {}, {}, {}, {}", 1, 2, 3, 4, 5)).getMessage());
+    }
 }

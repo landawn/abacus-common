@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
+import org.junit.jupiter.api.Assertions;
 
 public class DateTypeTest extends TestBase {
 
@@ -193,5 +194,21 @@ public class DateTypeTest extends TestBase {
 
         assertNull(type.valueOf((char[]) null, 0, 0));
         assertNull(type.valueOf(new char[0], 0, 0));
+    }
+
+    @Test
+    public void testValueOfShortNumericTextIsNotEpochMillis() {
+        final Type<Object> dateType = TypeFactory.getType("Date");
+
+        // more than four characters of an optional sign and ASCII digits: epoch milliseconds
+        Assertions.assertEquals(12345L, ((java.util.Date) dateType.valueOf("12345")).getTime());
+        Assertions.assertEquals(-12345L, ((java.util.Date) dateType.valueOf("-12345")).getTime());
+        Assertions.assertEquals(12345L, ((java.util.Date) dateType.valueOf("12345".toCharArray(), 0, 5)).getTime());
+
+        // shorter numeric text is not epoch millis: the formatted parser rejects it as ambiguous
+        for (final String text : new String[] { "0", "-1", "99", "2024" }) {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(text), text);
+            Assertions.assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(text.toCharArray(), 0, text.length()), text);
+        }
     }
 }

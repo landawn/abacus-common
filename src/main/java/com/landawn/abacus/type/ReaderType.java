@@ -101,8 +101,9 @@ public class ReaderType extends AbstractType<Reader> {
      * This constructor is package-private and intended to be called only by the TypeFactory.
      *
      * @param typeName the name of the Reader type
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    ReaderType(final String typeName) {
+    ReaderType(final String typeName) throws IllegalArgumentException {
         super(typeName);
 
         typeClass = Reader.class;
@@ -114,13 +115,13 @@ public class ReaderType extends AbstractType<Reader> {
      * Text construction is supported only for the content-preserving classes listed in {@link #valueOf(String)}.
      * This constructor is package-private and intended to be called only by the TypeFactory.
      *
-     * @param cls the specific Reader subclass to create a type handler for
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @param targetClass the specific Reader subclass to create a type handler for
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    ReaderType(final Class<Reader> cls) throws IllegalArgumentException {
-        super(ClassUtil.getSimpleClassName(cls));
+    ReaderType(final Class<Reader> targetClass) throws IllegalArgumentException {
+        super(ClassUtil.getSimpleClassName(targetClass));
 
-        typeClass = cls;
+        typeClass = targetClass;
 
     }
 
@@ -353,15 +354,15 @@ public class ReaderType extends AbstractType<Reader> {
      * stmt.executeUpdate();
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Reader to set as the parameter value
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
-        stmt.setCharacterStream(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
+        statement.setCharacterStream(columnIndex, x);
     }
 
     /**
@@ -377,15 +378,15 @@ public class ReaderType extends AbstractType<Reader> {
      * stmt.execute();
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Reader to set as the parameter value
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws NullPointerException, SQLException {
-        stmt.setCharacterStream(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final Reader x) throws NullPointerException, SQLException {
+        statement.setCharacterStream(parameterName, x);
     }
 
     /**
@@ -402,16 +403,17 @@ public class ReaderType extends AbstractType<Reader> {
      * stmt.executeUpdate();
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the Reader to set as the parameter value
      * @param sqlTypeOrLength the length of the stream in characters
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
-        stmt.setCharacterStream(columnIndex, x, sqlTypeOrLength);
+    public void set(final PreparedStatement statement, final int columnIndex, final Reader x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
+        statement.setCharacterStream(columnIndex, x, sqlTypeOrLength);
     }
 
     /**
@@ -428,17 +430,17 @@ public class ReaderType extends AbstractType<Reader> {
      * stmt.execute();
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Reader to set as the parameter value
      * @param sqlTypeOrLength the length of the stream in characters
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final Reader x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setCharacterStream(parameterName, x, sqlTypeOrLength);
+        statement.setCharacterStream(parameterName, x, sqlTypeOrLength);
     }
 
     /**

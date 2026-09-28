@@ -1600,4 +1600,56 @@ public class OkHttpRequestTest extends TestBase {
         assertEquals("{}", recorded.getBody().readUtf8());
     }
 
+    @Test
+    public void testTagWithNullTypeThrowsIaeInsteadOfKotlinNpe() {
+        final OkHttpRequest request = OkHttpRequest.url("http://localhost:18080/data");
+
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> request.tag((Class<Object>) null, "value"));
+        assertTrue(e.getMessage().contains("'type'"), e.getMessage());
+        assertThrows(IllegalArgumentException.class, () -> request.tag((Class<Object>) null, null));
+        assertSame(request, request.tag(String.class, null));
+    }
+
+    @Test
+    public void testJsonBodyAndXmlBodyNullStringMessageNamesTheParameter() {
+        final OkHttpRequest request = OkHttpRequest.url("http://localhost:18080/data");
+
+        final IllegalArgumentException jsonEx = assertThrows(IllegalArgumentException.class, () -> request.jsonBody((String) null));
+        assertTrue(jsonEx.getMessage().contains("'json'"), jsonEx.getMessage());
+
+        final IllegalArgumentException xmlEx = assertThrows(IllegalArgumentException.class, () -> request.xmlBody((String) null));
+        assertTrue(xmlEx.getMessage().contains("'xml'"), xmlEx.getMessage());
+    }
+
+    @Test
+    public void testMultiHeadersNullNameMessageNamesTheNullParameter() {
+        final OkHttpRequest request = OkHttpRequest.url("http://localhost:18080/data");
+
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> request.headers("A", "v", null, "w"));
+        assertTrue(e.getMessage().contains("'name2'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> request.headers(null, "v", "B", "w"));
+        assertTrue(e.getMessage().contains("'name1'"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> request.headers("A", "v", "B", "w", null, "x"));
+        assertTrue(e.getMessage().contains("'name3'"), e.getMessage());
+    }
+
+    @Test
+    public void testExecuteDecodesNoContentResponseAsEmptyInputRatherThanNull() throws IOException {
+        final MockWebServer noContentServer = new MockWebServer();
+        noContentServer.start();
+
+        try {
+            noContentServer.enqueue(new MockResponse().setResponseCode(204));
+            noContentServer.enqueue(new MockResponse().setResponseCode(204));
+            final String url = noContentServer.url("/no-content").toString();
+
+            // Only Void.class maps to null; a response without content is decoded from empty input.
+            assertEquals("", OkHttpRequest.url(url).get(String.class));
+            assertArrayEquals(new byte[0], OkHttpRequest.url(url).get(byte[].class));
+        } finally {
+            noContentServer.shutdown();
+        }
+    }
 }

@@ -219,30 +219,30 @@ public abstract class FloatIteratorEx extends FloatIterator implements IteratorE
      * FloatIteratorEx iterEx = FloatIteratorEx.of(iter);
      * }</pre>
      *
-     * @param iter the FloatIterator to wrap (can be null)
-     * @return the same instance if {@code iter} is already a FloatIteratorEx, a FloatIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
+     * @param iterator the FloatIterator to wrap (can be null)
+     * @return the same instance if {@code iterator} is already a FloatIteratorEx, a FloatIteratorEx wrapping the given iterator, or an empty iterator if {@code iterator} is null
      */
-    public static FloatIteratorEx of(final FloatIterator iter) {
-        if (iter == null) {
+    public static FloatIteratorEx of(final FloatIterator iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof FloatIteratorEx) {
-            return ((FloatIteratorEx) iter);
+        } else if (iterator instanceof FloatIteratorEx) {
+            return ((FloatIteratorEx) iterator);
         }
 
         return new FloatIteratorEx() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public float nextFloat() throws NoSuchElementException {
-                return iter.nextFloat();
+                return iterator.nextFloat();
             }
 
             @Override
             public void closeResource() {
-                ObjIteratorEx.closeResource(iter);
+                ObjIteratorEx.closeResource(iterator);
             }
         };
     }
@@ -260,13 +260,13 @@ public abstract class FloatIteratorEx extends FloatIterator implements IteratorE
      * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
      * is unboxed by its next method.</p>
      *
-     * @param iter the Iterator of Float objects (can be null)
+     * @param iterator the Iterator of Float objects (can be null)
      * @return a FloatIteratorEx unwrapping the given iterator, or empty iterator if iter is null
      */
-    public static FloatIteratorEx from(final Iterator<Float> iter) {
-        if (iter == null) {
+    public static FloatIteratorEx from(final Iterator<Float> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ObjIteratorEx<Float> iteratorEx) {
+        } else if (iterator instanceof ObjIteratorEx<Float> iteratorEx) {
 
             return new FloatIteratorEx() {
                 @Override
@@ -313,7 +313,7 @@ public abstract class FloatIteratorEx extends FloatIterator implements IteratorE
             return new FloatIteratorEx() {
                 @Override
                 public boolean hasNext() {
-                    return iter.hasNext();
+                    return iterator.hasNext();
                 }
 
                 /**
@@ -324,12 +324,12 @@ public abstract class FloatIteratorEx extends FloatIterator implements IteratorE
                  */
                 @Override
                 public float nextFloat() throws NoSuchElementException, NullPointerException {
-                    return iter.next();
+                    return iterator.next();
                 }
 
                 @Override
                 public void closeResource() {
-                    ObjIteratorEx.closeResource(iter);
+                    ObjIteratorEx.closeResource(iterator);
                 }
             };
         }
@@ -410,8 +410,8 @@ public abstract class FloatIteratorEx extends FloatIterator implements IteratorE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIteratorEx iter = FloatIteratorEx.of(1.0f, 2.0f);
-     * iter.closeResource();         // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
+     * iter.closeResource();        // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());  // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * FloatIteratorEx iter2 = FloatIteratorEx.of(3.0f, 4.0f);

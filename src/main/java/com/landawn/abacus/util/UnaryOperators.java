@@ -47,9 +47,9 @@ public final class UnaryOperators {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UnaryOperators.identity().apply("hello");   // returns "hello"
-     * UnaryOperators.identity().apply(42);        // returns 42
-     * UnaryOperators.identity().apply(null);      // returns null
+     * UnaryOperators.identity().apply("hello");  // returns "hello"
+     * UnaryOperators.identity().apply(42);       // returns 42
+     * UnaryOperators.identity().apply(null);     // returns null
      * }</pre>
      *
      * @param <T> the type of the operand and result of the operator

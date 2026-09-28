@@ -256,18 +256,18 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * // Sets parameter to SQL NULL
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OptionalChar value to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalChar x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final OptionalChar x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(columnIndex, Types.VARCHAR);
+            statement.setNull(columnIndex, Types.VARCHAR);
         } else {
-            stmt.setString(columnIndex, String.valueOf(x.get()));
+            statement.setString(columnIndex, String.valueOf(x.get()));
         }
     }
 
@@ -289,18 +289,18 @@ public class OptionalCharType extends AbstractOptionalType<OptionalChar> {
      * // Sets parameter to SQL NULL
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalChar value to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalChar x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final OptionalChar x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(parameterName, Types.VARCHAR);
+            statement.setNull(parameterName, Types.VARCHAR);
         } else {
-            stmt.setString(parameterName, String.valueOf(x.get()));
+            statement.setString(parameterName, String.valueOf(x.get()));
         }
     }
 

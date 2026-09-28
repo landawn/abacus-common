@@ -85,62 +85,63 @@ public class NCharacterStreamType extends ReaderType {
      * Sets a national character stream parameter in a {@link PreparedStatement} at the specified index.
      * The {@link java.io.Reader} will be read until end-of-file is reached.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Reader} containing the Unicode character stream to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
-        stmt.setNCharacterStream(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final Reader x) throws NullPointerException, SQLException {
+        statement.setNCharacterStream(columnIndex, x);
     }
 
     /**
      * Sets a national character stream parameter in a {@link CallableStatement} by name.
      * The {@link java.io.Reader} will be read until end-of-file is reached.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Reader} containing the Unicode character stream to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x) throws NullPointerException, SQLException {
-        stmt.setNCharacterStream(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final Reader x) throws NullPointerException, SQLException {
+        statement.setNCharacterStream(parameterName, x);
     }
 
     /**
      * Sets a national character stream parameter in a {@link PreparedStatement} at the specified index,
      * declaring that the {@link java.io.Reader} contains exactly {@code sqlTypeOrLength} characters.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Reader} containing the Unicode character stream to set
      * @param sqlTypeOrLength the declared number of characters in the stream
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Reader x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
-        stmt.setNCharacterStream(columnIndex, x, sqlTypeOrLength);
+    public void set(final PreparedStatement statement, final int columnIndex, final Reader x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
+        statement.setNCharacterStream(columnIndex, x, sqlTypeOrLength);
     }
 
     /**
      * Sets a national character stream parameter in a {@link CallableStatement} by name,
      * declaring that the {@link java.io.Reader} contains exactly {@code sqlTypeOrLength} characters.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Reader} containing the Unicode character stream to set
      * @param sqlTypeOrLength the declared number of characters in the stream
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Reader x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final Reader x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setNCharacterStream(parameterName, x, sqlTypeOrLength);
+        statement.setNCharacterStream(parameterName, x, sqlTypeOrLength);
     }
 }

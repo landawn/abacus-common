@@ -87,7 +87,7 @@ public class TryTest extends TestBase {
 
         AtomicBoolean bodyRan = new AtomicBoolean();
         AtomicBoolean finalRan = new AtomicBoolean();
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NullPointerException.class,
                 () -> Try.with((Throwables.Supplier<AutoCloseable, Exception>) () -> null, () -> finalRan.set(true)).run(x -> bodyRan.set(true)));
         assertFalse(bodyRan.get());
         assertTrue(finalRan.get());
@@ -496,7 +496,7 @@ public class TryTest extends TestBase {
         }, "fallback")));
     }
 
-    // Pins the corrected class-javadoc sentence about a supplier that returns null: the IllegalArgumentException
+    // Pins the corrected class-javadoc sentence about a supplier that returns null: the NullPointerException
     // is an acquisition failure like any other, so only run(cmd) and call(cmd) let it reach the caller - every
     // overload with error handling absorbs it.
     @Test
@@ -505,18 +505,18 @@ public class TryTest extends TestBase {
         final Throwables.Function<AutoCloseable, String, Exception> body = x -> "bodyResult";
 
         // no error handling -> the caller sees it
-        assertThrows(IllegalArgumentException.class, () -> Try.with(nullSupplier).run(x -> fail("body must not run")));
-        assertThrows(IllegalArgumentException.class, () -> Try.with(nullSupplier).call(body));
+        assertThrows(NullPointerException.class, () -> Try.with(nullSupplier).run(x -> fail("body must not run")));
+        assertThrows(NullPointerException.class, () -> Try.with(nullSupplier).call(body));
 
         // every overload that offers error handling absorbs it instead
         final AtomicReference<Exception> seen = new AtomicReference<>();
         Try.with(nullSupplier).run(x -> fail("body must not run"), seen::set);
-        assertTrue(seen.get() instanceof IllegalArgumentException);
+        assertTrue(seen.get() instanceof NullPointerException);
 
         assertEquals("fb", Try.with(nullSupplier).call(body, "fb"));
         assertEquals("fbSup", Try.with(nullSupplier).call(body, () -> "fbSup"));
         assertEquals("fbFn", Try.with(nullSupplier).call(body, e -> {
-            assertTrue(e instanceof IllegalArgumentException);
+            assertTrue(e instanceof NullPointerException);
             return "fbFn";
         }));
         assertEquals("fbPred", Try.with(nullSupplier).call(body, e -> true, "fbPred"));

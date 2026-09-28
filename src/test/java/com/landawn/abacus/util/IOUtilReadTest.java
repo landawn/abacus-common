@@ -1090,4 +1090,185 @@ public class IOUtilReadTest extends IOUtilTestSupport {
         // The low-level buffer fill stays checked: it mirrors InputStream.read and returns a count.
         assertThrows(IOException.class, () -> IOUtil.read(missing, new byte[8]));
     }
+
+    // ---- deep review 2026-09-25 G043 begin ----
+    /**
+     * A reader that reports end of input once and then serves more text, as a console does after Ctrl-D.
+     * Each {@code null} segment answers one read with -1.
+     */
+    private static Reader resumableReaderG043(final String... segments) {
+        final java.util.Deque<String> queue = new java.util.ArrayDeque<>();
+
+        for (final String segment : segments) {
+            queue.add(segment == null ? "\u0000EOF" : segment);
+        }
+
+        return new Reader() {
+            @Override
+            public int read(final char[] cbuf, final int off, final int len) {
+                if (len == 0) {
+                    return 0;
+                }
+
+                final String head = queue.poll();
+
+                if (head == null || head.equals("\u0000EOF")) {
+                    return -1;
+                }
+
+                final int n = Math.min(len, head.length());
+                head.getChars(0, n, cbuf, off);
+
+                if (n < head.length()) {
+                    queue.addFirst(head.substring(n));
+                }
+
+                return n;
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+    }
+
+    // G043-01: readLine over a caller's BufferedReader asked the source again after end of input and returned a line read past it
+    @Test
+    public void testReadLine_bufferedSourceEndOfInputIsSticky() {
+        // The unbuffered path already stops at the first end of input.
+        assertEquals(null, IOUtil.readLine(resumableReaderG043("a\n", null, "b\n"), 2));
+        assertEquals(null, IOUtil.readLine(new java.io.BufferedReader(resumableReaderG043("a\n", null, "b\n")), 2));
+    }
+
+    // G043-01: readLines with an offset past end of input over a caller's BufferedReader returned a line read past that end
+    @Test
+    public void testReadLines_bufferedSourceEndOfInputIsSticky() {
+        assertEquals(0, IOUtil.readLines(resumableReaderG043("a\n", null, "b\n"), 2, 1).size());
+        assertEquals(0, IOUtil.readLines(new java.io.BufferedReader(resumableReaderG043("a\n", null, "b\n")), 2, 1).size());
+    }
+    // ---- deep review 2026-09-25 G043 end ----
+    // ---- perf review 2026-09-26 G043 begin ----
+    private static byte[] patternBytesG043(final int size) {
+        final byte[] data = new byte[size];
+
+        for (int i = 0; i < size; i++) {
+            data[i] = (byte) (i * 31 + 7);
+        }
+
+        return data;
+    }
+
+    private static String patternStringG043(final int size) {
+        final StringBuilder sb = new StringBuilder(size);
+
+        for (int i = 0; i < size; i++) {
+            sb.append((char) ('a' + (i * 7) % 26));
+        }
+
+        return sb.toString();
+    }
+
+    // G043-01: bounded readBytes whose buffer grows and is capped at maxLength (exactly-full grown array returned as is)
+    @Test
+    public void testReadBytes_grownBufferCappedAtMaxLength() throws IOException {
+        final int bufferSize = Objectory.BUFFER_SIZE;
+        final byte[] data = patternBytesG043(bufferSize * 5 + 123);
+
+        for (final int maxLength : new int[] { bufferSize - 1, bufferSize, bufferSize + 1, bufferSize * 2, bufferSize * 3 + 17, data.length - 1,
+                data.length, data.length + 1, Integer.MAX_VALUE }) {
+            for (final long offset : new long[] { 0, 1, bufferSize, data.length - 5, data.length, data.length + 1L }) {
+                final int from = (int) Math.min(offset, data.length);
+                final int to = (int) Math.min((long) from + maxLength, data.length);
+                final byte[] expected = java.util.Arrays.copyOfRange(data, from, to);
+
+                final byte[] first = IOUtil.readBytes(new ByteArrayInputStream(data), offset, maxLength);
+                final byte[] second = IOUtil.readBytes(new ByteArrayInputStream(data), offset, maxLength);
+
+                org.junit.jupiter.api.Assertions.assertArrayEquals(expected, first, "maxLength=" + maxLength + ", offset=" + offset);
+                org.junit.jupiter.api.Assertions.assertArrayEquals(expected, second);
+                assertTrue(expected.length == 0 || first != second, "every call returns a fresh array");
+            }
+        }
+    }
+
+    // G043-01: the pooled buffer is never handed out - a result filling it exactly must survive later reads
+    @Test
+    public void testReadBytes_resultFillingPooledBufferIsACopy() throws IOException {
+        final int bufferSize = Objectory.BUFFER_SIZE;
+        final byte[] data = patternBytesG043(bufferSize * 2);
+        final byte[] result = IOUtil.readBytes(new ByteArrayInputStream(data), 0, bufferSize);
+        final byte[] snapshot = result.clone();
+
+        IOUtil.readBytes(new ByteArrayInputStream(new byte[bufferSize * 2]), 0, bufferSize);
+        IOUtil.readAllBytes(new ByteArrayInputStream(new byte[bufferSize * 3]));
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(snapshot, result);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOf(data, bufferSize), result);
+        result[0] ^= 1;
+        org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOf(data, bufferSize),
+                IOUtil.readBytes(new ByteArrayInputStream(data), 0, bufferSize));
+    }
+
+    // G043-01: a grown array that is returned is exclusively the caller's
+    @Test
+    public void testReadBytes_grownResultIsExclusive() throws IOException {
+        final int bufferSize = Objectory.BUFFER_SIZE;
+        final byte[] data = patternBytesG043(bufferSize * 4);
+        final int maxLength = bufferSize * 2 + 3;
+        final byte[] result = IOUtil.readBytes(new ByteArrayInputStream(data), 0, maxLength);
+
+        assertEquals(maxLength, result.length);
+        java.util.Arrays.fill(result, (byte) 0);
+
+        org.junit.jupiter.api.Assertions.assertArrayEquals(java.util.Arrays.copyOf(data, maxLength),
+                IOUtil.readBytes(new ByteArrayInputStream(data), 0, maxLength));
+        org.junit.jupiter.api.Assertions.assertArrayEquals(data, IOUtil.readAllBytes(new ByteArrayInputStream(data)));
+    }
+
+    // G043-01: bounded readChars whose buffer grows and is capped at maxLength
+    @Test
+    public void testReadChars_grownBufferCappedAtMaxLength() throws IOException {
+        final int bufferSize = Objectory.BUFFER_SIZE;
+        final String data = patternStringG043(bufferSize * 5 + 123);
+
+        for (final int maxLength : new int[] { bufferSize - 1, bufferSize, bufferSize + 1, bufferSize * 2, bufferSize * 3 + 17, data.length() - 1,
+                data.length(), data.length() + 1, Integer.MAX_VALUE }) {
+            for (final long offset : new long[] { 0, 1, bufferSize, data.length() - 5, data.length(), data.length() + 1L }) {
+                final int from = (int) Math.min(offset, data.length());
+                final int to = (int) Math.min((long) from + maxLength, data.length());
+                final String expected = data.substring(from, to);
+
+                final char[] first = IOUtil.readChars(new StringReader(data), offset, maxLength);
+                final char[] second = IOUtil.readChars(new ByteArrayInputStream(data.getBytes(UTF_8)), offset, maxLength);
+
+                assertEquals(expected, new String(first), "maxLength=" + maxLength + ", offset=" + offset);
+                assertEquals(expected, new String(second));
+                assertTrue(expected.isEmpty() || first != second, "every call returns a fresh array");
+            }
+        }
+    }
+
+    // G043-01: the pooled char buffer is never handed out, and a grown result is exclusively the caller's
+    @Test
+    public void testReadChars_pooledAndGrownResultsAreExclusive() throws IOException {
+        final int bufferSize = Objectory.BUFFER_SIZE;
+        final String data = patternStringG043(bufferSize * 3);
+
+        final char[] exact = IOUtil.readChars(new StringReader(data), 0, bufferSize);
+        final char[] grown = IOUtil.readChars(new StringReader(data), 0, bufferSize * 2 + 1);
+
+        IOUtil.readChars(new StringReader(patternStringG043(bufferSize * 2)), 0, bufferSize);
+        IOUtil.readAllChars(new StringReader(data));
+
+        assertEquals(data.substring(0, bufferSize), new String(exact));
+        assertEquals(data.substring(0, bufferSize * 2 + 1), new String(grown));
+
+        java.util.Arrays.fill(exact, 'x');
+        java.util.Arrays.fill(grown, 'x');
+
+        assertEquals(data.substring(0, bufferSize), new String(IOUtil.readChars(new StringReader(data), 0, bufferSize)));
+        assertEquals(data.substring(0, bufferSize * 2 + 1), new String(IOUtil.readChars(new StringReader(data), 0, bufferSize * 2 + 1)));
+        assertEquals(data, new String(IOUtil.readAllChars(new StringReader(data))));
+    }
+    // ---- perf review 2026-09-26 G043 end ----
 }

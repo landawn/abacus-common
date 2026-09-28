@@ -78,8 +78,8 @@ import java.lang.annotation.Target;
  * BeanDifference<Map<String, Object>, Map<String, Object>, Map<String, Pair<Object, Object>>> diff
  *         = Difference.BeanDifference.of(user1, user2);
  *
- * diff.common();          // {id=42, username=..., ...}
- * diff.differentValues(); // {email=Pair.of("old@example.com", "new@example.com")}
+ * diff.common();           // {id=42, username=..., ...}
+ * diff.differentValues();  // {email=Pair.of("old@example.com", "new@example.com")}
  *
  * // Explicit non-empty property list: @DiffIgnore is NOT honored here.
  * Difference.BeanDifference.of(user1, user2, List.of("email", "lastModified"));

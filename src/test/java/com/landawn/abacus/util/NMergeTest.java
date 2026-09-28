@@ -128,7 +128,7 @@ public class NMergeTest extends NTestSupport {
                 final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> N.merge(input, requiresSameColumns),
                         () -> "size " + input.size() + ", requiresSameColumns=" + requiresSameColumns);
 
-                assertTrue(e.getMessage().contains("dss"), e.getMessage());
+                assertTrue(e.getMessage().contains("datasets"), e.getMessage());
             }
 
             assertThrows(IllegalArgumentException.class, () -> N.merge(input), () -> "size " + input.size());

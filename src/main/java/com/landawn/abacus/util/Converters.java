@@ -55,57 +55,58 @@ final class Converters {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Converters.register(MyType.class, (value, targetType) -> value.toString());   // returns true (MyType is a non-built-in class, not already registered)
-     * Converters.register(String.class, (value, targetType) -> value);              // throws IllegalArgumentException (built-in java.* class)
+     * Converters.register(MyType.class, (value, targetType) -> value.toString());  // returns true (MyType is a non-built-in class, not already registered)
+     * Converters.register(String.class, (value, targetType) -> value);             // throws IllegalArgumentException (built-in java.* class)
      * }</pre>
      *
      * @param <S> the registered source type, which the converter must accept
-     * @param srcClass the source class that the converter can convert from. This must not be a built-in class.
+     * @param sourceClass the source class that the converter can convert from. This must not be a built-in class.
      * @param converter the converter function that takes a source object and a target class, and returns an instance of the target class.
-     * @return {@code true} if there is no {@code converter} registered with specified {@code srcClass} yet before this call.
-     * @throws IllegalArgumentException if {@code srcClass} is {@code null} or is a built-in class, or
+     * @return {@code true} if there is no {@code converter} registered with specified {@code sourceClass} yet before this call.
+     * @throws IllegalArgumentException if {@code sourceClass} is {@code null} or is a built-in class, or
      *         {@code converter} is {@code null}.
      */
     @SuppressWarnings("rawtypes")
-    public static <S> boolean register(@NotNull final Class<S> srcClass, final BiFunction<? super S, Class<?>, ?> converter) throws IllegalArgumentException {
-        N.checkArgNotNull(srcClass, cs.srcClass);
+    public static <S> boolean register(@NotNull final Class<S> sourceClass, final BiFunction<? super S, Class<?>, ?> converter)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(sourceClass, cs.sourceClass);
         N.checkArgNotNull(converter, cs.converter);
 
-        if (N.isBuiltinClass(srcClass)) {
-            throw new IllegalArgumentException("Can't register converter with built-in class: " + ClassUtil.getCanonicalClassName(srcClass));
+        if (N.isBuiltinClass(sourceClass)) {
+            throw new IllegalArgumentException("Can't register converter with built-in class: " + ClassUtil.getCanonicalClassName(sourceClass));
         }
 
         synchronized (converterMap) {
-            if (converterMap.containsKey(srcClass)) {
+            if (converterMap.containsKey(sourceClass)) {
                 return false;
             }
 
             // Lookup only applies this erased function to instances of its registered source class or subclasses.
-            converterMap.put(srcClass, (BiFunction) converter);
+            converterMap.put(sourceClass, (BiFunction) converter);
 
             return true;
         }
     }
 
     /**
-     * Returns the converter registered for {@code srcClass}, or the nearest registered superclass.
+     * Returns the converter registered for {@code sourceClass}, or the nearest registered superclass.
      * Interfaces are not considered. {@code Object} is not walked.
      *
-     * @param srcClass the source class to look up
+     * @param sourceClass the source class to look up
      * @return the registered converter, or {@code null} if there is none
      */
-    static BiFunction<Object, Class<?>, Object> getConverter(final Class<?> srcClass) {
-        if (srcClass == null) {
+    static BiFunction<Object, Class<?>, Object> getConverter(final Class<?> sourceClass) {
+        if (sourceClass == null) {
             return null;
         }
 
-        BiFunction<Object, Class<?>, Object> converter = converterMap.get(srcClass);
+        BiFunction<Object, Class<?>, Object> converter = converterMap.get(sourceClass);
 
         if (converter != null) {
             return converter;
         }
 
-        Class<?> cls = srcClass.getSuperclass();
+        Class<?> cls = sourceClass.getSuperclass();
 
         while (cls != null && cls != Object.class) {
             converter = converterMap.get(cls);

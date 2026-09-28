@@ -89,9 +89,9 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setExclusion(Exclusion.NULL);      // removes null fields
-     * config.setExclusion(Exclusion.DEFAULT);   // removes fields with default values
-     * config.setExclusion(Exclusion.NONE);      // disables value-based exclusion; other filters still apply
+     * config.setExclusion(Exclusion.NULL);     // removes null fields
+     * config.setExclusion(Exclusion.DEFAULT);  // removes fields with default values
+     * config.setExclusion(Exclusion.NONE);     // disables value-based exclusion; other filters still apply
      * }</pre>
      *
      * @param exclusion the exclusion strategy to use, or {@code null} to use the bean annotation or the parser default
@@ -134,8 +134,8 @@ public abstract class SerializationConfig<C extends SerializationConfig<C>> exte
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setSkipTransientField(true);    // removes transient fields
-     * config.setSkipTransientField(false);   // keeps transient fields
+     * config.setSkipTransientField(true);   // removes transient fields
+     * config.setSkipTransientField(false);  // keeps transient fields
      * }</pre>
      *
      * @param skipTransientField {@code true} to skip transient fields, {@code false} to include them

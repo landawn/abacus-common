@@ -40,8 +40,8 @@ import com.landawn.abacus.annotation.MayReturnNull;
  * int statusCode = orderStatus.code();   // returns 32
  *
  * // Retrieving status from code
- * UnifiedStatus retrieved = UnifiedStatus.fromCode(32);   // returns PROCESSING
- * UnifiedStatus missing = UnifiedStatus.fromCodeOrNull(10);   // returns null
+ * UnifiedStatus retrieved = UnifiedStatus.fromCode(32);      // returns PROCESSING
+ * UnifiedStatus missing = UnifiedStatus.fromCodeOrNull(10);  // returns null
  *
  * // Checking status
  * if (userStatus == UnifiedStatus.ACTIVE) {
@@ -400,8 +400,8 @@ public enum UnifiedStatus {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * UnifiedStatus status = UnifiedStatus.fromCode(1);      // returns ACTIVE
-     * UnifiedStatus missing = UnifiedStatus.fromCodeOrNull(999);   // returns null
+     * UnifiedStatus status = UnifiedStatus.fromCode(1);           // returns ACTIVE
+     * UnifiedStatus missing = UnifiedStatus.fromCodeOrNull(999);  // returns null
      * }</pre>
      *
      * <p>Not every value in the {@code [0, 128)} range is assigned (there are intentional

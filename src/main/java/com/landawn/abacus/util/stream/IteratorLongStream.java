@@ -18,7 +18,6 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.LongSummaryStatistics;
 import java.util.Map;
@@ -141,8 +140,8 @@ class IteratorLongStream extends AbstractLongStream {
      *
      * IteratorLongStream stream = new IteratorLongStream(sortedIterator, true, closeHandlers);
      * try {
-     *     OptionalLong min = stream.min();                 // returns the first element (optimized for sorted input)
-     *     System.out.println("Min: " + min.getAsLong());   // prints 1
+     *     OptionalLong min = stream.min();                // returns the first element (optimized for sorted input)
+     *     System.out.println("Min: " + min.getAsLong());  // prints 1
      * } finally {
      *     stream.close();
      * }
@@ -999,7 +998,9 @@ class IteratorLongStream extends AbstractLongStream {
             private long[] aar;
             private int cursor = 0;
             private int to;
-            private LinkedList<Long> queue;
+            private LongList window;
+            // Index of the oldest retained value once full; preserve it across failed source pulls.
+            private int windowCursor;
             private Queue<Long> heap;
 
             @Override
@@ -1070,19 +1071,30 @@ class IteratorLongStream extends AbstractLongStream {
                 if (!initialized) {
                     // Keep the window/heap across retries so a failed source read does not drop already-accepted candidates.
                     if (isSorted() && isSameComparator(comparator, comparator())) {
-                        if (queue == null) {
-                            queue = new LinkedList<>();
+                        if (window == null) {
+                            window = new LongList(Math.min(n, 16));
                         }
 
                         while (elements.hasNext()) {
-                            if (queue.size() >= n) {
-                                queue.poll();
+                            final long next = elements.nextLong();
+                            if (window.size() < n) {
+                                window.add(next);
+                            } else {
+                                window.set(windowCursor, next);
+                                if (++windowCursor == n) {
+                                    windowCursor = 0;
+                                }
                             }
-
-                            queue.offer(elements.nextLong());
                         }
 
-                        aar = Array.unbox(queue.toArray(N.EMPTY_LONG_OBJ_ARRAY));
+                        aar = new long[window.size()];
+                        int outputIndex = 0;
+                        for (int i = windowCursor; i < window.size(); i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
+                        for (int i = 0; i < windowCursor; i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
                     } else {
                         final Comparator<? super Long> cmp = comparator;
                         if (heap == null) {
@@ -1107,7 +1119,7 @@ class IteratorLongStream extends AbstractLongStream {
                     }
 
                     to = aar.length;
-                    queue = null;
+                    window = null;
                     heap = null;
                     initialized = true;
                 }
@@ -1146,6 +1158,9 @@ class IteratorLongStream extends AbstractLongStream {
             while (elements.hasNext()) {
                 action.accept(elements.nextLong());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1157,6 +1172,12 @@ class IteratorLongStream extends AbstractLongStream {
 
         try {
             return elements.toArray();
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1170,6 +1191,9 @@ class IteratorLongStream extends AbstractLongStream {
 
         try {
             return elements.toList();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1190,19 +1214,23 @@ class IteratorLongStream extends AbstractLongStream {
     }
 
     @Override
-    public <C extends Collection<Long>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Long>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextLong());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1216,19 +1244,23 @@ class IteratorLongStream extends AbstractLongStream {
     }
 
     @Override
-    public Multiset<Long> toMultiset(final Supplier<? extends Multiset<Long>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Long> toMultiset(final Supplier<? extends Multiset<Long>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Long> result = supplier.get();
+            final Multiset<Long> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextLong());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1237,7 +1269,7 @@ class IteratorLongStream extends AbstractLongStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.LongFunction<? extends K, E> keyMapper,
             final Throwables.LongFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1246,7 +1278,7 @@ class IteratorLongStream extends AbstractLongStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
             long next = 0;
 
             while (elements.hasNext()) {
@@ -1255,6 +1287,9 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1262,7 +1297,8 @@ class IteratorLongStream extends AbstractLongStream {
 
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.LongFunction<? extends K, E> keyMapper,
-            final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Long, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1270,7 +1306,7 @@ class IteratorLongStream extends AbstractLongStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Long> downstreamAccumulator = (BiConsumer<Object, ? super Long>) downstream.accumulator();
@@ -1283,7 +1319,7 @@ class IteratorLongStream extends AbstractLongStream {
 
             while (elements.hasNext()) {
                 next = elements.nextLong();
-                key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1298,6 +1334,9 @@ class IteratorLongStream extends AbstractLongStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1317,6 +1356,9 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1340,6 +1382,9 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             return OptionalLong.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1347,7 +1392,7 @@ class IteratorLongStream extends AbstractLongStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjLongConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1355,13 +1400,16 @@ class IteratorLongStream extends AbstractLongStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 accumulator.accept(result, elements.nextLong());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1390,6 +1438,9 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             return OptionalLong.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1424,6 +1475,9 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             return OptionalLong.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1454,7 +1508,10 @@ class IteratorLongStream extends AbstractLongStream {
                         window[size++] = v;
                     } else {
                         window[idx] = v;
-                        idx = (idx + 1) % k;
+                        // Wrap with a compare instead of a per-element integer division ('%' by a non-constant k).
+                        if (++idx == k) {
+                            idx = 0;
+                        }
                     }
                 }
                 if (size < k) {
@@ -1471,6 +1528,9 @@ class IteratorLongStream extends AbstractLongStream {
             final Optional<Long> optional = boxed().kthLargest(k, LONG_COMPARATOR);
 
             return optional.isPresent() ? OptionalLong.of(optional.get()) : OptionalLong.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1488,6 +1548,9 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1510,26 +1573,27 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             long sum = 0;
+            long carry = 0; // number of times 'sum' wrapped, in units of 2^64 (signed): the exact total is carry * 2^64 + sum
             long count = 0;
-            BigInteger overflowSafeSum = null;
 
             do {
                 final long value = elements.nextLong();
+                final long r = sum + value;
 
-                if (overflowSafeSum == null) {
-                    try {
-                        sum = Math.addExact(sum, value);
-                    } catch (final ArithmeticException e) {
-                        overflowSafeSum = BigInteger.valueOf(sum).add(BigInteger.valueOf(value));
-                    }
-                } else {
-                    overflowSafeSum = overflowSafeSum.add(BigInteger.valueOf(value));
+                // Math.addExact's overflow test, inlined so that the wrap is counted instead of switching to a BigInteger
+                // accumulator (which allocated two BigIntegers per element once a partial sum had left the long range).
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
                 }
 
+                sum = r;
                 count++;
             } while (elements.hasNext());
 
-            return OptionalDouble.of((overflowSafeSum == null ? (double) sum : overflowSafeSum.doubleValue()) / count);
+            return OptionalDouble.of((carry == 0 ? (double) sum : BigInteger.valueOf(carry).shiftLeft(64).add(BigInteger.valueOf(sum)).doubleValue()) / count);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1541,6 +1605,9 @@ class IteratorLongStream extends AbstractLongStream {
 
         try {
             return elements.count();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1558,6 +1625,9 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1575,6 +1645,9 @@ class IteratorLongStream extends AbstractLongStream {
                     return true;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1594,6 +1667,9 @@ class IteratorLongStream extends AbstractLongStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1613,6 +1689,9 @@ class IteratorLongStream extends AbstractLongStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1634,6 +1713,9 @@ class IteratorLongStream extends AbstractLongStream {
                     return OptionalLong.of(e);
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1666,6 +1748,9 @@ class IteratorLongStream extends AbstractLongStream {
             }
 
             return hasResult ? OptionalLong.of(result) : OptionalLong.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

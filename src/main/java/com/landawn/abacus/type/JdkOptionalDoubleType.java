@@ -154,9 +154,10 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @param rs the ResultSet to read from
      * @param columnIndex the index of the column to read (1-based)
      * @return OptionalDouble.empty() if the column is {@code null}, otherwise OptionalDouble containing the value. A
-     *         non-{@code Number} column value is parsed with {@link Numbers#toDouble(String)}, so an empty string yields
-     *         a <i>present</i> zero (the same answer {@code DoubleType.get} gives), unlike {@link #valueOf(String)}
-     *         which answers empty for {@code ""}
+     *         non-{@code Double} column value is converted with {@link Numbers#toDouble(Object)}, exactly as
+     *         {@code DoubleType.get} does: a {@code Float} is widened through its decimal spelling ({@code 0.1f} yields
+     *         {@code 0.1}), and a non-{@code Number} value is parsed as text, so an empty string yields a <i>present</i>
+     *         zero, unlike {@link #valueOf(String)} which answers empty for {@code ""}
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string included)
@@ -165,9 +166,9 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     public OptionalDouble get(final ResultSet rs, final int columnIndex) throws NullPointerException, SQLException, NumberFormatException {
         final Object result = rs.getObject(columnIndex);
 
-        return result == null ? OptionalDouble.empty()
-                : OptionalDouble
-                        .of(result instanceof Double num ? num : (result instanceof Number num ? num.doubleValue() : Numbers.toDouble(result.toString())));
+        // Numbers.toDouble(Object), like DoubleType.get: a Float column is widened through its decimal spelling
+        // (0.1f -> 0.1, not 0.10000000149011612); other values convert exactly as before.
+        return result == null ? OptionalDouble.empty() : OptionalDouble.of(result instanceof Double num ? num : Numbers.toDouble(result));
     }
 
     /**
@@ -178,9 +179,10 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * @param rs the ResultSet to read from
      * @param columnName the label of the column to read
      * @return OptionalDouble.empty() if the column is {@code null}, otherwise OptionalDouble containing the value. A
-     *         non-{@code Number} column value is parsed with {@link Numbers#toDouble(String)}, so an empty string yields
-     *         a <i>present</i> zero (the same answer {@code DoubleType.get} gives), unlike {@link #valueOf(String)}
-     *         which answers empty for {@code ""}
+     *         non-{@code Double} column value is converted with {@link Numbers#toDouble(Object)}, exactly as
+     *         {@code DoubleType.get} does: a {@code Float} is widened through its decimal spelling ({@code 0.1f} yields
+     *         {@code 0.1}), and a non-{@code Number} value is parsed as text, so an empty string yields a <i>present</i>
+     *         zero, unlike {@link #valueOf(String)} which answers empty for {@code ""}
      * @throws NullPointerException if {@code rs} is {@code null}.
      * @throws SQLException if the result set is closed, the requested column is invalid, or the JDBC read fails.
      * @throws NumberFormatException if a non-{@code Number} column value is not a valid number token (a blank string included)
@@ -189,9 +191,9 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
     public OptionalDouble get(final ResultSet rs, final String columnName) throws NullPointerException, SQLException, NumberFormatException {
         final Object result = rs.getObject(columnName);
 
-        return result == null ? OptionalDouble.empty()
-                : OptionalDouble
-                        .of(result instanceof Double num ? num : (result instanceof Number num ? num.doubleValue() : Numbers.toDouble(result.toString())));
+        // Numbers.toDouble(Object), like DoubleType.get: a Float column is widened through its decimal spelling
+        // (0.1f -> 0.1, not 0.10000000149011612); other values convert exactly as before.
+        return result == null ? OptionalDouble.empty() : OptionalDouble.of(result instanceof Double num ? num : Numbers.toDouble(result));
     }
 
     /**
@@ -199,18 +201,18 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * If the OptionalDouble is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the double value.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the OptionalDouble to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalDouble x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final OptionalDouble x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(columnIndex, java.sql.Types.DOUBLE);
+            statement.setNull(columnIndex, java.sql.Types.DOUBLE);
         } else {
-            stmt.setDouble(columnIndex, x.getAsDouble());
+            statement.setDouble(columnIndex, x.getAsDouble());
         }
     }
 
@@ -219,18 +221,18 @@ public class JdkOptionalDoubleType extends AbstractOptionalType<OptionalDouble> 
      * If the OptionalDouble is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the double value.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalDouble to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalDouble x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final OptionalDouble x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(parameterName, java.sql.Types.DOUBLE);
+            statement.setNull(parameterName, java.sql.Types.DOUBLE);
         } else {
-            stmt.setDouble(parameterName, x.getAsDouble());
+            statement.setDouble(parameterName, x.getAsDouble());
         }
     }
 

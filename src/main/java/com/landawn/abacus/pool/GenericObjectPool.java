@@ -288,7 +288,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      *
      * <p>When auto-balancing removes victims, their pool state and accounting are updated under
      * the pool lock. Their destruction callbacks run only after the lock is released; on a
-     * successful add, the newly added object is already visible to a reentrant callback.</p>
+     * successful add, the newly added object is already visible to a reentrant callback.
+     * A candidate that the memory rule must reject whatever balancing frees (its measure is negative or
+     * failed, or it is larger than {@code maxMemorySize} on its own) is rejected without balancing.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -329,6 +331,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
             if (pool.size() >= capacity) {
                 if (autoBalance) {
+                    if (isNeverAdmissible(admissionMemorySize)) {
+                        // The memory rule below rejects this candidate anyway; do not destroy live objects for it.
+                        return false;
+                    }
+
                     pendingVacated = appendPendingDestroy(pendingVacated, detachForVacateUnderLock(numberToAutoBalance()), Caller.VACATE);
 
                     if (pool.size() >= capacity) {
@@ -349,6 +356,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                 if (elementMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
                     if (autoBalance) {
+                        if (isNeverAdmissible(elementMemorySize)) {
+                            // Larger than the whole memory limit: no amount of balancing can admit it.
+                            return false;
+                        }
+
                         pendingVacated = appendPendingDestroy(pendingVacated, detachForVacateUnderLock(numberToAutoBalance()), Caller.VACATE);
 
                         if (elementMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
@@ -427,7 +439,9 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
      * {@link Caller#VACATE} - and the element is inserted without waiting. Waiting for space occurs
      * only when auto-balancing is disabled (or the capacity is {@code 0}). Auto-balance victims are
      * detached and accounted while locked, but their destruction callbacks are deferred until this
-     * invocation releases the pool lock.</p>
+     * invocation releases the pool lock. A candidate that the memory rule must reject whatever balancing
+     * frees (its measure is negative or failed, or it is larger than {@code maxMemorySize} on its own) is
+     * rejected without balancing.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -484,6 +498,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
             assertNotClosed();
 
             if ((pool.size() >= capacity) && autoBalance) {
+                if (!pool.isEmpty() && isNeverAdmissible(admissionMemorySize)) {
+                    // The memory rule below rejects this candidate anyway; do not destroy live objects for it.
+                    return false;
+                }
+
                 pendingVacated = appendPendingDestroy(pendingVacated, detachForVacateUnderLock(numberToAutoBalance()), Caller.VACATE);
             }
 
@@ -512,6 +531,11 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
 
                         if (elementMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
                             if (autoBalance) {
+                                if (isNeverAdmissible(elementMemorySize)) {
+                                    // Larger than the whole memory limit: no amount of balancing can admit it.
+                                    return false;
+                                }
+
                                 pendingVacated = appendPendingDestroy(pendingVacated, detachForVacateUnderLock(numberToAutoBalance()), Caller.VACATE);
 
                                 if (elementMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
@@ -826,8 +850,19 @@ public class GenericObjectPool<E extends Poolable> extends AbstractPool implemen
         }
     }
 
+    /**
+     * Tells whether the memory admission rule is certain to reject a candidate with this measured size,
+     * whatever balancing frees: a negative size (including a measure that threw) or a size above the
+     * whole memory limit.
+     */
+    private boolean isNeverAdmissible(final long admissionMemorySize) {
+        return memoryMeasure != null && (admissionMemorySize < 0 || (maxMemorySize > 0 && admissionMemorySize > maxMemorySize));
+    }
+
     private void recordMemoryCharge(final E element, final long charge) {
-        memoryCharges.computeIfAbsent(element, ignored -> new ArrayDeque<>()).addFirst(charge);
+        // Almost every instance is pooled once: size the per-instance deque for one charge
+        // (a default ArrayDeque allocates a 17-slot array per admitted element); it grows on duplicates.
+        memoryCharges.computeIfAbsent(element, ignored -> new ArrayDeque<>(1)).addFirst(charge);
         totalDataSize.addAndGet(charge);
     }
 

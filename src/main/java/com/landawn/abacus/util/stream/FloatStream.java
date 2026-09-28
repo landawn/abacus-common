@@ -15,7 +15,6 @@
 package com.landawn.abacus.util.stream;
 
 import java.nio.FloatBuffer;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -93,6 +92,26 @@ import com.landawn.abacus.util.function.TriFunction;
  * Ordering operations (such as {@link #sorted()}, {@link #kthLargest(int)}, and {@link #top(int)}) instead use
  * {@link Float#compare(float, float)}, which treats {@code NaN} as greater than any
  * other value (including positive infinity) and considers {@code -0.0f} less than {@code +0.0f}.
+ * {@link #distinct()} and {@link #toSet()} compare with {@link Float#equals(Object)}: every {@code NaN}
+ * (whatever its bit pattern) is one value, while {@code -0.0f} and {@code 0.0f} stay distinct.
+ *
+ * <p>Write any selector or comparator you pass to {@code merge(...)} in those same terms:
+ * {@code Float.compare(x, y) <= 0}, not {@code x <= y}. The two disagree on {@code NaN} and on
+ * signed zero, and a {@code <=} selector silently produces an unsorted result when merging sorted
+ * inputs &mdash; for example merging {@code [2.0f, 3.0f]} with {@code [1.0f, NaN]} yields
+ * {@code [1.0, NaN, 2.0, 3.0]}, because every comparison against {@code NaN} is {@code false}.
+ *
+ * <p><b>Set operations:</b> {@link #intersection(Collection)} and {@link #difference(Collection)} match
+ * elements by boxed {@code equals} (so, as for {@code distinct()}, {@code NaN} matches {@code NaN} and
+ * {@code -0.0f} does not match {@code 0.0f}), and the collection must hold {@code Float} values.
+ * {@code FloatStream.of(1.5f, 2.5f).intersection(Arrays.asList(1.5, 2.5))} is empty (and {@code difference}
+ * keeps every element), because {@code Arrays.asList(1.5, 2.5)} is a {@code List<Double>} and a {@code Double}
+ * never equals a {@code Float}; pass {@code Arrays.asList(1.5f, 2.5f)} instead.
+ *
+ * <p><b>Parallel streams and order:</b> parallel stages such as {@code map}/{@code filter}/{@code flatMap}/{@code onEach}
+ * emit results in completion order, so encounter order is <b>not</b> guaranteed after them. Parallel {@code collect} and
+ * {@code reduce} need commutative functions, and the {@code mergeFunction} of {@code toMap} and the downstream collector of
+ * {@code groupTo} receive the values of a key in an unspecified order. Sort the result or stay sequential when order matters.
  *
  * <p><b>Key Features:</b>
  * <ul>
@@ -124,34 +143,34 @@ import com.landawn.abacus.util.function.TriFunction;
  * <pre>{@code
  * // Basic float stream operations
  * FloatStream.of(1.5f, 2.7f, 3.1f, 4.9f, 5.2f)
- *     .filter(f -> f > 3.0f)   // keeps values > 3.0
- *     .map(f -> f * 2)         // maps each value to its double
- *     .sum();                  // returns approximately 26.4
+ *     .filter(f -> f > 3.0f)  // keeps values > 3.0
+ *     .map(f -> f * 2)        // maps each value to its double
+ *     .sum();                 // returns approximately 26.4
  *
  * // Statistical operations
  * FloatSummaryStatistics stats = FloatStream.of(temperatureReadings)
- *     .filter(temp -> temp > 0)   // filters valid temperatures
- *     .summaryStatistics();       // gets min, max, avg, count
+ *     .filter(temp -> temp > 0)  // filters valid temperatures
+ *     .summaryStatistics();      // gets min, max, avg, count
  *
  * // Mathematical operations with parallel processing
  * double result = FloatStream.iterate(1.0f, f -> f * 1.1f)
- *     .limit(1000)               // keeps 1000 values
- *     .parallel()                // switches to parallel processing
- *     .filter(f -> f < 100)      // filters values < 100
- *     .mapToDouble(Math::sqrt)   // maps via square root
- *     .average()                 // returns average
- *     .orElse(0.0);              // returns 0.0 if empty
+ *     .limit(1000)              // keeps 1000 values
+ *     .parallel()               // switches to parallel processing
+ *     .filter(f -> f < 100)     // filters values < 100
+ *     .mapToDouble(Math::sqrt)  // maps via square root
+ *     .average()                // returns average
+ *     .orElse(0.0);             // returns 0.0 if empty
  *
  * // Integration with other stream types
  * IntStream counts = FloatStream.of(coordinates)
- *     .mapToInt(coord -> (int) Math.ceil(coord)) // maps to ceiling integers
- *     .distinct();                               // removes duplicates
+ *     .mapToInt(coord -> (int) Math.ceil(coord))  // maps to ceiling integers
+ *     .distinct();                                // removes duplicates
  *
  * // Processing a sequence of float values
  * FloatStream.of(1.5f, 2.5f, 3.5f)
- *     .takeWhile(f -> f >= 0)            // keeps values until negative number
- *     .mapToObj(String::valueOf)         // maps to strings
- *     .forEach(System.out::println);     // prints each value
+ *     .takeWhile(f -> f >= 0)         // keeps values until negative number
+ *     .mapToObj(String::valueOf)      // maps to strings
+ *     .forEach(System.out::println);  // prints each value
  * }</pre>
  *
  * <p><b>Float-Specific Operations:</b>
@@ -191,7 +210,9 @@ import com.landawn.abacus.util.function.TriFunction;
 @LazyEvaluation
 public abstract class FloatStream extends StreamBase<Float, float[], FloatPredicate, FloatConsumer, OptionalFloat, IndexedFloat, FloatIterator, FloatStream> {
 
-    static final Random RAND = new SecureRandom();
+    // Unboxes the result of an N-ary zip function; a null result is a bug in the function, not a 0 value,
+    // so it is rejected (house rule: a function returning null -> NullPointerException).
+    private static final ToFloatFunction<Float> UNBOX_ZIP_RESULT = r -> N.requireNonNull(r, "zipFunction returned null");
 
     FloatStream(final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
         super(sorted, null, closeHandlers);
@@ -509,7 +530,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * // Format floats as currency
      * FloatStream.of(19.99f, 29.99f, 39.99f)
-     *       .mapToObj(f -> String.format("$%.2f", f))
+     *       .mapToObj(f -> String.format(Locale.ROOT, "$%.2f", f))
      *       .toList();   // returns ["$19.99", "$29.99", "$39.99"]
      * }</pre>
      *
@@ -867,9 +888,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *     .toArray();   // returns [2.0, 3.0, 4.0] (only non-negative inputs)
      * }</pre>
      *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the element is reached.</p>
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @param mapper a function to apply to each element which produces an OptionalFloat
+     * @param mapper a function to apply to each element which produces an OptionalFloat. It must return an
+     *               empty optional, never {@code null}, for an element with no result
      * @return a new FloatStream with the non-empty mapped elements
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code mapper} is {@code null}
@@ -935,7 +960,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <pre>{@code
      * Stream<String> rangeDescriptions = FloatStream.of(1f, 2f, 3f, 10f, 11f, 20f)
      *     .rangeMapToObj((first, next) -> next - first < 2,
-     *                    (first, last) -> String.format("[%.1f-%.1f]", first, last));
+     *                    (first, last) -> String.format(Locale.ROOT, "[%.1f-%.1f]", first, last));
      *     // returns Stream of ["[1.0-2.0]", "[3.0-3.0]", "[10.0-11.0]", "[20.0-20.0]"]
      *
      * Stream<Pair<Float, Float>> rangePairs = FloatStream.of(1f, 2f, 5f, 6f, 7f)
@@ -1390,7 +1415,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *     // returns {"key1"=15, "key2"=27, "key3"=39}
      *
      * Map<Integer, String> formatted = FloatStream.of(10.5f, 20.3f, 30.8f)
-     *     .toMap(f -> (int)f, f -> String.format("%.2f", f));
+     *     .toMap(f -> (int)f, f -> String.format(Locale.ROOT, "%.2f", f));
      *     // returns {10="10.50", 20="20.30", 30="30.80"}
      * }</pre>
      *
@@ -1445,6 +1470,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a Map containing the mapped key-value pairs
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function, Supplier)
@@ -1453,7 +1479,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
             Throwables.FloatFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2;
 
     /**
      * Returns a Map where keys are generated by the keyMapper function and values are generated by the valueMapper function, with a merge function to handle duplicate keys.
@@ -1523,6 +1549,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a Map containing the mapped key-value pairs
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}
      * @throws E if the keyMapper throws an exception
      * @throws E2 if the valueMapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1531,7 +1558,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.FloatFunction<? extends K, E> keyMapper,
             Throwables.FloatFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2;
 
     /**
      * Groups the elements of this stream by a classifier function and collects them using the specified downstream collector.
@@ -1561,13 +1588,14 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
+     * @throws NullPointerException if {@code keyMapper} returns a {@code null} key
      * @throws E if the keyMapper throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.FloatFunction<? extends K, E> keyMapper,
-            final Collector<? super Float, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
+            final Collector<? super Float, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, NullPointerException, E;
 
     /**
      * Groups the elements of this stream by a classifier function and collects them using the specified downstream collector and map factory.
@@ -1602,13 +1630,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} or {@code keyMapper} returns a {@code null} key
      * @throws E if the keyMapper throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.FloatFunction<? extends K, E> keyMapper,
-            final Collector<? super Float, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E;
+            final Collector<? super Float, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided identity value and
@@ -1618,7 +1648,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p>If the stream is empty, {@code identity} is returned. The {@code identity} value must be
      * an identity for the accumulator function, i.e., for all {@code t},
-     * {@code accumulator.apply(identity, t) == t}.
+     * {@code accumulator.applyAsFloat(identity, t) == t}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1709,6 +1739,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
@@ -1716,7 +1748,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @ParallelSupported
     @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, ObjFloatConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using a supplier and accumulator.
@@ -1745,8 +1777,17 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
-     * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of: {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
-     *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
+     * @throws IllegalArgumentException if this stream is parallel and the container type cannot be combined by default
+     *         (the result type {@code R} is not one of
+     *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}; message
+     *         "... cannot be combined by default ..."), and two per-thread containers actually have to be combined.
+     *         The check is made by the default combiner, so it fails only <i>after</i> the workers have accumulated their
+     *         elements, and whether containers have to be combined depends on the source and the number of workers:
+     *         a very small parallel stream can succeed while a larger one fails.
+     *         Sequential streams never combine and perform no such check. For any other result type, call
+     *         {@link #collect(Supplier, ObjFloatConsumer, BiConsumer)} with an explicit combiner.
      * @see #collect(Supplier, ObjFloatConsumer, BiConsumer)
      * @see Stream#collect(Supplier, BiConsumer)
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
@@ -1754,7 +1795,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     @ParallelSupported
     @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, ObjFloatConsumer<? super R> accumulator)
-            throws IllegalStateException, IllegalArgumentException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException;
 
     /**
      * Performs an action for each element of this stream.
@@ -1950,8 +1991,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalFloat first = FloatStream.of(1f, 2f, 3f).findFirst();   // returns OptionalFloat.of(1f)
-     * OptionalFloat none = FloatStream.empty().findFirst();           // returns OptionalFloat.empty()
+     * OptionalFloat first = FloatStream.of(1f, 2f, 3f).findFirst();  // returns OptionalFloat.of(1f)
+     * OptionalFloat none = FloatStream.empty().findFirst();          // returns OptionalFloat.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1983,8 +2024,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalFloat any = FloatStream.of(1f, 2f, 3f).findAny();     // returns OptionalFloat.of(1f)
-     * OptionalFloat none = FloatStream.empty().findAny();           // returns OptionalFloat.empty()
+     * OptionalFloat any = FloatStream.of(1f, 2f, 3f).findAny();  // returns OptionalFloat.of(1f)
+     * OptionalFloat none = FloatStream.empty().findAny();        // returns OptionalFloat.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -2291,14 +2332,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * Returns statistics about the elements of this stream.
      * The statistics include count, sum, min, max, and average.
      *
+     * <p>If any element is {@code NaN}, the min, max, sum and average are all {@code NaN}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatSummaryStatistics stats = FloatStream.of(1.5f, 2.3f, 3.7f, 4.2f, 5.8f).summaryStatistics();
-     * System.out.println("Count: " + stats.getCount());       // count is 5
-     * System.out.println("Sum: " + stats.getSum());           // sum is 17.5
-     * System.out.println("Min: " + stats.getMin());           // min is 1.5
-     * System.out.println("Max: " + stats.getMax());           // max is 5.8
-     * System.out.println("Average: " + stats.getAverage());   // average is 3.5
+     * System.out.println("Count: " + stats.getCount());      // count is 5
+     * System.out.println("Sum: " + stats.getSum());          // sum is 17.5
+     * System.out.println("Min: " + stats.getMin());          // min is 1.5
+     * System.out.println("Max: " + stats.getMax());          // max is 5.8
+     * System.out.println("Average: " + stats.getAverage());  // average is 3.5
+     *
+     * // NaN propagation in statistics
+     * FloatStream.of(1f, Float.NaN, 3f).summaryStatistics();   // {min=NaN, max=NaN, count=3, sum=NaN, average=NaN}
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
@@ -2324,8 +2370,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *         .summaryStatisticsAndPercentiles();
      *
      * FloatSummaryStatistics stats = result.left();
-     * System.out.println("Count: " + stats.getCount());       // count is 10
-     * System.out.println("Average: " + stats.getAverage());   // average is approximately 5.92
+     * System.out.println("Count: " + stats.getCount());      // count is 10
+     * System.out.println("Average: " + stats.getAverage());  // average is approximately 5.92
      *
      * Optional<Map<Percentage, Float>> percentiles = result.right();
      * if (percentiles.isPresent()) {
@@ -2353,7 +2399,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * <pre>{@code
      * float[] merged = FloatStream.of(1f, 3f, 5f)
      *     .mergeWith(FloatStream.of(2f, 4f, 6f),
-     *                (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     *                (a, b) -> Float.compare(a, b) < 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0] (sorted merge)
      *
      * float[] alternate = FloatStream.of(10f, 20f, 30f)
@@ -2368,7 +2414,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a new FloatStream containing the merged elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
@@ -2397,7 +2443,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param b the FloatStream to be combined with the current FloatStream. Must be {@code non-null}. Will be closed along with this stream.
      * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(FloatStream, float, float, FloatBinaryOperator)
      */
@@ -2426,7 +2472,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param c the third FloatStream to be combined with the current FloatStream. Will be closed along with this FloatStream.
      * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStreams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(FloatStream, FloatStream, float, float, float, FloatTernaryOperator)
      */
@@ -2455,7 +2501,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueForNoneB the default value to use for the given FloatStream when it runs out of elements
      * @param zipFunction a FloatBinaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
@@ -2488,7 +2534,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param valueForNoneC the default value to use for the third FloatStream when it runs out of elements
      * @param zipFunction a FloatTernaryOperator that determines the combination of elements in the combined FloatStream.
      * @return a new FloatStream that is the result of combining the current FloatStream with the given FloatStreams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
@@ -2734,7 +2780,8 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param fromIndex the starting index (inclusive)
      * @param toIndex the ending index (exclusive)
      * @return a FloatStream containing the specified range of unboxed elements
-     * @throws IndexOutOfBoundsException if the indices are out of range
+     * @throws IndexOutOfBoundsException if {@code fromIndex} is negative, {@code toIndex} is greater than
+     *         the array length, or {@code fromIndex} is greater than {@code toIndex}
      */
     public static FloatStream of(final Float[] a, final int fromIndex, final int toIndex) throws IndexOutOfBoundsException {
         return Stream.of(a, fromIndex, toIndex).mapToFloat(FF.unbox());
@@ -2791,9 +2838,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * to its {@link FloatBuffer#limit() limit} (exclusive). Returns an empty stream if
      * {@code buf} is {@code null}.
      *
-     * <p>The buffer's position is <b>not</b> advanced by stream consumption — the stream
-     * reads via absolute indexed {@code get(int)} access, so the buffer remains usable
-     * afterwards.
+     * <p>The window {@code [position, limit)} is fixed when this method is called. The elements are read from the
+     * buffer when the stream is traversed (directly from its backing array when {@link FloatBuffer#hasArray()} is
+     * {@code true}, otherwise by absolute {@code get(int)} on a {@link FloatBuffer#duplicate() duplicate} taken when this
+     * method is called), so the stream is a live view of that window: a write to the buffer is seen by elements not
+     * yet read. This method never changes the buffer's position or limit, and changing them afterwards (for example
+     * with {@code limit(n)}, {@code flip()} or {@code clear()}) does not affect the stream, so the buffer remains
+     * usable right away.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2816,8 +2867,20 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
             return empty();
         }
 
+        if (buf.hasArray()) {
+            // Same live view of the same backing array, but array-backed: O(1) count/skip and the array fast paths.
+            final int offset = buf.arrayOffset();
+
+            return of(buf.array(), offset + buf.position(), offset + buf.limit());
+        }
+
+        // Read through a duplicate taken now: it shares the content (so the stream stays a live view) but has its own
+        // position and limit, so a later limit(n)/flip()/clear() on the caller's buffer cannot shrink the window under
+        // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
+        final FloatBuffer view = buf.duplicate();
+
         //noinspection resource
-        return IntStream.range(buf.position(), buf.limit()).mapToFloat(buf::get);
+        return IntStream.range(view.position(), view.limit()).mapToFloat(view::get);
     }
 
     private static final Function<float[], FloatStream> flatMapper = FloatStream::of;
@@ -2872,9 +2935,15 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
         }
 
         long n = 0;
+        int maxLen = 0;
 
         for (final float[] e : a) {
-            n += N.len(e);
+            final int len = N.len(e);
+            n += len;
+
+            if (len > maxLen) {
+                maxLen = len;
+            }
         }
 
         if (n == 0) {
@@ -2883,6 +2952,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
         final int rows = N.len(a);
         final long count = n;
+
+        // The walk below checks about rows * maxLen positions, rescanning null or too short rows in every later column.
+        // It is the fastest per element, so it is kept unless most of those positions are empty (jagged input such as
+        // one long row among many short ones), where it would be up to 'rows' times slower than the elements it returns.
+        if ((long) rows * maxLen > 4 * n) {
+            return of(flattenJaggedVertically(a, count));
+        }
 
         final FloatIterator iter = new FloatIteratorEx() {
             private int rowNum = 0;
@@ -2919,6 +2995,67 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
         };
 
         return of(iter);
+    }
+
+    /**
+     * Column-major iterator over a jagged {@code float[][]} (rows of different lengths, or {@code null} rows) holding
+     * {@code count > 0} elements in total. It keeps the indices (in row order) of the rows that have an element in the
+     * current column. A row that is too short for one column is too short for every later one, so it is dropped once
+     * instead of being rescanned for every column: O(count + rows) in total instead of O(rows * longest row).
+     */
+    private static FloatIterator flattenJaggedVertically(final float[][] a, final long count) {
+        return new FloatIteratorEx() {
+            private int[] activeRows = null;
+            private int activeCount = 0;
+            private int activeIndex = 0;
+            private int colNum = 0;
+            private long cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cnt < count;
+            }
+
+            @Override
+            public float nextFloat() throws NoSuchElementException {
+                if (cnt++ >= count) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                if (activeIndex == activeCount) {
+                    nextColumn();
+                }
+
+                return a[activeRows[activeIndex++]][colNum];
+            }
+
+            // Moves to the next column (the first one on the first call), keeping only the rows that have an element in it.
+            private void nextColumn() {
+                if (activeRows == null) {
+                    activeRows = new int[a.length];
+
+                    for (int rowNum = 0; rowNum < a.length; rowNum++) {
+                        if (a[rowNum] != null && a[rowNum].length > 0) {
+                            activeRows[activeCount++] = rowNum;
+                        }
+                    }
+                } else {
+                    colNum++;
+
+                    int kept = 0;
+
+                    for (int i = 0; i < activeCount; i++) {
+                        if (colNum < a[activeRows[i]].length) {
+                            activeRows[kept++] = activeRows[i];
+                        }
+                    }
+
+                    activeCount = kept;
+                }
+
+                activeIndex = 0;
+            }
+        };
     }
 
     /**
@@ -3073,7 +3210,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param element the element to repeat
      * @param n the number of times to repeat the element
      * @return a FloatStream containing n repetitions of the element
-     * @throws IllegalArgumentException if n is negative.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static FloatStream repeat(final float element, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -3146,6 +3283,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     /**
      * Returns an effectively unlimited stream of pseudorandom float values, each between 0.0 (inclusive) and 1.0 (exclusive).
      *
+     * <p><b>Source of randomness:</b> each value is drawn from
+     * {@link java.util.concurrent.ThreadLocalRandom#current()} of the thread that pulls it, so the stream is fast
+     * and does not contend across threads. The values are <b>not</b> cryptographically secure and cannot be
+     * seeded; callers that need unpredictable values should use {@link java.security.SecureRandom} directly, and
+     * callers that need a reproducible sequence can pass their own generator to {@link #generate(FloatSupplier)}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Generate 5 random floats
@@ -3169,7 +3312,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @return a stream of pseudorandom float values
      */
     public static FloatStream random() {
-        return generate(RAND::nextFloat);
+        return generate(() -> ThreadLocalRandom.current().nextFloat());
     }
 
     /**
@@ -3533,6 +3676,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
     /**
      * Concatenates multiple FloatStreams into a single FloatStream.
      *
+     * <p>The resulting stream will automatically close all input streams when it is closed.
+     * As each input stream is exhausted during iteration, it is immediately closed before moving to the next stream
+     * (the last one is closed when the resulting stream is closed). A failure thrown while closing an exhausted input
+     * therefore ends the traversal: it is thrown by the resulting stream's iteration, and the elements of the remaining
+     * inputs are not delivered.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatStream stream1 = FloatStream.of(1.0f, 2.0f, 3.0f);
@@ -3611,6 +3760,57 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
 
                 return cur[cursor++];
             }
+
+            /*
+             * count() and toList() (which the inherited toArray() uses) read the remaining array segments directly
+             * instead of pulling every element through hasNext()/nextFloat(). The list iterator is consumed in the
+             * same order and no caller-supplied code runs per element, so the results are identical. Short segments,
+             * and any segment that would push the list past the maximum array size, are still added element by element
+             * (bulk copying does not pay off for a few elements; the size limit keeps the same OutOfMemoryError).
+             */
+            @Override
+            public long count() {
+                long result = cur == null ? 0 : cur.length - cursor;
+
+                while (iter.hasNext()) {
+                    cur = iter.next();
+                    result += N.len(cur);
+                }
+
+                cursor = N.len(cur);
+
+                return result;
+            }
+
+            @Override
+            public FloatList toList() {
+                final FloatList result = new FloatList();
+
+                while (true) {
+                    final int len = N.len(cur);
+
+                    if (cursor < len) {
+                        if (len - cursor < 16 || len - cursor > Integer.MAX_VALUE - 8 - result.size()) {
+                            for (int i = cursor; i < len; i++) {
+                                result.add(cur[i]);
+                            }
+                        } else {
+                            result.addAll(cursor == 0 ? cur : N.copyOfRange(cur, cursor, len));
+                        }
+
+                        cursor = len;
+                    }
+
+                    if (!iter.hasNext()) {
+                        break;
+                    }
+
+                    cur = iter.next();
+                    cursor = 0;
+                }
+
+                return result;
+            }
         });
     }
 
@@ -3618,6 +3818,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * Concatenates a collection of FloatStream into a single FloatStream.
      * The collection's membership and encounter order are snapshotted when this method is called.
      * Closing the returned stream closes every snapshotted input stream.
+     *
+     * <p>As each input stream is exhausted during iteration, it is immediately closed before moving to the next stream
+     * (the last one is closed when the resulting stream is closed). A failure thrown while closing an exhausted input
+     * therefore ends the traversal: it is thrown by the resulting stream's iteration, and the elements of the remaining
+     * inputs are not delivered.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3924,9 +4129,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#zip(Stream, Stream, BiFunction)
      */
-    public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
+    public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatBinaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
@@ -3952,10 +4159,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see Stream#zip(Stream, Stream, Stream, TriFunction)
      */
     public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatStream c, final FloatTernaryOperator zipFunction)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
@@ -3977,16 +4185,19 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * }</pre>
      *
      * @param streams the collection of float streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine elements from all the streams.
+     * @param zipFunction the function to combine elements from all the streams; must not return {@code null}
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws NullPointerException if {@code zipFunction} returns {@code null} (thrown lazily, when that element is reached).
+     * @throws IllegalStateException if any stream in {@code streams} is already closed
      * @see Stream#zip(Collection, Function)
      */
-    public static FloatStream zip(final Collection<? extends FloatStream> streams, final FloatNFunction<Float> zipFunction) throws IllegalArgumentException {
+    public static FloatStream zip(final Collection<? extends FloatStream> streams, final FloatNFunction<Float> zipFunction)
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         //noinspection resource
-        return Stream.zip(streams, zipFunction).mapToFloat(ToFloatFunction.UNBOX);
+        return Stream.zip(streams, zipFunction).mapToFloat(UNBOX_ZIP_RESULT);
     }
 
     /**
@@ -4223,10 +4434,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#zip(Stream, Stream, Object, Object, BiFunction)
      */
     public static FloatStream zip(final FloatStream a, final FloatStream b, final float valueForNoneA, final float valueForNoneB,
-            final FloatBinaryOperator zipFunction) throws IllegalArgumentException {
+            final FloatBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
@@ -4257,10 +4469,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see Stream#zip(Stream, Stream, Stream, Object, Object, Object, TriFunction)
      */
     public static FloatStream zip(final FloatStream a, final FloatStream b, final FloatStream c, final float valueForNoneA, final float valueForNoneB,
-            final float valueForNoneC, final FloatTernaryOperator zipFunction) throws IllegalArgumentException {
+            final float valueForNoneC, final FloatTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
@@ -4285,18 +4498,18 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *
      * @param streams the collection of float streams to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone the default values to use if the corresponding stream is shorter
-     * @param zipFunction the function to combine elements from all the streams.
+     * @param zipFunction the function to combine elements from all the streams; must not return {@code null}
      * @return a stream of combined values
      * @throws IllegalArgumentException if the size of {@code valuesForNone} doesn't match the size of the streams
      *         collection, or if {@code zipFunction} is {@code null}.
+     * @throws NullPointerException if {@code zipFunction} returns {@code null} (thrown lazily, when that element is reached).
+     * @throws IllegalStateException if any stream in {@code streams} is already closed
      * @see Stream#zip(Collection, List, Function)
      */
     public static FloatStream zip(final Collection<? extends FloatStream> streams, final float[] valuesForNone, final FloatNFunction<Float> zipFunction)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.zipFunction);
-
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         //noinspection resource
-        return Stream.zip(streams, valuesForNone, zipFunction).mapToFloat(ToFloatFunction.UNBOX);
+        return Stream.zip(streams, valuesForNone, zipFunction).mapToFloat(UNBOX_ZIP_RESULT);
     }
 
     /**
@@ -4308,7 +4521,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * // Merge two sorted arrays in ascending order
      * float[] a = {1.0f, 3.0f, 5.0f};
      * float[] b = {2.0f, 4.0f, 6.0f};
-     * float[] merged = FloatStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * float[] merged = FloatStream.merge(a, b, (x, y) -> Float.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
      *
      * // Always take from first array first
@@ -4371,7 +4584,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * float[] a = {1.0f, 4.0f, 7.0f};
      * float[] b = {2.0f, 5.0f, 8.0f};
      * float[] c = {3.0f, 6.0f, 9.0f};
-     * float[] merged = FloatStream.merge(a, b, c, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * float[] merged = FloatStream.merge(a, b, c, (x, y) -> Float.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      * }</pre>
      *
@@ -4401,13 +4614,13 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * // Merge two iterators in ascending order
      * FloatIterator a = FloatIterator.of(1.0f, 3.0f, 5.0f);
      * FloatIterator b = FloatIterator.of(2.0f, 4.0f, 6.0f);
-     * float[] merged = FloatStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * float[] merged = FloatStream.merge(a, b, (x, y) -> Float.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
      *
      * // Custom merge logic
      * FloatIterator iter1 = FloatIterator.of(10.0f, 20.0f, 30.0f);
      * FloatIterator iter2 = FloatIterator.of(15.0f, 25.0f, 35.0f);
-     * float[] custom = FloatStream.merge(iter1, iter2, (x, y) -> x < y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * float[] custom = FloatStream.merge(iter1, iter2, (x, y) -> Float.compare(x, y) < 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [10.0, 15.0, 20.0, 25.0, 30.0, 35.0]
      * }</pre>
      *
@@ -4478,7 +4691,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * FloatIterator a = FloatIterator.of(1.0f, 4.0f, 7.0f);
      * FloatIterator b = FloatIterator.of(2.0f, 5.0f, 8.0f);
      * FloatIterator c = FloatIterator.of(3.0f, 6.0f, 9.0f);
-     * float[] merged = FloatStream.merge(a, b, c, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * float[] merged = FloatStream.merge(a, b, c, (x, y) -> Float.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      * }</pre>
      *
@@ -4508,7 +4721,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * // Merge two sorted streams in ascending order
      * FloatStream a = FloatStream.of(1.0f, 3.0f, 5.0f);
      * FloatStream b = FloatStream.of(2.0f, 4.0f, 6.0f);
-     * float[] merged = FloatStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * float[] merged = FloatStream.merge(a, b, (x, y) -> Float.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
      *
      * // Merge with custom logic (take smaller absolute value)
@@ -4524,9 +4737,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the two input streams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
+    public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
@@ -4542,7 +4757,7 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * FloatStream a = FloatStream.of(1.0f, 4.0f, 7.0f);
      * FloatStream b = FloatStream.of(2.0f, 5.0f, 8.0f);
      * FloatStream c = FloatStream.of(3.0f, 6.0f, 9.0f);
-     * float[] merged = FloatStream.merge(a, b, c, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * float[] merged = FloatStream.merge(a, b, c, (x, y) -> Float.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      * }</pre>
      *
@@ -4553,10 +4768,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the three input streams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static FloatStream merge(final FloatStream a, final FloatStream b, final FloatStream c, final FloatBiFunction<MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(merge(a, b, nextSelector), c, nextSelector);
@@ -4566,6 +4782,16 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      * Merges a collection of FloatStream into a single FloatStream based on the provided nextSelector function.
      * The nextSelector function determines which element to take next from the multiple streams.
      *
+     * <p>The streams are merged lazily as a balanced tree of pairwise merges of <i>adjacent</i> streams, so each
+     * element passes through about {@code log2(k)} selector calls for {@code k} streams (the tree is built, and every
+     * stream is opened, when this method is called). All streams should provide elements in pre-sorted order
+     * according to the same ordering that the nextSelector function expects; for a {@code nextSelector} that returns
+     * {@code TAKE_FIRST} on ties, elements it treats as equal keep their source order, and the result is the same as
+     * merging the streams one after another from left to right.
+     * The returned stream will automatically close all input streams when it is closed. If an input stream is found
+     * to be already closed, the streams that precede it in the collection are closed, the ones after it are left
+     * untouched, and the exception is rethrown.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Merge multiple sorted streams in ascending order
@@ -4574,12 +4800,12 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *     FloatStream.of(2.0f, 5.0f, 8.0f),
      *     FloatStream.of(3.0f, 6.0f, 9.0f)
      * );
-     * float[] merged = FloatStream.merge(streams, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
+     * float[] merged = FloatStream.merge(streams, (x, y) -> Float.compare(x, y) <= 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND)
      *     .toArray();   // returns [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
      *
      * // Merge dynamic set of streams
      * Set<FloatStream> streamSet = generateFloatStreams();
-     * FloatStream combined = FloatStream.merge(streamSet, (a, b) -> a < b ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
+     * FloatStream combined = FloatStream.merge(streamSet, (a, b) -> Float.compare(a, b) < 0 ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND);
      * }</pre>
      *
      * @param streams the collection of FloatStream instances to merge; a {@code null} collection and {@code null} elements are treated as empty
@@ -4587,10 +4813,11 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a FloatStream containing the merged elements from the input FloatStreams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code streams} contains more than one stream and any of them is already closed
      * @see Stream#merge(Collection, BiFunction)
      */
     public static FloatStream merge(final Collection<? extends FloatStream> streams, final FloatBiFunction<MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {
@@ -4603,14 +4830,43 @@ public abstract class FloatStream extends StreamBase<Float, float[], FloatPredic
             return merge(iter.next(), iter.next(), nextSelector);
         }
 
-        final Iterator<? extends FloatStream> iter = streams.iterator();
-        FloatStream result = merge(iter.next(), iter.next(), nextSelector);
+        // Merge adjacent pairs level by level - a balanced tree, as Stream.merge(Collection) does (C-104) - instead of
+        // folding left. The left fold merge(merge(merge(s1, s2), s3), ...) is k - 1 merges deep: an element of an early
+        // source passed through up to k - 1 selector calls (O(n * k) in total), and every hasNext()/next()/close()
+        // recursed through all levels (StackOverflowError, with sources left open, at about 2,000 sources). The tree is
+        // ceil(log2(k)) deep. Merging adjacent runs keeps elements that a TAKE_FIRST-on-ties selector treats as equal in
+        // source order, so for such a selector the result is exactly the left fold's.
+        List<FloatStream> level = new ArrayList<>(streams);
+        final List<FloatStream> created = new ArrayList<>(level.size() - 1);
 
-        while (iter.hasNext()) {
-            result = merge(result, iter.next(), nextSelector);
+        try {
+            while (level.size() > 1) {
+                final int size = level.size();
+                final List<FloatStream> nextLevel = new ArrayList<>((size + 1) / 2);
+
+                for (int i = 0; i + 1 < size; i += 2) {
+                    final FloatStream merged = merge(level.get(i), level.get(i + 1), nextSelector);
+                    created.add(merged);
+                    nextLevel.add(merged);
+                }
+
+                if (size % 2 == 1) {
+                    nextLevel.add(level.get(size - 1));
+                }
+
+                level = nextLevel;
+            }
+        } catch (final RuntimeException | Error e) {
+            // As in each pairwise merge, close only what has been opened: every merge created so far (which closes
+            // the sources it consumed; closing twice is a no-op). Sources not reached yet are left untouched.
+            for (int i = created.size() - 1; i >= 0; i--) {
+                closeOpenedSource(created.get(i), e);
+            }
+
+            throw e;
         }
 
-        return result;
+        return level.get(0);
     }
 
     /**

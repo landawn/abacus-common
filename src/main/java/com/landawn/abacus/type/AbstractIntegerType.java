@@ -137,28 +137,28 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
-     * @param len the number of characters to read
-     * @return the {@code Integer} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param length the number of characters to read
+     * @return the {@code Integer} value, or the default value if {@code cbuf} is {@code null} or {@code length} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
-     * @throws IllegalArgumentException if {@code cbuf} is non-null, {@code len} is nonzero, and the decimal parsing path receives a negative offset or length.
+     * @throws IllegalArgumentException if {@code cbuf} is non-null, {@code length} is nonzero, and the decimal parsing path receives a negative offset or length.
      * @throws NumberFormatException if the character sequence cannot be parsed as an {@code int}
      * @throws ArithmeticException if the region is a well-formed integer outside the {@code int} range
      */
     @Override
-    public Integer valueOf(final char[] cbuf, final int offset, final int len)
+    public Integer valueOf(final char[] cbuf, final int offset, final int length)
             throws IndexOutOfBoundsException, IllegalArgumentException, NumberFormatException, ArithmeticException {
-        if ((cbuf == null) || (len == 0)) {
+        if ((cbuf == null) || (length == 0)) {
             return (Integer) defaultValue();
         }
 
         // parseInt's digit-only fast path strips a trailing F/D as a type suffix and then rejects "0x1", so a
         // hex token parsed from JSON (char[]) failed while the same text parsed from XML (String). Hand a
         // radix-prefixed region to the single authority instead of teaching the shared helper about hex.
-        if (hasRadixPrefix(cbuf, offset, len)) {
-            return Numbers.toInt(new String(cbuf, offset, len));
+        if (hasRadixPrefix(cbuf, offset, length)) {
+            return Numbers.toInt(new String(cbuf, offset, length));
         }
 
-        return parseInt(cbuf, offset, len);
+        return parseInt(cbuf, offset, length);
     }
 
     /**
@@ -168,19 +168,20 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      *
      * @param cbuf the character array
      * @param offset the starting position of the region
-     * @param len the length of the region
-     * @return {@code true} if the region begins with an (optionally signed) radix prefix followed by at least one more character
-     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code len} exceeds one.
+     * @param length the length of the region
+     * @return {@code true} if, after the optional sign, at least two characters remain and they begin with {@code #} or
+     *         {@code 0x}/{@code 0X} (so {@code "#1"} and a bare {@code "0x"} qualify, a lone {@code "#"} does not)
+     * @throws NullPointerException if {@code cbuf} is {@code null} and {@code length} exceeds one.
      * @throws ArrayIndexOutOfBoundsException if checking the sign or radix prefix accesses an index outside {@code cbuf}.
      */
-    static boolean hasRadixPrefix(final char[] cbuf, final int offset, final int len) throws NullPointerException, ArrayIndexOutOfBoundsException {
+    static boolean hasRadixPrefix(final char[] cbuf, final int offset, final int length) throws NullPointerException, ArrayIndexOutOfBoundsException {
         int i = offset;
 
-        if (len > 1 && (cbuf[i] == '-' || cbuf[i] == '+')) {
+        if (length > 1 && (cbuf[i] == '-' || cbuf[i] == '+')) {
             i++;
         }
 
-        final int rest = len - (i - offset);
+        final int rest = length - (i - offset);
 
         return rest > 1 && (cbuf[i] == '#' || (cbuf[i] == '0' && (cbuf[i + 1] == 'x' || cbuf[i + 1] == 'X')));
     }
@@ -234,18 +235,18 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * Otherwise, converts the {@code Number} to an {@code int} value.
      * </p>
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Number} value to set as {@code int}, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.INTEGER);
+            statement.setNull(columnIndex, Types.INTEGER);
         } else {
-            stmt.setInt(columnIndex, x.intValue());
+            statement.setInt(columnIndex, x.intValue());
         }
     }
 
@@ -256,18 +257,18 @@ public abstract class AbstractIntegerType extends NumberType<Number> {
      * Otherwise, converts the {@code Number} to an {@code int} value.
      * </p>
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Number} value to set as {@code int}, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.INTEGER);
+            statement.setNull(parameterName, Types.INTEGER);
         } else {
-            stmt.setInt(parameterName, x.intValue());
+            statement.setInt(parameterName, x.intValue());
         }
     }
 

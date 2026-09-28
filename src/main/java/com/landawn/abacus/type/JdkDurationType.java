@@ -168,19 +168,19 @@ public class JdkDurationType extends AbstractType<Duration> {
      * The Duration is converted to milliseconds for database storage.
      * If the Duration is {@code null}, SQL NULL is set.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the Duration to set, or null
      * @throws ArithmeticException if the duration has sub-millisecond precision or its millisecond count overflows
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws ArithmeticException, NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Duration x) throws ArithmeticException, NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.BIGINT);
+            statement.setNull(columnIndex, Types.BIGINT);
         } else {
-            stmt.setLong(columnIndex, exactMillis(x));
+            statement.setLong(columnIndex, exactMillis(x));
         }
     }
 
@@ -189,19 +189,20 @@ public class JdkDurationType extends AbstractType<Duration> {
      * The Duration is converted to milliseconds for database storage.
      * If the Duration is {@code null}, SQL NULL is set.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the Duration to set, or null
      * @throws ArithmeticException if the duration has sub-millisecond precision or its millisecond count overflows
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws ArithmeticException, NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Duration x)
+            throws ArithmeticException, NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.BIGINT);
+            statement.setNull(parameterName, Types.BIGINT);
         } else {
-            stmt.setLong(parameterName, exactMillis(x));
+            statement.setLong(parameterName, exactMillis(x));
         }
     }
 
@@ -262,10 +263,11 @@ public class JdkDurationType extends AbstractType<Duration> {
      * @param writer the CharacterWriter to write to
      * @param x the Duration to write; may be {@code null}
      * @param config the serialization configuration; {@code null} means unquoted text
+     * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the duration text, configured quotation or null literal to {@code writer} fails
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Duration x, final JsonXmlSerConfig<?> config) throws IOException {
+    public void serializeTo(final CharacterWriter writer, final Duration x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         super.serializeTo(writer, x, config);
     }
 }

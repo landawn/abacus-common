@@ -114,8 +114,8 @@ public interface Poolable {
      * }</pre>
      *
      * @param <T> the type of the object to wrap
-     * @param value the object to wrap, can be {@code null}; must be {@code Serializable} if the adapter
-     *        (or a pool containing it) is to be serialized
+     * @param value the object to wrap, can be {@code null}; the adapter itself is never {@code Serializable}, whatever
+     *        the value's type, so a pool that still contains it cannot be serialized
      * @return a PoolableAdapter containing the source object
      */
     static <T> PoolableAdapter<T> wrap(final T value) {
@@ -135,8 +135,8 @@ public interface Poolable {
      * }</pre>
      *
      * @param <T> the type of the object to wrap
-     * @param value the object to wrap, can be {@code null}; must be {@code Serializable} if the adapter
-     *        (or a pool containing it) is to be serialized
+     * @param value the object to wrap, can be {@code null}; the adapter itself is never {@code Serializable}, whatever
+     *        the value's type, so a pool that still contains it cannot be serialized
      * @param maxLiveTime maximum lifetime in milliseconds before the object expires
      * @param maxIdleTime maximum idle time in milliseconds before the object expires
      * @return a PoolableAdapter containing the source object with the specified expiration settings

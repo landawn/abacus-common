@@ -477,10 +477,10 @@ public class BiIteratorTest extends TestBase {
         Pair<List<String>, List<Integer>> empty = BiIterator.<String, Integer> empty().unzipToLists(LinkedList::new);
         assertTrue(empty.left().isEmpty());
         assertTrue(empty.right().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.empty().unzipToLists(() -> null));
+        assertThrows(NullPointerException.class, () -> BiIterator.empty().unzipToLists(() -> null));
 
         BiIterator<Integer, String> source = BiIterator.zip(new Integer[] { 1 }, new String[] { "a" });
-        assertThrows(IllegalArgumentException.class, () -> source.unzipToCollections(ArrayList::new, () -> null));
+        assertThrows(NullPointerException.class, () -> source.unzipToCollections(ArrayList::new, () -> null));
         assertTrue(source.hasNext());
     }
 
@@ -501,7 +501,7 @@ public class BiIteratorTest extends TestBase {
 
         Pair<Set<String>, Set<Integer>> empty = BiIterator.<String, Integer> empty().unzipToSets(HashSet::new);
         assertTrue(empty.left().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> BiIterator.empty().unzipToSets(() -> null));
+        assertThrows(NullPointerException.class, () -> BiIterator.empty().unzipToSets(() -> null));
     }
 
     @Test
@@ -530,4 +530,19 @@ public class BiIteratorTest extends TestBase {
         }));
         assertEquals(100, BiIterator.<Integer, String> generate(0, 10000, (i, pair) -> pair.set(i, "v" + i)).filter((k, v) -> k % 100 == 0).count());
     }
+
+    // ---- deep review 2026-09-25 G021 begin ----
+    // G021-01: next() on a null source entry must throw NPE (as documented), like forEachRemaining/map already do.
+    @Test
+    public void testOfEntryIterator_nullEntry_nextThrowsNpe() {
+        final List<Map.Entry<String, Integer>> entries = new ArrayList<>();
+        entries.add(null);
+
+        assertThrows(NullPointerException.class, () -> BiIterator.of(entries.iterator()).next());
+        assertThrows(NullPointerException.class, () -> BiIterator.of(entries.iterator()).toList());
+        assertThrows(NullPointerException.class, () -> BiIterator.of(entries.iterator()).forEachRemaining((k, v) -> {
+        }));
+        assertThrows(NullPointerException.class, () -> BiIterator.of(entries.iterator()).map((k, v) -> k).next());
+    }
+    // ---- deep review 2026-09-25 G021 end ----
 }

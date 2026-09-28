@@ -193,4 +193,20 @@ public class HttpResponseSnapshotTest extends TestBase {
         assertEquals(3, error.headers().size());
         assertEquals(List.of("third"), error.headers().get("X-VALUE"));
     }
+
+    // ---- deep review 2026-09-25 G001 begin ----
+    // G001-01: the message truncation must not leave a lone high surrogate when the limit falls inside a pair.
+    @Test
+    public void testGetMessage_truncationDoesNotSplitSurrogatePair() {
+        final int limit = HttpUtil.MAX_ERROR_BODY_IN_MESSAGE;
+        // An odd-length BMP prefix makes a pair straddle positions limit - 1 / limit.
+        final String body = "x" + "\uD83D\uDE00".repeat(limit);
+        final String message = new HttpResponseException("u", 500, null, null, body).getMessage();
+        final String rendered = message.substring("500. ".length(), message.length() - "... (truncated)".length());
+        assertEquals(limit - 1, rendered.length());
+        assertEquals(body.substring(0, limit - 1), rendered);
+        assertFalse(Character.isHighSurrogate(rendered.charAt(rendered.length() - 1)));
+        assertEquals(body, new HttpResponseException("u", 500, null, null, body).responseBody());
+    }
+    // ---- deep review 2026-09-25 G001 end ----
 }

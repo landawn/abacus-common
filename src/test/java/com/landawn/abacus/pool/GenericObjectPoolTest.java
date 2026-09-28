@@ -1419,4 +1419,57 @@ public class GenericObjectPoolTest extends TestBase {
             p.close();
         }
     }
+
+    // ---- deep review 2026-09-25 G011 begin ----
+    // G011-05: a candidate that the memory rule must reject anyway must not cost live pooled objects.
+    @Test
+    public void testAdd_neverAdmissibleCandidateDoesNotVacate() throws InterruptedException {
+        final ObjectPool.MemoryMeasure<TestPoolable> measure = e -> "big".equals(e.getId()) ? 1000 : "bad".equals(e.getId()) ? -1 : 10;
+        // Memory path: pool not full, but the candidate is larger than the whole 100-byte limit.
+        final ObjectPool<TestPoolable> roomy = PoolFactory.createObjectPool(10, 0, EvictionPolicy.LAST_ACCESS_TIME, 100L, measure);
+        // Capacity path: pool full, candidate oversized or negatively measured.
+        final ObjectPool<TestPoolable> full = PoolFactory.createObjectPool(3, 0, EvictionPolicy.LAST_ACCESS_TIME, 100L, measure);
+        try {
+            final List<TestPoolable> residents = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                final TestPoolable r = new TestPoolable("r" + i);
+                residents.add(r);
+                assertTrue(roomy.add(r));
+            }
+            for (int i = 0; i < 3; i++) {
+                final TestPoolable r = new TestPoolable("f" + i);
+                residents.add(r);
+                assertTrue(full.add(r));
+            }
+
+            final TestPoolable big = new TestPoolable("big");
+            final TestPoolable bad = new TestPoolable("bad");
+            assertFalse(roomy.add(big));
+            assertFalse(roomy.add(big, 0, TimeUnit.MILLISECONDS));
+            assertFalse(full.add(big));
+            assertFalse(full.add(bad));
+            assertFalse(full.add(big, 0, TimeUnit.MILLISECONDS));
+            assertFalse(full.add(bad, 0, TimeUnit.MILLISECONDS));
+
+            assertEquals(5, roomy.size());
+            assertEquals(3, full.size());
+            assertEquals(0, roomy.stats().evictionCount());
+            assertEquals(0, full.stats().evictionCount());
+            assertEquals(50, roomy.stats().dataSize());
+            assertEquals(30, full.stats().dataSize());
+            for (final TestPoolable r : residents) {
+                assertFalse(r.isDestroyed(), r.getId());
+            }
+            assertFalse(big.isDestroyed());
+            assertFalse(bad.isDestroyed());
+
+            // An admissible candidate still balances a full pool as before.
+            assertTrue(full.add(new TestPoolable("ok")));
+            assertEquals(1, full.stats().evictionCount());
+        } finally {
+            roomy.close();
+            full.close();
+        }
+    }
+    // ---- deep review 2026-09-25 G011 end ----
 }

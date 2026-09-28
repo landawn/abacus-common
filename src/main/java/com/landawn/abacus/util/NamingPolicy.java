@@ -51,10 +51,10 @@ import com.landawn.abacus.annotation.Beta;
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
- * NamingPolicy.CAMEL_CASE.convert("user-name");          // "userName"
- * NamingPolicy.SNAKE_CASE.convert("userName");           // "user_name"
- * NamingPolicy.SNAKE_CASE.convert(" first-name ");       // "first_name"
- * NamingPolicy.KEBAB_CASE.convert(" _first_name_ ");     // "first-name"
+ * NamingPolicy.CAMEL_CASE.convert("user-name");       // "userName"
+ * NamingPolicy.SNAKE_CASE.convert("userName");        // "user_name"
+ * NamingPolicy.SNAKE_CASE.convert(" first-name ");    // "first_name"
+ * NamingPolicy.KEBAB_CASE.convert(" _first_name_ ");  // "first-name"
  * }</pre>
  *
  * @see Strings#toCamelCase(String)
@@ -74,11 +74,11 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * NamingPolicy.CAMEL_CASE.convert("user_name");     // "userName"
-     * NamingPolicy.CAMEL_CASE.convert("first-name");    // "firstName"
-     * NamingPolicy.CAMEL_CASE.convert("MY_CONSTANT");   // "myConstant"
-     * NamingPolicy.CAMEL_CASE.convert("XMLParser");     // "xmlParser"
-     * NamingPolicy.CAMEL_CASE.convert("_helloWorld");   // "helloWorld"
+     * NamingPolicy.CAMEL_CASE.convert("user_name");    // "userName"
+     * NamingPolicy.CAMEL_CASE.convert("first-name");   // "firstName"
+     * NamingPolicy.CAMEL_CASE.convert("MY_CONSTANT");  // "myConstant"
+     * NamingPolicy.CAMEL_CASE.convert("XMLParser");    // "xmlParser"
+     * NamingPolicy.CAMEL_CASE.convert("_helloWorld");  // "helloWorld"
      * }</pre>
      *
      * @see #convert(String)
@@ -95,9 +95,9 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * NamingPolicy.UPPER_CAMEL_CASE.convert("user_name");     // "UserName"
-     * NamingPolicy.UPPER_CAMEL_CASE.convert("first-name");    // "FirstName"
-     * NamingPolicy.UPPER_CAMEL_CASE.convert("XMLParser");     // "XmlParser"
+     * NamingPolicy.UPPER_CAMEL_CASE.convert("user_name");   // "UserName"
+     * NamingPolicy.UPPER_CAMEL_CASE.convert("first-name");  // "FirstName"
+     * NamingPolicy.UPPER_CAMEL_CASE.convert("XMLParser");   // "XmlParser"
      * }</pre>
      *
      * @see #convert(String)
@@ -116,11 +116,11 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * NamingPolicy.SNAKE_CASE.convert("userName");      // "user_name"
-     * NamingPolicy.SNAKE_CASE.convert("first-name");    // "first_name"
-     * NamingPolicy.SNAKE_CASE.convert("first name");    // "first_name"
-     * NamingPolicy.SNAKE_CASE.convert("a__b");          // "a_b"
-     * NamingPolicy.SNAKE_CASE.convert(" -hello- ");     // "hello"
+     * NamingPolicy.SNAKE_CASE.convert("userName");    // "user_name"
+     * NamingPolicy.SNAKE_CASE.convert("first-name");  // "first_name"
+     * NamingPolicy.SNAKE_CASE.convert("first name");  // "first_name"
+     * NamingPolicy.SNAKE_CASE.convert("a__b");        // "a_b"
+     * NamingPolicy.SNAKE_CASE.convert(" -hello- ");   // "hello"
      * }</pre>
      *
      * @see #convert(String)
@@ -137,9 +137,9 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * NamingPolicy.SCREAMING_SNAKE_CASE.convert("userName");      // "USER_NAME"
-     * NamingPolicy.SCREAMING_SNAKE_CASE.convert("first-name");    // "FIRST_NAME"
-     * NamingPolicy.SCREAMING_SNAKE_CASE.convert(" -hello- ");     // "HELLO"
+     * NamingPolicy.SCREAMING_SNAKE_CASE.convert("userName");    // "USER_NAME"
+     * NamingPolicy.SCREAMING_SNAKE_CASE.convert("first-name");  // "FIRST_NAME"
+     * NamingPolicy.SCREAMING_SNAKE_CASE.convert(" -hello- ");   // "HELLO"
      * }</pre>
      *
      * @see #convert(String)
@@ -157,10 +157,10 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * NamingPolicy.KEBAB_CASE.convert("userName");      // "user-name"
-     * NamingPolicy.KEBAB_CASE.convert("first_name");    // "first-name"
-     * NamingPolicy.KEBAB_CASE.convert("first name");    // "first-name"
-     * NamingPolicy.KEBAB_CASE.convert(" _hello_ ");     // "hello"
+     * NamingPolicy.KEBAB_CASE.convert("userName");    // "user-name"
+     * NamingPolicy.KEBAB_CASE.convert("first_name");  // "first-name"
+     * NamingPolicy.KEBAB_CASE.convert("first name");  // "first-name"
+     * NamingPolicy.KEBAB_CASE.convert(" _hello_ ");   // "hello"
      * }</pre>
      *
      * @see #convert(String)
@@ -173,9 +173,9 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * NamingPolicy.NO_CHANGE.convert("any-String_123");   // "any-String_123"
-     * NamingPolicy.NO_CHANGE.convert("MixedCase");        // "MixedCase"
-     * NamingPolicy.NO_CHANGE.convert(null);               // null
+     * NamingPolicy.NO_CHANGE.convert("any-String_123");  // "any-String_123"
+     * NamingPolicy.NO_CHANGE.convert("MixedCase");       // "MixedCase"
+     * NamingPolicy.NO_CHANGE.convert(null);              // null
      * }</pre>
      *
      * @see #convert(String)
@@ -223,12 +223,12 @@ public enum NamingPolicy {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * NamingPolicy.CAMEL_CASE.convert("user-name");    // "userName"
-     * NamingPolicy.CAMEL_CASE.convert("USER_NAME");    // "userName"
-     * NamingPolicy.SNAKE_CASE.convert("userName");     // "user_name"
-     * NamingPolicy.SNAKE_CASE.convert(" first-name "); // "first_name"
-     * NamingPolicy.CAMEL_CASE.convert(null);           // null
-     * NamingPolicy.CAMEL_CASE.convert("");             // ""
+     * NamingPolicy.CAMEL_CASE.convert("user-name");     // "userName"
+     * NamingPolicy.CAMEL_CASE.convert("USER_NAME");     // "userName"
+     * NamingPolicy.SNAKE_CASE.convert("userName");      // "user_name"
+     * NamingPolicy.SNAKE_CASE.convert(" first-name ");  // "first_name"
+     * NamingPolicy.CAMEL_CASE.convert(null);            // null
+     * NamingPolicy.CAMEL_CASE.convert("");              // ""
      * }</pre>
      *
      * @param str the string to convert; may be {@code null} or empty

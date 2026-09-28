@@ -749,4 +749,178 @@ public class ReflectionTest extends TestBase {
                     "PROBE available=" + Reflection.isReflectASMAvailable + " get=" + got + " newInstance=" + (created instanceof TestClass ? "ok" : "FAILED"));
         }
     }
+
+    // ---- deep review 2026-09-25 G064 begin ----
+    // G064-01: a null for a public primitive field took the ReflectASM fast path and failed its unboxing with
+    // NullPointerException, while the same null for a private primitive field got IllegalArgumentException.
+    @Test
+    public void testSet_nullForPrimitiveFieldIsIllegalArgumentRegardlessOfVisibility() {
+        final ShadowedFieldParent parent = new ShadowedFieldParent();
+        parent.number = 7L;
+        assertThrows(IllegalArgumentException.class, () -> Reflection.on(parent).set("number", null));
+        assertEquals(7L, parent.number);
+
+        final TestClass privateHolder = new TestClass();
+        assertThrows(IllegalArgumentException.class, () -> Reflection.on(privateHolder).set("intField", null));
+
+        // A non-null value and a null for a reference field still go through unchanged.
+        Reflection.on(parent).set("number", 9L).set("value", null);
+        assertEquals(9L, parent.number);
+        assertNull(parent.value);
+    }
+    // ---- deep review 2026-09-25 G064 end ----
+    // ---- perf review 2026-09-26 G064 begin ----
+    public static class PerfMemoBean {
+        private String secret = "s0";
+        private int count = 1;
+        public String open = "o0";
+        public long wide;
+    }
+
+    public static class PerfMemoParent {
+        public String name = "parent";
+    }
+
+    public static class PerfMemoChild extends PerfMemoParent {
+        private String name = "child";
+
+        public String childName() {
+            return name;
+        }
+    }
+
+    public static class PerfMemoStatic {
+        public static String shared = "initial";
+    }
+
+    public static class PerfMethodPoolTarget {
+        public String hello() {
+            return "hello";
+        }
+
+        public String echo(final String text) {
+            return text;
+        }
+    }
+
+    // G064-01: repeated reads and writes of private fields keep their answers (GREEN on base and fix)
+    @Test
+    public void testGet_privateFieldRepeatedAccess() {
+        final PerfMemoBean bean = new PerfMemoBean();
+        final Reflection<PerfMemoBean> reflection = Reflection.on(bean);
+
+        assertEquals("s0", reflection.get("secret"));
+        assertEquals("s0", reflection.get("secret"));
+
+        assertSame(reflection, reflection.set("secret", "s1"));
+        assertEquals("s1", bean.secret);
+        assertEquals("s1", reflection.get("secret"));
+        assertEquals("s1", Reflection.on(bean).get("secret"));
+        assertNull(reflection.set("secret", null).get("secret"));
+
+        // A private primitive field: first touched by set, then read; widening and null handling are unchanged.
+        reflection.set("count", 5);
+        assertEquals(5, (Integer) reflection.get("count"));
+        reflection.set("count", (short) 6);
+        assertEquals(6, bean.count);
+        assertThrows(IllegalArgumentException.class, () -> reflection.set("count", null));
+        assertThrows(RuntimeException.class, () -> reflection.set("count", "x"));
+        assertEquals(6, bean.count);
+
+        // A public field keeps the fast path.
+        assertEquals("o0", reflection.get("open"));
+        reflection.set("open", "o1");
+        assertEquals("o1", bean.open);
+        assertFalse(Reflection.asmUnreachableFields.get(PerfMemoBean.class).contains("open"));
+
+        // Unknown fields are never recorded.
+        assertThrows(RuntimeException.class, () -> reflection.get("noSuchField"));
+        assertThrows(RuntimeException.class, () -> reflection.set("noSuchField", 1));
+        assertFalse(Reflection.asmUnreachableFields.get(PerfMemoBean.class).contains("noSuchField"));
+    }
+
+    // G064-01: a private field rejected by ReflectASM is memoized, on first read or first write (RED on base)
+    @Test
+    public void testGet_privateFieldRejectionIsMemoized() {
+        final PerfMemoChild child = new PerfMemoChild();
+        final Reflection<PerfMemoChild> reflection = Reflection.on(child);
+
+        assertEquals("child", reflection.get("name"));
+        assertEquals(Reflection.isReflectASMAvailable, Reflection.asmUnreachableFields.get(PerfMemoChild.class).contains("name"));
+        assertEquals("child", reflection.get("name"));
+
+        final PerfMemoBean bean = new PerfMemoBean();
+        Reflection.on(bean).set("count", 9);
+        assertEquals(Reflection.isReflectASMAvailable, Reflection.asmUnreachableFields.get(PerfMemoBean.class).contains("count"));
+        assertEquals(9, (Integer) Reflection.on(bean).get("count"));
+    }
+
+    // G064-01: a value-dependent ClassCastException on a public field is NOT memoized
+    @Test
+    public void testSet_publicFieldWideningFallbackNotMemoized() {
+        final PerfMemoBean bean = new PerfMemoBean();
+        final Reflection<PerfMemoBean> reflection = Reflection.on(bean);
+
+        reflection.set("wide", 5); // Integer into a long field: the fast path fails its cast, reflection widens
+        assertEquals(5L, bean.wide);
+        assertFalse(Reflection.asmUnreachableFields.get(PerfMemoBean.class).contains("wide"));
+
+        reflection.set("wide", 7L);
+        assertEquals(7L, bean.wide);
+        assertEquals(7L, (Long) reflection.get("wide"));
+        assertThrows(RuntimeException.class, () -> reflection.set("wide", "x"));
+        assertEquals(7L, bean.wide);
+        assertFalse(Reflection.asmUnreachableFields.get(PerfMemoBean.class).contains("wide"));
+    }
+
+    // G064-01: a private subclass field hiding a public superclass field, and a static field, repeated
+    @Test
+    public void testGet_hiddenAndStaticFieldsRepeatedAccess() {
+        final PerfMemoChild child = new PerfMemoChild();
+        final Reflection<PerfMemoChild> reflection = Reflection.on(child);
+
+        for (int i = 0; i < 3; i++) {
+            assertEquals(i == 0 ? "child" : "child" + (i - 1), reflection.get("name"));
+            reflection.set("name", "child" + i);
+            assertEquals("child" + i, child.childName());
+            assertEquals("parent", ((PerfMemoParent) child).name);
+        }
+
+        final String original = PerfMemoStatic.shared;
+
+        try {
+            final Reflection<PerfMemoStatic> staticReflection = Reflection.on(PerfMemoStatic.class);
+
+            for (int i = 0; i < 3; i++) {
+                assertEquals(i == 0 ? "initial" : "v" + (i - 1), staticReflection.get("shared"));
+                staticReflection.set("shared", "v" + i);
+                assertEquals("v" + i, PerfMemoStatic.shared);
+            }
+        } finally {
+            PerfMemoStatic.shared = original;
+        }
+    }
+
+    // G064-02: a lookup of a method that does not exist leaves no empty per-name pool behind
+    @Test
+    public void testInvoke_unknownMethodLeavesNoPoolEntry() {
+        final Reflection<PerfMethodPoolTarget> reflection = Reflection.on(new PerfMethodPoolTarget());
+
+        for (int i = 0; i < 3; i++) {
+            final String name = "noSuchMethod" + i;
+            assertThrows(RuntimeException.class, () -> reflection.invoke(name));
+            assertThrows(RuntimeException.class, () -> reflection.invoke(name, "a", 1));
+            assertThrows(RuntimeException.class, () -> reflection.call(name, (Object) null));
+            assertFalse(Reflection.clsMethodPool.get(PerfMethodPoolTarget.class).containsKey(name));
+        }
+
+        // Existing methods still resolve, repeatedly, with the same results.
+        for (int i = 0; i < 3; i++) {
+            assertEquals("hello", reflection.invoke("hello"));
+            assertEquals("x" + i, reflection.invoke("echo", "x" + i));
+            assertNull(reflection.invoke("echo", (Object) null));
+            assertSame(reflection, reflection.call("echo", "y"));
+        }
+    }
+    // ---- perf review 2026-09-26 G064 end ----
 }

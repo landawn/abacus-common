@@ -82,7 +82,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
 
     /**
      * Converts a BooleanList to its string representation.
-     * The list is first converted to a boolean array, then serialized using the array type handler.
+     * The logical elements use the built-in array format or a registered array type handler.
      * Returns {@code null} if the input list is {@code null}.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -96,9 +96,10 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public String stringOf(final BooleanList x) {
-        return x == null ? null : arrayType.stringOf(x.toArray());
+        return x == null ? null : arrayType instanceof PrimitiveBooleanArrayType ? stringOf(x.internalArray(), x.size()) : arrayType.stringOf(x.toArray());
     }
 
     /**
@@ -129,7 +130,7 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
 
     /**
      * Appends the string representation of a BooleanList to an Appendable.
-     * Delegates to the array type handler after converting the list to an array.
+     * Writes the array-type representation, preserving a snapshot for application-controlled callbacks.
      * Appends "null" if the list is {@code null}.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
@@ -151,18 +152,23 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void appendTo(final Appendable appendable, final BooleanList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            arrayType.appendTo(appendable, x.toArray());
+            if (arrayType instanceof PrimitiveBooleanArrayType && canWriteDirectly(appendable)) {
+                appendTo(appendable, x.internalArray(), x.size());
+            } else {
+                arrayType.appendTo(appendable, x.toArray());
+            }
         }
     }
 
     /**
      * Writes the character representation of a BooleanList to a CharacterWriter.
-     * Delegates to the array type handler after converting the list to an array.
+     * Writes the array-type representation, preserving a snapshot for application-controlled callbacks.
      * Writes "null" if the list is {@code null}.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
@@ -180,12 +186,17 @@ public final class PrimitiveBooleanListType extends AbstractPrimitiveListType<Bo
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void serializeTo(final CharacterWriter writer, final BooleanList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            arrayType.serializeTo(writer, x.toArray(), config);
+            if (arrayType instanceof PrimitiveBooleanArrayType && canWriteDirectly(writer, config)) {
+                serializeTo(writer, x.internalArray(), x.size());
+            } else {
+                arrayType.serializeTo(writer, x.toArray(), config);
+            }
         }
     }
 }

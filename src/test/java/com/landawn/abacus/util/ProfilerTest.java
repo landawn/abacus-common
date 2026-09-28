@@ -2123,4 +2123,18 @@ public class ProfilerTest extends AbstractTest {
         assertTrue(xml.contains("failure &lt;&amp;&gt;"), xml);
         assertFalse(xml.contains("<method name=\"" + methodName + "\">"), xml);
     }
+
+    @Test
+    public void testMultiLoopsStatisticsWriteToNullOutputStreamNamesOutputParameter() {
+        final Profiler.MultiLoopsStatistics stats = new Profiler.MultiLoopsStatistics(0, 0, 0, 0, 1);
+
+        final IllegalArgumentException textEx = assertThrows(IllegalArgumentException.class, () -> stats.writeResult((java.io.OutputStream) null));
+        assertTrue(textEx.getMessage().contains("'output'"), textEx.getMessage());
+
+        final IllegalArgumentException htmlEx = assertThrows(IllegalArgumentException.class, () -> stats.writeHtmlResult((java.io.OutputStream) null));
+        assertTrue(htmlEx.getMessage().contains("'output'"), htmlEx.getMessage());
+
+        final IllegalArgumentException xmlEx = assertThrows(IllegalArgumentException.class, () -> stats.writeXmlResult((java.io.OutputStream) null));
+        assertTrue(xmlEx.getMessage().contains("'output'"), xmlEx.getMessage());
+    }
 }

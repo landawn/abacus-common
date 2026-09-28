@@ -58,8 +58,11 @@ class SLF4JLogger extends AbstractLogger {
 
     private final LocationAwareLogger locationAwareLogger;
 
+    /**
+     * @throws NullPointerException if {@code level} is {@code null}.
+     */
     @Override
-    void log(final LogLevel level, final String message) {
+    void log(final LogLevel level, final String message) throws NullPointerException {
         if (locationAwareLogger == null) {
             super.log(level, message);
         } else {
@@ -67,8 +70,11 @@ class SLF4JLogger extends AbstractLogger {
         }
     }
 
+    /**
+     * @throws NullPointerException if {@code level} is {@code null}.
+     */
     @Override
-    void log(final LogLevel level, final String message, final Throwable throwable) {
+    void log(final LogLevel level, final String message, final Throwable throwable) throws NullPointerException {
         if (locationAwareLogger == null) {
             super.log(level, message, throwable);
         } else {

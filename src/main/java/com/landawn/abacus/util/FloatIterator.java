@@ -225,6 +225,9 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
     public static FloatIterator defer(final Supplier<? extends FloatIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends FloatIterator>> supplierHolder = Holder.of(iteratorSupplier);
+
         return new FloatIterator() {
             private FloatIterator iter = null;
             private volatile boolean isInitialized = false;
@@ -263,7 +266,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                             isInitializing = true;
 
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == this) {
                                     throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
@@ -277,6 +280,7 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;
                             }
@@ -395,8 +399,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f);
-     * Float boxed = iter.next();            // returns 1.0f (boxed) — avoid this
-     * float primitive = iter.nextFloat();   // returns 2.0f — prefer this
+     * Float boxed = iter.next();           // returns 1.0f (boxed) — avoid this
+     * float primitive = iter.nextFloat();  // returns 2.0f — prefer this
      * }</pre>
      *
      * @return the next element as a {@link Float} object
@@ -415,8 +419,8 @@ public abstract class FloatIterator extends ImmutableIterator<Float> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * FloatIterator iter = FloatIterator.of(1.0f, 2.0f, 3.0f);
-     * float first = iter.nextFloat();    // returns 1.0f
-     * float second = iter.nextFloat();   // returns 2.0f
+     * float first = iter.nextFloat();   // returns 1.0f
+     * float second = iter.nextFloat();  // returns 2.0f
      * }</pre>
      *
      * @return the next float value

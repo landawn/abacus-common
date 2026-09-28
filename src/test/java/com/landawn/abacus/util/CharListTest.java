@@ -1872,9 +1872,9 @@ public class CharListTest extends CharListTestSupport {
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
         assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
     }
 
     @Test
@@ -2000,4 +2000,378 @@ public class CharListTest extends CharListTestSupport {
         assertEquals('a', backed.get(0));
         assertEquals('b', backed.get(1));
     }
+
+    @Test
+    public void testRemoveAllAtUnsortedDuplicateIndicesLeavesCallerArrayUnmodified() {
+        final CharList chars = CharList.of('a', 'b', 'c', 'd', 'e');
+        final int[] indices = { 4, 0, 2, 0 };
+
+        chars.removeAllAt(indices);
+
+        assertArrayEquals(new char[] { 'b', 'd' }, chars.toArray());
+        assertArrayEquals(new int[] { 4, 0, 2, 0 }, indices);
+    }
+
+    @Test
+    public void testRemoveAllAtWithOneInvalidIndexLeavesListUnchanged() {
+        final CharList chars = CharList.of('a', 'b', 'c');
+
+        assertThrows(IndexOutOfBoundsException.class, () -> chars.removeAllAt(0, 3));
+
+        assertEquals(3, chars.size());
+        assertArrayEquals(new char[] { 'a', 'b', 'c' }, chars.toArray());
+    }
+
+    // ---- perf review 2026-09-26 G024 begin ----
+
+    private static char[] g024RandomChars(final Random random, final int length, final int mode) {
+        final char[] edges = { 0, 1, 63, 64, 65, 127, 128, 255, 256, 0xD800, 0xDFFF, 0xFFBF, 0xFFC0, 0xFFFE, 0xFFFF };
+        final char[] a = new char[length];
+
+        for (int i = 0; i < length; i++) {
+            switch (mode) {
+                case 0:
+                    a[i] = (char) random.nextInt(65536);
+                    break;
+                case 1:
+                    a[i] = edges[random.nextInt(edges.length)];
+                    break;
+                case 2:
+                    a[i] = (char) ('a' + random.nextInt(5));
+                    break;
+                default:
+                    a[i] = (char) (random.nextBoolean() ? random.nextInt(200) : 65535 - random.nextInt(200));
+            }
+        }
+
+        return a;
+    }
+
+    // G024-05: removeDuplicates (unsorted path, both the small hash-set and the large bit-set branch) keeps the first occurrence of each
+    // value, in order, and zeroes the vacated tail.
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testRemoveDuplicates_unsortedMatchesBoxedReference() {
+        final Random random = new Random(20260926L);
+
+        for (int round = 0; round < 4000; round++) {
+            final int length = round < 1000 ? random.nextInt(12) : (round < 3500 ? 55 + random.nextInt(20) : random.nextInt(3000));
+            final char[] a = g024RandomChars(random, length, round % 4);
+            final java.util.LinkedHashSet<Character> expected = new java.util.LinkedHashSet<>();
+
+            for (final char e : a) {
+                expected.add(e);
+            }
+
+            final CharList list = CharList.of(a.clone());
+            final boolean changed = list.removeDuplicates();
+
+            assertEquals(expected.size() != a.length, changed);
+            assertEquals(expected.size(), list.size());
+
+            int i = 0;
+
+            for (final Character e : expected) {
+                assertEquals(e.charValue(), list.get(i++));
+            }
+
+            for (int j = list.size(); j < a.length; j++) {
+                assertEquals(0, list.internalArray()[j]);
+            }
+        }
+
+        final char[] everyValueTwice = new char[131072];
+
+        for (int i = 0; i < 65536; i++) {
+            everyValueTwice[i] = (char) (65535 - i);
+            everyValueTwice[65536 + i] = (char) i;
+        }
+
+        final CharList all = CharList.of(everyValueTwice);
+        assertTrue(all.removeDuplicates());
+        assertEquals(65536, all.size());
+        assertEquals((char) 65535, all.get(0));
+        assertEquals((char) 0, all.get(65535));
+    }
+
+    // G024-06: toMultiset and the Multiset-based set operations still count every occurrence of a large list.
+    @Test
+    public void testToMultiset_largeListCountsEveryOccurrence() {
+        final Random random = new Random(26L);
+        final char[] a = g024RandomChars(random, 70000, 3);
+        final char[] b = g024RandomChars(random, 70000, 3);
+
+        final Multiset<Character> multiset = CharList.of(a).toMultiset();
+        final java.util.Map<Character, Integer> counts = new java.util.HashMap<>();
+
+        for (final char e : a) {
+            counts.merge(e, 1, Integer::sum);
+        }
+
+        assertEquals(counts.size(), multiset.countOfDistinctElements());
+
+        for (final java.util.Map.Entry<Character, Integer> entry : counts.entrySet()) {
+            assertEquals(entry.getValue().intValue(), multiset.getCount(entry.getKey()));
+        }
+
+        final java.util.Map<Character, Integer> bCounts = new java.util.HashMap<>();
+
+        for (final char e : b) {
+            bCounts.merge(e, 1, Integer::sum);
+        }
+
+        final CharList expectedIntersection = new CharList();
+        final CharList expectedDifference = new CharList();
+        final java.util.Map<Character, Integer> remaining = new java.util.HashMap<>(bCounts);
+
+        for (final char e : a) {
+            if (remaining.getOrDefault(e, 0) > 0) {
+                remaining.merge(e, -1, Integer::sum);
+                expectedIntersection.add(e);
+            } else {
+                expectedDifference.add(e);
+            }
+        }
+
+        final CharList expectedSymmetricDifference = expectedDifference.copy();
+
+        for (final char e : b) {
+            if (remaining.getOrDefault(e, 0) > 0) {
+                remaining.merge(e, -1, Integer::sum);
+                expectedSymmetricDifference.add(e);
+            }
+        }
+
+        assertEquals(expectedIntersection, CharList.of(a).intersection(CharList.of(b)));
+        assertEquals(expectedDifference, CharList.of(a).difference(CharList.of(b)));
+        assertEquals(expectedSymmetricDifference, CharList.of(a).symmetricDifference(CharList.of(b)));
+    }
+
+    // ---- perf review 2026-09-26 G024 end ----
+
+    // ---- perf review 2026-09-26 G111 begin ----
+
+    private static char[] randomCharsG111(final Random random, final int length, final int range) {
+        final char[] a = new char[length];
+
+        for (int i = 0; i < length; i++) {
+            a[i] = range >= 65536 ? (char) random.nextInt(65536) : (char) (random.nextBoolean() ? random.nextInt(range) : 65535 - random.nextInt(range));
+        }
+
+        if (length > 4 && range >= 65536) {
+            a[0] = Character.MIN_VALUE;
+            a[1] = Character.MAX_VALUE;
+            a[2] = (char) 63;
+            a[3] = (char) 64;
+            a[4] = (char) 0xD800;
+        }
+
+        return a;
+    }
+
+    private static java.util.Set<Character> boxedSetG111(final char[] a) {
+        final java.util.Set<Character> set = new java.util.HashSet<>();
+
+        for (final char e : a) {
+            set.add(e);
+        }
+
+        return set;
+    }
+
+    private static char[] filterG111(final char[] a, final java.util.Set<Character> set, final boolean keepIfContained) {
+        final CharList result = new CharList();
+
+        for (final char e : a) {
+            if (set.contains(e) == keepIfContained) {
+                result.add(e);
+            }
+        }
+
+        return result.toArray();
+    }
+
+    private static java.util.Map<Character, Integer> countsG111(final char[] a) {
+        final java.util.Map<Character, Integer> counts = new java.util.HashMap<>();
+
+        for (final char e : a) {
+            counts.merge(e, 1, Integer::sum);
+        }
+
+        return counts;
+    }
+
+    private static boolean takeG111(final java.util.Map<Character, Integer> counts, final char e) {
+        final Integer count = counts.get(e);
+
+        if (count == null || count == 0) {
+            return false;
+        }
+
+        counts.put(e, count - 1);
+        return true;
+    }
+
+    private static char[][] multisetReferenceG111(final char[] a, final char[] b) {
+        final CharList intersection = new CharList();
+        final CharList difference = new CharList();
+        final CharList symmetricDifference = new CharList();
+
+        java.util.Map<Character, Integer> counts = countsG111(b);
+        for (final char e : a) {
+            if (takeG111(counts, e)) {
+                intersection.add(e);
+            } else {
+                difference.add(e);
+            }
+        }
+
+        counts = countsG111(b);
+        for (final char e : a) {
+            if (!takeG111(counts, e)) {
+                symmetricDifference.add(e);
+            }
+        }
+        for (final char e : b) {
+            if (takeG111(counts, e)) {
+                symmetricDifference.add(e);
+            }
+        }
+
+        return new char[][] { intersection.toArray(), difference.toArray(), symmetricDifference.toArray() };
+    }
+
+    // G111-02: removeAll/retainAll (hash set or bit set of the argument), containsAll/disjoint/containsAny (hash set or bit set
+    // of this list) and the linear path must all agree with a boxed-set reference, for both overloads and around every threshold.
+    @Test
+    public void testBulkMembershipOps_matchBoxedReferenceG111() {
+        final Random random = new Random(111);
+        final int[] lengths = { 0, 1, 3, 4, 9, 10, 11, 60, 64, 65, 70, 200, 256, 257, 300, 1000 };
+        final int[] ranges = { 8, 300, 65536 };
+
+        for (final int lengthA : lengths) {
+            for (final int lengthB : lengths) {
+                for (final int range : ranges) {
+                    final char[] a = randomCharsG111(random, lengthA, range);
+                    final char[] b = random.nextInt(4) == 0 && lengthA > 0 && lengthB > 0
+                            ? java.util.Arrays.copyOfRange(a, 0, Math.min(lengthA, lengthB)) // contained case
+                            : randomCharsG111(random, lengthB, range);
+                    final String msg = "a=" + lengthA + ", b=" + lengthB + ", range=" + range;
+                    final java.util.Set<Character> setA = boxedSetG111(a);
+                    final java.util.Set<Character> setB = boxedSetG111(b);
+                    final char[] expectedRemoveAll = lengthB == 0 ? a : filterG111(a, setB, false);
+                    final char[] expectedRetainAll = filterG111(a, setB, true);
+                    final boolean expectedContainsAll = setA.containsAll(setB);
+                    final boolean expectedDisjoint = java.util.Collections.disjoint(setA, setB);
+
+                    CharList list = CharList.of(a.clone());
+                    assertEquals(expectedRemoveAll.length != a.length, list.removeAll(CharList.of(b.clone())), msg);
+                    assertArrayEquals(expectedRemoveAll, list.toArray(), msg);
+
+                    list = CharList.of(a.clone());
+                    assertEquals(expectedRemoveAll.length != a.length, list.removeAll(b.clone()), msg);
+                    assertArrayEquals(expectedRemoveAll, list.toArray(), msg);
+
+                    list = CharList.of(a.clone());
+                    assertEquals(expectedRetainAll.length != a.length, list.retainAll(CharList.of(b.clone())), msg);
+                    assertArrayEquals(expectedRetainAll, list.toArray(), msg);
+
+                    list = CharList.of(a.clone());
+                    assertEquals(expectedRetainAll.length != a.length, list.retainAll(b.clone()), msg);
+                    assertArrayEquals(expectedRetainAll, list.toArray(), msg);
+
+                    final CharList listA = CharList.of(a.clone());
+                    assertEquals(expectedContainsAll, listA.containsAll(CharList.of(b)), msg);
+                    assertEquals(expectedContainsAll, listA.containsAll(b), msg);
+                    assertEquals(expectedDisjoint, listA.disjoint(CharList.of(b)), msg);
+                    assertEquals(expectedDisjoint, listA.disjoint(b), msg);
+                    assertEquals(!expectedDisjoint, listA.containsAny(CharList.of(b)), msg);
+                    assertEquals(!expectedDisjoint, listA.containsAny(b), msg);
+                    assertArrayEquals(a, listA.toArray(), msg);
+                }
+            }
+        }
+    }
+
+    // G111-02: self-aliased and shared-backing-array arguments must still see the argument's original membership.
+    @Test
+    public void testBulkMembershipOps_selfAndSharedArrayArgumentsG111() {
+        final Random random = new Random(111111);
+
+        for (final int length : new int[] { 5, 64, 65, 300, 2000 }) {
+            final char[] source = randomCharsG111(random, length, 500);
+
+            CharList list = CharList.of(source.clone());
+            assertTrue(list.removeAll(list));
+            assertEquals(0, list.size());
+
+            list = CharList.of(source.clone());
+            assertFalse(list.retainAll(list));
+            assertArrayEquals(source, list.toArray());
+            assertTrue(list.containsAll(list));
+            assertFalse(list.disjoint(list));
+            assertTrue(list.containsAny(list));
+
+            // other wraps the SAME array but only its first half: compaction of `list` must not change other's membership.
+            final char[] shared = source.clone();
+            final int half = length / 2;
+            final java.util.Set<Character> firstHalf = boxedSetG111(java.util.Arrays.copyOf(source, half));
+            list = CharList.of(shared, length);
+            final CharList other = CharList.of(shared, half);
+            list.removeAll(other);
+            assertArrayEquals(filterG111(source, firstHalf, false), list.toArray(), "removeAll length=" + length);
+
+            final char[] shared2 = source.clone();
+            list = CharList.of(shared2, length);
+            list.retainAll(CharList.of(shared2, half));
+            assertArrayEquals(filterG111(source, firstHalf, true), list.toArray(), "retainAll length=" + length);
+        }
+    }
+
+    // G111-03: intersection/difference/symmetricDifference (boxed Multiset up to 1024 elements of b, int[65536] count table above)
+    // must match a boxed counting reference, incl. the order of b's surviving occurrences in symmetricDifference.
+    @Test
+    public void testMultisetOps_matchBoxedReferenceG111() {
+        final Random random = new Random(11111111);
+        final int[] lengths = { 0, 1, 5, 100, 1023, 1024, 1025, 1100, 3000 };
+        final int[] ranges = { 16, 2000, 65536 };
+
+        for (final int lengthA : lengths) {
+            for (final int lengthB : lengths) {
+                for (final int range : ranges) {
+                    final char[] a = randomCharsG111(random, lengthA, range);
+                    final char[] b = randomCharsG111(random, lengthB, range);
+                    final String msg = "a=" + lengthA + ", b=" + lengthB + ", range=" + range;
+                    final char[][] expected = multisetReferenceG111(a, b);
+                    final CharList listA = CharList.of(a.clone());
+
+                    assertArrayEquals(expected[0], listA.intersection(CharList.of(b.clone())).toArray(), msg);
+                    assertArrayEquals(expected[0], listA.intersection(b.clone()).toArray(), msg);
+                    assertArrayEquals(expected[1], listA.difference(CharList.of(b.clone())).toArray(), msg);
+                    assertArrayEquals(expected[1], listA.difference(b.clone()).toArray(), msg);
+                    assertArrayEquals(expected[2], listA.symmetricDifference(CharList.of(b.clone())).toArray(), msg);
+                    assertArrayEquals(expected[2], listA.symmetricDifference(b.clone()).toArray(), msg);
+                    assertArrayEquals(a, listA.toArray(), msg);
+                }
+            }
+        }
+
+        for (final int length : new int[] { 3, 1500 }) {
+            final char[] a = randomCharsG111(random, length, 100);
+            final CharList list = CharList.of(a.clone());
+            assertArrayEquals(a, list.intersection(list).toArray());
+            assertEquals(0, list.difference(list).size());
+            assertEquals(0, list.symmetricDifference(list).size());
+        }
+
+        // The documented partial-cancellation example, on both sides of the threshold.
+        assertArrayEquals(new char[] { 'b', 'a' }, CharList.of('b').symmetricDifference(CharList.of('b', 'a', 'b')).toArray());
+        final char[] big = new char[1500];
+        Arrays.fill(big, 'b');
+        big[1] = 'a';
+        // one 'b' cancels; the 1,499 survivors are b's earliest occurrences in index order: [b, a, b, b, ...]
+        assertArrayEquals(Arrays.copyOf(big, 1500 - 1), CharList.of('b').symmetricDifference(CharList.of(big)).toArray());
+    }
+
+    // ---- perf review 2026-09-26 G111 end ----
 }

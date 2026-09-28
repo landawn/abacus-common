@@ -273,4 +273,85 @@ public class JdkLoggerTest extends TestBase {
         assertEquals("test.jdk.logger", testHandler.records.get(0).getLoggerName());
         assertEquals(Logger.ROOT_LOGGER_NAME, new JdkLogger(Logger.ROOT_LOGGER_NAME).getName());
     }
+
+    // ---- perf review 2026-09-26 G005 begin ----
+    // G005-01: pins the caller location for every AbstractLogger shape (formatted/supplier/throwable-first overloads add AbstractLogger frames)
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testFillCallerData_allOverloadShapes() {
+        jdkLogger.setLevel(Level.ALL);
+        final Exception ex = new Exception("shape");
+        logger.info("m");
+        logger.info("m", ex);
+        logger.info("a {}", 1);
+        logger.info("a {} {}", 1, 2);
+        logger.info("a {} {} {}", 1, 2, 3);
+        logger.info("a {} {} {} {}", 1, 2, 3, 4);
+        logger.info("a {} {} {} {} {}", 1, 2, 3, 4, 5);
+        logger.info("a {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6);
+        logger.info("a {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7);
+        logger.info("a {} {} {} {} {} {} {} {}", 1, 2, 3, 4, 5, 6, 7, 8);
+        logger.info(ex, "m");
+        logger.info(ex, "a {}", 1);
+        logger.info(ex, "a {} {}", 1, 2);
+        logger.info(ex, "a {} {} {}", 1, 2, 3);
+        logger.info(() -> "s");
+        logger.info(() -> "s", ex);
+        logger.info(ex, () -> "s");
+        logger.trace("t {}", 1);
+        logger.debug(ex, "d {}", 1);
+        logger.warn(() -> "w");
+        logger.error("e {} {}", 1, 2);
+
+        assertEquals(21, testHandler.records.size());
+        for (int i = 0; i < testHandler.records.size(); i++) {
+            final LogRecord record = testHandler.records.get(i);
+            assertEquals(JdkLoggerTest.class.getName(), record.getSourceClassName(), "shape " + i);
+            assertEquals("testFillCallerData_allOverloadShapes", record.getSourceMethodName(), "shape " + i);
+        }
+    }
+
+    // G005-01: a call through a nested helper, a lambda and a method reference reports the innermost non-logger frame
+    @Test
+    public void testFillCallerData_helperLambdaAndMethodReference() throws NoSuchMethodException {
+        jdkLogger.setLevel(Level.ALL);
+        logFromHelper(logger);
+        final Runnable runnable = () -> logger.warn("from lambda {}", 1);
+        runnable.run();
+        final List<String> messages = List.of("from method reference");
+        messages.forEach(logger::info);
+
+        assertEquals(3, testHandler.records.size());
+        assertEquals(JdkLoggerTest.class.getName(), testHandler.records.get(0).getSourceClassName());
+        assertEquals("logFromHelper", testHandler.records.get(0).getSourceMethodName());
+        assertEquals(JdkLoggerTest.class.getName(), testHandler.records.get(1).getSourceClassName());
+        assertTrue(testHandler.records.get(1).getSourceMethodName().startsWith("lambda$"), testHandler.records.get(1).getSourceMethodName());
+        // The method-reference proxy is hidden, so the caller is the runtime's forEach implementation:
+        // Iterable on JDK 21, or the immutable list's override on newer JDKs.
+        final Class<?> forEachClass = messages.getClass().getMethod("forEach", java.util.function.Consumer.class).getDeclaringClass();
+        assertEquals(forEachClass.getName(), testHandler.records.get(2).getSourceClassName());
+        assertEquals("forEach", testHandler.records.get(2).getSourceMethodName());
+    }
+
+    private static void logFromHelper(final JdkLogger target) {
+        target.error("from helper {}", "x");
+    }
+
+    // G005-01: a reflective call reports the same (reflection) frame as a Throwable stack trace does
+    @Test
+    public void testFillCallerData_reflectiveCall() throws Exception {
+        jdkLogger.setLevel(Level.ALL);
+        final java.lang.reflect.Method infoMethod = JdkLogger.class.getMethod("info", String.class);
+        infoMethod.invoke(logger, "via reflection");
+        final java.lang.reflect.Method formatMethod = AbstractLogger.class.getMethod("info", String.class, Object.class);
+        formatMethod.invoke(logger, "via reflection {}", 1);
+
+        assertEquals(2, testHandler.records.size());
+        for (final LogRecord record : testHandler.records) {
+            // reflection frames are visible in a Throwable stack trace, so the reflective accessor is the reported caller
+            assertEquals("jdk.internal.reflect.DirectMethodHandleAccessor", record.getSourceClassName());
+            assertEquals("invoke", record.getSourceMethodName());
+        }
+    }
+    // ---- perf review 2026-09-26 G005 end ----
 }

@@ -54,9 +54,9 @@ public interface ShortNConsumer {
      * minMaxPrinter.accept((short) 5, (short) 2, (short) 8, (short) 1);
      * }</pre>
      *
-     * @param args the input arguments as a variable-length array of short values
+     * @param arguments the input arguments as a variable-length array of short values
      */
-    void accept(short... args);
+    void accept(short... arguments);
 
     /**
      * Returns a composed {@code ShortNConsumer} that performs, in sequence, this operation followed by the {@code after} operation.

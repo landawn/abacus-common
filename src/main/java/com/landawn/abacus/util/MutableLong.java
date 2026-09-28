@@ -201,8 +201,8 @@ public final class MutableLong extends Number implements Comparable<MutableLong>
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableLong num = MutableLong.of(10L);
-     * boolean updated = num.setIf(v -> v < 15L, 20L);   // returns true, value is now 20L
-     * updated = num.setIf(v -> v < 15L, 30L);           // returns false, value remains 20L
+     * boolean updated = num.setIf(v -> v < 15L, 20L);  // returns true, value is now 20L
+     * updated = num.setIf(v -> v < 15L, 30L);          // returns false, value remains 20L
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw

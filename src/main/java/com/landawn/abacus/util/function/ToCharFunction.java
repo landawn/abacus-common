@@ -42,8 +42,8 @@ public interface ToCharFunction<T> extends Throwables.ToCharFunction<T, RuntimeE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToCharFunction<Character> unbox = ToCharFunction.UNBOX;
-     * char result1 = unbox.applyAsChar('A');    // returns 'A'
-     * char result2 = unbox.applyAsChar(null);   // returns '\0' (0)
+     * char result1 = unbox.applyAsChar('A');   // returns 'A'
+     * char result2 = unbox.applyAsChar(null);  // returns '\0' (0)
      *
      * ToCharFunction<String> firstChar = str -> str != null && str.length() > 0 ? str.charAt(0) : '\0';
      * char result3 = firstChar.applyAsChar("Hello");   // returns 'H'

@@ -255,8 +255,8 @@ public interface EntityId {
      *
      * @param entity the entity object to extract ID from; must not be {@code null}
      * @return a new EntityId instance
-     * @throws IllegalArgumentException if {@code entity} is {@code null}
-     *         or if no ID property is defined in the entity class.
+     * @throws IllegalArgumentException if {@code entity} is {@code null}, if the entity's class is not a bean class
+     *         (it has no property getter/setter method or public field), or if no ID property is defined in the entity class.
      * @throws RuntimeException if entity metadata or an ID property cannot be read; reflection and getter failures are propagated as unchecked exceptions
      */
     static EntityId create(final Object entity) throws IllegalArgumentException, RuntimeException {
@@ -282,9 +282,9 @@ public interface EntityId {
      * @param entity the entity object to extract properties from; must not be {@code null}
      * @param idPropNames the collection of property names to use as ID
      * @return a new EntityId instance
-     * @throws IllegalArgumentException if {@code idPropNames} is {@code null} or empty, or if a named property does
-     *         not exist on the entity type
-     *         or if {@code entity} is {@code null}
+     * @throws IllegalArgumentException if {@code entity} is {@code null}, if {@code idPropNames} is {@code null} or
+     *         empty, if the entity's class is not a bean class (it has no property getter/setter method or public field),
+     *         if {@code idPropNames} contains {@code null}, or if a named property does not exist on the entity type
      * @throws RuntimeException if entity metadata or an ID property cannot be read; reflection and getter failures are propagated as unchecked exceptions
      */
     static EntityId create(final Object entity, final Collection<String> idPropNames) throws IllegalArgumentException, RuntimeException {
@@ -392,8 +392,8 @@ public interface EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * EntityId id = EntityId.of("User.id", 100, "User.name", "John");
-     * boolean hasId = id.containsKey("id");         // returns true
-     * boolean hasEmail = id.containsKey("email");   // returns false
+     * boolean hasId = id.containsKey("id");        // returns true
+     * boolean hasEmail = id.containsKey("email");  // returns false
      * }</pre>
      *
      * @param propName the property name to check

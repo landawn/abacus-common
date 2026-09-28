@@ -46,13 +46,15 @@ public class XMLType<T> extends AbstractType<T> {
      * Constructs an XMLType instance for the specified class.
      * This constructor is package-private and should only be called by TypeFactory.
      *
-     * @param clsName the name of the class to be handled by this XML type
+     * @param className the name of the class to be handled by this XML type
+     * @throws IllegalArgumentException if {@code className} is {@code null}, empty or blank, or is not a type name that
+     *         {@link TypeFactory#getType(String)} accepts.
      */
     @SuppressWarnings("unchecked")
-    XMLType(final String clsName) {
-        super(XML + SK.LESS_THAN + TypeFactory.getType(clsName).name() + SK.GREATER_THAN);
+    XMLType(final String className) throws IllegalArgumentException {
+        super(XML + SK.LESS_THAN + TypeFactory.getType(className).name() + SK.GREATER_THAN);
 
-        targetType = (Type<T>) TypeFactory.getType(clsName);
+        targetType = (Type<T>) TypeFactory.getType(className);
         declaringName = XML + SK.LESS_THAN + targetType.declaringName() + SK.GREATER_THAN;
         // Resolve through TypeFactory (like the name built above): pool-registered simple names
         // such as "UUID" are valid type names that ClassUtil.forName cannot resolve.

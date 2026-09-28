@@ -47,8 +47,8 @@ public interface IntToByteFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntToByteFunction toByte = value -> (byte) value;
-     * byte result1 = toByte.applyAsByte(65);    // Returns 65 (ASCII 'A')
-     * byte result2 = toByte.applyAsByte(255);   // Returns -1 (overflow)
+     * byte result1 = toByte.applyAsByte(65);   // Returns 65 (ASCII 'A')
+     * byte result2 = toByte.applyAsByte(255);  // Returns -1 (overflow)
      *
      * IntToByteFunction clampToByte = value -> {
      *     if (value > 127) return 127;

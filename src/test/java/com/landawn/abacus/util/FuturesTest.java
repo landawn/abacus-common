@@ -2615,8 +2615,10 @@ public class FuturesTest extends TestBase {
     @Test
     @Timeout(10)
     public void testTimedIterateRejectsLatePlainFutureAndInlineOutcomes() throws Exception {
-        // Exercise both non-CompletableFuture producers: a background relay and an already-done
-        // input whose get still performs work. Neither may admit an outcome after the budget.
+        // Exercise both a pending and an already-done non-CompletableFuture input whose get still performs work.
+        // Neither may admit an outcome after the budget. (Since review C-005 a done FutureTask SUBCLASS is
+        // observed through a relay like a pending one - only a completed plain task is read inline - so the
+        // factory returns at once and the slow get() runs on the relay thread.)
         for (final boolean initiallyDone : new boolean[] { false, true }) {
             final java.util.concurrent.CountDownLatch returned = new java.util.concurrent.CountDownLatch(1);
             final FutureTask<String> late = new FutureTask<>(() -> "unused") {

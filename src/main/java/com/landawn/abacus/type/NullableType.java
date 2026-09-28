@@ -233,16 +233,16 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      *
      * <p>The declared element handler performs the binding, including its null mapping and JDBC representation.</p>
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code Nullable} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null} and the selected type handler accesses it.
+     * @throws NullPointerException if {@code statement} is {@code null} and the selected type handler accesses it.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      * @throws RuntimeException if the declared element type rejects or cannot convert the contained value for JDBC binding.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Nullable<T> x) throws NullPointerException, SQLException, RuntimeException {
-        elementType.set(stmt, columnIndex, (x == null || x.isNull()) ? null : x.get());
+    public void set(final PreparedStatement statement, final int columnIndex, final Nullable<T> x) throws NullPointerException, SQLException, RuntimeException {
+        elementType.set(statement, columnIndex, (x == null || x.isNull()) ? null : x.get());
     }
 
     /**
@@ -251,16 +251,17 @@ public class NullableType<T> extends AbstractOptionalType<Nullable<T>> {
      *
      * <p>The declared element handler performs the binding, including its null mapping and JDBC representation.</p>
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code Nullable} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null} and the selected type handler accesses it.
+     * @throws NullPointerException if {@code statement} is {@code null} and the selected type handler accesses it.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      * @throws RuntimeException if the declared element type rejects or cannot convert the contained value for JDBC binding.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Nullable<T> x) throws NullPointerException, SQLException, RuntimeException {
-        elementType.set(stmt, parameterName, (x == null || x.isNull()) ? null : x.get());
+    public void set(final CallableStatement statement, final String parameterName, final Nullable<T> x)
+            throws NullPointerException, SQLException, RuntimeException {
+        elementType.set(statement, parameterName, (x == null || x.isNull()) ? null : x.get());
     }
 
     /**

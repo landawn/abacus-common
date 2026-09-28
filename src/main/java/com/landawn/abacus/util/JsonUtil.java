@@ -433,12 +433,12 @@ public final class JsonUtil {
      *
      * A {@code null} collection is treated as empty.
      *
-     * @param coll the collection to convert; may be {@code null}
+     * @param collection the collection to convert; may be {@code null}
      * @return a new {@link JSONArray} containing all elements from the collection in iteration order
      * @throws JSONException if a value is a non-finite number, or wrapping a nested container or bean exceeds the JSON nesting limit or detects a recursive bean property
      */
-    public static JSONArray wrap(final Collection<?> coll) throws JSONException {
-        return new JSONArray(coll);
+    public static JSONArray wrap(final Collection<?> collection) throws JSONException {
+        return new JSONArray(collection);
     }
 
     /**

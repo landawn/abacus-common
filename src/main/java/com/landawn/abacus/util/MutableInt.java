@@ -201,8 +201,8 @@ public final class MutableInt extends Number implements Comparable<MutableInt>, 
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableInt num = MutableInt.of(10);
-     * boolean updated = num.setIf(v -> v < 15, 20);   // returns true, value is now 20
-     * updated = num.setIf(v -> v < 15, 30);           // returns false, value remains 20
+     * boolean updated = num.setIf(v -> v < 15, 20);  // returns true, value is now 20
+     * updated = num.setIf(v -> v < 15, 30);          // returns false, value remains 20
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw

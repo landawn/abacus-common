@@ -83,9 +83,9 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Nulls.firstNonNull("hello", "world");   // returns "hello"
-     * String result2 = Nulls.firstNonNull(null, "world");     // returns "world"
-     * String result3 = Nulls.firstNonNull(null, null);        // returns null
+     * String result = Nulls.firstNonNull("hello", "world");  // returns "hello"
+     * String result2 = Nulls.firstNonNull(null, "world");    // returns "world"
+     * String result3 = Nulls.firstNonNull(null, null);       // returns null
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -109,10 +109,10 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Nulls.firstNonNull("hello", "world", "test");   // returns "hello"
-     * String result2 = Nulls.firstNonNull(null, "world", "test");     // returns "world"
-     * String result3 = Nulls.firstNonNull(null, null, "test");        // returns "test"
-     * String result4 = Nulls.firstNonNull(null, null, null);          // returns null
+     * String result = Nulls.firstNonNull("hello", "world", "test");  // returns "hello"
+     * String result2 = Nulls.firstNonNull(null, "world", "test");    // returns "world"
+     * String result3 = Nulls.firstNonNull(null, null, "test");       // returns "test"
+     * String result4 = Nulls.firstNonNull(null, null, null);         // returns null
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -137,10 +137,10 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Nulls.firstNonNull("a", "b", "c", "d");            // returns "a"
-     * String result2 = Nulls.firstNonNull(null, null, "c", "d");         // returns "c"
-     * String result3 = Nulls.firstNonNull(new String[] {null, null});    // returns null
-     * String result4 = Nulls.firstNonNull(new String[0]);                // returns null
+     * String result = Nulls.firstNonNull("a", "b", "c", "d");          // returns "a"
+     * String result2 = Nulls.firstNonNull(null, null, "c", "d");       // returns "c"
+     * String result3 = Nulls.firstNonNull(new String[] {null, null});  // returns null
+     * String result4 = Nulls.firstNonNull(new String[0]);              // returns null
      * }</pre>
      *
      * <p>Note: a call with exactly two or three arguments binds to the fixed-arity
@@ -225,22 +225,22 @@ public final class Nulls {
      * }</pre>
      *
      * @param <T> the type of the elements.
-     * @param iter the iterator of elements to evaluate.
+     * @param iterator the iterator of elements to evaluate.
      * @return the first {@code non-null} element, or {@code null} if the iterator is {@code null} or empty.
      * @see N#firstNonNull(Iterator)
      * @see N#firstNonNullOrDefault(Iterator, Object)
      */
     @MayReturnNull
     @Beta
-    public static <T> T firstNonNull(final Iterator<? extends T> iter) {
-        if (iter == null) {
+    public static <T> T firstNonNull(final Iterator<? extends T> iterator) {
+        if (iterator == null) {
             return null;
         }
 
         T e = null;
 
-        while (iter.hasNext()) {
-            if ((e = iter.next()) != null) {
+        while (iterator.hasNext()) {
+            if ((e = iterator.next()) != null) {
                 return e;
             }
         }
@@ -257,9 +257,9 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Nulls.lastNonNull("hello", "world");   // returns "world"
-     * String result2 = Nulls.lastNonNull("hello", null);     // returns "hello"
-     * String result3 = Nulls.lastNonNull(null, null);        // returns null
+     * String result = Nulls.lastNonNull("hello", "world");  // returns "world"
+     * String result2 = Nulls.lastNonNull("hello", null);    // returns "hello"
+     * String result3 = Nulls.lastNonNull(null, null);       // returns null
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -283,10 +283,10 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Nulls.lastNonNull("hello", "world", "test");   // returns "test"
-     * String result2 = Nulls.lastNonNull("hello", "world", null);    // returns "world"
-     * String result3 = Nulls.lastNonNull("hello", null, null);       // returns "hello"
-     * String result4 = Nulls.lastNonNull(null, null, null);          // returns null
+     * String result = Nulls.lastNonNull("hello", "world", "test");  // returns "test"
+     * String result2 = Nulls.lastNonNull("hello", "world", null);   // returns "world"
+     * String result3 = Nulls.lastNonNull("hello", null, null);      // returns "hello"
+     * String result4 = Nulls.lastNonNull(null, null, null);         // returns null
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -311,10 +311,10 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String result = Nulls.lastNonNull("a", "b", "c", "d");           // returns "d"
-     * String result2 = Nulls.lastNonNull("a", "b", "c", null);         // returns "c"
-     * String result3 = Nulls.lastNonNull(new String[] {null, null});   // returns null
-     * String result4 = Nulls.lastNonNull(new String[0]);               // returns null
+     * String result = Nulls.lastNonNull("a", "b", "c", "d");          // returns "d"
+     * String result2 = Nulls.lastNonNull("a", "b", "c", null);        // returns "c"
+     * String result3 = Nulls.lastNonNull(new String[] {null, null});  // returns null
+     * String result4 = Nulls.lastNonNull(new String[0]);              // returns null
      * }</pre>
      *
      * <p>Note: a call with exactly two or three arguments binds to the fixed-arity
@@ -416,23 +416,23 @@ public final class Nulls {
      * }</pre>
      *
      * @param <T> the type of the elements.
-     * @param iter the iterator of elements to evaluate.
+     * @param iterator the iterator of elements to evaluate.
      * @return the last {@code non-null} element, or {@code null} if the iterator is {@code null} or empty.
      * @see N#lastNonNull(Iterator)
      * @see N#lastNonNullOrDefault(Iterator, Object)
      */
     @MayReturnNull
     @Beta
-    public static <T> T lastNonNull(final Iterator<? extends T> iter) {
-        if (iter == null) {
+    public static <T> T lastNonNull(final Iterator<? extends T> iterator) {
+        if (iterator == null) {
             return null;
         }
 
         T e = null;
         T lastNonNull = null;
 
-        while (iter.hasNext()) {
-            if ((e = iter.next()) != null) {
+        while (iterator.hasNext()) {
+            if ((e = iterator.next()) != null) {
                 lastNonNull = e;
             }
         }
@@ -452,10 +452,10 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.firstElement(new String[] {"a", "b"});    // returns "a"
-     * Nulls.firstElement(new String[] {null, "b"});   // returns null (index 0 holds null)
-     * Nulls.firstElement(new String[0]);              // returns null (empty)
-     * Nulls.firstElement((String[]) null);            // returns null
+     * Nulls.firstElement(new String[] {"a", "b"});   // returns "a"
+     * Nulls.firstElement(new String[] {null, "b"});  // returns null (index 0 holds null)
+     * Nulls.firstElement(new String[0]);             // returns null (empty)
+     * Nulls.firstElement((String[]) null);           // returns null
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -487,9 +487,9 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.firstElement(Arrays.asList("a", "b"));    // returns "a"
-     * Nulls.firstElement(Arrays.asList(null, "b"));   // returns null (first element is null)
-     * Nulls.firstElement(Collections.emptyList());    // returns null (empty)
+     * Nulls.firstElement(Arrays.asList("a", "b"));   // returns "a"
+     * Nulls.firstElement(Arrays.asList(null, "b"));  // returns null (first element is null)
+     * Nulls.firstElement(Collections.emptyList());   // returns null (empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -527,21 +527,21 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.firstElement(Arrays.asList("a", "b").iterator());    // returns "a"
-     * Nulls.firstElement(Arrays.asList(null, "b").iterator());   // returns null (first element is null)
-     * Nulls.firstElement(Collections.emptyIterator());           // returns null (empty)
+     * Nulls.firstElement(Arrays.asList("a", "b").iterator());   // returns "a"
+     * Nulls.firstElement(Arrays.asList(null, "b").iterator());  // returns null (first element is null)
+     * Nulls.firstElement(Collections.emptyIterator());          // returns null (empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
-     * @param iter the iterator to read.
+     * @param iterator the iterator to read.
      * @return the first element, which may itself be {@code null}, or {@code null} if the iterator is {@code null} or empty.
      * @see #firstNonNull(Iterator)
      * @see N#firstOrNullIfEmpty(Iterator)
      */
     @MayReturnNull
     @Beta
-    public static <T> T firstElement(final Iterator<? extends T> iter) {
-        return iter != null && iter.hasNext() ? iter.next() : null;
+    public static <T> T firstElement(final Iterator<? extends T> iterator) {
+        return iterator != null && iterator.hasNext() ? iterator.next() : null;
     }
 
     /**
@@ -556,10 +556,10 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.lastElement(new String[] {"a", "b"});    // returns "b"
-     * Nulls.lastElement(new String[] {"a", null});   // returns null (last index holds null)
-     * Nulls.lastElement(new String[0]);              // returns null (empty)
-     * Nulls.lastElement((String[]) null);            // returns null
+     * Nulls.lastElement(new String[] {"a", "b"});   // returns "b"
+     * Nulls.lastElement(new String[] {"a", null});  // returns null (last index holds null)
+     * Nulls.lastElement(new String[0]);             // returns null (empty)
+     * Nulls.lastElement((String[]) null);           // returns null
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -588,9 +588,9 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.lastElement(Arrays.asList("a", "b"));    // returns "b"
-     * Nulls.lastElement(Arrays.asList("a", null));   // returns null (last element is null)
-     * Nulls.lastElement(Collections.emptyList());    // returns null (empty)
+     * Nulls.lastElement(Arrays.asList("a", "b"));   // returns "b"
+     * Nulls.lastElement(Arrays.asList("a", null));  // returns null (last element is null)
+     * Nulls.lastElement(Collections.emptyList());   // returns null (empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
@@ -632,29 +632,29 @@ public final class Nulls {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Nulls.lastElement(Arrays.asList("a", "b").iterator());    // returns "b"
-     * Nulls.lastElement(Arrays.asList("a", null).iterator());   // returns null (last element is null)
-     * Nulls.lastElement(Collections.emptyIterator());           // returns null (empty)
+     * Nulls.lastElement(Arrays.asList("a", "b").iterator());   // returns "b"
+     * Nulls.lastElement(Arrays.asList("a", null).iterator());  // returns null (last element is null)
+     * Nulls.lastElement(Collections.emptyIterator());          // returns null (empty)
      * }</pre>
      *
      * @param <T> the type of the elements.
-     * @param iter the iterator to read.
+     * @param iterator the iterator to read.
      * @return the last element, which may itself be {@code null}, or {@code null} if the iterator is {@code null} or empty.
      * @see #lastNonNull(Iterator)
      * @see N#lastOrNullIfEmpty(Iterator)
      */
     @MayReturnNull
     @Beta
-    public static <T> T lastElement(final Iterator<? extends T> iter) {
-        if (iter == null || !iter.hasNext()) {
+    public static <T> T lastElement(final Iterator<? extends T> iterator) {
+        if (iterator == null || !iterator.hasNext()) {
             return null;
         }
 
         T result;
 
         do {
-            result = iter.next();
-        } while (iter.hasNext());
+            result = iterator.next();
+        } while (iterator.hasNext());
 
         return result;
     }

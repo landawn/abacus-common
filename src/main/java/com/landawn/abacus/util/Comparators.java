@@ -597,18 +597,18 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared.
-     * @param cmp the comparator used when both values are {@code non-null}; must not be {@code null}
+     * @param comparator the comparator used when both values are {@code non-null}; must not be {@code null}
      * @return a comparator that considers {@code null} less than {@code non-null} values, comparing {@code non-null} values using the specified comparator.
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> Comparator<T> nullsFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> Comparator<T> nullsFirst(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        if (cmp == NULL_FIRST_COMPARATOR) { // NOSONAR
+        if (comparator == NULL_FIRST_COMPARATOR) { // NOSONAR
             return (Comparator<T>) NULL_FIRST_COMPARATOR;
         }
 
-        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : cmp.compare(a, b));
+        return (a, b) -> a == null ? (b == null ? 0 : -1) : (b == null ? 1 : comparator.compare(a, b));
     }
 
     /**
@@ -711,18 +711,18 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the objects being compared.
-     * @param cmp the comparator used when both values are {@code non-null}; must not be {@code null}
+     * @param comparator the comparator used when both values are {@code non-null}; must not be {@code null}
      * @return a comparator that considers {@code null} greater than {@code non-null} values, comparing {@code non-null} values using the specified comparator.
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> Comparator<T> nullsLast(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> Comparator<T> nullsLast(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        if (cmp == NULL_LAST_COMPARATOR) { // NOSONAR
+        if (comparator == NULL_LAST_COMPARATOR) { // NOSONAR
             return (Comparator<T>) NULL_LAST_COMPARATOR;
         }
 
-        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : cmp.compare(a, b));
+        return (a, b) -> a == null ? (b == null ? 0 : 1) : (b == null ? -1 : comparator.compare(a, b));
     }
 
     @SuppressWarnings("rawtypes")
@@ -827,16 +827,16 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the optional value
-     * @param cmp the comparator to use for comparing present values
+     * @param comparator the comparator to use for comparing present values
      * @return a comparator that treats empty optionals as less than present optionals
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> Comparator<u.Optional<T>> emptiesFirst(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> Comparator<u.Optional<T>> emptiesFirst(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         // return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsFirst(cmp));
 
-        return (a, b) -> a == null || a.isEmpty() ? (b == null || b.isEmpty() ? 0 : -1) : (b == null || b.isEmpty() ? 1 : cmp.compare(a.get(), b.get()));
+        return (a, b) -> a == null || a.isEmpty() ? (b == null || b.isEmpty() ? 0 : -1) : (b == null || b.isEmpty() ? 1 : comparator.compare(a.get(), b.get()));
     }
 
     /**
@@ -878,16 +878,16 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of the optional value
-     * @param cmp the comparator to use for comparing present values
+     * @param comparator the comparator to use for comparing present values
      * @return a comparator that treats empty optionals as greater than present optionals
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> Comparator<u.Optional<T>> emptiesLast(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> Comparator<u.Optional<T>> emptiesLast(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         // return Comparators.<u.Optional<T>, T> comparingBy(o -> o.orElse(null), Comparator.nullsLast(cmp));
 
-        return (a, b) -> a == null || a.isEmpty() ? (b == null || b.isEmpty() ? 0 : 1) : (b == null || b.isEmpty() ? -1 : cmp.compare(a.get(), b.get()));
+        return (a, b) -> a == null || a.isEmpty() ? (b == null || b.isEmpty() ? 0 : 1) : (b == null || b.isEmpty() ? -1 : comparator.compare(a.get(), b.get()));
     }
 
     /**
@@ -1483,14 +1483,14 @@ public final class Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param cmp the comparator to use for comparing keys
+     * @param comparator the comparator to use for comparing keys
      * @return a comparator that compares map entries by their keys
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(final Comparator<? super K> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return (a, b) -> cmp.compare(a.getKey(), b.getKey());
+        return (a, b) -> comparator.compare(a.getKey(), b.getKey());
     }
 
     /**
@@ -1513,14 +1513,14 @@ public final class Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param cmp the comparator to use for comparing values
+     * @param comparator the comparator to use for comparing values
      * @return a comparator that compares map entries by their values
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(final Comparator<? super V> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return (a, b) -> cmp.compare(a.getValue(), b.getValue());
+        return (a, b) -> comparator.compare(a.getValue(), b.getValue());
     }
 
     /**
@@ -1646,23 +1646,23 @@ public final class Comparators {
      * int result = cmp.compare(arr1, arr2);   // returns negative (banana < cherry)
      * }</pre>
      *
-     * <p><b>The element comparator is applied unchecked.</b> {@code cmp} is accepted at any element type so
+     * <p><b>The element comparator is applied unchecked.</b> {@code comparator} is accepted at any element type so
      * that a narrower comparator such as {@link String#CASE_INSENSITIVE_ORDER} can be used on an
      * {@code Object[]}; nothing verifies that the array elements are acceptable to it. The <i>returned
      * comparator</i> therefore throws {@link ClassCastException} at comparison time if an element is not of
-     * the type {@code cmp} expects. Use {@link #comparingArray(Comparator)} when the element type is known -
+     * the type {@code comparator} expects. Use {@link #comparingArray(Comparator)} when the element type is known -
      * it is checked at compile time.</p>
      *
-     * @param cmp the comparator to use for comparing array elements; must not be {@code null}
+     * @param comparator the comparator to use for comparing array elements; must not be {@code null}
      * @return a comparator that performs lexicographic comparison of Object arrays
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      * @see #comparingArray(Comparator)
      */
     @SuppressWarnings("rawtypes")
-    public static Comparator<Object[]> comparingObjArray(final Comparator<?> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static Comparator<Object[]> comparingObjArray(final Comparator<?> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return comparingArray((Comparator) cmp);
+        return comparingArray((Comparator) comparator);
     }
 
     /**
@@ -1714,12 +1714,12 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of elements in the arrays
-     * @param cmp the comparator to use for comparing array elements
+     * @param comparator the comparator to use for comparing array elements
      * @return a comparator that performs lexicographic comparison of arrays
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> Comparator<T[]> comparingArray(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> Comparator<T[]> comparingArray(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         return (a, b) -> {
             if (a == null) {
@@ -1733,7 +1733,7 @@ public final class Comparators {
             int result = 0;
 
             for (int i = 0, minLen = N.min(lenA, lenB); i < minLen; i++) {
-                result = cmp.compare(a[i], b[i]);
+                result = comparator.compare(a[i], b[i]);
 
                 if (result != 0) {
                     return result;
@@ -1795,12 +1795,12 @@ public final class Comparators {
      *
      * @param <T> the type of elements in the collections
      * @param <C> the type of Collection
-     * @param cmp the comparator to use for comparing collection elements
+     * @param comparator the comparator to use for comparing collection elements
      * @return a comparator that performs lexicographic comparison of collections
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T, C extends Collection<T>> Comparator<C> comparingCollection(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         return (a, b) -> {
             if (a == null) {
@@ -1816,7 +1816,7 @@ public final class Comparators {
             int result = 0;
 
             while (iterA.hasNext() && iterB.hasNext()) {
-                result = cmp.compare(iterA.next(), iterB.next());
+                result = comparator.compare(iterA.next(), iterB.next());
 
                 if (result != 0) {
                     return result;
@@ -1882,12 +1882,12 @@ public final class Comparators {
      *
      * @param <T> the type of elements in the iterables
      * @param <C> the type of Iterable
-     * @param cmp the comparator to use for comparing iterable elements
+     * @param comparator the comparator to use for comparing iterable elements
      * @return a comparator that performs lexicographic comparison of iterables
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T, C extends Iterable<T>> Comparator<C> comparingIterable(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T, C extends Iterable<T>> Comparator<C> comparingIterable(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         return (a, b) -> {
             if (a == b) {
@@ -1906,7 +1906,7 @@ public final class Comparators {
             int result = 0;
 
             while (iterA.hasNext() && iterB.hasNext()) {
-                result = cmp.compare(iterA.next(), iterB.next());
+                result = comparator.compare(iterA.next(), iterB.next());
 
                 if (result != 0) {
                     return result;
@@ -1974,12 +1974,12 @@ public final class Comparators {
      *
      * @param <T> the type of elements in the iterators
      * @param <C> the type of Iterator
-     * @param cmp the comparator to use for comparing iterator elements
+     * @param comparator the comparator to use for comparing iterator elements
      * @return a comparator that performs lexicographic comparison of iterators
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T, C extends Iterator<T>> Comparator<C> comparingIterator(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         return (a, b) -> {
             if (a == b) {
@@ -1996,7 +1996,7 @@ public final class Comparators {
             int result = 0;
 
             while (a.hasNext() && b.hasNext()) {
-                result = cmp.compare(a.next(), b.next());
+                result = comparator.compare(a.next(), b.next());
 
                 if (result != 0) {
                     return result;
@@ -2068,12 +2068,12 @@ public final class Comparators {
      *
      * @param <K> the type of keys in the maps
      * @param <M> the type of Map
-     * @param cmp the comparator to use for comparing map keys
+     * @param comparator the comparator to use for comparing map keys
      * @return a comparator that compares maps by their keys
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <K, M extends Map<K, ?>> Comparator<M> comparingMapByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <K, M extends Map<K, ?>> Comparator<M> comparingMapByKey(final Comparator<? super K> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         return (a, b) -> {
             if (a == null) {
@@ -2089,7 +2089,7 @@ public final class Comparators {
             int result = 0;
 
             while (iterA.hasNext() && iterB.hasNext()) {
-                result = cmp.compare(iterA.next(), iterB.next());
+                result = comparator.compare(iterA.next(), iterB.next());
 
                 if (result != 0) {
                     return result;
@@ -2152,12 +2152,12 @@ public final class Comparators {
      *
      * @param <V> the type of values in the maps
      * @param <M> the type of Map
-     * @param cmp the comparator to use for comparing map values
+     * @param comparator the comparator to use for comparing map values
      * @return a comparator that compares maps by their values
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <V, M extends Map<?, V>> Comparator<M> comparingMapByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <V, M extends Map<?, V>> Comparator<M> comparingMapByValue(final Comparator<? super V> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
         return (a, b) -> {
             if (a == null) {
@@ -2173,7 +2173,7 @@ public final class Comparators {
             int result = 0;
 
             while (iterA.hasNext() && iterB.hasNext()) {
-                result = cmp.compare(iterA.next(), iterB.next());
+                result = comparator.compare(iterA.next(), iterB.next());
 
                 if (result != 0) {
                     return result;
@@ -2269,7 +2269,7 @@ public final class Comparators {
      *   <li>{@code reverseOrder(customComparator)} returns a reversed custom comparator</li>
      * </ul>
      *
-     * <p>Unlike {@link Collections#reverseOrder(Comparator)}, a {@code null} {@code cmp} is rejected
+     * <p>Unlike {@link Collections#reverseOrder(Comparator)}, a {@code null} {@code comparator} is rejected
      * rather than treated as natural order.</p>
      *
      * <p>Serialization depends on the actual comparator returned by {@link Collections#reverseOrder(Comparator)}.
@@ -2288,22 +2288,22 @@ public final class Comparators {
      * }</pre>
      *
      * @param <T> the type of objects to compare
-     * @param cmp the comparator whose ordering is to be reversed; must not be {@code null}
-     * @return a comparator that imposes the reverse ordering of {@code cmp}
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @param comparator the comparator whose ordering is to be reversed; must not be {@code null}
+     * @return a comparator that imposes the reverse ordering of {@code comparator}
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public static <T> Comparator<T> reverseOrder(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> Comparator<T> reverseOrder(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        if (cmp == NATURAL_ORDER) { // NOSONAR
+        if (comparator == NATURAL_ORDER) { // NOSONAR
             return REVERSED_ORDER;
-        } else if (cmp == REVERSED_ORDER) { // NOSONAR
+        } else if (comparator == REVERSED_ORDER) { // NOSONAR
             return NATURAL_ORDER;
         }
 
         // Reversing a Comparator<? super T> yields a comparator usable wherever a Comparator<T> is expected.
-        return (Comparator<T>) Collections.reverseOrder(cmp);
+        return (Comparator<T>) Collections.reverseOrder(comparator);
     }
 
     /**
@@ -2732,14 +2732,14 @@ public final class Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param cmp the comparator to use for comparing keys (will be reversed)
+     * @param comparator the comparator to use for comparing keys (will be reversed)
      * @return a comparator that compares entries by key using reversed cmp
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByKey(final Comparator<? super K> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        final Comparator<? super K> reversedOrder = reverseOrder(cmp);
+        final Comparator<? super K> reversedOrder = reverseOrder(comparator);
 
         return (a, b) -> reversedOrder.compare(a.getKey(), b.getKey());
     }
@@ -2768,14 +2768,14 @@ public final class Comparators {
      *
      * @param <K> the key type
      * @param <V> the value type
-     * @param cmp the comparator to use for comparing values (will be reversed)
+     * @param comparator the comparator to use for comparing values (will be reversed)
      * @return a comparator that compares entries by value using reversed cmp
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <K, V> Comparator<Map.Entry<K, V>> reversedComparingByValue(final Comparator<? super V> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        final Comparator<? super V> reversedOrder = reverseOrder(cmp);
+        final Comparator<? super V> reversedOrder = reverseOrder(comparator);
 
         return (a, b) -> reversedOrder.compare(a.getValue(), b.getValue());
     }

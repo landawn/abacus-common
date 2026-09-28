@@ -94,9 +94,9 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = new Seid("User");
-     * String name = seid.entityName();   // returns "User"
-     * boolean empty = seid.isEmpty();    // returns true
-     * int size = seid.size();            // returns 0
+     * String name = seid.entityName();  // returns "User"
+     * boolean empty = seid.isEmpty();   // returns true
+     * int size = seid.size();           // returns 0
      * }</pre>
      *
      * @param entityName the name of the entity
@@ -170,8 +170,8 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("Account");
-     * String name = seid.entityName();   // returns "Account"
-     * boolean empty = seid.isEmpty();    // returns true
+     * String name = seid.entityName();  // returns "Account"
+     * boolean empty = seid.isEmpty();   // returns true
      * }</pre>
      *
      * @param entityName the name of the entity
@@ -302,9 +302,12 @@ public class Seid implements EntityId {
      *
      * @param entity the entity object to extract ID from; must not be {@code null}
      * @return a new Seid containing the entity's ID properties
-     * @throws IllegalArgumentException if {@code entity} is {@code null}, or if no ID properties are defined in the entity class.
+     * @throws IllegalArgumentException if {@code entity} is {@code null}, if the entity's class is not a bean class
+     *         (it has no property getter/setter method or public field), or if no ID properties are defined in the entity class.
+     * @throws RuntimeException if an ID property value cannot be read from {@code entity}; a getter or field-access
+     *         failure is propagated as an unchecked exception.
      */
-    public static Seid create(final Object entity) throws IllegalArgumentException {
+    public static Seid create(final Object entity) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(entity, cs.entity);
 
         final List<String> idPropNames = Seid.getIdFieldNames(entity.getClass());
@@ -331,9 +334,12 @@ public class Seid implements EntityId {
      * @param idPropNames the simple names of properties to use as ID; must not be {@code null} or empty
      * @return a new Seid containing the specified properties and their values from the entity
      * @throws IllegalArgumentException if {@code entity} is {@code null}, {@code idPropNames} is {@code null}
-     *         or empty, or a named property does not exist on the entity type.
+     *         or empty, the entity's class is not a bean class (it has no property getter/setter method or public
+     *         field), {@code idPropNames} contains {@code null}, or a named property does not exist on the entity type.
+     * @throws RuntimeException if a named property value cannot be read from {@code entity}; a getter or
+     *         field-access failure is propagated as an unchecked exception.
      */
-    public static Seid create(final Object entity, final Collection<String> idPropNames) throws IllegalArgumentException {
+    public static Seid create(final Object entity, final Collection<String> idPropNames) throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(entity, cs.entity);
 
         if (N.isEmpty(idPropNames)) {
@@ -380,8 +386,8 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
-     * Integer id = seid.get("id");         // returns 123
-     * Integer id2 = seid.get("User.id");   // also returns 123
+     * Integer id = seid.get("id");        // returns 123
+     * Integer id2 = seid.get("User.id");  // also returns 123
      * }</pre>
      *
      * @param <T> the expected type of the property value
@@ -469,8 +475,8 @@ public class Seid implements EntityId {
      */
     @Override
     public <T> T get(final String propName, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
-        N.checkArgNotNull(targetType, cs.targetType);
         Object propValue = get(propName);
+        N.checkArgNotNull(targetType, cs.targetType);
 
         if (propValue == null) {
             propValue = N.defaultValueOf(targetType);
@@ -487,11 +493,11 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User");
-     * seid.set("User.id", 123);               // canonical name stored as "id"
-     * Integer id = seid.get("id");            // returns 123
-     * seid.set("name", "John").get("name");   // returns "John" (chaining returns this)
-     * seid.set("id", 456);                    // overwrites existing value
-     * Integer newId = seid.get("id");         // returns 456
+     * seid.set("User.id", 123);              // canonical name stored as "id"
+     * Integer id = seid.get("id");           // returns 123
+     * seid.set("name", "John").get("name");  // returns "John" (chaining returns this)
+     * seid.set("id", 456);                   // overwrites existing value
+     * Integer newId = seid.get("id");        // returns 456
      * }</pre>
      *
      * @param propName the property name
@@ -532,10 +538,10 @@ public class Seid implements EntityId {
      * props.put("User.id", 123);   // canonical name stored as "id"
      * props.put("name", "John");
      * seid.set(props);
-     * Integer id = seid.get("id");            // returns 123
-     * String name = seid.get("name");         // returns "John"
-     * int size = seid.size();                 // returns 2
-     * seid.set((Map<String, Object>) null);   // null map is ignored, size stays 2
+     * Integer id = seid.get("id");           // returns 123
+     * String name = seid.get("name");        // returns "John"
+     * int size = seid.size();                // returns 2
+     * seid.set((Map<String, Object>) null);  // null map is ignored, size stays 2
      * }</pre>
      *
      * <p>The update is atomic with respect to validation: if any property name is invalid,
@@ -572,8 +578,8 @@ public class Seid implements EntityId {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Seid seid = Seid.of("User.id", 123);
-     * boolean hasId = seid.containsKey("id");                 // returns true
-     * boolean hasIdCanonical = seid.containsKey("User.id");   // also returns true
+     * boolean hasId = seid.containsKey("id");                // returns true
+     * boolean hasIdCanonical = seid.containsKey("User.id");  // also returns true
      * }</pre>
      *
      * @param propName the property name to check
@@ -680,8 +686,8 @@ public class Seid implements EntityId {
      * Seid seid = Seid.of("User.id", 123);
      * boolean before = seid.isEmpty();   // returns false
      * seid.clear();
-     * boolean after = seid.isEmpty();   // returns true
-     * int size = seid.size();           // returns 0
+     * boolean after = seid.isEmpty();  // returns true
+     * int size = seid.size();          // returns 0
      * }</pre>
      *
      * @deprecated for internal use only
@@ -702,10 +708,10 @@ public class Seid implements EntityId {
      * <pre>{@code
      * Seid original = Seid.of("User.id", 123, "User.name", "John");
      * Seid copy = original.copy();
-     * boolean equal = original.equals(copy);   // returns true
-     * boolean same = (original == copy);       // returns false (distinct instances)
-     * copy.set("id", 999);                     // mutating the copy
-     * Integer origId = original.get("id");     // returns 123 (original unaffected)
+     * boolean equal = original.equals(copy);  // returns true
+     * boolean same = (original == copy);      // returns false (distinct instances)
+     * copy.set("id", 999);                    // mutating the copy
+     * Integer origId = original.get("id");    // returns 123 (original unaffected)
      * }</pre>
      *
      * @return a copy of this Seid

@@ -311,9 +311,11 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return an instance of the target type populated with data from the XML node
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      * @throws ParsingException if the XML structure does not match the target type
+     * @throws UnsupportedOperationException if the concrete parser does not support deserialization from a DOM {@code Node}
      */
     @Override
-    public <T> T deserialize(final Node source, final Type<? extends T> targetType) throws IllegalArgumentException, ParsingException {
+    public <T> T deserialize(final Node source, final Type<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException {
         return deserialize(source, null, targetType);
     }
 
@@ -334,9 +336,11 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @return an instance of the target class populated with data from the XML node
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      * @throws ParsingException if the XML structure does not match the target type
+     * @throws UnsupportedOperationException if the concrete parser does not support deserialization from a DOM {@code Node}
      */
     @Override
-    public <T> T deserialize(final Node source, final Class<? extends T> targetType) throws IllegalArgumentException, ParsingException {
+    public <T> T deserialize(final Node source, final Class<? extends T> targetType)
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException {
         return deserialize(source, null, targetType);
     }
 
@@ -440,8 +444,10 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      *
      * @param br the reader containing XML content to parse
      * @return an XMLStreamReader configured to skip comments and processing instructions, and to retain whitespace
+     * @throws IllegalArgumentException if {@code br} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot create the reader over {@code br} or its filtering wrapper
      */
-    protected XMLStreamReader createXMLStreamReader(final Reader br) {
+    protected XMLStreamReader createXMLStreamReader(final Reader br) throws IllegalArgumentException, RuntimeException {
         return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(br), NO_COMMENT_OR_PI);
     }
 
@@ -451,8 +457,10 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      *
      * @param is the input stream containing XML content to parse
      * @return an XMLStreamReader configured to skip comments and processing instructions, and to retain whitespace
+     * @throws IllegalArgumentException if {@code is} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot create the reader over {@code is} or its filtering wrapper
      */
-    protected XMLStreamReader createXMLStreamReader(final InputStream is) {
+    protected XMLStreamReader createXMLStreamReader(final InputStream is) throws IllegalArgumentException, RuntimeException {
         return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(is), NO_COMMENT_OR_PI);
     }
 
@@ -736,9 +744,13 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * Writes a property-less object as an empty bean element when requested. This applies only to the
      * generic object handler: unsupported structured types such as Dataset must still fail, not lose data.
      * This serialization option does not provide a deserialization codec for the otherwise unsupported class.
+     *
+     * @throws IOException if writing the element to {@code writer} fails
+     * @throws ParsingException if {@code tagByPropertyName} is enabled and the class's simple name, converted by the naming policy, is not
+     *         a valid XML element name
      */
     protected static boolean writeEmptyObject(final Type<?> type, final XmlSerConfig config, final String indentation, final BufferedXmlWriter writer)
-            throws IOException {
+            throws IOException, ParsingException {
         if (config.isFailOnEmptyBean() || !(type instanceof ObjectType) || !type.isObject()) {
             return false;
         }
@@ -773,7 +785,8 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param value the value to write; must not be {@code null}
      * @param config the serialization configuration
      * @param what a short description of the value used in the error message
-     * @throws ParsingException if the value contains a code unit that cannot be represented in XML 1.0
+     * @throws ParsingException if the value contains a code unit that cannot be represented in XML 1.0, or wraps a present
+     *         {@code Nullable} holding {@code null}
      * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     protected static void writeXmlScalar(final BufferedXmlWriter bw, final Type<?> type, final Object value, final XmlSerConfig config, final String what)
@@ -781,7 +794,13 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
         writeXmlScalar(bw, type, value, config, what, null);
     }
 
-    /** The property name is formatted only if validation fails, avoiding a diagnostic String on each successful write. */
+    /**
+     * The property name is formatted only if validation fails, avoiding a diagnostic String on each successful write.
+     *
+     * @throws ParsingException if the value contains a code unit that cannot be represented in XML 1.0, or wraps a present
+     *         {@code Nullable} holding {@code null}
+     * @throws IOException if writing the serialized content to {@code bw} fails
+     */
     @SuppressWarnings("unchecked")
     static void writeXmlScalar(final BufferedXmlWriter bw, final Type<?> type, final Object value, final XmlSerConfig config, final String what,
             final String propName) throws ParsingException, IOException {
@@ -871,7 +890,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      *         {@code value} itself when it is not a wrapper
      * @throws ParsingException if a present-null Nullable cannot be represented without losing its presence state
      */
-    protected static Object unwrapOptional(final Object value) {
+    protected static Object unwrapOptional(final Object value) throws ParsingException {
         if (value instanceof u.Optional) {
             return ((u.Optional<?>) value).orElseNull();
         } else if (value instanceof u.Nullable) {
@@ -938,11 +957,33 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param value the unwrapped, non-{@code null} value
      * @param config the serialization configuration
      * @param what a short description of the value used in error messages
+     * @throws ParsingException if the value, or a value nested in it, is a present {@code Nullable} holding {@code null}, or holds text
+     *         that XML 1.0 cannot carry
+     * @throws IOException if writing or flushing the serialized content to {@code bw} fails
+     */
+    protected void writeUnwrappedValue(final BufferedXmlWriter bw, final Type<?> declaredElementType, final Object value, final XmlSerConfig config,
+            final String what) throws ParsingException, IOException {
+        writeUnwrappedValue(bw, declaredElementType, value, config, what, null);
+    }
+
+    /**
+     * Same as {@link #writeUnwrappedValue(BufferedXmlWriter, Type, Object, XmlSerConfig, String)}, but a non-{@code null}
+     * {@code propName} names the value as {@code Property '<propName>'} in error messages instead of {@code what}, so a
+     * per-property caller does not have to build that description for every value it writes.
+     *
+     * @param bw the writer to write to
+     * @param declaredElementType the declared element type, or {@code null}/{@code Object} to use the runtime type
+     * @param value the unwrapped, non-{@code null} value
+     * @param config the serialization configuration
+     * @param what a short description of the value used in error messages when {@code propName} is {@code null}
+     * @param propName the name of the property holding the value, or {@code null}
+     * @throws ParsingException if the value, or a value nested in it, is a present {@code Nullable} holding {@code null}, or holds text
+     *         that XML 1.0 cannot carry
      * @throws IOException if writing or flushing the serialized content to {@code bw} fails
      */
     @SuppressWarnings("unchecked")
-    protected void writeUnwrappedValue(final BufferedXmlWriter bw, final Type<?> declaredElementType, final Object value, final XmlSerConfig config,
-            final String what) throws IOException {
+    void writeUnwrappedValue(final BufferedXmlWriter bw, final Type<?> declaredElementType, final Object value, final XmlSerConfig config, final String what,
+            final String propName) throws ParsingException, IOException {
         final Type<?> type = declaredElementType == null || declaredElementType.isObject() || !declaredElementType.javaType().isInstance(value)
                 ? Type.of(value.getClass())
                 : declaredElementType;
@@ -951,14 +992,14 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
             final Object nested = unwrapOptional(value);
 
             if (nested != null) {
-                writeUnwrappedValue(bw, type.elementType(), nested, config, what);
+                writeUnwrappedValue(bw, type.elementType(), nested, config, what, propName);
             }
         } else if (isTupleLike(type)) {
             // Preserve declared slot types and JSON quoting while propagating XML's policy into nested values.
             // stringOf uses the ordinary JSON defaults and would silently collapse present-null Nullable slots.
             strType.serializeTo(bw, serializeEmbeddedJson(type, value, config), config);
         } else if (type.isSerializable() && !type.isObjectArray() && !type.isCollection()) {
-            writeXmlScalar(bw, type, value, config, what);
+            writeXmlScalar(bw, type, value, config, what, propName);
         } else {
             strType.serializeTo(bw, serializeEmbeddedJson(value, config), config);
         }
@@ -1100,7 +1141,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
-     * advanceToDocumentElement(reader);
+     * moveToRootElement(reader);
      * String typeValue = getAttribute(reader, "type");
      * }</pre>
      *
@@ -1184,7 +1225,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
-     * advanceToDocumentElement(reader);
+     * moveToRootElement(reader);
      * Class<?> typeClass = getAttributeTypeClass(reader);
      * }</pre>
      *
@@ -1377,7 +1418,7 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * XMLStreamReader reader = createXMLStreamReader(inputReader);
-     * advanceToDocumentElement(reader);
+     * moveToRootElement(reader);
      * Class<?> concreteClass = getConcreteClass(reader, Map.class);
      * }</pre>
      *
@@ -1450,8 +1491,10 @@ abstract class AbstractXmlParser extends AbstractParser<XmlSerConfig, XmlDeserCo
      * @param value the value to serialize
      * @param config the XML serialization settings
      * @return the JSON text with XML-forbidden code units escaped, or null if the type returns null text
+     * @throws ParsingException if {@code value} cannot be serialized as JSON under the XML embedding policy, for example because it
+     *         holds a present {@code Nullable} whose value is {@code null}
      */
-    protected String serializeEmbeddedJson(final Object value, final XmlSerConfig config) {
+    protected String serializeEmbeddedJson(final Object value, final XmlSerConfig config) throws ParsingException {
         if (value != null) {
             final Type<?> type = Type.of(value.getClass());
             if (type.isOptionalOrNullable() || isTupleLike(type) || value instanceof Holder) {

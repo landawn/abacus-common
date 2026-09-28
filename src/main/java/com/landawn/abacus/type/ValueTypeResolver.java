@@ -32,7 +32,12 @@ import com.landawn.abacus.util.cs;
 
 /** Resolves the value and creator metadata of a single-value wrapper before numeric inference. */
 final class ValueTypeResolver {
+    private static final String WILDCARD_EXTENDS = "? extends ";
+
     private final Map<TypeVariable<?>, java.lang.reflect.Type> bindings = new HashMap<>();
+    // Arguments that select a format handler (JSON<T>, XML<T>, also nested): their reflection binding is T itself (for
+    // the creator/bound checks), so the value type is rebuilt from the original handler name to keep its format.
+    private final Map<TypeVariable<?>, String> handlerNames = new HashMap<>();
 
     /**
      * @throws IllegalArgumentException if {@code wrapper} or {@code arguments} is {@code null}, or a wildcard type
@@ -43,8 +48,23 @@ final class ValueTypeResolver {
         N.checkArgNotNull(arguments, cs.arguments);
 
         final TypeVariable<?>[] variables = wrapper.getTypeParameters();
+        // "? extends X" arguments that select a format handler somewhere in X: the handler X itself
+        final Map<TypeVariable<?>, Type<?>> wildcardHandlers = new HashMap<>();
         for (int i = 0; i < Math.min(variables.length, arguments.size()); i++) {
             bindings.put(variables[i], reflectionType(arguments.get(i)));
+
+            if (selectsFormatHandler(arguments.get(i))) {
+                // "? extends XML<T>" is resolved through its upper bound (see parsingName), so that bound's handler is kept
+                final String name = arguments.get(i).name();
+
+                if (name.startsWith(WILDCARD_EXTENDS)) {
+                    final Type<?> upper = TypeFactory.getType(name.substring(WILDCARD_EXTENDS.length()));
+                    handlerNames.put(variables[i], upper.name());
+                    wildcardHandlers.put(variables[i], upper);
+                } else {
+                    handlerNames.put(variables[i], name);
+                }
+            }
         }
         for (Map.Entry<TypeVariable<?>, java.lang.reflect.Type> entry : bindings.entrySet()) {
             if (entry.getValue() instanceof WildcardType wildcard && raw(wildcard.getUpperBounds()[0]).isAssignableFrom(raw(entry.getKey().getBounds()[0]))) {
@@ -55,6 +75,12 @@ final class ValueTypeResolver {
                 }
                 final java.lang.reflect.Type[] lower = wildcard.getLowerBounds();
                 entry.setValue(new Wildcard(entry.getKey().getBounds()[0], lower.length == 0 ? null : lower[0]));
+
+                if (wildcardHandlers.containsKey(entry.getKey())) {
+                    // The declaration bound (e.g. List<Long> for "? extends XML<List<?>>") is now the effective value
+                    // type: re-apply the wildcard's JSON/XML handlers, at any depth, onto that bound.
+                    handlerNames.put(entry.getKey(), overlayHandlers(wildcardHandlers.get(entry.getKey()), entry.getKey().getBounds()[0]));
+                }
             }
         }
     }
@@ -69,6 +95,12 @@ final class ValueTypeResolver {
         } else if (name.equals("?")) {
             return new Wildcard(Object.class, null);
         }
+        if (type instanceof JSONType || type instanceof XMLType) {
+            // JSON<T> / XML<T>: javaType() is already T's class and T is the only parameter type, so it is not a type
+            // argument of javaType() (JSON<List<Long>> is a List<Long>, not a List<List<Long>>). The handler itself (its
+            // JSON/XML format) is kept apart, in handlerNames, for valueType().
+            return reflectionType(type.parameterTypes().get(0));
+        }
         if (type.isArray()) {
             final java.lang.reflect.Type component = reflectionType(type.elementType());
             return component instanceof Class<?> cls ? Array.newInstance(cls, 0).getClass() : new GenericArray(component);
@@ -80,12 +112,103 @@ final class ValueTypeResolver {
         return new Parameterized(type.javaType(), parameters.stream().map(ValueTypeResolver::reflectionType).toArray(java.lang.reflect.Type[]::new));
     }
 
+    private static boolean selectsFormatHandler(final Type<?> type) {
+        if (type instanceof JSONType || type instanceof XMLType) {
+            return true;
+        } else if (type.name().startsWith(WILDCARD_EXTENDS)) {
+            // an upper-bounded wildcard is read and written through its bound: "? extends XML<T>" keeps the XML format
+            return selectsFormatHandler(TypeFactory.getType(type.name().substring(WILDCARD_EXTENDS.length())));
+        } else if (type.name().startsWith("?")) {
+            return false; // "?" and "? super X" do not constrain the value: resolved as their (Object) upper bound
+        } else if (type.isArray()) {
+            return type.elementType() != null && selectsFormatHandler(type.elementType());
+        }
+
+        for (final Type<?> parameter : type.parameterTypes()) {
+            if (selectsFormatHandler(parameter)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * The type name of {@code bound} with the JSON/XML handlers selected by {@code handler} placed at the positions they
+     * occupy in {@code handler}: {@code overlayHandlers(List<XML<List<?>>>, List<List<Long>>)} is
+     * {@code "java.util.List<XML<java.util.List<java.lang.Long>>>"}. Type arguments are matched through the bound's
+     * supertype view of the handler's class, so a narrower bound class (ArrayList for List) keeps the handlers too; a
+     * handler position the bound fixes or does not parameterize takes the bound's own type there.
+     */
+    private String overlayHandlers(final Type<?> handler, java.lang.reflect.Type bound) {
+        if (handler instanceof JSONType || handler instanceof XMLType) {
+            return (handler instanceof XMLType ? "XML<" : "JSON<") + overlayHandlers(handler.parameterTypes().get(0), bound) + ">";
+        } else if (!selectsFormatHandler(handler)) {
+            return parsingName(bound, new HashSet<>());
+        } else if (handler.name().startsWith(WILDCARD_EXTENDS)) {
+            return overlayHandlers(TypeFactory.getType(handler.name().substring(WILDCARD_EXTENDS.length())), bound);
+        }
+
+        bound = dereference(bound);
+
+        if (bound instanceof WildcardType wildcard) {
+            bound = wildcard.getUpperBounds()[0];
+        } else if (bound instanceof TypeVariable<?> variable) {
+            bound = variable.getBounds()[0];
+        }
+
+        if (handler.isArray()) {
+            final java.lang.reflect.Type component = bound instanceof GenericArrayType array ? array.getGenericComponentType()
+                    : bound instanceof Class<?> cls && cls.isArray() ? cls.getComponentType() : null;
+
+            return component == null ? parsingName(bound, new HashSet<>()) : overlayHandlers(handler.elementType(), component) + "[]";
+        }
+
+        final Class<?> boundClass = raw(bound);
+        final TypeVariable<?>[] boundVariables = boundClass.getTypeParameters();
+
+        if (!(bound instanceof ParameterizedType parameterized) || boundVariables.length == 0 || !handler.javaType().isAssignableFrom(boundClass)) {
+            return parsingName(bound, new HashSet<>());
+        }
+
+        final java.lang.reflect.Type[] boundArguments = parameterized.getActualTypeArguments();
+        final String[] names = new String[boundArguments.length];
+
+        for (int k = 0; k < boundArguments.length; k++) {
+            names[k] = parsingName(boundArguments[k], new HashSet<>());
+        }
+
+        // Which handler argument does each of the bound class's own type variables feed (ArrayList<E> -> List<E>)?
+        final java.lang.reflect.Type view = asSupertype(new Parameterized(boundClass, boundVariables), handler.javaType());
+        final List<Type<?>> handlerArguments = handler.parameterTypes();
+
+        if (view instanceof ParameterizedType projected) {
+            final java.lang.reflect.Type[] viewArguments = projected.getActualTypeArguments();
+
+            for (int j = 0; j < Math.min(viewArguments.length, handlerArguments.size()); j++) {
+                for (int k = 0; k < boundVariables.length; k++) {
+                    if (viewArguments[j] == boundVariables[k] && selectsFormatHandler(handlerArguments.get(j))) {
+                        names[k] = overlayHandlers(handlerArguments.get(j), boundArguments[k]);
+                    }
+                }
+            }
+        }
+
+        return boundClass.getTypeName() + "<" + String.join(", ", names) + ">";
+    }
+
     Type<Object> valueType(final java.lang.reflect.Type member) {
         return TypeFactory.getType(parsingName(member, new HashSet<>()));
     }
 
     private String parsingName(final java.lang.reflect.Type type, final Set<TypeVariable<?>> visiting) {
         if (type instanceof TypeVariable<?> variable) {
+            final String handlerName = handlerNames.get(variable);
+
+            if (handlerName != null) {
+                return handlerName;
+            }
+
             if (!visiting.add(variable)) {
                 return Object.class.getName();
             }
@@ -351,12 +474,31 @@ final class ValueTypeResolver {
         public java.lang.reflect.Type getOwnerType() {
             return raw.getDeclaringClass();
         }
+
+        // Type.getTypeName() defaults to toString(), which the exception messages above print. The generated
+        // record form ("Parameterized[raw=..., arguments=[Ljava.lang.reflect.Type;@1b6d3586]") hid the arguments.
+        @Override
+        public String toString() {
+            final StringBuilder result = new StringBuilder(raw.getTypeName()).append('<');
+            for (int i = 0; i < arguments.length; i++) {
+                if (i > 0) {
+                    result.append(", ");
+                }
+                result.append(arguments[i].getTypeName());
+            }
+            return result.append('>').toString();
+        }
     }
 
     private record GenericArray(java.lang.reflect.Type component) implements GenericArrayType {
         @Override
         public java.lang.reflect.Type getGenericComponentType() {
             return component;
+        }
+
+        @Override
+        public String toString() {
+            return component.getTypeName() + "[]";
         }
     }
 
@@ -369,6 +511,14 @@ final class ValueTypeResolver {
         @Override
         public java.lang.reflect.Type[] getLowerBounds() {
             return lower == null ? new java.lang.reflect.Type[0] : new java.lang.reflect.Type[] { lower };
+        }
+
+        @Override
+        public String toString() {
+            if (lower != null) {
+                return "? super " + lower.getTypeName();
+            }
+            return upper == Object.class ? "?" : "? extends " + upper.getTypeName();
         }
     }
 }

@@ -76,12 +76,12 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortPredicate isPositive = ShortPredicate.IS_POSITIVE;
-     * boolean result1 = isPositive.test((short) 10);   // returns true
-     * boolean result2 = isPositive.test((short) -5);   // returns false
+     * boolean result1 = isPositive.test((short) 10);  // returns true
+     * boolean result2 = isPositive.test((short) -5);  // returns false
      *
      * ShortPredicate inRange = ShortPredicate.between((short) 10, (short) 100);
-     * boolean result3 = inRange.test((short) 50);   // returns true
-     * boolean result4 = inRange.test((short) 5);    // returns false
+     * boolean result3 = inRange.test((short) 50);  // returns true
+     * boolean result4 = inRange.test((short) 5);   // returns false
      *
      * ShortPredicate isEven = value -> value % 2 == 0;
      * boolean result5 = isEven.test((short) 4);   // returns true
@@ -192,8 +192,8 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortPredicate is42 = ShortPredicate.equal((short) 42);
-     * boolean result1 = is42.test((short) 42);   // returns true
-     * boolean result2 = is42.test((short) 0);    // returns false
+     * boolean result1 = is42.test((short) 42);  // returns true
+     * boolean result2 = is42.test((short) 0);   // returns false
      * }</pre>
      *
      * @param targetShort the value to compare against
@@ -209,8 +209,8 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortPredicate notZero = ShortPredicate.notEqual((short) 0);
-     * boolean result1 = notZero.test((short) 5);   // returns true
-     * boolean result2 = notZero.test((short) 0);   // returns false
+     * boolean result1 = notZero.test((short) 5);  // returns true
+     * boolean result2 = notZero.test((short) 0);  // returns false
      * }</pre>
      *
      * @param targetShort the value to compare against
@@ -226,8 +226,8 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortPredicate greaterThan10 = ShortPredicate.greaterThan((short) 10);
-     * boolean result1 = greaterThan10.test((short) 15);   // returns true
-     * boolean result2 = greaterThan10.test((short) 5);    // returns false
+     * boolean result1 = greaterThan10.test((short) 15);  // returns true
+     * boolean result2 = greaterThan10.test((short) 5);   // returns false
      * }</pre>
      *
      * @param targetShort the value to compare against
@@ -243,8 +243,8 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortPredicate greaterOrEqual10 = ShortPredicate.greaterThanOrEqual((short) 10);
-     * boolean result1 = greaterOrEqual10.test((short) 10);   // returns true
-     * boolean result2 = greaterOrEqual10.test((short) 5);    // returns false
+     * boolean result1 = greaterOrEqual10.test((short) 10);  // returns true
+     * boolean result2 = greaterOrEqual10.test((short) 5);   // returns false
      * }</pre>
      *
      * @param targetShort the value to compare against
@@ -260,8 +260,8 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortPredicate lessThan100 = ShortPredicate.lessThan((short) 100);
-     * boolean result1 = lessThan100.test((short) 50);    // returns true
-     * boolean result2 = lessThan100.test((short) 150);   // returns false
+     * boolean result1 = lessThan100.test((short) 50);   // returns true
+     * boolean result2 = lessThan100.test((short) 150);  // returns false
      * }</pre>
      *
      * @param targetShort the value to compare against
@@ -277,8 +277,8 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortPredicate lessOrEqual100 = ShortPredicate.lessThanOrEqual((short) 100);
-     * boolean result1 = lessOrEqual100.test((short) 100);   // returns true
-     * boolean result2 = lessOrEqual100.test((short) 150);   // returns false
+     * boolean result1 = lessOrEqual100.test((short) 100);  // returns true
+     * boolean result2 = lessOrEqual100.test((short) 150);  // returns false
      * }</pre>
      *
      * @param targetShort the value to compare against
@@ -295,9 +295,9 @@ public interface ShortPredicate extends Throwables.ShortPredicate<RuntimeExcepti
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortPredicate between10And100 = ShortPredicate.between((short) 10, (short) 100);
-     * boolean result1 = between10And100.test((short) 50);    // returns true
-     * boolean result2 = between10And100.test((short) 10);    // returns false (exclusive)
-     * boolean result3 = between10And100.test((short) 100);   // returns false (exclusive)
+     * boolean result1 = between10And100.test((short) 50);   // returns true
+     * boolean result2 = between10And100.test((short) 10);   // returns false (exclusive)
+     * boolean result3 = between10And100.test((short) 100);  // returns false (exclusive)
      * }</pre>
      *
      * @param minValue the exclusive lower bound

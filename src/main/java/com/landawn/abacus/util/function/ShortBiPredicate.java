@@ -110,9 +110,9 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * ShortBiPredicate lessThan100 = (a, b) -> a < 100 && b < 100;
      *
      * ShortBiPredicate inRange = isPositive.and(lessThan100);
-     * boolean result1 = inRange.test((short) 10, (short) 20);     // returns true (both positive and < 100)
-     * boolean result2 = inRange.test((short) -5, (short) 50);     // returns false (not both positive)
-     * boolean result3 = inRange.test((short) 150, (short) 200);   // returns false (not both < 100)
+     * boolean result1 = inRange.test((short) 10, (short) 20);    // returns true (both positive and < 100)
+     * boolean result2 = inRange.test((short) -5, (short) 50);    // returns false (not both positive)
+     * boolean result3 = inRange.test((short) 150, (short) 200);  // returns false (not both < 100)
      * }</pre>
      *
      * @param other a predicate that will be logically-ANDed with this predicate.
@@ -139,9 +139,9 @@ public interface ShortBiPredicate extends Throwables.ShortBiPredicate<RuntimeExc
      * ShortBiPredicate bothZero = (a, b) -> a == 0 && b == 0;
      *
      * ShortBiPredicate equalsOrBothZero = equals.or(bothZero);
-     * boolean result1 = equalsOrBothZero.test((short) 5, (short) 5);   // returns true (equal)
-     * boolean result2 = equalsOrBothZero.test((short) 0, (short) 0);   // returns true (both zero AND equal)
-     * boolean result3 = equalsOrBothZero.test((short) 3, (short) 7);   // returns false
+     * boolean result1 = equalsOrBothZero.test((short) 5, (short) 5);  // returns true (equal)
+     * boolean result2 = equalsOrBothZero.test((short) 0, (short) 0);  // returns true (both zero AND equal)
+     * boolean result3 = equalsOrBothZero.test((short) 3, (short) 7);  // returns false
      * }</pre>
      *
      * @param other a predicate that will be logically-ORed with this predicate.

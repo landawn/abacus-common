@@ -218,6 +218,9 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
     public static LongIterator defer(final Supplier<? extends LongIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends LongIterator>> supplierHolder = Holder.of(iteratorSupplier);
+
         return new LongIterator() {
             private LongIterator iter = null;
             private volatile boolean isInitialized = false;
@@ -256,7 +259,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                             isInitializing = true;
 
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == this) {
                                     throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
@@ -270,6 +273,7 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;
                             }
@@ -382,8 +386,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(1L, 2L);
-     * Long boxed = iter.next();           // returns 1L (boxed) — avoid this
-     * long primitive = iter.nextLong();   // returns 2L — prefer this
+     * Long boxed = iter.next();          // returns 1L (boxed) — avoid this
+     * long primitive = iter.nextLong();  // returns 2L — prefer this
      * }</pre>
      *
      * @return the next long value as a boxed {@link Long}
@@ -402,8 +406,8 @@ public abstract class LongIterator extends ImmutableIterator<Long> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIterator iter = LongIterator.of(1L, 2L, 3L);
-     * long first = iter.nextLong();    // returns 1
-     * long second = iter.nextLong();   // returns 2
+     * long first = iter.nextLong();   // returns 1
+     * long second = iter.nextLong();  // returns 2
      * }</pre>
      *
      * @return the next long value

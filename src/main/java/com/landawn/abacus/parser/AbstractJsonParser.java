@@ -102,12 +102,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * Constructs an {@code AbstractJsonParser} with the given serialization and deserialization configurations.
      * When either argument is {@code null}, a new default configuration is used in its place.
      *
-     * @param jsc the JSON serialization configuration, or {@code null} to use a new default configuration
-     * @param jdc the JSON deserialization configuration, or {@code null} to use a new default configuration
+     * @param jsonSerConfig the JSON serialization configuration, or {@code null} to use a new default configuration
+     * @param jsonDeserConfig the JSON deserialization configuration, or {@code null} to use a new default configuration
      */
-    protected AbstractJsonParser(final JsonSerConfig jsc, final JsonDeserConfig jdc) {
-        defaultJsonSerConfig = jsc != null ? jsc : new JsonSerConfig();
-        defaultJsonDeserConfig = jdc != null ? jdc : new JsonDeserConfig();
+    protected AbstractJsonParser(final JsonSerConfig jsonSerConfig, final JsonDeserConfig jsonDeserConfig) {
+        defaultJsonSerConfig = jsonSerConfig != null ? jsonSerConfig : new JsonSerConfig();
+        defaultJsonDeserConfig = jsonDeserConfig != null ? jsonDeserConfig : new JsonDeserConfig();
     }
 
     /**
@@ -458,12 +458,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @param elementType the type of elements to deserialize; must not be {@code null}
      * @return a Stream of deserialized elements; never {@code null}
      * @throws IllegalArgumentException if {@code elementType} is null or unsupported for streaming.
-     * @throws UnsupportedOperationException if the root of the source is a JSON object or a quoted string
      * @throws ParsingException if the root token is malformed; malformed later elements fail while consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the source is a JSON object or a quoted string
      */
     @Override
     public <T> Stream<T> stream(final String source, final Type<? extends T> elementType)
-            throws IllegalArgumentException, UnsupportedOperationException, ParsingException {
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException {
         return stream(source, null, elementType);
     }
 
@@ -487,12 +487,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      *         unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures occur while
      *         consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the file content is a JSON object or a quoted string
      * @throws ParsingException if the root token is malformed; malformed later elements fail while consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the file content is a JSON object or a quoted string
      */
     @Override
     public <T> Stream<T> stream(final File source, final Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
         return stream(source, null, elementType);
     }
 
@@ -516,12 +516,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws IllegalArgumentException if the source is null, or {@code elementType} is null or unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures occur while
      *         consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      * @throws ParsingException if the root token is malformed; malformed later elements fail while consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      */
     @Override
     public <T> Stream<T> stream(final InputStream source, final boolean closeInputStreamWhenStreamIsClosed, final Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
         return stream(source, closeInputStreamWhenStreamIsClosed, null, elementType);
     }
 
@@ -545,12 +545,12 @@ abstract class AbstractJsonParser extends AbstractParser<JsonSerConfig, JsonDese
      * @throws IllegalArgumentException if the source is null, or {@code elementType} is null or unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures occur while
      *         consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      * @throws ParsingException if the root token is malformed; malformed later elements fail while consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      */
     @Override
     public <T> Stream<T> stream(final Reader reader, final boolean closeReaderWhenStreamIsClosed, final Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException {
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException {
         return stream(reader, closeReaderWhenStreamIsClosed, null, elementType);
     }
 

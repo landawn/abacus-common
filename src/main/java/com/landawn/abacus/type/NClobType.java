@@ -52,15 +52,15 @@ public class NClobType extends AbstractType<NClob> {
 
     /**
      * Package-private constructor for {@code NClobType} bound to a specific {@link NClob}
-     * implementation class. The handler name is derived from {@code clazz}, so a driver-specific
+     * implementation class. The handler name is derived from {@code targetClass}, so a driver-specific
      * implementation remains distinguishable from the standard {@code NClob} interface in type metadata.
      *
-     * @param clazz the specific {@link NClob} class or subclass to handle; must not be {@code null}
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
+     * @param targetClass the specific {@link NClob} class or subclass to handle; must not be {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    NClobType(final Class<? extends NClob> clazz) throws IllegalArgumentException {
-        super(ClassUtil.getSimpleClassName(clazz));
-        this.clazz = (Class<NClob>) clazz;
+    NClobType(final Class<? extends NClob> targetClass) throws IllegalArgumentException {
+        super(ClassUtil.getSimpleClassName(targetClass));
+        this.clazz = (Class<NClob>) targetClass;
     }
 
     /**
@@ -200,28 +200,28 @@ public class NClobType extends AbstractType<NClob> {
     /**
      * Sets a parameter in a {@link PreparedStatement} at the specified index to an {@link NClob} value.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code NClob} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnIndex} is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final NClob x) throws NullPointerException, SQLException {
-        stmt.setNClob(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final NClob x) throws NullPointerException, SQLException {
+        statement.setNClob(columnIndex, x);
     }
 
     /**
      * Sets a parameter in a {@link CallableStatement} by name to an {@link NClob} value.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code NClob} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final NClob x) throws NullPointerException, SQLException {
-        stmt.setNClob(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final NClob x) throws NullPointerException, SQLException {
+        statement.setNClob(parameterName, x);
     }
 }

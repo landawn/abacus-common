@@ -40,8 +40,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate alwaysPass = LongPredicate.ALWAYS_TRUE;
-     * alwaysPass.test(42L);   // returns true
-     * alwaysPass.test(-1L);   // returns true
+     * alwaysPass.test(42L);  // returns true
+     * alwaysPass.test(-1L);  // returns true
      * }</pre>
      *
      */
@@ -52,8 +52,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate alwaysFail = LongPredicate.ALWAYS_FALSE;
-     * alwaysFail.test(42L);   // returns false
-     * alwaysFail.test(-1L);   // returns false
+     * alwaysFail.test(42L);  // returns false
+     * alwaysFail.test(-1L);  // returns false
      * }</pre>
      *
      */
@@ -215,8 +215,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate isFortyTwo = LongPredicate.equal(42L);
-     * isFortyTwo.test(42L);   // returns true
-     * isFortyTwo.test(41L);   // returns false
+     * isFortyTwo.test(42L);  // returns true
+     * isFortyTwo.test(41L);  // returns false
      * }</pre>
      *
      * @param targetLong the value to compare against
@@ -232,8 +232,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate notFortyTwo = LongPredicate.notEqual(42L);
-     * notFortyTwo.test(42L);   // returns false
-     * notFortyTwo.test(41L);   // returns true
+     * notFortyTwo.test(42L);  // returns false
+     * notFortyTwo.test(41L);  // returns true
      * }</pre>
      *
      * @param targetLong the value to compare against
@@ -249,8 +249,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate greaterThanTen = LongPredicate.greaterThan(10L);
-     * greaterThanTen.test(11L);   // returns true
-     * greaterThanTen.test(10L);   // returns false
+     * greaterThanTen.test(11L);  // returns true
+     * greaterThanTen.test(10L);  // returns false
      * }</pre>
      *
      * @param targetLong the value to compare against
@@ -266,8 +266,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate atLeastTen = LongPredicate.greaterThanOrEqual(10L);
-     * atLeastTen.test(10L);   // returns true
-     * atLeastTen.test(9L);    // returns false
+     * atLeastTen.test(10L);  // returns true
+     * atLeastTen.test(9L);   // returns false
      * }</pre>
      *
      * @param targetLong the value to compare against
@@ -283,8 +283,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate lessThanTen = LongPredicate.lessThan(10L);
-     * lessThanTen.test(9L);    // returns true
-     * lessThanTen.test(10L);   // returns false
+     * lessThanTen.test(9L);   // returns true
+     * lessThanTen.test(10L);  // returns false
      * }</pre>
      *
      * @param targetLong the value to compare against
@@ -300,8 +300,8 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate atMostTen = LongPredicate.lessThanOrEqual(10L);
-     * atMostTen.test(10L);   // returns true
-     * atMostTen.test(11L);   // returns false
+     * atMostTen.test(10L);  // returns true
+     * atMostTen.test(11L);  // returns false
      * }</pre>
      *
      * @param targetLong the value to compare against
@@ -320,9 +320,9 @@ public interface LongPredicate extends Throwables.LongPredicate<RuntimeException
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongPredicate inRange = LongPredicate.between(10L, 20L);
-     * inRange.test(15L);   // returns true
-     * inRange.test(10L);   // returns false (not greater than min)
-     * inRange.test(20L);   // returns false (not less than max)
+     * inRange.test(15L);  // returns true
+     * inRange.test(10L);  // returns false (not greater than min)
+     * inRange.test(20L);  // returns false (not less than max)
      * }</pre>
      *
      * @param minValue the exclusive lower bound

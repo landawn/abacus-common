@@ -37,7 +37,7 @@ import com.landawn.abacus.util.N;
  * // Wrap with infinite lifetime
  * String data = "cached data";
  * PoolableAdapter<String> adapted = new PoolableAdapter<>(data);
- * pool.add(adapted);
+ * pool.add(adapted);   // pool is an ObjectPool<PoolableAdapter<String>>
  *
  * // Wrap with specific lifetime limits
  * ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -46,7 +46,7 @@ import com.landawn.abacus.util.N;
  *     600000,  // 10 minute lifetime
  *     60000    // 1 minute max idle
  * );
- * pool.add(adaptedBuffer);
+ * bufferPool.add(adaptedBuffer);   // a separate ObjectPool<PoolableAdapter<ByteBuffer>>
  *
  * // Retrieve and use
  * PoolableAdapter<String> retrieved = pool.poll();
@@ -77,14 +77,14 @@ public final class PoolableAdapter<T> extends AbstractPoolable {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * PoolableAdapter<String> adapted = new PoolableAdapter<>("cached");
-     * adapted.value();                            // returns "cached"
-     * adapted.activityPrint().getMaxLiveTime();   // returns Long.MAX_VALUE (never expires by lifetime)
-     * adapted.activityPrint().getMaxIdleTime();   // returns Long.MAX_VALUE (never expires by idle)
-     * new PoolableAdapter<>(null).value();        // returns null (a null value is permitted)
+     * adapted.value();                           // returns "cached"
+     * adapted.activityPrint().getMaxLiveTime();  // returns Long.MAX_VALUE (never expires by lifetime)
+     * adapted.activityPrint().getMaxIdleTime();  // returns Long.MAX_VALUE (never expires by idle)
+     * new PoolableAdapter<>(null).value();       // returns null (a null value is permitted)
      * }</pre>
      *
-     * @param value the object to adapt, can be {@code null}; must be {@code Serializable} if this adapter
-     *        (or a pool containing it) is to be serialized
+     * @param value the object to adapt, can be {@code null}; the adapter itself is never {@code Serializable}, whatever
+     *        the value's type, so a pool that still contains it cannot be serialized
      */
     public PoolableAdapter(final T value) {
         this(value, Long.MAX_VALUE, Long.MAX_VALUE);
@@ -95,14 +95,14 @@ public final class PoolableAdapter<T> extends AbstractPoolable {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * PoolableAdapter<String> adapted = new PoolableAdapter<>("data", 600000, 60000);   // 10 min live, 1 min idle
-     * adapted.value();                                                                  // returns "data"
-     * adapted.activityPrint().getMaxLiveTime();                                         // returns 600000
-     * adapted.activityPrint().getMaxIdleTime();                                         // returns 60000
+     * PoolableAdapter<String> adapted = new PoolableAdapter<>("data", 600000, 60000);  // 10 min live, 1 min idle
+     * adapted.value();                                                                 // returns "data"
+     * adapted.activityPrint().getMaxLiveTime();                                        // returns 600000
+     * adapted.activityPrint().getMaxIdleTime();                                        // returns 60000
      * }</pre>
      *
-     * @param value the object to adapt, can be {@code null}; must be {@code Serializable} if this adapter
-     *        (or a pool containing it) is to be serialized
+     * @param value the object to adapt, can be {@code null}; the adapter itself is never {@code Serializable}, whatever
+     *        the value's type, so a pool that still contains it cannot be serialized
      * @param maxLiveTime the maximum lifetime in milliseconds before expiration
      * @param maxIdleTime the maximum idle time in milliseconds before expiration
      * @throws IllegalArgumentException if maxLiveTime or maxIdleTime is not positive.
@@ -123,8 +123,8 @@ public final class PoolableAdapter<T> extends AbstractPoolable {
      * }</pre>
      *
      * @param <T> the type of the object to adapt
-     * @param value the object to adapt, can be {@code null}; must be {@code Serializable} if the adapter
-     *        (or a pool containing it) is to be serialized
+     * @param value the object to adapt, can be {@code null}; the adapter itself is never {@code Serializable}, whatever
+     *        the value's type, so a pool that still contains it cannot be serialized
      * @return a new PoolableAdapter containing the source object
      */
     public static <T> PoolableAdapter<T> of(final T value) {
@@ -145,8 +145,8 @@ public final class PoolableAdapter<T> extends AbstractPoolable {
      * }</pre>
      *
      * @param <T> the type of the object to adapt
-     * @param value the object to adapt, can be {@code null}; must be {@code Serializable} if the adapter
-     *        (or a pool containing it) is to be serialized
+     * @param value the object to adapt, can be {@code null}; the adapter itself is never {@code Serializable}, whatever
+     *        the value's type, so a pool that still contains it cannot be serialized
      * @param maxLiveTime the maximum lifetime in milliseconds before expiration
      * @param maxIdleTime the maximum idle time in milliseconds before expiration
      * @return a new PoolableAdapter with the specified settings

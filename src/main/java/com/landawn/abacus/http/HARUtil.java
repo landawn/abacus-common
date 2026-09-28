@@ -197,7 +197,9 @@ public final class HARUtil {
      * }</pre>
      *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable.
-     * @param quoteChar the character to use for quoting in curl commands (typically {@code '} or {@code "}).
+     * @param quoteChar the character to use for quoting in curl commands; must be {@code '} or {@code "}. It is not validated here:
+     *        while logging is enabled, any other character makes each HAR replay on this thread fail with an
+     *        {@link IllegalArgumentException} when the curl command is built.
      * @see #configureCurlLoggingForCurrentThread(boolean)
      * @see #configureCurlLoggingForCurrentThread(boolean, char, Consumer)
      */
@@ -233,7 +235,9 @@ public final class HARUtil {
      * }</pre>
      *
      * @param logRequest {@code true} to enable curl logging, {@code false} to disable.
-     * @param quoteChar the character to use for quoting in curl commands.
+     * @param quoteChar the character to use for quoting in curl commands; must be {@code '} or {@code "}. It is not validated here:
+     *        while logging is enabled, any other character makes each HAR replay on this thread fail with an
+     *        {@link IllegalArgumentException} when the curl command is built.
      * @param logHandler the consumer that will handle the generated curl command strings; must not be {@code null}
      * @throws IllegalArgumentException if {@code logHandler} is {@code null}.
      * @see #configureCurlLoggingForCurrentThread(boolean)
@@ -293,11 +297,11 @@ public final class HARUtil {
      * @param har the HAR file containing captured HTTP requests.
      * @param targetUrl the exact URL to match in the HAR file.
      * @return the response body as a string.
-     * @throws IllegalArgumentException if {@code har} is {@code null}, the HAR content contains no entries under {@code log.entries}
-     *         , or the matching entry cannot be replayed
-     *         (see {@link #sendRequestByRequestEntry(Map, Class)})
-     * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws IllegalArgumentException if {@code har} is {@code null}, the HAR content is not a JSON object or its {@code log.entries} structure is
+     *         malformed or contains no entries, or the matching entry cannot be replayed (see {@link #sendRequestByRequestEntry(Map, Class)})
+     * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request, including
+     *         (as an {@link com.landawn.abacus.exception.HttpResponseException}) a non-2xx response status
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @throws NoSuchElementException if no request entry matches {@code targetUrl}
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
@@ -326,11 +330,12 @@ public final class HARUtil {
      * @param har the HAR file containing captured HTTP requests.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
-     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, the HAR content
-     *         contains no entries under {@code log.entries}, or the matching entry cannot be replayed
+     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, the HAR content is not a JSON
+     *         object or its {@code log.entries} structure is malformed or contains no entries, or the matching entry cannot be replayed
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
-     * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request, including
+     *         (as an {@link com.landawn.abacus.exception.HttpResponseException}) a non-2xx response status
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @throws NoSuchElementException if no request entry matches {@code filterForTargetUrl}
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
@@ -358,12 +363,12 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param targetUrl the exact URL to match in the HAR content.
      * @return the response body as a string.
-     * @throws IllegalArgumentException if {@code har} is {@code null}, the HAR content contains no entries under {@code log.entries}, or the matching entry cannot
-     *         be replayed
-     *         (see {@link #sendRequestByRequestEntry(Map, Class)})
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws IllegalArgumentException if {@code har} is {@code null}, the HAR content is not a JSON object or its {@code log.entries} structure is
+     *         malformed or contains no entries, or the matching entry cannot be replayed (see {@link #sendRequestByRequestEntry(Map, Class)})
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
-     * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails
+     * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails,
+     *         including (as an {@link com.landawn.abacus.exception.HttpResponseException}) a non-2xx response status
      * @throws NoSuchElementException if no request entry matches {@code targetUrl}
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -396,12 +401,13 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs; the first matching URL's request will be sent.
      * @return the response body as a string.
-     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, the HAR content contains no entries under
-     *         {@code log.entries}, or the matching entry cannot be replayed
+     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, the HAR content is not a JSON
+     *         object or its {@code log.entries} structure is malformed or contains no entries, or the matching entry cannot be replayed
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
-     * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails
+     * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails,
+     *         including (as an {@link com.landawn.abacus.exception.HttpResponseException}) a non-2xx response status
      * @throws NoSuchElementException if no request entry matches {@code filterForTargetUrl}
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -448,11 +454,12 @@ public final class HARUtil {
      * @param filterForTargetUrl predicate to test URLs; all matching URLs' requests will be sent.
      * @return a list of response bodies as strings, in the order they appear in the HAR file;
      *         an empty list if the HAR has no entries or none of them match
-     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, or a matching
-     *         entry cannot be replayed
+     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, the HAR content is not a JSON
+     *         object or its {@code log.entries} structure is malformed, or a matching entry cannot be replayed
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
-     * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws UncheckedIOException if the HAR file cannot be read or an I/O error occurs while replaying a matching request, including
+     *         (as an {@link com.landawn.abacus.exception.HttpResponseException}) a non-2xx response status
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
@@ -483,11 +490,13 @@ public final class HARUtil {
      * @param filterForTargetUrl predicate to test URLs; all matching URLs' requests will be sent.
      * @return a list of response bodies as strings, in the order they appear in the HAR content;
      *         an empty list if the HAR has no entries under {@code log.entries} or none of them match
-     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, or a matching entry cannot be replayed
+     * @throws IllegalArgumentException if {@code har} is {@code null}, {@code filterForTargetUrl} is {@code null}, the HAR content is not a JSON
+     *         object or its {@code log.entries} structure is malformed, or a matching entry cannot be replayed
      *         (see {@link #sendRequestByRequestEntry(Map, Class)})
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      * @throws UnsupportedOperationException if a matching entry's method is {@code PATCH} or {@code CONNECT} (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT})
-     * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails
+     * @throws UncheckedIOException if connecting to the selected HAR request URL, transmitting its body or reading its response fails,
+     *         including (as an {@link com.landawn.abacus.exception.HttpResponseException}) a non-2xx response status
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -538,9 +547,10 @@ public final class HARUtil {
      * @param filterForTargetUrl predicate to test URLs; only matching URLs will be included in the stream.
      * @return a stream of tuples where the first element is the request entry map and the second is the
      *         {@code HttpResponse}; an empty stream if the HAR has no entries or none of them match
-     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}
+     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}, or the HAR content is not a JSON object or its
+     *         {@code log.entries} structure is malformed
      * @throws UncheckedIOException if the HAR file cannot be read
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -577,8 +587,9 @@ public final class HARUtil {
      * @return a stream of tuples where the first element is the request entry map and the second is the
      *         {@code HttpResponse}; an empty stream if the HAR has no entries under {@code log.entries}
      *         or none of them match
-     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}, or the HAR content is not a JSON object or its
+     *         {@code log.entries} structure is malformed
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      * @see <a href="http://www.softwareishard.com/har/viewer/">HAR Viewer</a>
      * @see <a href="https://confluence.atlassian.com/kb/generating-har-files-and-analyzing-web-requests-720420612.html">Generating HAR files</a>
      */
@@ -637,13 +648,18 @@ public final class HARUtil {
      * @param responseClass the class to deserialize the response into.
      * @return the response deserialized into the specified type.
      * @throws IllegalArgumentException if {@code requestEntry} is {@code null}, has no {@code method} field, or its value is not a
-     *         recognized {@link HttpMethod}, or the entry carries a non-empty body ({@code postData.text} or
+     *         recognized {@link HttpMethod}; if its {@code headers} or {@code postData} are malformed, or included repeated headers
+     *         cannot be combined without changing their semantics; if the entry carries a non-empty body ({@code postData.text} or
      *         {@code postData.params}) but its method is none of {@code POST}, {@code PUT}, {@code DELETE},
-     *         {@code OPTIONS}, {@code PATCH}.
+     *         {@code OPTIONS}, {@code PATCH}; if curl logging is enabled for the current thread with a quote character that is
+     *         neither a single nor a double quote; or if its {@code url} is missing, empty, relative or malformed
+     *         (see {@link HttpRequest#url(String)}).
      * @throws ClassCastException if the entry's {@code url} field is present but is not a {@code String}
      * @throws UnsupportedOperationException if the entry's method is {@code PATCH} or {@code CONNECT}, which the underlying
      *         {@code java.net.HttpURLConnection} cannot issue (see {@link HttpMethod#PATCH} and {@link HttpMethod#CONNECT}).
-     * @throws UncheckedIOException if the HTTP request execution fails with an I/O error.
+     * @throws UncheckedIOException if converting the URL fails or the HTTP request execution fails with an I/O error, including
+     *         (as an {@link com.landawn.abacus.exception.HttpResponseException}) a non-2xx response status when {@code responseClass}
+     *         is not {@link HttpResponse}.
      */
     public static <T> T sendRequestByRequestEntry(final Map<String, Object> requestEntry, final Class<T> responseClass)
             throws IllegalArgumentException, ClassCastException, UnsupportedOperationException, UncheckedIOException {
@@ -722,9 +738,10 @@ public final class HARUtil {
      * @param har the HAR file containing captured HTTP requests.
      * @param filterForTargetUrl predicate to test URLs.
      * @return an {@code Optional} containing the first matching request entry map, or empty if no match is found.
-     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}.
+     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}, or the HAR content is not a JSON object or its
+     *         {@code log.entries} structure is malformed.
      * @throws UncheckedIOException if the HAR file cannot be read.
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      */
     public static Optional<Map<String, Object>> findRequestEntry(final File har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
@@ -759,8 +776,9 @@ public final class HARUtil {
      * @param har the HAR content as a JSON string.
      * @param filterForTargetUrl predicate to test URLs.
      * @return an {@code Optional} containing the first matching request entry map, or empty if no match is found.
-     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}.
-     * @throws ParsingException if the HAR content cannot be parsed as a JSON object
+     * @throws IllegalArgumentException if {@code har} or {@code filterForTargetUrl} is {@code null}, or the HAR content is not a JSON object or its
+     *         {@code log.entries} structure is malformed.
+     * @throws ParsingException if the HAR content cannot be parsed as JSON
      */
     public static Optional<Map<String, Object>> findRequestEntry(final String har, final Predicate<? super String> filterForTargetUrl)
             throws IllegalArgumentException, ParsingException {
@@ -902,12 +920,19 @@ public final class HARUtil {
      * @return a tuple where the first element is the request body text (may be {@code null} if the
      *         request has no body) and the second element is the MIME type (may be {@code null} if
      *         no MIME type is present).
+     * @throws IllegalArgumentException if the entry's {@code postData}, {@code postData.text}, {@code postData.mimeType} or
+     *         {@code postData.params} is present but malformed (the message names the offending HAR path).
      */
-    public static Tuple2<String, String> getBodyAndMimeTypeByRequestEntry(final Map<String, Object> requestEntry) {
+    public static Tuple2<String, String> getBodyAndMimeTypeByRequestEntry(final Map<String, Object> requestEntry) throws IllegalArgumentException {
         return bodyAndMimeType(requestEntry, "request");
     }
 
-    private static Tuple2<String, String> bodyAndMimeType(final Map<String, Object> requestEntry, final String path) {
+    /**
+     * Extracts the body text and MIME type of {@code requestEntry}, synthesizing a form body from {@code postData.params} when needed.
+     *
+     * @throws IllegalArgumentException if {@code postData} or any of its text, MIME type or params nodes is present but malformed
+     */
+    private static Tuple2<String, String> bodyAndMimeType(final Map<String, Object> requestEntry, final String path) throws IllegalArgumentException {
         if (requestEntry == null) {
             return Tuple.of(null, null);
         }
@@ -926,7 +951,13 @@ public final class HARUtil {
         return Tuple.of(requestBody, mimeType);
     }
 
-    private static List<?> validatedPostDataParams(final Map<?, ?> postData, final String path) {
+    /**
+     * Returns the {@code params} list of {@code postData} after validating every entry.
+     *
+     * @throws IllegalArgumentException if {@code params} is not an array, or an entry is not an object, lacks a scalar {@code name}
+     *         or has a non-scalar {@code value}
+     */
+    private static List<?> validatedPostDataParams(final Map<?, ?> postData, final String path) throws IllegalArgumentException {
         final List<?> params = optionalHarList(postData, "params", path);
         for (int i = 0; i < params.size(); i++) {
             final Map<?, ?> param = harMap(params.get(i), path + "[" + i + "]");
@@ -948,7 +979,13 @@ public final class HARUtil {
 
     // Validate the whole archive before returning any replayable entry, including entries after the first match.
     // Missing/null optional data is empty; malformed non-null data must not produce a partial replay.
-    private static List<Map<String, Object>> readRequestEntries(final String har) {
+    /**
+     * Parses {@code har} and returns the validated {@code request} object of every entry under {@code log.entries}.
+     *
+     * @throws ParsingException if {@code har} cannot be parsed as JSON
+     * @throws IllegalArgumentException if the HAR content is not a JSON object or any part of its {@code log.entries} structure is malformed
+     */
+    private static List<Map<String, Object>> readRequestEntries(final String har) throws ParsingException, IllegalArgumentException {
         final Map<?, ?> root = harMap(N.fromJson(har, Object.class), "$");
         final Map<?, ?> log = optionalHarMap(root, "log", "log");
         final List<?> entries = optionalHarList(log, "entries", "log.entries");
@@ -972,7 +1009,13 @@ public final class HARUtil {
         return requests;
     }
 
-    private static List<?> validatedHeaders(final Map<?, ?> request, final String path) {
+    /**
+     * Returns the {@code headers} list of {@code request} after validating every entry.
+     *
+     * @throws IllegalArgumentException if {@code headers} is not an array, or an entry is not an object, lacks a scalar {@code name}
+     *         or has a non-scalar {@code value}
+     */
+    private static List<?> validatedHeaders(final Map<?, ?> request, final String path) throws IllegalArgumentException {
         final List<?> headers = optionalHarList(request, "headers", path + ".headers");
         for (int i = 0; i < headers.size(); i++) {
             final String headerPath = path + ".headers[" + i + "]";
@@ -983,19 +1026,34 @@ public final class HARUtil {
         return headers;
     }
 
-    private static Map<?, ?> optionalHarMap(final Map<?, ?> parent, final String key, final String path) {
+    /**
+     * Returns the object at {@code key}, or an empty map if it is absent or {@code null}.
+     *
+     * @throws IllegalArgumentException if the value at {@code key} is present but is not an object
+     */
+    private static Map<?, ?> optionalHarMap(final Map<?, ?> parent, final String key, final String path) throws IllegalArgumentException {
         final Object value = parent.get(key);
         return value == null ? Map.of() : harMap(value, path);
     }
 
-    private static Map<?, ?> harMap(final Object value, final String path) {
+    /**
+     * Returns {@code value} as an object node.
+     *
+     * @throws IllegalArgumentException if {@code value} is not a {@code Map}
+     */
+    private static Map<?, ?> harMap(final Object value, final String path) throws IllegalArgumentException {
         if (!(value instanceof Map<?, ?>)) {
             throw new IllegalArgumentException("Malformed HAR at " + path + ": expected an object");
         }
         return (Map<?, ?>) value;
     }
 
-    private static List<?> optionalHarList(final Map<?, ?> parent, final String key, final String path) {
+    /**
+     * Returns the array at {@code key}, or an empty list if it is absent or {@code null}.
+     *
+     * @throws IllegalArgumentException if the value at {@code key} is present but is not an array
+     */
+    private static List<?> optionalHarList(final Map<?, ?> parent, final String key, final String path) throws IllegalArgumentException {
         final Object value = parent.get(key);
         if (value == null) {
             return List.of();
@@ -1006,11 +1064,23 @@ public final class HARUtil {
         return (List<?>) value;
     }
 
-    private static String harText(final Map<?, ?> parent, final String key, final String path, final boolean required) {
+    /**
+     * Returns the scalar at {@code key} converted to text, or {@code null} if it is absent and not {@code required}.
+     *
+     * @throws IllegalArgumentException if the value at {@code key} is not a string, number or boolean (a missing value counts only
+     *         when {@code required})
+     */
+    private static String harText(final Map<?, ?> parent, final String key, final String path, final boolean required) throws IllegalArgumentException {
         return N.stringOf(harScalar(parent, key, path, required));
     }
 
-    private static Object harScalar(final Map<?, ?> parent, final String key, final String path, final boolean required) {
+    /**
+     * Returns the scalar at {@code key}, or {@code null} if it is absent and not {@code required}.
+     *
+     * @throws IllegalArgumentException if the value at {@code key} is not a string, number or boolean (a missing value counts only
+     *         when {@code required})
+     */
+    private static Object harScalar(final Map<?, ?> parent, final String key, final String path, final boolean required) throws IllegalArgumentException {
         final Object value = parent.get(key);
         if (value == null && !required) {
             return null;
@@ -1021,7 +1091,12 @@ public final class HARUtil {
         return value;
     }
 
-    private static String harString(final Map<?, ?> parent, final String key, final String path, final boolean required) {
+    /**
+     * Returns the string at {@code key}, or {@code null} if it is absent and not {@code required}.
+     *
+     * @throws IllegalArgumentException if the value at {@code key} is not a string (a missing value counts only when {@code required})
+     */
+    private static String harString(final Map<?, ?> parent, final String key, final String path, final boolean required) throws IllegalArgumentException {
         if (!required && parent.get(key) == null) {
             return null;
         }

@@ -130,12 +130,12 @@ public interface Hasher {
      *
      * @param bytes the byte array containing data to add to the hash computation
      * @param off the starting offset in the array (zero-based, inclusive)
-     * @param len the number of bytes to process from the array
+     * @param length the number of bytes to process from the array
      * @return this hasher instance for method chaining
      * @throws NullPointerException if {@code bytes} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if {@code off + len > bytes.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or if {@code off + len > bytes.length}
      */
-    Hasher put(byte[] bytes, int off, int len) throws NullPointerException, IndexOutOfBoundsException;
+    Hasher put(byte[] bytes, int off, int length) throws NullPointerException, IndexOutOfBoundsException;
 
     /**
      * Adds all remaining bytes from the given ByteBuffer to this hasher's internal state.
@@ -295,12 +295,12 @@ public interface Hasher {
      *
      * @param chars the character array containing data to add to the hash computation
      * @param off the starting offset in the array (zero-based, inclusive)
-     * @param len the number of characters to process from the array
+     * @param length the number of characters to process from the array
      * @return this hasher instance for method chaining
-     * @throws IllegalArgumentException if {@code len} is negative.
+     * @throws IllegalArgumentException if {@code length} is negative.
      * @throws IndexOutOfBoundsException if {@code off} is negative or the requested range exceeds the array length, treating a {@code null} array as empty.
      */
-    Hasher put(char[] chars, int off, int len) throws IllegalArgumentException, IndexOutOfBoundsException;
+    Hasher put(char[] chars, int off, int length) throws IllegalArgumentException, IndexOutOfBoundsException;
 
     /**
      * Adds all characters from the given CharSequence to this hasher's internal state
@@ -340,7 +340,7 @@ public interface Hasher {
      *
      * <p><b>Warning:</b> Characters the charset cannot encode (including unpaired surrogates) are
      * replaced by the charset's replacement byte (typically {@code '?'}) before hashing, so such inputs
-     * can collide with each other: {@code put("a\uD800", UTF_8)} hashes like {@code put("a?", UTF_8)}.
+     * can collide with each other: {@code put("a" + (char) 0xD800, UTF_8)} hashes like {@code put("a?", UTF_8)}.
      * Use {@link #put(CharSequence)} to hash every {@code char} exactly. Chunked calls equal one call
      * over the concatenation only when the encoding has no per-call state and chunk boundaries
      * do not split surrogate pairs. UTF-16, for example, emits a byte-order mark per non-empty call.

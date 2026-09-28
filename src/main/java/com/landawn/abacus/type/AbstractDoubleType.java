@@ -189,18 +189,18 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * Otherwise, converts the {@code Number} to a {@code double} value using {@link Numbers#toDouble(Object)}.
      * </p>
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Number} value to set as {@code double}, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.DOUBLE);
+            statement.setNull(columnIndex, Types.DOUBLE);
         } else {
-            stmt.setDouble(columnIndex, Numbers.toDouble(x));
+            statement.setDouble(columnIndex, Numbers.toDouble(x));
         }
     }
 
@@ -211,18 +211,18 @@ public abstract class AbstractDoubleType extends NumberType<Number> {
      * Otherwise, converts the {@code Number} to a {@code double} value using {@link Numbers#toDouble(Object)}.
      * </p>
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Number} value to set as {@code double}, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.DOUBLE);
+            statement.setNull(parameterName, Types.DOUBLE);
         } else {
-            stmt.setDouble(parameterName, Numbers.toDouble(x));
+            statement.setDouble(parameterName, Numbers.toDouble(x));
         }
     }
 

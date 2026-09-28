@@ -1645,9 +1645,9 @@ public class BooleanListTest extends BooleanListTestSupport {
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
         assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
     }
 
     @Test
@@ -1740,4 +1740,237 @@ public class BooleanListTest extends BooleanListTestSupport {
         assertTrue(f.retainAll(BooleanList.of(true)));
         assertEquals(2, f.size(), "both true elements match the retained value; only the false one goes");
     }
+
+    // ---- perf review 2026-09-26 G022 begin ----
+
+    // G022-01 / G022-02: set operations checked against a boxed reference over every list of length 0..5 plus larger lists
+    @Test
+    public void testSetOperations_matchBoxedReferenceForAllSmallAndLargeInputs() {
+        final List<boolean[]> inputs = new ArrayList<>();
+
+        for (int len = 0; len <= 5; len++) {
+            for (int bits = 0; bits < (1 << len); bits++) {
+                final boolean[] a = new boolean[len];
+
+                for (int i = 0; i < len; i++) {
+                    a[i] = ((bits >> i) & 1) != 0;
+                }
+
+                inputs.add(a);
+            }
+        }
+
+        final Random random = new Random(20260926L);
+
+        for (final int len : new int[] { 10, 11, 25, 40 }) {
+            inputs.add(Array.repeat(true, len));
+            inputs.add(Array.repeat(false, len));
+
+            final boolean[] mixed = new boolean[len];
+
+            for (int i = 0; i < len; i++) {
+                mixed[i] = random.nextBoolean();
+            }
+
+            inputs.add(mixed);
+        }
+
+        for (final boolean[] a : inputs) {
+            for (final boolean[] b : inputs) {
+                checkSetOperationsAgainstReferenceG022(a, b);
+            }
+        }
+    }
+
+    // G022-01 / G022-02: the argument is the list itself or another list wrapping the same array
+    @Test
+    public void testSetOperations_aliasedArgumentMatchesBoxedReference() {
+        final boolean[] source = { true, false, false, true, true, false, true, true, false, false, true, true };
+
+        for (int prefix = 0; prefix <= source.length; prefix++) {
+            final boolean[] expectedB = java.util.Arrays.copyOf(source, prefix);
+
+            BooleanList list = BooleanList.of(source.clone());
+            assertTrue(list.removeAll(list));
+            assertEquals(0, list.size());
+
+            list = BooleanList.of(source.clone());
+            assertFalse(list.retainAll(list));
+            assertArrayEquals(source, list.toArray());
+
+            final boolean[] shared = source.clone();
+            list = BooleanList.of(shared);
+            final List<Boolean> expectedRemoveAll = referenceRemoveAllG022(source, expectedB);
+            assertEquals(!expectedRemoveAll.equals(boxedG022(source)), list.removeAll(BooleanList.of(shared, prefix)));
+            assertEquals(expectedRemoveAll, boxedG022(list.toArray()));
+
+            final boolean[] shared2 = source.clone();
+            list = BooleanList.of(shared2);
+            final List<Boolean> expectedRetainAll = referenceRetainAllG022(source, expectedB);
+            assertEquals(!expectedRetainAll.equals(boxedG022(source)), list.retainAll(BooleanList.of(shared2, prefix)));
+            assertEquals(expectedRetainAll, boxedG022(list.toArray()));
+
+            list = BooleanList.of(expectedB.clone());
+            assertEquals(boxedG022(expectedB), boxedG022(list.intersection(list).toArray()));
+            assertEquals(0, list.difference(list).size());
+            assertEquals(0, list.symmetricDifference(list).size());
+            assertTrue(list.containsAll(list));
+            assertEquals(prefix == 0, list.disjoint(list));
+            assertArrayEquals(expectedB, list.toArray());
+        }
+    }
+
+    private static void checkSetOperationsAgainstReferenceG022(final boolean[] a, final boolean[] b) {
+        final String msg = java.util.Arrays.toString(a) + " vs " + java.util.Arrays.toString(b);
+        final List<Boolean> boxedA = boxedG022(a);
+        final List<Boolean> boxedB = boxedG022(b);
+
+        BooleanList list = BooleanList.of(a.clone());
+        final List<Boolean> expectedRemoveAll = referenceRemoveAllG022(a, b);
+        assertEquals(!expectedRemoveAll.equals(boxedA), list.removeAll(BooleanList.of(b.clone())), msg);
+        assertEquals(expectedRemoveAll, boxedG022(list.toArray()), msg);
+
+        list = BooleanList.of(a.clone());
+        list.removeAll(b.clone());
+        assertEquals(expectedRemoveAll, boxedG022(list.toArray()), msg);
+
+        list = BooleanList.of(a.clone());
+        final List<Boolean> expectedRetainAll = referenceRetainAllG022(a, b);
+        assertEquals(!expectedRetainAll.equals(boxedA), list.retainAll(BooleanList.of(b.clone())), msg);
+        assertEquals(expectedRetainAll, boxedG022(list.toArray()), msg);
+
+        list = BooleanList.of(a.clone());
+        list.retainAll(b.clone());
+        assertEquals(expectedRetainAll, boxedG022(list.toArray()), msg);
+
+        list = BooleanList.of(a.clone());
+        final boolean expectedContainsAll = boxedA.containsAll(boxedB);
+        boolean expectedDisjoint = true;
+
+        for (final Boolean e : boxedB) {
+            if (boxedA.contains(e)) {
+                expectedDisjoint = false;
+            }
+        }
+
+        assertEquals(expectedContainsAll, list.containsAll(BooleanList.of(b)), msg);
+        assertEquals(expectedContainsAll, list.containsAll(b), msg);
+        assertEquals(expectedDisjoint, list.disjoint(BooleanList.of(b)), msg);
+        assertEquals(expectedDisjoint, list.disjoint(b), msg);
+        assertEquals(!expectedDisjoint, list.containsAny(BooleanList.of(b)), msg);
+        assertEquals(!expectedDisjoint, list.containsAny(b), msg);
+
+        final List<Boolean> expectedIntersection = new ArrayList<>();
+        final List<Boolean> expectedDifference = new ArrayList<>();
+        final List<Boolean> remaining = new ArrayList<>(boxedB);
+
+        for (final Boolean e : boxedA) {
+            if (remaining.remove(e)) {
+                expectedIntersection.add(e);
+            } else {
+                expectedDifference.add(e);
+            }
+        }
+
+        final List<Boolean> expectedSymmetricDifference = new ArrayList<>(expectedDifference);
+
+        for (final Boolean e : boxedB) {
+            if (remaining.remove(e)) {
+                expectedSymmetricDifference.add(e);
+            }
+        }
+
+        assertEquals(expectedIntersection, boxedG022(list.intersection(BooleanList.of(b)).toArray()), msg);
+        assertEquals(expectedIntersection, boxedG022(list.intersection(b).toArray()), msg);
+        assertEquals(expectedDifference, boxedG022(list.difference(BooleanList.of(b)).toArray()), msg);
+        assertEquals(expectedDifference, boxedG022(list.difference(b).toArray()), msg);
+        assertEquals(expectedSymmetricDifference, boxedG022(list.symmetricDifference(BooleanList.of(b)).toArray()), msg);
+        assertEquals(expectedSymmetricDifference, boxedG022(list.symmetricDifference(b).toArray()), msg);
+        assertArrayEquals(a, list.toArray(), msg);
+    }
+
+    private static List<Boolean> referenceRemoveAllG022(final boolean[] a, final boolean[] b) {
+        final List<Boolean> boxedB = boxedG022(b);
+        final List<Boolean> result = new ArrayList<>();
+
+        for (final boolean e : a) {
+            if (!boxedB.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    private static List<Boolean> referenceRetainAllG022(final boolean[] a, final boolean[] b) {
+        final List<Boolean> boxedB = boxedG022(b);
+        final List<Boolean> result = new ArrayList<>();
+
+        for (final boolean e : a) {
+            if (boxedB.contains(e)) {
+                result.add(e);
+            }
+        }
+
+        return result;
+    }
+
+    private static List<Boolean> boxedG022(final boolean[] a) {
+        final List<Boolean> result = new ArrayList<>(a.length);
+
+        for (final boolean e : a) {
+            result.add(e);
+        }
+
+        return result;
+    }
+
+    // ---- perf review 2026-09-26 G022 end ----
+
+    // ---- perf review 2026-09-26 G111 begin ----
+
+    // G111-04: toMultiset() with the capped (2-entry) multiset supplier still counts every occurrence, for the full list,
+    // a sub-range, an empty range and a single-valued list.
+    @Test
+    public void testToMultiset_cappedSupplierCountsEveryOccurrenceG111() {
+        final Random random = new Random(111L);
+        final boolean[] a = new boolean[100_000];
+        int trueCount = 0;
+
+        for (int i = 0; i < a.length; i++) {
+            a[i] = random.nextInt(3) == 0;
+            trueCount += a[i] ? 1 : 0;
+        }
+
+        final BooleanList list = BooleanList.of(a);
+        final Multiset<Boolean> multiset = list.toMultiset();
+        assertEquals(a.length, multiset.size());
+        assertEquals(2, multiset.countOfDistinctElements());
+        assertEquals(trueCount, multiset.getCount(Boolean.TRUE));
+        assertEquals(a.length - trueCount, multiset.getCount(Boolean.FALSE));
+
+        int rangeTrue = 0;
+        for (int i = 10; i < 5000; i++) {
+            rangeTrue += a[i] ? 1 : 0;
+        }
+        final Multiset<Boolean> range = list.toMultiset(10, 5000);
+        assertEquals(4990, range.size());
+        assertEquals(rangeTrue, range.getCount(Boolean.TRUE));
+        assertEquals(4990 - rangeTrue, range.getCount(Boolean.FALSE));
+
+        assertEquals(0, list.toMultiset(7, 7).size());
+        assertEquals(0, new BooleanList().toMultiset().size());
+
+        final Multiset<Boolean> allTrue = BooleanList.repeat(true, 1000).toMultiset();
+        assertEquals(1, allTrue.countOfDistinctElements());
+        assertEquals(1000, allTrue.getCount(Boolean.TRUE));
+        assertEquals(0, allTrue.getCount(Boolean.FALSE));
+
+        // The returned multiset is a fresh mutable instance that can still grow.
+        allTrue.add(Boolean.FALSE, 3);
+        assertEquals(3, allTrue.getCount(Boolean.FALSE));
+        assertNotSame(list.toMultiset(), list.toMultiset());
+    }
+
+    // ---- perf review 2026-09-26 G111 end ----
 }

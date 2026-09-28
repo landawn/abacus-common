@@ -84,9 +84,9 @@ import com.landawn.abacus.util.u.OptionalInt;
  * otherwise {@code of} and {@code allOf} walk the iterator, while {@code last} calls the collection's own public
  * {@code descendingIterator()} if it has one and, failing that, copies the whole collection to an array first -
  * that copy being the exception, so {@code last} on, say, a {@link java.util.LinkedHashSet} costs O(n) extra
- * space. A sublist search takes the indexed path only when <i>both</i> lists are
- * {@code RandomAccess}, and otherwise copies the searched region and the pattern to arrays first, which costs O(n)
- * extra space.
+ * space. A sublist search takes the indexed path when the searched list is {@code RandomAccess} (copying only the
+ * matched slice of a pattern that is not {@code RandomAccess}, O(m) extra space), and otherwise copies the searched
+ * region and the pattern to arrays first, which costs O(n) extra space.
  *
  * <p>All methods are static. Array and collection contents are left unchanged; iterator searches consume input elements. Concurrent modification of an input is the
  * caller's problem, as usual.
@@ -95,25 +95,25 @@ import com.landawn.abacus.util.u.OptionalInt;
  * <pre>{@code
  * int[] numbers = {1, 2, 3, 4, 5, 3, 2, 1};
  *
- * Index.of(numbers, 3);        // OptionalInt[2]
- * Index.last(numbers, 3);      // OptionalInt[5]
- * Index.of(numbers, 2, 3);     // OptionalInt[6] - searching forward from index 3
- * Index.allOf(numbers, 1);     // {0, 7}
- * Index.of(numbers, 10);       // OptionalInt.empty
+ * Index.of(numbers, 3);     // OptionalInt[2]
+ * Index.last(numbers, 3);   // OptionalInt[5]
+ * Index.of(numbers, 2, 3);  // OptionalInt[6] - searching forward from index 3
+ * Index.allOf(numbers, 1);  // {0, 7}
+ * Index.of(numbers, 10);    // OptionalInt.empty
  *
  * // Idiomatic handling
  * Index.of(numbers, 3).ifPresent(i -> System.out.println("found at " + i));
  * boolean present = Index.of(numbers, 3).isPresent();
  *
  * // Strings
- * Index.of("Hello World", 'o');                  // OptionalInt[4]
- * Index.of("Hello World", "World");              // OptionalInt[6]
- * Index.ofIgnoreCase("Hello World", "WORLD");    // OptionalInt[6]
+ * Index.of("Hello World", 'o');                // OptionalInt[4]
+ * Index.of("Hello World", "World");            // OptionalInt[6]
+ * Index.ofIgnoreCase("Hello World", "WORLD");  // OptionalInt[6]
  *
  * // Collections and patterns
  * List<String> document = Arrays.asList("The", "quick", "brown", "fox");
- * Index.ofSubList(document, Arrays.asList("quick", "brown"));   // OptionalInt[1]
- * Index.ofSubArray(new int[] {1, 2, 3, 4, 5}, new int[] {3, 4});   // OptionalInt[2]
+ * Index.ofSubList(document, Arrays.asList("quick", "brown"));     // OptionalInt[1]
+ * Index.ofSubArray(new int[] {1, 2, 3, 4, 5}, new int[] {3, 4});  // OptionalInt[2]
  *
  * // Predicates
  * String[] words = {"apple", "apricot", "banana", "avocado"};
@@ -121,8 +121,8 @@ import com.landawn.abacus.util.u.OptionalInt;
  *
  * // Floating point within a tolerance (the 4-arg overloads; 0 = from the start)
  * double[] measurements = {1.0, 2.001, 3.0, 2.002, 4.0};
- * Index.of(measurements, 2.0, 0, 0.01);      // OptionalInt[1]
- * Index.allOf(measurements, 2.0, 0, 0.01);   // {1, 3}
+ * Index.of(measurements, 2.0, 0, 0.01);     // OptionalInt[1]
+ * Index.allOf(measurements, 2.0, 0, 0.01);  // {1, 3}
  * }</pre>
  *
  * <p><b>The same operation exists in three places, with two "not found" conventions.</b> {@code Index.of} /
@@ -162,9 +162,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {false, true, false, true, false};
-     * Index.of(arr, true).get();          // returns 1
-     * Index.of(arr, false).get();         // returns 0
-     * Index.of(null, true).isPresent();   // returns false
+     * Index.of(arr, true).get();         // returns 1
+     * Index.of(arr, false).get();        // returns 0
+     * Index.of(null, true).isPresent();  // returns false
      * }</pre>
      *
      * @param source the boolean array to be searched, may be {@code null}
@@ -187,9 +187,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {false, true, false, true, false};
-     * Index.of(arr, true, 0).get();         // returns 1
-     * Index.of(arr, true, 2).get();         // returns 3
-     * Index.of(arr, true, 4).isPresent();   // returns false
+     * Index.of(arr, true, 0).get();        // returns 1
+     * Index.of(arr, true, 2).get();        // returns 3
+     * Index.of(arr, true, 4).isPresent();  // returns false
      * }</pre>
      *
      * @param source the boolean array to be searched, may be {@code null}
@@ -213,9 +213,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'h', 'e', 'l', 'l', 'o'};
-     * Index.of(arr, 'l').get();         // returns 2
-     * Index.of(arr, 'h').get();         // returns 0
-     * Index.of(arr, 'x').isPresent();   // returns false
+     * Index.of(arr, 'l').get();        // returns 2
+     * Index.of(arr, 'h').get();        // returns 0
+     * Index.of(arr, 'x').isPresent();  // returns false
      * }</pre>
      *
      * @param source the char array to be searched, may be {@code null}
@@ -238,9 +238,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'h', 'e', 'l', 'l', 'o'};
-     * Index.of(arr, 'l', 0).get();         // returns 2
-     * Index.of(arr, 'l', 3).get();         // returns 3
-     * Index.of(arr, 'l', 4).isPresent();   // returns false
+     * Index.of(arr, 'l', 0).get();        // returns 2
+     * Index.of(arr, 'l', 3).get();        // returns 3
+     * Index.of(arr, 'l', 4).isPresent();  // returns false
      * }</pre>
      *
      * @param source the char array to be searched, may be {@code null}
@@ -263,10 +263,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
-     * Index.of(arr, (byte) 10).get();                   // returns 1
-     * Index.of(arr, (byte) 20).get();                   // returns 2
-     * Index.of(arr, (byte) 90).isPresent();             // returns false
-     * Index.of((byte[]) null, (byte) 10).isPresent();   // returns false
+     * Index.of(arr, (byte) 10).get();                  // returns 1
+     * Index.of(arr, (byte) 20).get();                  // returns 2
+     * Index.of(arr, (byte) 90).isPresent();            // returns false
+     * Index.of((byte[]) null, (byte) 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
@@ -289,10 +289,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
-     * Index.of(arr, (byte) 10, 0).get();          // returns 1
-     * Index.of(arr, (byte) 20, 2).get();          // returns 2
-     * Index.of(arr, (byte) 90, 0).isPresent();    // returns false
-     * Index.of(arr, (byte) 10, 10).isPresent();   // returns false
+     * Index.of(arr, (byte) 10, 0).get();         // returns 1
+     * Index.of(arr, (byte) 20, 2).get();         // returns 2
+     * Index.of(arr, (byte) 90, 0).isPresent();   // returns false
+     * Index.of(arr, (byte) 10, 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
@@ -316,10 +316,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
-     * Index.of(arr, (short) 10).get();                    // returns 1
-     * Index.of(arr, (short) 20).get();                    // returns 2
-     * Index.of(arr, (short) 90).isPresent();              // returns false
-     * Index.of((short[]) null, (short) 10).isPresent();   // returns false
+     * Index.of(arr, (short) 10).get();                   // returns 1
+     * Index.of(arr, (short) 20).get();                   // returns 2
+     * Index.of(arr, (short) 90).isPresent();             // returns false
+     * Index.of((short[]) null, (short) 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
@@ -342,10 +342,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
-     * Index.of(arr, (short) 10, 0).get();          // returns 1
-     * Index.of(arr, (short) 20, 2).get();          // returns 2
-     * Index.of(arr, (short) 90, 0).isPresent();    // returns false
-     * Index.of(arr, (short) 10, 10).isPresent();   // returns false
+     * Index.of(arr, (short) 10, 0).get();         // returns 1
+     * Index.of(arr, (short) 20, 2).get();         // returns 2
+     * Index.of(arr, (short) 90, 0).isPresent();   // returns false
+     * Index.of(arr, (short) 10, 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
@@ -369,10 +369,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {0, 10, 20, 30, 40};
-     * Index.of(arr, 10).get();                  // returns 1
-     * Index.of(arr, 20).get();                  // returns 2
-     * Index.of(arr, 90).isPresent();            // returns false
-     * Index.of((int[]) null, 10).isPresent();   // returns false
+     * Index.of(arr, 10).get();                 // returns 1
+     * Index.of(arr, 20).get();                 // returns 2
+     * Index.of(arr, 90).isPresent();           // returns false
+     * Index.of((int[]) null, 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
@@ -395,10 +395,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {0, 10, 20, 30, 40};
-     * Index.of(arr, 10, 0).get();          // returns 1
-     * Index.of(arr, 20, 2).get();          // returns 2
-     * Index.of(arr, 90, 0).isPresent();    // returns false
-     * Index.of(arr, 10, 10).isPresent();   // returns false
+     * Index.of(arr, 10, 0).get();         // returns 1
+     * Index.of(arr, 20, 2).get();         // returns 2
+     * Index.of(arr, 90, 0).isPresent();   // returns false
+     * Index.of(arr, 10, 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
@@ -422,10 +422,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {0L, 10L, 20L, 30L, 40L};
-     * Index.of(arr, 10L).get();                   // returns 1
-     * Index.of(arr, 20L).get();                   // returns 2
-     * Index.of(arr, 90L).isPresent();             // returns false
-     * Index.of((long[]) null, 10L).isPresent();   // returns false
+     * Index.of(arr, 10L).get();                  // returns 1
+     * Index.of(arr, 20L).get();                  // returns 2
+     * Index.of(arr, 90L).isPresent();            // returns false
+     * Index.of((long[]) null, 10L).isPresent();  // returns false
      * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
@@ -448,10 +448,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {0L, 10L, 20L, 30L, 40L};
-     * Index.of(arr, 10L, 0).get();          // returns 1
-     * Index.of(arr, 20L, 2).get();          // returns 2
-     * Index.of(arr, 90L, 0).isPresent();    // returns false
-     * Index.of(arr, 10L, 10).isPresent();   // returns false
+     * Index.of(arr, 10L, 0).get();         // returns 1
+     * Index.of(arr, 20L, 2).get();         // returns 2
+     * Index.of(arr, 90L, 0).isPresent();   // returns false
+     * Index.of(arr, 10L, 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
@@ -476,10 +476,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
-     * Index.of(arr, 2.0f).get();                    // returns 1
-     * Index.of(arr, 1.0f).get();                    // returns 0
-     * Index.of(arr, 5.0f).isPresent();              // returns false
-     * Index.of((float[]) null, 1.0f).isPresent();   // returns false
+     * Index.of(arr, 2.0f).get();                   // returns 1
+     * Index.of(arr, 1.0f).get();                   // returns 0
+     * Index.of(arr, 5.0f).isPresent();             // returns false
+     * Index.of((float[]) null, 1.0f).isPresent();  // returns false
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -504,10 +504,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
-     * Index.of(arr, 2.0f, 0).get();          // returns 1
-     * Index.of(arr, 2.0f, 2).get();          // returns 3
-     * Index.of(arr, 5.0f, 0).isPresent();    // returns false
-     * Index.of(arr, 1.0f, 10).isPresent();   // returns false
+     * Index.of(arr, 2.0f, 0).get();         // returns 1
+     * Index.of(arr, 2.0f, 2).get();         // returns 3
+     * Index.of(arr, 5.0f, 0).isPresent();   // returns false
+     * Index.of(arr, 1.0f, 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -542,10 +542,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
-     * Index.of(arr, 2.0f, 0, 0.2f).get();         // returns 1
-     * Index.of(arr, 2.0f, 2, 0.2f).isPresent();   // returns false (2.2f - 2.0f > 0.2f)
-     * Index.of(arr, 5.0f, 0, 0.1f).isPresent();   // returns false
-     * Index.of(arr, 2.0f, 5, 0.2f).isPresent();   // returns false
+     * Index.of(arr, 2.0f, 0, 0.2f).get();        // returns 1
+     * Index.of(arr, 2.0f, 2, 0.2f).isPresent();  // returns false (2.2f - 2.0f > 0.2f)
+     * Index.of(arr, 5.0f, 0, 0.1f).isPresent();  // returns false
+     * Index.of(arr, 2.0f, 5, 0.2f).isPresent();  // returns false
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -572,10 +572,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
-     * Index.of(arr, 2.0).get();                     // returns 1
-     * Index.of(arr, 1.0).get();                     // returns 0
-     * Index.of(arr, 5.0).isPresent();               // returns false
-     * Index.of((double[]) null, 1.0).isPresent();   // returns false
+     * Index.of(arr, 2.0).get();                    // returns 1
+     * Index.of(arr, 1.0).get();                    // returns 0
+     * Index.of(arr, 5.0).isPresent();              // returns false
+     * Index.of((double[]) null, 1.0).isPresent();  // returns false
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -599,10 +599,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
-     * Index.of(arr, 2.0, 0).get();          // returns 1
-     * Index.of(arr, 2.0, 2).get();          // returns 3
-     * Index.of(arr, 5.0, 0).isPresent();    // returns false
-     * Index.of(arr, 1.0, 10).isPresent();   // returns false
+     * Index.of(arr, 2.0, 0).get();         // returns 1
+     * Index.of(arr, 2.0, 2).get();         // returns 3
+     * Index.of(arr, 5.0, 0).isPresent();   // returns false
+     * Index.of(arr, 1.0, 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -637,10 +637,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.of(arr, 2.0, 0, 0.2).get();         // returns 1
-     * Index.of(arr, 2.0, 2, 0.2).isPresent();   // returns false (2.2 - 2.0 = 0.200...018 > 0.2)
-     * Index.of(arr, 5.0, 0, 0.1).isPresent();   // returns false
-     * Index.of(arr, 2.0, 5, 0.2).isPresent();   // returns false
+     * Index.of(arr, 2.0, 0, 0.2).get();        // returns 1
+     * Index.of(arr, 2.0, 2, 0.2).isPresent();  // returns false (2.2 - 2.0 = 0.200...018 > 0.2)
+     * Index.of(arr, 5.0, 0, 0.1).isPresent();  // returns false
+     * Index.of(arr, 2.0, 5, 0.2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -668,8 +668,8 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"a", "b", "c", "b"};
-     * Index.of(arr, "b").get();         // returns 1
-     * Index.of(arr, "d").isPresent();   // returns false
+     * Index.of(arr, "b").get();        // returns 1
+     * Index.of(arr, "d").isPresent();  // returns false
      * }</pre>
      *
      * @param source the object array to be searched, may be {@code null}
@@ -692,10 +692,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"a", "b", "c", "b", "a"};
-     * Index.of(arr, "b", 0).get();         // returns 1
-     * Index.of(arr, "b", 2).get();         // returns 3
-     * Index.of(arr, "b", 4).isPresent();   // returns false
-     * Index.of(arr, "a", 0).get();         // returns 0
+     * Index.of(arr, "b", 0).get();        // returns 1
+     * Index.of(arr, "b", 2).get();        // returns 3
+     * Index.of(arr, "b", 4).isPresent();  // returns false
+     * Index.of(arr, "a", 0).get();        // returns 0
      * }</pre>
      *
      * @param source the object array to be searched, may be {@code null}
@@ -719,10 +719,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "b");
-     * Index.of(list, "b").get();                   // returns 1
-     * Index.of(list, "a").get();                   // returns 0
-     * Index.of(list, "x").isPresent();             // returns false
-     * Index.of((List<?>) null, "a").isPresent();   // returns false
+     * Index.of(list, "b").get();                  // returns 1
+     * Index.of(list, "a").get();                  // returns 0
+     * Index.of(list, "x").isPresent();            // returns false
+     * Index.of((List<?>) null, "a").isPresent();  // returns false
      * }</pre>
      *
      * @param source the collection to be searched, may be {@code null}
@@ -769,9 +769,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
-     * Index.of(list.iterator(), "b").get();            // returns 1
-     * Index.of(list.iterator(), "x").isPresent();      // returns false
-     * Index.of((Iterator<?>) null, "a").isPresent();   // returns false
+     * Index.of(list.iterator(), "b").get();           // returns 1
+     * Index.of(list.iterator(), "x").isPresent();     // returns false
+     * Index.of((Iterator<?>) null, "a").isPresent();  // returns false
      * }</pre>
      *
      * @param source the iterator to be searched, may be {@code null}
@@ -795,9 +795,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "b");
-     * Index.of(list.iterator(), "b", 1).get();            // returns 1
-     * Index.of(list.iterator(), "x", 0).isPresent();      // returns false
-     * Index.of((Iterator<?>) null, "a", 0).isPresent();   // returns false
+     * Index.of(list.iterator(), "b", 1).get();           // returns 1
+     * Index.of(list.iterator(), "x", 0).isPresent();     // returns false
+     * Index.of((Iterator<?>) null, "a", 0).isPresent();  // returns false
      * }</pre>
      *
      * @param source the iterator to be searched, may be {@code null}
@@ -820,10 +820,10 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.of("hello", 'o').get();               // returns 4
-     * Index.of("hello", 'h').get();               // returns 0
-     * Index.of("hello", 'x').isPresent();         // returns false
-     * Index.of((String) null, 'a').isPresent();   // returns false
+     * Index.of("hello", 'o').get();              // returns 4
+     * Index.of("hello", 'h').get();              // returns 0
+     * Index.of("hello", 'x').isPresent();        // returns false
+     * Index.of((String) null, 'a').isPresent();  // returns false
      * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
@@ -872,8 +872,8 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.of("hello world", "world").get();       // returns 6
-     * Index.of("hello world", "bye").isPresent();   // returns false
+     * Index.of("hello world", "world").get();      // returns 6
+     * Index.of("hello world", "bye").isPresent();  // returns false
      * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
@@ -927,10 +927,10 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.ofIgnoreCase("Hello World", "world").get();       // returns 6
-     * Index.ofIgnoreCase("Hello World", "HELLO").get();       // returns 0
-     * Index.ofIgnoreCase("Hello World", "bye").isPresent();   // returns false
-     * Index.ofIgnoreCase((String) null, "a").isPresent();     // returns false
+     * Index.ofIgnoreCase("Hello World", "world").get();      // returns 6
+     * Index.ofIgnoreCase("Hello World", "HELLO").get();      // returns 0
+     * Index.ofIgnoreCase("Hello World", "bye").isPresent();  // returns false
+     * Index.ofIgnoreCase((String) null, "a").isPresent();    // returns false
      * }</pre>
      *
      * <p>A {@code null} {@code valueToFind} never matches here - a substring search for "no string" has no
@@ -958,10 +958,10 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.ofIgnoreCase("Hello Hello", "HELLO", 1).get();   // returns 6
-     * Index.ofIgnoreCase("Hello World", "WORLD", 0).get();   // returns 6
-     * Index.ofIgnoreCase("Hello", "bye", 0).isPresent();     // returns false
-     * Index.ofIgnoreCase("Hello", "HELLO", 5).isPresent();   // returns false
+     * Index.ofIgnoreCase("Hello Hello", "HELLO", 1).get();  // returns 6
+     * Index.ofIgnoreCase("Hello World", "WORLD", 0).get();  // returns 6
+     * Index.ofIgnoreCase("Hello", "bye", 0).isPresent();    // returns false
+     * Index.ofIgnoreCase("Hello", "HELLO", 5).isPresent();  // returns false
      * }</pre>
      *
      * <p>A {@code null} {@code valueToFind} never matches here - a substring search for "no string" has no
@@ -985,8 +985,8 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.ofIgnoreCase(new String[] {"Hello", "World"}, "hello").get();   // returns 0
-     * Index.ofIgnoreCase(new String[] {"Hello"}, "xyz").isPresent();        // returns false
+     * Index.ofIgnoreCase(new String[] {"Hello", "World"}, "hello").get();  // returns 0
+     * Index.ofIgnoreCase(new String[] {"Hello"}, "xyz").isPresent();       // returns false
      * }</pre>
      *
      * <p>A {@code null} {@code valueToFind} matches a {@code null} <i>element</i> of the array, unlike the
@@ -1008,8 +1008,8 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.ofIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 1).get();   // returns 2
-     * Index.ofIgnoreCase(new String[] {"Hello"}, "xyz", 0).isPresent();                 // returns false
+     * Index.ofIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 1).get();  // returns 2
+     * Index.ofIgnoreCase(new String[] {"Hello"}, "xyz", 0).isPresent();                // returns false
      * }</pre>
      *
      * <p>A {@code null} {@code valueToFind} matches a {@code null} <i>element</i> of the array, unlike the
@@ -1064,9 +1064,9 @@ public final class Index {
      * <pre>{@code
      * boolean[] source = {true, false, true, true, false, true, true};
      * boolean[] sub = {true, true};
-     * Index.ofSubArray(source, 0, sub).get();         // returns 2
-     * Index.ofSubArray(source, 3, sub).get();         // returns 5
-     * Index.ofSubArray(source, 6, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub).get();        // returns 2
+     * Index.ofSubArray(source, 3, sub).get();        // returns 5
+     * Index.ofSubArray(source, 6, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1104,11 +1104,11 @@ public final class Index {
      * <pre>{@code
      * boolean[] source = {true, false, true, true, false};
      * boolean[] sub = {true, true, false};
-     * Index.ofSubArray(source, 0, sub, 0, 2).get();                   // returns 2
-     * Index.ofSubArray(source, 0, sub, 0, 3).get();                   // returns 2
-     * Index.ofSubArray(source, 3, sub, 0, 2).isPresent();             // returns false
-     * Index.ofSubArray(source, 3, sub, 0, 0).get();                   // returns 3 (empty match clamped to fromIndex)
-     * Index.ofSubArray((boolean[]) null, 0, sub, 0, 2).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();                  // returns 2
+     * Index.ofSubArray(source, 0, sub, 0, 3).get();                  // returns 2
+     * Index.ofSubArray(source, 3, sub, 0, 2).isPresent();            // returns false
+     * Index.ofSubArray(source, 3, sub, 0, 0).get();                  // returns 3 (empty match clamped to fromIndex)
+     * Index.ofSubArray((boolean[]) null, 0, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1200,9 +1200,9 @@ public final class Index {
      * <pre>{@code
      * char[] source = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
      * char[] sub = {'o', 'r'};
-     * Index.ofSubArray(source, 0, sub).get();         // returns 7
-     * Index.ofSubArray(source, 5, sub).get();         // returns 7
-     * Index.ofSubArray(source, 9, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub).get();        // returns 7
+     * Index.ofSubArray(source, 5, sub).get();        // returns 7
+     * Index.ofSubArray(source, 9, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1318,9 +1318,9 @@ public final class Index {
      * <pre>{@code
      * byte[] source = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50};
      * byte[] sub = {(byte) 30, (byte) 40};
-     * Index.ofSubArray(source, sub).get();                // returns 3
-     * Index.ofSubArray(new byte[0], sub).isPresent();     // returns false
-     * Index.ofSubArray((byte[]) null, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, sub).get();               // returns 3
+     * Index.ofSubArray(new byte[0], sub).isPresent();    // returns false
+     * Index.ofSubArray((byte[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1348,8 +1348,8 @@ public final class Index {
      * <pre>{@code
      * byte[] source = {1, 2, 3, 4, 5, 6, 7, 8};
      * byte[] pattern = {4, 5, 6};
-     * Index.ofSubArray(source, 0, pattern).get();         // returns 3
-     * Index.ofSubArray(source, 4, pattern).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, pattern).get();        // returns 3
+     * Index.ofSubArray(source, 4, pattern).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1456,9 +1456,9 @@ public final class Index {
      * <pre>{@code
      * short[] source = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40, (short) 50};
      * short[] sub = {(short) 30, (short) 40};
-     * Index.ofSubArray(source, sub).get();                 // returns 3
-     * Index.ofSubArray(new short[0], sub).isPresent();     // returns false
-     * Index.ofSubArray((short[]) null, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, sub).get();                // returns 3
+     * Index.ofSubArray(new short[0], sub).isPresent();    // returns false
+     * Index.ofSubArray((short[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1488,8 +1488,8 @@ public final class Index {
      * <pre>{@code
      * short[] source = {10, 20, 30, 40, 50, 60};
      * short[] pattern = {30, 40, 50};
-     * Index.ofSubArray(source, 0, pattern).get();         // returns 2
-     * Index.ofSubArray(source, 3, pattern).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, pattern).get();        // returns 2
+     * Index.ofSubArray(source, 3, pattern).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1596,9 +1596,9 @@ public final class Index {
      * <pre>{@code
      * int[] source = {0, 10, 20, 30, 40, 50};
      * int[] sub = {30, 40};
-     * Index.ofSubArray(source, sub).get();               // returns 3
-     * Index.ofSubArray(new int[0], sub).isPresent();     // returns false
-     * Index.ofSubArray((int[]) null, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, sub).get();              // returns 3
+     * Index.ofSubArray(new int[0], sub).isPresent();    // returns false
+     * Index.ofSubArray((int[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1625,10 +1625,10 @@ public final class Index {
      * <pre>{@code
      * int[] source = {0, 10, 20, 30, 40, 50};
      * int[] sub = {20, 30};
-     * Index.ofSubArray(source, 0, sub).get();               // returns 2
-     * Index.ofSubArray(source, 3, sub).isPresent();         // returns false
-     * Index.ofSubArray(source, 10, sub).isPresent();        // returns false
-     * Index.ofSubArray((int[]) null, 0, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub).get();              // returns 2
+     * Index.ofSubArray(source, 3, sub).isPresent();        // returns false
+     * Index.ofSubArray(source, 10, sub).isPresent();       // returns false
+     * Index.ofSubArray((int[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1669,11 +1669,11 @@ public final class Index {
      * <pre>{@code
      * int[] source = {1, 2, 3, 2, 3, 4};
      * int[] sub = {2, 3, 9};
-     * Index.ofSubArray(source, 0, sub, 0, 2).get();               // returns 1
-     * Index.ofSubArray(source, 2, sub, 0, 2).get();               // returns 3
-     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();         // returns false
-     * Index.ofSubArray(source, 2, sub, 0, 0).get();               // returns 2 (empty match clamped to fromIndex)
-     * Index.ofSubArray((int[]) null, 0, sub, 0, 2).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();              // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).get();              // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();        // returns false
+     * Index.ofSubArray(source, 2, sub, 0, 0).get();              // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray((int[]) null, 0, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1738,9 +1738,9 @@ public final class Index {
      * <pre>{@code
      * long[] source = {0L, 10L, 20L, 30L, 40L, 50L};
      * long[] sub = {30L, 40L};
-     * Index.ofSubArray(source, sub).get();                // returns 3
-     * Index.ofSubArray(new long[0], sub).isPresent();     // returns false
-     * Index.ofSubArray((long[]) null, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, sub).get();               // returns 3
+     * Index.ofSubArray(new long[0], sub).isPresent();    // returns false
+     * Index.ofSubArray((long[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1767,10 +1767,10 @@ public final class Index {
      * <pre>{@code
      * long[] source = {0L, 10L, 20L, 30L, 40L, 50L};
      * long[] sub = {20L, 30L};
-     * Index.ofSubArray(source, 0, sub).get();                // returns 2
-     * Index.ofSubArray(source, 3, sub).isPresent();          // returns false
-     * Index.ofSubArray(source, 10, sub).isPresent();         // returns false
-     * Index.ofSubArray((long[]) null, 0, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub).get();               // returns 2
+     * Index.ofSubArray(source, 3, sub).isPresent();         // returns false
+     * Index.ofSubArray(source, 10, sub).isPresent();        // returns false
+     * Index.ofSubArray((long[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1811,11 +1811,11 @@ public final class Index {
      * <pre>{@code
      * long[] source = {1L, 2L, 3L, 2L, 3L, 4L};
      * long[] sub = {2L, 3L, 9L};
-     * Index.ofSubArray(source, 0, sub, 0, 2).get();                // returns 1
-     * Index.ofSubArray(source, 2, sub, 0, 2).get();                // returns 3
-     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();          // returns false
-     * Index.ofSubArray(source, 2, sub, 0, 0).get();                // returns 2 (empty match clamped to fromIndex)
-     * Index.ofSubArray((long[]) null, 0, sub, 0, 2).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();               // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).get();               // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();         // returns false
+     * Index.ofSubArray(source, 2, sub, 0, 0).get();               // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray((long[]) null, 0, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1881,9 +1881,9 @@ public final class Index {
      * <pre>{@code
      * float[] source = {0.0f, 10.0f, 20.0f, 30.0f, 40.0f, 50.0f};
      * float[] sub = {30.0f, 40.0f};
-     * Index.ofSubArray(source, sub).get();                 // returns 3
-     * Index.ofSubArray(new float[0], sub).isPresent();     // returns false
-     * Index.ofSubArray((float[]) null, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, sub).get();                // returns 3
+     * Index.ofSubArray(new float[0], sub).isPresent();    // returns false
+     * Index.ofSubArray((float[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1910,10 +1910,10 @@ public final class Index {
      * <pre>{@code
      * float[] source = {0.0f, 10.0f, 20.0f, 30.0f, 40.0f, 50.0f};
      * float[] sub = {20.0f, 30.0f};
-     * Index.ofSubArray(source, 0, sub).get();                 // returns 2
-     * Index.ofSubArray(source, 3, sub).isPresent();           // returns false
-     * Index.ofSubArray(source, 10, sub).isPresent();          // returns false
-     * Index.ofSubArray((float[]) null, 0, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub).get();                // returns 2
+     * Index.ofSubArray(source, 3, sub).isPresent();          // returns false
+     * Index.ofSubArray(source, 10, sub).isPresent();         // returns false
+     * Index.ofSubArray((float[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -1953,11 +1953,11 @@ public final class Index {
      * <pre>{@code
      * float[] source = {1f, 2f, 3f, 2f, 3f, 4f};
      * float[] sub = {2f, 3f, 9f};
-     * Index.ofSubArray(source, 0, sub, 0, 2).get();                 // returns 1
-     * Index.ofSubArray(source, 2, sub, 0, 2).get();                 // returns 3
-     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();           // returns false
-     * Index.ofSubArray(source, 2, sub, 0, 0).get();                 // returns 2 (empty match clamped to fromIndex)
-     * Index.ofSubArray((float[]) null, 0, sub, 0, 2).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();                // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).get();                // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();          // returns false
+     * Index.ofSubArray(source, 2, sub, 0, 0).get();                // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray((float[]) null, 0, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -2023,9 +2023,9 @@ public final class Index {
      * <pre>{@code
      * double[] source = {0.0, 10.0, 20.0, 30.0, 40.0, 50.0};
      * double[] sub = {30.0, 40.0};
-     * Index.ofSubArray(source, sub).get();                  // returns 3
-     * Index.ofSubArray(new double[0], sub).isPresent();     // returns false
-     * Index.ofSubArray((double[]) null, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, sub).get();                 // returns 3
+     * Index.ofSubArray(new double[0], sub).isPresent();    // returns false
+     * Index.ofSubArray((double[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -2052,10 +2052,10 @@ public final class Index {
      * <pre>{@code
      * double[] source = {0.0, 10.0, 20.0, 30.0, 40.0, 50.0};
      * double[] sub = {20.0, 30.0};
-     * Index.ofSubArray(source, 0, sub).get();                  // returns 2
-     * Index.ofSubArray(source, 3, sub).isPresent();            // returns false
-     * Index.ofSubArray(source, 10, sub).isPresent();           // returns false
-     * Index.ofSubArray((double[]) null, 0, sub).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub).get();                 // returns 2
+     * Index.ofSubArray(source, 3, sub).isPresent();           // returns false
+     * Index.ofSubArray(source, 10, sub).isPresent();          // returns false
+     * Index.ofSubArray((double[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -2095,11 +2095,11 @@ public final class Index {
      * <pre>{@code
      * double[] source = {1d, 2d, 3d, 2d, 3d, 4d};
      * double[] sub = {2d, 3d, 9d};
-     * Index.ofSubArray(source, 0, sub, 0, 2).get();                  // returns 1
-     * Index.ofSubArray(source, 2, sub, 0, 2).get();                  // returns 3
-     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();            // returns false
-     * Index.ofSubArray(source, 2, sub, 0, 0).get();                  // returns 2 (empty match clamped to fromIndex)
-     * Index.ofSubArray((double[]) null, 0, sub, 0, 2).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, sub, 0, 2).get();                 // returns 1
+     * Index.ofSubArray(source, 2, sub, 0, 2).get();                 // returns 3
+     * Index.ofSubArray(source, 0, sub, 0, 3).isPresent();           // returns false
+     * Index.ofSubArray(source, 2, sub, 0, 0).get();                 // returns 2 (empty match clamped to fromIndex)
+     * Index.ofSubArray((double[]) null, 0, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -2203,9 +2203,9 @@ public final class Index {
      * <pre>{@code
      * String[] source = {"a", "b", "c", "d", "c", "d", "e"};
      * String[] pattern = {"c", "d"};
-     * Index.ofSubArray(source, 0, pattern).get();         // returns 2
-     * Index.ofSubArray(source, 3, pattern).get();         // returns 4
-     * Index.ofSubArray(source, 5, pattern).isPresent();   // returns false
+     * Index.ofSubArray(source, 0, pattern).get();        // returns 2
+     * Index.ofSubArray(source, 3, pattern).get();        // returns 4
+     * Index.ofSubArray(source, 5, pattern).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -2359,9 +2359,9 @@ public final class Index {
      * <pre>{@code
      * List<String> source = Arrays.asList("a", "b", "c", "d", "c", "d", "e");
      * List<String> pattern = Arrays.asList("c", "d");
-     * Index.ofSubList(source, 0, pattern).get();         // returns 2
-     * Index.ofSubList(source, 3, pattern).get();         // returns 4
-     * Index.ofSubList(source, 5, pattern).isPresent();   // returns false
+     * Index.ofSubList(source, 0, pattern).get();        // returns 2
+     * Index.ofSubList(source, 3, pattern).get();        // returns 4
+     * Index.ofSubList(source, 5, pattern).isPresent();  // returns false
      * }</pre>
      *
      * @param source the list to be searched, may be {@code null}
@@ -2389,8 +2389,8 @@ public final class Index {
      * starting at {@code startIndexOfSubList}. Elements are compared using {@link N#equals(Object, Object)},
      * which handles {@code null} values correctly. This allows for flexible partial sublist matching.
      * <p>
-     * The implementation is optimized for {@link RandomAccess} lists. For non-RandomAccess lists,
-     * it converts sublists to arrays for comparison.
+     * The implementation is optimized for {@link RandomAccess} lists. A list that is not RandomAccess is
+     * copied to an array (only the part that is searched or matched) before comparison.
      * <p>
      * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
@@ -2457,12 +2457,17 @@ public final class Index {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        if (source instanceof RandomAccess && subListToFind instanceof RandomAccess) {
-            final int endIndexOfTargetSubList = startIndexOfSubList + sizeToMatch;
+        if (source instanceof RandomAccess) {
+            // Only a sequential pattern is copied (just the slice to match); a RandomAccess source is never copied.
+            final boolean isRandomAccessTarget = subListToFind instanceof RandomAccess;
+            final List<?> target = isRandomAccessTarget ? subListToFind
+                    : Arrays.asList(subListToFind.subList(startIndexOfSubList, startIndexOfSubList + sizeToMatch).toArray());
+            final int startIndexOfTarget = isRandomAccessTarget ? startIndexOfSubList : 0;
+            final int endIndexOfTargetSubList = startIndexOfTarget + sizeToMatch;
 
             for (int i = N.max(fromIndex, 0), maxFromIndex = len - sizeToMatch; i <= maxFromIndex; i++) {
-                for (int k = i, j = startIndexOfSubList; j < endIndexOfTargetSubList; k++, j++) {
-                    if (!N.equals(source.get(k), subListToFind.get(j))) {
+                for (int k = i, j = startIndexOfTarget; j < endIndexOfTargetSubList; k++, j++) {
+                    if (!N.equals(source.get(k), target.get(j))) {
                         break;
                     } else if (j == endIndexOfTargetSubList - 1) {
                         return toOptionalInt(i);
@@ -2489,10 +2494,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {false, true, false, true};
-     * Index.last(arr, true).get();                      // returns 3
-     * Index.last(arr, false).get();                     // returns 2
-     * Index.last(arr, true).orElse(-1);                 // returns 3
-     * Index.last((boolean[]) null, true).isPresent();   // returns false
+     * Index.last(arr, true).get();                     // returns 3
+     * Index.last(arr, false).get();                    // returns 2
+     * Index.last(arr, true).orElse(-1);                // returns 3
+     * Index.last((boolean[]) null, true).isPresent();  // returns false
      * }</pre>
      *
      * @param source the boolean array to be searched, may be {@code null}
@@ -2516,10 +2521,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {false, true, false, true, false};
-     * Index.last(arr, true, 3).get();    // returns 3
-     * Index.last(arr, true, 1).get();    // returns 1
-     * Index.last(arr, false, 3).get();   // returns 2
-     * Index.last(arr, true, 10).get();   // returns 3
+     * Index.last(arr, true, 3).get();   // returns 3
+     * Index.last(arr, true, 1).get();   // returns 1
+     * Index.last(arr, false, 3).get();  // returns 2
+     * Index.last(arr, true, 10).get();  // returns 3
      * }</pre>
      *
      * @param source the boolean array to be searched, may be {@code null}
@@ -2543,10 +2548,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'h', 'e', 'l', 'l', 'o'};
-     * Index.last(arr, 'l').get();                   // returns 3
-     * Index.last(arr, 'h').get();                   // returns 0
-     * Index.last(arr, 'x').isPresent();             // returns false
-     * Index.last((char[]) null, 'a').isPresent();   // returns false
+     * Index.last(arr, 'l').get();                  // returns 3
+     * Index.last(arr, 'h').get();                  // returns 0
+     * Index.last(arr, 'x').isPresent();            // returns false
+     * Index.last((char[]) null, 'a').isPresent();  // returns false
      * }</pre>
      *
      * @param source the char array to be searched, may be {@code null}
@@ -2569,10 +2574,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'h', 'e', 'l', 'l', 'o'};
-     * Index.last(arr, 'l', 3).get();         // returns 3
-     * Index.last(arr, 'l', 2).get();         // returns 2
-     * Index.last(arr, 'h', 0).get();         // returns 0
-     * Index.last(arr, 'x', 3).isPresent();   // returns false
+     * Index.last(arr, 'l', 3).get();        // returns 3
+     * Index.last(arr, 'l', 2).get();        // returns 2
+     * Index.last(arr, 'h', 0).get();        // returns 0
+     * Index.last(arr, 'x', 3).isPresent();  // returns false
      * }</pre>
      *
      * @param source the char array to be searched, may be {@code null}
@@ -2598,10 +2603,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
-     * Index.last(arr, (byte) 10).get();                   // returns 1
-     * Index.last(arr, (byte) 20).get();                   // returns 2
-     * Index.last(arr, (byte) 90).isPresent();             // returns false
-     * Index.last((byte[]) null, (byte) 10).isPresent();   // returns false
+     * Index.last(arr, (byte) 10).get();                  // returns 1
+     * Index.last(arr, (byte) 20).get();                  // returns 2
+     * Index.last(arr, (byte) 90).isPresent();            // returns false
+     * Index.last((byte[]) null, (byte) 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
@@ -2624,10 +2629,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
-     * Index.last(arr, (byte) 10, 2).get();         // returns 1
-     * Index.last(arr, (byte) 20, 4).get();         // returns 2
-     * Index.last(arr, (byte) 90, 3).isPresent();   // returns false
-     * Index.last(arr, (byte) 10, 10).get();        // returns 1
+     * Index.last(arr, (byte) 10, 2).get();        // returns 1
+     * Index.last(arr, (byte) 20, 4).get();        // returns 2
+     * Index.last(arr, (byte) 90, 3).isPresent();  // returns false
+     * Index.last(arr, (byte) 10, 10).get();       // returns 1
      * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
@@ -2653,10 +2658,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
-     * Index.last(arr, (short) 10).get();                    // returns 1
-     * Index.last(arr, (short) 20).get();                    // returns 2
-     * Index.last(arr, (short) 90).isPresent();              // returns false
-     * Index.last((short[]) null, (short) 10).isPresent();   // returns false
+     * Index.last(arr, (short) 10).get();                   // returns 1
+     * Index.last(arr, (short) 20).get();                   // returns 2
+     * Index.last(arr, (short) 90).isPresent();             // returns false
+     * Index.last((short[]) null, (short) 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
@@ -2679,10 +2684,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
-     * Index.last(arr, (short) 10, 2).get();         // returns 1
-     * Index.last(arr, (short) 20, 4).get();         // returns 2
-     * Index.last(arr, (short) 90, 3).isPresent();   // returns false
-     * Index.last(arr, (short) 10, 10).get();        // returns 1
+     * Index.last(arr, (short) 10, 2).get();        // returns 1
+     * Index.last(arr, (short) 20, 4).get();        // returns 2
+     * Index.last(arr, (short) 90, 3).isPresent();  // returns false
+     * Index.last(arr, (short) 10, 10).get();       // returns 1
      * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
@@ -2708,10 +2713,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {0, 10, 20, 30, 40};
-     * Index.last(arr, 10).get();                  // returns 1
-     * Index.last(arr, 20).get();                  // returns 2
-     * Index.last(arr, 90).isPresent();            // returns false
-     * Index.last((int[]) null, 10).isPresent();   // returns false
+     * Index.last(arr, 10).get();                 // returns 1
+     * Index.last(arr, 20).get();                 // returns 2
+     * Index.last(arr, 90).isPresent();           // returns false
+     * Index.last((int[]) null, 10).isPresent();  // returns false
      * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
@@ -2734,10 +2739,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {0, 10, 20, 30, 40};
-     * Index.last(arr, 10, 2).get();         // returns 1
-     * Index.last(arr, 20, 4).get();         // returns 2
-     * Index.last(arr, 90, 3).isPresent();   // returns false
-     * Index.last(arr, 10, 10).get();        // returns 1
+     * Index.last(arr, 10, 2).get();        // returns 1
+     * Index.last(arr, 20, 4).get();        // returns 2
+     * Index.last(arr, 90, 3).isPresent();  // returns false
+     * Index.last(arr, 10, 10).get();       // returns 1
      * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
@@ -2763,10 +2768,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {0L, 10L, 20L, 30L, 40L};
-     * Index.last(arr, 10L).get();                   // returns 1
-     * Index.last(arr, 20L).get();                   // returns 2
-     * Index.last(arr, 90L).isPresent();             // returns false
-     * Index.last((long[]) null, 10L).isPresent();   // returns false
+     * Index.last(arr, 10L).get();                  // returns 1
+     * Index.last(arr, 20L).get();                  // returns 2
+     * Index.last(arr, 90L).isPresent();            // returns false
+     * Index.last((long[]) null, 10L).isPresent();  // returns false
      * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
@@ -2789,10 +2794,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {0L, 10L, 20L, 30L, 40L};
-     * Index.last(arr, 10L, 2).get();         // returns 1
-     * Index.last(arr, 20L, 4).get();         // returns 2
-     * Index.last(arr, 90L, 3).isPresent();   // returns false
-     * Index.last(arr, 10L, 10).get();        // returns 1
+     * Index.last(arr, 10L, 2).get();        // returns 1
+     * Index.last(arr, 20L, 4).get();        // returns 2
+     * Index.last(arr, 90L, 3).isPresent();  // returns false
+     * Index.last(arr, 10L, 10).get();       // returns 1
      * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
@@ -2819,10 +2824,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
-     * Index.last(arr, 2.0f).get();                    // returns 3
-     * Index.last(arr, 1.0f).get();                    // returns 0
-     * Index.last(arr, 5.0f).isPresent();              // returns false
-     * Index.last((float[]) null, 1.0f).isPresent();   // returns false
+     * Index.last(arr, 2.0f).get();                   // returns 3
+     * Index.last(arr, 1.0f).get();                   // returns 0
+     * Index.last(arr, 5.0f).isPresent();             // returns false
+     * Index.last((float[]) null, 1.0f).isPresent();  // returns false
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -2848,10 +2853,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
-     * Index.last(arr, 2.0f, 3).get();         // returns 3
-     * Index.last(arr, 2.0f, 1).get();         // returns 1
-     * Index.last(arr, 5.0f, 2).isPresent();   // returns false
-     * Index.last(arr, 1.0f, 0).get();         // returns 0
+     * Index.last(arr, 2.0f, 3).get();        // returns 3
+     * Index.last(arr, 2.0f, 1).get();        // returns 1
+     * Index.last(arr, 5.0f, 2).isPresent();  // returns false
+     * Index.last(arr, 1.0f, 0).get();        // returns 0
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -2888,10 +2893,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
-     * Index.last(arr, 2.0f, 4, 0.2f).get();                    // returns 1 (2.2f at index 3 excluded: 2.2f - 2.0f > 0.2f)
-     * Index.last(arr, 2.0f, 2, 0.2f).get();                    // returns 1
-     * Index.last(arr, 5.0f, 3, 0.1f).isPresent();              // returns false
-     * Index.last((float[]) null, 2.0f, 4, 0.1f).isPresent();   // returns false
+     * Index.last(arr, 2.0f, 4, 0.2f).get();                   // returns 1 (2.2f at index 3 excluded: 2.2f - 2.0f > 0.2f)
+     * Index.last(arr, 2.0f, 2, 0.2f).get();                   // returns 1
+     * Index.last(arr, 5.0f, 3, 0.1f).isPresent();             // returns false
+     * Index.last((float[]) null, 2.0f, 4, 0.1f).isPresent();  // returns false
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -2920,10 +2925,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
-     * Index.last(arr, 2.0).get();                     // returns 3
-     * Index.last(arr, 1.0).get();                     // returns 0
-     * Index.last(arr, 5.0).isPresent();               // returns false
-     * Index.last((double[]) null, 1.0).isPresent();   // returns false
+     * Index.last(arr, 2.0).get();                    // returns 3
+     * Index.last(arr, 1.0).get();                    // returns 0
+     * Index.last(arr, 5.0).isPresent();              // returns false
+     * Index.last((double[]) null, 1.0).isPresent();  // returns false
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -2948,10 +2953,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
-     * Index.last(arr, 2.0, 3).get();         // returns 3
-     * Index.last(arr, 2.0, 1).get();         // returns 1
-     * Index.last(arr, 5.0, 2).isPresent();   // returns false
-     * Index.last(arr, 1.0, 0).get();         // returns 0
+     * Index.last(arr, 2.0, 3).get();        // returns 3
+     * Index.last(arr, 2.0, 1).get();        // returns 1
+     * Index.last(arr, 5.0, 2).isPresent();  // returns false
+     * Index.last(arr, 1.0, 0).get();        // returns 0
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -2987,10 +2992,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.last(arr, 2.0, 4, 0.2).get();                     // returns 1 (2.2 at index 3 is outside the tolerance)
-     * Index.last(arr, 2.0, 2, 0.2).get();                     // returns 1
-     * Index.last(arr, 5.0, 3, 0.1).isPresent();               // returns false
-     * Index.last((double[]) null, 2.0, 4, 0.1).isPresent();   // returns false
+     * Index.last(arr, 2.0, 4, 0.2).get();                    // returns 1 (2.2 at index 3 is outside the tolerance)
+     * Index.last(arr, 2.0, 2, 0.2).get();                    // returns 1
+     * Index.last(arr, 5.0, 3, 0.1).isPresent();              // returns false
+     * Index.last((double[]) null, 2.0, 4, 0.1).isPresent();  // returns false
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -3019,9 +3024,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"a", "b", "c", "b", "a"};
-     * Index.last(arr, "b").get();         // returns 3
-     * Index.last(arr, "a").get();         // returns 4
-     * Index.last(arr, "d").isPresent();   // returns false
+     * Index.last(arr, "b").get();        // returns 3
+     * Index.last(arr, "a").get();        // returns 4
+     * Index.last(arr, "d").isPresent();  // returns false
      *
      * // Handles null elements
      * String[] withNull = {"a", null, "b", null};
@@ -3050,9 +3055,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"a", "b", "c", "b", "a"};
-     * Index.last(arr, "b", 4).get();         // returns 3 (searches from index 4 backward)
-     * Index.last(arr, "b", 2).get();         // returns 1 (searches from index 2 backward)
-     * Index.last(arr, "b", 0).isPresent();   // returns false (only checks index 0)
+     * Index.last(arr, "b", 4).get();        // returns 3 (searches from index 4 backward)
+     * Index.last(arr, "b", 2).get();        // returns 1 (searches from index 2 backward)
+     * Index.last(arr, "b", 0).isPresent();  // returns false (only checks index 0)
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3078,9 +3083,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "b", "a");
-     * Index.last(list, "b").get();         // returns 3
-     * Index.last(list, "a").get();         // returns 4
-     * Index.last(list, "d").isPresent();   // returns false
+     * Index.last(list, "b").get();        // returns 3
+     * Index.last(list, "a").get();        // returns 4
+     * Index.last(list, "d").isPresent();  // returns false
      * }</pre>
      *
      * @param source the collection to be searched, may be {@code null}
@@ -3104,10 +3109,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "b");
-     * Index.last(list, "b", 3).get();         // returns 3
-     * Index.last(list, "b", 2).get();         // returns 1
-     * Index.last(list, "a", 0).get();         // returns 0
-     * Index.last(list, "x", 2).isPresent();   // returns false
+     * Index.last(list, "b", 3).get();        // returns 3
+     * Index.last(list, "b", 2).get();        // returns 1
+     * Index.last(list, "a", 0).get();        // returns 0
+     * Index.last(list, "x", 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the collection to be searched, may be {@code null}
@@ -3130,10 +3135,10 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.last("hello", 'l').get();               // returns 3
-     * Index.last("hello", 'o').get();               // returns 4
-     * Index.last("hello", 'x').isPresent();         // returns false
-     * Index.last((String) null, 'a').isPresent();   // returns false
+     * Index.last("hello", 'l').get();              // returns 3
+     * Index.last("hello", 'o').get();              // returns 4
+     * Index.last("hello", 'x').isPresent();        // returns false
+     * Index.last((String) null, 'a').isPresent();  // returns false
      * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
@@ -3156,10 +3161,10 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.last("hello", 'l', 3).get();         // returns 3
-     * Index.last("hello", 'l', 2).get();         // returns 2
-     * Index.last("hello", 'h', 0).get();         // returns 0
-     * Index.last("hello", 'x', 3).isPresent();   // returns false
+     * Index.last("hello", 'l', 3).get();        // returns 3
+     * Index.last("hello", 'l', 2).get();        // returns 2
+     * Index.last("hello", 'h', 0).get();        // returns 0
+     * Index.last("hello", 'x', 3).isPresent();  // returns false
      * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
@@ -3183,9 +3188,9 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.last("hello world hello", "hello").get();   // returns 12
-     * Index.last("hello world", "world").get();         // returns 6
-     * Index.last("hello world", "bye").isPresent();     // returns false
+     * Index.last("hello world hello", "hello").get();  // returns 12
+     * Index.last("hello world", "world").get();        // returns 6
+     * Index.last("hello world", "bye").isPresent();    // returns false
      * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
@@ -3211,10 +3216,10 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.last("hello world hello", "hello", 12).get();   // returns 12
-     * Index.last("hello world hello", "hello", 6).get();    // returns 0
-     * Index.last("hello", "bye", 4).isPresent();            // returns false
-     * Index.last("hello", "he", 1).get();                   // returns 0
+     * Index.last("hello world hello", "hello", 12).get();  // returns 12
+     * Index.last("hello world hello", "hello", 6).get();   // returns 0
+     * Index.last("hello", "bye", 4).isPresent();           // returns false
+     * Index.last("hello", "he", 1).get();                  // returns 0
      * }</pre>
      *
      * @param source the string to be searched, may be {@code null}
@@ -3242,10 +3247,10 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.lastOfIgnoreCase("Hello World Hello", "Hello").get();   // returns 12
-     * Index.lastOfIgnoreCase("Hello World", "WORLD").get();         // returns 6
-     * Index.lastOfIgnoreCase("Hello", "bye").isPresent();           // returns false
-     * Index.lastOfIgnoreCase((String) null, "a").isPresent();       // returns false
+     * Index.lastOfIgnoreCase("Hello World Hello", "Hello").get();  // returns 12
+     * Index.lastOfIgnoreCase("Hello World", "WORLD").get();        // returns 6
+     * Index.lastOfIgnoreCase("Hello", "bye").isPresent();          // returns false
+     * Index.lastOfIgnoreCase((String) null, "a").isPresent();      // returns false
      * }</pre>
      *
      * <p>A {@code null} {@code valueToFind} never matches here - a substring search for "no string" has no
@@ -3273,10 +3278,10 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.lastOfIgnoreCase("Hello World Hello", "HELLO", 12).get();   // returns 12
-     * Index.lastOfIgnoreCase("Hello World Hello", "HELLO", 6).get();    // returns 0
-     * Index.lastOfIgnoreCase("Hello", "bye", 4).isPresent();            // returns false
-     * Index.lastOfIgnoreCase("Hello", "he", 1).get();                   // returns 0
+     * Index.lastOfIgnoreCase("Hello World Hello", "HELLO", 12).get();  // returns 12
+     * Index.lastOfIgnoreCase("Hello World Hello", "HELLO", 6).get();   // returns 0
+     * Index.lastOfIgnoreCase("Hello", "bye", 4).isPresent();           // returns false
+     * Index.lastOfIgnoreCase("Hello", "he", 1).get();                  // returns 0
      * }</pre>
      *
      * <p>A {@code null} {@code valueToFind} never matches here - a substring search for "no string" has no
@@ -3301,8 +3306,8 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello").get();   // returns 2
-     * Index.lastOfIgnoreCase(new String[] {"Hello"}, "xyz").isPresent();                 // returns false
+     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello").get();  // returns 2
+     * Index.lastOfIgnoreCase(new String[] {"Hello"}, "xyz").isPresent();                // returns false
      * }</pre>
      *
      * <p>A {@code null} {@code valueToFind} matches a {@code null} <i>element</i> of the array, unlike the
@@ -3324,8 +3329,8 @@ public final class Index {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 2).get();   // returns 2
-     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 1).get();   // returns 0
+     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 2).get();  // returns 2
+     * Index.lastOfIgnoreCase(new String[] {"Hello", "World", "HELLO"}, "hello", 1).get();  // returns 0
      * }</pre>
      *
      * <p>A {@code null} {@code valueToFind} matches a {@code null} <i>element</i> of the array, unlike the
@@ -3354,9 +3359,9 @@ public final class Index {
      * <pre>{@code
      * boolean[] source = {true, false, true, true, false, true, true};
      * boolean[] sub = {true, true};
-     * Index.lastOfSubArray(source, sub).get();                   // returns 5
-     * Index.lastOfSubArray(source, new boolean[0]).get();        // returns 7
-     * Index.lastOfSubArray((boolean[]) null, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, sub).get();                  // returns 5
+     * Index.lastOfSubArray(source, new boolean[0]).get();       // returns 7
+     * Index.lastOfSubArray((boolean[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3385,10 +3390,10 @@ public final class Index {
      * <pre>{@code
      * boolean[] source = {true, false, true, true, false, true, true};
      * boolean[] sub = {true, true};
-     * Index.lastOfSubArray(source, 6, sub).get();                   // returns 5
-     * Index.lastOfSubArray(source, 2, sub).get();                   // returns 2
-     * Index.lastOfSubArray(source, 1, sub).isPresent();             // returns false
-     * Index.lastOfSubArray((boolean[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();                  // returns 5
+     * Index.lastOfSubArray(source, 2, sub).get();                  // returns 2
+     * Index.lastOfSubArray(source, 1, sub).isPresent();            // returns false
+     * Index.lastOfSubArray((boolean[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3426,11 +3431,11 @@ public final class Index {
      * <pre>{@code
      * boolean[] source = {true, true, false, true, true, false};
      * boolean[] sub = {true, true, false};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                   // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                   // returns 0
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();            // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                   // returns 5 (empty match)
-     * Index.lastOfSubArray((boolean[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                  // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                  // returns 0
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();           // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                  // returns 5 (empty match)
+     * Index.lastOfSubArray((boolean[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3493,9 +3498,9 @@ public final class Index {
      * <pre>{@code
      * char[] source = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
      * char[] sub = {'l', 'l'};
-     * Index.lastOfSubArray(source, sub).get();                          // returns 2
-     * Index.lastOfSubArray(source, new char[]{'x', 'y'}).isPresent();   // returns false
-     * Index.lastOfSubArray((char[]) null, sub).isPresent();             // returns false
+     * Index.lastOfSubArray(source, sub).get();                         // returns 2
+     * Index.lastOfSubArray(source, new char[]{'x', 'y'}).isPresent();  // returns false
+     * Index.lastOfSubArray((char[]) null, sub).isPresent();            // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3523,10 +3528,10 @@ public final class Index {
      * <pre>{@code
      * char[] source = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
      * char[] sub = {'l', 'l'};
-     * Index.lastOfSubArray(source, 10, sub).get();               // returns 2
-     * Index.lastOfSubArray(source, 1, sub).isPresent();          // returns false
-     * Index.lastOfSubArray(source, 6, sub).get();                // returns 2
-     * Index.lastOfSubArray((char[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();              // returns 2
+     * Index.lastOfSubArray(source, 1, sub).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();               // returns 2
+     * Index.lastOfSubArray((char[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3566,11 +3571,11 @@ public final class Index {
      * <pre>{@code
      * char[] source = {'a', 'b', 'c', 'b', 'c', 'd'};
      * char[] sub = {'b', 'c', 'z'};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                // returns 1
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
-     * Index.lastOfSubArray((char[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();               // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();               // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();               // returns 5 (empty match)
+     * Index.lastOfSubArray((char[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3631,9 +3636,9 @@ public final class Index {
      * <pre>{@code
      * byte[] source = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50, (byte) 60};
      * byte[] sub = {(byte) 10, (byte) 20};
-     * Index.lastOfSubArray(source, sub).get();                // returns 1
-     * Index.lastOfSubArray(new byte[0], sub).isPresent();     // returns false
-     * Index.lastOfSubArray((byte[]) null, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, sub).get();               // returns 1
+     * Index.lastOfSubArray(new byte[0], sub).isPresent();    // returns false
+     * Index.lastOfSubArray((byte[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3661,10 +3666,10 @@ public final class Index {
      * <pre>{@code
      * byte[] source = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40, (byte) 50, (byte) 60};
      * byte[] sub = {(byte) 10, (byte) 20};
-     * Index.lastOfSubArray(source, 6, sub).get();                // returns 1
-     * Index.lastOfSubArray(source, 0, sub).isPresent();          // returns false
-     * Index.lastOfSubArray(source, 10, sub).get();               // returns 1
-     * Index.lastOfSubArray((byte[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();               // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();              // returns 1
+     * Index.lastOfSubArray((byte[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3704,11 +3709,11 @@ public final class Index {
      * <pre>{@code
      * byte[] source = {1, 2, 3, 2, 3, 4};
      * byte[] sub = {2, 3, 9};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                // returns 1
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
-     * Index.lastOfSubArray((byte[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();               // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();               // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();               // returns 5 (empty match)
+     * Index.lastOfSubArray((byte[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3769,9 +3774,9 @@ public final class Index {
      * <pre>{@code
      * short[] source = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40, (short) 50, (short) 60};
      * short[] sub = {(short) 10, (short) 20};
-     * Index.lastOfSubArray(source, sub).get();                 // returns 1
-     * Index.lastOfSubArray(new short[0], sub).isPresent();     // returns false
-     * Index.lastOfSubArray((short[]) null, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, sub).get();                // returns 1
+     * Index.lastOfSubArray(new short[0], sub).isPresent();    // returns false
+     * Index.lastOfSubArray((short[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3800,10 +3805,10 @@ public final class Index {
      * <pre>{@code
      * short[] source = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40, (short) 50, (short) 60};
      * short[] sub = {(short) 10, (short) 20};
-     * Index.lastOfSubArray(source, 6, sub).get();                 // returns 1
-     * Index.lastOfSubArray(source, 0, sub).isPresent();           // returns false
-     * Index.lastOfSubArray(source, 10, sub).get();                // returns 1
-     * Index.lastOfSubArray((short[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();                // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();          // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();               // returns 1
+     * Index.lastOfSubArray((short[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3845,11 +3850,11 @@ public final class Index {
      * <pre>{@code
      * short[] source = {1, 2, 3, 2, 3, 4};
      * short[] sub = {2, 3, 9};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                 // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                 // returns 1
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();          // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                 // returns 5 (empty match)
-     * Index.lastOfSubArray((short[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
+     * Index.lastOfSubArray((short[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3910,9 +3915,9 @@ public final class Index {
      * <pre>{@code
      * int[] source = {0, 10, 20, 30, 40, 50, 60};
      * int[] sub = {10, 20};
-     * Index.lastOfSubArray(source, sub).get();               // returns 1
-     * Index.lastOfSubArray(new int[0], sub).isPresent();     // returns false
-     * Index.lastOfSubArray((int[]) null, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, sub).get();              // returns 1
+     * Index.lastOfSubArray(new int[0], sub).isPresent();    // returns false
+     * Index.lastOfSubArray((int[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3941,10 +3946,10 @@ public final class Index {
      * <pre>{@code
      * int[] source = {0, 10, 20, 30, 40, 50, 60};
      * int[] sub = {10, 20};
-     * Index.lastOfSubArray(source, 6, sub).get();               // returns 1
-     * Index.lastOfSubArray(source, 0, sub).isPresent();         // returns false
-     * Index.lastOfSubArray(source, 10, sub).get();              // returns 1
-     * Index.lastOfSubArray((int[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();              // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();             // returns 1
+     * Index.lastOfSubArray((int[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -3986,11 +3991,11 @@ public final class Index {
      * <pre>{@code
      * int[] source = {1, 2, 3, 2, 3, 4};
      * int[] sub = {2, 3, 9};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();               // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();               // returns 1
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();        // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();               // returns 5 (empty match)
-     * Index.lastOfSubArray((int[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();              // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();              // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();       // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();              // returns 5 (empty match)
+     * Index.lastOfSubArray((int[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4051,9 +4056,9 @@ public final class Index {
      * <pre>{@code
      * long[] source = {0L, 10L, 20L, 30L, 40L, 50L, 60L};
      * long[] sub = {10L, 20L};
-     * Index.lastOfSubArray(source, sub).get();                // returns 1
-     * Index.lastOfSubArray(new long[0], sub).isPresent();     // returns false
-     * Index.lastOfSubArray((long[]) null, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, sub).get();               // returns 1
+     * Index.lastOfSubArray(new long[0], sub).isPresent();    // returns false
+     * Index.lastOfSubArray((long[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4082,10 +4087,10 @@ public final class Index {
      * <pre>{@code
      * long[] source = {0L, 10L, 20L, 30L, 40L, 50L, 60L};
      * long[] sub = {10L, 20L};
-     * Index.lastOfSubArray(source, 6, sub).get();                // returns 1
-     * Index.lastOfSubArray(source, 0, sub).isPresent();          // returns false
-     * Index.lastOfSubArray(source, 10, sub).get();               // returns 1
-     * Index.lastOfSubArray((long[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();               // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();              // returns 1
+     * Index.lastOfSubArray((long[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4127,11 +4132,11 @@ public final class Index {
      * <pre>{@code
      * long[] source = {1L, 2L, 3L, 2L, 3L, 4L};
      * long[] sub = {2L, 3L, 9L};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                // returns 1
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
-     * Index.lastOfSubArray((long[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();               // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();               // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();        // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();               // returns 5 (empty match)
+     * Index.lastOfSubArray((long[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4193,9 +4198,9 @@ public final class Index {
      * <pre>{@code
      * float[] source = {0.0f, 10.0f, 20.0f, 30.0f, 40.0f, 50.0f, 60.0f};
      * float[] sub = {10.0f, 20.0f};
-     * Index.lastOfSubArray(source, sub).get();                 // returns 1
-     * Index.lastOfSubArray(new float[0], sub).isPresent();     // returns false
-     * Index.lastOfSubArray((float[]) null, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, sub).get();                // returns 1
+     * Index.lastOfSubArray(new float[0], sub).isPresent();    // returns false
+     * Index.lastOfSubArray((float[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4224,10 +4229,10 @@ public final class Index {
      * <pre>{@code
      * float[] source = {0.0f, 10.0f, 20.0f, 30.0f, 40.0f, 50.0f, 60.0f};
      * float[] sub = {10.0f, 20.0f};
-     * Index.lastOfSubArray(source, 6, sub).get();                 // returns 1
-     * Index.lastOfSubArray(source, 0, sub).isPresent();           // returns false
-     * Index.lastOfSubArray(source, 10, sub).get();                // returns 1
-     * Index.lastOfSubArray((float[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();                // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();          // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();               // returns 1
+     * Index.lastOfSubArray((float[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4270,11 +4275,11 @@ public final class Index {
      * <pre>{@code
      * float[] source = {1f, 2f, 3f, 2f, 3f, 4f};
      * float[] sub = {2f, 3f, 9f};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                 // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                 // returns 1
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();          // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                 // returns 5 (empty match)
-     * Index.lastOfSubArray((float[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();         // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
+     * Index.lastOfSubArray((float[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4336,9 +4341,9 @@ public final class Index {
      * <pre>{@code
      * double[] source = {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0};
      * double[] sub = {10.0, 20.0};
-     * Index.lastOfSubArray(source, sub).get();                  // returns 1
-     * Index.lastOfSubArray(new double[0], sub).isPresent();     // returns false
-     * Index.lastOfSubArray((double[]) null, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, sub).get();                 // returns 1
+     * Index.lastOfSubArray(new double[0], sub).isPresent();    // returns false
+     * Index.lastOfSubArray((double[]) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4367,10 +4372,10 @@ public final class Index {
      * <pre>{@code
      * double[] source = {0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0};
      * double[] sub = {10.0, 20.0};
-     * Index.lastOfSubArray(source, 6, sub).get();                  // returns 1
-     * Index.lastOfSubArray(source, 0, sub).isPresent();            // returns false
-     * Index.lastOfSubArray(source, 10, sub).get();                 // returns 1
-     * Index.lastOfSubArray((double[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();                 // returns 1
+     * Index.lastOfSubArray(source, 0, sub).isPresent();           // returns false
+     * Index.lastOfSubArray(source, 10, sub).get();                // returns 1
+     * Index.lastOfSubArray((double[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4413,11 +4418,11 @@ public final class Index {
      * <pre>{@code
      * double[] source = {1d, 2d, 3d, 2d, 3d, 4d};
      * double[] sub = {2d, 3d, 9d};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                  // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                  // returns 1
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();           // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                  // returns 5 (empty match)
-     * Index.lastOfSubArray((double[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                 // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                 // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();          // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                 // returns 5 (empty match)
+     * Index.lastOfSubArray((double[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4480,9 +4485,9 @@ public final class Index {
      * <pre>{@code
      * String[] source = {"a", "b", "c", "d", "c", "d", "e"};
      * String[] sub = {"c", "d"};
-     * Index.lastOfSubArray(source, sub).get();                            // returns 4
-     * Index.lastOfSubArray(source, new String[]{"x", "y"}).isPresent();   // returns false
-     * Index.lastOfSubArray((String[]) null, sub).isPresent();             // returns false
+     * Index.lastOfSubArray(source, sub).get();                           // returns 4
+     * Index.lastOfSubArray(source, new String[]{"x", "y"}).isPresent();  // returns false
+     * Index.lastOfSubArray((String[]) null, sub).isPresent();            // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4512,10 +4517,10 @@ public final class Index {
      * <pre>{@code
      * String[] source = {"a", "b", "c", "d", "c", "d", "e"};
      * String[] sub = {"c", "d"};
-     * Index.lastOfSubArray(source, 6, sub).get();                  // returns 4
-     * Index.lastOfSubArray(source, 2, sub).get();                  // returns 2
-     * Index.lastOfSubArray(source, 1, sub).isPresent();            // returns false
-     * Index.lastOfSubArray((String[]) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 6, sub).get();                 // returns 4
+     * Index.lastOfSubArray(source, 2, sub).get();                 // returns 2
+     * Index.lastOfSubArray(source, 1, sub).isPresent();           // returns false
+     * Index.lastOfSubArray((String[]) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4554,11 +4559,11 @@ public final class Index {
      * <pre>{@code
      * String[] source = {"a", "b", "c", "b", "c", "d"};
      * String[] sub = {"b", "c", "z"};
-     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                  // returns 3
-     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                  // returns 1
-     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();           // returns false
-     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                  // returns 5 (empty match)
-     * Index.lastOfSubArray((Object[]) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 2).get();                 // returns 3
+     * Index.lastOfSubArray(source, 2, sub, 0, 2).get();                 // returns 1
+     * Index.lastOfSubArray(source, -1, sub, 0, 2).isPresent();          // returns false
+     * Index.lastOfSubArray(source, 5, sub, 0, 0).get();                 // returns 5 (empty match)
+     * Index.lastOfSubArray((Object[]) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -4621,9 +4626,9 @@ public final class Index {
      * <pre>{@code
      * List<String> source = Arrays.asList("a", "b", "c", "d", "c", "d", "e");
      * List<String> sub = Arrays.asList("c", "d");
-     * Index.lastOfSubList(source, sub).get();                 // returns 4
-     * Index.lastOfSubList(source, Arrays.asList()).get();     // returns 7
-     * Index.lastOfSubList((List<?>) null, sub).isPresent();   // returns false
+     * Index.lastOfSubList(source, sub).get();                // returns 4
+     * Index.lastOfSubList(source, Arrays.asList()).get();    // returns 7
+     * Index.lastOfSubList((List<?>) null, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the list to be searched, may be {@code null}
@@ -4649,10 +4654,10 @@ public final class Index {
      * <pre>{@code
      * List<String> source = Arrays.asList("a", "b", "c", "d", "c", "d", "e");
      * List<String> sub = Arrays.asList("c", "d");
-     * Index.lastOfSubList(source, 6, sub).get();                 // returns 4
-     * Index.lastOfSubList(source, 3, sub).get();                 // returns 2
-     * Index.lastOfSubList(source, 1, sub).isPresent();           // returns false
-     * Index.lastOfSubList((List<?>) null, 0, sub).isPresent();   // returns false
+     * Index.lastOfSubList(source, 6, sub).get();                // returns 4
+     * Index.lastOfSubList(source, 3, sub).get();                // returns 2
+     * Index.lastOfSubList(source, 1, sub).isPresent();          // returns false
+     * Index.lastOfSubList((List<?>) null, 0, sub).isPresent();  // returns false
      * }</pre>
      *
      * @param source the list to be searched, may be {@code null}
@@ -4677,7 +4682,8 @@ public final class Index {
      * starting the backwards search at {@code startIndexFromBack}. It looks for {@code sizeToMatch} elements from
      * {@code subListToFind} starting at {@code startIndexOfSubList}. Elements are compared using
      * {@link N#equals(Object, Object)}, which handles {@code null} values correctly. The implementation is
-     * optimized for {@link RandomAccess} lists; for non-RandomAccess lists it converts sublists to arrays for comparison.
+     * optimized for {@link RandomAccess} lists; a list that is not RandomAccess is copied to an array (only the part
+     * that is searched or matched) before comparison.
      * <p>
      * Special cases (after validating the pattern slice, treating a null pattern as length zero):
      * <ul>
@@ -4692,11 +4698,11 @@ public final class Index {
      * <pre>{@code
      * List<String> source = Arrays.asList("a", "b", "c", "b", "c", "d");
      * List<String> sub = Arrays.asList("b", "c", "z");
-     * Index.lastOfSubList(source, 5, sub, 0, 2).get();                 // returns 3
-     * Index.lastOfSubList(source, 2, sub, 0, 2).get();                 // returns 1
-     * Index.lastOfSubList(source, -1, sub, 0, 2).isPresent();          // returns false
-     * Index.lastOfSubList(source, 5, sub, 0, 0).get();                 // returns 5 (empty match)
-     * Index.lastOfSubList((List<?>) null, 5, sub, 0, 2).isPresent();   // returns false
+     * Index.lastOfSubList(source, 5, sub, 0, 2).get();                // returns 3
+     * Index.lastOfSubList(source, 2, sub, 0, 2).get();                // returns 1
+     * Index.lastOfSubList(source, -1, sub, 0, 2).isPresent();         // returns false
+     * Index.lastOfSubList(source, 5, sub, 0, 0).get();                // returns 5 (empty match)
+     * Index.lastOfSubList((List<?>) null, 5, sub, 0, 2).isPresent();  // returns false
      * }</pre>
      *
      * @param source the list to be searched, may be {@code null}
@@ -4733,12 +4739,17 @@ public final class Index {
             return toOptionalInt(N.INDEX_NOT_FOUND);
         }
 
-        if (source instanceof RandomAccess && subListToFind instanceof RandomAccess) {
-            final int endIndexOfTargetSubList = startIndexOfSubList + sizeToMatch;
+        if (source instanceof RandomAccess) {
+            // Only a sequential pattern is copied (just the slice to match); a RandomAccess source is never copied.
+            final boolean isRandomAccessTarget = subListToFind instanceof RandomAccess;
+            final List<?> target = isRandomAccessTarget ? subListToFind
+                    : Arrays.asList(subListToFind.subList(startIndexOfSubList, startIndexOfSubList + sizeToMatch).toArray());
+            final int startIndexOfTarget = isRandomAccessTarget ? startIndexOfSubList : 0;
+            final int endIndexOfTargetSubList = startIndexOfTarget + sizeToMatch;
 
             for (int i = N.min(startIndexFromBack, len - sizeToMatch); i >= 0; i--) {
-                for (int k = i, j = startIndexOfSubList; j < endIndexOfTargetSubList; k++) {
-                    if (!N.equals(source.get(k), subListToFind.get(j++))) {
+                for (int k = i, j = startIndexOfTarget; j < endIndexOfTargetSubList; k++) {
+                    if (!N.equals(source.get(k), target.get(j++))) {
                         break;
                     } else if (j == endIndexOfTargetSubList) {
                         return toOptionalInt(i);
@@ -4762,10 +4773,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {true, false, true, false, true};
-     * Index.allOf(arr, true).cardinality();            // returns 3
-     * Index.allOf(arr, true).get(0);                   // returns true
-     * Index.allOf(arr, true).toString();               // returns "{0, 2, 4}"
-     * Index.allOf((boolean[]) null, true).isEmpty();   // returns true
+     * Index.allOf(arr, true).cardinality();           // returns 3
+     * Index.allOf(arr, true).get(0);                  // returns true
+     * Index.allOf(arr, true).toString();              // returns "{0, 2, 4}"
+     * Index.allOf((boolean[]) null, true).isEmpty();  // returns true
      * }</pre>
      *
      * @param source the boolean array to be searched, may be {@code null}
@@ -4785,9 +4796,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * boolean[] arr = {true, false, true, false, true};
-     * Index.allOf(arr, true, 0).cardinality();    // returns 3
-     * Index.allOf(arr, true, 2).toString();       // returns "{2, 4}"
-     * Index.allOf(arr, false, 0).cardinality();   // returns 2
+     * Index.allOf(arr, true, 0).cardinality();   // returns 3
+     * Index.allOf(arr, true, 2).toString();      // returns "{2, 4}"
+     * Index.allOf(arr, false, 0).cardinality();  // returns 2
      * }</pre>
      *
      * @param source the boolean array to be searched, may be {@code null}
@@ -4824,9 +4835,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
-     * Index.allOf(arr, (byte) 10).cardinality();   // returns 1
-     * Index.allOf(arr, (byte) 10).toString();      // returns "{1}"
-     * Index.allOf(arr, (byte) 90).isEmpty();       // returns true
+     * Index.allOf(arr, (byte) 10).cardinality();  // returns 1
+     * Index.allOf(arr, (byte) 10).toString();     // returns "{1}"
+     * Index.allOf(arr, (byte) 90).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
@@ -4846,9 +4857,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[] arr = {(byte) 0, (byte) 10, (byte) 20, (byte) 30, (byte) 40};
-     * Index.allOf(arr, (byte) 10, 0).cardinality();   // returns 1
-     * Index.allOf(arr, (byte) 20, 2).cardinality();   // returns 1
-     * Index.allOf(arr, (byte) 90, 0).isEmpty();       // returns true
+     * Index.allOf(arr, (byte) 10, 0).cardinality();  // returns 1
+     * Index.allOf(arr, (byte) 20, 2).cardinality();  // returns 1
+     * Index.allOf(arr, (byte) 90, 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the byte array to be searched, may be {@code null}
@@ -4885,10 +4896,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'h', 'e', 'l', 'l', 'o'};
-     * Index.allOf(arr, 'l').cardinality();   // returns 2
-     * Index.allOf(arr, 'l').get(2);          // returns true
-     * Index.allOf(arr, 'l').toString();      // returns "{2, 3}"
-     * Index.allOf(arr, 'x').isEmpty();       // returns true
+     * Index.allOf(arr, 'l').cardinality();  // returns 2
+     * Index.allOf(arr, 'l').get(2);         // returns true
+     * Index.allOf(arr, 'l').toString();     // returns "{2, 3}"
+     * Index.allOf(arr, 'x').isEmpty();      // returns true
      * }</pre>
      *
      * @param source the char array to be searched, may be {@code null}
@@ -4908,9 +4919,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * char[] arr = {'h', 'e', 'l', 'l', 'o'};
-     * Index.allOf(arr, 'l', 0).cardinality();   // returns 2
-     * Index.allOf(arr, 'l', 3).toString();      // returns "{3}"
-     * Index.allOf(arr, 'x', 0).isEmpty();       // returns true
+     * Index.allOf(arr, 'l', 0).cardinality();  // returns 2
+     * Index.allOf(arr, 'l', 3).toString();     // returns "{3}"
+     * Index.allOf(arr, 'x', 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the char array to be searched, may be {@code null}
@@ -4947,9 +4958,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
-     * Index.allOf(arr, (short) 10).cardinality();   // returns 1
-     * Index.allOf(arr, (short) 10).toString();      // returns "{1}"
-     * Index.allOf(arr, (short) 90).isEmpty();       // returns true
+     * Index.allOf(arr, (short) 10).cardinality();  // returns 1
+     * Index.allOf(arr, (short) 10).toString();     // returns "{1}"
+     * Index.allOf(arr, (short) 90).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
@@ -4969,9 +4980,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short[] arr = {(short) 0, (short) 10, (short) 20, (short) 30, (short) 40};
-     * Index.allOf(arr, (short) 10, 0).cardinality();   // returns 1
-     * Index.allOf(arr, (short) 20, 2).cardinality();   // returns 1
-     * Index.allOf(arr, (short) 90, 0).isEmpty();       // returns true
+     * Index.allOf(arr, (short) 10, 0).cardinality();  // returns 1
+     * Index.allOf(arr, (short) 20, 2).cardinality();  // returns 1
+     * Index.allOf(arr, (short) 90, 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the short array to be searched, may be {@code null}
@@ -5008,9 +5019,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {0, 10, 20, 30, 40};
-     * Index.allOf(arr, 10).cardinality();   // returns 1
-     * Index.allOf(arr, 10).toString();      // returns "{1}"
-     * Index.allOf(arr, 90).isEmpty();       // returns true
+     * Index.allOf(arr, 10).cardinality();  // returns 1
+     * Index.allOf(arr, 10).toString();     // returns "{1}"
+     * Index.allOf(arr, 90).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
@@ -5030,9 +5041,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * int[] arr = {0, 10, 20, 30, 40};
-     * Index.allOf(arr, 10, 0).cardinality();   // returns 1
-     * Index.allOf(arr, 20, 2).cardinality();   // returns 1
-     * Index.allOf(arr, 90, 0).isEmpty();       // returns true
+     * Index.allOf(arr, 10, 0).cardinality();  // returns 1
+     * Index.allOf(arr, 20, 2).cardinality();  // returns 1
+     * Index.allOf(arr, 90, 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the int array to be searched, may be {@code null}
@@ -5069,9 +5080,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {0L, 10L, 20L, 30L, 40L};
-     * Index.allOf(arr, 10L).cardinality();   // returns 1
-     * Index.allOf(arr, 10L).toString();      // returns "{1}"
-     * Index.allOf(arr, 90L).isEmpty();       // returns true
+     * Index.allOf(arr, 10L).cardinality();  // returns 1
+     * Index.allOf(arr, 10L).toString();     // returns "{1}"
+     * Index.allOf(arr, 90L).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
@@ -5091,9 +5102,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * long[] arr = {0L, 10L, 20L, 30L, 40L};
-     * Index.allOf(arr, 10L, 0).cardinality();   // returns 1
-     * Index.allOf(arr, 20L, 2).cardinality();   // returns 1
-     * Index.allOf(arr, 90L, 0).isEmpty();       // returns true
+     * Index.allOf(arr, 10L, 0).cardinality();  // returns 1
+     * Index.allOf(arr, 20L, 2).cardinality();  // returns 1
+     * Index.allOf(arr, 90L, 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the long array to be searched, may be {@code null}
@@ -5131,9 +5142,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
-     * Index.allOf(arr, 2.0f).cardinality();   // returns 2
-     * Index.allOf(arr, 2.0f).toString();      // returns "{1, 3}"
-     * Index.allOf(arr, 5.0f).isEmpty();       // returns true
+     * Index.allOf(arr, 2.0f).cardinality();  // returns 2
+     * Index.allOf(arr, 2.0f).toString();     // returns "{1, 3}"
+     * Index.allOf(arr, 5.0f).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -5156,9 +5167,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.0f, 3.0f, 2.0f, 4.0f};
-     * Index.allOf(arr, 2.0f, 0).cardinality();   // returns 2
-     * Index.allOf(arr, 2.0f, 2).toString();      // returns "{3}"
-     * Index.allOf(arr, 5.0f, 0).isEmpty();       // returns true
+     * Index.allOf(arr, 2.0f, 0).cardinality();  // returns 2
+     * Index.allOf(arr, 2.0f, 2).toString();     // returns "{3}"
+     * Index.allOf(arr, 5.0f, 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -5203,9 +5214,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * float[] arr = {1.0f, 2.1f, 3.0f, 2.2f, 4.0f};
-     * Index.allOf(arr, 2.0f, 0, 0.2f).cardinality();   // returns 1  (only 2.1f matches; 2.2f - 2.0f > 0.2f)
-     * Index.allOf(arr, 2.0f, 2, 0.2f).isEmpty();       // returns true (no match from index 2)
-     * Index.allOf(arr, 5.0f, 0, 0.1f).isEmpty();       // returns true
+     * Index.allOf(arr, 2.0f, 0, 0.2f).cardinality();  // returns 1  (only 2.1f matches; 2.2f - 2.0f > 0.2f)
+     * Index.allOf(arr, 2.0f, 2, 0.2f).isEmpty();      // returns true (no match from index 2)
+     * Index.allOf(arr, 5.0f, 0, 0.1f).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the float array to be searched, may be {@code null}
@@ -5247,9 +5258,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
-     * Index.allOf(arr, 2.0).cardinality();   // returns 2
-     * Index.allOf(arr, 2.0).toString();      // returns "{1, 3}"
-     * Index.allOf(arr, 5.0).isEmpty();       // returns true
+     * Index.allOf(arr, 2.0).cardinality();  // returns 2
+     * Index.allOf(arr, 2.0).toString();     // returns "{1, 3}"
+     * Index.allOf(arr, 5.0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -5272,9 +5283,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.0, 3.0, 2.0, 4.0};
-     * Index.allOf(arr, 2.0, 0).cardinality();   // returns 2
-     * Index.allOf(arr, 2.0, 2).toString();      // returns "{3}"
-     * Index.allOf(arr, 5.0, 0).isEmpty();       // returns true
+     * Index.allOf(arr, 2.0, 0).cardinality();  // returns 2
+     * Index.allOf(arr, 2.0, 2).toString();     // returns "{3}"
+     * Index.allOf(arr, 5.0, 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -5319,9 +5330,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * double[] arr = {1.0, 2.1, 3.0, 2.2, 4.0};
-     * Index.allOf(arr, 2.0, 0, 0.2).cardinality();   // returns 1  (only 2.1 matches; 2.2 - 2.0 = 0.200...018 > 0.2)
-     * Index.allOf(arr, 2.0, 2, 0.2).isEmpty();       // returns true (no match from index 2)
-     * Index.allOf(arr, 5.0, 0, 0.1).isEmpty();       // returns true
+     * Index.allOf(arr, 2.0, 0, 0.2).cardinality();  // returns 1  (only 2.1 matches; 2.2 - 2.0 = 0.200...018 > 0.2)
+     * Index.allOf(arr, 2.0, 2, 0.2).isEmpty();      // returns true (no match from index 2)
+     * Index.allOf(arr, 5.0, 0, 0.1).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the double array to be searched, may be {@code null}
@@ -5401,9 +5412,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"a", "b", "c", "b", "a"};
-     * Index.allOf(arr, "b", 0).cardinality();   // returns 2
-     * Index.allOf(arr, "b", 2).toString();      // returns "{3}"
-     * Index.allOf(arr, "x", 0).isEmpty();       // returns true
+     * Index.allOf(arr, "b", 0).cardinality();  // returns 2
+     * Index.allOf(arr, "b", 2).toString();     // returns "{3}"
+     * Index.allOf(arr, "x", 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the array to be searched, may be {@code null}
@@ -5448,8 +5459,8 @@ public final class Index {
      * indices.stream().forEach(i -> System.out.println("Found at: " + i));
      *
      * // Get first and last occurrence
-     * int first = indices.stream().findFirst().getAsInt();   // returns 0
-     * int last = indices.stream().max().orElse(-1);          // returns 4
+     * int first = indices.stream().findFirst().getAsInt();  // returns 0
+     * int last = indices.stream().max().orElse(-1);         // returns 4
      *
      * // Check specific index
      * boolean foundAt2 = indices.get(2);                     // returns true
@@ -5475,9 +5486,9 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c", "b");
-     * Index.allOf(list, "b", 0).cardinality();   // returns 2
-     * Index.allOf(list, "b", 2).toString();      // returns "{3}"
-     * Index.allOf(list, "x", 0).isEmpty();       // returns true
+     * Index.allOf(list, "b", 0).cardinality();  // returns 2
+     * Index.allOf(list, "b", 2).toString();     // returns "{3}"
+     * Index.allOf(list, "x", 0).isEmpty();      // returns true
      * }</pre>
      *
      * @param source the collection to be searched, may be {@code null}
@@ -5561,10 +5572,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String[] arr = {"apple", "banana", "avocado", "cherry", "apricot"};
-     * Index.allOf(arr, s -> s.startsWith("a"), 1).toString();   // returns "{2, 4}"
-     * Index.allOf(arr, s -> s.startsWith("a"), 0).toString();   // returns "{0, 2, 4}"
-     * Index.allOf(arr, s -> s.startsWith("z"), 0).isEmpty();    // returns true
-     * Index.allOf(arr, s -> s.startsWith("a"), 10).isEmpty();   // returns true (fromIndex past end)
+     * Index.allOf(arr, s -> s.startsWith("a"), 1).toString();  // returns "{2, 4}"
+     * Index.allOf(arr, s -> s.startsWith("a"), 0).toString();  // returns "{0, 2, 4}"
+     * Index.allOf(arr, s -> s.startsWith("z"), 0).isEmpty();   // returns true
+     * Index.allOf(arr, s -> s.startsWith("a"), 10).isEmpty();  // returns true (fromIndex past end)
      * }</pre>
      *
      * @param <T> the type of elements in the array
@@ -5649,10 +5660,10 @@ public final class Index {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<String> list = Arrays.asList("apple", "banana", "avocado", "cherry", "apricot");
-     * Index.allOf(list, s -> s.startsWith("a"), 1).toString();   // returns "{2, 4}"
-     * Index.allOf(list, s -> s.startsWith("a"), 0).toString();   // returns "{0, 2, 4}"
-     * Index.allOf(list, s -> s.startsWith("z"), 0).isEmpty();    // returns true
-     * Index.allOf(list, s -> s.startsWith("a"), 10).isEmpty();   // returns true (fromIndex past end)
+     * Index.allOf(list, s -> s.startsWith("a"), 1).toString();  // returns "{2, 4}"
+     * Index.allOf(list, s -> s.startsWith("a"), 0).toString();  // returns "{0, 2, 4}"
+     * Index.allOf(list, s -> s.startsWith("z"), 0).isEmpty();   // returns true
+     * Index.allOf(list, s -> s.startsWith("a"), 10).isEmpty();  // returns true (fromIndex past end)
      * }</pre>
      *
      * @param <T> the type of the elements in the collection

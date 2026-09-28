@@ -432,7 +432,7 @@ public class MultiClassRegressionCTest extends TestBase {
         @Test
         public void rejectsNullMapperNullResultAndInvertedResult() {
             assertThrows(IllegalArgumentException.class, () -> Range.closed(1, 5).mapEndpoints(null));
-            assertThrows(IllegalArgumentException.class, () -> Range.closed(1, 5).mapEndpoints(v -> null));
+            assertThrows(NullPointerException.class, () -> Range.closed(1, 5).mapEndpoints(v -> null));
             assertThrows(IllegalArgumentException.class, () -> Range.closed(1, 5).mapEndpoints(v -> -v));
         }
 

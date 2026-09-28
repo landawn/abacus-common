@@ -1469,4 +1469,29 @@ public class HttpClientTest extends TestBase {
         }
     }
 
+    @Test
+    public void testOpenConnectionDoesNotMaterialiseHeadersOnPerRequestSettings() {
+        // Applying the per-request headers must only read the caller's settings: creating an empty
+        // HttpHeaders on them flipped their getContentFormat() from null to NONE.
+        final HttpSettings template = HttpSettings.create().setConnectTimeout(1234);
+        assertNull(template.getContentFormat());
+
+        final HttpClient client = HttpClient.create("http://localhost:1/never-connected");
+        final HttpURLConnection connection = client.openConnection(HttpMethod.GET, template, false);
+        connection.disconnect();
+
+        assertNull(template.getContentFormat());
+        assertTrue(template.toString().contains("headers=null"), template.toString());
+        assertEquals(1234, connection.getConnectTimeout());
+    }
+
+    @Test
+    public void testOpenConnectionStillAppliesPerRequestSettingsHeaders() {
+        final HttpSettings template = HttpSettings.create().header("X-Trace", "abc");
+        final HttpClient client = HttpClient.create("http://localhost:1/never-connected");
+        final HttpURLConnection connection = client.openConnection(HttpMethod.GET, template, false);
+        connection.disconnect();
+
+        assertEquals("abc", connection.getRequestProperty("X-Trace"));
+    }
 }

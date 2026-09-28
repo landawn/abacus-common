@@ -202,18 +202,18 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * If the OptionalInt is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the int value.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the index of the parameter to set (1-based)
      * @param x the OptionalInt to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OptionalInt x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final OptionalInt x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(columnIndex, java.sql.Types.INTEGER);
+            statement.setNull(columnIndex, java.sql.Types.INTEGER);
         } else {
-            stmt.setInt(columnIndex, x.getAsInt());
+            statement.setInt(columnIndex, x.getAsInt());
         }
     }
 
@@ -222,18 +222,18 @@ public class JdkOptionalIntType extends AbstractOptionalType<OptionalInt> {
      * If the OptionalInt is {@code null} or empty, sets the parameter to SQL NULL.
      * Otherwise, sets the int value.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OptionalInt to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OptionalInt x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final OptionalInt x) throws NullPointerException, SQLException {
         if (x == null || x.isEmpty()) {
-            stmt.setNull(parameterName, java.sql.Types.INTEGER);
+            statement.setNull(parameterName, java.sql.Types.INTEGER);
         } else {
-            stmt.setInt(parameterName, x.getAsInt());
+            statement.setInt(parameterName, x.getAsInt());
         }
     }
 

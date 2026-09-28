@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.util.AbstractCollection;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -114,17 +115,17 @@ import com.landawn.abacus.util.u.Optional;
  * // Basic entry stream operations
  * Map<String, Integer> scores = Map.of("Alice", 95, "Bob", 87, "Charlie", 92);
  * EntryStream.of(scores)
- *     .filterByValue(score -> score > 90)   // keeps high scores
- *     .mapValue(score -> score + 5)         // adds bonus points
- *     .toMap();                             // {Alice=100, Charlie=97}
+ *     .filterByValue(score -> score > 90)  // keeps high scores
+ *     .mapValue(score -> score + 5)        // adds bonus points
+ *     .toMap();                            // {Alice=100, Charlie=97}
  *
  * // Key and value transformations
  * Map<String, String> roles = Map.of("ADMIN_ALICE", "owner", "USER_BOB", "reader");
  * Map<String, String> adminRoles = EntryStream.of(roles)
- *     .mapKey(key -> key.toLowerCase())              // maps keys to lowercase
- *     .filterByKey(key -> key.startsWith("admin"))   // filters admin users
- *     .mapValue(value -> value.toUpperCase())        // normalizes each role
- *     .toMap();                                      // {admin_alice=OWNER}
+ *     .mapKey(key -> key.toLowerCase())             // maps keys to lowercase
+ *     .filterByKey(key -> key.startsWith("admin"))  // filters admin users
+ *     .mapValue(value -> value.toUpperCase())       // normalizes each role
+ *     .toMap();                                     // {admin_alice=OWNER}
  *
  * // Grouping and aggregation
  * Map<String, Integer> salesData = new LinkedHashMap<>();
@@ -140,20 +141,20 @@ import com.landawn.abacus.util.u.Optional;
  *     "temp-room-1", Arrays.asList(19.0, 23.0),
  *     "temp-room-2", Arrays.asList(24.0, 26.0));
  * Map<String, Double> averages = EntryStream.of(measurements)
- *     .parallel()                                 // uses parallel processing
- *     .filterByKey(key -> key.contains("temp"))   // keeps temperature measurements
+ *     .parallel()                                // uses parallel processing
+ *     .filterByKey(key -> key.contains("temp"))  // keeps temperature measurements
  *     .mapValue(values -> values.stream()
  *         .mapToDouble(Double::doubleValue)
- *         .average().orElse(0.0))            // maps each group to its average
- *     .filterByValue(avg -> avg > 20.0)      // filters valid temperatures
+ *         .average().orElse(0.0))        // maps each group to its average
+ *     .filterByValue(avg -> avg > 20.0)  // filters valid temperatures
  *     .toMap();
  *
  * // Integration with other stream types
  * Map<String, Integer> data = Map.of("apples", 12, "figs", 3);
  * List<String> reports = EntryStream.of(data)
  *     .entries()
- *     .map(entry -> entry.getKey() + ": " + entry.getValue()) // maps each entry to a string
- *     .filter(report -> report.length() > 6)                  // filters by length
+ *     .map(entry -> entry.getKey() + ": " + entry.getValue())  // maps each entry to a string
+ *     .filter(report -> report.length() > 6)                   // filters by length
  *     .toList();
  * }</pre>
  *
@@ -310,7 +311,11 @@ public final class EntryStream<K, V> extends
      * {@code keySet()} directly; it does not consume this {@code EntryStream}, and closing it closes
      * this one. The iterator follows the map's mutation policy and may throw
      * {@code ConcurrentModificationException}. If the view is empty when this method is called,
-     * the returned stream stays empty even if mappings are added later.
+     * the returned stream stays empty even if mappings are added later. The map is read when this
+     * method is called, not when this {@code EntryStream} was created: a mutation made in between is
+     * visible here, whereas the entry pipeline itself (for example {@code toList()} or
+     * {@code filter(..).keys()}) captured the map at creation and may then see no entries or throw
+     * {@code ConcurrentModificationException}. Do not modify the map while any stream over it is in use.
      * For a non-map source, {@code keys()} maps this stream and shares its one-shot consumption.
      *
      * <p><b>Usage Examples:</b></p>
@@ -355,7 +360,11 @@ public final class EntryStream<K, V> extends
      * {@code values()} collection directly; it does not consume this {@code EntryStream}, and closing it
      * closes this one. The iterator follows the map's mutation policy and may throw
      * {@code ConcurrentModificationException}. If the view is empty when this method is called,
-     * the returned stream stays empty even if mappings are added later.
+     * the returned stream stays empty even if mappings are added later. The map is read when this
+     * method is called, not when this {@code EntryStream} was created: a mutation made in between is
+     * visible here, whereas the entry pipeline itself (for example {@code toList()} or
+     * {@code filter(..).values()}) captured the map at creation and may then see no entries or throw
+     * {@code ConcurrentModificationException}. Do not modify the map while any stream over it is in use.
      * For a non-map source, {@code values()} maps this stream and shares its one-shot consumption.
      *
      * <p><b>Usage Examples:</b></p>
@@ -394,7 +403,10 @@ public final class EntryStream<K, V> extends
 
     /**
      * Returns a stream consisting of the entries (Map.Entry objects) in this EntryStream.
-     * This is an intermediate operation that essentially returns the underlying stream of entries.
+     * This is an intermediate operation that returns the underlying stream of entries itself, not a copy.
+     *
+     * <p>The returned stream shares this {@code EntryStream}'s state: consuming or closing it also consumes
+     * or closes this {@code EntryStream} (running its close handlers), and every call returns the same stream.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -407,7 +419,7 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
-     * @return a new Stream consisting of the entries in this EntryStream
+     * @return the underlying Stream of the entries in this EntryStream (the same instance on every call)
      * @throws IllegalStateException if the stream is already closed
      */
     @ParallelSupported
@@ -473,26 +485,26 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <KK> the type of keys to select
-     * @param clazz the class to filter the keys by
+     * @param targetClass the class to filter the keys by
      * @return a new EntryStream with keys filtered by the specified class
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see #selectByValue(Class)
      * @see #filterByKey(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK> EntryStream<KK, V> selectByKey(final Class<KK> clazz) throws IllegalStateException, IllegalArgumentException {
+    public <KK> EntryStream<KK, V> selectByKey(final Class<KK> targetClass) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
-        checkArgNotNull(clazz, cs.clazz);
+        checkArgNotNull(targetClass, cs.targetClass);
 
         if (isParallel()) {
             //noinspection resource
-            return (EntryStream<KK, V>) sequential().filterByKey(Fn.instanceOf(clazz))
+            return (EntryStream<KK, V>) sequential().filterByKey(Fn.instanceOf(targetClass))
                     .parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
-            return (EntryStream<KK, V>) filterByKey(Fn.instanceOf(clazz));
+            return (EntryStream<KK, V>) filterByKey(Fn.instanceOf(targetClass));
         }
     }
 
@@ -515,26 +527,26 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <VV> the type of values to select
-     * @param clazz the class to filter the values by
+     * @param targetClass the class to filter the values by
      * @return a new EntryStream with values filtered by the specified class
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see #selectByKey(Class)
      * @see #filterByValue(Predicate)
      */
     @ParallelSupported
     @IntermediateOp
-    public <VV> EntryStream<K, VV> selectByValue(final Class<VV> clazz) throws IllegalStateException, IllegalArgumentException {
+    public <VV> EntryStream<K, VV> selectByValue(final Class<VV> targetClass) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
-        checkArgNotNull(clazz, cs.clazz);
+        checkArgNotNull(targetClass, cs.targetClass);
 
         if (isParallel()) {
             //noinspection resource
-            return (EntryStream<K, VV>) sequential().filterByValue(Fn.instanceOf(clazz))
+            return (EntryStream<K, VV>) sequential().filterByValue(Fn.instanceOf(targetClass))
                     .parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
-            return (EntryStream<K, VV>) filterByValue(Fn.instanceOf(clazz));
+            return (EntryStream<K, VV>) filterByValue(Fn.instanceOf(targetClass));
         }
     }
 
@@ -1277,6 +1289,9 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
+     * <p>The mapper must return an empty optional - never {@code null} - for an entry that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the entry is reached.
+     *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless function that transforms each entry to an optional entry
@@ -1287,13 +1302,20 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK, VV> EntryStream<KK, VV> mapPartial(final Function<? super Map.Entry<K, V>, Optional<Map.Entry<? extends KK, ? extends VV>>> mapper)
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public <KK, VV> EntryStream<KK, VV> mapPartial(
+            final Function<? super Map.Entry<K, V>, ? extends Optional<? extends Map.Entry<? extends KK, ? extends VV>>> mapper)
             throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
 
-        return _stream.mapPartial(mapper).mapToEntry(Fn.identity());
+        // The wildcard return type only exists so that a typed mapper such as
+        // Function<Entry<String, Integer>, Optional<Entry<String, Integer>>> (or a method reference) is accepted;
+        // Optional is read-only, so viewing its content as Map.Entry<KK, VV> is safe.
+        final Function<? super Map.Entry<K, V>, Optional<Map.Entry<KK, VV>>> typedMapper = (Function) mapper;
+
+        return _stream.mapPartial(typedMapper).mapToEntry(Fn.identity());
     }
 
     /**
@@ -1314,6 +1336,9 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
+     * <p>The mapper must return an empty optional - never {@code null} - for an entry that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the entry is reached.
+     *
      * @param <KK> the type of keys in the resulting entries
      * @param <VV> the type of values in the resulting entries
      * @param mapper a non-interfering, stateless bi-function that transforms each key-value pair to an optional entry
@@ -1325,7 +1350,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @IntermediateOp
-    public <KK, VV> EntryStream<KK, VV> mapPartial(final BiFunction<? super K, ? super V, Optional<Map.Entry<? extends KK, ? extends VV>>> mapper)
+    public <KK, VV> EntryStream<KK, VV> mapPartial(
+            final BiFunction<? super K, ? super V, ? extends Optional<? extends Map.Entry<? extends KK, ? extends VV>>> mapper)
             throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
@@ -1345,6 +1371,13 @@ public final class EntryStream<K, V> extends
      *                                           .mapKey(k -> k.toUpperCase())
      *                                           .toMap();   // returns {"HELLO"=1, "WORLD"=2}
      * }</pre>
+     *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Integer::parseInt}, {@code Integer::valueOf}, {@code Integer::toString},
+     * {@code String::toUpperCase} or {@code Arrays::asList} - as a lambda instead ({@code x -> Integer.parseInt(x)}).
+     * The compiler cannot choose between this overload and
+     * {@link #mapKey(BiFunction)} for it and reports {@code reference to mapKey is ambiguous}. An exact method reference such as
+     * {@code String::trim} is fine.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -1382,6 +1415,13 @@ public final class EntryStream<K, V> extends
      *                                           .mapKey((k, v) -> k + v)
      *                                           .toMap();   // returns {"a1"=1, "b2"=2, "c3"=3}
      * }</pre>
+     *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Integer::parseInt}, {@code Integer::valueOf}, {@code Integer::toString},
+     * {@code String::toUpperCase} or {@code Arrays::asList} - as a lambda instead ({@code x -> Integer.parseInt(x)}).
+     * The compiler cannot choose between this overload and
+     * {@link #mapKey(Function)} for it and reports {@code reference to mapKey is ambiguous}. An exact method reference such as
+     * {@code String::trim} is fine.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -1421,6 +1461,13 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"a"=1, "b"=4, "c"=9}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Integer::parseInt}, {@code Integer::valueOf}, {@code Integer::toString},
+     * {@code String::toUpperCase} or {@code Arrays::asList} - as a lambda instead ({@code x -> Integer.parseInt(x)}).
+     * The compiler cannot choose between this overload and
+     * {@link #mapValue(BiFunction)} for it and reports {@code reference to mapValue is ambiguous}. An exact method reference such as
+     * {@code String::trim} is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <VV> the type of values in the resulting entries
@@ -1457,6 +1504,13 @@ public final class EntryStream<K, V> extends
      *                                           .mapValue((k, v) -> k + " has value " + v)
      *                                           .toMap();   // returns {"a"="a has value 1", "b"="b has value 2", "c"="c has value 3"}
      * }</pre>
+     *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Integer::parseInt}, {@code Integer::valueOf}, {@code Integer::toString},
+     * {@code String::toUpperCase} or {@code Arrays::asList} - as a lambda instead ({@code x -> Integer.parseInt(x)}).
+     * The compiler cannot choose between this overload and
+     * {@link #mapValue(Function)} for it and reports {@code reference to mapValue is ambiguous}. An exact method reference such as
+     * {@code String::trim} is fine.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -1504,7 +1558,15 @@ public final class EntryStream<K, V> extends
      *                                            .toMap();   // returns {1=10, 3=30}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method -
+     * as a lambda instead ({@code k -> Parser.parse(k)}). The compiler cannot choose between this overload and
+     * {@link #mapKeyPartial(BiFunction)} for it and reports {@code reference to mapKeyPartial is ambiguous}. An exact method
+     * reference is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     *
+     * <p>The mapper must return an empty optional - never {@code null} - for an entry that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the entry is reached.
      *
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless function to transform each key to an optional key
@@ -1527,6 +1589,10 @@ public final class EntryStream<K, V> extends
 
         final Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapper = entry -> {
             final Optional<KK> op = keyMapper.apply(entry.getKey());
+            if (op == null) {
+                throw new NullPointerException("keyMapper returned a null Optional; return Optional.empty() for no result");
+            }
+
             return op.isPresent() ? new SimpleImmutableEntry<>(op.get(), entry.getValue()) : noneEntry;
         };
 
@@ -1555,7 +1621,15 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"B"=2, "C"=3}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method -
+     * as a lambda instead ({@code (k, v) -> Parser.parse(k, v)}). The compiler cannot choose between this overload and
+     * {@link #mapKeyPartial(Function)} for it and reports {@code reference to mapKeyPartial is ambiguous}. An exact method
+     * reference is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     *
+     * <p>The mapper must return an empty optional - never {@code null} - for an entry that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the entry is reached.
      *
      * @param <KK> the type of keys in the resulting entries
      * @param keyMapper a non-interfering, stateless bi-function to transform each key-value pair to an optional key
@@ -1579,6 +1653,10 @@ public final class EntryStream<K, V> extends
 
         final Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapper = entry -> {
             final Optional<KK> op = keyMapper.apply(entry.getKey(), entry.getValue());
+            if (op == null) {
+                throw new NullPointerException("keyMapper returned a null Optional; return Optional.empty() for no result");
+            }
+
             return op.isPresent() ? new SimpleImmutableEntry<>(op.get(), entry.getValue()) : noneEntry;
         };
 
@@ -1611,7 +1689,15 @@ public final class EntryStream<K, V> extends
      *                                            .toMap();   // returns {"a"=1, "c"=3}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method -
+     * as a lambda instead ({@code v -> Parser.parse(v)}). The compiler cannot choose between this overload and
+     * {@link #mapValuePartial(BiFunction)} for it and reports {@code reference to mapValuePartial is ambiguous}. An exact method
+     * reference is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     *
+     * <p>The mapper must return an empty optional - never {@code null} - for an entry that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the entry is reached.
      *
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless function to transform each value to an optional value
@@ -1634,6 +1720,10 @@ public final class EntryStream<K, V> extends
 
         final Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapper = entry -> {
             final Optional<VV> op = valueMapper.apply(entry.getValue());
+            if (op == null) {
+                throw new NullPointerException("valueMapper returned a null Optional; return Optional.empty() for no result");
+            }
+
             return op.isPresent() ? new SimpleImmutableEntry<>(entry.getKey(), op.get()) : noneEntry;
         };
 
@@ -1662,7 +1752,15 @@ public final class EntryStream<K, V> extends
      *                                           .toMap();   // returns {"a"="a:1", "c"="c:3"}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method -
+     * as a lambda instead ({@code (k, v) -> Parser.parse(k, v)}). The compiler cannot choose between this overload and
+     * {@link #mapValuePartial(Function)} for it and reports {@code reference to mapValuePartial is ambiguous}. An exact method
+     * reference is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
+     *
+     * <p>The mapper must return an empty optional - never {@code null} - for an entry that has no result;
+     * a {@code null} return fails with a {@link NullPointerException} when the entry is reached.
      *
      * @param <VV> the type of values in the resulting entries
      * @param valueMapper a non-interfering, stateless bi-function to transform each key-value pair to an optional value
@@ -1686,6 +1784,10 @@ public final class EntryStream<K, V> extends
 
         final Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapper = entry -> {
             final Optional<VV> op = valueMapper.apply(entry.getKey(), entry.getValue());
+            if (op == null) {
+                throw new NullPointerException("valueMapper returned a null Optional; return Optional.empty() for no result");
+            }
+
             return op.isPresent() ? new SimpleImmutableEntry<>(entry.getKey(), op.get()) : noneEntry;
         };
 
@@ -1858,7 +1960,7 @@ public final class EntryStream<K, V> extends
      *         return expanded;
      *     })
      *     .toMap();
-     * // Result: {group1_item1=1, group1_item2=2, group2_item1=1}
+     * // Result (entry order may vary): {group1_item1=1, group1_item2=2, group2_item1=1}
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1911,6 +2013,12 @@ public final class EntryStream<K, V> extends
      * // Result: {a1=1, a2=2, b3=3, b4=4}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Stream::of} - as a lambda instead ({@code e -> Stream.of(e)}). When the referenced method can
+     * take both one and two arguments, the compiler cannot choose between this overload and
+     * {@link #flattMap(BiFunction)} and reports {@code reference to flattMap is ambiguous}. A reference to a method
+     * that has no two-argument form is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <KK> the type of the keys in the resulting entries
@@ -1953,8 +2061,14 @@ public final class EntryStream<K, V> extends
      *     .flattMap((k, v) -> Stream.of(v.split(","))
      *         .map(s -> new SimpleImmutableEntry<>(k + "-" + s, s.length())))
      *     .toMap();
-     * // Result: {prefix-a=1, prefix-b=1, suffix-c=1, suffix-d=1}
+     * // Result (entry order may vary): {prefix-a=1, prefix-b=1, suffix-c=1, suffix-d=1}
      * }</pre>
+     *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Stream::of} - as a lambda instead ({@code (k, v) -> Stream.of(new SimpleImmutableEntry<>(k, v))}).
+     * When the referenced method can take both one and two arguments, the compiler cannot choose between this
+     * overload and {@link #flattMap(Function)} and reports {@code reference to flattMap is ambiguous}.
+     * A reference to a method that only takes two arguments is fine.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -1998,6 +2112,12 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result (entry order may vary): {WORD=1, word=1, HELLO=2, hello=2}
      * }</pre>
+     *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Stream::of} - as a lambda instead ({@code k -> Stream.of(k)}). When the referenced method can
+     * take both one and two arguments, the compiler cannot choose between this overload and
+     * {@link #flatMapKey(BiFunction)} and reports {@code reference to flatMapKey is ambiguous}. A reference to a method
+     * that has no two-argument form, such as {@code Stream::ofNullable}, is fine.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -2044,6 +2164,12 @@ public final class EntryStream<K, V> extends
      * // Result (entry order may vary): {a1=1, a-1=1, b2=2, b-2=2}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Stream::of} - as a lambda instead ({@code (k, v) -> Stream.of(k, v)}). When the referenced method can
+     * take both one and two arguments, the compiler cannot choose between this overload and
+     * {@link #flatMapKey(Function)} and reports {@code reference to flatMapKey is ambiguous}. A reference to a method
+     * that only takes two arguments is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <KK> the type of the keys in the resulting entries
@@ -2087,6 +2213,12 @@ public final class EntryStream<K, V> extends
      * // Result (entry order may vary): {WORD=1, word=1, HELLO=2, hello=2}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Arrays::asList} or {@code Set::of} - as a lambda instead ({@code k -> Arrays.asList(k)}).
+     * When the referenced method can take both one and two arguments, the compiler cannot choose between this
+     * overload and {@link #flatmapKey(BiFunction)} and reports {@code reference to flatmapKey is ambiguous}.
+     * A reference to a method that has no two-argument form, such as {@code Collections::singletonList}, is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <KK> the type of the keys in the resulting entries
@@ -2106,10 +2238,19 @@ public final class EntryStream<K, V> extends
 
         checkArgNotNull(keyMapper, cs.keyMapper);
 
-        final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> Stream.of(keyMapper.apply(e.getKey()))
-                .map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
+        if (isParallel()) {
+            final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> Stream.of(keyMapper.apply(e.getKey()))
+                    .map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
 
-        return flattMap(secondMapper);
+            return flattMap(secondMapper);
+        }
+
+        // Sequential: expand through a lazily mapped view of the returned collection instead of creating and closing
+        // two throw-away Stream stages per element; the parallel path is left unchanged.
+        final Function<Map.Entry<K, V>, Collection<Map.Entry<KK, V>>> secondMapper = e -> lazyMapped(keyMapper.apply(e.getKey()),
+                kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
+
+        return of(_stream.flatmap(secondMapper));
     }
 
     /**
@@ -2127,6 +2268,12 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result (entry order may vary): {a1=1, a-1=1, b2=2, b-2=2}
      * }</pre>
+     *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Arrays::asList} or {@code Set::of} - as a lambda instead ({@code (k, v) -> Arrays.asList(k, v)}).
+     * When the referenced method can take both one and two arguments, the compiler cannot choose between this
+     * overload and {@link #flatmapKey(Function)} and reports {@code reference to flatmapKey is ambiguous}.
+     * A reference to a method that only takes two arguments is fine.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -2147,10 +2294,19 @@ public final class EntryStream<K, V> extends
 
         checkArgNotNull(keyMapper, cs.keyMapper);
 
-        final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> Stream.of(keyMapper.apply(e.getKey(), e.getValue()))
-                .map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
+        if (isParallel()) {
+            final Function<Map.Entry<K, V>, Stream<Map.Entry<KK, V>>> secondMapper = e -> Stream.of(keyMapper.apply(e.getKey(), e.getValue()))
+                    .map(kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
 
-        return flattMap(secondMapper);
+            return flattMap(secondMapper);
+        }
+
+        // Sequential: expand through a lazily mapped view of the returned collection instead of creating and closing
+        // two throw-away Stream stages per element; the parallel path is left unchanged.
+        final Function<Map.Entry<K, V>, Collection<Map.Entry<KK, V>>> secondMapper = e -> lazyMapped(keyMapper.apply(e.getKey(), e.getValue()),
+                kk -> new SimpleImmutableEntry<>(kk, e.getValue()));
+
+        return of(_stream.flatmap(secondMapper));
     }
 
     /**
@@ -2170,6 +2326,12 @@ public final class EntryStream<K, V> extends
      *     .toMultimap();
      * // Result: {a=[1, 2], b=[3, 4]}
      * }</pre>
+     *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Stream::of} - as a lambda instead ({@code v -> Stream.of(v)}). When the referenced method can
+     * take both one and two arguments, the compiler cannot choose between this overload and
+     * {@link #flatMapValue(BiFunction)} and reports {@code reference to flatMapValue is ambiguous}. A reference to a method
+     * that has no two-argument form, such as {@code Stream::ofNullable}, is fine.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -2216,6 +2378,12 @@ public final class EntryStream<K, V> extends
      * // Result: {prefix=[prefix-a, prefix-b], suffix=[suffix-c, suffix-d]}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Stream::of} - as a lambda instead ({@code (k, v) -> Stream.of(k, v)}). When the referenced method can
+     * take both one and two arguments, the compiler cannot choose between this overload and
+     * {@link #flatMapValue(Function)} and reports {@code reference to flatMapValue is ambiguous}. A reference to a method
+     * that only takes two arguments is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <VV> the type of the values in the resulting entries
@@ -2259,6 +2427,12 @@ public final class EntryStream<K, V> extends
      * // Result: {a=[1, 2], b=[3, 4]}
      * }</pre>
      *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Arrays::asList} or {@code Set::of} - as a lambda instead ({@code v -> Arrays.asList(v)}).
+     * When the referenced method can take both one and two arguments, the compiler cannot choose between this
+     * overload and {@link #flatmapValue(BiFunction)} and reports {@code reference to flatmapValue is ambiguous}.
+     * A reference to a method that has no two-argument form, such as {@code Collections::singletonList}, is fine.
+     *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @param <VV> the type of the values in the resulting entries
@@ -2278,10 +2452,19 @@ public final class EntryStream<K, V> extends
 
         checkArgNotNull(valueMapper, cs.valueMapper);
 
-        final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> Stream.of(valueMapper.apply(e.getValue()))
-                .map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
+        if (isParallel()) {
+            final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> Stream.of(valueMapper.apply(e.getValue()))
+                    .map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
 
-        return flattMap(secondMapper);
+            return flattMap(secondMapper);
+        }
+
+        // Sequential: expand through a lazily mapped view of the returned collection instead of creating and closing
+        // two throw-away Stream stages per element; the parallel path is left unchanged.
+        final Function<Map.Entry<K, V>, Collection<Map.Entry<K, VV>>> secondMapper = e -> lazyMapped(valueMapper.apply(e.getValue()),
+                vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
+
+        return of(_stream.flatmap(secondMapper));
     }
 
     /**
@@ -2299,6 +2482,12 @@ public final class EntryStream<K, V> extends
      *     .toMultimap();
      * // Result: {prefix=[prefix-a, prefix-b], suffix=[suffix-c, suffix-d]}
      * }</pre>
+     *
+     * <p><b>Note:</b> pass an <i>inexact</i> method reference - one that names an overloaded or a varargs method,
+     * such as {@code Arrays::asList} or {@code Set::of} - as a lambda instead ({@code (k, v) -> Arrays.asList(k, v)}).
+     * When the referenced method can take both one and two arguments, the compiler cannot choose between this
+     * overload and {@link #flatmapValue(Function)} and reports {@code reference to flatmapValue is ambiguous}.
+     * A reference to a method that only takes two arguments is fine.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -2319,10 +2508,61 @@ public final class EntryStream<K, V> extends
 
         checkArgNotNull(valueMapper, cs.valueMapper);
 
-        final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> Stream.of(valueMapper.apply(e.getKey(), e.getValue()))
-                .map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
+        if (isParallel()) {
+            final Function<Map.Entry<K, V>, Stream<Map.Entry<K, VV>>> secondMapper = e -> Stream.of(valueMapper.apply(e.getKey(), e.getValue()))
+                    .map(vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
 
-        return flattMap(secondMapper);
+            return flattMap(secondMapper);
+        }
+
+        // Sequential: expand through a lazily mapped view of the returned collection instead of creating and closing
+        // two throw-away Stream stages per element; the parallel path is left unchanged.
+        final Function<Map.Entry<K, V>, Collection<Map.Entry<K, VV>>> secondMapper = e -> lazyMapped(valueMapper.apply(e.getKey(), e.getValue()),
+                vv -> new SimpleImmutableEntry<>(e.getKey(), vv));
+
+        return of(_stream.flatmap(secondMapper));
+    }
+
+    /**
+     * Returns a lazily mapped, read-only view of the specified collection, or {@code null} if it is {@code null}
+     * ({@code Stream.flatmap} treats a {@code null} collection as empty, as {@code Stream.of(Collection)} does).
+     * {@code isEmpty()} and {@code size()} delegate to the collection, and the iterator applies {@code mapper}
+     * to each element only when that element is returned, so the expansion stays as lazy as
+     * {@code Stream.of(c).map(mapper)} without allocating a stream pipeline per collection.
+     */
+    private static <T, R> Collection<R> lazyMapped(final Collection<? extends T> c, final Function<? super T, ? extends R> mapper) {
+        if (c == null) {
+            return null;
+        }
+
+        return new AbstractCollection<>() {
+            @Override
+            public boolean isEmpty() {
+                return c.isEmpty();
+            }
+
+            @Override
+            public int size() {
+                return c.size();
+            }
+
+            @Override
+            public Iterator<R> iterator() {
+                final Iterator<? extends T> iter = c.iterator();
+
+                return new Iterator<>() {
+                    @Override
+                    public boolean hasNext() {
+                        return iter.hasNext();
+                    }
+
+                    @Override
+                    public R next() {
+                        return mapper.apply(iter.next());
+                    }
+                };
+            }
+        };
     }
 
     /**
@@ -2346,6 +2586,10 @@ public final class EntryStream<K, V> extends
      * and {@code Collector} overloads are {@code @ParallelSupported}.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; retains grouping state in memory; its size depends on the aggregation.
+     *
+     * <p><b>Null keys:</b> an entry whose key is {@code null} fails with {@link NullPointerException}
+     * ("element cannot be mapped to a null key") when the grouping runs, as {@link Stream#groupTo(Throwables.Function)} does, and
+     * the stream is closed. {@link #toMultimap()} and {@link #toMap(BinaryOperator)} accept {@code null} keys.
      *
      * @return a new EntryStream with keys and their associated list of values
      * @throws IllegalStateException if the stream is already closed
@@ -2395,10 +2639,16 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; retains grouping state in memory; its size depends on the aggregation.
      *
+     * <p><b>Null keys:</b> an entry whose key is {@code null} fails with {@link NullPointerException}
+     * ("element cannot be mapped to a null key") when the grouping runs, as {@link Stream#groupTo(Throwables.Function)} does, and
+     * the stream is closed. {@link #toMultimap()} and {@link #toMap(BinaryOperator)} accept {@code null} keys.
+     *
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated list of values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} when the grouping runs (checked once,
+     *         before any entry is added, so an empty stream is rejected too)
      * @see Stream#groupBy(Function, Function, Supplier)
      * @see #groupBy()
      */
@@ -2439,6 +2689,11 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
+     *
+     * <p><b>Null keys:</b> if {@code keyMapper} returns {@code null} for an entry, the grouping fails with
+     * {@link NullPointerException} ("element cannot be mapped to a null key") when it runs, as
+     * {@link Stream#groupBy(Function)} does, and the stream is closed. The {@code BinaryOperator} overloads of
+     * {@code groupBy} accept {@code null} keys.
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
@@ -2485,6 +2740,11 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
+     * <p><b>Null keys:</b> if {@code keyMapper} returns {@code null} for an entry, the grouping fails with
+     * {@link NullPointerException} ("element cannot be mapped to a null key") when it runs, as
+     * {@link Stream#groupBy(Function)} does, and the stream is closed. The {@code BinaryOperator} overloads of
+     * {@code groupBy} accept {@code null} keys.
+     *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
@@ -2493,7 +2753,9 @@ public final class EntryStream<K, V> extends
      * @return a new EntryStream consisting of entries where the key is the group identifier, and the value is a list of elements that mapped to the corresponding key.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is
-     *         {@code null}.
+     *         {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} when the grouping runs (checked once,
+     *         before any entry is added, so an empty stream is rejected too)
      * @see Stream#groupBy(Function, Function, Supplier)
      */
     @ParallelSupported
@@ -2527,6 +2789,10 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
+     *
+     * <p><b>Null keys:</b> an entry whose key is {@code null} fails with {@link NullPointerException}
+     * ("element cannot be mapped to a null key") when the grouping runs, as {@link Stream#groupTo(Throwables.Function)} does, and
+     * the stream is closed. {@link #toMultimap()} and {@link #toMap(BinaryOperator)} accept {@code null} keys.
      *
      * @param <D> the type of the result of the downstream collector
      * @param downstream the collector to use for grouping the entries
@@ -2567,12 +2833,18 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
+     * <p><b>Null keys:</b> an entry whose key is {@code null} fails with {@link NullPointerException}
+     * ("element cannot be mapped to a null key") when the grouping runs, as {@link Stream#groupTo(Throwables.Function)} does, and
+     * the stream is closed. {@link #toMultimap()} and {@link #toMap(BinaryOperator)} accept {@code null} keys.
+     *
      * @param <D> the type of the result of the downstream collector
      * @param downstream the collector to use for grouping the entries
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated collected results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code downstream} or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code downstream} or {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} when the grouping runs (checked once,
+     *         before any entry is added, so an empty stream is rejected too)
      * @see Stream#groupBy(Function, Collector, Supplier)
      */
     @ParallelSupported
@@ -2581,8 +2853,6 @@ public final class EntryStream<K, V> extends
     public <D> EntryStream<K, D> groupBy(final Collector<? super Map.Entry<K, V>, ?, D> downstream, final Supplier<? extends Map<K, D>> mapFactory)
             throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
-
-        checkArgNotNull(mapFactory, cs.mapFactory);
 
         final Function<? super Map.Entry<K, V>, K> keyMapper = Fn.key();
 
@@ -2609,6 +2879,11 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
+     *
+     * <p><b>Null keys:</b> if {@code keyMapper} returns {@code null} for an entry, the grouping fails with
+     * {@link NullPointerException} ("element cannot be mapped to a null key") when it runs, as
+     * {@link Stream#groupBy(Function)} does, and the stream is closed. The {@code BinaryOperator} overloads of
+     * {@code groupBy} accept {@code null} keys.
      *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <D> the type of the result of the downstream collector.
@@ -2654,6 +2929,11 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
+     * <p><b>Null keys:</b> if {@code keyMapper} returns {@code null} for an entry, the grouping fails with
+     * {@link NullPointerException} ("element cannot be mapped to a null key") when it runs, as
+     * {@link Stream#groupBy(Function)} does, and the stream is closed. The {@code BinaryOperator} overloads of
+     * {@code groupBy} accept {@code null} keys.
+     *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <D> the type of the result of the downstream collector.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
@@ -2661,7 +2941,10 @@ public final class EntryStream<K, V> extends
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of the downstream collector.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code downstream}, or {@code mapFactory} is
+     *         {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} when the grouping runs (checked once,
+     *         before any entry is added, so an empty stream is rejected too)
      * @see Stream#groupBy(Function, Collector, Supplier)
      */
     @ParallelSupported
@@ -2673,7 +2956,6 @@ public final class EntryStream<K, V> extends
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(mapFactory, cs.mapFactory);
 
         return of(_stream.groupBy(keyMapper, downstream, mapFactory));
     }
@@ -2697,7 +2979,16 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; retains grouping state in memory; its size depends on the aggregation.
      *
-     * @param mergeFunction the function to merge values associated with the same key
+     * <p><b>Null keys:</b> unlike the list and {@code Collector} overloads of {@code groupBy}, which reject them,
+     * this overload accepts a {@code null} key (it merges through {@code toMap} semantics) as long as the map
+     * allows one.
+     *
+     * @param mergeFunction the function to merge values associated with the same key. It is called with the value
+     *        already mapped to the key and the new value - even when the existing value is {@code null}, unlike
+     *        {@link Map#merge(Object, Object, BiFunction)}, which treats a {@code null} existing value as absent (so
+     *        {@code Integer::sum} fails with a {@code NullPointerException} there). A {@code null} result removes the
+     *        key; a later value for that key is then stored as a new mapping (placed after the keys already present
+     *        when the map keeps insertion order)
      * @return a new EntryStream with keys and their associated merged values
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
@@ -2738,16 +3029,27 @@ public final class EntryStream<K, V> extends
      *     .groupBy(Integer::sum, Suppliers.ofTreeMap())
      *     .toMap();
      * // Result: {a=4, b=6}
-     * // TreeMap::new controls the intermediate grouping order; toMap() creates the returned map.
+     * // Suppliers.ofTreeMap() controls the intermediate grouping order; toMap() creates the returned map.
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link SequentialOnly always sequential}; retains grouping state in memory; its size depends on the aggregation.
      *
-     * @param mergeFunction the function to merge values associated with the same key
+     * <p><b>Null keys:</b> unlike the list and {@code Collector} overloads of {@code groupBy}, which reject them,
+     * this overload accepts a {@code null} key (it merges through {@code toMap} semantics) as long as the map
+     * allows one.
+     *
+     * @param mergeFunction the function to merge values associated with the same key. It is called with the value
+     *        already mapped to the key and the new value - even when the existing value is {@code null}, unlike
+     *        {@link Map#merge(Object, Object, BiFunction)}, which treats a {@code null} existing value as absent (so
+     *        {@code Integer::sum} fails with a {@code NullPointerException} there). A {@code null} result removes the
+     *        key; a later value for that key is then stored as a new mapping (placed after the keys already present
+     *        when the map keeps insertion order)
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream with keys and their associated merged values
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mergeFunction} or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code mergeFunction} or {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} when the grouping runs (checked once,
+     *         before any entry is added, so an empty stream is rejected too)
      * @see Stream#groupBy(Function, Function, BinaryOperator, Supplier)
      */
     @SequentialOnly
@@ -2795,11 +3097,20 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
+     * <p><b>Null keys:</b> unlike the list and {@code Collector} overloads of {@code groupBy}, which reject them,
+     * this overload accepts a {@code null} key returned by {@code keyMapper} (it merges through {@code toMap}
+     * semantics) as long as the map allows one.
+     *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group
-     * @param mergeFunction the function to merge values associated with the same key
+     * @param mergeFunction the function to merge values associated with the same key. It is called with the value
+     *        already mapped to the key and the new value - even when the existing value is {@code null}, unlike
+     *        {@link Map#merge(Object, Object, BiFunction)}, which treats a {@code null} existing value as absent (so
+     *        {@code Integer::sum} fails with a {@code NullPointerException} there). A {@code null} result removes the
+     *        key; a later value for that key is then stored as a new mapping (placed after the keys already present
+     *        when the map keeps insertion order)
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of merging the values that mapped to the corresponding key.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mergeFunction}
@@ -2846,16 +3157,27 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation that {@link TerminalOpTriggered materializes the upstream before emitting results, possibly on first traversal}; {@link ParallelSupported parallel-supported}; retains grouping state in memory; its size depends on the aggregation.
      *
+     * <p><b>Null keys:</b> unlike the list and {@code Collector} overloads of {@code groupBy}, which reject them,
+     * this overload accepts a {@code null} key returned by {@code keyMapper} (it merges through {@code toMap}
+     * semantics) as long as the map allows one.
+     *
      * @param <KK> the type of the key in the resulting Map.Entry.
      * @param <VV> the type of the value in the resulting Map.Entry.
      * @param keyMapper the function to be applied to each element in the stream to determine the group it belongs to
      * @param valueMapper the function to be applied to each element in the stream to determine its value in the group
-     * @param mergeFunction the function to merge values associated with the same key
+     * @param mergeFunction the function to merge values associated with the same key. It is called with the value
+     *        already mapped to the key and the new value - even when the existing value is {@code null}, unlike
+     *        {@link Map#merge(Object, Object, BiFunction)}, which treats a {@code null} existing value as absent (so
+     *        {@code Integer::sum} fails with a {@code NullPointerException} there). A {@code null} result removes the
+     *        key; a later value for that key is then stored as a new mapping (placed after the keys already present
+     *        when the map keeps insertion order)
      * @param mapFactory the supplier providing a new empty Map into which the results will be inserted
      * @return a new EntryStream consisting of entries where the key is the group identifier and the value is the result of merging the values that mapped to the corresponding key.
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
-     *         {@code mapFactory} is {@code null}.
+     *         {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} when the grouping runs (checked once,
+     *         before any entry is added, so an empty stream is rejected too)
      * @see Stream#groupBy(Function, Function, BinaryOperator, Supplier)
      */
     @ParallelSupported
@@ -3325,7 +3647,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @IntermediateOp
-    public EntryStream<K, V> intersection(final Map<? extends K, ? extends V> map) throws IllegalStateException {
+    public EntryStream<K, V> intersection(final Map<?, ?> map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         return intersection(N.isEmpty(map) ? N.emptyList() : map.entrySet());
@@ -3506,7 +3828,7 @@ public final class EntryStream<K, V> extends
      *
      * @return never returns normally
      * @throws IllegalStateException if the stream is already closed
-     * @throws UnsupportedOperationException always
+     * @throws UnsupportedOperationException always; the stream is closed before it is thrown
      * @deprecated Use {@link #sorted(Comparator)} instead.
      */
     @Deprecated
@@ -3519,7 +3841,30 @@ public final class EntryStream<K, V> extends
         //
         //    return of(_stream.sorted(cmp));
 
-        throw new UnsupportedOperationException("Use sorted(Comparator) instead.");
+        throw closeAndCreateUnsupported("Use sorted(Comparator) instead.");
+    }
+
+    /**
+     * Closes this stream and returns the {@link UnsupportedOperationException} the caller is about to throw.
+     *
+     * <p>{@link #sorted()}, {@link #reverseSorted()} and {@link #percentiles()} can never succeed on an
+     * {@code EntryStream}. Like every other rejected call in this class they must release the stream - and any
+     * file or JDBC handle behind it - before throwing, or the source leaks unless the caller used
+     * try-with-resources. A failure while closing is attached to the returned exception as suppressed.</p>
+     *
+     * @param message the exception message
+     * @return the exception to throw
+     */
+    private UnsupportedOperationException closeAndCreateUnsupported(final String message) {
+        final UnsupportedOperationException ex = new UnsupportedOperationException(message);
+
+        try {
+            close();
+        } catch (final Throwable e) { // NOSONAR
+            ex.addSuppressed(e);
+        }
+
+        return ex;
     }
 
     /**
@@ -3805,7 +4150,7 @@ public final class EntryStream<K, V> extends
      *
      * @return never returns normally
      * @throws IllegalStateException if the stream is already closed
-     * @throws UnsupportedOperationException always
+     * @throws UnsupportedOperationException always; the stream is closed before it is thrown
      * @deprecated Use {@link #reverseSorted(Comparator)} instead.
      */
     @Deprecated
@@ -3818,7 +4163,7 @@ public final class EntryStream<K, V> extends
         //                .thenComparing(Comparators.comparingByValue((Comparator) Comparators.naturalOrder())));
         //
         //        return of(_stream.sorted(cmp));
-        throw new UnsupportedOperationException("Use reverseSorted(Comparator) instead.");
+        throw closeAndCreateUnsupported("Use reverseSorted(Comparator) instead.");
     }
 
     /**
@@ -3964,6 +4309,16 @@ public final class EntryStream<K, V> extends
      * <p>When duplicate entries are encountered, the merge function is applied to determine
      * which entry to keep. This allows for custom handling of duplicates beyond simple removal.
      *
+     * <p>Entries are compared with {@code Map.Entry#equals} (equal keys and equal values), as in {@link #distinct()},
+     * so an array key or value is compared by identity, not by content. The merge function should be associative
+     * for correct behavior in parallel streams.
+     *
+     * <p>Duplicates are merged into a map keyed by the entry itself, so {@code null} entries are allowed and a group
+     * whose current value is {@code null} is still passed to {@code mergeFunction}. A {@code null} merge result
+     * removes the group; a later equal entry then starts a new group, placed after the groups already present. So a
+     * {@code null} result drops an entry only if no further equal entry follows: with {@code (x, y) -> null}, the
+     * entries {@code [a=1, b=2, a=1]} yield {@code [b=2]}, but {@code [a=1, b=2, a=1, a=1]} yield {@code [b=2, a=1]}.
+     *
      * <p>This stateful intermediate operation materializes the upstream before emitting results;
      * materialization may be deferred until the first traversal.</p>
      *
@@ -4062,7 +4417,7 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns entries for ("a", 1), ("b", 2)
      * }</pre>
      *
-     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; retains the distinct extracted keys seen so far.
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; retains the distinct values seen so far.
      *
      * @return a new EntryStream with distinct elements based on the values
      * @throws IllegalStateException if the stream is already closed
@@ -4123,6 +4478,17 @@ public final class EntryStream<K, V> extends
      * <p>When multiple entries produce the same key from the extractor function, the merge function
      * determines which entry to keep. This allows for both custom uniqueness definitions and custom
      * duplicate handling.
+     *
+     * <p>Extracted keys are compared with ordinary map-key equality ({@code equals}), so an array key is compared by
+     * identity - unlike {@link #distinctBy(Function)}, which compares array keys by deep content. The merge function
+     * should be associative for correct behavior in parallel streams.
+     *
+     * <p>{@code null} keys are allowed, and in a sequential stream each group keeps the position of its first entry.
+     * A group whose current value is {@code null} is still passed to {@code mergeFunction}. A {@code null} merge result
+     * removes the group; a later entry with the same key then starts a new group, placed after the groups already
+     * present. So a {@code null} result drops a key's group only if no further entry with that key follows: with
+     * {@code (x, y) -> null}, the entries {@code [a=1, b=2, a=3]} yield {@code [b=2]}, but
+     * {@code [a=1, b=2, a=3, a=4]} yield {@code [b=2, a=4]}.
      *
      * <p>This stateful intermediate operation materializes the upstream before emitting results;
      * materialization may be deferred until the first traversal.</p>
@@ -4234,17 +4600,17 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns entries in a deterministic random order
      * }</pre>
      *
-     * @param rnd the random to shuffle the elements
+     * @param random the random to shuffle the elements
      * @return a new EntryStream with the elements shuffled using the specified random
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}
+     * @throws IllegalArgumentException if {@code random} is {@code null}
      * @see Stream#shuffled(Random)
      */
     @Override
-    public EntryStream<K, V> shuffled(final Random rnd) throws IllegalStateException, IllegalArgumentException {
+    public EntryStream<K, V> shuffled(final Random random) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
-        return of(_stream.shuffled(rnd));
+        return of(_stream.shuffled(random));
     }
 
     /**
@@ -4324,7 +4690,7 @@ public final class EntryStream<K, V> extends
      * @param rounds the number of rounds to cycle the elements
      * @return a new EntryStream with the elements cycled the specified number of times
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if rounds is negative.
+     * @throws IllegalArgumentException if {@code rounds} is negative.
      * @see Stream#cycled(long)
      */
     @Override
@@ -4336,7 +4702,7 @@ public final class EntryStream<K, V> extends
 
     /**
      * Prepends the specified map to the current EntryStream.
-     * If the map is empty, the original stream is returned.
+     * If the map is {@code null} or empty, this stream itself is returned.
      *
      * <p>This method only runs sequentially, even in parallel streams.
      *
@@ -4351,20 +4717,19 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param <M> the type of the map to prepend
      * @param map the map to prepend to the stream
-     * @return a new EntryStream with the elements of the specified map prepended
+     * @return a new EntryStream with the elements of the specified map prepended, or this stream if the map is {@code null} or empty
      * @throws IllegalStateException if the stream is already closed
      * @see Stream#prepend(Collection)
      */
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> prepend(final M map) throws IllegalStateException {
+    public EntryStream<K, V> prepend(final Map<? extends K, ? extends V> map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         if (N.isEmpty(map)) {
-            return of(_stream);
+            return this;
         }
 
         final Set<Map.Entry<K, V>> set = (Set) map.entrySet();
@@ -4411,28 +4776,28 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns [("x", 10), ("a", 1), ("b", 2)]
      * }</pre>
      *
-     * @param op the optional entry to prepend to the stream
+     * @param optional the optional entry to prepend to the stream
      * @return a new EntryStream with the optional entry prepended
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code op} is {@code null}.
+     * @throws IllegalArgumentException if {@code optional} is {@code null}.
      * @see #prepend(Map)
      */
     @Override
-    public EntryStream<K, V> prepend(final Optional<Map.Entry<K, V>> op) throws IllegalStateException, IllegalArgumentException {
+    public EntryStream<K, V> prepend(final Optional<Map.Entry<K, V>> optional) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(optional, cs.optional);
 
-        if (op.isEmpty()) {
+        if (optional.isEmpty()) {
             return this;
         }
 
-        return of(_stream.prepend(op));
+        return of(_stream.prepend(optional));
     }
 
     /**
      * Appends the specified map to the current EntryStream.
-     * If the map is empty, the original stream is returned.
+     * If the map is {@code null} or empty, this stream itself is returned.
      *
      * <p>This method only runs sequentially, even in parallel streams.
      *
@@ -4447,20 +4812,19 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param <M> the type of the map to append
      * @param map the map to append to the stream
-     * @return a new EntryStream with the elements of the specified map appended
+     * @return a new EntryStream with the elements of the specified map appended, or this stream if the map is {@code null} or empty
      * @throws IllegalStateException if the stream is already closed
      * @see Stream#append(Collection)
      */
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> append(final M map) throws IllegalStateException {
+    public EntryStream<K, V> append(final Map<? extends K, ? extends V> map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         if (N.isEmpty(map)) {
-            return of(_stream);
+            return this;
         }
 
         final Set<Map.Entry<K, V>> set = (Set) map.entrySet();
@@ -4507,29 +4871,29 @@ public final class EntryStream<K, V> extends
      *     .toList();   // returns [("a", 1), ("b", 2), ("x", 10)]
      * }</pre>
      *
-     * @param op the optional entry to append to the stream
+     * @param optional the optional entry to append to the stream
      * @return a new EntryStream with the optional entry appended
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code op} is {@code null}.
+     * @throws IllegalArgumentException if {@code optional} is {@code null}.
      * @see #append(Map)
      */
     @Override
-    public EntryStream<K, V> append(final Optional<Map.Entry<K, V>> op) throws IllegalStateException, IllegalArgumentException {
+    public EntryStream<K, V> append(final Optional<Map.Entry<K, V>> optional) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
 
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(optional, cs.optional);
 
-        if (op.isEmpty()) {
+        if (optional.isEmpty()) {
             return this;
         }
 
-        return of(_stream.append(op));
+        return of(_stream.append(optional));
     }
 
     /**
      * Returns a stream consisting of this stream's entries when it is non-empty, or the entries of the
-     * specified map when this stream is empty. If the map is empty, this stream's entries are returned
-     * unchanged (no entries are appended).
+     * specified map when this stream is empty. If the map is {@code null} or empty, this stream itself is
+     * returned (no entries are appended).
      *
      * <p>This method only runs sequentially, even in parallel streams.
      *
@@ -4550,20 +4914,20 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
      *
-     * @param <M> the type of the map to append
      * @param map the map to append to the stream if the stream is empty
-     * @return a stream containing this stream's entries if non-empty, otherwise the map's entries
+     * @return a stream containing this stream's entries if non-empty, otherwise the map's entries;
+     *         this stream itself if the map is {@code null} or empty
      * @throws IllegalStateException if the stream is already closed
      * @see Stream#appendIfEmpty(Collection)
      */
     @SequentialOnly
     @IntermediateOp
     @SuppressWarnings("rawtypes")
-    public <M extends Map<? extends K, ? extends V>> EntryStream<K, V> appendIfEmpty(final M map) throws IllegalStateException {
+    public EntryStream<K, V> appendIfEmpty(final Map<? extends K, ? extends V> map) throws IllegalStateException {
         _stream.assertNotClosed();
 
         if (N.isEmpty(map)) {
-            return of(_stream);
+            return this;
         }
 
         final Set<Map.Entry<K, V>> set = (Set) map.entrySet();
@@ -4580,17 +4944,14 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Supplier<EntryStream<String, Integer>> defaultSupplier =
-     *     () -> EntryStream.of("default", 0);
-     *
      * // Empty stream gets defaults appended
      * EntryStream.<String, Integer>empty()
-     *     .appendIfEmpty(defaultSupplier)
+     *     .appendIfEmpty(() -> EntryStream.of("default", 0))
      *     .toList();   // returns [("default", 0)]
      *
-     * // Non-empty stream keeps its entries
+     * // Non-empty stream keeps its entries; the supplier is not invoked
      * EntryStream.of("a", 1)
-     *     .appendIfEmpty(defaultSupplier)
+     *     .appendIfEmpty(() -> EntryStream.of("default", 0))
      *     .toList();   // returns [("a", 1)]
      * }</pre>
      *
@@ -4660,7 +5021,7 @@ public final class EntryStream<K, V> extends
      * @param n the number of elements to skip
      * @return a new EntryStream with the first <i>n</i> elements skipped
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if n is negative.
+     * @throws IllegalArgumentException if {@code n} is negative.
      * @see Stream#skip(long)
      */
     @SequentialOnly
@@ -4675,7 +5036,11 @@ public final class EntryStream<K, V> extends
     /**
      * Skips the first <i>n</i> elements of this EntryStream and applies the specified consumer to each skipped element.
      *
-     * <p>This method only runs sequentially, even in parallel streams.
+     * <p>This method only runs sequentially, even in parallel streams: the skip stage takes the entries one at a time
+     * in the order it receives them, invokes {@code onSkip} for the first <i>n</i> of them one at a time, and does not
+     * itself reorder the entries it passes on. The parallel settings are kept for the stages after it. Entries arriving
+     * from an upstream parallel stage are received in that stage's completion order (see
+     * {@link BaseStream#skip(long, Object)}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4686,16 +5051,24 @@ public final class EntryStream<K, V> extends
      * // skipped contains [("a", 1), ("b", 2)]
      * }</pre>
      *
+     * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link SequentialOnly always sequential}; does not buffer elements in memory.
+     *
      * @param n the number of elements to skip
      * @param onSkip the consumer to apply to each skipped element
      * @return a new EntryStream with the first <i>n</i> elements skipped
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if n is negative, or if {@code onSkip} is {@code null}.
+     * @throws IllegalArgumentException if {@code n} is negative, or if {@code onSkip} is {@code null}.
      * @see #skip(long)
      */
+    @Beta
+    @SequentialOnly
+    @IntermediateOp
     @Override
     public EntryStream<K, V> skip(final long n, final Consumer<? super Map.Entry<K, V>> onSkip) throws IllegalStateException, IllegalArgumentException {
         _stream.assertNotClosed();
+
+        checkArgNotNegative(n, cs.n);
+        checkArgNotNull(onSkip, cs.onSkip);
 
         return of(_stream.skip(n, onSkip));
     }
@@ -4717,7 +5090,7 @@ public final class EntryStream<K, V> extends
      * @param maxSize the maximum number of elements to include in the stream
      * @return a new EntryStream with at most <i>maxSize</i> elements
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if maxSize is negative.
+     * @throws IllegalArgumentException if {@code maxSize} is negative.
      * @see Stream#limit(long)
      */
     @SequentialOnly
@@ -4746,7 +5119,7 @@ public final class EntryStream<K, V> extends
      * @param step the interval between elements to include in the resulting stream
      * @return a new EntryStream consisting of every 'step'th entry of this stream.
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if step is not positive.
+     * @throws IllegalArgumentException if {@code step} is not positive.
      * @see Stream#step(long)
      */
     @Override
@@ -5214,9 +5587,9 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to compare the entries
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #minByKey(Comparator)
      * @see #minByValue(Comparator)
      * @see #minBy(Function)
@@ -5224,7 +5597,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> min(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> min(final Comparator<? super Map.Entry<K, V>> comparator)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -5253,16 +5627,19 @@ public final class EntryStream<K, V> extends
      *
      * @param keyComparator the comparator to compare the keys
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyComparator} is {@code null}.
+     * @throws NullPointerException if the selected entry is {@code null} (even when it is the only entry), or if any
+     *         entry compared is {@code null}: the key comparator reads the key of every entry, {@code null} ones
+     *         included, even when that entry is not the result
      * @see #min(Comparator)
      * @see #minByValue(Comparator)
      * @see Stream#min(Comparator)
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> minByKey(final Comparator<? super K> keyComparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> minByKey(final Comparator<? super K> keyComparator)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyComparator, cs.keyComparator);
@@ -5291,16 +5668,19 @@ public final class EntryStream<K, V> extends
      *
      * @param valueComparator the comparator to compare the values
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code valueComparator} is {@code null}.
+     * @throws NullPointerException if the selected entry is {@code null} (even when it is the only entry), or if any
+     *         entry compared is {@code null}: the value comparator reads the value of every entry, {@code null} ones
+     *         included, even when that entry is not the result
      * @see #min(Comparator)
      * @see #minByKey(Comparator)
      * @see Stream#min(Comparator)
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> minByValue(final Comparator<? super V> valueComparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> minByValue(final Comparator<? super V> valueComparator)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueComparator, cs.valueComparator);
@@ -5331,10 +5711,10 @@ public final class EntryStream<K, V> extends
      *
      * @param keyMapper the function to extract the comparable sort key from each entry
      * @return an {@code Optional} containing the minimum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}, or if {@code keyMapper} rejects a {@code null} entry:
-     *         it is applied to every entry, {@code null} ones included, even when that entry is not the minimum
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws NullPointerException if the selected entry is {@code null}, or if {@code keyMapper} rejects a {@code null} entry:
+     *         it is applied to every entry, {@code null} ones included, even when that entry is not the minimum
      * @see #min(Comparator)
      * @see Stream#minBy(Function)
      */
@@ -5342,7 +5722,7 @@ public final class EntryStream<K, V> extends
     @TerminalOp
     @SuppressWarnings("rawtypes")
     public Optional<Map.Entry<K, V>> minBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -5372,9 +5752,9 @@ public final class EntryStream<K, V> extends
      *
      * @param comparator the comparator to compare the entries
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #maxByKey(Comparator)
      * @see #maxByValue(Comparator)
      * @see #maxBy(Function)
@@ -5382,7 +5762,8 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> max(final Comparator<? super Map.Entry<K, V>> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> max(final Comparator<? super Map.Entry<K, V>> comparator)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -5411,16 +5792,19 @@ public final class EntryStream<K, V> extends
      *
      * @param keyComparator the comparator to compare the keys
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyComparator} is {@code null}.
+     * @throws NullPointerException if the selected entry is {@code null} (even when it is the only entry), or if any
+     *         entry compared is {@code null}: the key comparator reads the key of every entry, {@code null} ones
+     *         included, even when that entry is not the result
      * @see #max(Comparator)
      * @see #maxByValue(Comparator)
      * @see Stream#max(Comparator)
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> maxByKey(final Comparator<? super K> keyComparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> maxByKey(final Comparator<? super K> keyComparator)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyComparator, cs.keyComparator);
@@ -5449,16 +5833,19 @@ public final class EntryStream<K, V> extends
      *
      * @param valueComparator the comparator to compare the values
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code valueComparator} is {@code null}.
+     * @throws NullPointerException if the selected entry is {@code null} (even when it is the only entry), or if any
+     *         entry compared is {@code null}: the value comparator reads the value of every entry, {@code null} ones
+     *         included, even when that entry is not the result
      * @see #max(Comparator)
      * @see #maxByKey(Comparator)
      * @see Stream#max(Comparator)
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> maxByValue(final Comparator<? super V> valueComparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> maxByValue(final Comparator<? super V> valueComparator)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(valueComparator, cs.valueComparator);
@@ -5489,10 +5876,10 @@ public final class EntryStream<K, V> extends
      *
      * @param keyMapper the function to extract the comparable sort key from each entry
      * @return an {@code Optional} containing the maximum entry of this EntryStream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}, or if {@code keyMapper} rejects a {@code null} entry:
-     *         it is applied to every entry, {@code null} ones included, even when that entry is not the maximum
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
+     * @throws NullPointerException if the selected entry is {@code null}, or if {@code keyMapper} rejects a {@code null} entry:
+     *         it is applied to every entry, {@code null} ones included, even when that entry is not the maximum
      * @see #max(Comparator)
      * @see Stream#maxBy(Function)
      */
@@ -5500,7 +5887,7 @@ public final class EntryStream<K, V> extends
     @TerminalOp
     @SuppressWarnings("rawtypes")
     public Optional<Map.Entry<K, V>> maxBy(final Function<? super Map.Entry<K, V>, ? extends Comparable> keyMapper)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -5861,15 +6248,15 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Optional<Map.Entry<String, Integer>> first = EntryStream.of("a", 1, "b", 2).findFirst();   // returns an Optional containing the entry ("a", 1)
-     * Optional<Map.Entry<String, Integer>> empty = EntryStream.<String, Integer>empty().findFirst();   // returns Optional.empty()
+     * Optional<Map.Entry<String, Integer>> first = EntryStream.of("a", 1, "b", 2).findFirst();        // returns an Optional containing the entry ("a", 1)
+     * Optional<Map.Entry<String, Integer>> empty = EntryStream.<String, Integer>empty().findFirst();  // returns Optional.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #first()
      * @see #findAny()
      * @see #findFirst(Throwables.Predicate)
@@ -5878,7 +6265,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> findFirst() throws IllegalStateException {
+    public Optional<Map.Entry<K, V>> findFirst() throws IllegalStateException, NullPointerException {
         _stream.assertNotClosed();
 
         return first();
@@ -5898,15 +6285,15 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Optional<Map.Entry<String, Integer>> first = EntryStream.of("a", 1, "b", 2).findAny();   // returns an Optional containing the entry ("a", 1)
-     * Optional<Map.Entry<String, Integer>> empty = EntryStream.<String, Integer>empty().findAny();   // returns Optional.empty()
+     * Optional<Map.Entry<String, Integer>> first = EntryStream.of("a", 1, "b", 2).findAny();        // returns an Optional containing the entry ("a", 1)
+     * Optional<Map.Entry<String, Integer>> empty = EntryStream.<String, Integer>empty().findAny();  // returns Optional.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #first()
      * @see #findFirst()
      * @see #findFirst(Throwables.Predicate)
@@ -5915,7 +6302,7 @@ public final class EntryStream<K, V> extends
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> findAny() throws IllegalStateException {
+    public Optional<Map.Entry<K, V>> findAny() throws IllegalStateException, NullPointerException {
         _stream.assertNotClosed();
 
         return first();
@@ -5949,10 +6336,10 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing the first entry that matches the predicate, or an empty {@code Optional} if no entry matches
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #findAny(Throwables.Predicate)
      * @see #findLast(Throwables.Predicate)
      * @see #findFirst(Throwables.BiPredicate)
@@ -5961,7 +6348,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findFirst(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -6048,10 +6435,10 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing a matching entry, or an empty {@code Optional} if no entry matches
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #findFirst(Throwables.Predicate)
      * @see #findLast(Throwables.Predicate)
      * @see #findAny(Throwables.BiPredicate)
@@ -6060,7 +6447,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findAny(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -6148,10 +6535,10 @@ public final class EntryStream<K, V> extends
      * @param <E> the type of exception that the predicate may throw
      * @param predicate a non-interfering, stateless predicate to test each entry of the stream
      * @return an {@code Optional} containing the last entry that matches the predicate, or an empty {@code Optional} if no entry matches
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #findFirst(Throwables.Predicate)
      * @see #findAny(Throwables.Predicate)
      * @see #findLast(Throwables.BiPredicate)
@@ -6161,7 +6548,7 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <E extends Exception> Optional<Map.Entry<K, V>> findLast(final Throwables.Predicate<? super Map.Entry<K, V>, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -6234,22 +6621,22 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Optional<Map.Entry<String, Integer>> first = EntryStream.of("a", 1, "b", 2).first();   // returns an Optional containing the entry ("a", 1)
-     * Optional<Map.Entry<String, Integer>> empty = EntryStream.<String, Integer>empty().first();   // returns Optional.empty()
+     * Optional<Map.Entry<String, Integer>> first = EntryStream.of("a", 1, "b", 2).first();        // returns an Optional containing the entry ("a", 1)
+     * Optional<Map.Entry<String, Integer>> empty = EntryStream.<String, Integer>empty().first();  // returns Optional.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the first entry of the stream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #findFirst()
      * @see #findAny()
      * @see #last()
      * @see Stream#first()
      */
     @Override
-    public Optional<Map.Entry<K, V>> first() throws IllegalStateException {
+    public Optional<Map.Entry<K, V>> first() throws IllegalStateException, NullPointerException {
         _stream.assertNotClosed();
 
         return _stream.first();
@@ -6267,21 +6654,21 @@ public final class EntryStream<K, V> extends
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Optional<Map.Entry<String, Integer>> last = EntryStream.of("a", 1, "b", 2)
-     *         .last();   // returns an Optional containing the entry ("b", 2)
-     * Optional<Map.Entry<String, Integer>> empty = EntryStream.<String, Integer>empty().last();   // returns Optional.empty()
+     *         .last();                                                                           // returns an Optional containing the entry ("b", 2)
+     * Optional<Map.Entry<String, Integer>> empty = EntryStream.<String, Integer>empty().last();  // returns Optional.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
      * @return an {@code Optional} containing the last entry of the stream, or an empty {@code Optional} if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see #first()
      * @see #findLast(Throwables.Predicate)
      * @see Stream#last()
      */
     @Override
-    public Optional<Map.Entry<K, V>> last() throws IllegalStateException {
+    public Optional<Map.Entry<K, V>> last() throws IllegalStateException, NullPointerException {
         _stream.assertNotClosed();
 
         return _stream.last();
@@ -6308,13 +6695,13 @@ public final class EntryStream<K, V> extends
      *
      * @param position the position of the entry to return (zero-based)
      * @return an {@code Optional} containing the entry at the specified position, or empty if that position does not exist
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code position} is negative.
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see Stream#elementAt(long)
      */
     @Override
-    public Optional<Map.Entry<K, V>> elementAt(final long position) throws IllegalStateException, IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> elementAt(final long position) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         return _stream.elementAt(position);
@@ -6340,13 +6727,13 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * @return an {@code Optional} containing the sole entry, or empty if the stream is empty
-     * @throws NullPointerException if the selected entry is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws TooManyElementsException if the EntryStream contains more than one entry
+     * @throws NullPointerException if the selected entry is {@code null}
      * @see Stream#onlyOne()
      */
     @Override
-    public Optional<Map.Entry<K, V>> onlyOne() throws IllegalStateException, TooManyElementsException {
+    public Optional<Map.Entry<K, V>> onlyOne() throws IllegalStateException, TooManyElementsException, NullPointerException {
         _stream.assertNotClosed();
 
         return _stream.onlyOne();
@@ -6372,7 +6759,7 @@ public final class EntryStream<K, V> extends
      *
      * @return never returns normally
      * @throws IllegalStateException if the stream is already closed
-     * @throws UnsupportedOperationException always
+     * @throws UnsupportedOperationException always; the stream is closed before it is thrown
      * @deprecated Use {@link #percentiles(Comparator)} instead.
      * @see #percentiles(Comparator)
      */
@@ -6386,7 +6773,7 @@ public final class EntryStream<K, V> extends
         //
         //    return percentiles((Comparator) cmp);
 
-        throw new UnsupportedOperationException("Use percentiles(Comparator) instead.");
+        throw closeAndCreateUnsupported("Use percentiles(Comparator) instead.");
     }
 
     /**
@@ -6628,11 +7015,14 @@ public final class EntryStream<K, V> extends
      * @param supplier the supplier providing the collection
      * @return a collection containing the entries of this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the stream is closed
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once, before any entry is added,
+     *         so an empty stream is rejected too); the stream is closed
      * @see Stream#toCollection(Supplier)
      */
     @Override
-    public <C extends Collection<Map.Entry<K, V>>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Map.Entry<K, V>>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -6683,13 +7073,15 @@ public final class EntryStream<K, V> extends
      *                 results will be inserted
      * @return a {@code Multiset} containing all entries from this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}; the stream is closed
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once, before any entry is added,
+     *         so an empty stream is rejected too); the stream is closed
      * @see Stream#toMultiset(Supplier)
      * @see #toMultiset()
      */
     @Override
     public Multiset<Map.Entry<K, V>> toMultiset(final Supplier<? extends Multiset<Map.Entry<K, V>>> supplier)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -6710,6 +7102,13 @@ public final class EntryStream<K, V> extends
      *     .toMap();
      * // Result: {"a"=1, "b"=2, "c"=3}
      * }</pre>
+     *
+     * <p><b>Nulls:</b> {@code null} keys and values are accepted and stored as-is (the target is a
+     * {@code HashMap}), unlike {@code java.util.stream.Collectors.toMap}, which rejects {@code null} values.
+     * A key that is already present counts as a duplicate even if its value is {@code null}.
+     *
+     * <p><b>Note:</b> If this stream is parallel, only the accumulation into the result runs sequentially, on the
+     * calling thread; upstream parallel stages, such as a preceding {@code mapValue}, still run in parallel.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
@@ -6754,11 +7153,19 @@ public final class EntryStream<K, V> extends
      * // Result: {"a"="second"}
      * }</pre>
      *
+     * <p><b>Nulls:</b> {@code null} keys and values are accepted and stored as-is (the target is a
+     * {@code HashMap}), unlike {@code java.util.stream.Collectors.toMap}, which rejects {@code null} values.
+     *
+     * <p><b>Note:</b> If this stream is parallel, only the accumulation into the result runs sequentially, on the
+     * calling thread; upstream parallel stages, such as a preceding {@code mapValue}, still run in parallel.
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param mergeFunction a function used to resolve collisions between values associated
-     *                      with the same key. A {@code null} result removes the key, as
-     *                      {@link Map#merge(Object, Object, BiFunction)} does
+     *                      with the same key. It is called with the value already mapped to the key
+     *                      and the new value - even when the existing value is {@code null}, unlike
+     *                      {@link Map#merge(Object, Object, BiFunction)}, which treats a {@code null}
+     *                      existing value as absent. A {@code null} result removes the key
      * @return a {@code Map} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
@@ -6808,6 +7215,14 @@ public final class EntryStream<K, V> extends
      * cannot choose between this overload and {@link #toMap(BinaryOperator)} and reports
      * {@code reference to toMap is ambiguous}.
      *
+     * <p><b>Nulls:</b> {@code null} keys and values are accepted and stored as-is whenever the map created by
+     * {@code mapFactory} allows them; for example a {@code TreeMap} with natural ordering rejects a {@code null}
+     * key and a {@code ConcurrentHashMap} rejects both, with the map's own exception.
+     * A key that is already present counts as a duplicate even if its value is {@code null}.
+     *
+     * <p><b>Note:</b> If this stream is parallel, only the accumulation into the result runs sequentially, on the
+     * calling thread; upstream parallel stages, such as a preceding {@code mapValue}, still run in parallel.
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param <M> the type of the resulting {@code Map}
@@ -6815,7 +7230,9 @@ public final class EntryStream<K, V> extends
      *                   results will be inserted
      * @return a {@code Map} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
-     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}; the stream is closed
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} (checked once, before any entry is added,
+     *         so an empty stream is rejected too); the stream is closed
      * @see Stream#toMap(Throwables.Function, Throwables.Function, Supplier)
      * @see #toMap()
      * @see #toMap(BinaryOperator)
@@ -6826,7 +7243,7 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public <M extends Map<K, V>> M toMap(final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException {
+    public <M extends Map<K, V>> M toMap(final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -6857,17 +7274,29 @@ public final class EntryStream<K, V> extends
      * // Result: ConcurrentHashMap {"a"=5, "b"=3}
      * }</pre>
      *
+     * <p><b>Nulls:</b> {@code null} keys and values are accepted and stored as-is whenever the map created by
+     * {@code mapFactory} allows them; for example a {@code TreeMap} with natural ordering rejects a {@code null}
+     * key and a {@code ConcurrentHashMap} rejects both, with the map's own exception.
+     *
+     * <p><b>Note:</b> If this stream is parallel, only the accumulation into the result runs sequentially, on the
+     * calling thread; upstream parallel stages, such as a preceding {@code mapValue}, still run in parallel.
+     *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param <M> the type of the resulting {@code Map}
      * @param mergeFunction a function used to resolve collisions between values associated
-     *                      with the same key. A {@code null} result removes the key, as
-     *                      {@link Map#merge(Object, Object, BiFunction)} does
+     *                      with the same key. It is called with the value already mapped to the key
+     *                      and the new value - even when the existing value is {@code null}, unlike
+     *                      {@link Map#merge(Object, Object, BiFunction)}, which treats a {@code null}
+     *                      existing value as absent. A {@code null} result removes the key
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
      *                   results will be inserted
      * @return a {@code Map} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mergeFunction} or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code mergeFunction} or {@code mapFactory} is {@code null}; the stream is
+     *         closed
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} (checked once, before any entry is added,
+     *         so an empty stream is rejected too); the stream is closed
      * @see Stream#toMap(Throwables.Function, Throwables.Function, BinaryOperator, Supplier)
      * @see #toMap()
      * @see #toMap(BinaryOperator)
@@ -6879,7 +7308,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <M extends Map<K, V>> M toMap(final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mergeFunction, cs.mergeFunction);
@@ -6916,10 +7345,10 @@ public final class EntryStream<K, V> extends
      *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown by the function
-     * @param func the function to apply to the resulting map
+     * @param function the function to apply to the resulting map
      * @return the result of applying the function to the collected map
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered during map collection
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @throws E if the function throws an exception
      * @see #toMap()
      * @see #toMapThenAccept(Throwables.Consumer)
@@ -6929,13 +7358,13 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public <R, E extends Exception> R toMapThenApply(final Throwables.Function<? super Map<K, V>, ? extends R, E> func)
+    public <R, E extends Exception> R toMapThenApply(final Throwables.Function<? super Map<K, V>, ? extends R, E> function)
             throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return func.apply(toMap());
+        return function.apply(toMap());
     }
 
     /**
@@ -7043,8 +7472,10 @@ public final class EntryStream<K, V> extends
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
      * @param mergeFunction a function used to resolve collisions between values associated
-     *                      with the same key. A {@code null} result removes the key, as
-     *                      {@link Map#merge(Object, Object, BiFunction)} does
+     *                      with the same key. It is called with the value already mapped to the key
+     *                      and the new value - even when the existing value is {@code null}, unlike
+     *                      {@link Map#merge(Object, Object, BiFunction)}, which treats a {@code null}
+     *                      existing value as absent. A {@code null} result removes the key
      * @return an {@code ImmutableMap} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code mergeFunction} is {@code null}.
@@ -7083,8 +7514,8 @@ public final class EntryStream<K, V> extends
      * List<Integer> aValues = result.get("a");   // returns [1, 3]
      * }</pre>
      *
-     * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
-     * processing, so any upstream parallelism is silently lost for this terminal step.
+     * <p><b>Note:</b> If this stream is parallel, only the accumulation into the result runs sequentially, on the
+     * calling thread; upstream parallel stages, such as a preceding {@code mapValue}, still run in parallel.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
@@ -7127,8 +7558,8 @@ public final class EntryStream<K, V> extends
      * // Result: {"a"={1, 2, 3}} with sorted keys and values
      * }</pre>
      *
-     * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
-     * processing, so any upstream parallelism is silently lost for this terminal step.
+     * <p><b>Note:</b> If this stream is parallel, only the accumulation into the result runs sequentially, on the
+     * calling thread; upstream parallel stages, such as a preceding {@code mapValue}, still run in parallel.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; accumulates the result map in memory.
      *
@@ -7138,7 +7569,9 @@ public final class EntryStream<K, V> extends
      *                   the results will be inserted
      * @return a {@code Multimap} containing all key-value pairs from this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}; the stream is closed
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} (checked once, before any entry is added,
+     *         so an empty stream is rejected too); the stream is closed
      * @see Stream#toMultimap(Throwables.Function, Throwables.Function, Supplier)
      * @see #toMultimap()
      * @see #groupTo(Supplier)
@@ -7147,7 +7580,7 @@ public final class EntryStream<K, V> extends
     @SequentialOnly
     @TerminalOp
     public <C extends Collection<V>, M extends Multimap<K, V, C>> M toMultimap(final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -7179,10 +7612,14 @@ public final class EntryStream<K, V> extends
      *     .groupTo();
      * }</pre>
      *
-     * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
-     * processing, so any upstream parallelism is silently lost for this terminal step.
+     * <p><b>Note:</b> If this stream is parallel, only the accumulation into the result runs sequentially, on the
+     * calling thread; upstream parallel stages, such as a preceding {@code mapValue}, still run in parallel.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     *
+     * <p><b>Null keys:</b> an entry whose key is {@code null} fails with {@link NullPointerException}
+     * ("element cannot be mapped to a null key") when the grouping runs, as {@link Stream#groupTo(Throwables.Function)} does, and
+     * the stream is closed. {@link #toMultimap()} and {@link #toMap(BinaryOperator)} accept {@code null} keys.
      *
      * @return a {@code Map} where each key maps to a {@code List} of all values associated
      *         with that key in this stream
@@ -7223,10 +7660,14 @@ public final class EntryStream<K, V> extends
      * // Result maintains order of first occurrence of each key
      * }</pre>
      *
-     * <p><b>Note:</b> If this stream is parallel, this operation internally switches to sequential
-     * processing, so any upstream parallelism is silently lost for this terminal step.
+     * <p><b>Note:</b> If this stream is parallel, only the accumulation into the result runs sequentially, on the
+     * calling thread; upstream parallel stages, such as a preceding {@code mapValue}, still run in parallel.
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     *
+     * <p><b>Null keys:</b> an entry whose key is {@code null} fails with {@link NullPointerException}
+     * ("element cannot be mapped to a null key") when the grouping runs, as {@link Stream#groupTo(Throwables.Function)} does, and
+     * the stream is closed. {@link #toMultimap()} and {@link #toMap(BinaryOperator)} accept {@code null} keys.
      *
      * @param <M> the type of the resulting {@code Map}
      * @param mapFactory a function which returns a new, empty {@code Map} into which the
@@ -7234,7 +7675,9 @@ public final class EntryStream<K, V> extends
      * @return a {@code Map} where each key maps to a {@code List} of all values associated
      *         with that key in this stream
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if {@code mapFactory} is {@code null}; the stream is closed
+     * @throws NullPointerException if {@code mapFactory} returns {@code null} (checked once, before any entry is added,
+     *         so an empty stream is rejected too); the stream is closed
      * @see Stream#groupTo(Throwables.Function, Throwables.Function, Supplier)
      * @see #groupTo()
      * @see #toMultimap(Supplier)
@@ -7242,7 +7685,8 @@ public final class EntryStream<K, V> extends
      */
     @SequentialOnly
     @TerminalOp
-    public <M extends Map<K, List<V>>> M groupTo(final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException {
+    public <M extends Map<K, List<V>>> M groupTo(final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(mapFactory, cs.mapFactory);
@@ -7279,25 +7723,29 @@ public final class EntryStream<K, V> extends
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
      *
+     * <p><b>Null keys:</b> an entry whose key is {@code null} fails with {@link NullPointerException}
+     * ("element cannot be mapped to a null key") when the grouping runs, as {@link Stream#groupTo(Throwables.Function)} does, and
+     * the stream is closed. {@link #toMultimap()} and {@link #toMap(BinaryOperator)} accept {@code null} keys.
+     *
      * @param <R> the type of the result
      * @param <E> the type of exception that may be thrown by the function
-     * @param func the function to apply to the grouped map
+     * @param function the function to apply to the grouped map
      * @return the result of applying the function to the grouped map
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @throws E if the function throws an exception
      * @see #groupTo()
      * @see #groupToThenAccept(Throwables.Consumer)
      */
     @SequentialOnly
     @TerminalOp
-    public <R, E extends Exception> R groupToThenApply(final Throwables.Function<? super Map<K, List<V>>, ? extends R, E> func)
+    public <R, E extends Exception> R groupToThenApply(final Throwables.Function<? super Map<K, List<V>>, ? extends R, E> function)
             throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return func.apply(groupTo());
+        return function.apply(groupTo());
     }
 
     /**
@@ -7323,6 +7771,10 @@ public final class EntryStream<K, V> extends
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; buffers all elements in memory.
+     *
+     * <p><b>Null keys:</b> an entry whose key is {@code null} fails with {@link NullPointerException}
+     * ("element cannot be mapped to a null key") when the grouping runs, as {@link Stream#groupTo(Throwables.Function)} does, and
+     * the stream is closed. {@link #toMultimap()} and {@link #toMap(BinaryOperator)} accept {@code null} keys.
      *
      * @param <E> the type of exception that may be thrown by the consumer
      * @param consumer the consumer to accept the grouped map
@@ -7414,15 +7866,16 @@ public final class EntryStream<K, V> extends
      *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@code Optional} describing the result, or empty if the stream is empty
-     * @throws NullPointerException if the final reduction result is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the final reduction result is {@code null}
      * @see Stream#reduce(BinaryOperator)
      * @see #reduce(Map.Entry, BinaryOperator)
      */
     @ParallelSupported
     @TerminalOp
-    public Optional<Map.Entry<K, V>> reduce(final BinaryOperator<Map.Entry<K, V>> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<Map.Entry<K, V>> reduce(final BinaryOperator<Map.Entry<K, V>> accumulator)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         _stream.assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -7627,10 +8080,10 @@ public final class EntryStream<K, V> extends
      * @param <RR> the type of the final result after applying the function
      * @param <E> the type of exception that may be thrown by the function
      * @param downstream the {@code Collector} to perform the mutable reduction
-     * @param func the function to apply to the result of the collection
+     * @param function the function to apply to the result of the collection
      * @return the result of applying the function to the collected data
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if {@code downstream} or {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code downstream} or {@code function} is {@code null}.
      * @throws E if the function throws an exception
      * @see Stream#collectThenApply(Collector, Throwables.Function)
      * @see #collect(Collector)
@@ -7639,12 +8092,10 @@ public final class EntryStream<K, V> extends
     @ParallelSupported
     @TerminalOp
     public <R, RR, E extends Exception> RR collectThenApply(final Collector<? super Map.Entry<K, V>, ?, R> downstream,
-            final Throwables.Function<? super R, ? extends RR, E> func) throws IllegalStateException, IllegalArgumentException, E {
+            final Throwables.Function<? super R, ? extends RR, E> function) throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
 
-        checkArgNotNull(func, cs.func);
-
-        return _stream.collectThenApply(downstream, func);
+        return _stream.collectThenApply(downstream, function);
     }
 
     /**
@@ -7693,8 +8144,6 @@ public final class EntryStream<K, V> extends
     public <R, E extends Exception> void collectThenAccept(final Collector<? super Map.Entry<K, V>, ?, R> downstream,
             final Throwables.Consumer<? super R, E> consumer) throws IllegalStateException, IllegalArgumentException, E {
         _stream.assertNotClosed();
-
-        checkArgNotNull(consumer, cs.consumer);
 
         _stream.collectThenAccept(downstream, consumer);
     }
@@ -7853,6 +8302,9 @@ public final class EntryStream<K, V> extends
             }
 
             return joiner.toString();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -7899,6 +8351,9 @@ public final class EntryStream<K, V> extends
                 joiner.appendEntry(iter.next());
             }
 
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -7914,7 +8369,8 @@ public final class EntryStream<K, V> extends
      *
      * <p>The transfer function receives the underlying stream with its current execution mode.
      * The resulting EntryStream uses the execution mode of the stream returned by the transfer.
-     * Closing the result also closes the input.
+     * Closing the result also closes the input. If {@code transfer} throws, this stream is closed
+     * before the exception propagates.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7932,9 +8388,11 @@ public final class EntryStream<K, V> extends
      *
      * @param <KK> the type of the keys in the resulting EntryStream
      * @param <VV> the type of the values in the resulting EntryStream
-     * @param transfer the function to be applied on the current stream to produce a new stream.
+     * @param transfer the function to be applied on the current stream to produce a new stream;
+     *        a {@code null} result is treated as an empty stream
      * @return a new EntryStream transformed by the provided function.
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if the stream is already closed, or if {@code transfer} returns a stream that
+     *         is already closed (this stream is closed first)
      * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      * @see #transformViaStream(Function, boolean)
      * @see Stream#transform(Function)
@@ -7958,7 +8416,8 @@ public final class EntryStream<K, V> extends
      * The function takes a Stream as input and returns a new Stream.
      * The returned Stream is then wrapped into an EntryStream of this class.
      * With {@code deferred = true}, the transfer is invoked on first traversal or closure.
-     * With {@code deferred = false}, it is invoked immediately. Closing the result also closes the input.
+     * With {@code deferred = false}, it is invoked immediately, and if it throws, this stream is closed
+     * before the exception propagates. Closing the result also closes the input.
      *
      * <p>The transfer function receives the underlying stream with its current execution mode.
      * Immediate transformation preserves the returned stream's mode. Deferred transformation creates
@@ -7981,10 +8440,13 @@ public final class EntryStream<K, V> extends
      *
      * @param <KK> the type of the keys in the resulting EntryStream
      * @param <VV> the type of the values in the resulting EntryStream
-     * @param transfer the function to be applied on the current stream to produce a new stream.
+     * @param transfer the function to be applied on the current stream to produce a new stream;
+     *        a {@code null} result is treated as an empty stream
      * @param deferred if {@code true}, invokes the transfer on first traversal or closure; otherwise invokes it immediately
      * @return a new EntryStream transformed by the provided function.
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if the stream is already closed, or if {@code transfer} returns a stream that
+     *         is already closed (this stream is closed first; with {@code deferred = true} this is thrown on
+     *         first traversal)
      * @throws IllegalArgumentException if {@code transfer} is {@code null}.
      * @see Stream#transform(Function)
      * @see Stream#transformViaJdkStream(Function)
@@ -8002,11 +8464,23 @@ public final class EntryStream<K, V> extends
 
         // onClose(this::close) for the same reason StreamBase.linkCloseToThis(..) exists: a transfer that
         // ignores its input would otherwise leave this stream - and any handle behind it - open forever.
+        // A null transfer result is treated as an empty stream, as Stream.transformViaJdkStream and
+        // Seq.transformViaStream do.
         if (deferred) {
-            final Supplier<EntryStream<KK, VV>> delayInitializer = () -> EntryStream.of(transfer.apply(_stream));
+            final Supplier<EntryStream<KK, VV>> delayInitializer = () -> {
+                final Stream<? extends Map.Entry<? extends KK, ? extends VV>> s = transfer.apply(_stream);
+                return s == null ? EntryStream.<KK, VV> empty() : EntryStream.<KK, VV> of(s);
+            };
+
             return EntryStream.<KK, VV> defer(delayInitializer).onClose(this::close);
         } else {
-            return of(transfer.apply(_stream)).onClose(this::close);
+            // linkCloseToThisAfter(..) also closes this stream when the eager transfer throws; there is no
+            // result to hand ownership to, so it would otherwise leak (StreamBase.transform(..) does the same).
+            return linkCloseToThisAfter(() -> {
+                final Stream<? extends Map.Entry<? extends KK, ? extends VV>> s = transfer.apply(_stream);
+
+                return s == null ? EntryStream.<KK, VV> empty() : EntryStream.<KK, VV> of(s);
+            });
         }
     }
 
@@ -8116,18 +8590,45 @@ public final class EntryStream<K, V> extends
      * Returns a new EntryStream with inverted key-value pairs, where each entry is represented
      * as a {@link DisposableEntry}. The elements can only be retrieved one by one, cannot be
      * modified or saved. The returned stream does not support operations that require two or more
-     * elements at the same time (e.g., sort, distinct, pairMap, slidingMap, sliding, split,
-     * toList, toSet, etc.).
+     * elements at the same time or keep a reference to an entry after pulling the next one (e.g., sort,
+     * reversed, min/max, distinct, collapseByKey, collapseByValue, sliding, split, reduce, toList, toSet, etc.).
+     * Some of them fail fast and some silently return a wrong result; see below.
      *
      * <p>This method is deprecated and marked as {@code @Beta} for experimental features.
      * It can only be used in sequential streams (not parallel).
      *
      * <p><b>Every emitted entry must be read before the next one is produced:</b> a single mutable entry is reused
      * for all elements, and it refuses to be overwritten while its current key/value pair has not been read through
-     * {@code getKey()} or {@code getValue()}. Downstream operations that advance without reading the entry, such as
-     * {@code skip(n)}, {@code count()} or {@code limit(n)} followed by another pull, therefore fail with an
-     * {@link IllegalStateException} ("Entry has already been set ..."). Consume the returned stream with
-     * {@code forEach}, {@code map}, {@code filter} or another operation that reads each entry.
+     * {@code getKey()} or {@code getValue()}. What an unsupported operation does therefore depends on whether the
+     * current entry has been read when the next element is pulled (with two or more elements):
+     * <ul>
+     *   <li><b>It fails fast</b> with an {@link IllegalStateException} ("Entry has already been set ...") if it pulls
+     *       the next element without reading the current entry. This is the case for operations applied directly to
+     *       the returned stream such as {@code count()}, {@code skip(n)}, {@code toList()}, {@code toSet()},
+     *       {@code reduce}, {@code sorted}/{@code sortedByKey}/{@code sortedByValue}, {@code reversed()},
+     *       {@code min}/{@code max}/{@code minByKey}/{@code minByValue}, {@code distinct()}, {@code sliding},
+     *       {@code split} and {@code filter(Predicate)} with a predicate that does not read the entry.</li>
+     *   <li><b>It silently returns a wrong result</b> if each entry is read before the next pull and a reference to it
+     *       is kept: every retained reference is the same entry, which ends up holding the last element. That happens
+     *       <ul>
+     *         <li>directly with {@code distinctByKey()} and {@code distinctByValue()} ({@code distinctByKey().toList()}
+     *             returns the last element once per input entry) and with {@code collapseByKey} and
+     *             {@code collapseByValue}, which end up comparing each entry with itself (a reflexive predicate puts
+     *             all elements into one group, an irreflexive one gives one group per element);</li>
+     *         <li>with an operation that keeps a reference to an entry - sort, {@code reversed()}, min/max,
+     *             {@code distinct()}, {@code reduce}, {@code sliding}, {@code split}, {@code toList()},
+     *             {@code toSet()} - placed after an upstream operation that reads each entry and passes the same
+     *             entry on: {@code filterByKey}, {@code filterByValue}, {@code filter(BiPredicate)},
+     *             {@code peek(BiConsumer)}, or a {@code filter}/{@code peek} action that reads the entry. Such an
+     *             operation no longer fails fast: for example {@code filterByKey(k -> true).sortedByKey(cmp)},
+     *             {@code filterByKey(k -> true).minByKey(cmp)} and {@code filterByKey(k -> true).toList()} all
+     *             report the last element in place of every entry.</li>
+     *       </ul></li>
+     * </ul>
+     * Safe use: consume each entry as it arrives, with {@code forEach}, {@code toMap}, {@code groupTo},
+     * {@code toMultimap}, {@code groupBy}, {@code keys()}, {@code values()} or {@code anyMatch}; or first copy it into
+     * a new entry with {@code map(e -> new SimpleImmutableEntry<>(e.getKey(), e.getValue()))}, {@code mapKey} or
+     * {@code mapValue}, each of which creates a new entry per element. After such a copy every operation is safe.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8808,7 +9309,7 @@ public final class EntryStream<K, V> extends
      *     String::length        // maps the value
      * );
      * Map<String, Integer> wordLengths = stream.toMap();
-     * // Result: {"HELLO": 5, "WORLD": 5, "JAVA": 4}
+     * // Result (entry order may vary): {HELLO=5, WORLD=5, JAVA=4}
      *
      * // Transform numbers to different representations
      * Integer[] numbers = {1, 2, 3, 4, 5};
@@ -8928,20 +9429,20 @@ public final class EntryStream<K, V> extends
      *
      * @param <T> the type of elements in the iterator
      * @param <K> the type of keys in the resulting EntryStream
-     * @param iter the iterator providing the elements to be converted into entries
+     * @param iterator the iterator providing the elements to be converted into entries
      * @param keyMapper the function that extracts/computes a key from each element
      * @return a new EntryStream containing entries created from the iterator elements
      * @throws IllegalArgumentException if {@code keyMapper} is {@code null}.
      * @see #of(Iterator, Function, Function)
      * @see Stream#mapToEntry(Function, Function)
      */
-    public static <T, K> EntryStream<K, T> of(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyMapper)
+    public static <T, K> EntryStream<K, T> of(final Iterator<? extends T> iterator, final Function<? super T, ? extends K> keyMapper)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper, cs.keyMapper);
 
         final Function<T, T> valueMapper = Fn.identity();
 
-        return Stream.of(iter).mapToEntry(keyMapper, valueMapper);
+        return Stream.of(iterator).mapToEntry(keyMapper, valueMapper);
     }
 
     /**
@@ -8970,7 +9471,7 @@ public final class EntryStream<K, V> extends
      * @param <T> the type of elements in the iterator
      * @param <K> the type of keys in the resulting EntryStream
      * @param <V> the type of values in the resulting EntryStream
-     * @param iter the iterator providing the source elements
+     * @param iterator the iterator providing the source elements
      * @param keyMapper the function that extracts/computes a key from each element
      * @param valueMapper the function that extracts/computes a value from each element
      * @return a new EntryStream containing entries created from the iterator elements
@@ -8978,12 +9479,12 @@ public final class EntryStream<K, V> extends
      * @see #of(Iterator, Function)
      * @see Stream#mapToEntry(Function, Function)
      */
-    public static <T, K, V> EntryStream<K, V> of(final Iterator<? extends T> iter, final Function<? super T, ? extends K> keyMapper,
+    public static <T, K, V> EntryStream<K, V> of(final Iterator<? extends T> iterator, final Function<? super T, ? extends K> keyMapper,
             final Function<? super T, ? extends V> valueMapper) throws IllegalArgumentException {
         N.checkArgNotNull(keyMapper, cs.keyMapper);
         N.checkArgNotNull(valueMapper, cs.valueMapper);
 
-        return Stream.of(iter).mapToEntry(keyMapper, valueMapper);
+        return Stream.of(iterator).mapToEntry(keyMapper, valueMapper);
     }
 
     /**
@@ -8992,7 +9493,8 @@ public final class EntryStream<K, V> extends
      * they appear in each map.
      *
      * <p>If the same key appears in multiple maps, it will appear multiple times in the
-     * resulting stream. This method does not perform any deduplication.
+     * resulting stream. This method does not perform any deduplication. A {@code null} map is
+     * skipped (treated as empty).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9030,7 +9532,8 @@ public final class EntryStream<K, V> extends
      * in the order they appear in each map.
      *
      * <p>If the same key appears in multiple maps, it will appear multiple times in the
-     * resulting stream. This method does not perform any deduplication.
+     * resulting stream. This method does not perform any deduplication. A {@code null} map is
+     * skipped (treated as empty).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9254,7 +9757,7 @@ public final class EntryStream<K, V> extends
      *
      * EntryStream<String, Integer> stream = EntryStream.zip(names, ages);
      * Map<String, Integer> result = stream.toMap();
-     * // Result: {Alice=25, Bob=30, Charlie=35}
+     * // Result (entry order may vary): {Alice=25, Bob=30, Charlie=35}
      * // Note: The value 40 is ignored since there's no corresponding name
      * }</pre>
      *
@@ -9310,15 +9813,15 @@ public final class EntryStream<K, V> extends
      * @param <V> the type of values
      * @param keys the array of keys
      * @param values the array of values
-     * @param valueForNoneKey the default key to use when the keys array is shorter (i.e., the values array is longer)
-     * @param valueForNoneValue the default value to use when the values array is shorter (i.e., the keys array is longer)
+     * @param defaultKey the default key to use when the keys array is shorter (i.e., the values array is longer)
+     * @param defaultValue the default value to use when the values array is shorter (i.e., the keys array is longer)
      * @return an EntryStream containing entries created from the arrays with defaults for missing elements
      * @see #zip(Object[], Object[])
      * @see #zip(Iterable, Iterable, Object, Object)
      * @see Stream#zip(Object[], Object[], Object, Object, BiFunction)
      * @see N#zip(Object[], Object[], Object, Object, BiFunction)
      */
-    public static <K, V> EntryStream<K, V> zip(final K[] keys, final V[] values, final K valueForNoneKey, final V valueForNoneValue) {
+    public static <K, V> EntryStream<K, V> zip(final K[] keys, final V[] values, final K defaultKey, final V defaultValue) {
         if (N.isEmpty(keys) && N.isEmpty(values)) {
             return EntryStream.empty();
         }
@@ -9327,7 +9830,7 @@ public final class EntryStream<K, V> extends
         final Function<Map.Entry<K, V>, Map.Entry<K, V>> mapper = Fn.identity();
 
         //noinspection resource
-        return Stream.zip(keys, values, valueForNoneKey, valueForNoneValue, zipFunction).mapToEntry(mapper);
+        return Stream.zip(keys, values, defaultKey, defaultValue, zipFunction).mapToEntry(mapper);
     }
 
     /**
@@ -9388,23 +9891,22 @@ public final class EntryStream<K, V> extends
      *     products, prices, "Unknown Product", 0.0
      * );
      * Map<String, Double> priceMap = stream.toMap();
-     * // Result: {Laptop=999.99, Mouse=29.99, Keyboard=0.0, Monitor=0.0}
+     * // Result (entry order may vary): {Laptop=999.99, Mouse=29.99, Keyboard=0.0, Monitor=0.0}
      * }</pre>
      *
      * @param <K> the type of keys
      * @param <V> the type of values
      * @param keys the iterable providing keys
      * @param values the iterable providing values
-     * @param valueForNoneKey the default key to use when the keys iterable is shorter (i.e., values has more elements)
-     * @param valueForNoneValue the default value to use when the values iterable is shorter (i.e., keys has more elements)
+     * @param defaultKey the default key to use when the keys iterable is shorter (i.e., values has more elements)
+     * @param defaultValue the default value to use when the values iterable is shorter (i.e., keys has more elements)
      * @return an EntryStream containing entries with defaults for missing elements
      * @see #zip(Iterable, Iterable)
      * @see #zip(Object[], Object[], Object, Object)
      * @see Stream#zip(Iterable, Iterable, Object, Object, BiFunction)
      * @see N#zip(Iterable, Iterable, Object, Object, BiFunction)
      */
-    public static <K, V> EntryStream<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K valueForNoneKey,
-            final V valueForNoneValue) {
+    public static <K, V> EntryStream<K, V> zip(final Iterable<? extends K> keys, final Iterable<? extends V> values, final K defaultKey, final V defaultValue) {
         // Only empty when BOTH sides are null: with default values, a null side is treated as empty
         // and filled with the default, matching the array sibling and the underlying zip.
         if (keys == null && values == null) {
@@ -9415,7 +9917,7 @@ public final class EntryStream<K, V> extends
         final Function<Map.Entry<K, V>, Map.Entry<K, V>> mapper = Fn.identity();
 
         //noinspection resource
-        return Stream.zip(keys, values, valueForNoneKey, valueForNoneValue, zipFunction).mapToEntry(mapper);
+        return Stream.zip(keys, values, defaultKey, defaultValue, zipFunction).mapToEntry(mapper);
     }
 
     /**
@@ -9466,7 +9968,8 @@ public final class EntryStream<K, V> extends
      *
      * <p>This method ensures that all elements from both iterators are used, filling in
      * with default values when one iterator has fewer elements than the other.
-     * The iterators are consumed by this operation.
+     * The iterators advance as the returned stream is traversed; a short-circuiting terminal operation may
+     * leave elements unread, and closing the returned stream does not drain either iterator.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9484,15 +9987,14 @@ public final class EntryStream<K, V> extends
      * @param <V> the type of values
      * @param keys the iterator providing keys
      * @param values the iterator providing values
-     * @param valueForNoneKey the default key to use when the keys iterator is shorter (i.e., values has more elements)
-     * @param valueForNoneValue the default value to use when the values iterator is shorter (i.e., keys has more elements)
+     * @param defaultKey the default key to use when the keys iterator is shorter (i.e., values has more elements)
+     * @param defaultValue the default value to use when the values iterator is shorter (i.e., keys has more elements)
      * @return an EntryStream containing entries with defaults for missing elements
      * @see #zip(Iterator, Iterator)
      * @see #zip(Iterable, Iterable, Object, Object)
      * @see Stream#zip(Iterator, Iterator, Object, Object, BiFunction)
      */
-    public static <K, V> EntryStream<K, V> zip(final Iterator<? extends K> keys, final Iterator<? extends V> values, final K valueForNoneKey,
-            final V valueForNoneValue) {
+    public static <K, V> EntryStream<K, V> zip(final Iterator<? extends K> keys, final Iterator<? extends V> values, final K defaultKey, final V defaultValue) {
         // Only empty when BOTH sides are null: with default values, a null side is treated as empty
         // and filled with the default, matching the array sibling and the underlying zip.
         if (keys == null && values == null) {
@@ -9503,7 +10005,7 @@ public final class EntryStream<K, V> extends
         final Function<Map.Entry<K, V>, Map.Entry<K, V>> mapper = Fn.identity();
 
         //noinspection resource
-        return Stream.zip(keys, values, valueForNoneKey, valueForNoneValue, zipFunction).mapToEntry(mapper);
+        return Stream.zip(keys, values, defaultKey, defaultValue, zipFunction).mapToEntry(mapper);
     }
 
     /**
@@ -9582,8 +10084,8 @@ public final class EntryStream<K, V> extends
          * <pre>{@code
          * ReusableEntry<String, Integer> entry = new ReusableEntry<>();
          * entry.set("key1", 100);
-         * String k = entry.getKey();   // returns "key1", resets flag
-         * entry.set("key2", 200);      // sets the new pair (valid since the entry was read)
+         * String k = entry.getKey();  // returns "key1", resets flag
+         * entry.set("key2", 200);     // sets the new pair (valid since the entry was read)
          * // entry.set("key3", 300);   // Would throw IllegalStateException if previous set wasn't read
          * }</pre>
          *

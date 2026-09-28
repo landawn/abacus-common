@@ -219,30 +219,30 @@ public abstract class CharIteratorEx extends CharIterator implements IteratorEx<
      * CharIteratorEx iterEx = CharIteratorEx.of(iter);
      * }</pre>
      *
-     * @param iter the CharIterator to wrap (can be null)
-     * @return the same instance if {@code iter} is already a CharIteratorEx, a CharIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
+     * @param iterator the CharIterator to wrap (can be null)
+     * @return the same instance if {@code iterator} is already a CharIteratorEx, a CharIteratorEx wrapping the given iterator, or an empty iterator if {@code iterator} is null
      */
-    public static CharIteratorEx of(final CharIterator iter) {
-        if (iter == null) {
+    public static CharIteratorEx of(final CharIterator iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof CharIteratorEx) {
-            return ((CharIteratorEx) iter);
+        } else if (iterator instanceof CharIteratorEx) {
+            return ((CharIteratorEx) iterator);
         }
 
         return new CharIteratorEx() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public char nextChar() throws NoSuchElementException {
-                return iter.nextChar();
+                return iterator.nextChar();
             }
 
             @Override
             public void closeResource() {
-                ObjIteratorEx.closeResource(iter);
+                ObjIteratorEx.closeResource(iterator);
             }
         };
     }
@@ -260,13 +260,13 @@ public abstract class CharIteratorEx extends CharIterator implements IteratorEx<
      * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
      * is unboxed by its next method.</p>
      *
-     * @param iter the Iterator of Character objects (can be null)
+     * @param iterator the Iterator of Character objects (can be null)
      * @return a CharIteratorEx unwrapping the given iterator, or empty iterator if iter is null
      */
-    public static CharIteratorEx from(final Iterator<Character> iter) {
-        if (iter == null) {
+    public static CharIteratorEx from(final Iterator<Character> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ObjIteratorEx<Character> iteratorEx) {
+        } else if (iterator instanceof ObjIteratorEx<Character> iteratorEx) {
 
             return new CharIteratorEx() {
                 @Override
@@ -313,7 +313,7 @@ public abstract class CharIteratorEx extends CharIterator implements IteratorEx<
             return new CharIteratorEx() {
                 @Override
                 public boolean hasNext() {
-                    return iter.hasNext();
+                    return iterator.hasNext();
                 }
 
                 /**
@@ -324,12 +324,12 @@ public abstract class CharIteratorEx extends CharIterator implements IteratorEx<
                  */
                 @Override
                 public char nextChar() throws NoSuchElementException, NullPointerException {
-                    return iter.next();
+                    return iterator.next();
                 }
 
                 @Override
                 public void closeResource() {
-                    ObjIteratorEx.closeResource(iter);
+                    ObjIteratorEx.closeResource(iterator);
                 }
             };
         }
@@ -410,8 +410,8 @@ public abstract class CharIteratorEx extends CharIterator implements IteratorEx<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIteratorEx iter = CharIteratorEx.of('a', 'b');
-     * iter.closeResource();         // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
+     * iter.closeResource();        // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());  // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * CharIteratorEx iter2 = CharIteratorEx.of('x', 'y');

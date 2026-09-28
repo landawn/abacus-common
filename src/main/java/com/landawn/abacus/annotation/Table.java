@@ -58,7 +58,7 @@ import java.lang.annotation.Target;
  *     private String name;
  *     private BigDecimal price;
  *     private transient String tempData;  // tempData is marked for exclusion by mapping consumers
- *     private Map cache;  // cache is marked for exclusion by mapping consumers
+ *     private Map cache;                  // cache is marked for exclusion by mapping consumers
  * }
  * }</pre>
  *

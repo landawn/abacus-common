@@ -618,4 +618,43 @@ public class IntFunctionsTest extends TestBase {
             assertEquals(0, ((Map<?, ?>) created).size());
         }
     }
+
+    @Test
+    public void testRegisterForCollectionReturnsFalseAfterOfCollectionCachedDiscoveredCreator() {
+        final Collection<?> discovered = IntFunctions.ofCollection(org.apache.commons.collections4.list.TreeList.class).apply(4);
+        assertTrue(discovered instanceof org.apache.commons.collections4.list.TreeList);
+
+        final org.apache.commons.collections4.list.TreeList<Object> sentinel = new org.apache.commons.collections4.list.TreeList<>();
+        assertFalse(IntFunctions.registerForCollection(org.apache.commons.collections4.list.TreeList.class, size -> sentinel));
+
+        assertNotSame(sentinel, IntFunctions.ofCollection(org.apache.commons.collections4.list.TreeList.class).apply(4));
+    }
+
+    @Test
+    public void testRegisterForMapReturnsFalseAfterOfMapCachedDiscoveredCreator() {
+        final Map<?, ?> discovered = IntFunctions.ofMap(org.apache.commons.collections4.map.LinkedMap.class).apply(4);
+        assertTrue(discovered instanceof org.apache.commons.collections4.map.LinkedMap);
+
+        final org.apache.commons.collections4.map.LinkedMap<Object, Object> sentinel = new org.apache.commons.collections4.map.LinkedMap<>();
+        assertFalse(IntFunctions.registerForMap(org.apache.commons.collections4.map.LinkedMap.class, size -> sentinel));
+
+        assertNotSame(sentinel, IntFunctions.ofMap(org.apache.commons.collections4.map.LinkedMap.class).apply(4));
+    }
+
+    // 2026-09-25: a registered creator returning null is a broken callback postcondition. It now fails at the
+    // factory with NPE (same rule as Suppliers' registered suppliers) instead of reaching N.convert / JsonUtil
+    // as an IllegalArgumentException("Container factory must create a fresh empty ...").
+    // Registration is permanent per class, so these two third-party classes must not be registered anywhere else.
+    @Test
+    public void testRegisteredCreatorReturningNullIsNpe() {
+        assertTrue(IntFunctions.registerForCollection(org.apache.commons.collections4.list.NodeCachingLinkedList.class, size -> null));
+        assertTrue(IntFunctions.registerForMap(org.apache.commons.collections4.map.HashedMap.class, size -> null));
+
+        assertEquals("The registered creator returned null",
+                assertThrows(NullPointerException.class, () -> IntFunctions.ofCollection(org.apache.commons.collections4.list.NodeCachingLinkedList.class).apply(3)).getMessage());
+        assertEquals("The registered creator returned null",
+                assertThrows(NullPointerException.class, () -> IntFunctions.ofMap(org.apache.commons.collections4.map.HashedMap.class).apply(3)).getMessage());
+        assertThrows(NullPointerException.class, () -> N.newCollection(org.apache.commons.collections4.list.NodeCachingLinkedList.class, 3));
+        assertThrows(NullPointerException.class, () -> N.newMap(org.apache.commons.collections4.map.HashedMap.class, 3));
+    }
 }

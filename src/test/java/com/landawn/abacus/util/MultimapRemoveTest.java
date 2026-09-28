@@ -1269,4 +1269,96 @@ public class MultimapRemoveTest extends MultimapTestSupport {
         assertTrue(ListMultimap.wrap(viaMap).removeValues(Collections.singletonMap("k", List.of("a"))));
         assertEquals(Collections.singletonList(null), viaMap.get("k"));
     }
+
+    // ---- perf review 2026-09-26 G053 begin ----
+
+    private static Map<String, List<Integer>> g053Backing() {
+        final Map<String, List<Integer>> backing = new LinkedHashMap<>();
+        backing.put("a", new ArrayList<>(Arrays.asList(1, 2, 1, 3)));
+        backing.put("b", new ArrayList<>(Arrays.asList(4, 5)));
+        backing.put("d", new ArrayList<>(Arrays.asList(6)));
+        backing.put("e", new ArrayList<>(Arrays.asList(7)));
+        // a no-match key whose value collection rejects removeIf: it must not be touched
+        backing.put("u", Collections.unmodifiableList(Arrays.asList(8, 9)));
+        return backing;
+    }
+
+    // G053-01: lazily allocated match sets - mixed matching / non-matching / absent keys
+    @Test
+    public void testRemoveValuesMap_mixedMatchingAndNonMatchingKeys() {
+        final Map<String, List<Integer>> backing = g053Backing();
+        final ListMultimap<String, Integer> mm = ListMultimap.wrap(backing);
+        final Map<String, List<Integer>> removals = new LinkedHashMap<>();
+        removals.put("a", Arrays.asList(1));
+        removals.put("b", Arrays.asList(9));
+        removals.put("c", Arrays.asList(1));
+        removals.put("d", Arrays.asList(6));
+        removals.put("e", Collections.emptyList());
+        removals.put("u", Arrays.asList(0));
+
+        assertTrue(mm.removeValues(removals));
+        assertEquals(Arrays.asList(2, 3), backing.get("a"));
+        assertEquals(Arrays.asList(4, 5), backing.get("b"));
+        assertFalse(backing.containsKey("c"));
+        assertFalse(backing.containsKey("d"));
+        assertEquals(Arrays.asList(7), backing.get("e"));
+        assertEquals(Arrays.asList(8, 9), backing.get("u"));
+        assertEquals(Arrays.asList("a", "b", "e", "u"), new ArrayList<>(backing.keySet()));
+
+        final Map<String, List<Integer>> noMatch = new LinkedHashMap<>();
+        noMatch.put("a", Arrays.asList(1));
+        noMatch.put("u", Arrays.asList(1));
+        assertFalse(mm.removeValues(noMatch));
+        assertEquals(Arrays.asList(2, 3), backing.get("a"));
+    }
+
+    // G053-01: lazily allocated match sets - removeValuesIf over matching and non-matching keys
+    @Test
+    public void testRemoveValuesIf_mixedMatchingAndNonMatchingKeys() {
+        final Map<String, List<Integer>> backing = g053Backing();
+        final ListMultimap<String, Integer> mm = ListMultimap.wrap(backing);
+
+        assertTrue(mm.removeValuesIf(key -> !key.equals("e"), Arrays.asList(1, 6, 7)));
+        assertEquals(Arrays.asList(2, 3), backing.get("a"));
+        assertEquals(Arrays.asList(4, 5), backing.get("b"));
+        assertFalse(backing.containsKey("d"));
+        assertEquals(Arrays.asList(7), backing.get("e"));
+        assertEquals(Arrays.asList(8, 9), backing.get("u"));
+
+        assertFalse(mm.removeValuesIf((key, values) -> true, Arrays.asList(100)));
+        assertTrue(mm.removeValuesIf((key, values) -> values.size() == 2 && !key.equals("u"), Arrays.asList(3, 4)));
+        assertEquals(Arrays.asList(2), backing.get("a"));
+        assertEquals(Arrays.asList(5), backing.get("b"));
+        assertEquals(Arrays.asList(8, 9), backing.get("u"));
+    }
+
+    // G053-02: pre-sized identity index in copyEntriesInto - copy/toMap of many keys incl. an emptied key
+    @Test
+    public void testCopy_manyKeysWithEmptiedKey() {
+        final ListMultimap<Integer, Integer> mm = N.newListMultimap();
+
+        for (int i = 0; i < 1000; i++) {
+            mm.put(i, i);
+            mm.put(i, -i);
+        }
+
+        mm.get(7).clear();
+
+        final ListMultimap<Integer, Integer> copy = mm.copy();
+        assertEquals(mm, copy);
+        assertEquals(1000, copy.keyCount());
+        assertTrue(copy.get(7).isEmpty());
+
+        for (int i = 0; i < 1000; i++) {
+            assertTrue(copy.get(i) != mm.get(i));
+        }
+
+        final Map<Integer, List<Integer>> map = mm.toMap();
+        assertEquals(1000, map.size());
+        assertEquals(Arrays.asList(3, -3), map.get(3));
+        assertTrue(map.get(3) != mm.get(3));
+        assertTrue(N.<Integer, Integer> newListMultimap().copy().isEmpty());
+    }
+
+    // ---- perf review 2026-09-26 G053 end ----
 }

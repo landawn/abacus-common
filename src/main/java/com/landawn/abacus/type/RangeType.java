@@ -41,11 +41,11 @@ import com.landawn.abacus.util.Strings;
  * Type<Range<Integer>> type = TypeFactory.getType("Range<Integer>");
  *
  * // Serialize a Range to string
- * Range<Integer> closedRange = Range.closed(1, 10);   // [1, 10]
- * String str1 = type.stringOf(closedRange);           // Returns "[1, 10]"
+ * Range<Integer> closedRange = Range.closed(1, 10);  // [1, 10]
+ * String str1 = type.stringOf(closedRange);          // Returns "[1, 10]"
  *
- * Range<Integer> openRange = Range.open(1, 10);   // (1, 10)
- * String str2 = type.stringOf(openRange);         // Returns "(1, 10)"
+ * Range<Integer> openRange = Range.open(1, 10);  // (1, 10)
+ * String str2 = type.stringOf(openRange);        // Returns "(1, 10)"
  *
  * // Deserialize string to Range
  * Range<Integer> restored = type.valueOf("[1, 10]");
@@ -87,9 +87,10 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * This constructor is package-private and intended to be called only by the TypeFactory.
      *
      * @param parameterTypeName the type name for the range's element type, which must be Comparable
+     * @throws IllegalArgumentException if {@code parameterTypeName} is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings("rawtypes")
-    RangeType(final String parameterTypeName) {
+    RangeType(final String parameterTypeName) throws IllegalArgumentException {
         super(RANGE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).name() + SK.GREATER_THAN);
 
         declaringName = RANGE + SK.LESS_THAN + TypeFactory.getType(parameterTypeName).declaringName() + SK.GREATER_THAN;
@@ -182,12 +183,13 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      *
      * @param x the Range to convert to string
      * @return the string representation of the Range, or {@code null} if the input is {@code null}
+     * @throws RuntimeException if an endpoint cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @MayReturnNull
     @Override
-    public String stringOf(final Range<T> x) {
+    public String stringOf(final Range<T> x) throws RuntimeException {
         if (x == null) {
             return null; // NOSONAR
         }
@@ -249,7 +251,8 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
      *
      * @param str the string to parse
-     * @return the parsed Range object, or {@code null} if the input string is {@code null} or empty
+     * @return the parsed Range object, or {@code null} if the input string is {@code null}, empty or blank (surrounding
+     *         whitespace is trimmed before parsing)
      * @throws IllegalArgumentException if the string format is invalid or does not contain exactly two endpoints,
      *         or if the endpoints are out of order or {@code null} (rejected by {@code Range} itself)
      * @throws RuntimeException if an endpoint cannot be parsed as the element type; the exception is the element
@@ -302,27 +305,24 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * The format depends on the bound type and includes the appropriate brackets/parentheses.
      * If the Range is {@code null}, appends "null".
      * <p>
-     * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
-     * JSON/XML quoting or escaping (for general text output), whereas {@code serializeTo} produces the JSON/XML
-     * serialized form (applying string quotation and character escaping per the serialization config) and is used by the
-     * JSON/XML serializers.
+     * Unlike the general {@code appendTo} contract (a {@code toString()}-style rendering), the text appended for a
+     * non-null range is exactly {@link #stringOf(Range)}: each endpoint keeps its serialized form, so {@code String}
+     * endpoints are JSON-quoted and escaped ({@code Range.closed("a", "b")} is appended as {@code ["a", "b"]}, not
+     * as {@code Range.toString()}'s {@code [a, b]}), and the appended text can be read back by
+     * {@link #valueOf(String)}.
+     * <p>
+     * <b>appendTo vs. serializeTo:</b> {@code appendTo} appends the bracket notation as is, whereas
+     * {@code serializeTo} writes that same text as a JSON/XML string value (applying string quotation and character
+     * escaping per the serialization config) and is used by the JSON/XML serializers.
      *
      * @param appendable the Appendable to write to (e.g., StringBuilder, Writer)
      * @param x the Range to append
      * @throws NullPointerException if {@code appendable} is {@code null}.
      * @throws IOException if appending the range text or null literal to {@code appendable} fails
-     * @implNote
-     * This method appends a string representation of {@code x} to {@code appendable} (the literal {@code "null"} for a
-     * {@code null} value). Conceptually this is the human-readable form produced by {@code toString()}, <i>not</i> the
-     * value returned by {@code stringOf}, which is a formatted, serializable representation (typically a JSON string)
-     * that {@link #valueOf(String)} can convert back into an equivalent value. For values whose nested structure makes
-     * the two forms differ (collections, maps, arrays), {@code appendTo} emits the unquoted, {@code toString()}-style
-     * form; it is therefore not, in the general contract, a plain
-     * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
-     * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
+     * @throws RuntimeException if an endpoint cannot be serialized by its selected type handler.
      */
     @Override
-    public void appendTo(final Appendable appendable, final Range<T> x) throws NullPointerException, IOException {
+    public void appendTo(final Appendable appendable, final Range<T> x) throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
@@ -349,9 +349,11 @@ public class RangeType<T extends Comparable<? super T>> extends AbstractType<Ran
      * @param config the serialization configuration that determines string quotation
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the range text, configured string quotation or null literal to {@code writer} fails
+     * @throws RuntimeException if an endpoint cannot be serialized by its selected type handler.
      */
     @Override
-    public void serializeTo(final CharacterWriter writer, final Range<T> x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
+    public void serializeTo(final CharacterWriter writer, final Range<T> x, final JsonXmlSerConfig<?> config)
+            throws NullPointerException, IOException, RuntimeException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {

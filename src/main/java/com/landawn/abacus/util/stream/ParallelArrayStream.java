@@ -124,7 +124,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param cancelUncompletedThreads whether to cancel uncompleted threads when the stream is closed
      * @param closeHandlers handlers to execute when the stream is closed, may be {@code null}
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex > values.length},
-     *         or {@code fromIndex > toIndex}
+     *         or {@code fromIndex > toIndex}; a {@code null} array is treated as having length zero
      */
     ParallelArrayStream(final T[] values, final int fromIndex, final int toIndex, final boolean sorted, final Comparator<? super T> comparator,
             final int maxThreadNum, final SplitStrategy splitStrategy, final AsyncExecutor asyncExecutor, final boolean cancelUncompletedThreads,
@@ -3492,6 +3492,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * slice; with {@link SplitStrategy#ITERATOR}, a shared synchronized cursor is used. All per-thread
      * partial maps are then merged using {@code mergeFunction} to resolve key collisions.
      *
+     * <p>With {@link SplitStrategy#ITERATOR} (the default), threads take elements one at a time from a shared
+     * cursor, so colliding values reach {@code mergeFunction} in no particular order. The merge function must
+     * then be commutative as well as associative; for example {@code (a, b) -> a} does not reliably keep the
+     * value of the first element in encounter order. With {@link SplitStrategy#ARRAY} each thread covers one
+     * contiguous slice and the partial maps are merged in slice order, so an associative merge function sees
+     * the values of a key in encounter order.
+     *
      * @param <K> the type of map keys
      * @param <V> the type of map values
      * @param <M> the type of the resulting map
@@ -3505,6 +3512,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, or
      *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -3544,7 +3552,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
-                    final M map = mapFactory.get();
+                    final M map = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
                     try {
                         while (cursor < to && eHolder.value() == null) {
@@ -3563,7 +3571,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final M map = mapFactory.get();
+                    final M map = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
                     T next = null;
 
                     try {
@@ -3612,6 +3620,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * downstream collector's combiner. The downstream finisher is applied to each grouped container
      * at the end.
      *
+     * <p>With {@link SplitStrategy#ITERATOR} (the default), threads take elements one at a time from a shared
+     * cursor, so each downstream container receives an interleaved subset of its key's values; an order-sensitive downstream result
+     * (for example {@code Collectors.toList()}) may not follow the encounter order. With {@link SplitStrategy#ARRAY}
+     * each thread covers one contiguous slice and the partial results are combined in slice order, so such a
+     * result follows the encounter order.
+     *
      * @param <K> the type of grouping keys
      * @param <V> the type of values fed into the downstream collector
      * @param <D> the type of the downstream collector's result
@@ -3625,15 +3639,17 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map from keys to finished downstream results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if the key mapper returns {@code null}, or if any of {@code keyMapper},
-     *         {@code valueMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code downstream}, or
+     *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if the key mapper returns {@code null}, or if {@code mapFactory} returns
+     *         {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
     @Override
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M groupTo(final Throwables.Function<? super T, ? extends K, E> keyMapper,
             final Throwables.Function<? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -3672,13 +3688,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
                     @SuppressWarnings("rawtypes")
-                    final Map<K, Object> map = (Map) mapFactory.get();
+                    final Map<K, Object> map = (Map) N.requireNonNull(mapFactory.get(), "mapFactory returned null");
                     K key = null;
                     Object valueContainer = null;
 
                     try {
                         while (cursor < to && eHolder.value() == null) {
-                            key = checkArgNotNull(keyMapper.apply(elements[cursor]), "element cannot be mapped to a null key"); //NOSONAR
+                            // N.requireNonNull, not the inherited checkArgNotNull: the inherited one closes this stream from the worker thread
+                            // while sibling workers are still running. completeAndFinishResults closes it once every worker has finished.
+                            key = N.requireNonNull(keyMapper.apply(elements[cursor]), "element cannot be mapped to a null key"); //NOSONAR
 
                             valueContainer = map.get(key);
 
@@ -3704,7 +3722,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     @SuppressWarnings("rawtypes")
-                    final Map<K, Object> map = (Map) mapFactory.get();
+                    final Map<K, Object> map = (Map) N.requireNonNull(mapFactory.get(), "mapFactory returned null");
                     K key = null;
                     Object valueContainer = null;
                     T next = null;
@@ -3719,7 +3737,9 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 }
                             }
 
-                            key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                            // N.requireNonNull, not the inherited checkArgNotNull: the inherited one closes this stream from the worker thread
+                            // while sibling workers are still running. completeAndFinishResults closes it once every worker has finished.
+                            key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
                             valueContainer = map.get(key);
 
                             if (valueContainer == null) {
@@ -3777,6 +3797,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * used. Per-thread partial maps are merged by combining per-key downstream containers. The
      * downstream finisher is applied at the end.
      *
+     * <p>With {@link SplitStrategy#ITERATOR} (the default), threads take elements one at a time from a shared
+     * cursor, so each downstream container receives an interleaved subset of its key's values; an order-sensitive downstream result
+     * (for example {@code Collectors.toList()}) may not follow the encounter order. With {@link SplitStrategy#ARRAY}
+     * each thread covers one contiguous slice and the partial results are combined in slice order, so such a
+     * result follows the encounter order.
+     *
      * @param <K> the type of grouping keys
      * @param <V> the type of values fed into the downstream collector
      * @param <D> the type of the downstream collector's result
@@ -3790,8 +3816,9 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param mapFactory a supplier providing a new empty map into which results are inserted
      * @return a map from keys to finished downstream results
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if a returned key is {@code null}, or if any of {@code flatKeyExtractor},
-     *         {@code valueMapper}, {@code downstream}, or {@code mapFactory} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code flatKeyExtractor}, {@code valueMapper}, {@code downstream}, or
+     *         {@code mapFactory} is {@code null}.
+     * @throws NullPointerException if a returned key is {@code null}, or if {@code mapFactory} returns {@code null}.
      * @throws E if the flat key extractor throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -3799,7 +3826,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
     public <K, V, D, M extends Map<K, D>, E extends Exception, E2 extends Exception> M flatGroupTo(
             final Throwables.Function<? super T, ? extends Collection<? extends K>, E> flatKeyExtractor,
             final Throwables.BiFunction<? super K, ? super T, ? extends V, E2> valueMapper, final Collector<? super V, ?, D> downstream,
-            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E, E2 {
+            final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(flatKeyExtractor, cs.flatKeyExtractor);
@@ -3833,7 +3860,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
                     @SuppressWarnings("rawtypes")
-                    final Map<K, Object> map = (Map) mapFactory.get();
+                    final Map<K, Object> map = (Map) N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
                     Iterator<? extends K> keyIter = null;
                     K key = null;
@@ -3847,7 +3874,9 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 keyIter = kc.iterator();
 
                                 while (eHolder.value() == null && keyIter.hasNext()) {
-                                    key = checkArgNotNull(keyIter.next(), "element cannot be mapped to a null key");
+                                    // N.requireNonNull, not the inherited checkArgNotNull: the inherited one closes this stream from the worker thread
+                                    // while sibling workers are still running. completeAndFinishResults closes it once every worker has finished.
+                                    key = N.requireNonNull(keyIter.next(), "element cannot be mapped to a null key");
                                     valueContainer = map.get(key);
 
                                     if (valueContainer == null) {
@@ -3874,7 +3903,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     @SuppressWarnings("rawtypes")
-                    final Map<K, Object> map = (Map) mapFactory.get();
+                    final Map<K, Object> map = (Map) N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
                     Iterator<? extends K> keyIter = null;
                     K key = null;
@@ -3897,7 +3926,9 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                                 keyIter = kc.iterator();
 
                                 while (eHolder.value() == null && keyIter.hasNext()) {
-                                    key = checkArgNotNull(keyIter.next(), "element cannot be mapped to a null key");
+                                    // N.requireNonNull, not the inherited checkArgNotNull: the inherited one closes this stream from the worker thread
+                                    // while sibling workers are still running. completeAndFinishResults closes it once every worker has finished.
+                                    key = N.requireNonNull(keyIter.next(), "element cannot be mapped to a null key");
                                     valueContainer = map.get(key);
 
                                     if (valueContainer == null) {
@@ -3955,6 +3986,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * All per-thread partial multimaps are then merged by putting all values from each partial
      * result into the final map.
      *
+     * <p>With {@link SplitStrategy#ITERATOR} (the default), threads take elements one at a time from a shared
+     * cursor, so the values of a key are not added in encounter order: an ordered value collection (for example
+     * a {@code List}) may hold them in a different order. With {@link SplitStrategy#ARRAY} each thread covers
+     * one contiguous slice and the partial multimaps are combined in slice order, so such a collection follows
+     * the encounter order.
+     *
      * @param <K> the type of multimap keys
      * @param <V> the type of multimap values
      * @param <C> the type of the collection used to hold values for each key
@@ -3968,6 +4005,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, or {@code mapFactory} is
      *         {@code null}.
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}.
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      */
@@ -4002,7 +4040,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
-                    final M map = mapFactory.get();
+                    final M map = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
                     try {
                         while (cursor < to && eHolder.value() == null) {
@@ -4021,7 +4059,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final M map = mapFactory.get();
+                    final M map = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
                     T next = null;
 
                     try {
@@ -4067,15 +4105,21 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * for both per-thread accumulation and result combination, it must be associative. The
      * {@code accumulator} should also be stateless and non-interfering.
      *
+     * <p>With {@link SplitStrategy#ARRAY}, each thread reduces one contiguous slice and the partial
+     * results are combined in slice order. With the default {@link SplitStrategy#ITERATOR}, threads
+     * take elements one at a time from a shared cursor, so each partial result covers an interleaved
+     * subset of the elements; the accumulator must then also be commutative, otherwise the result can
+     * differ from a sequential reduction and from run to run.
+     *
      * @param accumulator an associative, non-interfering, stateless function for combining two values
      * @return an {@link Optional} describing the result of the reduction, or an empty Optional if the
      *         stream is empty
-     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the result of the reduction is {@code null}
      */
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -4172,6 +4216,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * accumulation function, and combining function. Each thread independently accumulates its partition
      * starting from {@code identity}, and the partial results are then combined with {@code combiner}.
      * The {@code accumulator} and {@code combiner} must be non-interfering and stateless.
+     *
+     * <p>With {@link SplitStrategy#ARRAY}, each thread accumulates one contiguous slice and the partial
+     * results are combined in slice order. With the default {@link SplitStrategy#ITERATOR}, threads
+     * take elements one at a time from a shared cursor, so each partial result covers an interleaved
+     * subset of the elements; the reduction must then also be insensitive to element order, otherwise
+     * the result can differ from a sequential reduction and from run to run.
      *
      * @param <U> the type of the result
      * @param identity the identity value for the combining function and the default value if there are
@@ -4270,6 +4320,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * and the partial containers are combined with {@code combiner}. The {@code accumulator} and
      * {@code combiner} must be non-interfering and stateless.
      *
+     * <p>With {@link SplitStrategy#ARRAY}, each container receives one contiguous slice and the
+     * containers are merged in slice order, so encounter order is preserved. With the default
+     * {@link SplitStrategy#ITERATOR}, threads take elements one at a time from a shared cursor, so each
+     * container receives an interleaved subset of the elements; an order-sensitive result (for example
+     * a {@code List}) may then not follow the encounter order.
+     *
      * @param <R> the type of the mutable result container
      * @param supplier a function that creates a new mutable result container
      * @param accumulator a non-interfering, stateless function that folds an element into a result container
@@ -4279,10 +4335,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
      *         {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -4308,9 +4366,15 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
 
-                    final R container = supplier.get();
+                    R container = null;
 
                     try {
+                        // Kept inside the try so that the container is created under the same failure handling as the
+                        // accumulation loop; callWithErrorCapture would record a null container in eHolder either way (as it
+                        // does for the toMap/groupTo factory checks that sit before their try), stopping the other workers and
+                        // rethrowing the NullPointerException itself.
+                        container = N.requireNonNull(supplier.get(), "supplier returned null");
+
                         while (cursor < to && eHolder.value() == null) {
                             accumulator.accept(container, elements[cursor++]);
                         }
@@ -4326,10 +4390,13 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final R container = supplier.get();
+                    R container = null;
                     T next = null;
 
                     try {
+                        // See the ARRAY branch: a null container is an ordinary worker failure.
+                        container = N.requireNonNull(supplier.get(), "supplier returned null");
+
                         while (eHolder.value() == null) {
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
@@ -4359,7 +4426,10 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * and {@link java.util.stream.Collector.Characteristics#UNORDERED UNORDERED} characteristics, a single
      * shared container is used for accumulation across all threads. Otherwise,
      * each thread accumulates into its own container and the partial containers are combined using the
-     * collector's combiner.
+     * collector's combiner: with {@link SplitStrategy#ARRAY} each container receives one contiguous
+     * slice and the containers are combined in slice order; with the default
+     * {@link SplitStrategy#ITERATOR} each container receives an interleaved subset of the elements, so an
+     * order-sensitive result (for example a {@code List}) may not follow the encounter order.
      *
      * @param <R> the type of the result
      * @param collector the {@code Collector} describing the reduction
@@ -4472,12 +4542,12 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param comparator a non-interfering, stateless comparator to compare elements
      * @return an {@link Optional} describing the minimum element, or an empty Optional if the stream
      *         is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
-    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -4492,6 +4562,11 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             } else {
                 isDone = false;
             }
+        } catch (final Throwable e) {
+            // Anything thrown above (the sorted shortcut's documented NPE from Optional.of) ends the operation before
+            // isDone is cleared: it must win over a failing close handler.
+            closeAfterFailure(e);
+            throw e;
         } finally {
             if (isDone) {
                 close();
@@ -4503,18 +4578,20 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
     /**
      * Returns the maximum element of this stream according to the provided comparator, determined in
-     * parallel. If the stream is already sorted with the same comparator, the last element is returned
-     * directly without parallel scanning.
+     * parallel. If the stream is already sorted with the same comparator, the result is found from the end without
+     * parallel scanning: the trailing run of elements equivalent to the last one is stepped back over (usually a
+     * single comparison) and the first element of that run is returned. Otherwise, which of several maximal
+     * elements is returned is unspecified.
      *
      * @param comparator a non-interfering, stateless comparator to compare elements
      * @return an {@link Optional} describing the maximum element, or an empty Optional if the stream
      *         is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
-    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -4525,10 +4602,23 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.of(elements[toIndex - 1]);
+                // Ties resolve to the FIRST maximal element (JDK max, Collections.max, Collectors.max, maxBy), so step
+                // back over the trailing run of elements equivalent to the last one - usually a single comparison.
+                int idx = toIndex - 1;
+
+                while (idx > fromIndex && comparator.compare(elements[idx - 1], elements[toIndex - 1]) == 0) {
+                    idx--;
+                }
+
+                return Optional.of(elements[idx]);
             } else {
                 isDone = false;
             }
+        } catch (final Throwable e) {
+            // Anything thrown above (a comparator failure in the tie walk, the documented NPE from Optional.of) ends the
+            // operation before isDone is cleared: it must win over a failing close handler.
+            closeAfterFailure(e);
+            throw e;
         } finally {
             if (isDone) {
                 close();
@@ -4895,14 +4985,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the first (lowest-index) matching element, or an empty
      *         Optional if no element matches
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -4926,17 +5016,19 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     int cursor = fromIndex + sliceIndex * sliceSize;
                     final int to = toIndex - cursor > sliceSize ? cursor + sliceSize : toIndex;
-                    final Pair<Integer, T> pair = new Pair<>();
+                    // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
+                    int candidateIndex = 0;
+                    T candidate = null;
 
                     try {
                         while (cursor < to && (resultHolder.value() == null || cursor < resultHolder.value().left()) && eHolder.value() == null) {
-                            pair.setLeft(cursor);
-                            pair.setRight(elements[cursor++]);
+                            candidateIndex = cursor;
+                            candidate = elements[cursor++];
 
-                            if (predicate.test(pair.right())) {
+                            if (predicate.test(candidate)) {
                                 synchronized (resultHolder) {
-                                    if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
-                                        resultHolder.setValue(pair.copy());
+                                    if (resultHolder.value() == null || candidateIndex < resultHolder.value().left()) {
+                                        resultHolder.setValue(Pair.of(candidateIndex, candidate));
                                     }
                                 }
 
@@ -4953,23 +5045,25 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final Pair<Integer, T> pair = new Pair<>();
+                    // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
+                    int candidateIndex = 0;
+                    T candidate = null;
 
                     try {
                         while (resultHolder.value() == null && eHolder.value() == null) {
                             synchronized (elements) {
                                 if (cursor.value() < toIndex) {
-                                    pair.setLeft(cursor.value());
-                                    pair.setRight(elements[cursor.getAndIncrement()]);
+                                    candidateIndex = cursor.value();
+                                    candidate = elements[cursor.getAndIncrement()];
                                 } else {
                                     break;
                                 }
                             }
 
-                            if (predicate.test(pair.right())) {
+                            if (predicate.test(candidate)) {
                                 synchronized (resultHolder) {
-                                    if (resultHolder.value() == null || pair.left() < resultHolder.value().left()) {
-                                        resultHolder.setValue(pair.copy());
+                                    if (resultHolder.value() == null || candidateIndex < resultHolder.value().left()) {
+                                        resultHolder.setValue(Pair.of(candidateIndex, candidate));
                                     }
                                 }
 
@@ -4999,14 +5093,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing any matching element, or an empty Optional if no element
      *         matches
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5100,14 +5194,14 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param predicate a non-interfering, stateless predicate to test each element
      * @return an {@link Optional} describing the last (highest-index) matching element, or an empty
      *         Optional if no element matches
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws an exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -5131,17 +5225,19 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
                     final int from = fromIndex + sliceIndex * sliceSize;
                     int cursor = toIndex - from > sliceSize ? from + sliceSize : toIndex;
-                    final Pair<Integer, T> pair = new Pair<>();
+                    // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
+                    int candidateIndex = 0;
+                    T candidate = null;
 
                     try {
                         while (cursor > from && (resultHolder.value() == null || cursor > resultHolder.value().left()) && eHolder.value() == null) {
-                            pair.setLeft(cursor);
-                            pair.setRight(elements[--cursor]);
+                            candidateIndex = cursor;
+                            candidate = elements[--cursor];
 
-                            if (predicate.test(pair.right())) {
+                            if (predicate.test(candidate)) {
                                 synchronized (resultHolder) {
-                                    if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
-                                        resultHolder.setValue(pair.copy());
+                                    if (resultHolder.value() == null || candidateIndex > resultHolder.value().left()) {
+                                        resultHolder.setValue(Pair.of(candidateIndex, candidate));
                                     }
                                 }
 
@@ -5158,23 +5254,25 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
 
             for (int i = 0; i < threadNum; i++) {
                 asyncExecutorToUse = execute(asyncExecutorToUse, threadNum, i, futureList, eHolder, () -> {
-                    final Pair<Integer, T> pair = new Pair<>();
+                    // Primitive locals instead of a reused Pair: setLeft(..) boxed the index of every element scanned.
+                    int candidateIndex = 0;
+                    T candidate = null;
 
                     try {
                         while (resultHolder.value() == null && eHolder.value() == null) {
                             synchronized (elements) {
                                 if (cursor.value() > fromIndex) {
-                                    pair.setLeft(cursor.value());
-                                    pair.setRight(elements[cursor.decrementAndGet()]);
+                                    candidateIndex = cursor.value();
+                                    candidate = elements[cursor.decrementAndGet()];
                                 } else {
                                     break;
                                 }
                             }
 
-                            if (predicate.test(pair.right())) {
+                            if (predicate.test(candidate)) {
                                 synchronized (resultHolder) {
-                                    if (resultHolder.value() == null || pair.left() > resultHolder.value().left()) {
-                                        resultHolder.setValue(pair.copy());
+                                    if (resultHolder.value() == null || candidateIndex > resultHolder.value().left()) {
+                                        resultHolder.setValue(Pair.of(candidateIndex, candidate));
                                     }
                                 }
 
@@ -5352,7 +5450,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      *        returns {@link MergeResult#TAKE_FIRST} to take from this stream, or
      *        {@link MergeResult#TAKE_SECOND} to take from {@code b}
      * @return a new parallel stream of merged elements
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
      */
     @Override
@@ -5485,7 +5583,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param b the stream to zip with this stream
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}.
      */
     @Override
@@ -5513,7 +5611,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param valueForNoneB the padding value used when {@code b} is exhausted
      * @param zipFunction a function to combine corresponding elements
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}.
      */
     @Override
@@ -5540,7 +5638,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param c the third stream to zip with this stream
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}.
      */
     @Override
@@ -5572,7 +5670,7 @@ final class ParallelArrayStream<T> extends ArrayStream<T> {
      * @param valueForNoneC the padding value used when {@code c} is exhausted
      * @param zipFunction a function to combine corresponding element triples
      * @return a new parallel stream of zipped results
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}.
      */
     @Override

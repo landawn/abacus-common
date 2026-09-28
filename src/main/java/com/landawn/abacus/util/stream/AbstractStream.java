@@ -28,8 +28,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +43,9 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -156,11 +159,11 @@ abstract class AbstractStream<T> extends Stream<T> {
      * Constructs an AbstractStream with the specified sorting state, comparator, and close handlers.
      *
      * @param sorted whether the stream elements are in sorted order
-     * @param cmp the comparator for ordering elements, or {@code null} if using natural order
+     * @param comparator the comparator for ordering elements, or {@code null} if using natural order
      * @param closeHandlers collection of handlers to execute when the stream is closed
      */
-    AbstractStream(final boolean sorted, final Comparator<? super T> cmp, final Collection<LocalRunnable> closeHandlers) {
-        super(sorted, cmp, closeHandlers);
+    AbstractStream(final boolean sorted, final Comparator<? super T> comparator, final Collection<LocalRunnable> closeHandlers) {
+        super(sorted, comparator, closeHandlers);
     }
 
     @Override
@@ -243,16 +246,43 @@ abstract class AbstractStream<T> extends Stream<T> {
         final ObjIteratorEx<T> iter = iteratorEx();
 
         final Iterator<T> iterator = new ObjIteratorEx<>() {
+            // Same shape as Seq.step: the gap is skipped on the way *in* to the next element, not on the way out of
+            // the previous one. Skipping eagerly inside next() made step(n).first() pull n source elements (visible
+            // through an upstream peek/onEach, wasteful for resource-backed or generated sources, and able to throw
+            // for a gap element that is never needed).
+            private long remainingGap = 0;
+
             @Override
             public boolean hasNext() {
+                skipGapIfNeeded();
+
                 return iter.hasNext();
             }
 
             @Override
             public T next() throws NoSuchElementException {
+                skipGapIfNeeded();
+
                 final T next = iter.next();
-                iter.advance(skip);
+                remainingGap = skip;
                 return next;
+            }
+
+            private void skipGapIfNeeded() {
+                if (remainingGap > 0) {
+                    final long gap = remainingGap;
+
+                    if (!iter.supportsFailureAtomicAdvance()) {
+                        // A failing non-atomic advance leaves an unknown position: never re-skip the gap on a retry.
+                        remainingGap = 0;
+                    }
+
+                    // Bulk advance, never element by element: upstream range/skip/array-backed/step iterators skip the
+                    // gap without reading the skipped elements, exactly as the former eager advance(skip) did. (A map()
+                    // iterator keeps the default advance(), a next() loop, so it still maps what it skips.)
+                    iter.advance(gap);
+                    remainingGap = 0;
+                }
             }
         };
 
@@ -556,38 +586,48 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             return flatmap(secondMapper);
         } else {
-            // LinkedList (not ArrayDeque) so that a mapper emitting a null element does not throw NPE,
-            // matching the parallel path above (SpinedBuffer permits null) and JDK Stream.mapMulti.
-            final Deque<R> queue = new LinkedList<>();
+            // A FIFO buffer read through a cursor: an ArrayList (not ArrayDeque) so that a mapper emitting a null element
+            // does not throw NPE, matching the parallel path above (SpinedBuffer permits null) and JDK Stream.mapMulti,
+            // and not a LinkedList, which allocated a node for every emitted element. The pending elements are
+            // buffer[cursor, size); a delivered slot is cleared at once, and the drained buffer is reset before the
+            // next source element is mapped.
+            final List<R> buffer = new ArrayList<>();
 
-            final Consumer<R> consumer = queue::offer;
+            final Consumer<R> consumer = buffer::add;
 
             @SuppressWarnings("resource")
             final ObjIteratorEx<T> iter = iteratorEx();
 
             return newStream(new ObjIteratorEx<>() { //NOSONAR
+                private int cursor = 0;
+
                 @Override
                 public boolean hasNext() {
-                    if (queue.size() == 0) {
+                    if (cursor >= buffer.size()) {
+                        if (cursor > 0) {
+                            buffer.clear();
+                            cursor = 0;
+                        }
+
                         while (iter.hasNext()) {
                             mapper.accept(iter.next(), consumer);
 
-                            if (queue.size() > 0) {
+                            if (buffer.size() > 0) {
                                 break;
                             }
                         }
                     }
 
-                    return queue.size() > 0;
+                    return cursor < buffer.size();
                 }
 
                 @Override
                 public R next() throws NoSuchElementException {
-                    if (queue.size() == 0 && !hasNext()) {
+                    if (cursor >= buffer.size() && !hasNext()) {
                         throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
-                    return queue.poll();
+                    return buffer.set(cursor++, null);
                 }
             }, false, null);
         }
@@ -644,13 +684,47 @@ abstract class AbstractStream<T> extends Stream<T> {
         return flatMapToDouble(secondMapper);
     }
 
+    /**
+     * Rejects a {@code null} {@code Optional} returned by a {@code mapPartial*} mapper with a
+     * {@link NullPointerException} that names the cause (the type stays NPE, as for any other null dereference of a
+     * mapper result). Same as {@code requireNonNullOptional(opt, "Optional")}.
+     *
+     * @param <O> the optional type
+     * @param opt the value returned by the mapper
+     * @return {@code opt}
+     * @throws NullPointerException if {@code opt} is {@code null}
+     */
+    static <O> O requireNonNullOptional(final O opt) throws NullPointerException {
+        return requireNonNullOptional(opt, "Optional");
+    }
+
+    /**
+     * Rejects a {@code null} optional returned by a {@code mapPartial*} mapper with a {@link NullPointerException}
+     * whose message names the optional type the mapper should have returned, e.g. {@code "mapper returned a null
+     * OptionalInt; return OptionalInt.empty() for no result"}.
+     *
+     * @param <O> the optional type
+     * @param opt the value returned by the mapper
+     * @param optionalTypeName the simple (or qualified, for {@code java.util} types) name of the mapper's optional
+     *        return type, such as {@code "OptionalInt"} or {@code "java.util.OptionalInt"}
+     * @return {@code opt}
+     * @throws NullPointerException if {@code opt} is {@code null}
+     */
+    static <O> O requireNonNullOptional(final O opt, final String optionalTypeName) throws NullPointerException {
+        if (opt == null) {
+            throw new NullPointerException("mapper returned a null " + optionalTypeName + "; return " + optionalTypeName + ".empty() for no result");
+        }
+
+        return opt;
+    }
+
     @Override
     public <R> Stream<R> mapPartial(final Function<? super T, Optional<R>> mapper) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(mapper, cs.mapper);
 
-        final Predicate<Optional<R>> predicate = Fn.isPresent();
+        final Predicate<Optional<R>> predicate = o -> requireNonNullOptional(o).isPresent();
         final Function<Optional<R>, R> func = Fn.getIfPresentOrElseNull();
         if (isParallel()) {
             //noinspection resource
@@ -668,12 +742,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
+        final Predicate<OptionalInt> isPresent = o -> requireNonNullOptional(o, "OptionalInt").isPresent();
+
         if (isParallel()) {
             //noinspection resource
-            return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_INT).mapToInt(Fn.GET_AS_INT));
+            return map(mapper).psp(s -> s.filter(isPresent).mapToInt(Fn.GET_AS_INT));
         } else {
             //noinspection resource
-            return map(mapper).filter(Fn.IS_PRESENT_INT).mapToInt(Fn.GET_AS_INT);
+            return map(mapper).filter(isPresent).mapToInt(Fn.GET_AS_INT);
         }
     }
 
@@ -683,12 +759,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
+        final Predicate<OptionalLong> isPresent = o -> requireNonNullOptional(o, "OptionalLong").isPresent();
+
         if (isParallel()) {
             //noinspection resource
-            return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_LONG).mapToLong(Fn.GET_AS_LONG));
+            return map(mapper).psp(s -> s.filter(isPresent).mapToLong(Fn.GET_AS_LONG));
         } else {
             //noinspection resource
-            return map(mapper).filter(Fn.IS_PRESENT_LONG).mapToLong(Fn.GET_AS_LONG);
+            return map(mapper).filter(isPresent).mapToLong(Fn.GET_AS_LONG);
         }
     }
 
@@ -698,12 +776,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
+        final Predicate<OptionalDouble> isPresent = o -> requireNonNullOptional(o, "OptionalDouble").isPresent();
+
         if (isParallel()) {
             //noinspection resource
-            return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_DOUBLE).mapToDouble(Fn.GET_AS_DOUBLE));
+            return map(mapper).psp(s -> s.filter(isPresent).mapToDouble(Fn.GET_AS_DOUBLE));
         } else {
             //noinspection resource
-            return map(mapper).filter(Fn.IS_PRESENT_DOUBLE).mapToDouble(Fn.GET_AS_DOUBLE);
+            return map(mapper).filter(isPresent).mapToDouble(Fn.GET_AS_DOUBLE);
         }
     }
 
@@ -713,12 +793,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
+        final Predicate<java.util.Optional<R>> isPresent = o -> requireNonNullOptional(o, "java.util.Optional").isPresent();
+
         if (isParallel()) {
             //noinspection resource
-            return map(mapper).psp(s -> s.filter(Fn.isPresentJdk()).map(Fn.getIfPresentOrElseNullJdk()));
+            return map(mapper).psp(s -> s.filter(isPresent).map(Fn.getIfPresentOrElseNullJdk()));
         } else {
             //noinspection resource
-            return map(mapper).filter(Fn.isPresentJdk()).map(Fn.getIfPresentOrElseNullJdk());
+            return map(mapper).filter(isPresent).map(Fn.getIfPresentOrElseNullJdk());
         }
     }
 
@@ -728,12 +810,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
+        final Predicate<java.util.OptionalInt> isPresent = o -> requireNonNullOptional(o, "java.util.OptionalInt").isPresent();
+
         if (isParallel()) {
             //noinspection resource
-            return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_INT_JDK).mapToInt(Fn.GET_AS_INT_JDK));
+            return map(mapper).psp(s -> s.filter(isPresent).mapToInt(Fn.GET_AS_INT_JDK));
         } else {
             //noinspection resource
-            return map(mapper).filter(Fn.IS_PRESENT_INT_JDK).mapToInt(Fn.GET_AS_INT_JDK);
+            return map(mapper).filter(isPresent).mapToInt(Fn.GET_AS_INT_JDK);
         }
     }
 
@@ -743,12 +827,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
+        final Predicate<java.util.OptionalLong> isPresent = o -> requireNonNullOptional(o, "java.util.OptionalLong").isPresent();
+
         if (isParallel()) {
             //noinspection resource
-            return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_LONG_JDK).mapToLong(Fn.GET_AS_LONG_JDK));
+            return map(mapper).psp(s -> s.filter(isPresent).mapToLong(Fn.GET_AS_LONG_JDK));
         } else {
             //noinspection resource
-            return map(mapper).filter(Fn.IS_PRESENT_LONG_JDK).mapToLong(Fn.GET_AS_LONG_JDK);
+            return map(mapper).filter(isPresent).mapToLong(Fn.GET_AS_LONG_JDK);
         }
     }
 
@@ -759,12 +845,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
+        final Predicate<java.util.OptionalDouble> isPresent = o -> requireNonNullOptional(o, "java.util.OptionalDouble").isPresent();
+
         if (isParallel()) {
             //noinspection resource
-            return map(mapper).psp(s -> s.filter(Fn.IS_PRESENT_DOUBLE_JDK).mapToDouble(Fn.GET_AS_DOUBLE_JDK));
+            return map(mapper).psp(s -> s.filter(isPresent).mapToDouble(Fn.GET_AS_DOUBLE_JDK));
         } else {
             //noinspection resource
-            return map(mapper).filter(Fn.IS_PRESENT_DOUBLE_JDK).mapToDouble(Fn.GET_AS_DOUBLE_JDK);
+            return map(mapper).filter(isPresent).mapToDouble(Fn.GET_AS_DOUBLE_JDK);
         }
     }
 
@@ -845,7 +933,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             @Override
             public C next() throws NoSuchElementException {
-                final C c = supplier.get();
+                final C c = N.requireNonNull(supplier.get(), "supplier returned null");
                 c.add(hasNext ? next : (next = iter.next()));
 
                 hasNext = false;
@@ -914,12 +1002,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U> Stream<U> collapse(final BiPredicate<? super T, ? super T> collapsible, final U init, final BiFunction<? super U, ? super T, U> op)
+    public <U> Stream<U> collapse(final BiPredicate<? super T, ? super T> collapsible, final U init, final BiFunction<? super U, ? super T, U> operator)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(operator, cs.mergeFunction); // the public parameter is named mergeFunction
 
         final ObjIteratorEx<T> iter = iteratorEx();
 
@@ -934,7 +1022,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             @Override
             public U next() throws NoSuchElementException {
-                U res = op.apply(init, hasNext ? next : (next = iter.next()));
+                U res = operator.apply(init, hasNext ? next : (next = iter.next()));
 
                 hasNext = false;
 
@@ -944,7 +1032,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     hasNext = true;
 
                     if (collapsible.test(previous, next)) {
-                        res = op.apply(res, next);
+                        res = operator.apply(res, next);
                     } else {
                         break;
                     }
@@ -1036,7 +1124,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public C next() throws NoSuchElementException {
                 final T first = hasNext ? next : (next = iter.next());
-                final C c = supplier.get();
+                final C c = N.requireNonNull(supplier.get(), "supplier returned null");
                 c.add(first);
 
                 hasNext = false;
@@ -1106,12 +1194,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U> Stream<U> collapse(final TriPredicate<? super T, ? super T, ? super T> collapsible, final U init, final BiFunction<? super U, ? super T, U> op)
-            throws IllegalStateException, IllegalArgumentException {
+    public <U> Stream<U> collapse(final TriPredicate<? super T, ? super T, ? super T> collapsible, final U init,
+            final BiFunction<? super U, ? super T, U> operator) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(collapsible, cs.collapsible);
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(operator, cs.mergeFunction); // the public parameter is named mergeFunction
 
         final ObjIteratorEx<T> iter = iteratorEx();
 
@@ -1127,7 +1215,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public U next() throws NoSuchElementException {
                 final T first = hasNext ? next : (next = iter.next());
-                U res = op.apply(init, first);
+                U res = operator.apply(init, first);
 
                 hasNext = false;
 
@@ -1137,7 +1225,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     hasNext = true;
 
                     if (collapsible.test(first, previous, next)) {
-                        res = op.apply(res, next);
+                        res = operator.apply(res, next);
                     } else {
                         break;
                     }
@@ -1416,7 +1504,30 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNegative(position, cs.position);
         checkArgNotNull(collector, cs.collector);
 
-        return splitAt(position).map(s -> s.collect(collector));
+        return collectParts(splitAt(position), collector);
+    }
+
+    /**
+     * Collects each of the two parts produced by {@code splitAt} with {@code collector}, keeping the positional
+     * {@code [head, tail]} result. On a parallel stream the outer map and each part's collect run sequentially:
+     * a parallel outer map could emit the tail before the head, and a parallel collect scrambles the order of the
+     * elements inside each part - both contradict the "sequential only" contract of the Collector overloads. The
+     * 2-element result is then switched back to this stream's parallel settings, as {@link #select(Class)} does.
+     *
+     * @param <R> the collector result type
+     * @param parts the two part streams
+     * @param collector collects each part
+     * @return a stream of the two collected parts, in order
+     */
+    private <R> Stream<R> collectParts(final Stream<Stream<T>> parts, final Collector<? super T, ?, R> collector) {
+        if (isParallel()) {
+            //noinspection resource
+            return parts.sequential()
+                    .map(s -> s.sequential().collect(collector))
+                    .parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
+        } else {
+            return parts.map(s -> s.collect(collector));
+        }
     }
 
     @Override
@@ -1549,7 +1660,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(where, cs.where);
         checkArgNotNull(collector, cs.collector);
 
-        return splitAt(where).map(s -> s.collect(collector));
+        return collectParts(splitAt(where), collector);
     }
 
     //    @Override
@@ -1737,6 +1848,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             while (flagToBreak.isFalse() && iter.hasNext()) {
                 action.accept(iter.next());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2241,7 +2355,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             @SuppressWarnings("resource")
             final ObjIteratorEx<T> iter = iteratorEx();
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super V> downstreamAccumulator = (BiConsumer<Object, ? super V>) downstream.accumulator();
@@ -2254,7 +2368,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             while (iter.hasNext()) {
                 next = iter.next();
-                key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -2269,6 +2383,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2375,7 +2492,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             @SuppressWarnings("resource")
             final ObjIteratorEx<T> iter = iteratorEx();
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super V> downstreamAccumulator = (BiConsumer<Object, ? super V>) downstream.accumulator();
@@ -2394,7 +2511,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 if (N.notEmpty(ks)) {
                     for (final K k : ks) {
-                        checkArgNotNull(k, "element cannot be mapped to a null key");
+                        N.requireNonNull(k, "element cannot be mapped to a null key");
 
                         if ((v = intermediate.get(k)) == null) {
                             v = downstreamSupplier.get();
@@ -2411,6 +2528,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2443,15 +2563,14 @@ abstract class AbstractStream<T> extends Stream<T> {
         final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
         final Function<Object, D> downstreamFinisher = (Function<Object, D>) downstream.finisher();
 
-        if (!map.containsKey(Boolean.TRUE)) {
-            map.put(Boolean.TRUE, downstreamFinisher.apply(downstreamSupplier.get()));
-        }
+        // Same contract as Seq.partitionTo: a LinkedHashMap that always iterates false-then-true, whatever
+        // the encounter order of the two partitions (groupTo inserts keys in first-seen order).
+        final Map<Boolean, D> result = new LinkedHashMap<>(4);
 
-        if (!map.containsKey(Boolean.FALSE)) {
-            map.put(Boolean.FALSE, downstreamFinisher.apply(downstreamSupplier.get()));
-        }
+        result.put(Boolean.FALSE, map.containsKey(Boolean.FALSE) ? map.get(Boolean.FALSE) : downstreamFinisher.apply(downstreamSupplier.get()));
+        result.put(Boolean.TRUE, map.containsKey(Boolean.TRUE) ? map.get(Boolean.TRUE) : downstreamFinisher.apply(downstreamSupplier.get()));
 
-        return map;
+        return result;
     }
 
     @Override
@@ -2529,7 +2648,10 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         checkArgNotNull(mapper, cs.mapper);
 
-        return collect(Collectors.averagingLongOrEmpty(mapper));
+        // Not Collectors.averagingLongOrEmpty: that collector keeps a plain long sum (documented JDK-compatible wrap),
+        // while LongStream.average() is exact and overflow-safe, like Seq/N.averageLong - also under parallel().
+        //noinspection resource
+        return mapToLong(mapper).average();
     }
 
     @Override
@@ -2553,7 +2675,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             try {
                 @SuppressWarnings("resource")
                 final ObjIteratorEx<T> iter = iteratorEx();
-                final List<T> result = new ArrayList<>();
+                List<T> result = new ArrayList<>();
 
                 if (!iter.hasNext()) {
                     return result;
@@ -2587,7 +2709,12 @@ abstract class AbstractStream<T> extends Stream<T> {
                         if (cp == 0) {
                             result.add(next);
                         } else if (cp < 0) {
-                            result.clear();
+                            if (result.size() > 16) {
+                                // A long run of earlier ties may have grown the list: start a new one rather than keep that capacity.
+                                result = new ArrayList<>();
+                            } else {
+                                result.clear();
+                            }
                             result.add(next);
                             candidate = next;
                         }
@@ -2595,6 +2722,9 @@ abstract class AbstractStream<T> extends Stream<T> {
                 }
 
                 return result;
+            } catch (final Throwable e) {
+                closeAfterFailure(e);
+                throw e;
             } finally {
                 close();
             }
@@ -2613,7 +2743,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             try {
                 @SuppressWarnings("resource")
                 final ObjIteratorEx<T> iter = iteratorEx();
-                final List<T> result = new ArrayList<>();
+                List<T> result = new ArrayList<>();
 
                 if (!iter.hasNext()) {
                     return result;
@@ -2634,13 +2764,21 @@ abstract class AbstractStream<T> extends Stream<T> {
                     if (cp == 0) {
                         result.add(next);
                     } else if (cp > 0) {
-                        result.clear();
+                        if (result.size() > 16) {
+                            // A long run of earlier ties may have grown the list: start a new one rather than keep that capacity.
+                            result = new ArrayList<>();
+                        } else {
+                            result.clear();
+                        }
                         result.add(next);
                         candidate = next;
                     }
                 }
 
                 return result;
+            } catch (final Throwable e) {
+                closeAfterFailure(e);
+                throw e;
             } finally {
                 close();
             }
@@ -2649,7 +2787,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <E extends Exception> Optional<T> findAny(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -2670,6 +2808,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             } else {
                 return containsAll(N.toSet(a));
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2691,6 +2832,9 @@ abstract class AbstractStream<T> extends Stream<T> {
                 // Match using Object.equals even when stream distinctness has special handling for arrays.
                 return sequential().anyMatch(value -> set.remove(value) && set.isEmpty());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2721,6 +2865,9 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 return anyMatch(set::contains);
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2741,6 +2888,9 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 return anyMatch(set::contains);
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2757,6 +2907,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return !containsAny(a);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2772,13 +2925,16 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return !containsAny(c);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
     @Override
-    public Optional<T> first() throws IllegalStateException {
+    public Optional<T> first() throws IllegalStateException, NullPointerException {
         assertNotClosed();
 
         try {
@@ -2790,13 +2946,16 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return Optional.of(iter.next());
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
     @Override
-    public Optional<T> last() throws IllegalStateException {
+    public Optional<T> last() throws IllegalStateException, NullPointerException {
         assertNotClosed();
 
         try {
@@ -2814,13 +2973,16 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return Optional.of(next);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
     @Override
-    public Optional<T> elementAt(final long position) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> elementAt(final long position) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
         checkArgNotNegative(position, cs.position);
 
@@ -2831,6 +2993,9 @@ abstract class AbstractStream<T> extends Stream<T> {
                 //noinspection resource
                 return skip(position).first();
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2838,7 +3003,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @SuppressWarnings("DuplicateThrows")
     @Override
-    public Optional<T> onlyOne() throws IllegalStateException, TooManyElementsException {
+    public Optional<T> onlyOne() throws IllegalStateException, TooManyElementsException, NullPointerException {
         assertNotClosed();
 
         try {
@@ -2858,6 +3023,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return Optional.of(first);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3000,7 +3168,7 @@ abstract class AbstractStream<T> extends Stream<T> {
         assertNotClosed();
         checkArgNotNegative(startInclusive, cs.startInclusive);
         checkArgNotNegative(endExclusive, cs.endExclusive);
-        checkArgNotNegative(endExclusive - startInclusive, "endExclusive - startInclusive");
+        checkArgument(startInclusive <= endExclusive, "'startInclusive' (%s) must be <= 'endExclusive' (%s)", startInclusive, endExclusive);
 
         if (startInclusive == endExclusive) {
             return skip(0);
@@ -3050,14 +3218,15 @@ abstract class AbstractStream<T> extends Stream<T> {
             return this;
         }
 
-        final Predicate<T> filter = isParallel() ? new Predicate<>() {
-            final AtomicLong cnt = new AtomicLong(n);
+        if (isParallel()) {
+            // Like rateLimited/delay: the skip stage runs sequentially and the parallel settings are restored for the
+            // downstream stages. A parallel dropWhile stage serialised every element under its lock anyway, and emitted
+            // the retained elements in completion order.
+            //noinspection resource
+            return sequential().skip(n, action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
+        }
 
-            @Override
-            public boolean test(final T value) {
-                return cnt.getAndDecrement() > 0;
-            }
-        } : new Predicate<>() {
+        final Predicate<T> filter = new Predicate<>() {
             final MutableLong cnt = MutableLong.of(n);
 
             @Override
@@ -3290,8 +3459,21 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 a = a.length >= remaining ? a : (A[]) N.newArray(a.getClass().getComponentType(), remaining);
 
-                for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = (A) elements[(int) (((long) start + i) % len) + fromIndex];
+                if (remaining > 0 && a != elements && a.getClass().getComponentType().isAssignableFrom(elements.getClass().getComponentType())) {
+                    // No element can fail the array-store check here (the usual case: toArray() passes an Object[]) and
+                    // the target is not the source array, so copy the at most two contiguous runs of the backing range,
+                    // [head, len) then [0, ...), in bulk.
+                    final long first = (long) start + cnt;
+                    final int head = (int) (first < len ? first : first - len);
+                    final int headLength = Math.min(len - head, remaining);
+
+                    System.arraycopy(elements, fromIndex + head, a, 0, headLength);
+                    System.arraycopy(elements, fromIndex, a, headLength, remaining - headLength);
+                } else {
+                    // Element by element, so that a mistyped array fails with the usual ArrayStoreException.
+                    for (int i = cnt; i < len; i++) {
+                        a[i - cnt] = (A) elements[(int) (((long) start + i) % len) + fromIndex];
+                    }
                 }
 
                 if (a.length > remaining) {
@@ -3330,12 +3512,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> shuffled(final Random rnd) throws IllegalStateException, IllegalArgumentException {
+    public Stream<T> shuffled(final Random random) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(rnd, cs.rnd);
+        checkArgNotNull(random, cs.random);
 
         return lazyLoad(a -> {
-            N.shuffle(a, rnd);
+            N.shuffle(a, random);
             return a;
         }, false, null);
     }
@@ -3355,7 +3537,9 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         final Comparator<? super T> cmpToUse = comparator;
 
-        if (isSorted() && cmpToUse == comparator()) {
+        // isSameComparator, like every other sorted shortcut: a boxed primitive stream is flagged sorted with its
+        // primitive comparator (e.g. IntStream.range(..).boxed()), which orders exactly like NATURAL_COMPARATOR.
+        if (isSorted() && isSameComparator(cmpToUse, comparator())) {
             return this;
         }
 
@@ -3478,15 +3662,15 @@ abstract class AbstractStream<T> extends Stream<T> {
         return sorted(cmpToUse);
     }
 
-    private Stream<T> lazyLoad(final UnaryOperator<Object[]> op, final boolean sorted, final Comparator<? super T> cmp) {
+    private Stream<T> lazyLoad(final UnaryOperator<Object[]> operator, final boolean sorted, final Comparator<? super T> comparator) {
         // Preserve sorted/comparator on the outer stream. Stream.defer(...) wraps the supplier as a
         // plain unsorted iterator stream, which drops isSorted() and breaks sorted-aware ops (min/max
         // short-circuit, top window, redundant sorted() elision, etc.).
         return newStream(ObjIteratorEx.defer(() -> { //NOSONAR
             @SuppressWarnings("unchecked")
-            final T[] a = (T[]) op.apply(toArrayForIntermediateOp());
+            final T[] a = (T[]) operator.apply(toArrayForIntermediateOp());
             return a == null || a.length == 0 ? ObjIteratorEx.<T> empty() : ObjIteratorEx.of(a);
-        }), sorted, cmp);
+        }), sorted, comparator);
     }
 
     @Override
@@ -3532,6 +3716,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return Optional.of((Map<Percentage, T>) N.percentilesOfSorted(a));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3552,6 +3739,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return Optional.of((Map<Percentage, T>) N.percentilesOfSorted(a));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3569,35 +3759,38 @@ abstract class AbstractStream<T> extends Stream<T> {
                     false, null);
         } else {
             //noinspection resource
-            return newStream((T[]) toArray(), false, null).combinations(); //NOSONAR
+            return newStream(toArrayWithoutClosing(), false, null).combinations(); //NOSONAR
         }
     }
 
     @Override
-    public Stream<List<T>> combinations(final int len) throws IllegalStateException, IndexOutOfBoundsException {
+    public Stream<List<T>> combinations(final int length) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
         assertNotClosed();
+        checkArgNotNegative(length, cs.length);
 
         if (this instanceof ArrayStream<T> s) {
             final int count = s.toIndex - s.fromIndex;
-            checkFromIndexSize(0, len, count);
+            checkFromIndexSize(0, length, count);
 
-            if (len == 0) {
+            if (length == 0) {
                 return newStream(N.asArray(N.emptyList()), false, null);
-            } else if (len == 1) {
+            } else if (length == 1) {
                 return map(N::toList);
-            } else if (len == count) {
-                return newStream(N.asArray(toList()), false, null);
+            } else if (length == count) {
+                // Copy the elements directly: the terminal toList() would close this stream (running its close
+                // handlers) during this intermediate call, before the returned stream is even traversed.
+                return newStream(N.asArray(N.toList(s.elements, s.fromIndex, s.toIndex)), false, null);
             } else {
                 final T[] a = s.elements;
                 final int fromIndex = s.fromIndex;
                 final int toIndex = s.toIndex;
 
                 return newStream(new ObjIteratorEx<>() { //NOSONAR
-                    private final int[] indices = Array.range(fromIndex, fromIndex + len);
+                    private final int[] indices = Array.range(fromIndex, fromIndex + length);
 
                     @Override
                     public boolean hasNext() {
-                        return indices[0] <= toIndex - len;
+                        return indices[0] <= toIndex - length;
                     }
 
                     @Override
@@ -3606,18 +3799,18 @@ abstract class AbstractStream<T> extends Stream<T> {
                             throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                         }
 
-                        final List<T> result = new ArrayList<>(len);
+                        final List<T> result = new ArrayList<>(length);
 
                         for (final int idx : indices) {
                             result.add(a[idx]);
                         }
 
-                        if (++indices[len - 1] == toIndex) {
-                            for (int i = len - 1; i > 0; i--) {
-                                if (indices[i] > toIndex - (len - i)) {
+                        if (++indices[length - 1] == toIndex) {
+                            for (int i = length - 1; i > 0; i--) {
+                                if (indices[i] > toIndex - (length - i)) {
                                     indices[i - 1]++;
 
-                                    for (int j = i; j < len; j++) {
+                                    for (int j = i; j < length; j++) {
                                         indices[j] = indices[j - 1] + 1;
                                     }
                                 }
@@ -3631,18 +3824,41 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
         } else {
             //noinspection resource
-            return newStream((T[]) toArray(), false, null).combinations(len); //NOSONAR
+            return newStream(toArrayWithoutClosing(), false, null).combinations(length); //NOSONAR
+        }
+    }
+
+    /**
+     * Materializes the remaining elements of this (iterator-backed) stream for {@code combinations()} and
+     * {@code combinations(int)} without running a terminal operation on it.
+     *
+     * <p>The terminal {@code toArray()} used before closed this stream - running its close
+     * handlers - during the intermediate call, before the returned stream was even traversed. The derived stream links
+     * {@code this::close} through {@code closeHandlersForNewStream()}, so the handlers now run when the RESULT is
+     * closed, as in the array-backed branch. A failure while reading the source still closes this stream, and wins
+     * over a failing close handler (LST/C-114).
+     *
+     * @return the remaining elements
+     */
+    @SuppressWarnings("unchecked")
+    private T[] toArrayWithoutClosing() {
+        try {
+            return (T[]) toArray(false);
+        } catch (final Throwable e) { // NOSONAR
+            closeAfterFailure(e);
+            throw e;
         }
     }
 
     @Override
-    public Stream<List<T>> combinations(final int len, final boolean repeat) throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
+    public Stream<List<T>> combinations(final int length, final boolean repeat)
+            throws IllegalStateException, IllegalArgumentException, IndexOutOfBoundsException {
         assertNotClosed();
 
-        checkArgNotNegative(len, cs.len);
+        checkArgNotNegative(length, cs.length);
 
         if (!repeat) {
-            return combinations(len);
+            return combinations(length);
         } else {
             return newStream(new ObjIteratorEx<>() { //NOSONAR
                 private boolean initialized = false;
@@ -3695,7 +3911,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 private void init() {
                     if (!initialized) {
                         initialized = true;
-                        list = Iterables.cartesianProduct(N.repeat(AbstractStream.this.toList(), len));
+                        list = Iterables.cartesianProduct(N.repeat(AbstractStream.this.toList(), length));
                         size = list.size();
                     }
                 }
@@ -3805,8 +4021,12 @@ abstract class AbstractStream<T> extends Stream<T> {
         checkArgNotNull(generator, cs.generator);
 
         try {
-            final Object[] src = toArray();
-            A[] dest = generator.apply(src.length);
+            // toArray(false), not the closing terminal toArray(): the latter closed this stream
+            // (running its close handlers) before the generator was called, so a failing close handler replaced a
+            // generator/copy failure that had not even happened yet. The stream is now closed once, below, after
+            // the generator step, through the ordinary closeAfterFailure/finally path (LST/C-114 precedence).
+            final Object[] src = toArray(false);
+            A[] dest = N.requireNonNull(generator.apply(src.length), "generator returned null");
 
             if (dest.length < src.length) {
                 // A generator that ignores its size argument (e.g. n -> new String[0]) used to blow up in arraycopy
@@ -3817,6 +4037,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             //noinspection SuspiciousSystemArraycopy
             System.arraycopy(src, 0, dest, 0, src.length);
             return dest;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3850,6 +4073,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return joiner.toString();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3869,6 +4095,9 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             return joiner;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3879,17 +4108,22 @@ abstract class AbstractStream<T> extends Stream<T> {
         assertNotClosed();
 
         try {
-            final Set<T> set = N.newHashSet();
+            final Set<Object> set = N.newHashSet();
             @SuppressWarnings("resource")
             final Iterator<T> iter = iteratorEx();
 
             while (iter.hasNext()) {
-                if (!set.add(iter.next())) {
+                // hashKey(..) - the normalization distinct() uses - so array elements compare by content, as in
+                // Seq.containsDuplicates and N.containsDuplicates.
+                if (!set.add(hashKey(iter.next()))) {
                     return true;
                 }
             }
 
             return false;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3897,7 +4131,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator)
-            throws IllegalStateException, IllegalArgumentException, RuntimeException {
+            throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -3911,13 +4145,13 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R, RR, E extends Exception> RR collectThenApply(final Collector<? super T, ?, R> downstream,
-            final Throwables.Function<? super R, ? extends RR, E> func) throws IllegalStateException, IllegalArgumentException, E {
+            final Throwables.Function<? super R, ? extends RR, E> function) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(downstream, cs.downstream);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return func.apply(collect(downstream));
+        return function.apply(collect(downstream));
     }
 
     @Override
@@ -3932,13 +4166,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <R, E extends Exception> R toListThenApply(final Throwables.Function<? super List<T>, ? extends R, E> func)
+    public <R, E extends Exception> R toListThenApply(final Throwables.Function<? super List<T>, ? extends R, E> function)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return func.apply(toList());
+        return function.apply(toList());
     }
 
     @Override
@@ -3952,13 +4186,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <R, E extends Exception> R toSetThenApply(final Throwables.Function<? super Set<T>, ? extends R, E> func)
+    public <R, E extends Exception> R toSetThenApply(final Throwables.Function<? super Set<T>, ? extends R, E> function)
             throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return func.apply(toSet());
+        return function.apply(toSet());
     }
 
     @Override
@@ -3973,13 +4207,13 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <R, C extends Collection<T>, E extends Exception> R toCollectionThenApply(final Supplier<? extends C> supplier,
-            final Throwables.Function<? super C, ? extends R, E> func) throws IllegalStateException, IllegalArgumentException, E {
+            final Throwables.Function<? super C, ? extends R, E> function) throws IllegalStateException, IllegalArgumentException, E {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return func.apply(toCollection(supplier));
+        return function.apply(toCollection(supplier));
     }
 
     @Override
@@ -4029,6 +4263,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     return true;
                 } else {
                     a = list.toArray();
+                    list = null; // The immutable cycle snapshot now owns the cached values.
                     len = a.length;
                     cursor = 0;
 
@@ -4108,6 +4343,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     return true;
                 } else {
                     a = list.toArray();
+                    list = null; // The immutable cycle snapshot now owns the cached values.
                     len = a.length;
                     cursor = 0;
                     m++;
@@ -4234,7 +4470,29 @@ abstract class AbstractStream<T> extends Stream<T> {
         assertNotClosed();
         checkArgPositive(bufferSize, cs.bufferSize);
 
-        return buffered(new ArrayBlockingQueue<>(bufferSize));
+        final BlockingQueue<T> queueToBuffer;
+
+        try {
+            // bufferSize is a bound, not a size: ArrayBlockingQueue allocates its whole capacity up front, so a large
+            // bound (e.g. Integer.MAX_VALUE, "let the producer run far ahead") would cost gigabytes or fail with an
+            // OutOfMemoryError before a single element is read. Above MAX_BUFFERED_SIZE (the largest size the default
+            // sizing picks, the same threshold as the Stream factories' bounded queues) use a LinkedBlockingQueue:
+            // equally bounded and blocking, but it allocates only for elements actually buffered.
+            queueToBuffer = bufferSize <= MAX_BUFFERED_SIZE ? new ArrayBlockingQueue<>(bufferSize) : new LinkedBlockingQueue<>(bufferSize);
+        } catch (final Throwable e) {
+            // No stream owns this one yet: release it (and any file/JDBC handle behind it) before the failure propagates.
+            try {
+                close();
+            } catch (final Throwable e2) {
+                if (e2 != e) {
+                    e.addSuppressed(e2);
+                }
+            }
+
+            throw e;
+        }
+
+        return buffered(queueToBuffer);
     }
 
     @Override
@@ -4266,13 +4524,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> append(final Optional<T> op) throws IllegalStateException, IllegalArgumentException {
+    public Stream<T> append(final Optional<T> optional) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(optional, cs.optional);
 
         // return append(op.stream());
-        return op.isEmpty() ? this : append(op.orElseThrow());
+        return optional.isEmpty() ? this : append(optional.orElseThrow());
     }
 
     @Override
@@ -4290,13 +4548,13 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> prepend(final Optional<T> op) throws IllegalStateException, IllegalArgumentException { //NOSONAR
+    public Stream<T> prepend(final Optional<T> optional) throws IllegalStateException, IllegalArgumentException { //NOSONAR
         assertNotClosed();
 
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(optional, cs.optional);
 
         // return prepend(op.stream());
-        return op.isEmpty() ? this : prepend(op.orElseThrow());
+        return optional.isEmpty() ? this : prepend(optional.orElseThrow());
     }
 
     @Override
@@ -4430,6 +4688,12 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             @Override
             public boolean hasNext() {
+                if (!initialized) {
+                    // Create/truncate the file as soon as traversal starts - even if the stream turns out to be
+                    // empty - like persist(File) does, so an empty run does not leave a previous run's output behind.
+                    init();
+                }
+
                 return iter.hasNext();
             }
 
@@ -4474,10 +4738,15 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             private void init() {
-                initialized = true;
+                // Mark initialized only once the file is open: after a failed open (e.g. the output is a directory) a
+                // later hasNext()/next() retries - and fails again with the same descriptive exception - instead of
+                // writing to a null writer.
+                if (writer == null) {
+                    writer = IOUtil.newFileWriter(output);
+                }
 
-                writer = IOUtil.newFileWriter(output);
                 bw = Objectory.createBufferedWriter(writer);
+                initialized = true;
             }
         };
 
@@ -4623,6 +4892,12 @@ abstract class AbstractStream<T> extends Stream<T> {
 
             @Override
             public boolean hasNext() {
+                if (!initialized) {
+                    // Create/truncate the file as soon as traversal starts - even if the stream turns out to be
+                    // empty - like persist(File) does, so an empty run does not leave a previous run's output behind.
+                    init();
+                }
+
                 return iter.hasNext();
             }
 
@@ -4667,10 +4942,15 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             private void init() {
-                initialized = true;
+                // Mark initialized only once the file is open: after a failed open (e.g. the output is a directory) a
+                // later hasNext()/next() retries - and fails again with the same descriptive exception - instead of
+                // writing to a null writer.
+                if (writer == null) {
+                    writer = IOUtil.newFileWriter(output);
+                }
 
-                writer = IOUtil.newFileWriter(output);
                 bw = Objectory.createBufferedWriter(writer);
+                initialized = true;
             }
         };
 
@@ -4743,21 +5023,19 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> onEachSave(final PreparedStatement stmt, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
+    public Stream<T> onEachSave(final PreparedStatement statement, final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(stmtSetter, cs.stmtSetter);
-
-        return onEachSave(stmt, 1, 0, stmtSetter);
+        return onEachSave(statement, 1, 0, stmtSetter);
     }
 
     @Override
-    public Stream<T> onEachSave(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
+    public Stream<T> onEachSave(final PreparedStatement statement, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(stmt, cs.PreparedStatement);
+        checkArgNotNull(statement, cs.statement);
         checkArgNotNegative(batchSize, cs.batchSize);
         checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
         checkArgNotNull(stmtSetter, cs.stmtSetter);
@@ -4789,21 +5067,21 @@ abstract class AbstractStream<T> extends Stream<T> {
                 final T next = iter.next();
 
                 try {
-                    stmtSetter.accept(next, stmt);
+                    stmtSetter.accept(next, statement);
 
                     if (isBatchUsed) {
                         cnt++;
-                        stmt.addBatch();
+                        statement.addBatch();
 
                         if (cnt % batchSize == 0) {
-                            DataSourceUtil.executeBatch(stmt);
+                            DataSourceUtil.executeBatch(statement);
 
                             if (batchIntervalInMillis > 0) {
                                 N.sleepUninterruptibly(batchIntervalInMillis);
                             }
                         }
                     } else {
-                        stmt.execute();
+                        statement.execute();
                     }
                 } catch (final SQLException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
@@ -4816,7 +5094,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             public void closeResource() {
                 if (isBatchUsed && (cnt % batchSize) > 0) {
                     try {
-                        DataSourceUtil.executeBatch(stmt);
+                        DataSourceUtil.executeBatch(statement);
                     } catch (final SQLException e) {
                         throw ExceptionUtil.toRuntimeException(e, true);
                     }
@@ -4828,21 +5106,19 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> onEachSave(final Connection conn, final String insertSQL,
+    public Stream<T> onEachSave(final Connection connection, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(stmtSetter, cs.stmtSetter);
-
-        return onEachSave(conn, insertSQL, 1, 0, stmtSetter);
+        return onEachSave(connection, insertSQL, 1, 0, stmtSetter);
     }
 
     @Override
-    public Stream<T> onEachSave(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    public Stream<T> onEachSave(final Connection connection, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(conn, cs.Connection);
+        checkArgNotNull(connection, cs.connection);
         checkArgNotNull(insertSQL, cs.insertSQL);
         checkArgNotNegative(batchSize, cs.batchSize);
         checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
@@ -4920,13 +5196,15 @@ abstract class AbstractStream<T> extends Stream<T> {
             }
 
             private void init() {
-                initialized = true;
-
+                // Mark initialized only once the statement is prepared: after a failed prepareStatement a later
+                // next() retries - and fails again with the SQL failure - instead of passing a null statement on.
                 try {
-                    stmt = conn.prepareStatement(insertSQL);
+                    stmt = connection.prepareStatement(insertSQL);
                 } catch (final SQLException e) {
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
+
+                initialized = true;
             }
         };
 
@@ -4934,21 +5212,19 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public Stream<T> onEachSave(final javax.sql.DataSource ds, final String insertSQL,
+    public Stream<T> onEachSave(final javax.sql.DataSource dataSource, final String insertSQL,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(stmtSetter, cs.stmtSetter);
-
-        return onEachSave(ds, insertSQL, 1, 0, stmtSetter);
+        return onEachSave(dataSource, insertSQL, 1, 0, stmtSetter);
     }
 
     @Override
-    public Stream<T> onEachSave(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    public Stream<T> onEachSave(final javax.sql.DataSource dataSource, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(ds, cs.DataSource);
+        checkArgNotNull(dataSource, cs.dataSource);
         checkArgNotNull(insertSQL, cs.insertSQL);
         checkArgNotNegative(batchSize, cs.batchSize);
         checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
@@ -5027,15 +5303,19 @@ abstract class AbstractStream<T> extends Stream<T> {
                         }
                     }
                 } finally {
-                    DataSourceUtil.releaseConnection(conn, ds);
+                    DataSourceUtil.releaseConnection(conn, dataSource);
                 }
             }
 
             private void init() {
-                initialized = true;
-
+                // Mark initialized only once the statement is prepared (see the Connection overload): a failed
+                // getConnection/prepareStatement is retried by a later next() instead of using a null statement. A
+                // connection kept after an unchecked prepareStatement failure is reused, not replaced and leaked.
                 try {
-                    conn = ds.getConnection();
+                    if (conn == null) {
+                        conn = dataSource.getConnection();
+                    }
+
                     stmt = conn.prepareStatement(insertSQL);
                 } catch (final SQLException e) {
                     final Connection failedConnection = conn;
@@ -5045,11 +5325,13 @@ abstract class AbstractStream<T> extends Stream<T> {
                             DataSourceUtil.closeQuietly(stmt);
                         }
                     } finally {
-                        DataSourceUtil.releaseConnection(failedConnection, ds);
+                        DataSourceUtil.releaseConnection(failedConnection, dataSource);
                     }
 
                     throw ExceptionUtil.toRuntimeException(e, true);
                 }
+
+                initialized = true;
             }
         };
 
@@ -5099,12 +5381,17 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             writer = IOUtil.newFileWriter(output);
             return persist(header, tail, toLine, writer);
+        } catch (final Throwable e) {
+            // Opening the file can fail before the Writer overload owns (and closes) this stream, and flushing/closing
+            // the writer can fail as well: neither close failure may replace the primary failure.
+            final Writer toClose = writer;
+            writer = null; // closed here, not again in the finally below
+            closeAfterFailure(toClose, e);
+            throw e;
         } finally {
             try {
                 IOUtil.close(writer);
             } finally {
-                // The writer can fail to open before the Writer overload gets a chance to
-                // consume (and close) this terminal stream.
                 close();
             }
         }
@@ -5123,6 +5410,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             bw = Objectory.createBufferedWriter(output);
             return persist(toLine, bw);
+        } catch (final Throwable e) {
+            // The writer is still flushed and recycled, but that must not replace the primary failure either.
+            final BufferedWriter toRecycle = bw;
+            bw = null; // recycled here, not again in the finally below
+            recycleAfterFailure(toRecycle, e);
+            closeAfterFailure(e);
+            throw e;
         } finally {
             try {
                 if (bw != null) {
@@ -5147,6 +5441,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             bw = Objectory.createBufferedWriter(output);
             return persist(header, tail, toLine, bw);
+        } catch (final Throwable e) {
+            // The writer is still flushed and recycled, but that must not replace the primary failure either.
+            final BufferedWriter toRecycle = bw;
+            bw = null; // recycled here, not again in the finally below
+            recycleAfterFailure(toRecycle, e);
+            closeAfterFailure(e);
+            throw e;
         } finally {
             try {
                 if (bw != null) {
@@ -5181,6 +5482,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
             long cnt = 0;
+            Throwable primaryFailure = null;
 
             try {
                 @SuppressWarnings("resource")
@@ -5204,17 +5506,17 @@ abstract class AbstractStream<T> extends Stream<T> {
                     bw.write(tail);
                     bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 }
+            } catch (final Throwable e) {
+                primaryFailure = e;
+                throw e;
             } finally {
-                try {
-                    bw.flush();
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
+                flushAndRecycle(bw, !isBufferedWriter, primaryFailure);
             }
 
             return cnt;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -5244,6 +5546,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             writer = IOUtil.newFileWriter(output);
             return persist(header, tail, write, writer);
+        } catch (final Throwable e) {
+            // Opening the file can fail before the Writer overload owns (and closes) this stream, and flushing/closing
+            // the writer can fail as well: neither close failure may replace the primary failure.
+            final Writer toClose = writer;
+            writer = null; // closed here, not again in the finally below
+            closeAfterFailure(toClose, e);
+            throw e;
         } finally {
             try {
                 IOUtil.close(writer);
@@ -5276,6 +5585,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             final boolean isBufferedWriter = IOUtil.isBufferedWriter(output);
             final Writer bw = isBufferedWriter ? output : Objectory.createBufferedWriter(output); //NOSONAR
             long cnt = 0;
+            Throwable primaryFailure = null;
 
             try {
                 @SuppressWarnings("resource")
@@ -5300,75 +5610,90 @@ abstract class AbstractStream<T> extends Stream<T> {
                     bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 }
 
+            } catch (final Throwable e) {
+                primaryFailure = e;
+                throw e;
             } finally {
-                try {
-                    bw.flush();
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle((BufferedWriter) bw);
-                    }
-                }
+                flushAndRecycle(bw, !isBufferedWriter, primaryFailure);
             }
 
             return cnt;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
     @Override
-    public long persist(final PreparedStatement stmt, final int batchSize, final long batchIntervalInMillis,
+    public long persist(final PreparedStatement statement, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
             throws IllegalStateException, IllegalArgumentException, SQLException {
         assertNotClosed();
 
-        checkArgNotNull(stmt, cs.PreparedStatement);
+        checkArgNotNull(statement, cs.statement);
         checkArgNotNegative(batchSize, cs.batchSize);
         checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
         checkArgNotNull(stmtSetter, cs.stmtSetter);
 
+        final boolean isBatchUsed = batchSize > 1;
+
         try {
             @SuppressWarnings("resource")
             final Iterator<T> iter = iteratorEx();
-            final boolean isBatchUsed = batchSize > 1;
             long cnt = 0;
 
             while (iter.hasNext()) {
-                stmtSetter.accept(iter.next(), stmt);
+                stmtSetter.accept(iter.next(), statement);
                 cnt++;
 
                 if (isBatchUsed) {
-                    stmt.addBatch();
+                    statement.addBatch();
 
                     if (cnt % batchSize == 0) {
-                        DataSourceUtil.executeBatch(stmt);
+                        DataSourceUtil.executeBatch(statement);
 
                         if (batchIntervalInMillis > 0) {
                             N.sleepUninterruptibly(batchIntervalInMillis);
                         }
                     }
                 } else {
-                    stmt.execute();
+                    statement.execute();
                 }
             }
 
             if (isBatchUsed && cnt % batchSize > 0) {
-                DataSourceUtil.executeBatch(stmt);
+                DataSourceUtil.executeBatch(statement);
             }
 
             return cnt;
+        } catch (final Throwable e) {
+            if (isBatchUsed) {
+                // The statement belongs to the caller: rows added by addBatch() but not yet executed would otherwise be
+                // inserted by the caller's next executeBatch() (e.g. on a retry). DataSourceUtil.executeBatch clears the
+                // batch on its own failure path for the same reason.
+                try {
+                    statement.clearBatch();
+                } catch (final Throwable e2) {
+                    e.addSuppressed(e2);
+                }
+            }
+
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
     @Override
-    public long persist(final Connection conn, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    public long persist(final Connection connection, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
             throws IllegalStateException, IllegalArgumentException, SQLException {
         assertNotClosed();
 
-        checkArgNotNull(conn, cs.Connection);
+        checkArgNotNull(connection, cs.connection);
         checkArgNotNull(insertSQL, cs.insertSQL);
         checkArgNotNegative(batchSize, cs.batchSize);
         checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
@@ -5377,9 +5702,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         PreparedStatement stmt = null;
 
         try {
-            stmt = conn.prepareStatement(insertSQL);
+            stmt = connection.prepareStatement(insertSQL);
 
             return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
+        } catch (final Throwable e) {
+            // prepareStatement can fail before persist(PreparedStatement, ...) owns (and closes) this stream.
+            closeAfterFailure(e);
+            throw e;
         } finally {
             try {
                 DataSourceUtil.closeQuietly(stmt);
@@ -5390,12 +5719,12 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public long persist(final javax.sql.DataSource ds, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
+    public long persist(final javax.sql.DataSource dataSource, final String insertSQL, final int batchSize, final long batchIntervalInMillis,
             final Throwables.BiConsumer<? super T, ? super PreparedStatement, SQLException> stmtSetter)
             throws IllegalStateException, IllegalArgumentException, SQLException {
         assertNotClosed();
 
-        checkArgNotNull(ds, cs.DataSource);
+        checkArgNotNull(dataSource, cs.dataSource);
         checkArgNotNull(insertSQL, cs.insertSQL);
         checkArgNotNegative(batchSize, cs.batchSize);
         checkArgNotNegative(batchIntervalInMillis, cs.batchIntervalInMillis);
@@ -5405,16 +5734,20 @@ abstract class AbstractStream<T> extends Stream<T> {
         PreparedStatement stmt = null;
 
         try {
-            conn = ds.getConnection();
+            conn = dataSource.getConnection();
             stmt = conn.prepareStatement(insertSQL);
 
             return persist(stmt, batchSize, batchIntervalInMillis, stmtSetter);
+        } catch (final Throwable e) {
+            // getConnection/prepareStatement can fail before persist(PreparedStatement, ...) owns (and closes) this stream.
+            closeAfterFailure(e);
+            throw e;
         } finally {
             try {
                 DataSourceUtil.closeQuietly(stmt);
             } finally {
                 try {
-                    DataSourceUtil.releaseConnection(conn, ds);
+                    DataSourceUtil.releaseConnection(conn, dataSource);
                 } finally {
                     close();
                 }
@@ -5433,6 +5766,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             writer = IOUtil.newFileWriter(output);
             return persistToCsv(writer);
+        } catch (final Throwable e) {
+            // Opening the file can fail before the Writer overload owns (and closes) this stream, and flushing/closing
+            // the writer can fail as well: neither close failure may replace the primary failure.
+            final Writer toClose = writer;
+            writer = null; // closed here, not again in the finally below
+            closeAfterFailure(toClose, e);
+            throw e;
         } finally {
             try {
                 IOUtil.close(writer);
@@ -5455,6 +5795,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             writer = IOUtil.newFileWriter(output);
             return persistToCsv(headers, writer);
+        } catch (final Throwable e) {
+            // Opening the file can fail before the Writer overload owns (and closes) this stream, and flushing/closing
+            // the writer can fail as well: neither close failure may replace the primary failure.
+            final Writer toClose = writer;
+            writer = null; // closed here, not again in the finally below
+            closeAfterFailure(toClose, e);
+            throw e;
         } finally {
             try {
                 IOUtil.close(writer);
@@ -5475,6 +5822,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             bw = Objectory.createBufferedWriter(output);
             return persistToCsv(bw);
+        } catch (final Throwable e) {
+            // The writer is still flushed and recycled, but that must not replace the primary failure either.
+            final BufferedWriter toRecycle = bw;
+            bw = null; // recycled here, not again in the finally below
+            recycleAfterFailure(toRecycle, e);
+            closeAfterFailure(e);
+            throw e;
         } finally {
             try {
                 if (bw != null) {
@@ -5498,6 +5852,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             bw = Objectory.createBufferedWriter(output);
             return persistToCsv(headers, bw);
+        } catch (final Throwable e) {
+            // The writer is still flushed and recycled, but that must not replace the primary failure either.
+            final BufferedWriter toRecycle = bw;
+            bw = null; // recycled here, not again in the finally below
+            recycleAfterFailure(toRecycle, e);
+            closeAfterFailure(e);
+            throw e;
         } finally {
             try {
                 if (bw != null) {
@@ -5543,6 +5904,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             long cnt = 0;
             T next = null;
             Class<?> cls = null;
+            Throwable primaryFailure = null;
 
             try {
                 @SuppressWarnings("resource")
@@ -5598,13 +5960,37 @@ abstract class AbstractStream<T> extends Stream<T> {
                             CsvUtil.writeField(bw, propInfo.jsonXmlType, propInfo.getPropValue(next));
                         }
 
+                        // A later row may be of another bean class (e.g. sibling subclasses in a Stream<Animal>), so the
+                        // header properties are resolved per row class - each row is read through its own class's
+                        // accessors - and a row is rejected only if its class lacks a header property.
+                        final Class<?> firstCls = cls;
+                        Map<Class<?>, PropInfo[]> propInfosByClass = null;
+                        Class<?> rowCls = cls;
+                        PropInfo[] rowPropInfos = propInfos;
+
                         while (iter.hasNext()) {
-                            next = iter.next();
+                            next = checkCsvRowType(iter.next(), Object.class, cnt + 1);
+
+                            if (next.getClass() != rowCls) {
+                                rowCls = next.getClass();
+
+                                if (propInfosByClass == null) {
+                                    propInfosByClass = new HashMap<>();
+                                    propInfosByClass.put(firstCls, propInfos);
+                                }
+
+                                rowPropInfos = propInfosByClass.get(rowCls);
+
+                                if (rowPropInfos == null) {
+                                    rowPropInfos = getCsvBeanRowPropInfos(rowCls, headers, firstCls, cnt + 1);
+                                    propInfosByClass.put(rowCls, rowPropInfos);
+                                }
+                            }
 
                             bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
                             for (int i = 0; i < headSize; i++) {
-                                propInfo = propInfos[i];
+                                propInfo = rowPropInfos[i];
 
                                 if (i > 0) {
                                     bw.write(separator);
@@ -5645,7 +6031,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                         }
 
                         while (iter.hasNext()) {
-                            row = (Map<Object, Object>) iter.next();
+                            row = (Map<Object, Object>) checkCsvRowType(iter.next(), Map.class, cnt + 1);
 
                             bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
@@ -5675,6 +6061,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                         bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
+                        checkCsvRowSize(row.size(), headSize, cnt);
+
                         Iterator<Object> rowIter = row.iterator();
 
                         for (int i = 0; i < headSize; i++) {
@@ -5686,7 +6074,8 @@ abstract class AbstractStream<T> extends Stream<T> {
                         }
 
                         while (iter.hasNext()) {
-                            row = (Collection<Object>) iter.next();
+                            row = (Collection<Object>) checkCsvRowType(iter.next(), Collection.class, cnt + 1);
+                            checkCsvRowSize(row.size(), headSize, cnt + 1);
                             rowIter = row.iterator();
 
                             bw.write(IOUtil.LINE_SEPARATOR_UNIX);
@@ -5715,6 +6104,8 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                         bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
+                        checkCsvRowSize(row.length, headSize, cnt);
+
                         for (int i = 0; i < headSize; i++) {
                             if (i > 0) {
                                 bw.write(separator);
@@ -5724,7 +6115,8 @@ abstract class AbstractStream<T> extends Stream<T> {
                         }
 
                         while (iter.hasNext()) {
-                            row = (Object[]) iter.next();
+                            row = (Object[]) checkCsvRowType(iter.next(), Object[].class, cnt + 1);
+                            checkCsvRowSize(row.length, headSize, cnt + 1);
 
                             bw.write(IOUtil.LINE_SEPARATOR_UNIX);
 
@@ -5755,19 +6147,89 @@ abstract class AbstractStream<T> extends Stream<T> {
                         CsvUtil.writeField(bw, null, headers.get(i));
                     }
                 }
+            } catch (final Throwable e) {
+                primaryFailure = e;
+                throw e;
             } finally {
-                try {
-                    bw.flush();
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle(bw);
-                    }
-                }
+                flushAndRecycle(bw, !isBufferedWriter, primaryFailure);
             }
 
             return cnt;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
+        }
+    }
+
+    /**
+     * Resolves the header properties for a bean CSV row whose class differs from the first row's.
+     *
+     * @param rowCls the class of the row
+     * @param headers the CSV headers (property names)
+     * @param firstCls the class of the first row, for the message
+     * @param rowNum the 1-based position of the row among the data rows
+     * @return the property of {@code rowCls} for each header, in header order
+     * @throws IllegalArgumentException if {@code rowCls} is not a bean class or lacks a header property
+     */
+    private static PropInfo[] getCsvBeanRowPropInfos(final Class<?> rowCls, final List<Object> headers, final Class<?> firstCls, final long rowNum)
+            throws IllegalArgumentException {
+        if (!Beans.isBeanClass(rowCls)) {
+            throw new IllegalArgumentException("CSV row " + rowNum + " is a " + ClassUtil.getCanonicalClassName(rowCls) + ", but the first row is a bean ("
+                    + ClassUtil.getCanonicalClassName(firstCls) + "); every row must be a bean that has all header properties");
+        }
+
+        final BeanInfo beanInfo = ParserUtil.getBeanInfo(rowCls);
+        final int headSize = headers.size();
+        final PropInfo[] propInfos = new PropInfo[headSize];
+
+        for (int i = 0; i < headSize; i++) {
+            propInfos[i] = beanInfo.getPropInfo(headers.get(i).toString());
+
+            if (propInfos[i] == null) {
+                throw new IllegalArgumentException("CSV row " + rowNum + " is a " + ClassUtil.getCanonicalClassName(rowCls) + ", which has no property '"
+                        + headers.get(i) + "' (a CSV header)");
+            }
+        }
+
+        return propInfos;
+    }
+
+    /**
+     * Validates a CSV data row after the first one: it must be non-null and of the same kind as the first row
+     * (the header row and the column extraction are derived from the first row). Bean rows are only checked for
+     * {@code null} here ({@code expectedType} {@code Object}); their properties are checked per row class.
+     *
+     * @param row the row
+     * @param expectedType {@code Map}/{@code Collection}/{@code Object[]}, or {@code Object} for bean rows
+     * @param rowNum the 1-based position of the row among the data rows
+     * @return {@code row}
+     * @throws IllegalArgumentException if {@code row} is {@code null} or not an instance of {@code expectedType}
+     */
+    private static <R> R checkCsvRowType(final R row, final Class<?> expectedType, final long rowNum) throws IllegalArgumentException {
+        if (row == null) {
+            throw new IllegalArgumentException("CSV row " + rowNum + " is null; null rows are not supported for CSV format");
+        } else if (!expectedType.isInstance(row)) {
+            throw new IllegalArgumentException("CSV row " + rowNum + " is a " + ClassUtil.getCanonicalClassName(row.getClass()) + ", but the first row is a "
+                    + ClassUtil.getCanonicalClassName(expectedType) + "; all rows must be of the same kind");
+        }
+
+        return row;
+    }
+
+    /**
+     * Validates that a {@code Collection}/{@code Object[]} CSV row has exactly one field per header, so that a
+     * longer row is not silently truncated and a shorter one does not fail with a raw iterator/index exception.
+     *
+     * @param rowSize the number of fields in the row
+     * @param headSize the number of headers
+     * @param rowNum the 1-based position of the row among the data rows
+     * @throws IllegalArgumentException if {@code rowSize != headSize}
+     */
+    private static void checkCsvRowSize(final int rowSize, final int headSize, final long rowNum) throws IllegalArgumentException {
+        if (rowSize != headSize) {
+            throw new IllegalArgumentException("CSV row " + rowNum + " has " + rowSize + " field(s), but there are " + headSize + " header(s)");
         }
     }
 
@@ -5782,6 +6244,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             writer = IOUtil.newFileWriter(output);
             return persistToJson(writer);
+        } catch (final Throwable e) {
+            // Opening the file can fail before the Writer overload owns (and closes) this stream, and flushing/closing
+            // the writer can fail as well: neither close failure may replace the primary failure.
+            final Writer toClose = writer;
+            writer = null; // closed here, not again in the finally below
+            closeAfterFailure(toClose, e);
+            throw e;
         } finally {
             try {
                 IOUtil.close(writer);
@@ -5802,6 +6271,13 @@ abstract class AbstractStream<T> extends Stream<T> {
         try {
             bw = Objectory.createBufferedWriter(output);
             return persistToJson(bw);
+        } catch (final Throwable e) {
+            // The writer is still flushed and recycled, but that must not replace the primary failure either.
+            final BufferedWriter toRecycle = bw;
+            bw = null; // recycled here, not again in the finally below
+            recycleAfterFailure(toRecycle, e);
+            closeAfterFailure(e);
+            throw e;
         } finally {
             try {
                 if (bw != null) {
@@ -5824,6 +6300,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             final BufferedJsonWriter bw = isBufferedWriter ? (BufferedJsonWriter) output : Objectory.createBufferedJsonWriter(output); // NOSONAR
 
             long cnt = 0;
+            Throwable primaryFailure = null;
 
             try {
                 @SuppressWarnings("resource")
@@ -5846,19 +6323,75 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write("]");
+            } catch (final Throwable e) {
+                primaryFailure = e;
+                throw e;
             } finally {
-                try {
-                    bw.flush();
-                } finally {
-                    if (!isBufferedWriter) {
-                        Objectory.recycle(bw);
-                    }
-                }
+                flushAndRecycle(bw, !isBufferedWriter, primaryFailure);
             }
 
             return cnt;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
+        }
+    }
+
+    /**
+     * Final flush (and, for a writer created by the terminal itself, recycle) of the {@code persist*(..., Writer)}
+     * terminals. It also runs after a failure of the write loop, so that the lines written before the failure still
+     * reach the target, but then a flush or recycle failure must not replace the primary failure (for example the
+     * {@code toLine} mapper's exception): it is added to {@code primaryFailure} as a suppressed exception instead, as
+     * {@code closeAfterFailure} does for a failing close handler.
+     *
+     * @param writer the writer to flush
+     * @param recycle whether {@code writer} was created by the terminal and must be returned to the {@code Objectory} pool
+     * @param primaryFailure the failure of the write loop, or {@code null} if it completed normally
+     * @throws IOException if {@code primaryFailure} is {@code null} and flushing fails
+     */
+    private static void flushAndRecycle(final Writer writer, final boolean recycle, final Throwable primaryFailure) throws IOException {
+        if (primaryFailure == null) {
+            try {
+                writer.flush();
+            } finally {
+                if (recycle) {
+                    Objectory.recycle((BufferedWriter) writer);
+                }
+            }
+
+            return;
+        }
+
+        try {
+            writer.flush();
+        } catch (final Throwable flushFailure) { // NOSONAR
+            addSuppressedTo(primaryFailure, flushFailure);
+        }
+
+        if (recycle) {
+            try {
+                Objectory.recycle((BufferedWriter) writer);
+            } catch (final Throwable recycleFailure) { // NOSONAR
+                addSuppressedTo(primaryFailure, recycleFailure);
+            }
+        }
+    }
+
+    private static void recycleAfterFailure(final BufferedWriter writer, final Throwable primaryFailure) {
+        if (writer != null) {
+            try {
+                Objectory.recycle(writer);
+            } catch (final Throwable recycleFailure) { // NOSONAR
+                addSuppressedTo(primaryFailure, recycleFailure);
+            }
+        }
+    }
+
+    private static void addSuppressedTo(final Throwable primaryFailure, final Throwable secondaryFailure) {
+        if (secondaryFailure != primaryFailure) {
+            primaryFailure.addSuppressed(secondaryFailure);
         }
     }
 
@@ -5899,8 +6432,8 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     /**
-     * Returns a mapper that turns each {@code List} produced by a chunking operation (such as {@code splitToList}
-     * or {@code slidingToList}) into a {@code Stream} over a snapshot copy of that list. The returned streams
+     * Returns a mapper that turns each {@code List} produced by a chunking operation (such as {@code split}
+     * or {@code sliding}) into a {@code Stream} over a snapshot copy of that list. The returned streams
      * inherit this stream's sorted flag and comparator and carry no close handlers.
      *
      * @return a function mapping a list of elements to a stream over a copy of that list
@@ -5917,23 +6450,23 @@ abstract class AbstractStream<T> extends Stream<T> {
     }
 
     @Override
-    public <U, R> Stream<R> crossJoin(final Collection<? extends U> b, final BiFunction<? super T, ? super U, ? extends R> func)
+    public <U, R> Stream<R> crossJoin(final Collection<? extends U> b, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return flatMap(t -> Stream.of(b).map(u -> func.apply(t, u)));
+        return flatMap(t -> Stream.of(b).map(u -> function.apply(t, u)));
     }
 
     @Override
-    public <U, R> Stream<R> crossJoin(final Stream<? extends U> b, final BiFunction<? super T, ? super U, ? extends R> func)
+    public <U, R> Stream<R> crossJoin(final Stream<? extends U> b, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' cannot be null");
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         //noinspection resource
         return flatMap(new Function<T, Stream<R>>() {
@@ -5942,14 +6475,14 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (c == null) {
-                    synchronized (b) {
+                    synchronized (this) { // lock the private function instance, never the caller's stream
                         if (c == null) {
                             c = (List<U>) b.toList();
                         }
                     }
                 }
 
-                return Stream.of(c).map(u -> func.apply(t, u));
+                return Stream.of(c).map(u -> function.apply(t, u));
             }
         }).onClose(newCloseHandler(b));
     }
@@ -5979,14 +6512,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, K, R> Stream<R> innerJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         return flatMap(new Function<T, Stream<R>>() {
             private volatile ListMultimap<K, U> rightKeyMap = null;
@@ -5994,40 +6527,40 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (rightKeyMap == null) {
-                    synchronized (rightKeyExtractor) {
+                    synchronized (this) { // lock the private function instance, never a caller-supplied object
                         if (rightKeyMap == null) {
                             rightKeyMap = ListMultimap.fromCollection(b, rightKeyExtractor);
                         }
                     }
                 }
 
-                return Stream.of(rightKeyMap.get(leftKeyExtractor.apply(t))).map(u -> func.apply(t, u));
+                return Stream.of(rightKeyMap.get(leftKeyExtractor.apply(t))).map(u -> function.apply(t, u));
             }
         });
     }
 
     @Override
     public <K, R> Stream<R> innerJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
-            final BiFunction<? super T, ? super T, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super T, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return innerJoin(b, keyMapper, keyMapper, func);
+        return innerJoin(b, keyMapper, keyMapper, function);
     }
 
     @Override
     public <U, K, R> Stream<R> innerJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' cannot be null");
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         //noinspection resource
         return flatMap(new Function<T, Stream<R>>() {
@@ -6036,14 +6569,14 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (rightKeyMap == null) {
-                    synchronized (rightKeyExtractor) {
+                    synchronized (this) { // lock the private function instance, never a caller-supplied object
                         if (rightKeyMap == null) {
                             rightKeyMap = ((Stream<U>) b).toMultimap(Fn.from(rightKeyExtractor));
                         }
                     }
                 }
 
-                return Stream.of(rightKeyMap.get(leftKeyExtractor.apply(t))).map(u -> func.apply(t, u));
+                return Stream.of(rightKeyMap.get(leftKeyExtractor.apply(t))).map(u -> function.apply(t, u));
             }
         }).onClose(newCloseHandler(b));
     }
@@ -6061,14 +6594,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, R> Stream<R> innerJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate,
-            final BiFunction<? super T, ? super U, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super U, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(predicate, cs.predicate);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return flatMap(t -> Stream.of(b).filter(u -> predicate.test(t, u)).map(u -> func.apply(t, u)));
+        return flatMap(t -> Stream.of(b).filter(u -> predicate.test(t, u)).map(u -> function.apply(t, u)));
     }
 
     @Override
@@ -6096,14 +6629,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, K, R> Stream<R> fullJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final boolean isParallelStream = isParallel();
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -6115,7 +6648,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (rightKeyMap == null) {
-                    synchronized (rightKeyExtractor) {
+                    synchronized (this) { // lock the private function instance, never a caller-supplied object
                         if (rightKeyMap == null) {
                             rightKeyMap = ListMultimap.fromCollection(b, rightKeyExtractor);
                         }
@@ -6124,7 +6657,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 final List<U> values = rightKeyMap.get(leftKeyExtractor.apply(t));
 
-                return N.isEmpty(values) ? Stream.of(func.apply(t, null)) : Stream.of(values).map(u -> {
+                return N.isEmpty(values) ? Stream.of(function.apply(t, null)) : Stream.of(values).map(u -> {
                     if (isParallelStream) {
                         synchronized (joinedRights) {
                             joinedRights.put(u, u);
@@ -6133,34 +6666,34 @@ abstract class AbstractStream<T> extends Stream<T> {
                         joinedRights.put(u, u);
                     }
 
-                    return func.apply(t, u);
+                    return function.apply(t, u);
                 });
             }
-        }).append(Stream.of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply(null, u)));
+        }).append(Stream.of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> function.apply(null, u)));
     }
 
     @Override
     public <K, R> Stream<R> fullJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
-            final BiFunction<? super T, ? super T, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super T, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return fullJoin(b, keyMapper, keyMapper, func);
+        return fullJoin(b, keyMapper, keyMapper, function);
     }
 
     @Override
     public <U, K, R> Stream<R> fullJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' cannot be null");
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final boolean isParallelStream = isParallel();
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -6173,7 +6706,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (rightKeyMap == null) {
-                    synchronized (rightKeyExtractor) {
+                    synchronized (this) { // lock the private function instance, never a caller-supplied object
                         if (rightKeyMap == null) {
                             final List<U> c = ((Stream<U>) b).toList();
                             rightKeyMap = ListMultimap.fromCollection(c, rightKeyExtractor);
@@ -6184,7 +6717,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 final List<U> values = rightKeyMap.get(leftKeyExtractor.apply(t));
 
-                return N.isEmpty(values) ? Stream.of(func.apply(t, null)) : Stream.of(values).map(u -> {
+                return N.isEmpty(values) ? Stream.of(function.apply(t, null)) : Stream.of(values).map(u -> {
                     if (isParallelStream) {
                         synchronized (joinedRights) {
                             joinedRights.put(u, u);
@@ -6193,15 +6726,16 @@ abstract class AbstractStream<T> extends Stream<T> {
                         joinedRights.put(u, u);
                     }
 
-                    return func.apply(t, u);
+                    return function.apply(t, u);
                 });
             }
-        }).append(Stream.defer(() -> {
+        }).append(deferTail(() -> {
             // The right side is materialized lazily by the mapper; when this (left) stream was empty
-            // the mapper never ran, so consume b here to keep the documented join semantics.
+            // the mapper never ran, so consume b here to keep the documented join semantics. Built only when
+            // traversal reaches the tail (see deferTail): closing the result early does not consume b.
             final List<U> rights = holder.value() != null ? holder.value() : ((Stream<U>) b).toList();
 
-            return Stream.of(rights).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply(null, u));
+            return Stream.of(rights).filter(u -> !joinedRights.containsKey(u)).map(u -> function.apply(null, u));
         })).onClose(newCloseHandler(b));
     }
 
@@ -6218,12 +6752,12 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, R> Stream<R> fullJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate,
-            final BiFunction<? super T, ? super U, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super U, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(predicate, cs.predicate);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final boolean isParallelStream = isParallel();
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -6238,9 +6772,9 @@ abstract class AbstractStream<T> extends Stream<T> {
                 joinedRights.put(u, u);
             }
 
-            return (R) func.apply(t, u);
-        }).appendIfEmpty(() -> Stream.of(t).map(tt -> func.apply(t, null))))
-                .append(Stream.of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply(null, u)));
+            return (R) function.apply(t, u);
+        }).appendIfEmpty(() -> Stream.of(t).map(tt -> function.apply(t, null))))
+                .append(Stream.of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> function.apply(null, u)));
     }
 
     @Override
@@ -6268,14 +6802,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, K, R> Stream<R> leftJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         return flatMap(new Function<T, Stream<R>>() {
             private volatile ListMultimap<K, U> rightKeyMap = null;
@@ -6283,7 +6817,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (rightKeyMap == null) {
-                    synchronized (rightKeyExtractor) {
+                    synchronized (this) { // lock the private function instance, never a caller-supplied object
                         if (rightKeyMap == null) {
                             rightKeyMap = ListMultimap.fromCollection(b, rightKeyExtractor);
                         }
@@ -6292,33 +6826,33 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 final List<U> values = rightKeyMap.get(leftKeyExtractor.apply(t));
 
-                return N.isEmpty(values) ? Stream.of(func.apply(t, null)) : Stream.of(values).map(u -> func.apply(t, u));
+                return N.isEmpty(values) ? Stream.of(function.apply(t, null)) : Stream.of(values).map(u -> function.apply(t, u));
             }
         });
     }
 
     @Override
     public <K, R> Stream<R> leftJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
-            final BiFunction<? super T, ? super T, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super T, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return leftJoin(b, keyMapper, keyMapper, func);
+        return leftJoin(b, keyMapper, keyMapper, function);
     }
 
     @Override
     public <U, K, R> Stream<R> leftJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' cannot be null");
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         //noinspection resource
         return flatMap(new Function<T, Stream<R>>() {
@@ -6327,7 +6861,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (rightKeyMap == null) {
-                    synchronized (rightKeyExtractor) {
+                    synchronized (this) { // lock the private function instance, never a caller-supplied object
                         if (rightKeyMap == null) {
                             rightKeyMap = ((Stream<U>) b).toMultimap(Fn.from(rightKeyExtractor));
                         }
@@ -6336,7 +6870,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 final List<U> values = rightKeyMap.get(leftKeyExtractor.apply(t));
 
-                return N.isEmpty(values) ? Stream.of(func.apply(t, null)) : Stream.of(values).map(u -> func.apply(t, u));
+                return N.isEmpty(values) ? Stream.of(function.apply(t, null)) : Stream.of(values).map(u -> function.apply(t, u));
             }
         }).onClose(newCloseHandler(b));
     }
@@ -6354,17 +6888,17 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, R> Stream<R> leftJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate,
-            final BiFunction<? super T, ? super U, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super U, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(predicate, cs.predicate);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         return flatMap(t -> Stream.of(b)
                 .filter(u -> predicate.test(t, u))
-                .map(u -> (R) func.apply(t, u))
-                .appendIfEmpty(() -> Stream.of(t).map(tt -> func.apply(t, null))));
+                .map(u -> (R) function.apply(t, u))
+                .appendIfEmpty(() -> Stream.of(t).map(tt -> function.apply(t, null))));
     }
 
     @Override
@@ -6392,14 +6926,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, K, R> Stream<R> rightJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final boolean isParallelStream = isParallel();
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -6411,7 +6945,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (rightKeyMap == null) {
-                    synchronized (rightKeyExtractor) {
+                    synchronized (this) { // lock the private function instance, never a caller-supplied object
                         if (rightKeyMap == null) {
                             rightKeyMap = ListMultimap.fromCollection(b, rightKeyExtractor);
                         }
@@ -6427,34 +6961,34 @@ abstract class AbstractStream<T> extends Stream<T> {
                         joinedRights.put(u, u);
                     }
 
-                    return func.apply(t, u);
+                    return function.apply(t, u);
                 });
             }
-        }).append(Stream.of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply(null, u)));
+        }).append(Stream.of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> function.apply(null, u)));
     }
 
     @Override
     public <K, R> Stream<R> rightJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
-            final BiFunction<? super T, ? super T, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super T, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return rightJoin(b, keyMapper, keyMapper, func);
+        return rightJoin(b, keyMapper, keyMapper, function);
     }
 
     @Override
     public <U, K, R> Stream<R> rightJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super U, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' cannot be null");
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final boolean isParallelStream = isParallel();
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -6467,7 +7001,7 @@ abstract class AbstractStream<T> extends Stream<T> {
             @Override
             public Stream<R> apply(final T t) {
                 if (rightKeyMap == null) {
-                    synchronized (rightKeyExtractor) {
+                    synchronized (this) { // lock the private function instance, never a caller-supplied object
                         if (rightKeyMap == null) {
                             final List<U> c = ((Stream<U>) b).toList();
                             rightKeyMap = ListMultimap.fromCollection(c, rightKeyExtractor);
@@ -6485,15 +7019,16 @@ abstract class AbstractStream<T> extends Stream<T> {
                         joinedRights.put(u, u);
                     }
 
-                    return func.apply(t, u);
+                    return function.apply(t, u);
                 });
             }
-        }).append(Stream.defer(() -> {
+        }).append(deferTail(() -> {
             // The right side is materialized lazily by the mapper; when this (left) stream was empty
-            // the mapper never ran, so consume b here to keep the documented join semantics.
+            // the mapper never ran, so consume b here to keep the documented join semantics. Built only when
+            // traversal reaches the tail (see deferTail): closing the result early does not consume b.
             final List<U> rights = holder.value() != null ? holder.value() : ((Stream<U>) b).toList();
 
-            return Stream.of(rights).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply(null, u));
+            return Stream.of(rights).filter(u -> !joinedRights.containsKey(u)).map(u -> function.apply(null, u));
         })).onClose(newCloseHandler(b));
     }
 
@@ -6510,12 +7045,12 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, R> Stream<R> rightJoin(final Collection<? extends U> b, final BiPredicate<? super T, ? super U> predicate,
-            final BiFunction<? super T, ? super U, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super U, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(predicate, cs.predicate);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final boolean isParallelStream = isParallel();
         final Map<U, U> joinedRights = new IdentityHashMap<>();
@@ -6530,8 +7065,8 @@ abstract class AbstractStream<T> extends Stream<T> {
                 joinedRights.put(u, u);
             }
 
-            return (R) func.apply(t, u);
-        })).append(Stream.of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> func.apply(null, u)));
+            return (R) function.apply(t, u);
+        })).append(Stream.of(b).filter(u -> !joinedRights.containsKey(u)).map(u -> function.apply(null, u)));
     }
 
     @Override
@@ -6559,14 +7094,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, K, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super List<U>, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super List<U>, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final Function<T, R> mapper = new Function<>() {
             private volatile boolean initialized = false;
@@ -6581,7 +7116,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 // Local, not a field: this mapper instance is shared across parallel worker threads.
                 final List<U> val = map.get(leftKeyExtractor.apply(t));
 
-                return func.apply(t, Objects.requireNonNullElseGet(val, Suppliers.ofList()));
+                return function.apply(t, Objects.requireNonNullElseGet(val, Suppliers.ofList()));
             }
 
             private void init() {
@@ -6589,7 +7124,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     synchronized (this) {
                         if (!initialized) {
                             // map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor()).groupTo(rightKeyExtractor);   // TODO may not be necessary.
-                            map = Stream.<U> of(b).groupTo(Fn.from(rightKeyExtractor));
+                            map = groupRightSide(b.iterator(), rightKeyExtractor, Collectors.<U> toList());
                             initialized = true;
                         }
                     }
@@ -6602,26 +7137,26 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, R> Stream<R> groupJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
-            final BiFunction<? super T, ? super List<T>, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super List<T>, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return groupJoin(b, keyMapper, keyMapper, func);
+        return groupJoin(b, keyMapper, keyMapper, function);
     }
 
     @Override
     public <U, K, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
-            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super List<U>, ? extends R> func)
+            final Function<? super U, ? extends K> rightKeyExtractor, final BiFunction<? super T, ? super List<U>, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' cannot be null");
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final Function<T, R> mapper = new Function<>() {
             private volatile boolean initialized = false;
@@ -6636,7 +7171,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 // Local, not a field: this mapper instance is shared across parallel worker threads.
                 final List<U> val = map.get(leftKeyExtractor.apply(t));
 
-                return func.apply(t, Objects.requireNonNullElseGet(val, Suppliers.ofList()));
+                return function.apply(t, Objects.requireNonNullElseGet(val, Suppliers.ofList()));
             }
 
             private void init() {
@@ -6647,12 +7182,12 @@ abstract class AbstractStream<T> extends Stream<T> {
                         synchronized (this) {
                             if (!initialized) {
                                 // map = Stream.of(b).parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor()).groupTo(rightKeyExtractor);   // TODO may not be necessary.
-                                map = ((Stream<U>) b).groupTo(Fn.from(rightKeyExtractor));
+                                map = groupRightSide((Stream<U>) b, rightKeyExtractor, Collectors.<U> toList());
                                 initialized = true;
                             }
                         }
                     } else {
-                        map = ((Stream<U>) b).groupTo(Fn.from(rightKeyExtractor));
+                        map = groupRightSide((Stream<U>) b, rightKeyExtractor, Collectors.<U> toList());
                         initialized = true;
                     }
                 }
@@ -6680,14 +7215,14 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor, final BinaryOperator<U> mergeFunction,
-            final BiFunction<? super T, ? super U, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super U, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final Function<T, R> mapper = new Function<>() {
             private volatile boolean initialized = false;
@@ -6704,7 +7239,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 // null), so a containsKey() probe would only cost a second lookup.
                 final U val = map.get(leftKeyExtractor.apply(t));
 
-                return func.apply(t, val);
+                return function.apply(t, val);
             }
 
             private void init() {
@@ -6738,14 +7273,14 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor, final BinaryOperator<U> mergeFunction,
-            final BiFunction<? super T, ? super U, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super U, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' cannot be null");
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
         checkArgNotNull(mergeFunction, cs.mergeFunction);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final Function<T, R> mapper = new Function<>() {
             private volatile boolean initialized = false;
@@ -6762,7 +7297,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                 // null), so a containsKey() probe would only cost a second lookup.
                 final U val = map.get(leftKeyExtractor.apply(t));
 
-                return func.apply(t, val);
+                return function.apply(t, val);
             }
 
             private void init() {
@@ -6810,14 +7345,14 @@ abstract class AbstractStream<T> extends Stream<T> {
     @Override
     public <U, K, D, R> Stream<R> groupJoin(final Collection<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor, final Collector<? super U, ?, D> downstream,
-            final BiFunction<? super T, ? super D, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super D, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
         checkArgNotNull(downstream, cs.downstream);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final Function<T, R> mapper = new Function<>() {
             private volatile boolean initialized = false;
@@ -6836,9 +7371,9 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 if (val == null && !map.containsKey(key)) {
                     //noinspection resource
-                    return func.apply(t, Stream.<U> empty().collect(downstream));
+                    return function.apply(t, Stream.<U> empty().collect(downstream));
                 } else {
-                    return func.apply(t, val);
+                    return function.apply(t, val);
                 }
             }
 
@@ -6853,13 +7388,13 @@ abstract class AbstractStream<T> extends Stream<T> {
                                 //            .parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor())
                                 //            .toMap(rightKeyExtractor, Fn.<U> identity(), downstream);   // TODO may not be necessary.
 
-                                map = Stream.of(b).groupTo(Fn.from(rightKeyExtractor), Fn.<U> identity(), downstream);
+                                map = groupRightSide(b.iterator(), rightKeyExtractor, downstream);
 
                                 initialized = true;
                             }
                         }
                     } else {
-                        map = Stream.of(b).groupTo(Fn.from(rightKeyExtractor), Fn.<U> identity(), downstream);
+                        map = groupRightSide(b.iterator(), rightKeyExtractor, downstream);
 
                         initialized = true;
                     }
@@ -6883,28 +7418,27 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <K, D, R> Stream<R> groupJoin(final Collection<? extends T> b, final Function<? super T, ? extends K> keyMapper,
-            final Collector<? super T, ?, D> downstream, final BiFunction<? super T, ? super D, ? extends R> func)
+            final Collector<? super T, ?, D> downstream, final BiFunction<? super T, ? super D, ? extends R> function)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, cs.b);
         checkArgNotNull(keyMapper, cs.keyMapper);
-        checkArgNotNull(func, cs.func);
 
-        return groupJoin(b, keyMapper, keyMapper, downstream, func);
+        return groupJoin(b, keyMapper, keyMapper, downstream, function);
     }
 
     @Override
     public <U, K, D, R> Stream<R> groupJoin(final Stream<? extends U> b, final Function<? super T, ? extends K> leftKeyExtractor,
             final Function<? super U, ? extends K> rightKeyExtractor, final Collector<? super U, ?, D> downstream,
-            final BiFunction<? super T, ? super D, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super D, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "stream 'b' cannot be null");
         checkArgNotNull(leftKeyExtractor, cs.leftKeyExtractor);
         checkArgNotNull(rightKeyExtractor, cs.rightKeyExtractor);
         checkArgNotNull(downstream, cs.downstream);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final Function<T, R> mapper = new Function<>() {
             private volatile boolean initialized = false;
@@ -6923,9 +7457,9 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 if (val == null && !map.containsKey(key)) {
                     //noinspection resource
-                    return func.apply(t, Stream.<U> empty().collect(downstream));
+                    return function.apply(t, Stream.<U> empty().collect(downstream));
                 } else {
-                    return func.apply(t, val);
+                    return function.apply(t, val);
                 }
             }
 
@@ -6940,13 +7474,13 @@ abstract class AbstractStream<T> extends Stream<T> {
                                 //            .parallel(ps.maxThreadNum(), ps.splitStrategy(), ps.asyncExecutor())
                                 //            .toMap(rightKeyExtractor, Fn.<U> identity(), downstream);   // TODO may not be necessary.
 
-                                map = b.groupTo(Fn.from(rightKeyExtractor), Fn.<U> identity(), downstream);
+                                map = groupRightSide((Stream<U>) b, rightKeyExtractor, downstream);
 
                                 initialized = true;
                             }
                         }
                     } else {
-                        map = b.groupTo(Fn.from(rightKeyExtractor), Fn.<U> identity(), downstream);
+                        map = groupRightSide((Stream<U>) b, rightKeyExtractor, downstream);
 
                         initialized = true;
                     }
@@ -6956,6 +7490,112 @@ abstract class AbstractStream<T> extends Stream<T> {
 
         //noinspection resource
         return map(mapper).onClose(newCloseHandler(b));
+    }
+
+    /**
+     * Returns a stream whose elements are those of the stream built by {@code supplier}, built on first traversal.
+     * Used for the tails that {@code fullJoin}/{@code rightJoin(Stream, ..)} and {@code joinByRange(..,
+     * mapperForUnJoinedElements)} append after the joined elements.
+     *
+     * <p>Unlike {@link Stream#defer(Supplier)}, whose close handler invokes the supplier so that a never-traversed
+     * supplied stream can still be closed, closing this stream never invokes {@code supplier}: the tail suppliers
+     * have side effects (they drain the right-hand source, or call the user's unjoined-elements mapper), so closing
+     * the join result early, {@code limit(0)}, or a failure of the left stream must not run them - that drained
+     * {@code b} for nothing and let a secondary failure replace the real one. The stream built by a traversal is
+     * closed with this stream (a mapper-supplied stream may carry close handlers), provided it was built before the
+     * close started: a close from another thread that races the build may miss it. Sources such as {@code b} keep
+     * their own close handlers on the join result, so they are closed exactly once either way.
+     *
+     * @param <R> the element type
+     * @param supplier builds the tail stream; may return {@code null} for an empty tail
+     * @return a lazily built stream that closes the built stream, if any, when closed
+     */
+    static <R> Stream<R> deferTail(final Supplier<? extends Stream<? extends R>> supplier) {
+        // The tail may be built on a parallel worker thread and closed on the caller's thread. Known window:
+        // a close() that runs while supplier.get() is still executing - only a cross-thread close of the join result
+        // during a running terminal - finds nothing built yet, and the tail built afterwards is not closed by this
+        // handler. The join terminals close the result after the traversal, so every single-threaded path closes the
+        // tail; only a mapper-supplied tail with its own close handlers could be affected.
+        final AtomicReference<Stream<? extends R>> built = new AtomicReference<>();
+
+        return Stream.<R> of(ObjIteratorEx.<R> defer(() -> {
+            final Stream<? extends R> s = supplier.get();
+            built.set(s);
+            return s == null ? ObjIteratorEx.<R> empty() : s.iteratorEx();
+        })).onClose(() -> {
+            @SuppressWarnings("resource")
+            final Stream<? extends R> s = built.get();
+
+            if (s != null) {
+                s.close();
+            }
+        });
+    }
+
+    /**
+     * Builds the right-side index of a {@code groupJoin} over a stream, closing {@code b} afterwards like the
+     * terminal {@code groupTo} this replaces did. A failure of the grouping (the right key extractor, the downstream
+     * collector or {@code b}'s own upstream) wins over a failing close handler of {@code b}, which is added to it as
+     * a suppressed exception.
+     *
+     * @see #groupRightSide(Iterator, Function, Collector)
+     */
+    static <U, K, D> Map<K, D> groupRightSide(final Stream<U> b, final Function<? super U, ? extends K> keyExtractor,
+            final Collector<? super U, ?, D> downstream) {
+        try {
+            return groupRightSide(b.iteratorEx(), keyExtractor, downstream);
+        } catch (final Throwable e) { // NOSONAR
+            // let the primary failure win over a close failure of b (LST/C-114 at a site the
+            // C-011 rewrite created); the innerJoin/leftJoin(Stream) paths get this from the terminal b.toList().
+            b.closeAfterFailure(e);
+            throw e;
+        } finally {
+            b.close();
+        }
+    }
+
+    /**
+     * Groups the right side of a {@code groupJoin} by key. Unlike {@code groupTo}, which rejects a {@code null} key,
+     * this accepts it: every {@code groupJoin} overload documents that keys use ordinary map equality, so a
+     * {@code null} right key must match a {@code null} left key (as it does in {@code innerJoin}/{@code leftJoin}).
+     *
+     * @param <U> the right element type
+     * @param <K> the key type
+     * @param <D> the downstream result type
+     * @param iterator the right-side elements
+     * @param keyExtractor extracts the join key of a right element; may return {@code null}
+     * @param downstream reduces the right elements sharing a key
+     * @return a {@code HashMap} from key to the reduced right elements
+     */
+    @SuppressWarnings("unchecked")
+    static <U, K, D> Map<K, D> groupRightSide(final Iterator<? extends U> iterator, final Function<? super U, ? extends K> keyExtractor,
+            final Collector<? super U, ?, D> downstream) {
+        final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
+        final BiConsumer<Object, ? super U> downstreamAccumulator = (BiConsumer<Object, ? super U>) downstream.accumulator();
+        final Map<K, Object> result = new HashMap<>();
+        K key = null;
+        Object container = null;
+        U next = null;
+
+        while (iterator.hasNext()) {
+            next = iterator.next();
+            key = keyExtractor.apply(next);
+
+            if ((container = result.get(key)) == null) {
+                container = downstreamSupplier.get();
+                result.put(key, container);
+            }
+
+            downstreamAccumulator.accept(container, next);
+        }
+
+        if (!downstream.characteristics().contains(Collector.Characteristics.IDENTITY_FINISH)) {
+            final Function<Object, Object> downstreamFinisher = (Function<Object, Object>) downstream.finisher();
+
+            result.replaceAll((k, v) -> downstreamFinisher.apply(v));
+        }
+
+        return (Map<K, D>) result;
     }
 
     @Override
@@ -7011,20 +7651,18 @@ abstract class AbstractStream<T> extends Stream<T> {
             final Collector<? super U, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(predicate, cs.predicate);
-
         return joinByRange(b, predicate, collector, Fn.pair());
     }
 
     @Override
     public <U, D, R> Stream<R> joinByRange(final Iterator<U> b, final BiPredicate<? super T, ? super U> predicate, final Collector<? super U, ?, D> collector,
-            final BiFunction<? super T, ? super D, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super D, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Iterator 'b' cannot be null");
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(collector, cs.collector);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
         final BiConsumer<Object, ? super U> accumulator = (BiConsumer<Object, ? super U>) collector.accumulator();
@@ -7043,7 +7681,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     if (iter.hasNext()) {
                         next = iter.next();
                     } else {
-                        return func.apply(t, finisher.apply(container));
+                        return function.apply(t, finisher.apply(container));
                     }
                 }
 
@@ -7058,7 +7696,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     }
                 }
 
-                return func.apply(t, finisher.apply(container));
+                return function.apply(t, finisher.apply(container));
             }
         };
 
@@ -7072,14 +7710,14 @@ abstract class AbstractStream<T> extends Stream<T> {
 
     @Override
     public <U, D, R> Stream<R> joinByRange(final Iterator<U> b, final BiPredicate<? super T, ? super U> predicate, final Collector<? super U, ?, D> collector,
-            final BiFunction<? super T, ? super D, ? extends R> func, final Function<Iterator<U>, Stream<R>> mapperForUnJoinedElements)
+            final BiFunction<? super T, ? super D, ? extends R> function, final Function<Iterator<U>, Stream<R>> mapperForUnJoinedElements)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Iterator 'b' cannot be null");
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(collector, cs.collector);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
         checkArgNotNull(mapperForUnJoinedElements, cs.mapperForUnJoinedElements);
 
         final Supplier<Object> supplier = (Supplier<Object>) collector.supplier();
@@ -7100,7 +7738,7 @@ abstract class AbstractStream<T> extends Stream<T> {
                     if (iter.hasNext()) {
                         next = iter.next();
                     } else {
-                        return func.apply(t, finisher.apply(container));
+                        return function.apply(t, finisher.apply(container));
                     }
                 }
 
@@ -7117,7 +7755,7 @@ abstract class AbstractStream<T> extends Stream<T> {
 
                 nextValueHolder.setValue(next);
 
-                return func.apply(t, finisher.apply(container));
+                return function.apply(t, finisher.apply(container));
             }
         };
 
@@ -7126,16 +7764,15 @@ abstract class AbstractStream<T> extends Stream<T> {
             return sequential().map(mapper)
                     // value == none also occurs when this (left) stream was empty and the mapper never
                     // ran: the untouched iterator must still be routed to mapperForUnJoinedElements.
-                    .append(Stream.defer(() -> nextValueHolder.value() == none ? (b.hasNext() ? mapperForUnJoinedElements.apply(b) : Stream.<R> empty())
+                    .append(deferTail(() -> nextValueHolder.value() == none ? (b.hasNext() ? mapperForUnJoinedElements.apply(b) : Stream.<R> empty())
                             : mapperForUnJoinedElements.apply(Iterators.concat(ObjIterator.of(nextValueHolder.value()), b))))
                     .parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
         } else {
             //noinspection resource
             // value == none also occurs when this (left) stream was empty and the mapper never
             // ran: the untouched iterator must still be routed to mapperForUnJoinedElements.
-            return map(mapper)
-                    .append(Stream.defer(() -> nextValueHolder.value() == none ? (b.hasNext() ? mapperForUnJoinedElements.apply(b) : Stream.<R> empty())
-                            : mapperForUnJoinedElements.apply(Iterators.concat(ObjIterator.of(nextValueHolder.value()), b))));
+            return map(mapper).append(deferTail(() -> nextValueHolder.value() == none ? (b.hasNext() ? mapperForUnJoinedElements.apply(b) : Stream.<R> empty())
+                    : mapperForUnJoinedElements.apply(Iterators.concat(ObjIterator.of(nextValueHolder.value()), b))));
         }
     }
 
@@ -7155,37 +7792,35 @@ abstract class AbstractStream<T> extends Stream<T> {
             final Collector<? super U, ?, R> collector) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(predicate, cs.predicate);
-
         return joinByRange(b, predicate, collector, Fn.pair());
     }
 
     @Override
     public <U, D, R> Stream<R> joinByRange(final Stream<U> b, final BiPredicate<? super T, ? super U> predicate, final Collector<? super U, ?, D> collector,
-            final BiFunction<? super T, ? super D, ? extends R> func) throws IllegalStateException, IllegalArgumentException {
+            final BiFunction<? super T, ? super D, ? extends R> function) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Stream 'b' cannot be null");
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(collector, cs.collector);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
 
-        return ((Stream<R>) joinByRange(b.iteratorEx(), predicate, collector, func)).onClose(newCloseHandler(b));
+        return ((Stream<R>) joinByRange(b.iteratorEx(), predicate, collector, function)).onClose(newCloseHandler(b));
     }
 
     @Override
     public <U, D, R> Stream<R> joinByRange(final Stream<U> b, final BiPredicate<? super T, ? super U> predicate, final Collector<? super U, ?, D> collector,
-            final BiFunction<? super T, ? super D, ? extends R> func, final Function<Iterator<U>, Stream<R>> mapperForUnJoinedElements)
+            final BiFunction<? super T, ? super D, ? extends R> function, final Function<Iterator<U>, Stream<R>> mapperForUnJoinedElements)
             throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
         checkArgNotNull(b, "Stream 'b' cannot be null");
         checkArgNotNull(predicate, cs.predicate);
         checkArgNotNull(collector, cs.collector);
-        checkArgNotNull(func, cs.func);
+        checkArgNotNull(function, cs.function);
         checkArgNotNull(mapperForUnJoinedElements, cs.mapperForUnJoinedElements);
 
-        return joinByRange(b.iteratorEx(), predicate, collector, func, mapperForUnJoinedElements).onClose(newCloseHandler(b));
+        return joinByRange(b.iteratorEx(), predicate, collector, function, mapperForUnJoinedElements).onClose(newCloseHandler(b));
     }
 
     @Override

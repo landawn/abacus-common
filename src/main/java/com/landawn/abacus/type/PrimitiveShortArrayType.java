@@ -58,8 +58,8 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * Class<short[]> clazz = type.javaType();
-     * System.out.println(clazz.getName());   // Output: [S
-     * System.out.println(clazz.isArray());   // Output: true
+     * System.out.println(clazz.getName());  // Output: [S
+     * System.out.println(clazz.isArray());  // Output: true
      * }</pre>
      *
      * @return the Class object for short[] type
@@ -94,8 +94,8 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * List<Type<?>> paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.size());          // Output: 1
-     * System.out.println(paramTypes.get(0).name());   // Output: short
+     * System.out.println(paramTypes.size());         // Output: 1
+     * System.out.println(paramTypes.get(0).name());  // Output: short
      * }</pre>
      *
      * @return an immutable list containing the primitive {@code short} Type that describes the elements of this array type
@@ -154,8 +154,8 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * <pre>{@code
      * Type<short[]> type = TypeFactory.getType(short[].class);
      * short[] array = type.valueOf("[1, 2, 3]");
-     * System.out.println(array.length);   // Output: 3
-     * System.out.println(array[0]);       // Output: 1
+     * System.out.println(array.length);  // Output: 3
+     * System.out.println(array[0]);      // Output: 1
      *
      * short[] emptyArray = type.valueOf("[]");
      * System.out.println(emptyArray.length);   // Output: 0
@@ -428,9 +428,9 @@ public final class PrimitiveShortArrayType extends AbstractPrimitiveArrayType<sh
      * short[] array1 = {1, 2, 3};
      * short[] array2 = {1, 2, 3};
      * short[] array3 = {1, 2, 4};
-     * System.out.println(type.equals(array1, array2));   // Output: true
-     * System.out.println(type.equals(array1, array3));   // Output: false
-     * System.out.println(type.equals(null, null));       // Output: true
+     * System.out.println(type.equals(array1, array2));  // Output: true
+     * System.out.println(type.equals(array1, array3));  // Output: false
+     * System.out.println(type.equals(null, null));      // Output: true
      * }</pre>
      *
      * @param x the first short array to compare

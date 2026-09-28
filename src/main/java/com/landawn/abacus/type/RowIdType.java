@@ -246,15 +246,15 @@ public class RowIdType extends AbstractType<RowId> {
      * type.set(stmt, 2, rowId);   // Set RowId at parameter index 2
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the RowId value to set as the parameter
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final RowId x) throws NullPointerException, SQLException {
-        stmt.setRowId(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final RowId x) throws NullPointerException, SQLException {
+        statement.setRowId(columnIndex, x);
     }
 
     /**
@@ -268,15 +268,15 @@ public class RowIdType extends AbstractType<RowId> {
      * type.set(stmt, "user_rowid", rowId);   // Set RowId by parameter name
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the RowId value to set as the parameter
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final RowId x) throws NullPointerException, SQLException {
-        stmt.setRowId(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final RowId x) throws NullPointerException, SQLException {
+        statement.setRowId(parameterName, x);
     }
 
     /**

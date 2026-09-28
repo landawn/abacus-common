@@ -44,8 +44,8 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = CharPredicate.IS_ZERO.test('\0');   // Returns true
-     * boolean result2 = CharPredicate.IS_ZERO.test('a');   // Returns false
+     * boolean result = CharPredicate.IS_ZERO.test('\0');  // Returns true
+     * boolean result2 = CharPredicate.IS_ZERO.test('a');  // Returns false
      * }</pre>
      *
      */
@@ -55,8 +55,8 @@ public interface CharPredicate extends Throwables.CharPredicate<RuntimeException
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = CharPredicate.NOT_ZERO.test('a');     // Returns true
-     * boolean result2 = CharPredicate.NOT_ZERO.test('\0');   // Returns false
+     * boolean result = CharPredicate.NOT_ZERO.test('a');    // Returns true
+     * boolean result2 = CharPredicate.NOT_ZERO.test('\0');  // Returns false
      * }</pre>
      *
      */

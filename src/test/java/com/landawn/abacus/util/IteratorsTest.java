@@ -2091,6 +2091,7 @@ public class IteratorsTest extends IteratorsTestSupport {
     public void testToSizeIterators_sourceEmptiedAfterCreation() {
         // Emptied before anything is pulled: both iterators obtain a fresh (empty) source iterator and must report
         // the shortfall with the standard message rather than letting the source's bare exception escape.
+        // repeatElementsToSize treats an emptied source like a shrunk one (C-322, 2026-09-24): hasNext() is false.
         final List<String> emptiedBeforeUse = new ArrayList<>(Arrays.asList("a", "b", "c"));
         final ObjIterator<String> cycleFromStart = Iterators.cycleToSize(emptiedBeforeUse, 6);
         final ObjIterator<String> repeatFromStart = Iterators.repeatElementsToSize(emptiedBeforeUse, 6);
@@ -2098,7 +2099,7 @@ public class IteratorsTest extends IteratorsTestSupport {
 
         assertTrue(cycleFromStart.hasNext());
         assertNotNull(assertThrows(NoSuchElementException.class, cycleFromStart::next).getMessage());
-        assertTrue(repeatFromStart.hasNext());
+        assertFalse(repeatFromStart.hasNext());
         assertNotNull(assertThrows(NoSuchElementException.class, repeatFromStart::next).getMessage());
 
         // cycleToSize re-reads the source once per round, so it hits the same guard mid-iteration.

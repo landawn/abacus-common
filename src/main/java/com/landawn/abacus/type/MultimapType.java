@@ -198,13 +198,14 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      *
      * @param x the {@code Multimap} object to convert, may be {@code null}
      * @return the JSON string representation of the {@code Multimap}
-     *         (e.g., {@code {"colors":["red","blue"],"sizes":["large"]}}),
+     *         (e.g., {@code {"colors": ["red", "blue"], "sizes": ["large"]}}),
      *         or {@code null} if the input is {@code null}
+     * @throws RuntimeException if a value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         return (x == null) ? null : Utils.jsonParser.serialize(x.toMap(), Utils.jsc);
     }
 
@@ -233,12 +234,13 @@ public class MultimapType<K, E, V extends Collection<E>, T extends Multimap<K, E
      * @param str the JSON string to parse; may be {@code null} or blank
      * @return the parsed {@code Multimap} object, or {@code null} if the input is {@code null} or blank
      * @throws ParsingException if {@code str} is not a well-formed JSON object text
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Multimap)
      */
     @MayReturnNull
     @Override
-    public T valueOf(final String str) throws ParsingException {
+    public T valueOf(final String str) throws ParsingException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }

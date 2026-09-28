@@ -1229,4 +1229,16 @@ public class DigestUtilTest extends TestBase {
         }
     }
 
+    @Test
+    public void testGetDigestNullAlgorithmThrowsIae() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> DigestUtil.getDigest((String) null));
+        assertTrue(e.getMessage().contains("algorithm"));
+    }
+
+    @Test
+    public void testGetDigestWithDefaultNullAlgorithmStillReturnsDefault() {
+        final MessageDigest fallback = DigestUtil.getSha256Digest();
+        assertTrue(DigestUtil.getDigest(null, fallback) == fallback);
+        assertFalse(DigestUtil.isAvailable(null));
+    }
 }

@@ -862,4 +862,26 @@ public class DeserializationConfigTest extends TestBase {
         assertEquals("n", bean.getName());
     }
 
+    // ---- deep review 2026-09-25 G007 begin ----
+    // G007-02: a null key (unquoted JSON null map key) must not reach BeanInfo.getPropInfo(null), which throws IAE
+    @Test
+    public void testGetValueType_nullKeyWithBeanValueTypes() {
+        final Type<Integer> intType = Type.of(Integer.class);
+        config.setValueTypesByBeanClass(Named.class);
+
+        assertNull(config.getValueType(null));
+        assertSame(intType, config.getValueType(null, intType));
+        assertEquals(String.class, config.getValueType("name").javaType());
+
+        // the map a JsonParser writes for a null key with quoteMapKey=false reads back under bean-based value types
+        final JsonParser jp = ParserFactory.createJsonParser();
+        final Map<String, Object> map = new HashMap<>();
+        map.put(null, 1);
+        map.put("name", "n");
+        final String json = jp.serialize(map, new JsonSerConfig().setQuoteMapKey(false));
+        final Map<String, Object> read = jp.deserialize(json, new JsonDeserConfig().setValueTypesByBeanClass(Named.class), Type.ofMap(String.class, Object.class));
+        assertEquals(map, read);
+    }
+    // ---- deep review 2026-09-25 G007 end ----
+
 }

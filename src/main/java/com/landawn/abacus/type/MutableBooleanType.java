@@ -161,18 +161,18 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BOOLEAN}) is set;
      * otherwise the wrapped boolean value is stored.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code MutableBoolean} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final MutableBoolean x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final MutableBoolean x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.BOOLEAN);
+            statement.setNull(columnIndex, Types.BOOLEAN);
         } else {
-            stmt.setBoolean(columnIndex, x.value());
+            statement.setBoolean(columnIndex, x.value());
         }
     }
 
@@ -181,18 +181,18 @@ public class MutableBooleanType extends AbstractType<MutableBoolean> {
      * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#BOOLEAN}) is set;
      * otherwise the wrapped boolean value is stored.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code MutableBoolean} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final MutableBoolean x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final MutableBoolean x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.BOOLEAN);
+            statement.setNull(parameterName, Types.BOOLEAN);
         } else {
-            stmt.setBoolean(parameterName, x.value());
+            statement.setBoolean(parameterName, x.value());
         }
     }
 

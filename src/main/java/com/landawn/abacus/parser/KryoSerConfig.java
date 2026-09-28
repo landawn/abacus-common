@@ -89,11 +89,11 @@ public class KryoSerConfig extends SerializationConfig<KryoSerConfig> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * KryoSerConfig config = new KryoSerConfig();
-     * config.setWriteClass(true);                 // returns this (config) for chaining
-     * boolean enabled = config.isWriteClass();    // returns true
+     * config.setWriteClass(true);               // returns this (config) for chaining
+     * boolean enabled = config.isWriteClass();  // returns true
      *
-     * config.setWriteClass(false);                // returns this (config) for chaining
-     * boolean disabled = config.isWriteClass();   // returns false (default)
+     * config.setWriteClass(false);               // returns this (config) for chaining
+     * boolean disabled = config.isWriteClass();  // returns false (default)
      * }</pre>
      *
      * @param writeClass {@code true} to write class information, {@code false} to omit it

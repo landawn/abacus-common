@@ -287,4 +287,18 @@ public class RangeTypeTest extends TestBase {
         assertNull(rangeType.valueOf(" "));
     }
 
+
+    @Test
+    public void testAppendToKeepsJsonQuotedStringEndpointsUnlikeRangeToString() throws IOException {
+        final Type<Range<String>> type = TypeFactory.getType("Range<String>");
+        final Range<String> range = Range.closed("a", "b");
+        final StringBuilder sb = new StringBuilder();
+
+        type.appendTo(sb, range);
+
+        assertEquals("[\"a\", \"b\"]", sb.toString());
+        assertEquals(type.stringOf(range), sb.toString());
+        assertNotEquals(range.toString(), sb.toString());
+        assertEquals(range, type.valueOf(sb.toString()));
+    }
 }

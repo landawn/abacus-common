@@ -190,12 +190,12 @@ public final class JsonMappers {
     }
 
     /**
-     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
+     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code length} is negative.
      * @throws IndexOutOfBoundsException if {@code offset} is negative or the range exceeds {@code json.length}.
      */
-    private static void checkByteRange(final byte[] json, final int offset, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
+    private static void checkByteRange(final byte[] json, final int offset, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(json, cs.json);
-        N.checkFromIndexSize(offset, len, json.length);
+        N.checkFromIndexSize(offset, length, json.length);
     }
 
     /**
@@ -680,20 +680,20 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the byte array containing JSON content
      * @param offset the offset in the array where JSON data starts
-     * @param len the number of bytes to read from the offset
+     * @param length the number of bytes to read from the offset
      * @param targetType the class of the object to deserialize to
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
+     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code length} is negative.
      * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
      * @throws RuntimeException if deserialization fails or the JSON is invalid
      * @see #fromJson(byte[], Class)
      */
-    public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType)
+    public static <T> T fromJson(final byte[] json, final int offset, final int length, final Class<? extends T> targetType)
             throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
-        checkByteRange(json, offset, len);
+        checkByteRange(json, offset, length);
 
         try {
-            return defaultJsonMapper.readValue(json, offset, len, targetType);
+            return defaultJsonMapper.readValue(json, offset, length, targetType);
         } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -859,11 +859,14 @@ public final class JsonMappers {
      * @param json the file containing JSON content
      * @param targetType the class of the object to deserialize to
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws RuntimeException if file cannot be read or JSON is invalid
      * @see #fromJson(File, Class, DeserializationConfig)
      * @see #fromJson(File, TypeReference)
      */
-    public static <T> T fromJson(final File json, final Class<? extends T> targetType) throws RuntimeException {
+    public static <T> T fromJson(final File json, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         try {
             return defaultJsonMapper.readValue(json, targetType);
         } catch (final IOException e) {
@@ -893,11 +896,15 @@ public final class JsonMappers {
      * @param targetType the class of the object to deserialize to
      * @param config the custom deserialization configuration; if {@code null}, uses default
      * @return the deserialized object; {@code null} if JSON contains "null"
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}
      * @throws RuntimeException if file cannot be read or JSON is invalid
      * @see #fromJson(File, Class)
      * @see DeserializationConfig
      */
-    public static <T> T fromJson(final File json, final Class<? extends T> targetType, final DeserializationConfig config) throws RuntimeException {
+    public static <T> T fromJson(final File json, final Class<? extends T> targetType, final DeserializationConfig config)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(targetType, cs.targetType);
+
         final JsonMapper jsonMapper = getJsonMapper(config);
 
         try {
@@ -1291,24 +1298,24 @@ public final class JsonMappers {
      * @param <T> the type of the object to deserialize to
      * @param json the byte array containing JSON content
      * @param offset the offset in the array where JSON data starts
-     * @param len the number of bytes to read from the offset
+     * @param length the number of bytes to read from the offset
      * @param targetType TypeReference capturing the generic type information
      * @return the deserialized object; {@code null} if JSON contains "null"
-     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}, or {@code len} is
+     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}, or {@code length} is
      *         negative.
      * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
      * @throws RuntimeException if deserialization fails or the JSON is invalid
      * @see TypeReference
      * @see #fromJson(byte[], int, int, Class)
      */
-    public static <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType)
+    public static <T> T fromJson(final byte[] json, final int offset, final int length, final TypeReference<? extends T> targetType)
             throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
-        checkByteRange(json, offset, len);
+        checkByteRange(json, offset, length);
 
         N.checkArgNotNull(targetType, cs.targetType);
 
         try {
-            return defaultJsonMapper.readValue(json, offset, len, targetType);
+            return defaultJsonMapper.readValue(json, offset, length, targetType);
         } catch (final IOException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -2240,19 +2247,19 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json byte array containing JSON data
          * @param offset the starting position in the array
-         * @param len the number of bytes to read
+         * @param length the number of bytes to read
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
-         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative.
+         * @throws IllegalArgumentException if {@code json} is {@code null} or {@code length} is negative.
          * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          */
-        public <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType)
+        public <T> T fromJson(final byte[] json, final int offset, final int length, final Class<? extends T> targetType)
                 throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
-            checkByteRange(json, offset, len);
+            checkByteRange(json, offset, length);
 
             try {
-                return jsonMapper.readValue(json, offset, len, targetType);
+                return jsonMapper.readValue(json, offset, length, targetType);
             } catch (final IOException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -2296,9 +2303,12 @@ public final class JsonMappers {
          * @param json the file containing JSON data
          * @param targetType the class of the target object
          * @return the deserialized object; {@code null} if JSON contains "null"
+         * @throws IllegalArgumentException if {@code targetType} is {@code null}
          * @throws RuntimeException wrapping any IOException that occurs during file reading or deserialization
          */
-        public <T> T fromJson(final File json, final Class<? extends T> targetType) throws RuntimeException {
+        public <T> T fromJson(final File json, final Class<? extends T> targetType) throws IllegalArgumentException, RuntimeException {
+            N.checkArgNotNull(targetType, cs.targetType);
+
             try {
                 return jsonMapper.readValue(json, targetType);
             } catch (final IOException e) {
@@ -2456,23 +2466,23 @@ public final class JsonMappers {
          * @param <T> the type of the object to deserialize to
          * @param json byte array containing JSON data
          * @param offset the starting position in the array
-         * @param len the number of bytes to read
+         * @param length the number of bytes to read
          * @param targetType TypeReference describing the target type
          * @return the deserialized object; {@code null} if JSON contains "null"
-         * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}, or {@code len}
+         * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}, or {@code length}
          *         is negative.
          * @throws IndexOutOfBoundsException if the requested segment is outside {@code json}
          * @throws RuntimeException wrapping any IOException that occurs during deserialization
          * @see TypeReference
          */
-        public <T> T fromJson(final byte[] json, final int offset, final int len, final TypeReference<? extends T> targetType)
+        public <T> T fromJson(final byte[] json, final int offset, final int length, final TypeReference<? extends T> targetType)
                 throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException {
-            checkByteRange(json, offset, len);
+            checkByteRange(json, offset, length);
 
             N.checkArgNotNull(targetType, cs.targetType);
 
             try {
-                return jsonMapper.readValue(json, offset, len, targetType);
+                return jsonMapper.readValue(json, offset, length, targetType);
             } catch (final IOException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }

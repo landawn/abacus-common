@@ -153,4 +153,12 @@ public class MultisetTypeTest extends TestBase {
         assertEquals(bean.getMs(), N.fromXml(xml, MultisetBean.class).getMs());
     }
 
+    @Test
+    public void testStringOfWritesSpaceSeparatedJsonObject() {
+        final Type<Multiset<String>> type = TypeFactory.getType("Multiset<String>");
+        final Multiset<String> multiset = N.newMultiset();
+        multiset.add("apple", 3);
+
+        assertEquals("{\"apple\": 3}", type.stringOf(multiset));
+    }
 }

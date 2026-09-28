@@ -467,4 +467,49 @@ public class PrimitiveCharArrayTypeTest extends TestBase {
         assertEquals(0, type.valueOf((Object) new SerialClob(new char[0])).length);
         assertArrayEquals(new char[] { 'a', 'b' }, type.valueOf((Object) new SerialClob(new char[] { 'a', 'b' })));
     }
+
+    // ---- perf review 2026-09-26 G015 begin ----
+    // G015-01: every char, alone and inside one array, serializes exactly as the escapeEcmaScript-per-char reference form
+    @Test
+    public void testStringOf_everyCharMatchesEscapeEcmaScriptForm() {
+        final char[] all = new char[65536];
+        final StringBuilder expected = new StringBuilder("[");
+
+        for (int c = 0; c < 65536; c++) {
+            all[c] = (char) c;
+            final String escaped = com.landawn.abacus.util.EscapeUtil.escapeEcmaScript(String.valueOf((char) c));
+
+            assertEquals("['" + escaped + "']", type.stringOf(new char[] { (char) c }), "char " + c);
+
+            if (c > 0) {
+                expected.append(", ");
+            }
+
+            expected.append('\'').append(escaped).append('\'');
+        }
+
+        expected.append(']');
+
+        assertEquals(expected.toString(), type.stringOf(all));
+        assertEquals("['a', '\\'', '\\\\', '\\/', '\\\"', ' ', '~', '\\n', '\\u0080', '\\u001F']",
+                type.stringOf(new char[] { 'a', '\'', '\\', '/', '"', ' ', '~', '\n', (char) 0x80, (char) 0x1F }));
+    }
+
+    // G015-01: stringOf/valueOf round-trip every char; quoted single-char elements (incl. quotes and backslash) parse as before
+    @Test
+    public void testValueOf_quotedSingleCharElements() {
+        final char[] all = new char[65536];
+
+        for (int c = 0; c < 65536; c++) {
+            all[c] = (char) c;
+        }
+
+        assertArrayEquals(all, type.valueOf(type.stringOf(all)));
+
+        assertArrayEquals(new char[] { 'a', 'b', ' ', '/', 'x', 'z' }, type.valueOf("['a', \"b\", ' ', '/', x, 'z']"));
+        assertArrayEquals(new char[] { '\\', '\'', 'A', '\n', '"' }, type.valueOf("['\\\\', '\\'', '\\u0041', '\\n', '\\\"']"));
+        assertArrayEquals(new char[] { 'A', (char) 0 }, type.valueOf("['65', '']"));
+        assertThrows(NumberFormatException.class, () -> type.valueOf("['ab']"));
+    }
+    // ---- perf review 2026-09-26 G015 end ----
 }

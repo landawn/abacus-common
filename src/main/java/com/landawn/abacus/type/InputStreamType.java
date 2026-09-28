@@ -70,13 +70,21 @@ public class InputStreamType extends AbstractType<InputStream> {
      * Used by subclasses that extend this type with a specialized name.
      *
      * @param typeName the custom type name to register
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
      */
-    InputStreamType(final String typeName) {
+    InputStreamType(final String typeName) throws IllegalArgumentException {
         this(typeName, Charsets.UTF_8);
     }
 
     // Keep inherited text conversion consistent with each JDBC stream specialization's writers.
-    InputStreamType(final String typeName, final Charset charset) {
+    /**
+     * Package-private constructor for {@code InputStreamType} with a custom type name and text charset.
+     *
+     * @param typeName the custom type name to register
+     * @param charset the charset used to convert the stream content to and from text
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}.
+     */
+    InputStreamType(final String typeName, final Charset charset) throws IllegalArgumentException {
         super(typeName);
         typeClass = InputStream.class;
         this.charset = charset;
@@ -86,13 +94,13 @@ public class InputStreamType extends AbstractType<InputStream> {
      * Package-private constructor for {@code InputStreamType} bound to a concrete {@link InputStream} subclass.
      * Text construction is supported only for the content-preserving classes listed in {@link #valueOf(String)}.
      *
-     * @param cls the {@link InputStream} class (or subclass) this type handler represents
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @param targetClass the {@link InputStream} class (or subclass) this type handler represents
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    InputStreamType(final Class<InputStream> cls) throws IllegalArgumentException {
-        super(ClassUtil.getSimpleClassName(cls));
+    InputStreamType(final Class<InputStream> targetClass) throws IllegalArgumentException {
+        super(ClassUtil.getSimpleClassName(targetClass));
 
-        typeClass = cls;
+        typeClass = targetClass;
         charset = Charsets.UTF_8;
     }
 
@@ -249,63 +257,63 @@ public class InputStreamType extends AbstractType<InputStream> {
     /**
      * Sets an {@link InputStream} value as a binary-stream parameter in a {@link PreparedStatement}.
      *
-     * @param stmt the {@link PreparedStatement} in which to set the parameter
+     * @param statement the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x the {@link InputStream} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
-        stmt.setBinaryStream(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
+        statement.setBinaryStream(columnIndex, x);
     }
 
     /**
      * Sets an {@link InputStream} value as a named binary-stream parameter in a {@link CallableStatement}.
      *
-     * @param stmt the {@link CallableStatement} in which to set the parameter
+     * @param statement the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@link InputStream} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
-        stmt.setBinaryStream(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
+        statement.setBinaryStream(parameterName, x);
     }
 
     /**
      * Sets an {@link InputStream} value as a binary-stream parameter in a {@link PreparedStatement},
      * declaring that the stream contains exactly {@code sqlTypeOrLength} bytes.
      *
-     * @param stmt the {@link PreparedStatement} in which to set the parameter
+     * @param statement the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x the {@link InputStream} to set; may be {@code null}
      * @param sqlTypeOrLength the declared number of bytes in the stream
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
+    public void set(final PreparedStatement statement, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setBinaryStream(columnIndex, x, sqlTypeOrLength);
+        statement.setBinaryStream(columnIndex, x, sqlTypeOrLength);
     }
 
     /**
      * Sets an {@link InputStream} value as a named binary-stream parameter in a {@link CallableStatement},
      * declaring that the stream contains exactly {@code sqlTypeOrLength} bytes.
      *
-     * @param stmt the {@link CallableStatement} in which to set the parameter
+     * @param statement the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@link InputStream} to set; may be {@code null}
      * @param sqlTypeOrLength the declared number of bytes in the stream
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final InputStream x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setBinaryStream(parameterName, x, sqlTypeOrLength);
+        statement.setBinaryStream(parameterName, x, sqlTypeOrLength);
     }
 
     /**

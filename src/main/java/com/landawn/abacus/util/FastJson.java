@@ -159,12 +159,12 @@ public final class FastJson {
     /**
      * Validates a byte-array range before passing it to FastJSON2.
      *
-     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code len} is negative
+     * @throws IllegalArgumentException if {@code json} is {@code null} or {@code length} is negative
      * @throws IndexOutOfBoundsException if {@code offset} is negative or the requested range exceeds {@code json.length}
      */
-    private static void checkByteRange(final byte[] json, final int offset, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
+    private static void checkByteRange(final byte[] json, final int offset, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(json, cs.json);
-        N.checkFromIndexSize(offset, len, json.length);
+        N.checkFromIndexSize(offset, length, json.length);
     }
 
     /**
@@ -561,21 +561,21 @@ public final class FastJson {
      * @param <T> the type of the target object
      * @param json the byte array containing JSON data
      * @param offset the starting position in the byte array
-     * @param len the number of bytes to read from the starting position
+     * @param length the number of bytes to read from the starting position
      * @param targetType the Class object representing the target type
      * @return the deserialized object of type T, or {@code null} if the JSON represents null
-     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}, or {@code len} is negative
-     * @throws IndexOutOfBoundsException if {@code offset} is negative, or if {@code offset + len}
+     * @throws IllegalArgumentException if {@code json} or {@code targetType} is {@code null}, or {@code length} is negative
+     * @throws IndexOutOfBoundsException if {@code offset} is negative, or if {@code offset + length}
      *         is greater than {@code json.length}
      * @throws JSONException if the JSON is malformed or cannot be bound to the requested type
      */
     @MayReturnNull
-    public static <T> T fromJson(final byte[] json, final int offset, final int len, final Class<? extends T> targetType)
+    public static <T> T fromJson(final byte[] json, final int offset, final int length, final Class<? extends T> targetType)
             throws IllegalArgumentException, IndexOutOfBoundsException, JSONException {
-        checkByteRange(json, offset, len);
+        checkByteRange(json, offset, length);
         N.checkArgNotNull(targetType, cs.targetType);
 
-        return JSON.parseObject(json, offset, len, targetType);
+        return JSON.parseObject(json, offset, length, targetType);
     }
 
     /**

@@ -155,4 +155,58 @@ public class GuavaHasherTest extends TestBase {
         assertThrows(IndexOutOfBoundsException.class, () -> sha.put(new byte[3], 0, 4));
         assertThrows(NullPointerException.class, () -> sha.put((byte[]) null, 0, 0));
     }
+
+    // ---- perf review 2026-09-26 G002 begin ----
+    // G002-01: put(char[], int, int) must feed exactly the bytes of one putChar per character, for short and bulk ranges
+    @Test
+    public void testPutCharArrayRange_matchesPerCharPutForAllFunctionsAndLengths() {
+        final com.google.common.hash.HashFunction[] functions = { com.google.common.hash.Hashing.murmur3_128(), com.google.common.hash.Hashing.murmur3_128(7),
+                com.google.common.hash.Hashing.murmur3_32_fixed(), com.google.common.hash.Hashing.sipHash24(), com.google.common.hash.Hashing.sha256(),
+                com.google.common.hash.Hashing.sha512(), com.google.common.hash.Hashing.crc32(), com.google.common.hash.Hashing.crc32c(),
+                com.google.common.hash.Hashing.adler32(), com.google.common.hash.Hashing.farmHashFingerprint64(),
+                com.google.common.hash.Hashing.hmacSha256(new byte[] { 1, 2, 3 }), com.google.common.hash.Hashing.goodFastHash(256),
+                com.google.common.hash.Hashing.concatenating(com.google.common.hash.Hashing.farmHashFingerprint64(), com.google.common.hash.Hashing.sha256()) };
+        final int[] lengths = { 0, 1, 15, 16, 17, 63, 511, 512, 513, 1024, 1025, 3001 };
+        final java.util.Random random = new java.util.Random(20260926L);
+
+        for (final com.google.common.hash.HashFunction function : functions) {
+            for (final int length : lengths) {
+                final int offset = length % 5;
+                final char[] chars = new char[offset + length + 3];
+
+                for (int i = 0; i < chars.length; i++) {
+                    chars[i] = (char) random.nextInt(Character.MAX_VALUE + 1);
+                }
+
+                chars[offset] = Character.MAX_VALUE;
+                chars[chars.length - 1] = '\0';
+
+                final com.google.common.hash.Hasher expected = function.newHasher().putInt(length);
+
+                for (int i = offset; i < offset + length; i++) {
+                    expected.putChar(chars[i]);
+                }
+
+                expected.putLong(-1L);
+
+                final com.google.common.hash.HashCode actual = GuavaHasher.wrap(function.newHasher()).put(length).put(chars, offset, length).put(-1L).hash();
+                assertEquals(expected.hash(), actual, function + " length " + length);
+
+                final char[] exact = java.util.Arrays.copyOfRange(chars, offset, offset + length);
+                assertEquals(function.hashUnencodedChars(new String(exact)), GuavaHasher.wrap(function.newHasher()).put(exact).hash(), function + " length " + length);
+            }
+        }
+    }
+
+    // G002-01: range validation still happens before anything is hashed, also for ranges long enough for the bulk path
+    @Test
+    public void testPutCharArrayRange_bulkLengthBoundsCheckedFirst() {
+        final char[] chars = new char[100];
+        assertThrows(IndexOutOfBoundsException.class, () -> wrapMurmur().put(chars, 1, 100));
+        assertThrows(IndexOutOfBoundsException.class, () -> wrapMurmur().put(chars, 0, Integer.MAX_VALUE));
+        assertThrows(IndexOutOfBoundsException.class, () -> wrapMurmur().put((char[]) null, 0, 16));
+        assertThrows(IllegalArgumentException.class, () -> wrapMurmur().put(chars, 0, -16));
+        assertEquals(wrapMurmur().put(chars, 0, 0).hash(), wrapMurmur().put((char[]) null, 0, 0).hash());
+    }
+    // ---- perf review 2026-09-26 G002 end ----
 }

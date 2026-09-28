@@ -224,6 +224,9 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
     public static ByteIterator defer(final Supplier<? extends ByteIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends ByteIterator>> supplierHolder = Holder.of(iteratorSupplier);
+
         return new ByteIterator() {
             private ByteIterator iter = null;
             private volatile boolean isInitialized = false;
@@ -262,7 +265,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                             isInitializing = true;
 
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == this) {
                                     throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
@@ -276,6 +279,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;
                             }
@@ -390,8 +394,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2);
-     * Byte boxed = iter.next();           // returns Byte.valueOf((byte)1) — avoid this
-     * byte primitive = iter.nextByte();   // returns (byte)2 — prefer this
+     * Byte boxed = iter.next();          // returns Byte.valueOf((byte)1) — avoid this
+     * byte primitive = iter.nextByte();  // returns (byte)2 — prefer this
      * }</pre>
      *
      * @return the next byte value as a Byte object
@@ -410,8 +414,8 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIterator iter = ByteIterator.of((byte)1, (byte)2, (byte)3);
-     * byte first = iter.nextByte();    // returns 1
-     * byte second = iter.nextByte();   // returns 2
+     * byte first = iter.nextByte();   // returns 1
+     * byte second = iter.nextByte();  // returns 2
      * }</pre>
      *
      * @return the next byte value
@@ -724,7 +728,7 @@ public abstract class ByteIterator extends ImmutableIterator<Byte> {
      *
      * @param startIndex the starting index value (must be non-negative)
      * @return an ObjIterator of IndexedByte elements with custom starting index
-     * @throws IllegalArgumentException if startIndex is negative.
+     * @throws IllegalArgumentException if {@code startIndex} is negative.
      */
     @Beta
     public ObjIterator<IndexedByte> indexed(final long startIndex) throws IllegalArgumentException {

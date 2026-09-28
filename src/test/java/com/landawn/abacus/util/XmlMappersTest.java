@@ -675,4 +675,18 @@ public class XmlMappersTest extends TestBase {
         assertEquals(Boolean.FALSE, factory.getProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES));
         assertThrows(XMLStreamException.class, () -> factory.getXMLResolver().resolveEntity("public", "system", "base", "namespace"));
     }
+
+    @Test
+    public void testFromXmlFileNullClassTargetTypeThrowsIaeBeforeOpeningFile() {
+        final File missing = new File("missing-xml-mappers-class-target-type-test.xml");
+        final Class<Map<String, Object>> missingType = null;
+        final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class, () -> XmlMappers.fromXml(missing, missingType));
+        assertTrue(e1.getMessage().contains("targetType"), e1.getMessage());
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class,
+                () -> XmlMappers.fromXml(missing, missingType, (DeserializationConfig) null));
+        assertTrue(e2.getMessage().contains("targetType"), e2.getMessage());
+        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class,
+                () -> XmlMappers.wrap(new XmlMapper()).fromXml(missing, missingType));
+        assertTrue(e3.getMessage().contains("targetType"), e3.getMessage());
+    }
 }

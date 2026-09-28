@@ -1391,4 +1391,69 @@ public class ParallelArrayFloatStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    @Test
+    public void testReduceAndCollectWithArraySplitStrategyFollowEncounterOrder() {
+        final float[] source = { 0f, 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f };
+        final ParallelSettings ps = ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build();
+
+        // "last element wins" is associative but not commutative: ARRAY slices are contiguous and combined in slice order
+        assertEquals(9f, FloatStream.of(source).parallel(ps).reduce((a, b) -> b).get());
+        assertEquals(9f, FloatStream.of(source).parallel(ps).reduce(-1f, (a, b) -> b));
+
+        final List<Float> collected = FloatStream.of(source).parallel(ps).collect(ArrayList::new, (c, e) -> c.add(e), ArrayList::addAll);
+        assertEquals(Arrays.asList(0f, 1f, 2f, 3f, 4f, 5f, 6f, 7f, 8f, 9f), collected);
+    }
+
+    // ---- perf review 2026-09-26 G101 begin ----
+    // G101-01: findFirst/findLast return the lowest/highest matching index for both split strategies (also over a sub-range)
+    @Test
+    public void testFindFirstFindLast_manyElements_bothSplitStrategies() {
+        final float[] source = new float[2000];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = 1000.0f + i;
+        }
+
+        for (final SplitStrategy strategy : new SplitStrategy[] { SplitStrategy.ARRAY, SplitStrategy.ITERATOR }) {
+            final ParallelSettings ps = ParallelSettings.builder().splitStrategy(strategy).maxThreadNum(testMaxThreadNum).build();
+
+            assertEquals(1300.0f, FloatStream.of(source).parallel(ps).findFirst(v -> v >= 1300 && v % 100 == 0).get());
+            assertEquals(2900.0f, FloatStream.of(source).parallel(ps).findLast(v -> v >= 1300 && v % 100 == 0).get());
+            assertEquals(1000.0f, FloatStream.of(source).parallel(ps).findFirst(v -> v == 1000 || v == 2999).get());
+            assertEquals(2999.0f, FloatStream.of(source).parallel(ps).findLast(v -> v == 1000 || v == 2999).get());
+            assertEquals(1000.0f, FloatStream.of(source).parallel(ps).findFirst(v -> true).get());
+            assertEquals(2999.0f, FloatStream.of(source).parallel(ps).findLast(v -> true).get());
+            assertFalse(FloatStream.of(source).parallel(ps).findFirst(v -> v < 0).isPresent());
+            assertFalse(FloatStream.of(source).parallel(ps).findLast(v -> v < 0).isPresent());
+
+            assertEquals(1100.0f, new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true).get());
+            assertEquals(2899.0f, new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true).get());
+            assertFalse(new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000).isPresent());
+            assertFalse(new ParallelArrayFloatStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999).isPresent());
+        }
+    }
+
+    // G101-01: the matching value is returned bit-for-bit (-0.0 and NaN) by both split strategies
+    @Test
+    public void testFindFirstFindLast_signedZeroAndNaN_bothSplitStrategies() {
+        final float[] source = new float[1000];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = 1000.0f + i;
+        }
+
+        source[300] = -0.0f;
+        source[700] = Float.NaN;
+
+        for (final SplitStrategy strategy : new SplitStrategy[] { SplitStrategy.ARRAY, SplitStrategy.ITERATOR }) {
+            final ParallelSettings ps = ParallelSettings.builder().splitStrategy(strategy).maxThreadNum(testMaxThreadNum).build();
+
+            assertEquals(Float.floatToRawIntBits(-0.0f), Float.floatToRawIntBits(FloatStream.of(source).parallel(ps).findFirst(v -> v == 0).get()));
+            assertEquals(Float.floatToRawIntBits(-0.0f), Float.floatToRawIntBits(FloatStream.of(source).parallel(ps).findLast(v -> v == 0).get()));
+            assertTrue(Float.isNaN(FloatStream.of(source).parallel(ps).findFirst(Float::isNaN).get()));
+            assertTrue(Float.isNaN(FloatStream.of(source).parallel(ps).findLast(v -> v != v).get()));
+        }
+    }
+    // ---- perf review 2026-09-26 G101 end ----
 }

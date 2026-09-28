@@ -130,32 +130,33 @@ public class PasswordType extends AbstractStringType {
      * Sets a password value in a PreparedStatement at the specified parameter index.
      * The plain-text password is automatically hashed using the configured algorithm before being bound.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the plain-text password to hash and set
      * @throws IllegalArgumentException if {@code x} contains an unpaired UTF-16 surrogate.
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or binding the password digest fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws IllegalArgumentException, NullPointerException, SQLException {
-        stmt.setString(columnIndex, password.digest(x));
+    public void set(final PreparedStatement statement, final int columnIndex, final String x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
+        statement.setString(columnIndex, password.digest(x));
     }
 
     /**
      * Sets a password value in a CallableStatement using the specified parameter name.
      * The plain-text password is automatically hashed using the configured algorithm before being bound.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the plain-text password to hash and set
      * @throws IllegalArgumentException if {@code x} contains an unpaired UTF-16 surrogate.
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or binding the password digest fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final String x)
+    public void set(final CallableStatement statement, final String parameterName, final String x)
             throws IllegalArgumentException, NullPointerException, SQLException {
-        stmt.setString(parameterName, password.digest(x));
+        statement.setString(parameterName, password.digest(x));
     }
 }

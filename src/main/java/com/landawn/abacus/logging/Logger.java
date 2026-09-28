@@ -289,11 +289,11 @@ public interface Logger {
      * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
-     * @param args an array of arguments
+     * @param arguments an array of arguments
      * @deprecated Prefer fixed-arity overloads or {@link #trace(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
-    void trace(String template, Object... args);
+    void trace(String template, Object... arguments);
 
     /**
      * Logs an exception at the {@code TRACE} level with an accompanying message.
@@ -546,11 +546,11 @@ public interface Logger {
      * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
-     * @param args an array of arguments
+     * @param arguments an array of arguments
      * @deprecated Prefer fixed-arity overloads or {@link #debug(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
-    void debug(String template, Object... args);
+    void debug(String template, Object... arguments);
 
     /**
      * Logs an exception at the {@code DEBUG} level with an accompanying message.
@@ -804,11 +804,11 @@ public interface Logger {
      * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
-     * @param args an array of arguments
+     * @param arguments an array of arguments
      * @deprecated Prefer fixed-arity overloads or {@link #info(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
-    void info(String template, Object... args);
+    void info(String template, Object... arguments);
 
     /**
      * Logs an exception at the {@code INFO} level with an accompanying message.
@@ -1062,11 +1062,11 @@ public interface Logger {
      * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
-     * @param args an array of arguments
+     * @param arguments an array of arguments
      * @deprecated Prefer fixed-arity overloads or {@link #warn(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
-    void warn(String template, Object... args);
+    void warn(String template, Object... arguments);
 
     /**
      * Logs an exception at the {@code WARN} level with an accompanying message.
@@ -1320,11 +1320,11 @@ public interface Logger {
      * or {@link Supplier}-based methods for allocation-sensitive paths.</p>
      *
      * @param template the template string
-     * @param args an array of arguments
+     * @param arguments an array of arguments
      * @deprecated Prefer fixed-arity overloads or {@link #error(Supplier)} for allocation-sensitive lazy evaluation
      */
     @Deprecated
-    void error(String template, Object... args);
+    void error(String template, Object... arguments);
 
     /**
      * Logs an exception at the {@code ERROR} level with an accompanying message.

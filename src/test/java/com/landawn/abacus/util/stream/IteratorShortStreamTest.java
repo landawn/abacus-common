@@ -362,4 +362,85 @@ public class IteratorShortStreamTest extends TestBase {
         assertEquals(3, seen[0]);
         stream.close();
     }
+
+    // ---- perf review 2026-09-26 G099 begin ----
+
+    // G099-06: unsorted distinct() tracks seen values in a BitSet indexed by the unsigned value - first-occurrence
+    // order, negative values, both extremes, laziness per element
+    @Test
+    public void testDistinct_unsortedBitSetMatchesLinkedHashSet() {
+        final short[] fixed = { 5, -1, Short.MIN_VALUE, 5, Short.MAX_VALUE, 0, -1, 127, 128, -128, -129, Short.MIN_VALUE, 0, Short.MAX_VALUE, 1, -32767 };
+        assertArrayEquals(new short[] { 5, -1, Short.MIN_VALUE, Short.MAX_VALUE, 0, 127, 128, -128, -129, 1, -32767 }, iter(fixed).distinct().toArray());
+        assertArrayEquals(new short[0], iter().distinct().toArray());
+        assertArrayEquals(new short[] { 7 }, iter((short) 7, (short) 7, (short) 7).distinct().toArray());
+
+        final java.util.Random random = new java.util.Random(20260926L);
+
+        for (int round = 0; round < 50; round++) {
+            final short[] values = new short[random.nextInt(2000)];
+
+            for (int i = 0; i < values.length; i++) {
+                values[i] = (short) (round % 2 == 0 ? random.nextInt(65536) : random.nextInt(64) - 32);
+            }
+
+            final java.util.Set<Short> expected = new java.util.LinkedHashSet<>();
+            for (final short v : values) {
+                expected.add(v);
+            }
+
+            final short[] expectedArray = new short[expected.size()];
+            int i = 0;
+            for (final Short v : expected) {
+                expectedArray[i++] = v;
+            }
+
+            assertArrayEquals(expectedArray, iter(values).distinct().toArray(), "round=" + round);
+        }
+
+        // lazy: each element is pulled once, and only as far as needed
+        final int[] pulled = { 0 };
+        final short[] source = { 1, 2, 1, 3, 2, 4 };
+        final ShortStream lazy = ShortStream.of(new ShortIterator() {
+            private int cursor = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor < source.length;
+            }
+
+            @Override
+            public short nextShort() {
+                pulled[0]++;
+                return source[cursor++];
+            }
+        }).distinct();
+        assertArrayEquals(new short[] { 1, 2, 3 }, lazy.limit(3).toArray());
+        assertEquals(4, pulled[0]);
+    }
+
+    // G099-07: kthLargest on a sorted stream - ring buffer wrap by compare instead of '%', every size around k
+    @Test
+    public void testKthLargest_sortedRingBufferWrap() {
+        for (final int k : new int[] { 1, 2, 3, 15, 16, 17, 33, Integer.MAX_VALUE }) {
+            for (int size = 0; size <= 40; size++) {
+                final short[] values = new short[size];
+                for (int i = 0; i < size; i++) {
+                    values[i] = (short) ((i * 7) % 11 - 5);
+                }
+
+                final short[] sorted = values.clone();
+                java.util.Arrays.sort(sorted);
+
+                final OptionalShort result = iter(values).sorted().kthLargest(k);
+
+                if (k > size) {
+                    assertFalse(result.isPresent(), "k=" + k + ", size=" + size);
+                } else {
+                    assertEquals(sorted[size - k], result.get(), "k=" + k + ", size=" + size);
+                }
+            }
+        }
+    }
+
+    // ---- perf review 2026-09-26 G099 end ----
 }

@@ -51,9 +51,9 @@ public final class TriPredicates {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriPredicates.alwaysTrue().test("a", "b", "c");           // returns true
-     * TriPredicates.alwaysTrue().test(null, null, null);        // returns true
-     * TriPredicates.alwaysTrue().test(new Object(), 1, true);   // returns true
+     * TriPredicates.alwaysTrue().test("a", "b", "c");          // returns true
+     * TriPredicates.alwaysTrue().test(null, null, null);       // returns true
+     * TriPredicates.alwaysTrue().test(new Object(), 1, true);  // returns true
      * }</pre>
      *
      * @param <A> the type of the first argument to the predicate
@@ -70,9 +70,9 @@ public final class TriPredicates {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * TriPredicates.alwaysFalse().test("a", "b", "c");           // returns false
-     * TriPredicates.alwaysFalse().test(null, null, null);        // returns false
-     * TriPredicates.alwaysFalse().test(new Object(), 1, true);   // returns false
+     * TriPredicates.alwaysFalse().test("a", "b", "c");          // returns false
+     * TriPredicates.alwaysFalse().test(null, null, null);       // returns false
+     * TriPredicates.alwaysFalse().test(new Object(), 1, true);  // returns false
      * }</pre>
      *
      * @param <A> the type of the first argument to the predicate

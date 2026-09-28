@@ -549,7 +549,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a {@link StringBuilder} suitable for the specified
-     * initial capacity. If {@code initCapacity} exceeds the internal default
+     * initial capacity. If {@code initialCapacity} exceeds the internal default
      * buffer size, a new {@code StringBuilder} of that capacity is allocated
      * (and is not pooled). Otherwise a pooled {@code StringBuilder} is returned,
      * whose capacity is typically the default buffer size but may be smaller if
@@ -569,17 +569,17 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param initCapacity the desired initial capacity
+     * @param initialCapacity the desired initial capacity
      * @return an empty {@code StringBuilder}; freshly allocated with capacity
-     *         {@code initCapacity} when that exceeds the default buffer size,
+     *         {@code initialCapacity} when that exceeds the default buffer size,
      *         otherwise obtained from the pool
-     * @throws IllegalArgumentException if {@code initCapacity} is negative.
+     * @throws IllegalArgumentException if {@code initialCapacity} is negative.
      */
-    public static StringBuilder createStringBuilder(final int initCapacity) throws IllegalArgumentException {
-        N.checkArgNotNegative(initCapacity, cs.initCapacity);
+    public static StringBuilder createStringBuilder(final int initialCapacity) throws IllegalArgumentException {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
-        if (initCapacity > BUFFER_SIZE) {
-            return new StringBuilder(initCapacity);
+        if (initialCapacity > BUFFER_SIZE) {
+            return new StringBuilder(initialCapacity);
         }
 
         StringBuilder sb = stringBuilderPool.poll();
@@ -620,7 +620,7 @@ public final class Objectory {
 
     /**
      * Creates or retrieves a {@link ByteArrayOutputStream} suitable for the
-     * specified initial capacity. If {@code initCapacity} exceeds the internal
+     * specified initial capacity. If {@code initialCapacity} exceeds the internal
      * default buffer size, a new stream of that capacity is allocated (and is
      * not pooled). Otherwise a pooled stream is returned, whose capacity is
      * typically the default buffer size (it grows automatically as needed).
@@ -636,19 +636,19 @@ public final class Objectory {
      * }
      * }</pre>
      *
-     * @param initCapacity the desired initial capacity
+     * @param initialCapacity the desired initial capacity
      * @return an empty {@code ByteArrayOutputStream}; freshly allocated with capacity
-     *         {@code initCapacity} when that exceeds the default buffer size,
+     *         {@code initialCapacity} when that exceeds the default buffer size,
      *         otherwise obtained from the pool
-     * @throws IllegalArgumentException if {@code initCapacity} is negative.
+     * @throws IllegalArgumentException if {@code initialCapacity} is negative.
      */
-    public static ByteArrayOutputStream createByteArrayOutputStream(final int initCapacity) throws IllegalArgumentException {
-        N.checkArgNotNegative(initCapacity, cs.initCapacity);
+    public static ByteArrayOutputStream createByteArrayOutputStream(final int initialCapacity) throws IllegalArgumentException {
+        N.checkArgNotNegative(initialCapacity, cs.initialCapacity);
 
-        if (initCapacity > BUFFER_SIZE) {
+        if (initialCapacity > BUFFER_SIZE) {
             // logCreated("createByteArrayOutputStream");
 
-            return new ByteArrayOutputStream(initCapacity);
+            return new ByteArrayOutputStream(initialCapacity);
         }
 
         ByteArrayOutputStream os = byteArrayOutputStreamPool.poll();

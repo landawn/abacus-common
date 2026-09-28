@@ -128,8 +128,8 @@ public enum IOCase {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String name = IOCase.SENSITIVE.getName();      // "Sensitive"
-     * String systemName = IOCase.SYSTEM.getName();   // "System"
+     * String name = IOCase.SENSITIVE.getName();     // "Sensitive"
+     * String systemName = IOCase.SYSTEM.getName();  // "System"
      * }</pre>
      *
      * @return the name of the constant ("Sensitive", "Insensitive", or "System")
@@ -164,8 +164,8 @@ public enum IOCase {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int result = IOCase.INSENSITIVE.checkCompareTo("File.txt", "file.txt");   // returns 0
-     * int result2 = IOCase.SENSITIVE.checkCompareTo("File.txt", "file.txt");    // returns negative
+     * int result = IOCase.INSENSITIVE.checkCompareTo("File.txt", "file.txt");  // returns 0
+     * int result2 = IOCase.SENSITIVE.checkCompareTo("File.txt", "file.txt");   // returns negative
      * }</pre>
      *
      * @param str1 the first string to compare, not null
@@ -188,8 +188,8 @@ public enum IOCase {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean equal = IOCase.INSENSITIVE.checkEquals("File.txt", "file.txt");   // true
-     * boolean equal2 = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt");    // false
+     * boolean equal = IOCase.INSENSITIVE.checkEquals("File.txt", "file.txt");  // true
+     * boolean equal2 = IOCase.SENSITIVE.checkEquals("File.txt", "file.txt");   // false
      * }</pre>
      *
      * @param str1 the first string to compare, not null
@@ -212,8 +212,8 @@ public enum IOCase {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean starts = IOCase.INSENSITIVE.checkStartsWith("File.txt", "FILE");   // true
-     * boolean starts2 = IOCase.SENSITIVE.checkStartsWith("File.txt", "FILE");    // false
+     * boolean starts = IOCase.INSENSITIVE.checkStartsWith("File.txt", "FILE");  // true
+     * boolean starts2 = IOCase.SENSITIVE.checkStartsWith("File.txt", "FILE");   // false
      * }</pre>
      *
      * @param str the string to check, not null
@@ -237,8 +237,8 @@ public enum IOCase {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean ends = IOCase.INSENSITIVE.checkEndsWith("File.txt", ".TXT");   // true
-     * boolean ends2 = IOCase.SENSITIVE.checkEndsWith("File.txt", ".TXT");    // false
+     * boolean ends = IOCase.INSENSITIVE.checkEndsWith("File.txt", ".TXT");  // true
+     * boolean ends2 = IOCase.SENSITIVE.checkEndsWith("File.txt", ".TXT");   // false
      * }</pre>
      *
      * @param str the string to check, not null
@@ -265,8 +265,8 @@ public enum IOCase {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * int index = IOCase.INSENSITIVE.checkIndexOf("Find a FILE here", 0, "file");   // returns 7
-     * int index2 = IOCase.SENSITIVE.checkIndexOf("Find a FILE here", 0, "file");    // returns -1
+     * int index = IOCase.INSENSITIVE.checkIndexOf("Find a FILE here", 0, "file");  // returns 7
+     * int index2 = IOCase.SENSITIVE.checkIndexOf("Find a FILE here", 0, "file");   // returns -1
      * }</pre>
      *
      * @param str the string to search in, not null
@@ -285,6 +285,13 @@ public enum IOCase {
         final int fromIndex = Math.max(0, strStartIndex);
 
         if (toIndex >= fromIndex) {
+            if (sensitive) {
+                // Exact matching is what String.indexOf does, and its intrinsic is far faster than probing each
+                // position with regionMatches. The guard above keeps fromIndex <= str.length() - search.length(),
+                // so an empty search still yields fromIndex and every match found lies within the loop's range.
+                return str.indexOf(search, fromIndex);
+            }
+
             for (int i = fromIndex; i <= toIndex; i++) {
                 if (checkRegionMatches(str, i, search)) {
                     return i;
@@ -303,8 +310,8 @@ public enum IOCase {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean matches = IOCase.INSENSITIVE.checkRegionMatches("File.txt", 0, "FILE");   // true
-     * boolean matches2 = IOCase.SENSITIVE.checkRegionMatches("File.txt", 0, "FILE");    // false
+     * boolean matches = IOCase.INSENSITIVE.checkRegionMatches("File.txt", 0, "FILE");  // true
+     * boolean matches2 = IOCase.SENSITIVE.checkRegionMatches("File.txt", 0, "FILE");   // false
      * }</pre>
      *
      * @param str the string to check, not null

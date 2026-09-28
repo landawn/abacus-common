@@ -1652,4 +1652,139 @@ public class EscapeUtilTest extends TestBase {
             }
         };
     }
+
+    @Test
+    public void testEscapeJsonLeavesDelCharacterUnescaped() {
+        // Only characters outside U+0020..U+007F are Unicode-escaped; DEL (U+007F) passes through.
+        assertEquals("a\u007fb", EscapeUtil.escapeJson("a\u007fb"));
+        assertEquals("\\u001F", EscapeUtil.escapeJson("\u001f"));
+        assertEquals("\\u0080", EscapeUtil.escapeJson("\u0080"));
+    }
+
+    // ---- perf review 2026-09-26 G037 begin ----
+
+    // G037-01/02: LookupTranslator prefix/suffix pre-filters must not change greedy longest-match results
+    @Test
+    public void testLookupTranslator_greedyLongestMatchWithSuffixFilter() {
+        final EscapeUtil.LookupTranslator translator = new EscapeUtil.LookupTranslator(
+                new String[][] { { "ab", "1" }, { "abc", "2" }, { "abxy", "3" }, { "b", "4" }, { "\u00e9", "E" }, { "\ud83d\ude00", "S" } });
+
+        assertEquals("2", translator.translate("abc"));
+        assertEquals("1x", translator.translate("abx"));
+        assertEquals("3", translator.translate("abxy"));
+        assertEquals("1q4", translator.translate("abqb"));
+        assertEquals("a", translator.translate("a"));
+        assertEquals("", translator.translate(""));
+        assertEquals("E\u00e8E", translator.translate("\u00e9\u00e8\u00e9"));
+        assertEquals("xSy\ud83d\ude01", translator.translate("x\ud83d\ude00y\ud83d\ude01"));
+        assertEquals("21", translator.translate(new StringBuilder("abcab")));
+        assertEquals("", new EscapeUtil.LookupTranslator((CharSequence[][]) null).translate(""));
+        assertEquals("abc", new EscapeUtil.LookupTranslator().translate("abc"));
+    }
+
+    // G037-01/02: randomized differential against the plain longest-match reference algorithm
+    @Test
+    public void testLookupTranslator_matchesReferenceAlgorithm() {
+        final String[][] table = { { "&a;", "A" }, { "&ab;", "B" }, { "&abc", "C" }, { "a", "x" }, { "b;", "y" }, { "&", "z" }, { "c;c", "w" } };
+        final EscapeUtil.LookupTranslator translator = new EscapeUtil.LookupTranslator(table);
+        final java.util.Map<String, String> map = new java.util.HashMap<>();
+
+        for (final String[] row : table) {
+            map.put(row[0], row[1]);
+        }
+
+        final char[] alphabet = { '&', 'a', 'b', 'c', ';', 'd' };
+        final java.util.Random random = new java.util.Random(260926L);
+
+        for (int trial = 0; trial < 3000; trial++) {
+            final char[] chars = new char[random.nextInt(12)];
+
+            for (int i = 0; i < chars.length; i++) {
+                chars[i] = alphabet[random.nextInt(alphabet.length)];
+            }
+
+            final String input = new String(chars);
+            final StringBuilder expected = new StringBuilder();
+            int pos = 0;
+
+            while (pos < input.length()) {
+                String replacement = null;
+                int matched = 0;
+
+                for (int len = Math.min(4, input.length() - pos); len >= 1 && replacement == null; len--) {
+                    replacement = map.get(input.substring(pos, pos + len));
+                    matched = len;
+                }
+
+                if (replacement == null) {
+                    expected.append(input.charAt(pos++));
+                } else {
+                    expected.append(replacement);
+                    pos += matched;
+                }
+            }
+
+            assertEquals(expected.toString(), translator.translate(input), input);
+        }
+    }
+
+    // G037-01/02: every bundled HTML entity (incl. non-ASCII prefixes) still escapes and unescapes, adjacent and truncated
+    @Test
+    public void testHtmlEntityTables_roundTripAfterLookupPrefilters() {
+        final StringBuilder raw = new StringBuilder();
+
+        for (final String[][] table : new String[][][] { EscapeUtil.EntityArrays.basicEscape(), EscapeUtil.EntityArrays.iso8859_1Escape(),
+                EscapeUtil.EntityArrays.html40ExtendedEscape() }) {
+            for (final String[] row : table) {
+                assertEquals(row[1], EscapeUtil.escapeHtml4(row[0]), row[0]);
+                assertEquals(row[0], EscapeUtil.unescapeHtml4(row[1]), row[1]);
+                assertEquals("x" + row[0] + "y", EscapeUtil.unescapeHtml4("x" + row[1] + "y"), row[1]);
+                raw.append(row[0]);
+            }
+        }
+
+        assertEquals(raw.toString(), EscapeUtil.unescapeHtml4(EscapeUtil.escapeHtml4(raw.toString())));
+        assertEquals("&amp", EscapeUtil.unescapeHtml4("&amp"));
+        assertEquals("&thetasym", EscapeUtil.unescapeHtml4("&thetasym"));
+        assertEquals("&amp;", EscapeUtil.unescapeHtml4("&amp;amp;"));
+        assertEquals("\u03d1\u039c&", EscapeUtil.unescapeHtml4("&thetasym;&Mu;&"));
+        assertEquals("&nosuch;<", EscapeUtil.unescapeHtml4("&nosuch;&lt;"));
+        assertEquals("'&\"<>", EscapeUtil.unescapeXml("&apos;&amp;&quot;&lt;&gt;"));
+        assertEquals("&euro;&diams;&eacute;", EscapeUtil.escapeHtml4("\u20ac\u2666\u00e9"));
+        assertEquals("&amp;euro;\u2666&eacute;", EscapeUtil.escapeHtml3("&euro;\u2666\u00e9"));
+        assertEquals("&#127;a\u4f60", EscapeUtil.escapeXml10("\u007fa\u4f60\u0001\ufffe"));
+    }
+
+    // G037-03 (NOTED, not changed): pins octal unescaping edge cases (Octal/Unicode/Lookup chain order)
+    @Test
+    public void testUnescapeJava_octalEdgeCases() {
+        assertEquals("\u0000", EscapeUtil.unescapeJava("\\0"));
+        assertEquals("\u00ff", EscapeUtil.unescapeJava("\\377"));
+        assertEquals(" 0", EscapeUtil.unescapeJava("\\400"));
+        assertEquals("\u0007x", EscapeUtil.unescapeJava("\\7x"));
+        assertEquals("?7", EscapeUtil.unescapeJava("\\0777"));
+        assertEquals("8", EscapeUtil.unescapeJava("\\8"));
+        assertEquals("a\u0001b\nc", EscapeUtil.unescapeJava("a\\1b\\nc"));
+        assertEquals("", EscapeUtil.unescapeJava("\\"));
+        assertEquals("plain text", EscapeUtil.unescapeJava("plain text"));
+    }
+
+    // G037-04: pins that the String-returning translate equals the Writer-based translate (guards any future writer swap)
+    @Test
+    public void testTranslate_toStringMatchesWriterOutput() throws IOException {
+        final String input = "Tab\tQuote\" \u4f60\ud83d\ude00 & <x> \\ /";
+
+        for (final CharSequenceTranslator translator : new CharSequenceTranslator[] { EscapeUtil.ESCAPE_JAVA, EscapeUtil.ESCAPE_JSON,
+                EscapeUtil.ESCAPE_ECMASCRIPT, EscapeUtil.ESCAPE_HTML4, EscapeUtil.ESCAPE_XML10, EscapeUtil.ESCAPE_XML11, EscapeUtil.ESCAPE_CSV }) {
+            final StringWriter writer = new StringWriter();
+            translator.translate(input, writer);
+            assertEquals(writer.toString(), translator.translate(input));
+            assertEquals(writer.toString(), translator.translate(new StringBuilder(input)));
+        }
+
+        assertEquals("", EscapeUtil.ESCAPE_JAVA.translate(""));
+        assertNull(EscapeUtil.ESCAPE_JAVA.translate(null));
+        assertEquals("\\uD83D\\uDE00", EscapeUtil.escapeJava("\ud83d\ude00"));
+    }
+    // ---- perf review 2026-09-26 G037 end ----
 }

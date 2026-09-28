@@ -119,14 +119,14 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
      *
      * @param cbuf the character array, may be {@code null}
      * @param offset the starting position in the array (0-based)
-     * @param len the number of characters to include
+     * @param length the number of characters to include
      * @return a new {@code String} from the specified characters, {@code null} if {@code cbuf} is
-     *         {@code null}, or an empty string if {@code cbuf} is empty or {@code len} is {@code 0}
-     * @throws IndexOutOfBoundsException if {@code cbuf} is nonempty, {@code len} is nonzero, and the requested region is outside the buffer.
+     *         {@code null}, or an empty string if {@code cbuf} is empty or {@code length} is {@code 0}
+     * @throws IndexOutOfBoundsException if {@code cbuf} is nonempty, {@code length} is nonzero, and the requested region is outside the buffer.
      */
     @Override
-    public String valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException {
-        return cbuf == null ? null : ((cbuf.length == 0 || len == 0) ? Strings.EMPTY : String.valueOf(cbuf, offset, len));
+    public String valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException {
+        return cbuf == null ? null : ((cbuf.length == 0 || length == 0) ? Strings.EMPTY : String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -232,29 +232,29 @@ public abstract class AbstractStringType extends AbstractCharSequenceType<String
     /**
      * Sets a {@code String} parameter in a {@code PreparedStatement} at the specified position.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code String} value to set, may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final String x) throws NullPointerException, SQLException {
-        stmt.setString(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final String x) throws NullPointerException, SQLException {
+        statement.setString(columnIndex, x);
     }
 
     /**
      * Sets a named {@code String} parameter in a {@code CallableStatement}.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code String} value to set, may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final String x) throws NullPointerException, SQLException {
-        stmt.setString(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final String x) throws NullPointerException, SQLException {
+        statement.setString(parameterName, x);
     }
 
     /**

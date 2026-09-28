@@ -105,18 +105,18 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * If {@code x} is {@code null}, the parameter is set to SQL NULL
      * ({@link java.sql.Types#BIGINT}); otherwise the contained long value is used.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code AtomicLong} value to set; {@code null} is stored as SQL NULL
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final AtomicLong x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final AtomicLong x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, java.sql.Types.BIGINT);
+            statement.setNull(columnIndex, java.sql.Types.BIGINT);
         } else {
-            stmt.setLong(columnIndex, x.get());
+            statement.setLong(columnIndex, x.get());
         }
     }
 
@@ -126,18 +126,18 @@ public class AtomicLongType extends AbstractAtomicType<AtomicLong> {
      * If {@code x} is {@code null}, the parameter is set to SQL NULL
      * ({@link java.sql.Types#BIGINT}); otherwise the contained long value is used.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code AtomicLong} value to set; {@code null} is stored as SQL NULL
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final AtomicLong x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final AtomicLong x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, java.sql.Types.BIGINT);
+            statement.setNull(parameterName, java.sql.Types.BIGINT);
         } else {
-            stmt.setLong(parameterName, x.get());
+            statement.setLong(parameterName, x.get());
         }
     }
 

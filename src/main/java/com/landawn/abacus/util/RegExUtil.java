@@ -185,10 +185,10 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * normally by every method, so a zero-width-capable pattern still reports its one empty match and the
  * class agrees with itself and with the JDK on empty input:
  * <pre>{@code
- * RegExUtil.find("", Pattern.compile("a*"));         // true
- * RegExUtil.findFirst("", Pattern.compile("a*"));    // ""
- * RegExUtil.findAll("", Pattern.compile("a*"));      // [""]      (one empty match)
- * RegExUtil.countMatches("", Pattern.compile("a*")); // 1
+ * RegExUtil.find("", Pattern.compile("a*"));             // true
+ * RegExUtil.findFirst("", Pattern.compile("a*"));        // ""
+ * RegExUtil.findAll("", Pattern.compile("a*"));          // [""]      (one empty match)
+ * RegExUtil.countMatches("", Pattern.compile("a*"));     // 1
  * RegExUtil.replaceAll("", Pattern.compile("a*"), "X");  // "X"   (same as "".replaceAll("a*", "X"))
  * }</pre>
  * Earlier releases short-circuited empty sources too, which made {@code findAll}/{@code countMatches}/
@@ -200,13 +200,13 @@ import com.landawn.abacus.util.function.IntBiFunction;
  * zero-width-capable pattern reports nothing for it. The rule is uniform, which matters only for a
  * pattern that can match the empty string:
  * <pre>{@code
- * RegExUtil.find(null, Pattern.compile("a*"));         // false
- * RegExUtil.matches(null, Pattern.compile("a*"));      // false
- * RegExUtil.findFirst(null, Pattern.compile("a*"));    // null   (not "")
- * RegExUtil.findAll(null, Pattern.compile("a*"));      // []
- * RegExUtil.countMatches(null, Pattern.compile("a*")); // 0
+ * RegExUtil.find(null, Pattern.compile("a*"));             // false
+ * RegExUtil.matches(null, Pattern.compile("a*"));          // false
+ * RegExUtil.findFirst(null, Pattern.compile("a*"));        // null   (not "")
+ * RegExUtil.findAll(null, Pattern.compile("a*"));          // []
+ * RegExUtil.countMatches(null, Pattern.compile("a*"));     // 0
  * RegExUtil.replaceAll(null, Pattern.compile("a*"), "X");  // ""  (not "X")
- * RegExUtil.split(null, Pattern.compile("a*"));        // []     (empty array)
+ * RegExUtil.split(null, Pattern.compile("a*"));            // []     (empty array)
  * }</pre>
  * The empty result is {@code false}, {@code null}, {@code ""}, {@code 0}, or an empty
  * list/stream/array, whichever the method returns. Earlier releases split the class in two here -
@@ -857,9 +857,19 @@ public final class RegExUtil {
      * A regular expression {@link Pattern} that matches email addresses according to RFC 5322 specification.
      * <p>
      * This pattern implements a commonly used ASCII, RFC 5322-inspired subset. It handles quoted local parts,
-     * IPv4 domain literals, and many permitted special characters, but it is not a complete RFC parser and does
-     * not support every valid address (for example, internationalized local parts or IPv6 domain literals).
+     * IPv4 domain literals, RFC 5321 general address literals such as {@code [IPv6:2001:db8::1]} (the content after
+     * the tag is only checked against {@code dtext}, not validated as an address), and many permitted special
+     * characters, but it is not a complete RFC parser and does not support every valid address (for example,
+     * internationalized local parts).
      * </p>
+     *
+     * <p><b>Boundaries when finding.</b> A candidate is skipped, not truncated, when the character before it is a
+     * letter, digit or combining mark (including supplementary characters), a local-part character, {@code '.'} or
+     * {@code '@'}, or when it is a quoted local part right after a backslash; it is also skipped when the character after
+     * it is a letter, digit, combining mark, {@code '_'} or {@code '-'}. So {@code "Kontakt: müller@firma.de"} yields
+     * nothing instead of the different address {@code "ller@firma.de"}. Local-part punctuation such as {@code ' / ? = &}
+     * directly before an address is part of the RFC local-part alphabet and stays in the match: split URLs and query
+     * strings before scanning. Matching is linear in the input length and cannot overflow the stack.</p>
      *
      * <p>The pattern validates:</p>
      * <ul>
@@ -873,7 +883,7 @@ public final class RegExUtil {
      * {@code [}, {@code \} and {@code ]}, which must be escaped inside a domain literal), extended with the
      * obsolete DEL that the upstream expression allowed. The widely copied form of this regex writes the second
      * range as {@code x53-x7f} instead of {@code x5e-x7f}; because that overlaps the first range it re-admits
-     * exactly the three characters the class exists to exclude, so {@code a@[1.2.3.x:a]b]} was accepted.</p>
+     * exactly the three characters the class exists to exclude, so {@code a@[x:a]b]} was accepted.</p>
      *
      * <p>Example matches:</p>
      * <ul>
@@ -889,7 +899,15 @@ public final class RegExUtil {
      * @see <a href="https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression">Stack Overflow Email Validation</a>
      */
     public static final Pattern EMAIL_ADDRESS_RFC_5322_FINDER = Pattern.compile(
-            "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x5e-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])",
+            // Possessive quantifiers: java.util.regex recurses once per iteration of a greedy group loop, so thousands of labels,
+            // dots or escapes threw StackOverflowError. The left lookbehind lets a match start only at the first character of a
+            // run (linear find instead of re-scanning every suffix, and no truncated fragment such as "ller@x.de" out of
+            // "mueller@x.de" with a u-umlaut); its surrogate-pair alternative never matches a real pair, it only raises the
+            // lookbehind length to 2 so a supplementary letter/digit/mark is tested as a whole code point. The right lookahead
+            // rejects a candidate that continues with a letter, digit, mark, '_' or '-'. The bracketed general address literal
+            // (tag:content, e.g. IPv6:...) is an alternative to the IPv4 literal instead of a 4th-octet alternative.
+            // Group count (4) and the language of the anchored MATCHER are unchanged apart from that literal fix.
+            "(?<![\\p{L}\\p{N}\\p{M}!#$%&'*+/=?^_`{|}~.@-]|[\\ud800-\\udbff][\\udc00-\\udfff])(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]++(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]++)*+|(?<!\\\\)\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*+\")@(?:[a-z0-9]++(?:-++[a-z0-9]++)*+(?:\\.[a-z0-9]++(?:-++[a-z0-9]++)*+)++|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])\\.){3}(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x5e-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])++)\\])(?![\\p{L}\\p{N}\\p{M}_-])",
             Pattern.CASE_INSENSITIVE);
 
     /**
@@ -1711,7 +1729,7 @@ public final class RegExUtil {
      * }</pre>
      *
      * <p><b>Performance Note:</b> This method iterates through all matches in the string
-     * to find the last one, so it may be less efficient than {@link #findFirst(String, Pattern)}
+     * to find the last one, materializing only that final substring. It may be less efficient than {@link #findFirst(String, Pattern)}
      * for very long strings with many matches. For better performance with large texts,
      * consider using alternative approaches if you only need to check for existence.</p>
      *
@@ -1735,13 +1753,15 @@ public final class RegExUtil {
         }
 
         final Matcher matcher = pattern.matcher(source);
-        String lastMatch = null;
+        int lastStart = -1;
+        int lastEnd = -1;
 
         while (matcher.find()) {
-            lastMatch = matcher.group();
+            lastStart = matcher.start();
+            lastEnd = matcher.end();
         }
 
-        return lastMatch;
+        return lastStart < 0 ? null : source.substring(lastStart, lastEnd);
     }
 
     /**

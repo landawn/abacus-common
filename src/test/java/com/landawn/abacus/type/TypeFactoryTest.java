@@ -2112,4 +2112,301 @@ public class TypeFactoryTest extends TestBase {
         assertNull(TypeFactory.getTypeIfPresent(malformed));
         assertNull(TypeFactory.getTypeIfPresent(malformed.substring(0, malformed.length() - 1)));
     }
+
+    // ---- bug review 2026-09-27 G017 begin ----
+    public static class G017TypeHolder {
+        private Type<?> type;
+
+        public Type<?> getType() {
+            return type;
+        }
+
+        public void setType(final Type<?> type) {
+            this.type = type;
+        }
+    }
+
+    public static class G017Box<T> {
+        private T v;
+
+        public G017Box(final T v) {
+            this.v = v;
+        }
+
+        public T value() {
+            return v;
+        }
+    }
+
+    // G017-01: reflection spells a Type<?> property "com.landawn.abacus.type.Type<?>"; that name hit the handler-class
+    // branch and failed with "No constructor found ... in class: com.landawn.abacus.type.Type", so the bean was unusable.
+    @Test
+    public void testGetType_ReflectiveTypeInterfaceParameterized() {
+        final Type<?> type = TypeFactory.getType(new com.landawn.abacus.util.TypeReference<Type<String>>() {
+        }.javaType());
+        assertEquals(Type.class, type.javaType());
+        assertEquals(1, type.parameterTypes().size());
+        assertEquals(String.class, type.parameterTypes().get(0).javaType());
+        assertSame(TypeFactory.getType(Integer.class), ((Type<Object>) type).valueOf("Integer"));
+
+        assertEquals(Type.class, TypeFactory.getType("com.landawn.abacus.type.Type<?>").javaType());
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("com.landawn.abacus.type.Type<String, Integer>"));
+        assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType("com.landawn.abacus.type.Type<String>(x)"));
+
+        final G017TypeHolder holder = N.fromJson("{\"type\":\"Long\"}", G017TypeHolder.class);
+        assertSame(TypeFactory.getType(Long.class), holder.getType());
+        assertTrue(N.toJson(holder).contains("Long"));
+    }
+
+    // G017-02: ValueTypeResolver rebuilt JSON<List<Long>> as List<List<Long>> (javaType() + parameterTypes()), so a
+    // single-value wrapper parsed "[5]" as [[5]].
+    @Test
+    public void testValueType_JsonTypeArgumentOfSingleValueWrapper() {
+        final Type<Object> type = TypeFactory.getType("com.landawn.abacus.type.TypeFactoryTest.G017Box<JSON<List<Long>>>");
+        final Object value = ((G017Box<?>) type.valueOf("[5]")).value();
+        assertEquals(List.of(5L), value);
+    }
+    // G017-03: a nested java.lang class in a generic argument was named "Thread.State" (java.lang. stripped), which no
+    // lookup resolves, so List<Thread.State> fell back to Object elements and read the constants as Strings.
+    @Test
+    public void testGetType_GenericArgumentNestedJavaLangClass() {
+        final Type<List<Thread.State>> type = TypeFactory.getType(new com.landawn.abacus.util.TypeReference<List<Thread.State>>() {
+        }.javaType());
+        assertEquals(Thread.State.class, type.elementType().javaType());
+        assertEquals(List.of(Thread.State.NEW), type.valueOf("[\"NEW\"]"));
+
+        final Type<?> arrayArgument = TypeFactory.getType(new com.landawn.abacus.util.TypeReference<List<Thread.State[]>>() {
+        }.javaType());
+        assertEquals(Thread.State[].class, arrayArgument.elementType().javaType());
+    }
+    // ---- bug review 2026-09-27 G017 end ----
+
+    // ---- bug review 2026-09-27 verify G119 begin ----
+
+    // G017-01 neighbours: the raw Type interface still resolves to the parameterless TypeType; Type<List<String>> keeps
+    // its nested argument and a Type<?> element of a collection argument resolves as well.
+    @Test
+    public void testGetType_ReflectiveTypeInterfaceVariants() {
+        assertEquals(TypeType.class, TypeFactory.getType(Type.class).getClass());
+        assertTrue(TypeFactory.getType("com.landawn.abacus.type.Type").parameterTypes().isEmpty());
+
+        final Type<?> nested = TypeFactory.getType(new com.landawn.abacus.util.TypeReference<Type<List<String>>>() {
+        }.javaType());
+        assertEquals(TypeType.class, nested.getClass());
+        assertEquals(List.class, nested.parameterTypes().get(0).javaType());
+        assertEquals(String.class, nested.parameterTypes().get(0).elementType().javaType());
+
+        final Type<List<Type<?>>> listOfTypes = TypeFactory.getType(new com.landawn.abacus.util.TypeReference<List<Type<?>>>() {
+        }.javaType());
+        assertEquals(List.of(TypeFactory.getType(Long.class), TypeFactory.getType("List<String>")), listOfTypes.valueOf("[\"Long\", \"List<String>\"]"));
+    }
+
+    // G017-02 neighbours: XML<T> (with its XML format), raw JSON (a Map, which used to fail as Map<Map<..>>), JSON<Map<K, V>>, nested JSON<JSON<T>>
+    // and JSON<T> inside another argument of a single-value wrapper all parse with T; a JSON<T> element outside a wrapper is unchanged.
+    @Test
+    public void testValueType_JsonXmlTypeArgumentVariantsOfSingleValueWrapper() {
+        final String box = "com.landawn.abacus.type.TypeFactoryTest.G017Box";
+        assertEquals(List.of(5L), ((G017Box<?>) TypeFactory.getType(box + "<XML<List<Long>>>").valueOf("<list>[5]</list>")).value());
+        assertEquals(java.util.Map.of("a", 5), ((G017Box<?>) TypeFactory.getType(box + "<JSON>").valueOf("{\"a\":5}")).value());
+        assertEquals(java.util.Map.of("a", 5L), ((G017Box<?>) TypeFactory.getType(box + "<JSON<Map<String, Long>>>").valueOf("{\"a\":5}")).value());
+        assertEquals(List.of(5L), ((G017Box<?>) TypeFactory.getType(box + "<JSON<JSON<List<Long>>>>").valueOf("[5]")).value());
+        assertEquals(java.util.Map.of("a", List.of(5L)),
+                ((G017Box<?>) TypeFactory.getType(box + "<Map<String, JSON<List<Long>>>>").valueOf("{\"a\":[5]}")).value());
+        assertEquals(List.of(5L), ((G017Box<?>) TypeFactory.getType(box + "<List<Long>>").valueOf("[5]")).value());
+        assertEquals(List.of(List.of(5L)), TypeFactory.getType("List<JSON<List<Long>>>").valueOf("[[5]]"));
+    }
+
+    // G017-03 neighbours: nested java.lang classes as map keys, wildcard bounds and generic-array components resolve too;
+    // top-level java.lang arguments keep their short names and a nested java.util class (Map.Entry) is unchanged.
+    @Test
+    public void testGetType_GenericArgumentNestedJavaLangClassVariants() {
+        final Type<java.util.Map<Character.UnicodeScript, List<? extends Thread.State>>> mapType = TypeFactory
+                .getType(new com.landawn.abacus.util.TypeReference<java.util.Map<Character.UnicodeScript, List<? extends Thread.State>>>() {
+                }.javaType());
+        assertEquals(Character.UnicodeScript.class, mapType.parameterTypes().get(0).javaType());
+        assertEquals(Thread.State.class, mapType.parameterTypes().get(1).elementType().javaType());
+        assertEquals(java.util.Map.of(Character.UnicodeScript.LATIN, List.of(Thread.State.NEW)), mapType.valueOf("{\"LATIN\": [\"NEW\"]}"));
+
+        final Type<?> genericArray = TypeFactory.getType(new com.landawn.abacus.util.TypeReference<List<Thread.State>[]>() {
+        }.javaType());
+        assertEquals(Thread.State.class, genericArray.elementType().elementType().javaType());
+
+        assertEquals("List<String>", TypeFactory.getType(new com.landawn.abacus.util.TypeReference<List<String>>() {
+        }.javaType()).name());
+        assertEquals("List<Map.Entry<String, Long>>", TypeFactory.getType(new com.landawn.abacus.util.TypeReference<List<java.util.Map.Entry<String, Long>>>() {
+        }.javaType()).name());
+    }
+    // ---- bug review 2026-09-27 verify G119 end ----
+
+    // ---- bug review 2026-09-27 verify G124 begin ----
+    // XML<T> / JSON<T> inside a single-value wrapper keep the selected handler's format (not just T): the wrapper reads and
+    // writes exactly what the standalone XML<..> / JSON<..> handler does, and XML text is not parsed as JSON.
+    @Test
+    public void testValueType_XmlAndJsonArgumentOfSingleValueWrapperKeepHandlerFormat() {
+        final String box = "com.landawn.abacus.type.TypeFactoryTest.G017Box";
+        final Type<Object> xmlHandler = TypeFactory.getType("XML<List<Long>>");
+        final Type<Object> xmlBox = TypeFactory.getType(box + "<XML<List<Long>>>");
+        final String xml = xmlHandler.stringOf(List.of(5L));
+
+        assertEquals(xml, xmlBox.stringOf(new G017Box<>(List.of(5L))));
+        assertEquals(List.of(5L), ((G017Box<?>) xmlBox.valueOf(xml)).value());
+        assertThrows(RuntimeException.class, () -> xmlBox.valueOf("[5]"));
+
+        final Type<Object> jsonHandler = TypeFactory.getType("JSON<List<Long>>");
+        final Type<Object> jsonBox = TypeFactory.getType(box + "<JSON<List<Long>>>");
+        assertEquals(jsonHandler.stringOf(List.of(5L)), jsonBox.stringOf(new G017Box<>(List.of(5L))));
+        assertEquals(List.of(5L), ((G017Box<?>) jsonBox.valueOf(jsonHandler.stringOf(List.of(5L)))).value());
+
+        // a plain List<Long> argument is unaffected
+        final Type<Object> listBox = TypeFactory.getType(box + "<List<Long>>");
+        assertEquals("[5]", listBox.stringOf(new G017Box<>(List.of(5L))));
+        assertEquals(List.of(5L), ((G017Box<?>) listBox.valueOf("[5]")).value());
+    }
+    // ---- bug review 2026-09-27 verify G124 end ----
+
+    // ---- bug review 2026-09-27 verify G125 begin ----
+    public static class G125ListBox<T extends List<Long>> {
+        private T v; // not final, like G017Box: a final field is not picked up as the single value
+
+        public G125ListBox(final T v) {
+            this.v = v;
+        }
+
+        public T value() {
+            return v;
+        }
+    }
+
+    // An upper-bounded wildcard "? extends XML<T>" (also nested, List<? extends XML<T>>, and against a type variable whose
+    // declared bound equals the wildcard's) keeps the XML format of its bound, exactly as the standalone handler does;
+    // "?", "? super XML<T>" and "? extends List<Long>" are unchanged.
+    @Test
+    public void testValueType_UpperBoundedWildcardXmlArgumentOfSingleValueWrapperKeepsHandlerFormat() {
+        final String box = "com.landawn.abacus.type.TypeFactoryTest.G017Box";
+
+        for (final String argument : new String[] { "? extends XML<List<Long>>", "List<? extends XML<List<Long>>>" }) {
+            final Object payload = argument.startsWith("List<") ? List.of(List.of(5L)) : List.of(5L);
+            final Type<Object> standalone = TypeFactory.getType(argument);
+            final Type<Object> wrapper = TypeFactory.getType(box + "<" + argument + ">");
+            final String text = standalone.stringOf(payload);
+
+            assertEquals(text, wrapper.stringOf(new G017Box<>(payload)), argument);
+            assertEquals(payload, ((G017Box<?>) wrapper.valueOf(text)).value(), argument);
+        }
+
+        assertThrows(RuntimeException.class, () -> TypeFactory.getType(box + "<? extends XML<List<Long>>>").valueOf("[5]"));
+
+        final Type<Object> boundedWrapper = TypeFactory.getType("com.landawn.abacus.type.TypeFactoryTest.G125ListBox<? extends XML<List<Long>>>");
+        final String xml = TypeFactory.getType("XML<List<Long>>").stringOf(List.of(5L));
+        assertEquals(xml, boundedWrapper.stringOf(new G125ListBox<>(List.of(5L))));
+        assertEquals(List.of(5L), ((G125ListBox<?>) boundedWrapper.valueOf(xml)).value());
+
+        for (final String argument : new String[] { "?", "? super XML<List<Long>>", "? extends List<Long>" }) {
+            final Type<Object> wrapper = TypeFactory.getType(box + "<" + argument + ">");
+            assertEquals("[5]", wrapper.stringOf(new G017Box<>(List.of(5L))), argument);
+            // "?" / "? super X" read as Object (the text itself); "? extends List<Long>" reads a List<Long>
+            final Object read = ((G017Box<?>) wrapper.valueOf("[5]")).value();
+            assertEquals(argument.startsWith("? extends") ? List.of(5L) : "[5]", read, argument);
+        }
+    }
+    // ---- bug review 2026-09-27 verify G125 end ----
+
+    // ---- bug review 2026-09-27 verify G127 begin ----
+    public static class G127ArrayListBox<T extends java.util.ArrayList<Long>> {
+        private T v; // not final: a final field is not picked up as the single value
+
+        public G127ArrayListBox(final T v) {
+            this.v = v;
+        }
+
+        public T value() {
+            return v;
+        }
+    }
+
+    // "? extends XML<List<?>>" / "? extends JSON<List<?>>" against T extends List<Long>: the declared generic bound is the
+    // effective value type, so the retained format reads Long elements (not Integer), and a strictly narrower declared
+    // bound (T extends ArrayList<Long>) keeps the wildcard's XML format instead of falling back to JSON.
+    @Test
+    public void testValueType_WildcardFormatArgumentUsesEffectiveDeclaredBound() {
+        final String listBox = "com.landawn.abacus.type.TypeFactoryTest.G125ListBox";
+        final String xml = TypeFactory.getType("XML<List<Long>>").stringOf(List.of(5L));
+
+        final Type<Object> xmlBox = TypeFactory.getType(listBox + "<? extends XML<List<?>>>");
+        final List<?> fromXml = ((G125ListBox<?>) xmlBox.valueOf(xml)).value();
+        assertEquals(List.of(5L), fromXml);
+        assertEquals(Long.class, fromXml.get(0).getClass());
+        assertEquals(xml, xmlBox.stringOf(new G125ListBox<>(List.of(5L))));
+
+        final Type<Object> jsonBox = TypeFactory.getType(listBox + "<? extends JSON<List<?>>>");
+        final List<?> fromJson = ((G125ListBox<?>) jsonBox.valueOf("[5]")).value();
+        assertEquals(List.of(5L), fromJson);
+        assertEquals(Long.class, fromJson.get(0).getClass());
+        assertEquals("[5]", jsonBox.stringOf(new G125ListBox<>(List.of(5L))));
+
+        final Type<Object> narrowerBox = TypeFactory.getType("com.landawn.abacus.type.TypeFactoryTest.G127ArrayListBox<? extends XML<List<Long>>>");
+        final List<?> fromNarrower = ((G127ArrayListBox<?>) narrowerBox.valueOf(xml)).value();
+        assertEquals(List.of(5L), fromNarrower);
+        assertEquals(java.util.ArrayList.class, fromNarrower.getClass());
+        assertEquals(xml, narrowerBox.stringOf(new G127ArrayListBox<>(new java.util.ArrayList<>(List.of(5L)))));
+    }
+    // ---- bug review 2026-09-27 verify G127 end ----
+
+    // ---- bug review 2026-09-27 verify G130 begin ----
+    public static class G130NestedBox<T extends List<List<Long>>> {
+        private T v; // not final: a final field is not picked up as the single value
+
+        public G130NestedBox(final T v) {
+            this.v = v;
+        }
+
+        public T value() {
+            return v;
+        }
+    }
+
+    public static class G130ArrayListNestedBox<T extends java.util.ArrayList<List<Long>>> {
+        private T v; // not final: a final field is not picked up as the single value
+
+        public G130ArrayListNestedBox(final T v) {
+            this.v = v;
+        }
+
+        public T value() {
+            return v;
+        }
+    }
+
+    // A JSON/XML handler NESTED in a wildcard bound ("? extends List<XML<List<Long>>>") survives when the wrapper's declared
+    // bound (T extends List<List<Long>>) becomes the value type: the wrapper reads/writes what the standalone
+    // List<XML<List<Long>>> handler does, a looser nested argument (List<?>) takes the declared Long, and a narrower
+    // declared class (ArrayList) keeps the nested XML format.
+    @Test
+    public void testValueType_WildcardNestedFormatArgumentKeptOnEffectiveDeclaredBound() {
+        final String nestedBox = "com.landawn.abacus.type.TypeFactoryTest.G130NestedBox";
+        final Type<Object> standalone = TypeFactory.getType("List<XML<List<Long>>>");
+        final List<List<Long>> payload = List.of(List.of(5L));
+        final String text = standalone.stringOf(payload);
+
+        for (final String argument : new String[] { "? extends List<XML<List<Long>>>", "? extends List<XML<List<?>>>" }) {
+            final Type<Object> wrapper = TypeFactory.getType(nestedBox + "<" + argument + ">");
+            final List<?> read = ((G130NestedBox<?>) wrapper.valueOf(text)).value();
+            assertEquals(payload, read, argument);
+            assertEquals(Long.class, ((List<?>) read.get(0)).get(0).getClass(), argument);
+            assertEquals(text, wrapper.stringOf(new G130NestedBox<>(payload)), argument);
+        }
+
+        final Type<Object> jsonWrapper = TypeFactory.getType(nestedBox + "<? extends List<JSON<List<?>>>>");
+        final List<?> fromJson = ((G130NestedBox<?>) jsonWrapper.valueOf("[[5]]")).value();
+        assertEquals(payload, fromJson);
+        assertEquals(Long.class, ((List<?>) fromJson.get(0)).get(0).getClass());
+
+        final Type<Object> narrower = TypeFactory
+                .getType("com.landawn.abacus.type.TypeFactoryTest.G130ArrayListNestedBox<? extends List<XML<List<Long>>>>");
+        final List<?> fromNarrower = ((G130ArrayListNestedBox<?>) narrower.valueOf(text)).value();
+        assertEquals(payload, fromNarrower);
+        assertEquals(java.util.ArrayList.class, fromNarrower.getClass());
+        assertEquals(text, narrower.stringOf(new G130ArrayListNestedBox<>(new java.util.ArrayList<>(payload))));
+    }
+    // ---- bug review 2026-09-27 verify G130 end ----
 }

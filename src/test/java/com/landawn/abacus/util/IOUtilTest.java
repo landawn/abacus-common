@@ -2668,4 +2668,307 @@ public class IOUtilTest extends IOUtilTestSupport {
             target.delete();
         }
     }
+
+    // ---- perf review 2026-09-26 G044 begin ----
+
+    /**
+     * A stream that hands out its bytes in pseudo-random chunk sizes (sometimes 0, sometimes more than one
+     * buffer's worth requested) and records how many read calls it served and how many bytes it gave away.
+     */
+    private static final class G044ChunkedInputStream extends InputStream {
+        private final byte[] data;
+        private final java.util.Random random;
+        private final int maxChunk;
+        private int position;
+        private int readCalls;
+
+        G044ChunkedInputStream(final byte[] data, final long seed, final int maxChunk) {
+            this.data = data;
+            this.random = new java.util.Random(seed);
+            this.maxChunk = maxChunk;
+        }
+
+        @Override
+        public int read() {
+            readCalls++;
+            return position < data.length ? data[position++] & 0xFF : -1;
+        }
+
+        @Override
+        public int read(final byte[] b, final int offset, final int length) {
+            readCalls++;
+
+            if (position >= data.length) {
+                return -1;
+            }
+
+            final int chunk = Math.min(Math.min(length, random.nextInt(maxChunk + 1)), data.length - position);
+            System.arraycopy(data, position, b, offset, chunk);
+            position += chunk;
+            return chunk;
+        }
+    }
+
+    /**
+     * The Reader twin of {@link G044ChunkedInputStream}.
+     */
+    private static final class G044ChunkedReader extends Reader {
+        private final char[] data;
+        private final java.util.Random random;
+        private final int maxChunk;
+        private int position;
+        private int readCalls;
+
+        G044ChunkedReader(final char[] data, final long seed, final int maxChunk) {
+            this.data = data;
+            this.random = new java.util.Random(seed);
+            this.maxChunk = maxChunk;
+        }
+
+        @Override
+        public int read() {
+            readCalls++;
+            return position < data.length ? data[position++] : -1;
+        }
+
+        @Override
+        public int read(final char[] b, final int offset, final int length) {
+            readCalls++;
+
+            if (position >= data.length) {
+                return -1;
+            }
+
+            final int chunk = Math.min(Math.min(length, random.nextInt(maxChunk + 1)), data.length - position);
+            System.arraycopy(data, position, b, offset, chunk);
+            position += chunk;
+            return chunk;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
+
+    /**
+     * The per-position algorithm contentEquals(InputStream, InputStream) used before G044-01, kept as the oracle.
+     */
+    private static boolean g044ReferenceContentEquals(final InputStream input1, final InputStream input2, final int bufferSize) throws IOException {
+        final byte[] buffer1 = new byte[bufferSize];
+        final byte[] buffer2 = new byte[bufferSize];
+        int pos1 = 0, pos2 = 0, count1 = 0, count2 = 0;
+
+        while (true) {
+            pos1 = 0;
+            pos2 = 0;
+
+            for (int index = 0; index < bufferSize; index++) {
+                if (pos1 == index) {
+                    count1 = input1.read(buffer1, pos1, bufferSize - pos1);
+
+                    if (count1 == 0) {
+                        final int value = input1.read();
+                        count1 = value == -1 ? -1 : 1;
+
+                        if (value != -1) {
+                            buffer1[pos1] = (byte) value;
+                        }
+                    }
+
+                    if (count1 == -1) {
+                        return pos2 == index && input2.read() == -1;
+                    }
+
+                    pos1 += count1;
+                }
+
+                if (pos2 == index) {
+                    count2 = input2.read(buffer2, pos2, bufferSize - pos2);
+
+                    if (count2 == 0) {
+                        final int value = input2.read();
+                        count2 = value == -1 ? -1 : 1;
+
+                        if (value != -1) {
+                            buffer2[pos2] = (byte) value;
+                        }
+                    }
+
+                    if (count2 == -1) {
+                        return pos1 == index && input1.read() == -1;
+                    }
+
+                    pos2 += count2;
+                }
+
+                if (buffer1[index] != buffer2[index]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    /**
+     * The Reader twin of {@link #g044ReferenceContentEquals(InputStream, InputStream, int)}.
+     */
+    private static boolean g044ReferenceContentEquals(final Reader input1, final Reader input2, final int bufferSize) throws IOException {
+        final char[] buffer1 = new char[bufferSize];
+        final char[] buffer2 = new char[bufferSize];
+        int pos1 = 0, pos2 = 0, count1 = 0, count2 = 0;
+
+        while (true) {
+            pos1 = 0;
+            pos2 = 0;
+
+            for (int index = 0; index < bufferSize; index++) {
+                if (pos1 == index) {
+                    count1 = input1.read(buffer1, pos1, bufferSize - pos1);
+
+                    if (count1 == 0) {
+                        final int value = input1.read();
+                        count1 = value == -1 ? -1 : 1;
+
+                        if (value != -1) {
+                            buffer1[pos1] = (char) value;
+                        }
+                    }
+
+                    if (count1 == -1) {
+                        return pos2 == index && input2.read() == -1;
+                    }
+
+                    pos1 += count1;
+                }
+
+                if (pos2 == index) {
+                    count2 = input2.read(buffer2, pos2, bufferSize - pos2);
+
+                    if (count2 == 0) {
+                        final int value = input2.read();
+                        count2 = value == -1 ? -1 : 1;
+
+                        if (value != -1) {
+                            buffer2[pos2] = (char) value;
+                        }
+                    }
+
+                    if (count2 == -1) {
+                        return pos1 == index && input1.read() == -1;
+                    }
+
+                    pos2 += count2;
+                }
+
+                if (buffer1[index] != buffer2[index]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    /**
+     * The data pairs of the differential tests: lengths around the pooled buffer size, with a difference at the
+     * start, the middle, the end, either side of the buffer boundary, a length difference, or none at all.
+     */
+    private static java.util.List<byte[][]> g044DataPairs() {
+        final int bufferSize = Objectory.BUFFER_SIZE;
+        final java.util.Random random = new java.util.Random(20260926L);
+        final java.util.List<byte[][]> pairs = new java.util.ArrayList<>();
+
+        for (final int length : new int[] { 0, 1, 2, 17, bufferSize - 1, bufferSize, bufferSize + 1, 2 * bufferSize + 13 }) {
+            final byte[] data = new byte[length];
+            random.nextBytes(data);
+
+            pairs.add(new byte[][] { data, data.clone() });
+
+            if (length > 0) {
+                pairs.add(new byte[][] { data, Arrays.copyOf(data, length - 1) });
+                pairs.add(new byte[][] { Arrays.copyOf(data, length - 1), data });
+                pairs.add(new byte[][] { data, Arrays.copyOf(data, length + 1) });
+
+                for (final int at : new int[] { 0, length / 2, length - 1, Math.min(length - 1, bufferSize - 1), Math.min(length - 1, bufferSize) }) {
+                    final byte[] changed = data.clone();
+                    changed[at] ^= 0x5A;
+                    pairs.add(new byte[][] { data, changed });
+                    pairs.add(new byte[][] { changed, data });
+                }
+            } else {
+                pairs.add(new byte[][] { data, new byte[] { 1 } });
+                pairs.add(new byte[][] { new byte[] { 1 }, data });
+            }
+        }
+
+        return pairs;
+    }
+
+    // G044-01: the bulk comparison must answer, and read both streams, exactly as the per-position loop did.
+    @Test
+    public void testContentEqualsInputStream_matchesPerPositionReferenceIncludingReadPattern() throws IOException {
+        final int bufferSize = Objectory.BUFFER_SIZE;
+        long seed = 1;
+
+        for (final byte[][] pair : g044DataPairs()) {
+            for (final int maxChunk : new int[] { 1, 7, 1000, bufferSize, 3 * bufferSize }) {
+                seed++;
+
+                final G044ChunkedInputStream expected1 = new G044ChunkedInputStream(pair[0], seed, maxChunk);
+                final G044ChunkedInputStream expected2 = new G044ChunkedInputStream(pair[1], seed * 31, maxChunk / 2 + 1);
+                final boolean expected = g044ReferenceContentEquals(expected1, expected2, bufferSize);
+
+                final G044ChunkedInputStream actual1 = new G044ChunkedInputStream(pair[0], seed, maxChunk);
+                final G044ChunkedInputStream actual2 = new G044ChunkedInputStream(pair[1], seed * 31, maxChunk / 2 + 1);
+                final boolean actual = IOUtil.contentEquals(actual1, actual2);
+
+                final String context = "lengths " + pair[0].length + "/" + pair[1].length + ", maxChunk " + maxChunk;
+                assertEquals(expected, actual, context);
+                assertEquals(Arrays.equals(pair[0], pair[1]), actual, context);
+                assertEquals(expected1.position, actual1.position, context);
+                assertEquals(expected2.position, actual2.position, context);
+                assertEquals(expected1.readCalls, actual1.readCalls, context);
+                assertEquals(expected2.readCalls, actual2.readCalls, context);
+            }
+        }
+    }
+
+    // G044-02: the Reader twin of the test above.
+    @Test
+    public void testContentEqualsReader_matchesPerPositionReferenceIncludingReadPattern() throws IOException {
+        final int bufferSize = Objectory.BUFFER_SIZE;
+        long seed = 1;
+
+        for (final byte[][] pair : g044DataPairs()) {
+            final char[] chars1 = new char[pair[0].length];
+            final char[] chars2 = new char[pair[1].length];
+
+            for (int i = 0; i < chars1.length; i++) {
+                chars1[i] = (char) (pair[0][i] * 257);
+            }
+
+            for (int i = 0; i < chars2.length; i++) {
+                chars2[i] = (char) (pair[1][i] * 257);
+            }
+
+            for (final int maxChunk : new int[] { 1, 7, 1000, bufferSize, 3 * bufferSize }) {
+                seed++;
+
+                final G044ChunkedReader expected1 = new G044ChunkedReader(chars1, seed, maxChunk);
+                final G044ChunkedReader expected2 = new G044ChunkedReader(chars2, seed * 31, maxChunk / 2 + 1);
+                final boolean expected = g044ReferenceContentEquals(expected1, expected2, bufferSize);
+
+                final G044ChunkedReader actual1 = new G044ChunkedReader(chars1, seed, maxChunk);
+                final G044ChunkedReader actual2 = new G044ChunkedReader(chars2, seed * 31, maxChunk / 2 + 1);
+                final boolean actual = IOUtil.contentEquals(actual1, actual2);
+
+                final String context = "lengths " + chars1.length + "/" + chars2.length + ", maxChunk " + maxChunk;
+                assertEquals(expected, actual, context);
+                assertEquals(Arrays.equals(chars1, chars2), actual, context);
+                assertEquals(expected1.position, actual1.position, context);
+                assertEquals(expected2.position, actual2.position, context);
+                assertEquals(expected1.readCalls, actual1.readCalls, context);
+                assertEquals(expected2.readCalls, actual2.readCalls, context);
+            }
+        }
+    }
+
+    // ---- perf review 2026-09-26 G044 end ----
 }

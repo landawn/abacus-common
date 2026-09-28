@@ -278,24 +278,24 @@ public final class BufferedJsonWriter extends CharacterWriter {
      *
      * @param cbuf the character array containing the data to write; must not be {@code null}
      * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
-     * @param len the number of characters to write; must be non-negative and {@code off + len} must not
+     * @param length the number of characters to write; must be non-negative and {@code off + len} must not
      *        exceed {@code cbuf.length}
      * @throws IOException if this writer is closed, or writing the escaped characters to the underlying
      *         output stream or writer fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + len}
      *         exceeds {@code cbuf.length}
      */
     @Override
-    public void writeCharacter(final char[] cbuf, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
+    public void writeCharacter(final char[] cbuf, final int off, final int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
         N.requireNonNull(cbuf, cs.cbuf);
 
-        if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
+        if ((off < 0) || (length < 0) || (off > cbuf.length) || (length > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
         }
 
-        final int end = off + len;
+        final int end = off + length;
         int from = off;
         char ch = 0;
 
@@ -362,28 +362,28 @@ public final class BufferedJsonWriter extends CharacterWriter {
      *        is used as the source
      * @param off the start offset in the string (or in {@code "null"} when {@code str} is {@code null});
      *        must be non-negative and not greater than the effective length
-     * @param len the number of characters to write; must be non-negative and {@code off + len} must not
+     * @param length the number of characters to write; must be non-negative and {@code off + len} must not
      *        exceed the effective length
      * @throws IOException if this writer is closed, or writing the escaped characters to the underlying
      *         output stream or writer fails
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + len}
      *         exceeds the effective length
      */
     @Override
-    public void writeCharacter(final String str, final int off, final int len) throws IOException, IndexOutOfBoundsException {
+    public void writeCharacter(final String str, final int off, final int length) throws IOException, IndexOutOfBoundsException {
         if (str == null) {
-            write(Strings.NULL_CHAR_ARRAY, off, len);
+            write(Strings.NULL_CHAR_ARRAY, off, length);
 
             return;
         }
 
         ensureOpen();
 
-        if (off < 0 || len < 0 || off > str.length() || len > str.length() - off) {
+        if (off < 0 || length < 0 || off > str.length() || length > str.length() - off) {
             throw new IndexOutOfBoundsException();
         }
 
-        final int end = off + len;
+        final int end = off + length;
         int from = off;
         char ch = 0;
 

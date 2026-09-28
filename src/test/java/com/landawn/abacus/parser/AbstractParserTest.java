@@ -47,6 +47,8 @@ import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.Strings;
 
 import testfixtures.types.WeekDay;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import com.landawn.abacus.util.IdentityHashSet;
 
 public abstract class AbstractParserTest extends AbstractTest {
 
@@ -526,5 +528,27 @@ public abstract class AbstractParserTest extends AbstractTest {
             return "TransientBean [transientField=" + transientField + ", nontransientField=" + nontransientField + "]";
         }
 
+    }
+
+
+    @Test
+    public void testHasCircularReferenceRecordsFirstVisitInSet() {
+        final IdentityHashSet<Object> visited = new IdentityHashSet<>();
+        final List<Object> list = new ArrayList<>();
+
+        // First visit: not circular, but the tracked object is recorded in the set.
+        assertFalse(AbstractParser.hasCircularReference(list, visited, null, null));
+        assertTrue(visited.contains(list));
+
+        // Second visit while still recorded: reported as circular (rejected without circular-reference support).
+        assertThrows(ParsingException.class, () -> AbstractParser.hasCircularReference(list, visited, null, null));
+
+        // Once the caller removes it, a repeated (non-circular) reference is accepted again.
+        visited.remove(list);
+        assertFalse(AbstractParser.hasCircularReference(list, visited, null, null));
+
+        // Scalars are never tracked.
+        assertFalse(AbstractParser.hasCircularReference("scalar", visited, null, null));
+        assertTrue(visited.size() == 1);
     }
 }

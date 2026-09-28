@@ -6252,4 +6252,301 @@ public class FloatStreamTest extends TestBase {
         assertThrows(NoSuchElementException.class, iter::nextFloat);
         assertEquals(1, conditionCalls.get());
     }
+
+    // ---- perf review 2026-09-26 G096 begin ----
+    private static float[] flattenVerticallyReference(final float[][] a) {
+        final FloatList ret = new FloatList();
+        int maxLen = 0;
+
+        for (final float[] row : a) {
+            maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+        }
+
+        for (int col = 0; col < maxLen; col++) {
+            for (final float[] row : a) {
+                if (row != null && col < row.length) {
+                    ret.add(row[col]);
+                }
+            }
+        }
+
+        return ret.toArray();
+    }
+
+    // G096-01: flatten(a, true) on jagged arrays with null/empty rows keeps the column-major order
+    @Test
+    public void testFlattenVertically_jaggedNullAndEmptyRows() {
+        final float[][] array = { null, { 1, 2, 3, 4 }, {}, { 5 }, null, { 6, 7 }, { 8, 9, 10, 11, 12 }, {} };
+        final float[] expected = { 1, 5, 6, 8, 2, 7, 9, 3, 10, 4, 11, 12 };
+        assertArrayEquals(expected, flattenVerticallyReference(array));
+        assertArrayEquals(expected, FloatStream.flatten(array, true).toArray());
+        assertEquals(12, FloatStream.flatten(array, true).count());
+        assertArrayEquals(new float[] { 9, 3, 10, 4, 11, 12 }, FloatStream.flatten(array, true).skip(6).toArray());
+        assertEquals(N.toList(1f, 5f, 6f, 8f, 2f, 7f, 9f, 3f, 10f, 4f, 11f, 12f), FloatStream.flatten(array, true).toList());
+
+        // only the last row is long, only the first row is long
+        assertArrayEquals(new float[] { 1, 2, 3, 4, 5, 6 }, FloatStream.flatten(new float[][] { { 1 }, { 2 }, { 3, 4, 5, 6 } }, true).toArray());
+        assertArrayEquals(new float[] { 1, 5, 6, 2, 3, 4 }, FloatStream.flatten(new float[][] { { 1, 2, 3, 4 }, { 5 }, { 6 } }, true).toArray());
+        // all rows null or empty
+        assertEquals(0, FloatStream.flatten(new float[][] { null, {}, null }, true).count());
+        // NaN / -0.0 are passed through bit for bit
+        final float[] special = FloatStream.flatten(new float[][] { { Float.NaN, 1 }, { -0.0f } }, true).toArray();
+        assertEquals(3, special.length);
+        assertTrue(Float.isNaN(special[0]));
+        assertEquals(Float.floatToRawIntBits(-0.0f), Float.floatToRawIntBits(special[1]));
+        assertEquals(1f, special[2]);
+    }
+
+    // G096-01: iterator of flatten(a, true) throws NoSuchElementException once exhausted
+    @Test
+    public void testFlattenVertically_iteratorExhaustion() {
+        final FloatIterator iter = FloatStream.flatten(new float[][] { { 1, 2, 3 }, null, { 4 } }, true).iterator();
+        assertEquals(1f, iter.nextFloat());
+        assertEquals(4f, iter.nextFloat());
+        assertEquals(2f, iter.nextFloat());
+        assertEquals(3f, iter.nextFloat());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextFloat);
+        assertThrows(NoSuchElementException.class, iter::nextFloat);
+    }
+
+    // G096-01: flatten(a, true) matches a naive column-major reference on random jagged arrays
+    @Test
+    public void testFlattenVertically_randomJaggedMatchesReference() {
+        final Random random = new Random(96);
+
+        for (int round = 0; round < 300; round++) {
+            final float[][] array = new float[2 + random.nextInt(8)][];
+
+            for (int i = 0; i < array.length; i++) {
+                final int len = random.nextInt(10) - 1;
+
+                if (len >= 0) {
+                    array[i] = new float[len];
+
+                    for (int j = 0; j < len; j++) {
+                        array[i][j] = random.nextInt(100);
+                    }
+                }
+            }
+
+            final float[] expected = flattenVerticallyReference(array);
+            assertArrayEquals(expected, FloatStream.flatten(array, true).toArray());
+            assertEquals(expected.length, FloatStream.flatten(array, true).count());
+
+            final int skip = random.nextInt(expected.length + 2);
+            assertArrayEquals(Arrays.copyOfRange(expected, Math.min(skip, expected.length), expected.length),
+                    FloatStream.flatten(array, true).skip(skip).toArray());
+        }
+    }
+    // ---- perf review 2026-09-26 G096 end ----
+    // ---- perf review 2026-09-26 G112 begin ----
+    // G112-01: bulk count()/toFloatList()/toArray() of concat(List<float[]>) / concat(float[]...) - null/empty arrays, skip into/at/after a
+    // segment, short (element-wise) and long (bulk copy) segments, fresh results, lazy read of the list, same list traversal calls
+    @Test
+    public void testConcatListOfArrays_bulkOpsMatchElementwise_G112() {
+        final float[] a = new float[20];
+        final float[] b = new float[40];
+        final float[] c = { (float) 1, (float) 2, (float) 3 };
+        for (int i = 0; i < a.length; i++) {
+            a[i] = (float) (10 + i);
+        }
+        for (int i = 0; i < b.length; i++) {
+            b[i] = (float) (100 + i);
+        }
+        final List<float[]> list = Arrays.asList(null, a, null, new float[0], c, b, c, new float[0]);
+        final float[] all = new float[66];
+        System.arraycopy(a, 0, all, 0, 20);
+        System.arraycopy(c, 0, all, 20, 3);
+        System.arraycopy(b, 0, all, 23, 40);
+        System.arraycopy(c, 0, all, 63, 3);
+
+        for (final int n : new int[] { 0, 1, 5, 19, 20, 21, 22, 23, 24, 40, 62, 63, 64, 65, 66, 70 }) {
+            final float[] expected = Arrays.copyOfRange(all, Math.min(n, all.length), all.length);
+            assertArrayEquals(expected, FloatStream.concat(list).skip(n).toArray(), "skip " + n);
+            assertEquals(expected.length, FloatStream.concat(list).skip(n).count(), "skip " + n);
+            final FloatList xl = FloatStream.concat(list).skip(n).toFloatList();
+            assertArrayEquals(expected, xl.toArray(), "skip " + n);
+            xl.add((float) 7);
+            assertEquals(expected.length + 1, xl.size());
+        }
+
+        assertArrayEquals(all, FloatStream.concat(a, c, b, c).toArray());
+        assertEquals(66, FloatStream.concat(a, null, c, b, c).count());
+
+        final List<float[]> empties = Arrays.asList(null, new float[0]);
+        assertEquals(0, FloatStream.concat(empties).toArray().length);
+        assertEquals(0, FloatStream.concat(empties).count());
+        final FloatList emptyList = FloatStream.concat(empties).toFloatList();
+        emptyList.add((float) 9);
+        assertEquals(1, emptyList.size());
+
+        final float[] result = FloatStream.concat(Arrays.asList(b)).toArray();
+        assertArrayEquals(b, result);
+        assertFalse(result == b);
+        result[0] = (float) 0;
+        assertEquals((float) 100, b[0]);
+
+        // the list is read when the terminal operation runs; close handlers still run
+        final List<float[]> live = new ArrayList<>(Arrays.asList(new float[] { (float) 1 }, new float[] { (float) 2 }));
+        final FloatStream stream = FloatStream.concat(live);
+        live.set(1, b);
+        final AtomicInteger closed = new AtomicInteger();
+        assertEquals(41, stream.onClose(closed::incrementAndGet).count());
+        assertEquals(1, closed.get());
+
+        // partially consumed iterator, then drained in bulk
+        final FloatIterator iter = FloatStream.concat(list).iterator();
+        assertEquals((float) 10, iter.nextFloat());
+        assertArrayEquals(Arrays.copyOfRange(all, 1, all.length), iter.toArray());
+        assertFalse(iter.hasNext());
+
+        // the list iterator is advanced exactly as element-by-element iteration advances it
+        final int[] calls = new int[2];
+        final List<float[]> counting = new ArrayList<float[]>(list) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public java.util.Iterator<float[]> iterator() {
+                final java.util.Iterator<float[]> it = super.iterator();
+
+                return new java.util.Iterator<float[]>() {
+                    @Override
+                    public boolean hasNext() {
+                        calls[0]++;
+                        return it.hasNext();
+                    }
+
+                    @Override
+                    public float[] next() {
+                        calls[1]++;
+                        return it.next();
+                    }
+                };
+            }
+        };
+
+        assertArrayEquals(all, FloatStream.concat(counting).toArray());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+        calls[0] = calls[1] = 0;
+        assertEquals(66, FloatStream.concat(counting).count());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+        calls[0] = calls[1] = 0;
+        assertEquals(66, FloatStream.concat(counting).toFloatList().size());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+    }
+    // ---- perf review 2026-09-26 G112 end ----
+    // ---- perf review 2026-09-26 G114 begin ----
+    private static float[] flattenVerticallyReferenceG114(final float[][] a) {
+        final FloatList ret = new FloatList();
+        int maxLen = 0;
+
+        for (final float[] row : a) {
+            maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+        }
+
+        for (int col = 0; col < maxLen; col++) {
+            for (final float[] row : a) {
+                if (row != null && col < row.length) {
+                    ret.add(row[col]);
+                }
+            }
+        }
+
+        return ret.toArray();
+    }
+
+    private static void assertFlattenVerticallyMatchesReferenceG114(final float[][] a, final int skip) {
+        final float[] expected = flattenVerticallyReferenceG114(a);
+        final String message = Arrays.deepToString(a);
+        assertArrayEquals(expected, FloatStream.flatten(a, true).toArray(), message);
+        assertEquals(expected.length, FloatStream.flatten(a, true).count(), message);
+        assertArrayEquals(Arrays.copyOfRange(expected, Math.min(skip, expected.length), expected.length), FloatStream.flatten(a, true).skip(skip).toArray(),
+                message);
+
+        final FloatIterator iter = FloatStream.flatten(a, true).iterator();
+
+        for (final float element : expected) {
+            assertTrue(iter.hasNext());
+            assertEquals(element, iter.nextFloat());
+        }
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextFloat);
+        assertFalse(iter.hasNext());
+    }
+
+    // G114-01: flatten(float[][], true) keeps the original walk for dense input and uses a compacted row walk when
+    // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
+    @Test
+    public void testFlattenVertically_denseAndSparseWalksMatchColumnMajorReference() {
+        final Random random = new Random(114);
+
+        for (int round = 0; round < 400; round++) {
+            // kind 0: dense jagged, 1: mostly null/empty rows plus a few long ones, 2: rectangular, 3: one long row among empty/null rows
+            final int kind = round % 4;
+            final int rows = 2 + random.nextInt(kind == 1 || kind == 3 ? 40 : 8);
+            final int width = 1 + random.nextInt(6);
+            final int longRow = random.nextInt(rows);
+            final float[][] a = new float[rows][];
+
+            for (int i = 0; i < rows; i++) {
+                final int len;
+
+                if (kind == 0) {
+                    len = random.nextInt(7) - 1;
+                } else if (kind == 1) {
+                    len = random.nextInt(6) == 0 ? random.nextInt(40) : random.nextInt(3) - 1;
+                } else if (kind == 2) {
+                    len = width;
+                } else {
+                    len = i == longRow ? 1 + random.nextInt(60) : random.nextInt(2) - 1;
+                }
+
+                if (len >= 0) {
+                    a[i] = new float[len];
+
+                    for (int j = 0; j < len; j++) {
+                        a[i][j] = (float) (i * 100 + j);
+                    }
+                }
+            }
+
+            assertFlattenVerticallyMatchesReferenceG114(a, random.nextInt(rows * 3 + 2));
+        }
+
+        // rows * longest row == 4 * elements keeps the original walk; one more empty row switches to the compacted walk
+        final float[][] boundary = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {} };
+        final float[][] boundaryPlusOne = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {}, {} };
+        assertArrayEquals(new float[] { 1, 5, 2, 6, 3, 7, 4, 8 }, FloatStream.flatten(boundary, true).toArray());
+        assertArrayEquals(new float[] { 1, 5, 2, 6, 3, 7, 4, 8 }, FloatStream.flatten(boundaryPlusOne, true).toArray());
+
+        for (int skip = 0; skip <= 9; skip++) {
+            assertFlattenVerticallyMatchesReferenceG114(boundary, skip);
+            assertFlattenVerticallyMatchesReferenceG114(boundaryPlusOne, skip);
+        }
+
+        // sparse: rows drop out of the compacted walk at different columns
+        final float[][] sparse = { null, {}, { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, {}, {}, { 10, 11 }, {}, null, {}, {}, { 12, 13, 14, 15 }, {} };
+        assertArrayEquals(new float[] { 1, 10, 12, 2, 11, 13, 3, 14, 4, 15, 5, 6, 7, 8, 9 }, FloatStream.flatten(sparse, true).toArray());
+        assertFlattenVerticallyMatchesReferenceG114(sparse, 4);
+
+        // one long row among 999 null rows (first and last position)
+        final float[][] oneLongRow = new float[1000][];
+        oneLongRow[999] = new float[5000];
+
+        for (int j = 0; j < 5000; j++) {
+            oneLongRow[999][j] = (float) j;
+        }
+
+        assertArrayEquals(oneLongRow[999], FloatStream.flatten(oneLongRow, true).toArray());
+        oneLongRow[0] = oneLongRow[999];
+        oneLongRow[999] = null;
+        assertFlattenVerticallyMatchesReferenceG114(oneLongRow, 4999);
+        assertEquals(0, FloatStream.flatten(new float[][] { null, {}, null, {} }, true).count());
+    }
+    // ---- perf review 2026-09-26 G114 end ----
 }

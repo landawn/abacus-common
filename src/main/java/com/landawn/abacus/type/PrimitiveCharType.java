@@ -27,8 +27,8 @@ package com.landawn.abacus.type;
  * Type<Character> type = TypeFactory.getType(char.class);
  *
  * // Convert string to char
- * Character value = type.valueOf("A");    // Returns 'A'
- * Character value2 = type.valueOf("9");   // Returns '9'
+ * Character value = type.valueOf("A");   // Returns 'A'
+ * Character value2 = type.valueOf("9");  // Returns '9'
  *
  * // Get default value
  * Character defaultVal = type.defaultValue();   // Returns '\0' (null character)

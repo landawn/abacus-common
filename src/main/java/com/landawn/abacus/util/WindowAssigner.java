@@ -42,8 +42,8 @@ public abstract class WindowAssigner {
      * handling, or resource-ownership behavior is defined by the implementation.
      *
      * @param <T> the type of elements in the stream
-     * @param iter the input iterator; this base type performs no null validation
+     * @param iterator the input iterator; this base type performs no null validation
      * @return the transformed iterator; the implementation defines whether {@code null} is permitted
      */
-    protected abstract <T> ObjIterator<T> process(ObjIterator<T> iter);
+    protected abstract <T> ObjIterator<T> process(ObjIterator<T> iterator);
 }

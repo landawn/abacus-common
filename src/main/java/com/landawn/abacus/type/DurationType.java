@@ -171,18 +171,18 @@ public class DurationType extends AbstractType<Duration> {
      * The duration is stored as its millisecond count ({@code long}).
      * A {@code null} duration is stored as SQL {@code NULL} with JDBC type {@link Types#BIGINT}.
      *
-     * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param statement        the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the {@link Duration} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Duration x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Duration x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.BIGINT);
+            statement.setNull(columnIndex, Types.BIGINT);
         } else {
-            stmt.setLong(columnIndex, x.toMillis());
+            statement.setLong(columnIndex, x.toMillis());
         }
     }
 
@@ -191,18 +191,18 @@ public class DurationType extends AbstractType<Duration> {
      * The duration is stored as its millisecond count ({@code long}).
      * A {@code null} duration is stored as SQL {@code NULL} with JDBC type {@link Types#BIGINT}.
      *
-     * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
+     * @param statement          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the {@link Duration} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Duration x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Duration x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.BIGINT);
+            statement.setNull(parameterName, Types.BIGINT);
         } else {
-            stmt.setLong(parameterName, x.toMillis());
+            statement.setLong(parameterName, x.toMillis());
         }
     }
 

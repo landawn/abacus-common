@@ -100,8 +100,17 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
                 if (x[i] == null) {
                     sb.append(NULL_CHAR_ARRAY);
                 } else {
+                    final char ch = x[i];
+
                     sb.append(SK.SINGLE_QUOTE);
-                    sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(x[i])));
+
+                    if (isVerbatimEcmaScriptChar(ch)) {
+                        // Same output as the escaping path below, without its per-element String/StringWriter allocations.
+                        sb.append(ch);
+                    } else {
+                        sb.append(EscapeUtil.escapeEcmaScript(String.valueOf(ch)));
+                    }
+
                     sb.append(SK.SINGLE_QUOTE);
                 }
             }
@@ -165,7 +174,10 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
                 final char quoteChar = element.charAt(0);
 
                 if ((quoteChar == SK._SINGLE_QUOTE || quoteChar == SK._DOUBLE_QUOTE) && element.charAt(element.length() - 1) == quoteChar) {
-                    array[i] = elementType.valueOf(EscapeUtil.unescapeEcmaScript(element.substring(1, element.length() - 1)));
+                    final String content = element.substring(1, element.length() - 1);
+
+                    // Unescaping only rewrites backslash sequences, so content without a backslash is already its own unescaped form.
+                    array[i] = elementType.valueOf(content.indexOf('\\') < 0 ? content : EscapeUtil.unescapeEcmaScript(content));
                     continue;
                 }
             }
@@ -319,5 +331,13 @@ public final class CharacterArrayType extends ObjectArrayType<Character> {
         }
 
         return Strings.join(x, ELEMENT_SEPARATOR, SK.BRACKET_L, SK.BRACKET_R);
+    }
+
+    /**
+     * Returns {@code true} if {@link EscapeUtil#escapeEcmaScript(String)} leaves the specified character unchanged,
+     * i.e. it is in U+0020..U+007F and is none of the single quote, double quote, backslash and slash.
+     */
+    private static boolean isVerbatimEcmaScriptChar(final char ch) {
+        return ch >= ' ' && ch <= 0x7F && ch != '\'' && ch != '"' && ch != '\\' && ch != '/';
     }
 }

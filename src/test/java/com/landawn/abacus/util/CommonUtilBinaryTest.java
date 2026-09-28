@@ -108,4 +108,11 @@ public class CommonUtilBinaryTest extends CommonUtilTestSupport {
         assertEquals(2, CommonUtil.binarySearch(Arrays.asList(1, 3, 5, 7, 9, 11), 1, 4, 5, Integer::compareTo));
         assertTrue(CommonUtil.binarySearch(Arrays.asList(1, 3, 5, 7, 9), 0, 5, 4, Integer::compareTo) < 0);
     }
+
+    @Test
+    public void testBinarySearch_charMissingAfterEnd_returnsMinusInsertionPointMinusOne() {
+        final char[] sortedArray = { 'a', 'b', 'c', 'd', 'e' };
+        assertEquals(2, CommonUtil.binarySearch(sortedArray, 'c'));
+        assertEquals(-6, CommonUtil.binarySearch(sortedArray, 'f'));
+    }
 }

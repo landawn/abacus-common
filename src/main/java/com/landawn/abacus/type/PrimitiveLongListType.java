@@ -91,8 +91,8 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * List<Type<?>> paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.size());          // Output: 1
-     * System.out.println(paramTypes.get(0).name());   // Output: long
+     * System.out.println(paramTypes.size());         // Output: 1
+     * System.out.println(paramTypes.get(0).name());  // Output: long
      * }</pre>
      *
      * @return an immutable list containing the primitive {@code long} Type that describes the elements of this list type
@@ -130,9 +130,10 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public String stringOf(final LongList x) {
-        return x == null ? null : arrayType.stringOf(x.toArray());
+        return x == null ? null : arrayType instanceof PrimitiveLongArrayType ? stringOf(x.internalArray(), x.size()) : arrayType.stringOf(x.toArray());
     }
 
     /**
@@ -143,8 +144,8 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <pre>{@code
      * Type<LongList> type = TypeFactory.getType(LongList.class);
      * LongList list = type.valueOf("[1, 2, 3]");
-     * System.out.println(list.size());   // Output: 3
-     * System.out.println(list.get(0));   // Output: 1
+     * System.out.println(list.size());  // Output: 3
+     * System.out.println(list.get(0));  // Output: 1
      *
      * LongList emptyList = type.valueOf("[]");
      * System.out.println(emptyList.isEmpty());   // Output: true
@@ -156,6 +157,10 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * <p>This method is intended as the inverse of {@code stringOf}: it parses the type-defined string form back into
      * a value of this type. Exact round-trip behavior is type-specific ({@code null}/empty inputs typically yield the
      * type's default). Strings produced by {@link Object#toString()} are not guaranteed to be parseable in this way.</p>
+     *
+     * <p>An element may also be enclosed in a matching pair of double or single quotes (for example
+     * {@code ["1", "2"]}), which is the form {@link #serializeTo(CharacterWriter, LongList, JsonXmlSerConfig)} writes
+     * when {@link JsonXmlSerConfig#isWriteLongAsString()} is set; the quotes are removed before the element is parsed.</p>
      *
      * @param str the string to parse, expected format is "[value1, value2, ...]"
      * @return the parsed LongList, or {@code null} if the input string is {@code null}, empty or blank
@@ -214,19 +219,24 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void appendTo(final Appendable appendable, final LongList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            arrayType.appendTo(appendable, x.toArray());
+            if (arrayType instanceof PrimitiveLongArrayType && canWriteDirectly(appendable)) {
+                appendTo(appendable, x.internalArray(), x.size());
+            } else {
+                arrayType.appendTo(appendable, x.toArray());
+            }
         }
     }
 
     /**
      * Writes the character representation of a LongList to a CharacterWriter.
      * This method is optimized for performance when writing to character-based outputs.
-     * The list is converted to an array and then written as comma-separated values
+     * The logical elements are written as comma-separated values
      * enclosed in square brackets.
      *
      * <p><b>Usage Examples:</b></p>
@@ -264,12 +274,17 @@ public final class PrimitiveLongListType extends AbstractPrimitiveListType<LongL
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void serializeTo(final CharacterWriter writer, final LongList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            arrayType.serializeTo(writer, x.toArray(), config);
+            if (arrayType instanceof PrimitiveLongArrayType && canWriteDirectly(writer, config)) {
+                serializeTo(writer, x.internalArray(), x.size(), config);
+            } else {
+                arrayType.serializeTo(writer, x.toArray(), config);
+            }
         }
     }
 }

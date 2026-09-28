@@ -168,12 +168,13 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      *
      * @param x the multimap to serialize; may be {@code null}
      * @return the JSON string representation, or {@code null} if {@code x} is {@code null}
+     * @throws RuntimeException if a key, value or bean property cannot be serialized by its selected type handler.
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
     @MayReturnNull
     @Override
-    public String stringOf(final T x) {
+    public String stringOf(final T x) throws RuntimeException {
         if (x == null) {
             return null;
         }
@@ -205,14 +206,17 @@ public class GuavaMultimapType<K, V, T extends Multimap<K, V>> extends AbstractT
      * @param str the JSON string to parse; may be {@code null} or empty
      * @return a new multimap instance containing the parsed data, or {@code null} if {@code str} is {@code null} or empty
      * @throws ParsingException if {@code str} is not a well-formed JSON object text
+     * @throws IllegalArgumentException if the target is a custom multimap class with no no-arg or {@code (int, int)} constructor
+     *         and no public static {@code create()} or {@code create(int, int)} factory returning it
      * @throws NullPointerException if a JSON array contains {@code null} and the target multimap rejects {@code null}
      *         values (the immutable multimaps and {@link TreeMultimap})
+     * @throws RuntimeException if a selected type handler cannot convert a parsed value, or constructing the target value fails.
      * @see #valueOf(Object)
      * @see #stringOf(Multimap)
      */
     @MayReturnNull
     @Override
-    public T valueOf(final String str) throws ParsingException, NullPointerException {
+    public T valueOf(final String str) throws ParsingException, IllegalArgumentException, NullPointerException, RuntimeException {
         if (Strings.isEmpty(str) || Strings.isBlank(str)) {
             return null; // NOSONAR
         }

@@ -182,4 +182,75 @@ public class CommonUtilCopyTest extends CommonUtilTestSupport {
         assertArrayEquals(new int[] {}, N.copyOfRange(new int[] { 1, 2, 3, 4, 5 }, 4, 1, 2));
         assertEquals("edc", N.copyOfRange("abcde", 4, 1, -1));
     }
+
+
+    @Test
+    public void testCopyOfRangeStringWithStepReturnsEmptyForNullString() {
+        assertEquals("", CommonUtil.copyOfRange((String) null, 0, 0, 2));
+        // C-107 (2026-09-24): a null String behaves exactly like "", which rejects the non-empty descending range (0, -1)
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange((String) null, 0, -1, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange((String) null, 0, 1, 1));
+    }
+
+    // ---- perf review 2026-09-26 G030 begin ----
+    // G030-02: copyOfRange(String, from, to, step) reads chars directly; pin every (from, to, step) combination against a reference.
+    @Test
+    public void testCopyOfRangeStringStep_allRanges() {
+        int thrownCount = 0;
+        final String[] inputs = { "", "a", "abcdefg", "\u00e8\u00e9\u4e2d\u6587x", "a\ud83d\ude00b\ud83d\ude01" };
+
+        for (final String str : inputs) {
+            final int len = str.length();
+
+            for (int step = -4; step <= 4; step++) {
+                if (step == 0) {
+                    continue;
+                }
+
+                for (int from = -1; from <= len; from++) {
+                    for (int to = -1; to <= len; to++) {
+                        final StringBuilder sb = new StringBuilder();
+
+                        if (step > 0) {
+                            for (int j = from; j < to; j += step) {
+                                sb.append(j >= 0 && j < len ? str.charAt(j) : '?');
+                            }
+                        } else {
+                            for (int j = from; j > to; j += step) {
+                                sb.append(j >= 0 && j < len ? str.charAt(j) : '?');
+                            }
+                        }
+
+                        String actual;
+
+                        try {
+                            actual = CommonUtil.copyOfRange(str, from, to, step);
+                        } catch (final IndexOutOfBoundsException e) {
+                            actual = null;
+                            thrownCount++;
+                        }
+
+                        if (actual != null) {
+                            assertEquals(sb.toString(), actual, str + " " + from + " " + to + " " + step);
+                        }
+                    }
+                }
+            }
+        }
+
+        assertEquals(288, thrownCount);
+        assertEquals("aceg", CommonUtil.copyOfRange("abcdefg", 0, 7, 2));
+        assertEquals("adg", CommonUtil.copyOfRange("abcdefg", 0, 7, 3));
+        assertEquals("ad", CommonUtil.copyOfRange("abcdefg", 0, 6, 3));
+        assertEquals("gda", CommonUtil.copyOfRange("abcdefg", 6, -1, -3));
+        assertEquals("ge", CommonUtil.copyOfRange("abcdefg", 6, 3, -2));
+        assertEquals("\u4e2d\u00e8", CommonUtil.copyOfRange("\u00e8\u00e9\u4e2d\u6587x", 2, -1, -2));
+        assertEquals("\ude00\ud83d", CommonUtil.copyOfRange("a\ud83d\ude00b", 2, 0, -1));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange("abc", 3, 0, -2));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange("abc", 0, 4, 2));
+        assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copyOfRange("abc", -1, 2, 2));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.copyOfRange("abc", 0, 3, 0));
+        assertEquals("", CommonUtil.copyOfRange((String) null, -1, -1, -2));
+    }
+    // ---- perf review 2026-09-26 G030 end ----
 }

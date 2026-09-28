@@ -1331,10 +1331,10 @@ public class CollectionsRegressionCTest extends TestBase {
     public class C004_SupplierConstructorNeedsAnExplicitTargetType extends TestBase {
 
         @Test
-        public void c004_aHoistedSupplierReachesTheDocumentedIllegalArgumentException() {
+        public void c004_aHoistedSupplierReachesTheDocumentedExceptions() {
             // `new Multiset<String>(() -> null)` does NOT compile - "reference to Multiset is ambiguous".
             final java.util.function.Supplier<Map<String, Object>> nullSupplier = () -> null;
-            assertThrows(IllegalArgumentException.class, () -> new Multiset<String>(nullSupplier));
+            assertThrows(NullPointerException.class, () -> new Multiset<String>(nullSupplier));
 
             final Map<String, Object> nonEmpty = new HashMap<>();
             nonEmpty.put("pre", "existing");

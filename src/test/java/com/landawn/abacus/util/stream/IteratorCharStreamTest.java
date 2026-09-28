@@ -1158,4 +1158,79 @@ public class IteratorCharStreamTest extends TestBase {
         assertEquals(3, seen[0]);
         stream.close();
     }
+
+    // ---- perf review 2026-09-26 G098 begin ----
+
+    // G098-01: unsorted distinct() tracks seen chars in a BitSet; pins first-occurrence order over the full char range.
+    @Test
+    public void testDistinct_unsortedWideCharRange() {
+        final java.util.Random random = new java.util.Random(98);
+        final char[] data = new char[3000];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (char) random.nextInt(i % 3 == 0 ? 128 : 65536);
+        }
+        data[7] = (char) 0;
+        data[8] = (char) 0xFFFF;
+        data[9] = (char) 0;
+        data[10] = (char) 0xFFFF;
+
+        final java.util.LinkedHashSet<Character> expected = new java.util.LinkedHashSet<>();
+        for (final char ch : data) {
+            expected.add(ch);
+        }
+
+        final char[] actual = CharStream.of(CharIterator.of(data)).distinct().toArray();
+        assertEquals(expected.size(), actual.length);
+
+        int i = 0;
+        for (final Character ch : expected) {
+            assertEquals(ch.charValue(), actual[i++]);
+        }
+
+        assertEquals(expected.size(), CharStream.of(CharIterator.of(data)).parallel().distinct().count());
+        assertEquals(0, CharStream.of(CharIterator.of(new char[0])).distinct().count());
+        assertEquals(1, CharStream.of(CharIterator.of((char) 0xFFFF, (char) 0xFFFF)).distinct().count());
+    }
+
+    // G098-01: unsorted distinct() stays lazy and pulls each source element exactly once.
+    @Test
+    public void testDistinct_unsortedLazyPullCount() {
+        final AtomicInteger pulled = new AtomicInteger();
+        final char wide = (char) 300;
+        final CharStream distinct = CharStream.of(CharIterator.of('b', 'a', 'b', wide, 'a', wide, 'c')).onEach(c -> pulled.incrementAndGet()).distinct();
+        assertEquals(0, pulled.get());
+        assertEquals(new String(new char[] { 'b', 'a', wide, 'c' }), new String(distinct.toArray()));
+        assertEquals(7, pulled.get());
+    }
+
+    // G098-02: sorted kthLargest ring buffer wraps with a compare; pins every k against the sorted reference.
+    @Test
+    public void testKthLargest_sortedRingWrapAllK() {
+        final char[] data = new char[37];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (char) ('a' + (i * 7) % 23);
+        }
+        final char[] sortedData = data.clone();
+        Arrays.sort(sortedData);
+
+        for (int k = 1; k <= data.length + 2; k++) {
+            final OptionalChar result = CharStream.of(CharIterator.of(data)).sorted().kthLargest(k);
+            if (k <= data.length) {
+                assertEquals(sortedData[data.length - k], result.get());
+            } else {
+                assertFalse(result.isPresent());
+            }
+        }
+
+        for (int k = 1; k <= 26; k++) {
+            final OptionalChar result = CharStream.range('a', 'z').kthLargest(k);
+            if (k <= 25) {
+                assertEquals((char) ('z' - k), result.get());
+            } else {
+                assertFalse(result.isPresent());
+            }
+        }
+    }
+
+    // ---- perf review 2026-09-26 G098 end ----
 }

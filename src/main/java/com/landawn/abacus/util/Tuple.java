@@ -270,8 +270,8 @@ import com.landawn.abacus.util.u.Optional;
  *         String[] fields = row.split(",");
  *         return Tuple.of(fields[0], Double.valueOf(fields[1]), Integer.valueOf(fields[2]));
  *     })
- *     .filter(tuple -> tuple._3 > 0)                    // Filter by count
- *     .sorted((t1, t2) -> Double.compare(t2._2, t1._2)) // Sort by score descending
+ *     .filter(tuple -> tuple._3 > 0)                     // Filter by count
+ *     .sorted((t1, t2) -> Double.compare(t2._2, t1._2))  // Sort by score descending
  *     .collect(Collectors.toList());
  *
  * List<String> summaries = processed.stream()
@@ -360,9 +360,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Tuple3<String, Integer, Boolean> t = Tuple.of("hello", 42, true);
-     * boolean found1 = t.contains(42);        // returns true
-     * boolean found2 = t.contains("world");   // returns false
-     * boolean found3 = t.contains(null);      // returns false
+     * boolean found1 = t.contains(42);       // returns true
+     * boolean found2 = t.contains("world");  // returns false
+     * boolean found3 = t.contains(null);     // returns false
      * }</pre>
      *
      * @param valueToFind the value to search for in this tuple, may be {@code null}.
@@ -1009,16 +1009,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the type of the element in the tuple.
-     * @param tp the Tuple1 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple1 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the single element; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple1<? extends T> tp) throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+    public static <T> List<T> toList(final Tuple1<? extends T> tuple) throws IllegalArgumentException {
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1);
+        return N.toList(tuple._1);
     }
 
     /**
@@ -1035,16 +1035,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple2 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple2 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the two elements, in order; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple2<? extends T, ? extends T> tp) throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+    public static <T> List<T> toList(final Tuple2<? extends T, ? extends T> tuple) throws IllegalArgumentException {
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1, tp._2);
+        return N.toList(tuple._1, tuple._2);
     }
 
     /**
@@ -1061,16 +1061,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple3 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple3 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the three elements, in order; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple3<? extends T, ? extends T, ? extends T> tp) throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+    public static <T> List<T> toList(final Tuple3<? extends T, ? extends T, ? extends T> tuple) throws IllegalArgumentException {
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1, tp._2, tp._3);
+        return N.toList(tuple._1, tuple._2, tuple._3);
     }
 
     /**
@@ -1087,16 +1087,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple4 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple4 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the four elements, in order; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tp) throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+    public static <T> List<T> toList(final Tuple4<? extends T, ? extends T, ? extends T, ? extends T> tuple) throws IllegalArgumentException {
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1, tp._2, tp._3, tp._4);
+        return N.toList(tuple._1, tuple._2, tuple._3, tuple._4);
     }
 
     /**
@@ -1114,16 +1114,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple5 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple5 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the five elements, in order; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp) throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+    public static <T> List<T> toList(final Tuple5<? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple) throws IllegalArgumentException {
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5);
+        return N.toList(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5);
     }
 
     /**
@@ -1141,17 +1141,17 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple6 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple6 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the six elements, in order; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp)
+    public static <T> List<T> toList(final Tuple6<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple)
             throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6);
+        return N.toList(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6);
     }
 
     /**
@@ -1169,17 +1169,17 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple7 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple7 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the seven elements, in order; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp)
+    public static <T> List<T> toList(final Tuple7<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple)
             throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7);
+        return N.toList(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7);
     }
 
     /**
@@ -1198,17 +1198,17 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple8 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple8 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the eight elements, in order; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
-    public static <T> List<T> toList(final Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp)
+    public static <T> List<T> toList(final Tuple8<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple)
             throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8);
+        return N.toList(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8);
     }
 
     /**
@@ -1227,18 +1227,18 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <p><b>Note:</b> This method is marked as {@link Beta} and may be subject to change.</p>
      *
      * @param <T> the common type of the elements in the tuple.
-     * @param tp the Tuple9 to convert to a list, must not be {@code null}.
+     * @param tuple the Tuple9 to convert to a list, must not be {@code null}.
      * @return a new mutable {@code List} holding the nine elements, in order; it is a snapshot, not a view -
      *         changing the list structure does not affect the tuple; element objects remain shared
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
      */
     @Beta
     public static <T> List<T> toList(
-            final Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tp)
+            final Tuple9<? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T, ? extends T> tuple)
             throws IllegalArgumentException {
-        N.checkArgNotNull(tp, cs.tp);
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return N.toList(tp._1, tp._2, tp._3, tp._4, tp._5, tp._6, tp._7, tp._8, tp._9);
+        return N.toList(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8, tuple._9);
     }
 
     /**
@@ -1260,16 +1260,16 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T1> the type of the first element in the nested tuple.
      * @param <T2> the type of the second element in the nested tuple.
      * @param <T3> the type of the third element (second element of the outer tuple).
-     * @param tp the nested tuple structure to flatten, must not be {@code null}.
-     * @return a new {@code Tuple3} containing {@code tp._1._1}, {@code tp._1._2}, and {@code tp._2} in order.
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
-     * @throws NullPointerException if the first element ({@code tp._1}) is {@code null}.
+     * @param tuple the nested tuple structure to flatten, must not be {@code null}.
+     * @return a new {@code Tuple3} containing {@code tuple._1._1}, {@code tuple._1._2}, and {@code tuple._2} in order.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
+     * @throws NullPointerException if the first element ({@code tuple._1}) is {@code null}.
      */
     @Beta
-    public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(final Tuple2<Tuple2<T1, T2>, T3> tp) throws IllegalArgumentException, NullPointerException {
-        N.checkArgNotNull(tp, cs.tp);
+    public static <T1, T2, T3> Tuple3<T1, T2, T3> flatten(final Tuple2<Tuple2<T1, T2>, T3> tuple) throws IllegalArgumentException, NullPointerException {
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return new Tuple3<>(tp._1._1, tp._1._2, tp._2);
+        return new Tuple3<>(tuple._1._1, tuple._1._2, tuple._2);
     }
 
     /**
@@ -1293,17 +1293,17 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * @param <T3> the type of the third element in the nested tuple.
      * @param <T4> the type of the fourth element (second element of the outer tuple).
      * @param <T5> the type of the fifth element (third element of the outer tuple).
-     * @param tp the nested tuple structure to flatten, must not be {@code null}.
-     * @return a new {@code Tuple5} containing {@code tp._1._1}, {@code tp._1._2}, {@code tp._1._3}, {@code tp._2}, and {@code tp._3} in order.
-     * @throws IllegalArgumentException if {@code tp} is {@code null}.
-     * @throws NullPointerException if the first element ({@code tp._1}) is {@code null}.
+     * @param tuple the nested tuple structure to flatten, must not be {@code null}.
+     * @return a new {@code Tuple5} containing {@code tuple._1._1}, {@code tuple._1._2}, {@code tuple._1._3}, {@code tuple._2}, and {@code tuple._3} in order.
+     * @throws IllegalArgumentException if {@code tuple} is {@code null}.
+     * @throws NullPointerException if the first element ({@code tuple._1}) is {@code null}.
      */
     @Beta
-    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(final Tuple3<Tuple3<T1, T2, T3>, T4, T5> tp)
+    public static <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5> flatten(final Tuple3<Tuple3<T1, T2, T3>, T4, T5> tuple)
             throws IllegalArgumentException, NullPointerException {
-        N.checkArgNotNull(tp, cs.tp);
+        N.checkArgNotNull(tuple, cs.tuple);
 
-        return new Tuple5<>(tp._1._1, tp._1._2, tp._1._3, tp._2, tp._3);
+        return new Tuple5<>(tuple._1._1, tuple._1._2, tuple._1._3, tuple._2, tuple._3);
     }
 
     /**
@@ -1320,8 +1320,8 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
      * <pre>{@code
      * class TupleArity {
      *     static int arityOf(Tuple<?> t) {
-     *         return switch (t) {                        // exhaustive: no default branch needed
-     *             case Tuple.Tuple0 unused -> 0;         // reachable: Tuple.fromArray(new Object[0])
+     *         return switch (t) {                 // exhaustive: no default branch needed
+     *             case Tuple.Tuple0 unused -> 0;  // reachable: Tuple.fromArray(new Object[0])
      *             case Tuple.Tuple1<?> unused -> 1;
      *             case Tuple.Tuple2<?, ?> unused -> 2;
      *             case Tuple.Tuple3<?, ?, ?> unused -> 3;
@@ -1642,9 +1642,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple1<String> t = Tuple.of("hello");
-         * boolean found1 = t.contains("hello");   // returns true
-         * boolean found2 = t.contains("world");   // returns false
-         * boolean found3 = t.contains(null);      // returns false
+         * boolean found1 = t.contains("hello");  // returns true
+         * boolean found2 = t.contains("world");  // returns false
+         * boolean found3 = t.contains(null);     // returns false
          * }</pre>
          *
          * @param valueToFind the value to search for.
@@ -1754,9 +1754,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple1<String> t1 = Tuple.of("hello");
          * Tuple1<String> t2 = Tuple.of("hello");
          * Tuple1<String> t3 = Tuple.of("world");
-         * assert t1.equals(t2);      // returns true - same element
-         * assert !t1.equals(t3);     // returns false - different element
-         * assert !t1.equals(null);   // returns false
+         * assert t1.equals(t2);     // returns true - same element
+         * assert !t1.equals(t3);    // returns false - different element
+         * assert !t1.equals(null);  // returns false
          * }</pre>
          *
          * @param obj the object to compare with.
@@ -1966,9 +1966,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Tuple2<String, Integer> t = Tuple.of("Alice", 25);
-         * boolean found1 = t.contains("Alice");   // returns true
-         * boolean found2 = t.contains(25);        // returns true
-         * boolean found3 = t.contains("Bob");     // returns false
+         * boolean found1 = t.contains("Alice");  // returns true
+         * boolean found2 = t.contains(25);       // returns true
+         * boolean found3 = t.contains("Bob");    // returns false
          * }</pre>
          *
          * @param valueToFind the value to search for.
@@ -2242,9 +2242,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple2<String, Integer> t1 = Tuple.of("Alice", 25);
          * Tuple2<String, Integer> t2 = Tuple.of("Alice", 25);
          * Tuple2<String, Integer> t3 = Tuple.of("Bob", 30);
-         * assert t1.equals(t2);      // returns true - same elements
-         * assert !t1.equals(t3);     // returns false - different elements
-         * assert !t1.equals(null);   // returns false
+         * assert t1.equals(t2);     // returns true - same elements
+         * assert !t1.equals(t3);    // returns false - different elements
+         * assert !t1.equals(null);  // returns false
          * }</pre>
          *
          * @param obj the object to compare with.
@@ -4034,10 +4034,10 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t =
          *     Tuple.of("A", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
-         * boolean found1 = t.contains("A");    // returns true
-         * boolean found2 = t.contains(100L);   // returns true
-         * boolean found3 = t.contains("B");    // returns false
-         * boolean found4 = t.contains(null);   // returns false
+         * boolean found1 = t.contains("A");   // returns true
+         * boolean found2 = t.contains(100L);  // returns true
+         * boolean found3 = t.contains("B");   // returns false
+         * boolean found4 = t.contains(null);  // returns false
          * }</pre>
          *
          * @param valueToFind the value to search for, may be {@code null}.
@@ -4251,9 +4251,9 @@ public abstract sealed class Tuple<TP> implements Immutable permits Tuple0, Tupl
          * Tuple9<String, Integer, Double, Boolean, Character, Long, Float, Short, Byte> t3 =
          *     Tuple.of("B", 1, 2.0, true, 'X', 100L, 3.14f, (short)5, (byte)10);
          *
-         * assert t1.equals(t2);               // returns true - all elements equal
-         * assert !t1.equals(t3);              // returns false - first element differs
-         * assert !t1.equals("not a tuple");   // returns false - different type
+         * assert t1.equals(t2);              // returns true - all elements equal
+         * assert !t1.equals(t3);             // returns false - first element differs
+         * assert !t1.equals("not a tuple");  // returns false - different type
          * }</pre>
          *
          * @param obj the object to compare with this tuple.

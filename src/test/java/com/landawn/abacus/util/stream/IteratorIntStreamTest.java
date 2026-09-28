@@ -456,4 +456,43 @@ public class IteratorIntStreamTest extends TestBase {
         assertEquals(2, top.length);
         assertTrue(top[0] == 10 || top[1] == 10);
     }
+
+    // ---- perf review 2026-09-26 G098 begin ----
+
+    // G098-02: sorted kthLargest ring buffer wraps with a compare; pins every k against the sorted reference.
+    @Test
+    public void testKthLargest_sortedRingWrapAllK() {
+        final int[] data = new int[37];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (i * 7) % 23 - 11;
+        }
+        final int[] sortedData = data.clone();
+        java.util.Arrays.sort(sortedData);
+
+        for (int k = 1; k <= data.length + 2; k++) {
+            final OptionalInt result = iter(data).sorted().kthLargest(k);
+            if (k <= data.length) {
+                assertEquals(sortedData[data.length - k], result.get());
+            } else {
+                assertFalse(result.isPresent());
+            }
+        }
+
+        for (int k = 1; k <= 20; k++) {
+            final OptionalInt result = iter(sortedData).sorted().kthLargest(k);
+            assertEquals(sortedData[data.length - k], result.get());
+        }
+    }
+
+    // G098-02: IntStream.range is a sorted IteratorIntStream; kthLargest over a long run wraps the ring many times.
+    @Test
+    public void testKthLargest_sortedRangeManyWraps() {
+        for (final int k : new int[] { 1, 2, 3, 16, 17, 100, 1000 }) {
+            assertEquals(10_000 - k, IntStream.range(0, 10_000).kthLargest(k).get());
+        }
+        assertFalse(IntStream.range(0, 10).kthLargest(11).isPresent());
+        assertFalse(IntStream.range(0, 0).kthLargest(1).isPresent());
+    }
+
+    // ---- perf review 2026-09-26 G098 end ----
 }

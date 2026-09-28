@@ -132,7 +132,7 @@ public class HttpResponseException extends UncheckedIOException {
      *
      * <p>The exception message is {@code "<statusCode>: <responseMessage>"}, followed by {@code ". "} and
      * at most {@link HttpUtil#MAX_ERROR_BODY_IN_MESSAGE} characters of the body (longer bodies end with
-     * {@code "... (truncated)"}). A {@code null} or empty status message - the case for a status line
+     * {@code "... (truncated)"}; the cut never splits a surrogate pair). A {@code null} or empty status message - the case for a status line
      * without a reason phrase, as reported by {@code HttpURLConnection} and by HTTP/2 clients - is left
      * out entirely, so the message starts with just the code (for example {@code "503"} or
      * {@code "503. body"}).</p>
@@ -211,7 +211,15 @@ public class HttpResponseException extends UncheckedIOException {
             sb.append(". ");
 
             if (responseBody.length() > HttpUtil.MAX_ERROR_BODY_IN_MESSAGE) {
-                sb.append(responseBody, 0, HttpUtil.MAX_ERROR_BODY_IN_MESSAGE).append("... (truncated)");
+                int end = HttpUtil.MAX_ERROR_BODY_IN_MESSAGE;
+
+                // Never cut a surrogate pair in half: a lone high surrogate is not valid text and is
+                // mangled by every encoder the message is later written through (logs, JSON, ...).
+                if (Character.isHighSurrogate(responseBody.charAt(end - 1)) && Character.isLowSurrogate(responseBody.charAt(end))) {
+                    end--;
+                }
+
+                sb.append(responseBody, 0, end).append("... (truncated)");
             } else {
                 sb.append(responseBody);
             }

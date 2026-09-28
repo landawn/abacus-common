@@ -80,7 +80,7 @@ public final class cs { // NOSONAR
     public static final String beanClassForColumnType = "beanClassForColumnType";
     public static final String binaryOperator = "binaryOperator";
     // public static final String BiConsumer = "BiConsumer";
-    // public static final String TriConsumer = "TriConsumer";
+    public static final String TriConsumer = "TriConsumer";
     // public static final String Function = "Function";
     // public static final String BiFunction = "BiFunction";
     // public static final String BiPredicate = "BiPredicate";
@@ -99,12 +99,7 @@ public final class cs { // NOSONAR
     public static final String charCount = "charCount";
     public static final String chunkSize = "chunkSize";
 
-    public static final String clazz = "clazz";
-    public static final String cls = "cls";
-    public static final String cmd = "cmd";
-    public static final String cmp = "cmp";
     public static final String codeConfig = "codeConfig";
-    public static final String coll = "coll";
     public static final String collapsible = "collapsible";
     public static final String collection = "collection";
     public static final String collectionSupplier = "collectionSupplier";
@@ -151,7 +146,6 @@ public final class cs { // NOSONAR
     public static final String downstream5 = "downstream5";
     public static final String downstream6 = "downstream6";
     public static final String downstream7 = "downstream7";
-    public static final String dss = "dss";
     public static final String duration = "duration";
     public static final String element = "element";
     public static final String emptyAction = "emptyAction";
@@ -161,6 +155,8 @@ public final class cs { // NOSONAR
     public static final String endDate2 = "endDate2";
     public static final String endExclusive = "endExclusive";
     public static final String entry = "entry";
+    public static final String entryDelimiter = "entryDelimiter";
+    public static final String entryDelimiterRegex = "entryDelimiterRegex";
     public static final String entryFilter = "entryFilter";
     public static final String entryPredicate = "entryPredicate";
     public static final String enumClass = "enumClass";
@@ -182,9 +178,11 @@ public final class cs { // NOSONAR
     public static final String flatMapper2 = "flatMapper2";
     public static final String format = "format";
     public static final String fromIndex = "fromIndex";
-    public static final String fromStringFunc = "fromStringFunc";
-    public static final String func = "func";
+    public static final String fromStringFunction = "fromStringFunction";
     public static final String function = "function";
+    public static final String functionOfExclusiveBeginIndex = "functionOfExclusiveBeginIndex";
+    public static final String functionOfExclusiveEndIndex = "functionOfExclusiveEndIndex";
+    public static final String functionOfInclusiveBeginIndex = "functionOfInclusiveBeginIndex";
     public static final String generator = "generator";
     public static final String handler = "handler";
     public static final String hashFunction = "hashFunction";
@@ -192,12 +190,12 @@ public final class cs { // NOSONAR
     public static final String hasNext = "hasNext";
     public static final String httpHeaderFilterForHARRequest = "httpHeaderFilterForHARRequest";
     // public static final String idPropNames = "idPropNames";
+    public static final String idPropName = "idPropName";
     public static final String in = "in";
     public static final String increment = "increment";
     public static final String index = "index";
-    public static final String indexFunc = "indexFunc";
+    public static final String indexFunction = "indexFunction";
     public static final String initialCapacity = "initialCapacity";
-    public static final String iter = "iter";
     public static final String iterator = "iterator";
     public static final String iteratorSupplier = "iteratorSupplier";
     public static final String joiner = "joiner";
@@ -210,11 +208,14 @@ public final class cs { // NOSONAR
     public static final String keyExtractor = "keyExtractor";
     public static final String keyFilter = "keyFilter";
     public static final String keyMapper = "keyMapper";
+    public static final String keyMapType = "keyMapType";
     public static final String keyPredicate = "keyPredicate";
     public static final String keyType = "keyType";
+    public static final String keyValueDelimiter = "keyValueDelimiter";
+    public static final String keyValueDelimiterRegex = "keyValueDelimiterRegex";
     public static final String leftKeyExtractor = "leftKeyExtractor";
-    public static final String len = "len";
     public static final String length = "length";
+    public static final String lengthOrSize = "lengthOrSize";
     public static final String limit = "limit";
     public static final String lineIndex = "lineIndex";
     public static final String list = "list";
@@ -228,11 +229,11 @@ public final class cs { // NOSONAR
     public static final String mapperD = "mapperD";
     public static final String mapSupplier = "mapSupplier";
     public static final String mappingFunction = "mappingFunction";
+    public static final String mapType = "mapType";
     public static final String max = "max";
     public static final String maxChunkCount = "maxChunkCount";
     public static final String maxCount = "maxCount";
     public static final String maxDuration = "maxDuration";
-    public static final String maxLen = "maxLen";
     public static final String maxLength = "maxLength";
     public static final String maxSize = "maxSize";
     public static final String maxThreadNum = "maxThreadNum";
@@ -263,7 +264,6 @@ public final class cs { // NOSONAR
     public static final String offset = "offset";
     public static final String onComplete = "onComplete";
     public static final String operator = "operator";
-    public static final String ops = "ops";
     public static final String ordinal = "ordinal";
     public static final String other = "other";
     public static final String otherIfErrorOccurred = "otherIfErrorOccurred";
@@ -272,6 +272,7 @@ public final class cs { // NOSONAR
     public static final String p = "p";
     public static final String pageSize = "pageSize";
     public static final String pair = "pair";
+    public static final String parallelSettings = "parallelSettings";
     public static final String parser = "parser";
     public static final String path = "path";
     public static final String permitsPerSecond = "permitsPerSecond";
@@ -284,7 +285,6 @@ public final class cs { // NOSONAR
     public static final String processThreadNum = "processThreadNum";
     public static final String processThreads = "processThreads";
     public static final String propName = "propName";
-    public static final String ps = "ps";
     public static final String q = "q";
     public static final String queue = "queue";
     public static final String queueSize = "queueSize";
@@ -302,7 +302,6 @@ public final class cs { // NOSONAR
     public static final String retryIntervalInMillis = "retryIntervalInMillis";
     public static final String retryTimes = "retryTimes";
     public static final String rightKeyExtractor = "rightKeyExtractor";
-    public static final String rnd = "rnd";
     public static final String roundingMode = "roundingMode";
     public static final String rounds = "rounds";
     public static final String rowElementName = "rowElementName";
@@ -317,8 +316,8 @@ public final class cs { // NOSONAR
     public static final String size = "size";
     public static final String sortKeyExtractor = "sortKeyExtractor";
     public static final String source = "source";
-    public static final String src = "src";
-    public static final String srcClass = "srcClass";
+    public static final String sourceClass = "sourceClass";
+    public static final String sourceDirectory = "sourceDirectory";
     public static final String startDate = "startDate";
     public static final String startDate1 = "startDate1";
     public static final String startDate2 = "startDate2";
@@ -327,9 +326,9 @@ public final class cs { // NOSONAR
     public static final String startTime = "startTime";
 
     public static final String startTimeSupplier = "startTimeSupplier";
+    public static final String statement = "statement";
     public static final String step = "step";
     public static final String str = "str";
-    public static final String subColl = "subColl";
     public static final String suffix = "suffix";
     public static final String supplier = "supplier";
     // public static final String Supplier = "Supplier";
@@ -343,7 +342,6 @@ public final class cs { // NOSONAR
     public static final String terminalAction = "terminalAction";
     public static final String timeInMillis = "timeInMillis";
     public static final String tolerance = "tolerance";
-    public static final String toStringFunc = "toStringFunc";
     public static final String toStringFunction = "toStringFunction";
     // public static final String totalRetryTimes = "totalRetryTimes";
     public static final String totalSize = "totalSize";
@@ -357,6 +355,7 @@ public final class cs { // NOSONAR
     public static final String unit = "unit";
     public static final String url = "url";
     public static final String value = "value";
+    public static final String valueClass = "valueClass";
     public static final String valueColumnName = "valueColumnName";
     public static final String valueComparator = "valueComparator";
     public static final String valueEquivalence = "valueEquivalence";
@@ -387,8 +386,6 @@ public final class cs { // NOSONAR
 
     public static final String parentPath = "parentPath";
 
-    public static final String lenOrSize = "lenOrSize";
-
     public static final String cause = "cause";
 
     public static final String maxThreadNumForZipFunction = "maxThreadNumForZipFunction";
@@ -417,7 +414,6 @@ public final class cs { // NOSONAR
     public static final String idExtractor1 = "idExtractor1";
     public static final String idExtractor2 = "idExtractor2";
 
-    // public static final String datasets = "datasets";
     public static final String componentType = "componentType";
     public static final String capacity = "capacity";
     public static final String propFilter = "propFilter";
@@ -434,13 +430,15 @@ public final class cs { // NOSONAR
     public static final String after = "after";
     public static final String before = "before";
     public static final String destFile = "destFile";
-    public static final String dir = "dir";
+    public static final String destinationDirectory = "destinationDirectory";
+    public static final String destinationFile = "destinationFile";
     public static final String input = "input";
     public static final String event = "event";
     public static final String files = "files";
     public static final String newFileName = "newFileName";
     public static final String sourceFile = "sourceFile";
     public static final String sourceFiles = "sourceFiles";
+    public static final String sourcePath = "sourcePath";
     public static final String subscriber = "subscriber";
     public static final String targetFile = "targetFile";
     public static final String urls = "urls";
@@ -452,11 +450,9 @@ public final class cs { // NOSONAR
     public static final String cellMapper = "cellMapper";
     // public static final String cleanup = "cleanup";
     // public static final String closeAction = "closeAction";
-    public static final String collSupplier = "collSupplier";
     public static final String collectionFactory = "collectionFactory";
     public static final String columnMapper = "columnMapper";
     public static final String columnNameFilter = "columnNameFilter";
-    public static final String combineFunc = "combineFunc";
     public static final String combiner = "combiner";
     public static final String command = "command";
     public static final String command2 = "command2";
@@ -466,7 +462,7 @@ public final class cs { // NOSONAR
     public static final String context = "context";
     public static final String defaultForEmpty = "defaultForEmpty";
     public static final String dispatcher = "dispatcher";
-    public static final String divideFunc = "divideFunc";
+    public static final String divideFunction = "divideFunction";
     public static final String downDispatcher = "downDispatcher";
     // public static final String downstreamFinisher = "downstreamFinisher";
     public static final String elementClass = "elementClass";
@@ -482,9 +478,6 @@ public final class cs { // NOSONAR
     public static final String fragment = "fragment";
     // public static final String freeAction = "freeAction";
     public static final String funnel = "funnel";
-    public static final String funcOfExclusiveBeginIndex = "funcOfExclusiveBeginIndex";
-    public static final String funcOfExclusiveEndIndex = "funcOfExclusiveEndIndex";
-    public static final String funcOfInclusiveBeginIndex = "funcOfInclusiveBeginIndex";
     public static final String graph = "graph";
     public static final String h = "h";
     public static final String har = "har";
@@ -493,29 +486,30 @@ public final class cs { // NOSONAR
     public static final String is = "is";
     public static final String json = "json";
     public static final String jsonArray = "jsonArray";
+    public static final String jsonDeserConfig = "jsonDeserConfig";
     public static final String jsonObject = "jsonObject";
+    public static final String jsonSerConfig = "jsonSerConfig";
     // public static final String keyFunc = "keyFunc";
     public static final String keyMapSupplier = "keyMapSupplier";
     public static final String leftSupplier = "leftSupplier";
     public static final String lineAction = "lineAction";
     public static final String loopStatistics = "loopStatistics";
-    public static final String mergeFunc = "mergeFunc";
     public static final String method = "method";
     public static final String memoryMeasure = "memoryMeasure";
     public static final String middleSupplier = "middleSupplier";
     public static final String multimapSupplier = "multimapSupplier";
     public static final String newColumnType = "newColumnType";
     public static final String op = "op";
-    // public static final String operation = "operation";
+    public static final String operation = "operation";
     public static final String os = "os";
     public static final String predicateForFirst = "predicateForFirst";
     public static final String predicateForLast = "predicateForLast";
     public static final String propNameConverter = "propNameConverter";
     public static final String propNameFilter = "propNameFilter";
     public static final String propNameValueFilter = "propNameValueFilter";
-    public static final String props = "props";
     public static final String pushPromiseHandler = "pushPromiseHandler";
     public static final String r = "r";
+    public static final String random = "random";
     public static final String range = "range";
     public static final String responseBodyHandler = "responseBodyHandler";
     public static final String rightSupplier = "rightSupplier";
@@ -544,7 +538,7 @@ public final class cs { // NOSONAR
     public static final String triConsumer = "triConsumer";
     public static final String triFunction = "triFunction";
     public static final String triPredicate = "triPredicate";
-    public static final String typeRef = "typeRef";
+    public static final String tuple = "tuple";
     public static final String typeReference = "typeReference";
     public static final String unzipFunction = "unzipFunction";
     public static final String updateFunction = "updateFunction";
@@ -568,11 +562,13 @@ public final class cs { // NOSONAR
     }
 
     public static final String atMostSize = "atMostSize";
+    public static final String attribute = "attribute";
     public static final String beanClassForColumnTypeInference = "beanClassForColumnTypeInference";
     public static final String callable = "callable";
     public static final String charset = "charset";
     public static final String columnKey = "columnKey";
     public static final String columnTypeMap = "columnTypeMap";
+    public static final String combineFunction = "combineFunction";
     public static final String connectTimeout = "connectTimeout";
     public static final String countA = "countA";
     public static final String csvFile = "csvFile";
@@ -581,15 +577,13 @@ public final class cs { // NOSONAR
     public static final String exception = "exception";
     public static final String flagToBreak = "flagToBreak";
     public static final String future = "future";
+    public static final String futures = "futures";
     public static final String headerParser = "headerParser";
     public static final String httpMethod = "httpMethod";
-    public static final String initCapacity = "initCapacity";
     public static final String instance = "instance";
     public static final String instant = "instant";
     public static final String interval = "interval";
     public static final String javaType = "javaType";
-    public static final String jdc = "jdc";
-    public static final String jsc = "jsc";
     public static final String jsonFile = "jsonFile";
     public static final String lineParser = "lineParser";
     public static final String locale = "locale";
@@ -612,10 +606,10 @@ public final class cs { // NOSONAR
     public static final String servers = "servers";
     public static final String sizeOfPart = "sizeOfPart";
     public static final String sourceReader = "sourceReader";
+    public static final String sourceZipFile = "sourceZipFile";
     public static final String target = "target";
     public static final String thread = "thread";
     public static final String unzip = "unzip";
-    public static final String val = "val";
 
     public static final String aa = "aa";
     public static final String backedMap = "backedMap";
@@ -652,14 +646,9 @@ public final class cs { // NOSONAR
     public static final String oldOccurrences = "oldOccurrences";
     public static final String options = "options";
     public static final String packageName = "packageName";
-    public static final String pkgName = "pkgName";
     public static final String propNameTableClassName = "propNameTableClassName";
     public static final String rowSplit = "rowSplit";
     public static final String set = "set";
-    public static final String srcDir = "srcDir";
-    public static final String srcFile = "srcFile";
-    public static final String srcPath = "srcPath";
-    public static final String srcZipFile = "srcZipFile";
     public static final String start = "start";
     public static final String targetMap = "targetMap";
     public static final String terminationTimeout = "terminationTimeout";
@@ -669,27 +658,25 @@ public final class cs { // NOSONAR
 
     public static final String aggregateResultColumnName = "aggregateResultColumnName";
     public static final String algorithm = "algorithm";
-    public static final String args = "args";
     public static final String array = "array";
-    public static final String attr = "attr";
     public static final String authenticator = "authenticator";
     public static final String by = "by";
     public static final String bytes = "bytes";
     public static final String characteristics = "characteristics";
-    public static final String clsName = "clsName";
     public static final String columnTargetTypes = "columnTargetTypes";
     public static final String compoundKey = "compoundKey";
     public static final String connectTimeoutInMillis = "connectTimeoutInMillis";
     public static final String constructor = "constructor";
     public static final String contextPath = "contextPath";
+    public static final String abbreviationMarker = "abbreviationMarker";
     public static final String cs = "cs";
+    public static final String charSequence = "charSequence";
     public static final String data = "data";
     public static final String defaultForBlank = "defaultForBlank";
     public static final String defaultForNull = "defaultForNull";
     public static final String desiredUnit = "desiredUnit";
     public static final String digest = "digest";
     public static final String e = "e";
-    public static final String eleClass = "eleClass";
     public static final String endInclusive = "endInclusive";
     public static final String entity = "entity";
     public static final String formFieldName = "formFieldName";
@@ -718,19 +705,14 @@ public final class cs { // NOSONAR
     public static final String rowIndexesToUpdate = "rowIndexesToUpdate";
     public static final String sequence = "sequence";
     public static final String sheetName = "sheetName";
-    public static final String stmt = "stmt";
     public static final String targetExceptionType = "targetExceptionType";
     public static final String targetFileName = "targetFileName";
-    public static final String tp = "tp";
-    public static final String valClass = "valClass";
     public static final String valueMap = "valueMap";
     public static final String valueMapType = "valueMapType";
     public static final String valueToDigest = "valueToDigest";
     public static final String values = "values";
     public static final String xmlMapper = "xmlMapper";
 
-    public static final String cfs = "cfs";
-    public static final String dest = "dest";
     public static final String fieldName = "fieldName";
     public static final String buf = "buf";
     public static final String propGetMethod = "propGetMethod";
@@ -749,12 +731,12 @@ public final class cs { // NOSONAR
     public static final String rows = "rows";
     public static final String outputExcelFile = "outputExcelFile";
     public static final String outputExcelPath = "outputExcelPath";
+    public static final String dataSource = "dataSource";
     public static final String dataset = "dataset";
+    public static final String datasets = "datasets";
     public static final String evictDelayInMillis = "evictDelayInMillis";
     public static final String maxMemorySize = "maxMemorySize";
     public static final String key = "key";
-    public static final String gHasher = "gHasher";
-    public static final String gHashFunction = "gHashFunction";
     public static final String startNode = "startNode";
     public static final String startNodes = "startNodes";
     public static final String hashFunctions = "hashFunctions";
@@ -763,6 +745,7 @@ public final class cs { // NOSONAR
     public static final String elementData = "elementData";
     public static final String indices = "indices";
     public static final String strValue = "strValue";
+    public static final String subCollection = "subCollection";
     public static final String cbuf = "cbuf";
     public static final String original = "original";
     public static final String newType = "newType";
@@ -779,6 +762,8 @@ public final class cs { // NOSONAR
     public static final String arguments = "arguments";
     public static final String test = "test";
     public static final String greeting = "greeting";
+    public static final String guavaHasher = "guavaHasher";
+    public static final String guavaHashFunction = "guavaHashFunction";
     public static final String padding = "padding";
     public static final String items = "items";
     public static final String intList = "intList";

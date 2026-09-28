@@ -97,14 +97,22 @@ public class DelayCancellationTest extends TestBase {
     }
 
     @Test
-    void unsuccessfulCancellationPreservesSuccessfulCompletionDelay() throws Exception {
+    void cancellationDuringTheDelayWindowEndsTheStage() throws Exception {
+        // Reversed on 2026-09-23 (review C-003): this test used to pin cancel() -> false with isDone() staying false
+        // for the whole window. That contradicted Future.cancel ("after this method returns, subsequent calls to
+        // isDone() will always return true") and thenDelay's own doc. The delay window is this stage's own pending
+        // work: while it is open the stage is cancellable, and the upstream's result stays available.
         final ContinuableFuture<String> original = ContinuableFuture.completed("\uD83D\uDE00");
         final ContinuableFuture<String> delayed = original.thenDelay(1, TimeUnit.DAYS);
-        assertFalse(delayed.cancel(true));
-        assertFalse(delayed.isCancelled());
         assertFalse(delayed.isDone());
         assertThrows(TimeoutException.class, () -> delayed.get(0, TimeUnit.NANOSECONDS));
+        assertTrue(delayed.cancel(true));
+        assertTrue(delayed.isCancelled());
+        assertTrue(delayed.isDone());
+        assertThrows(CancellationException.class, () -> delayed.get(0, TimeUnit.NANOSECONDS));
+        assertThrows(CancellationException.class, delayed::get);
+        assertFalse(delayed.cancel(false), "already cancelled");
         assertEquals("\uD83D\uDE00", original.get());
-        assertFalse(delayed.isDone());
+        assertFalse(original.isCancelled());
     }
 }

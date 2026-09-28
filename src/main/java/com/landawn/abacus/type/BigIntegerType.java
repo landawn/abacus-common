@@ -146,15 +146,15 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * {@link java.sql.PreparedStatement#setString(int, String)}, preserving full precision.
      * A {@code null} value sets the parameter to SQL NULL.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code BigInteger} value to set; {@code null} is stored as SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final BigInteger x) throws NullPointerException, SQLException {
-        stmt.setString(columnIndex, (x == null) ? null : x.toString());
+    public void set(final PreparedStatement statement, final int columnIndex, final BigInteger x) throws NullPointerException, SQLException {
+        statement.setString(columnIndex, (x == null) ? null : x.toString());
     }
 
     /**
@@ -163,14 +163,14 @@ public final class BigIntegerType extends NumberType<BigInteger> {
      * {@link java.sql.CallableStatement#setString(String, String)}, preserving full precision.
      * A {@code null} value sets the parameter to SQL NULL.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code BigInteger} value to set; {@code null} is stored as SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final BigInteger x) throws NullPointerException, SQLException {
-        stmt.setString(parameterName, (x == null) ? null : x.toString());
+    public void set(final CallableStatement statement, final String parameterName, final BigInteger x) throws NullPointerException, SQLException {
+        statement.setString(parameterName, (x == null) ? null : x.toString());
     }
 }

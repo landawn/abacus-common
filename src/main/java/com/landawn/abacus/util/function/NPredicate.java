@@ -36,8 +36,8 @@ import com.landawn.abacus.util.cs;
  *     }
  *     return true;
  * };
- * boolean result1 = allPositive.test(1, 2, 3, 4);   // returns true
- * boolean result2 = allPositive.test(1, -2, 3);   // returns false
+ * boolean result1 = allPositive.test(1, 2, 3, 4);  // returns true
+ * boolean result2 = allPositive.test(1, -2, 3);    // returns false
  *
  * NPredicate<String> anyEmpty = args -> {
  *     for (String s : args) {
@@ -65,11 +65,11 @@ public interface NPredicate<T> {
      * The varargs parameter may contain any number of arguments of type {@code T},
      * including zero (empty array).
      *
-     * @param args the input arguments as a varargs array
+     * @param arguments the input arguments as a varargs array
      * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
      */
     @SuppressWarnings("unchecked")
-    boolean test(T... args);
+    boolean test(T... arguments);
 
     /**
      * Returns a predicate that represents the logical negation of this predicate.

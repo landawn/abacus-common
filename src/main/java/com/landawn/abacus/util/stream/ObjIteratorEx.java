@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 import com.landawn.abacus.annotation.Internal;
+import com.landawn.abacus.util.Holder;
 import com.landawn.abacus.util.N;
 import com.landawn.abacus.util.ObjIterator;
 import com.landawn.abacus.util.cs;
@@ -268,30 +269,30 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      * }</pre>
      *
      * @param <T> the type of elements
-     * @param iter the Iterator to wrap (can be {@code null})
-     * @return the same instance if {@code iter} is already an ObjIteratorEx, an ObjIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
+     * @param iterator the Iterator to wrap (can be {@code null})
+     * @return the same instance if {@code iterator} is already an ObjIteratorEx, an ObjIteratorEx wrapping the given iterator, or an empty iterator if {@code iterator} is null
      */
-    public static <T> ObjIteratorEx<T> of(final Iterator<? extends T> iter) {
-        if (iter == null) {
+    public static <T> ObjIteratorEx<T> of(final Iterator<? extends T> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ObjIteratorEx) {
-            return ((ObjIteratorEx<T>) iter);
+        } else if (iterator instanceof ObjIteratorEx) {
+            return ((ObjIteratorEx<T>) iterator);
         }
 
         return new ObjIteratorEx<>() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public T next() throws NoSuchElementException {
-                return iter.next();
+                return iterator.next();
             }
 
             @Override
             public void closeResource() {
-                ObjIteratorEx.closeResource(iter);
+                ObjIteratorEx.closeResource(iterator);
             }
         };
     }
@@ -362,6 +363,9 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
      */
     public static <T> ObjIteratorEx<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
+
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends Iterator<? extends T>>> supplierHolder = Holder.of(iteratorSupplier);
 
         return new ObjIteratorEx<>() {
             private Iterator<? extends T> iter = null;
@@ -441,7 +445,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
                     synchronized (this) {
                         if (!isInitialized) {
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == null) {
                                     throw new IllegalStateException("Iterator supplier returned null");
@@ -451,6 +455,7 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
                             } catch (RuntimeException | Error e) {
                                 initializationFailure = e;
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitialized = true;
                             }
                         }
@@ -468,20 +473,20 @@ public abstract class ObjIteratorEx<T> extends ObjIterator<T> implements Iterato
 
     /**
      * Releases the resources held by the given object, if it is closeable.
-     * If {@code iter} implements {@link IteratorEx}, its {@link IteratorEx#closeResource()} method is
+     * If {@code iterator} implements {@link IteratorEx}, its {@link IteratorEx#closeResource()} method is
      * invoked; otherwise, if it implements {@link AutoCloseable}, its {@code close()} method is invoked.
      * Anything else (including {@code null}) is ignored.
      *
-     * @param iter the object whose resources should be released; may be {@code null}
+     * @param iterator the object whose resources should be released; may be {@code null}
      * @throws RuntimeException if the iterator's close operation fails; checked exceptions from
      *         {@link AutoCloseable#close()} are converted to unchecked exceptions
      */
-    static void closeResource(final Object iter) throws RuntimeException {
-        if (iter instanceof IteratorEx) {
-            ((IteratorEx<?>) iter).closeResource();
-        } else if (iter instanceof AutoCloseable) {
+    static void closeResource(final Object iterator) throws RuntimeException {
+        if (iterator instanceof IteratorEx) {
+            ((IteratorEx<?>) iterator).closeResource();
+        } else if (iterator instanceof AutoCloseable) {
             try {
-                ((AutoCloseable) iter).close();
+                ((AutoCloseable) iterator).close();
             } catch (Exception e) {
                 throw N.toRuntimeException(e);
             }

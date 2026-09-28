@@ -44,6 +44,17 @@ import com.landawn.abacus.util.cs;
 final class GuavaHasher implements Hasher {
 
     /**
+     * Character ranges shorter than this are fed to the Guava hasher one {@code putChar} call at a time; longer ranges
+     * are encoded into a temporary little-endian byte buffer and fed with bulk {@code putBytes} calls.
+     */
+    private static final int BULK_CHARS_THRESHOLD = 16;
+
+    /**
+     * The maximum number of characters encoded into the temporary byte buffer per bulk {@code putBytes} call.
+     */
+    private static final int BULK_CHARS_CHUNK_SIZE = 512;
+
+    /**
      * The wrapped Google Guava hasher that performs the actual hashing operations.
      */
     final com.google.common.hash.Hasher gHasher;
@@ -51,12 +62,12 @@ final class GuavaHasher implements Hasher {
     /**
      * Constructs a new GuavaHasher wrapping the specified Guava hasher.
      *
-     * @param gHasher the Guava hasher to wrap, must not be {@code null}
-     * @throws NullPointerException if {@code gHasher} is {@code null}
+     * @param guavaHasher the Guava hasher to wrap, must not be {@code null}
+     * @throws NullPointerException if {@code guavaHasher} is {@code null}
      */
-    GuavaHasher(final com.google.common.hash.Hasher gHasher) throws NullPointerException {
-        N.requireNonNull(gHasher, cs.gHasher);
-        this.gHasher = gHasher;
+    GuavaHasher(final com.google.common.hash.Hasher guavaHasher) throws NullPointerException {
+        N.requireNonNull(guavaHasher, cs.guavaHasher);
+        this.gHasher = guavaHasher;
     }
 
     /**
@@ -77,12 +88,12 @@ final class GuavaHasher implements Hasher {
      * Hasher wrapped = GuavaHasher.wrap(guavaHasher);
      * }</pre>
      *
-     * @param gHasher the Guava hasher to wrap, must not be {@code null}
+     * @param guavaHasher the Guava hasher to wrap, must not be {@code null}
      * @return a new GuavaHasher instance wrapping the given hasher
-     * @throws NullPointerException if {@code gHasher} is {@code null}
+     * @throws NullPointerException if {@code guavaHasher} is {@code null}
      */
-    static GuavaHasher wrap(final com.google.common.hash.Hasher gHasher) throws NullPointerException {
-        return new GuavaHasher(gHasher);
+    static GuavaHasher wrap(final com.google.common.hash.Hasher guavaHasher) throws NullPointerException {
+        return new GuavaHasher(guavaHasher);
     }
 
     /**
@@ -123,17 +134,17 @@ final class GuavaHasher implements Hasher {
      *
      * @param bytes the source byte array
      * @param off the start offset in the array
-     * @param len the number of bytes to add
+     * @param length the number of bytes to add
      * @return this hasher instance
      * @throws NullPointerException if {@code bytes} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or if {@code off + len > bytes.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or if {@code off + len > bytes.length}
      */
     @Override
-    public Hasher put(final byte[] bytes, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException {
+    public Hasher put(final byte[] bytes, final int off, final int length) throws NullPointerException, IndexOutOfBoundsException {
         // Guava's non-streaming hashers (farmHashFingerprint64) allocate `len` bytes BEFORE bounds-checking,
         // so an oversized len became an OutOfMemoryError instead of the documented IndexOutOfBoundsException.
-        Objects.checkFromIndexSize(off, len, bytes.length);
-        gHasher.putBytes(bytes, off, len);
+        Objects.checkFromIndexSize(off, length, bytes.length);
+        gHasher.putBytes(bytes, off, length);
         return this;
     }
 
@@ -271,25 +282,48 @@ final class GuavaHasher implements Hasher {
      * {@inheritDoc}
      *
      * <p>Adds a portion of a character array. Since Guava's Hasher doesn't have a direct
-     * method for character arrays, this implementation adds each character individually
-     * using {@link #put(char)}.
+     * method for character arrays, this implementation feeds the same byte stream that calling
+     * {@link #put(char)} for each character would: the low byte and then the high byte of every character.
+     * Short ranges are added one character at a time; longer ranges are encoded in chunks into a temporary
+     * byte buffer that is passed to the wrapped hasher's {@code putBytes}, which is much faster for
+     * digest- and checksum-backed functions and produces the identical hash code.
      *
      * <p><b>Implementation Note:</b> This method validates the array bounds using
      * {@link N#checkFromIndexSize} before processing the characters.
      *
      * @param chars the source character array
      * @param off the start offset in the array
-     * @param len the number of characters to add
+     * @param length the number of characters to add
      * @return this hasher instance
-     * @throws IllegalArgumentException if {@code len} is negative.
+     * @throws IllegalArgumentException if {@code length} is negative.
      * @throws IndexOutOfBoundsException if {@code off} is negative or the requested range exceeds the array length, treating a {@code null} array as empty.
      */
     @Override
-    public Hasher put(final char[] chars, final int off, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
-        N.checkFromIndexSize(off, len, N.len(chars));
+    public Hasher put(final char[] chars, final int off, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
+        N.checkFromIndexSize(off, length, N.len(chars));
 
-        for (int i = off, to = off + len; i < to; i++) {
-            put(chars[i]);
+        if (length < BULK_CHARS_THRESHOLD) {
+            for (int i = off, to = off + length; i < to; i++) {
+                put(chars[i]);
+            }
+        } else {
+            // Every Guava hasher treats putChar(c) as the two little-endian bytes of c, and consecutive puts are not
+            // delimited, so one putBytes per chunk yields the same hash while avoiding a per-char MessageDigest /
+            // Checksum update (and a per-char buffer round trip in the streaming hashers).
+            final byte[] buffer = new byte[Math.min(length, BULK_CHARS_CHUNK_SIZE) * 2];
+
+            for (int i = off, to = off + length; i < to;) {
+                final int count = Math.min(to - i, BULK_CHARS_CHUNK_SIZE);
+
+                for (int k = 0, j = 0; k < count; k++) {
+                    final char c = chars[i + k];
+                    buffer[j++] = (byte) c;
+                    buffer[j++] = (byte) (c >>> 8);
+                }
+
+                gHasher.putBytes(buffer, 0, count * 2);
+                i += count;
+            }
         }
 
         return this;

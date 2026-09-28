@@ -112,8 +112,8 @@ public final class BiFunctions {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiFunctions.selectFirst().apply("first","second");   // returns "first"
-     * BiFunctions.selectFirst().apply(1,2);                // returns 1
+     * BiFunctions.selectFirst().apply("first","second");  // returns "first"
+     * BiFunctions.selectFirst().apply(1,2);               // returns 1
      * }</pre>
      *
      * @param <T> the type of the first argument and result
@@ -129,8 +129,8 @@ public final class BiFunctions {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiFunctions.selectSecond().apply("first","second");   // returns "second"
-     * BiFunctions.selectSecond().apply(1,2);                // returns 2
+     * BiFunctions.selectSecond().apply("first","second");  // returns "second"
+     * BiFunctions.selectSecond().apply(1,2);               // returns 2
      * }</pre>
      *
      * @param <T> the type of the first argument
@@ -327,15 +327,15 @@ public final class BiFunctions {
      * @param <T> the type of the first argument to the function
      * @param <U> the type of the second argument to the function
      * @param <R> the type of the result of the function
-     * @param func the IntBiObjFunction that accepts an index and two elements and produces a result
+     * @param function the IntBiObjFunction that accepts an index and two elements and produces a result
      * @return a stateful BiFunction that applies the given IntBiObjFunction with an incrementing index
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
     @Beta
     @SequentialOnly
     @Stateful
-    public static <T, U, R> BiFunction<T, U, R> indexed(final IntBiObjFunction<T, U, ? extends R> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T, U, R> BiFunction<T, U, R> indexed(final IntBiObjFunction<T, U, ? extends R> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
         return new BiFunction<>() {
             private long idx;
@@ -351,7 +351,7 @@ public final class BiFunctions {
                     throw new ArithmeticException("Index exceeds Integer.MAX_VALUE");
                 }
 
-                return func.apply((int) idx++, t, u);
+                return function.apply((int) idx++, t, u);
             }
         };
     }

@@ -50,8 +50,8 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate alwaysTrue = LongTriPredicate.ALWAYS_TRUE;
-     * alwaysTrue.test(1L, 2L, 3L);    // returns true
-     * alwaysTrue.test(-1L, 0L, 1L);   // returns true
+     * alwaysTrue.test(1L, 2L, 3L);   // returns true
+     * alwaysTrue.test(-1L, 0L, 1L);  // returns true
      * }</pre>
      *
      */
@@ -64,8 +64,8 @@ public interface LongTriPredicate extends Throwables.LongTriPredicate<RuntimeExc
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongTriPredicate alwaysFalse = LongTriPredicate.ALWAYS_FALSE;
-     * alwaysFalse.test(1L, 2L, 3L);    // returns false
-     * alwaysFalse.test(-1L, 0L, 1L);   // returns false
+     * alwaysFalse.test(1L, 2L, 3L);   // returns false
+     * alwaysFalse.test(-1L, 0L, 1L);  // returns false
      * }</pre>
      *
      */

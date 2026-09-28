@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * Color myColor = Color.RED;
- * int colorCode = myColor.intValue();   // returns 2
- * Color fromCode = Color.of(2);         // returns Color.RED
+ * int colorCode = myColor.intValue();  // returns 2
+ * Color fromCode = Color.of(2);        // returns Color.RED
  * }</pre>
  *
  * @see UnifiedStatus
@@ -113,8 +113,8 @@ public enum Color {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Color red = Color.of(2);     // returns Color.RED
-     * Color green = Color.of(5);   // returns Color.GREEN
+     * Color red = Color.of(2);    // returns Color.RED
+     * Color green = Color.of(5);  // returns Color.GREEN
      * }</pre>
      *
      * @param intValue the integer value to look up; valid values are 0 through 8 inclusive

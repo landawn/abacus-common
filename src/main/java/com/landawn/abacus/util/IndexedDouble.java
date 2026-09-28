@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedDouble indexedDouble = IndexedDouble.of(3.14159, 5);
- * double value = indexedDouble.value();   // returns 3.14159
- * int index = indexedDouble.index();      // returns 5
+ * double value = indexedDouble.value();  // returns 3.14159
+ * int index = indexedDouble.index();     // returns 5
  * }</pre>
  *
  * @see Indexed
@@ -138,8 +138,8 @@ public final class IndexedDouble extends AbstractIndexed {
      * IndexedDouble indexed2 = IndexedDouble.of(3.14159, 5);
      * IndexedDouble indexed3 = IndexedDouble.of(2.71828, 5);
      *
-     * indexed1.equals(indexed2);   // returns true
-     * indexed1.equals(indexed3);   // returns false
+     * indexed1.equals(indexed2);  // returns true
+     * indexed1.equals(indexed3);  // returns false
      * }</pre>
      *
      * @param obj the object to compare with this {@code IndexedDouble} instance for equality

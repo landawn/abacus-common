@@ -219,30 +219,30 @@ public abstract class LongIteratorEx extends LongIterator implements IteratorEx<
      * LongIteratorEx iterEx = LongIteratorEx.of(iter);
      * }</pre>
      *
-     * @param iter the LongIterator to wrap (can be null)
-     * @return the same instance if {@code iter} is already a LongIteratorEx, a LongIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
+     * @param iterator the LongIterator to wrap (can be null)
+     * @return the same instance if {@code iterator} is already a LongIteratorEx, a LongIteratorEx wrapping the given iterator, or an empty iterator if {@code iterator} is null
      */
-    public static LongIteratorEx of(final LongIterator iter) {
-        if (iter == null) {
+    public static LongIteratorEx of(final LongIterator iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof LongIteratorEx) {
-            return ((LongIteratorEx) iter);
+        } else if (iterator instanceof LongIteratorEx) {
+            return ((LongIteratorEx) iterator);
         }
 
         return new LongIteratorEx() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public long nextLong() throws NoSuchElementException {
-                return iter.nextLong();
+                return iterator.nextLong();
             }
 
             @Override
             public void closeResource() {
-                ObjIteratorEx.closeResource(iter);
+                ObjIteratorEx.closeResource(iterator);
             }
         };
     }
@@ -260,13 +260,13 @@ public abstract class LongIteratorEx extends LongIterator implements IteratorEx<
      * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
      * is unboxed by its next method.</p>
      *
-     * @param iter the Iterator of Long objects (can be null)
+     * @param iterator the Iterator of Long objects (can be null)
      * @return a LongIteratorEx unwrapping the given iterator, or empty iterator if iter is null
      */
-    public static LongIteratorEx from(final Iterator<Long> iter) {
-        if (iter == null) {
+    public static LongIteratorEx from(final Iterator<Long> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ObjIteratorEx<Long> iteratorEx) {
+        } else if (iterator instanceof ObjIteratorEx<Long> iteratorEx) {
 
             return new LongIteratorEx() {
                 @Override
@@ -313,7 +313,7 @@ public abstract class LongIteratorEx extends LongIterator implements IteratorEx<
             return new LongIteratorEx() {
                 @Override
                 public boolean hasNext() {
-                    return iter.hasNext();
+                    return iterator.hasNext();
                 }
 
                 /**
@@ -324,12 +324,12 @@ public abstract class LongIteratorEx extends LongIterator implements IteratorEx<
                  */
                 @Override
                 public long nextLong() throws NoSuchElementException, NullPointerException {
-                    return iter.next();
+                    return iterator.next();
                 }
 
                 @Override
                 public void closeResource() {
-                    ObjIteratorEx.closeResource(iter);
+                    ObjIteratorEx.closeResource(iterator);
                 }
             };
         }
@@ -410,8 +410,8 @@ public abstract class LongIteratorEx extends LongIterator implements IteratorEx<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * LongIteratorEx iter = LongIteratorEx.of(1L, 2L);
-     * iter.closeResource();         // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
+     * iter.closeResource();        // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());  // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * LongIteratorEx iter2 = LongIteratorEx.of(3L, 4L);

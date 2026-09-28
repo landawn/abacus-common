@@ -1442,4 +1442,47 @@ public class ParallelArrayIntStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    @Test
+    public void testReduceAndCollectWithArraySplitStrategyFollowEncounterOrder() {
+        final int[] source = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        final ParallelSettings ps = ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build();
+
+        // "last element wins" is associative but not commutative: ARRAY slices are contiguous and combined in slice order
+        assertEquals(9, IntStream.of(source).parallel(ps).reduce((a, b) -> b).get());
+        assertEquals(9, IntStream.of(source).parallel(ps).reduce(-1, (a, b) -> b));
+
+        final List<Integer> collected = IntStream.of(source).parallel(ps).collect(ArrayList::new, (c, e) -> c.add(e), ArrayList::addAll);
+        assertEquals(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), collected);
+    }
+
+    // ---- perf review 2026-09-26 G101 begin ----
+    // G101-01: findFirst/findLast return the lowest/highest matching index for both split strategies (also over a sub-range)
+    @Test
+    public void testFindFirstFindLast_manyElements_bothSplitStrategies() {
+        final int[] source = new int[2000];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = (int) (1000 + i);
+        }
+
+        for (final SplitStrategy strategy : new SplitStrategy[] { SplitStrategy.ARRAY, SplitStrategy.ITERATOR }) {
+            final ParallelSettings ps = ParallelSettings.builder().splitStrategy(strategy).maxThreadNum(testMaxThreadNum).build();
+
+            assertEquals(1300, IntStream.of(source).parallel(ps).findFirst(v -> v >= 1300 && v % 100 == 0).get());
+            assertEquals(2900, IntStream.of(source).parallel(ps).findLast(v -> v >= 1300 && v % 100 == 0).get());
+            assertEquals(1000, IntStream.of(source).parallel(ps).findFirst(v -> v == 1000 || v == 2999).get());
+            assertEquals(2999, IntStream.of(source).parallel(ps).findLast(v -> v == 1000 || v == 2999).get());
+            assertEquals(1000, IntStream.of(source).parallel(ps).findFirst(v -> true).get());
+            assertEquals(2999, IntStream.of(source).parallel(ps).findLast(v -> true).get());
+            assertFalse(IntStream.of(source).parallel(ps).findFirst(v -> v < 0).isPresent());
+            assertFalse(IntStream.of(source).parallel(ps).findLast(v -> v < 0).isPresent());
+
+            assertEquals(1100, new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> true).get());
+            assertEquals(2899, new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> true).get());
+            assertFalse(new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findFirst(v -> v == 1000).isPresent());
+            assertFalse(new ParallelArrayIntStream(source, 100, 1900, false, testMaxThreadNum, strategy, null, false, new ArrayList<>()).findLast(v -> v == 2999).isPresent());
+        }
+    }
+    // ---- perf review 2026-09-26 G101 end ----
 }

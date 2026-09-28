@@ -333,8 +333,10 @@ public final class WebUtil {
      */
     private static void checkSupportedOption(final String token, final String curl) throws IllegalArgumentException {
         final int equalsIndex = token.indexOf('=');
+        // -G takes no argument, so in a cluster that it opens (-Gd, -Gs) the rest are further options; the
+        // cluster peeling in parseCurlCommand only strips flags that come BEFORE it (-sG).
         final boolean attachedUnsupportedArgument = token.length() > 2
-                && (token.startsWith("-u") || token.startsWith("-b") || token.startsWith("-T") || token.startsWith("-F"));
+                && (token.startsWith("-u") || token.startsWith("-b") || token.startsWith("-T") || token.startsWith("-F") || token.startsWith("-G"));
         final String optionName = attachedUnsupportedArgument ? token.substring(0, 2) : (equalsIndex > 0 ? token.substring(0, equalsIndex) : token);
 
         if (UNSUPPORTED_OPTIONS.contains(optionName)) {
@@ -996,11 +998,9 @@ public final class WebUtil {
      *        .jsonBody(requestData)
      *        .post(String.class);
      *
-     * // The logHandler will receive something like:
-     * // curl -X POST 'http://localhost:18080' \
-     * //   -H 'Authorization: Bearer token123' \
-     * //   -H 'Content-Type: application/json' \
-     * //   -d '{"key":"value"}'
+     * // The logHandler receives the command on a single line (framed by line breaks), with the
+     * // URL as OkHttp normalized it and the header names in OkHttp's lower-case form:
+     * // curl -X POST 'http://localhost:18080/' --globoff -H 'authorization: Bearer token123' -H 'content-type: application/json' --data-raw '{"key":"value"}'
      * }</pre>
      *
      * @param url the base URL for the HTTP request, must not be {@code null}
@@ -1051,9 +1051,8 @@ public final class WebUtil {
      * request.header("Content-Type", "application/json")
      *        .post(String.class);
      *
-     * // Generates:
-     * // curl -X POST "http://localhost:18080" \
-     * //   -H "Content-Type: application/json"
+     * // Generates (on a single line):
+     * // curl -X POST "http://localhost:18080/" --globoff -H "content-type: application/json"
      * }</pre>
      *
      * @param url the base URL for the HTTP request, must not be {@code null}
@@ -1063,7 +1062,8 @@ public final class WebUtil {
      *                   for each request.
      * @return an OkHttpRequest configured with cURL logging interceptor using the
      *         specified quote character
-     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or if {@code logHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code url} is {@code null} or empty, {@code quoteChar} is neither a single nor a double
+     *         quote, or {@code logHandler} is {@code null}.
      * @see #createCurlLoggingOkHttpRequest(String, Consumer)
      * @see CurlInterceptor
      */
@@ -1149,11 +1149,12 @@ public final class WebUtil {
      * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, {@code url} is {@code null}
      *         or empty, {@code quoteChar} is neither a single nor a double quote, or a header name is
      *         {@code null}.
+     * @throws ArithmeticException if a header value is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      * @see HttpHeaders#valueOf(String, Object)
      * @see Strings#escapeQuotes(String, char)
      */
     public static String buildCurl(final HttpMethod httpMethod, final String url, final Map<String, ?> headers, final String body, final String bodyContentType,
-            final char quoteChar) throws IllegalArgumentException {
+            final char quoteChar) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotNull(httpMethod, cs.httpMethod);
 
         return buildCurlByMethodName(httpMethod.name(), url, headers, body, bodyContentType, quoteChar);
@@ -1162,11 +1163,12 @@ public final class WebUtil {
     /**
      * String-based counterpart used by the OkHttp interceptor, whose request model permits
      * extension methods (for example, {@code PROPFIND}) that are not members of {@link HttpMethod}.
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code url} is null or empty, or {@code quoteChar} is neither a single nor a double
-     *         quote
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code url} is null or empty, {@code quoteChar} is neither a single nor a double
+     *         quote, or a header name is {@code null}
+     * @throws ArithmeticException if a header value is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      */
     static String buildCurlByMethodName(final String httpMethod, final String url, final Map<String, ?> headers, final String body,
-            final String bodyContentType, final char quoteChar) throws IllegalArgumentException {
+            final String bodyContentType, final char quoteChar) throws IllegalArgumentException, ArithmeticException {
         N.checkArgNotEmpty(httpMethod, cs.httpMethod);
         N.checkArgNotEmpty(url, cs.url);
         N.checkArgument(quoteChar == '\'' || quoteChar == '"', "quoteChar must be a single (') or double (\") quote, but was: {}", quoteChar);
@@ -1345,10 +1347,13 @@ public final class WebUtil {
      *                    when {@code requestBodyType} is not {@code null} or empty
      * @throws IllegalArgumentException if {@code httpHeaders} is {@code null} and {@code requestBodyType}
      *                                  is not {@code null} or empty
+     * @throws UnsupportedOperationException if the Content-Type header has to be set and {@code httpHeaders} is backed by a map that
+     *                                       does not support modification
      * @see HttpHeaders#setContentType(String)
      * @see HttpHeaders#get(String)
      */
-    public static void setContentTypeByRequestBodyType(final String requestBodyType, final HttpHeaders httpHeaders) throws IllegalArgumentException {
+    public static void setContentTypeByRequestBodyType(final String requestBodyType, final HttpHeaders httpHeaders)
+            throws IllegalArgumentException, UnsupportedOperationException {
         if (Strings.isNotEmpty(requestBodyType)) {
             N.checkArgNotNull(httpHeaders, cs.httpHeaders);
         }

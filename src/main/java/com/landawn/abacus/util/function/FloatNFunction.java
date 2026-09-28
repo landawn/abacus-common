@@ -46,12 +46,12 @@ public interface FloatNFunction<R> extends Throwables.FloatNFunction<R, RuntimeE
      * Float avg = average.apply(1.0f, 2.0f, 3.0f);   // Returns 2.0f
      * }</pre>
      *
-     * @param args the float values to be processed. May be empty, in which case
+     * @param arguments the float values to be processed. May be empty, in which case
      *             the function should handle the empty array appropriately.
      * @return the function result
      */
     @Override
-    R apply(float... args);
+    R apply(float... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input,

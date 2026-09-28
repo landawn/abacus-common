@@ -21,7 +21,6 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serial;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.IntFunction;
 
 import com.landawn.abacus.annotation.Beta;
@@ -83,14 +83,14 @@ import com.landawn.abacus.util.stream.Stream;
  * BooleanList withCapacity = new BooleanList(100);
  *
  * // Basic operations
- * flags.add(true);                // Append boolean value
- * boolean first = flags.get(0);   // Access by index: true
- * flags.set(1, true);             // Modify existing value
+ * flags.add(true);               // Append boolean value
+ * boolean first = flags.get(0);  // Access by index: true
+ * flags.set(1, true);            // Modify existing value
  *
  * // Boolean-specific operations
- * int trueCount = flags.frequency(true);     // Count true values
- * int falseCount = flags.frequency(false);   // Count false values
- * boolean hasTrue = flags.contains(true);    // Check for true values
+ * int trueCount = flags.frequency(true);    // Count true values
+ * int falseCount = flags.frequency(false);  // Count false values
+ * boolean hasTrue = flags.contains(true);   // Check for true values
  *
  * // Multiset-style occurrence operations
  * BooleanList set1 = BooleanList.of(true, false, true);
@@ -100,12 +100,12 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Bulk operations
  * boolean[] array = {true, true, false, true};
- * flags.addAll(array);             // Add array elements
- * flags.replaceAll(true, false);   // Replace all true with false
+ * flags.addAll(array);            // Add array elements
+ * flags.replaceAll(true, false);  // Replace all true with false
  *
  * // Conversion operations
- * boolean[] primitiveArray = flags.toArray();   // To primitive array
- * List<Boolean> boxedList = flags.boxed();      // To boxed collection
+ * boolean[] primitiveArray = flags.toArray();  // To primitive array
+ * List<Boolean> boxedList = flags.boxed();     // To boxed collection
  * }</pre>
  *
  * <p><b>Performance Characteristics:</b>
@@ -282,9 +282,6 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     @Serial
     private static final long serialVersionUID = -1194435277403867258L;
 
-    /** Shared random number generator used by {@link #random(int)}. */
-    static final Random RAND = new SecureRandom();
-
     /**
      * The array buffer into which the elements of the BooleanList are stored.
      */
@@ -302,8 +299,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = new BooleanList();
-     * list.size();      // returns 0
-     * list.isEmpty();   // returns true
+     * list.size();     // returns 0
+     * list.isEmpty();  // returns true
      * }</pre>
      *
      */
@@ -319,8 +316,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = new BooleanList(100);
-     * list.size();           // returns 0 (capacity does not affect size)
-     * list.isEmpty();        // returns true
+     * list.size();     // returns 0 (capacity does not affect size)
+     * list.isEmpty();  // returns true
      *
      * new BooleanList(-1);   // throws IllegalArgumentException
      * }</pre>
@@ -347,8 +344,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <pre>{@code
      * boolean[] arr = {true, false, true};
      * BooleanList list = new BooleanList(arr);
-     * list.size();   // returns 3
-     * list.get(0);   // returns true
+     * list.size();  // returns 3
+     * list.get(0);  // returns true
      * }</pre>
      *
      * @param a the array to be used as the element array for this list; must not be {@code null}
@@ -369,8 +366,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <pre>{@code
      * boolean[] arr = {true, false, true, false};
      * BooleanList list = new BooleanList(arr, 2);
-     * list.size();               // returns 2
-     * list.get(1);               // returns false
+     * list.size();  // returns 2
+     * list.get(1);  // returns false
      *
      * new BooleanList(arr, 5);   // throws IndexOutOfBoundsException (size > array length)
      * }</pre>
@@ -397,11 +394,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
-     * list.size();                                               // returns 3
-     * list.get(0);                                               // returns true
+     * list.size();  // returns 3
+     * list.get(0);  // returns true
      *
-     * BooleanList empty = BooleanList.of();                      // returns []
-     * BooleanList nullList = BooleanList.of((boolean[]) null);   // returns [] (null treated as empty)
+     * BooleanList empty = BooleanList.of();                     // returns []
+     * BooleanList nullList = BooleanList.of((boolean[]) null);  // returns [] (null treated as empty)
      * }</pre>
      *
      * @param a the array of elements to be included in the new list. Can be {@code null}.
@@ -420,8 +417,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <pre>{@code
      * boolean[] arr = {true, false, true, false};
      * BooleanList list = BooleanList.of(arr, 3);
-     * list.size();              // returns 3
-     * list.get(2);              // returns true
+     * list.size();  // returns 3
+     * list.get(2);  // returns true
      *
      * BooleanList.of(arr, 5);   // throws IndexOutOfBoundsException (size > array length)
      * }</pre>
@@ -476,8 +473,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <pre>{@code
      * boolean[] arr = {true, false, true, false, true};
      * BooleanList list = BooleanList.copyOf(arr, 1, 4);
-     * list.size();                      // returns 3
-     * list.get(0);                      // returns false
+     * list.size();  // returns 3
+     * list.get(0);  // returns false
      *
      * BooleanList.copyOf(arr, 0, 10);   // throws IndexOutOfBoundsException (toIndex > array length)
      * }</pre>
@@ -504,39 +501,40 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * }</pre>
      *
      * @param element the boolean value to be repeated
-     * @param len the number of times to repeat the element. Must be non-negative.
+     * @param length the number of times to repeat the element. Must be non-negative.
      * @return a new BooleanList containing the repeated elements
-     * @throws IllegalArgumentException if {@code len} is negative.
+     * @throws IllegalArgumentException if {@code length} is negative.
      */
-    public static BooleanList repeat(final boolean element, final int len) throws IllegalArgumentException {
-        return of(Array.repeat(element, len));
+    public static BooleanList repeat(final boolean element, final int length) throws IllegalArgumentException {
+        return of(Array.repeat(element, length));
     }
 
     /**
      * Creates a new BooleanList with random boolean values.
      *
      * <p>Each element in the list has an equal probability of being {@code true} or {@code false}.
-     * The random values are generated using a secure random number generator.</p>
+     * The random values come from {@link java.util.concurrent.ThreadLocalRandom} (see below).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList randomList = BooleanList.random(10);   // returns list with 10 random boolean values
      * }</pre>
      *
-     * <p>Randomness comes from a {@link java.security.SecureRandom} instance held by this class. That default is
-     * deliberate; its performance depends on the provider and workload. For bulk test data or fixtures,
-     * consider measuring {@link java.util.concurrent.ThreadLocalRandom}, filling an array yourself,
-     * and wrapping it with {@code of(..)}.</p>
+     * <p>Randomness comes from {@link java.util.concurrent.ThreadLocalRandom#current()}, the calling thread's
+     * generator, so concurrent callers do not contend. The values are <b>not</b> cryptographically secure;
+     * callers that need unpredictable values should use {@link java.security.SecureRandom} directly (for
+     * example, fill an array from it and wrap the array with {@code of(..)}).</p>
      *
-     * @param len the number of random boolean values to generate. Must be non-negative.
+     * @param length the number of random boolean values to generate. Must be non-negative.
      * @return a new BooleanList containing random boolean values
-     * @throws NegativeArraySizeException if {@code len} is negative
+     * @throws NegativeArraySizeException if {@code length} is negative
      */
-    public static BooleanList random(final int len) throws NegativeArraySizeException {
-        final boolean[] a = new boolean[len];
+    public static BooleanList random(final int length) throws NegativeArraySizeException {
+        final boolean[] a = new boolean[length];
+        final ThreadLocalRandom random = ThreadLocalRandom.current();
 
-        for (int i = 0; i < len; i++) {
-            a[i] = RAND.nextBoolean();
+        for (int i = 0; i < length; i++) {
+            a[i] = random.nextBoolean();
         }
 
         return of(a);
@@ -570,8 +568,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
-     * list.get(0);   // returns true
-     * list.get(1);   // returns false
+     * list.get(0);  // returns true
+     * list.get(1);  // returns false
      *
      * list.get(3);   // throws IndexOutOfBoundsException
      * }</pre>
@@ -592,8 +590,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
-     * boolean old = list.set(1, true);   // returns false (the previous value); list is now [true, true, true]
-     * list.set(0, false);                // returns true (the previous value); list is now [false, true, true]
+     * boolean old = list.set(1, true);  // returns false (the previous value); list is now [true, true, true]
+     * list.set(0, false);               // returns true (the previous value); list is now [false, true, true]
      *
      * list.set(5, true);   // throws IndexOutOfBoundsException
      * }</pre>
@@ -623,8 +621,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false);
-     * list.add(true);    // list is now [true, false, true]
-     * list.add(false);   // list is now [true, false, true, false]
+     * list.add(true);   // list is now [true, false, true]
+     * list.add(false);  // list is now [true, false, true, false]
      *
      * BooleanList empty = new BooleanList();
      * empty.add(true);   // list is now [true]
@@ -650,9 +648,9 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
-     * list.add(1, false);    // list is now [true, false, false, true]
-     * list.add(0, true);     // list is now [true, true, false, false, true]
-     * list.add(5, false);    // appends at the end; list is now [true, true, false, false, true, false]
+     * list.add(1, false);  // list is now [true, false, false, true]
+     * list.add(0, true);   // list is now [true, true, false, false, true]
+     * list.add(5, false);  // appends at the end; list is now [true, true, false, false, true, false]
      *
      * list.add(100, true);   // throws IndexOutOfBoundsException (index > size)
      * }</pre>
@@ -821,8 +819,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList flags = BooleanList.of(true, false, true, false);
-     * boolean removed = flags.remove(true);        // returns true, list is now [false, true, false]
-     * boolean removedAgain = flags.remove(true);   // returns true, list is now [false, false]
+     * boolean removed = flags.remove(true);       // returns true, list is now [false, true, false]
+     * boolean removedAgain = flags.remove(true);  // returns true, list is now [false, false]
      * }</pre>
      *
      * @param e the element to be removed from this list, if present
@@ -896,8 +894,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Removes from this list all of its elements that are contained in the specified BooleanList.
      *
-     * <p>This method runs in quadratic time in the worst case, but uses a more efficient
-     * set-based algorithm when the size conditions make it beneficial.</p>
+     * <p>This method runs in O(n + m) time, where n is the size of this list and m is the size of
+     * the specified list, and allocates no temporary collection.</p>
      *
      * @param c the BooleanList containing elements to be removed from this list.
      *          If {@code null} or empty, this list remains unchanged
@@ -1040,8 +1038,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * In other words, removes from this list all of its elements that are not contained
      * in the specified list.
      *
-     * <p>This method runs in quadratic time in the worst case, but uses a more efficient
-     * set-based algorithm when the size conditions make it beneficial.</p>
+     * <p>This method runs in O(n + m) time, where n is the size of this list and m is the size of
+     * the specified list, and allocates no temporary collection.</p>
      *
      * <p><b>Note:</b> If {@code c} is {@code null} or empty, all elements of this list are removed
      * (the list is cleared), because no elements can be retained.</p>
@@ -1098,22 +1096,17 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     private int batchRemove(final BooleanList c, final boolean complement) {
         final boolean[] elementData = this.elementData;//NOSONAR
 
+        // A boolean list holds at most two distinct values, so membership in c reduces to two flags.
+        // They are computed before any element is moved, so compaction cannot change membership when
+        // c is this list or another list wrapping the same array.
+        final boolean cContainsTrue = c.contains(true);
+        final boolean cContainsFalse = c.contains(false);
+
         int w = 0;
 
-        // Compaction must not change membership when another list wraps the same array.
-        if (elementData == c.elementData || needToSet(size(), c.size())) {
-            final Set<Boolean> set = c.toSet();
-
-            for (int i = 0; i < size; i++) {
-                if (set.contains(elementData[i]) == complement) {
-                    elementData[w++] = elementData[i];
-                }
-            }
-        } else {
-            for (int i = 0; i < size; i++) {
-                if (c.contains(elementData[i]) == complement) {
-                    elementData[w++] = elementData[i];
-                }
+        for (int i = 0; i < size; i++) {
+            if ((elementData[i] ? cContainsTrue : cContainsFalse) == complement) {
+                elementData[w++] = elementData[i];
             }
         }
 
@@ -1137,8 +1130,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * boolean removed = list.removeAt(1);   // returns false; list is now [true, true, false]
-     * list.removeAt(0);                     // returns true; list is now [true, false]
+     * boolean removed = list.removeAt(1);  // returns false; list is now [true, true, false]
+     * list.removeAt(0);                    // returns true; list is now [true, false]
      *
      * list.removeAt(5);                     // throws IndexOutOfBoundsException
      * }</pre>
@@ -1251,8 +1244,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * @param toIndex the ending index (exclusive) of the range to be moved
      * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if
-     *         newPositionAfterMove would cause elements to be moved outside the list
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}, or if
+     *         {@code newPositionAfterMove < 0} or {@code newPositionAfterMove > size() - (toIndex - fromIndex)}
      */
     @Override
     public void moveRange(final int fromIndex, final int toIndex, final int newPositionAfterMove) throws IndexOutOfBoundsException {
@@ -1471,17 +1464,17 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
-     * list.fill(false);   // list is now [false, false, false]
-     * list.fill(true);    // list is now [true, true, true]
+     * list.fill(false);  // list is now [false, false, false]
+     * list.fill(true);   // list is now [true, true, true]
      *
      * BooleanList empty = new BooleanList();
      * empty.fill(true);   // list is still [] (no elements to fill)
      * }</pre>
      *
-     * @param val the value to be stored in all elements of the list
+     * @param value the value to be stored in all elements of the list
      */
-    public void fill(final boolean val) {
-        fill(0, size(), val);
+    public void fill(final boolean value) {
+        fill(0, size(), value);
     }
 
     /**
@@ -1498,13 +1491,13 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * @param fromIndex the index of the first element (inclusive) to be filled with the specified value
      * @param toIndex the index after the last element (exclusive) to be filled with the specified value
-     * @param val the value to be stored in the specified range of elements
+     * @param value the value to be stored in the specified range of elements
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
      */
-    public void fill(final int fromIndex, final int toIndex, final boolean val) throws IndexOutOfBoundsException {
+    public void fill(final int fromIndex, final int toIndex, final boolean value) throws IndexOutOfBoundsException {
         checkFromToIndex(fromIndex, toIndex);
 
-        N.fill(elementData, fromIndex, toIndex, val);
+        N.fill(elementData, fromIndex, toIndex, value);
     }
 
     /**
@@ -1517,8 +1510,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, true, true);
-     * list.contains(true);    // returns true
-     * list.contains(false);   // returns false
+     * list.contains(true);   // returns true
+     * list.contains(false);  // returns false
      *
      * BooleanList empty = new BooleanList();
      * empty.contains(true);   // returns false
@@ -1534,9 +1527,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns {@code true} if this list contains any of the elements in the specified BooleanList.
      *
-     * <p>This method runs in O(n*m) time in the worst case, where n is the size of this list
-     * and m is the size of the specified list. However, it may use more efficient algorithms
-     * based on the relative sizes of the lists.</p>
+     * <p>This method runs in O(n + m) time in the worst case, where n is the size of this list
+     * and m is the size of the specified list.</p>
      *
      * @param c the BooleanList to be checked for containment in this list.
      *          If {@code null} or empty, {@code false} is returned
@@ -1574,9 +1566,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     /**
      * Returns {@code true} if this list contains all of the elements in the specified BooleanList.
      *
-     * <p>This method runs in O(n*m) time in the worst case, where n is the size of this list
-     * and m is the size of the specified list. However, it may use more efficient set-based
-     * algorithms when beneficial.</p>
+     * <p>This method runs in O(n + m) time in the worst case, where n is the size of this list
+     * and m is the size of the specified list, and allocates no temporary collection.</p>
      *
      * @param c the BooleanList to be checked for containment in this list.
      *          If {@code null} or empty, {@code true} is returned (vacuously)
@@ -1591,23 +1582,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             return false;
         }
 
-        if (needToSet(size(), c.size())) {
-            final Set<Boolean> set = this.toSet();
-
-            for (int i = 0, len = c.size(); i < len; i++) {
-                if (!set.contains(c.elementData[i])) {
-                    return false;
-                }
-            }
-        } else {
-            for (int i = 0, len = c.size(); i < len; i++) {
-                if (!contains(c.elementData[i])) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        // At most two distinct values: every value present in c must also be present in this list.
+        return (!c.contains(true) || contains(true)) && (!c.contains(false) || contains(false));
     }
 
     /**
@@ -1648,23 +1624,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             return true;
         }
 
-        if (needToSet(size(), c.size())) {
-            final Set<Boolean> set = this.toSet();
-
-            for (int i = 0, len = c.size(); i < len; i++) {
-                if (set.contains(c.elementData[i])) {
-                    return false;
-                }
-            }
-        } else {
-            for (int i = 0, len = c.size(); i < len; i++) {
-                if (contains(c.elementData[i])) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        // At most two distinct values: the lists are disjoint unless one value is present in both.
+        return !(contains(true) && c.contains(true)) && !(contains(false) && c.contains(false));
     }
 
     /**
@@ -1709,16 +1670,23 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      */
     @Override
     public BooleanList intersection(final BooleanList b) {
+        if (isEmpty()) {
+            return new BooleanList();
+        }
+
         if (N.isEmpty(b)) {
             return new BooleanList();
         }
 
-        final Multiset<Boolean> bOccurrences = b.toMultiset();
+        final int[] bOccurrences = occurrencesOf(b);
 
         final BooleanList c = new BooleanList(N.min(9, size(), b.size()));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (bOccurrences.remove(elementData[i])) {
+            final int k = elementData[i] ? 1 : 0;
+
+            if (bOccurrences[k] > 0) {
+                bOccurrences[k]--;
                 c.add(elementData[i]);
             }
         }
@@ -1739,6 +1707,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      */
     @Override
     public BooleanList intersection(final boolean[] b) {
+        if (isEmpty()) {
+            return new BooleanList();
+        }
+
         if (N.isEmpty(b)) {
             return new BooleanList();
         }
@@ -1769,16 +1741,24 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      */
     @Override
     public BooleanList difference(final BooleanList b) {
+        if (isEmpty()) {
+            return new BooleanList();
+        }
+
         if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
 
-        final Multiset<Boolean> bOccurrences = b.toMultiset();
+        final int[] bOccurrences = occurrencesOf(b);
 
         final BooleanList c = new BooleanList(N.min(size(), N.max(9, size() - b.size())));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (!bOccurrences.remove(elementData[i])) {
+            final int k = elementData[i] ? 1 : 0;
+
+            if (bOccurrences[k] > 0) {
+                bOccurrences[k]--;
+            } else {
                 c.add(elementData[i]);
             }
         }
@@ -1800,6 +1780,10 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      */
     @Override
     public BooleanList difference(final boolean[] b) {
+        if (isEmpty()) {
+            return new BooleanList();
+        }
+
         if (N.isEmpty(b)) {
             return of(N.copyOfRange(elementData, 0, size()));
         }
@@ -1846,21 +1830,28 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
             return b.copy();
         }
 
-        final Multiset<Boolean> bOccurrences = b.toMultiset();
+        final int[] bOccurrences = occurrencesOf(b);
         final BooleanList c = new BooleanList(N.max(9, Math.abs(size() - b.size())));
 
         for (int i = 0, len = size(); i < len; i++) {
-            if (!bOccurrences.remove(elementData[i])) {
+            final int k = elementData[i] ? 1 : 0;
+
+            if (bOccurrences[k] > 0) {
+                bOccurrences[k]--;
+            } else {
                 c.add(elementData[i]);
             }
         }
 
         for (int i = 0, len = b.size(); i < len; i++) {
-            if (bOccurrences.remove(b.elementData[i])) {
+            final int k = b.elementData[i] ? 1 : 0;
+
+            if (bOccurrences[k] > 0) {
+                bOccurrences[k]--;
                 c.add(b.elementData[i]);
             }
 
-            if (bOccurrences.isEmpty()) {
+            if (bOccurrences[0] == 0 && bOccurrences[1] == 0) {
                 break;
             }
         }
@@ -1940,8 +1931,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * list.indexOf(false);   // returns 1
-     * list.indexOf(true);    // returns 0
+     * list.indexOf(false);  // returns 1
+     * list.indexOf(true);   // returns 0
      *
      * BooleanList allTrue = BooleanList.of(true, true);
      * allTrue.indexOf(false);   // returns -1 (not found)
@@ -1965,11 +1956,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * list.indexOf(true, 1);    // returns 2 (first true at or after index 1)
-     * list.indexOf(false, 2);   // returns 3
+     * list.indexOf(true, 1);   // returns 2 (first true at or after index 1)
+     * list.indexOf(false, 2);  // returns 3
      *
-     * list.indexOf(true, -5);   // returns 0 (negative fromIndex treated as 0)
-     * list.indexOf(true, 10);   // returns -1 (fromIndex >= size)
+     * list.indexOf(true, -5);  // returns 0 (negative fromIndex treated as 0)
+     * list.indexOf(true, 10);  // returns -1 (fromIndex >= size)
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -2002,8 +1993,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * list.lastIndexOf(true);    // returns 2
-     * list.lastIndexOf(false);   // returns 3
+     * list.lastIndexOf(true);   // returns 2
+     * list.lastIndexOf(false);  // returns 3
      *
      * BooleanList allTrue = BooleanList.of(true, true);
      * allTrue.lastIndexOf(false);   // returns -1 (not found)
@@ -2027,11 +2018,11 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false);
-     * list.lastIndexOf(true, 1);    // returns 0 (last true at or before index 1)
-     * list.lastIndexOf(false, 2);   // returns 1
+     * list.lastIndexOf(true, 1);   // returns 0 (last true at or before index 1)
+     * list.lastIndexOf(false, 2);  // returns 1
      *
-     * list.lastIndexOf(true, 10);   // returns 2 (startIndexFromBack >= size: search from last element)
-     * list.lastIndexOf(true, -1);   // returns -1 (negative startIndexFromBack)
+     * list.lastIndexOf(true, 10);  // returns 2 (startIndexFromBack >= size: search from last element)
+     * list.lastIndexOf(true, -1);  // returns -1 (negative startIndexFromBack)
      * }</pre>
      *
      * @param valueToFind the element to search for
@@ -2132,8 +2123,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
-     * list.first().isPresent();   // returns true
-     * list.first().get();         // returns true
+     * list.first().isPresent();  // returns true
+     * list.first().get();        // returns true
      *
      * BooleanList empty = new BooleanList();
      * empty.first().isPresent();   // returns false
@@ -2153,8 +2144,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true);
-     * list.last().isPresent();   // returns true
-     * list.last().get();         // returns true
+     * list.last().isPresent();  // returns true
+     * list.last().get();        // returns true
      *
      * BooleanList empty = new BooleanList();
      * empty.last().isPresent();   // returns false
@@ -2319,9 +2310,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *
      * <p>This operation modifies the list in-place and has O(n) time complexity.</p>
      *
-     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom}, which is <b>not</b>
-     * cryptographically secure. Note that this is a <i>different</i> generator from the one the
-     * {@code random(..)} factories use; call {@link #shuffle(Random)} with a
+     * <p>The source is {@link java.util.concurrent.ThreadLocalRandom} (as for the {@code random(..)}
+     * factories), which is <b>not</b> cryptographically secure; call {@link #shuffle(Random)} with a
      * {@link java.security.SecureRandom} when the permutation must be unpredictable.</p>
      *
      */
@@ -2337,15 +2327,15 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * Each possible permutation occurs with approximately equal probability, assuming that
      * the source of randomness is fair.
      *
-     * @param rnd the random number generator to use for shuffling; must not be {@code null}
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
+     * @param random the random number generator to use for shuffling; must not be {@code null}
+     * @throws IllegalArgumentException if {@code random} is {@code null}.
      */
     @Override
-    public void shuffle(final Random rnd) throws IllegalArgumentException {
-        N.checkArgNotNull(rnd, cs.rnd);
+    public void shuffle(final Random random) throws IllegalArgumentException {
+        N.checkArgNotNull(random, cs.random);
 
         if (size() > 1) {
-            N.shuffle(elementData, 0, size, rnd);
+            N.shuffle(elementData, 0, size, random);
         }
     }
 
@@ -2573,16 +2563,17 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *                 initial capacity. The function receives the number of elements as input.
      * @return a Collection containing the boxed boolean values from the specified range
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     @Override
     public <C extends Collection<Boolean>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException, UnsupportedOperationException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final C c = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final C c = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             c.add(elementData[i]);
@@ -2602,15 +2593,16 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      *                 initial capacity. The function receives the number of elements as input.
      * @return a Multiset containing the boxed boolean values from the specified range with their counts
      * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()}
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      */
     @Override
     public Multiset<Boolean> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<Boolean>> supplier)
-            throws IndexOutOfBoundsException, IllegalArgumentException {
+            throws IndexOutOfBoundsException, IllegalArgumentException, NullPointerException {
         checkFromToIndex(fromIndex, toIndex);
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final Multiset<Boolean> multiset = N.checkArgNotNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
+        final Multiset<Boolean> multiset = N.requireNonNull(supplier.apply(toIndex - fromIndex), "supplier returned null");
 
         for (int i = fromIndex; i < toIndex; i++) {
             multiset.add(elementData[i]);
@@ -2666,8 +2658,8 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanList list = BooleanList.of(true, false, true, false, true);
-     * long trueCount = list.stream(1, 4).filter(b -> b).count();   // returns 1 (index 2 is the only true in [1,4))
-     * list.stream(0, 5).count();                                   // returns 5
+     * long trueCount = list.stream(1, 4).filter(b -> b).count();  // returns 1 (index 2 is the only true in [1,4))
+     * list.stream(0, 5).count();                                  // returns 5
      *
      * list.stream(0, 10);                                          // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
@@ -2889,6 +2881,20 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
     }
 
     /**
+     * Counts the occurrences of the two possible values in the specified list, in place of a boxed
+     * {@code Multiset<Boolean>} for the occurrence-based set operations.
+     *
+     * @param list the list whose values are counted
+     * @return a new two-element array: index {@code 0} holds the number of {@code false} values and
+     *         index {@code 1} the number of {@code true} values
+     */
+    private static int[] occurrencesOf(final BooleanList list) {
+        final int trueCount = list.frequency(true);
+
+        return new int[] { list.size() - trueCount, trueCount };
+    }
+
+    /**
      * @throws OutOfMemoryError if {@code minCapacity} is negative or exceeds the maximum supported array size, or the enlarged array cannot be allocated
      */
     private void ensureCapacity(final int minCapacity) throws OutOfMemoryError {
@@ -2953,4 +2959,25 @@ public final class BooleanList extends PrimitiveList<Boolean, boolean[], Boolean
         elementData = array;
         size = sz;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Caps the expected set size at the 2 distinct values representable by this primitive type.</p>
+     */
+    @Override
+    protected <T> IntFunction<Set<T>> createSetSupplier() {
+        return size -> N.newHashSet(Math.min(size, 2));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Caps the expected multiset size at the 2 distinct values representable by this primitive type.</p>
+     */
+    @Override
+    protected <T> IntFunction<Multiset<T>> createMultisetSupplier() {
+        return size -> N.newMultiset(Math.min(size, 2));
+    }
+
 }

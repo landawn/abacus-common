@@ -24,6 +24,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.landawn.abacus.parser.JsonSerConfig;
 import com.landawn.abacus.parser.XmlSerConfig;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class NToTest extends NTestSupport {
 
@@ -159,5 +161,23 @@ public class NToTest extends NTestSupport {
         assertEquals(new HashSet<>(Arrays.asList(1, 2, 3)), set);
         assertEquals(Collections.emptySet(), CommonUtil.toSet(new Integer[] {}));
         assertEquals(Collections.emptySet(), CommonUtil.toSet((Integer[]) null));
+    }
+
+
+    @Test
+    public void testToJson_defaultSeparatorSpacing() throws IOException {
+        final Map<String, Integer> data = new LinkedHashMap<>();
+        data.put("age", 25);
+        data.put("score", 90);
+
+        assertEquals("{\"age\": 25, \"score\": 90}", N.toJson(data));
+
+        final StringWriter writer = new StringWriter();
+        N.toJson(data, writer);
+        assertEquals("{\"age\": 25, \"score\": 90}", writer.toString());
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        N.toJson(data, out);
+        assertEquals("{\"age\": 25, \"score\": 90}", out.toString(StandardCharsets.UTF_8.name()));
     }
 }

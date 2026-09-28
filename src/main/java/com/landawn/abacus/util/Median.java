@@ -82,8 +82,8 @@ import com.landawn.abacus.util.u.OptionalShort;
  * // Even length: both middle elements
  * int[] numbers = {5, 2, 8, 1, 9, 3};
  * Pair<Integer, OptionalInt> result = Median.of(numbers);
- * result.left();          // 3
- * result.right().get();   // 5
+ * result.left();         // 3
+ * result.right().get();  // 5
  *
  * // Odd length: right is empty
  * Median.of(numbers, 1, 4);   // (2, OptionalInt.empty) - considers indices 1..3
@@ -440,8 +440,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Integer, OptionalInt> median = Median.of(10, 5, 20, 15);
-     * int lowerMedian = median.left();          // returns 10
-     * int upperMedian = median.right().get();   // returns 15
+     * int lowerMedian = median.left();         // returns 10
+     * int upperMedian = median.right().get();  // returns 15
      * }</pre>
      *
      * @param source the array of integers to find the median from. Must not be {@code null} or empty.
@@ -541,8 +541,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Long, OptionalLong> median = Median.of(1000L, 500L, 1500L, 750L);
-     * long lowerMedian = median.left();          // returns 750
-     * long upperMedian = median.right().get();   // returns 1000
+     * long lowerMedian = median.left();         // returns 750
+     * long upperMedian = median.right().get();  // returns 1000
      * }</pre>
      *
      * @param source the array of long integers to find the median from. Must not be {@code null} or empty.
@@ -749,8 +749,8 @@ public final class Median {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Pair<Double, OptionalDouble> median = Median.of(10.5, 5.2, 20.8, 15.1);
-     * double lowerMedian = median.left();          // returns 10.5
-     * double upperMedian = median.right().get();   // returns 15.1
+     * double lowerMedian = median.left();         // returns 10.5
+     * double upperMedian = median.right().get();  // returns 15.1
      * }</pre>
      *
      * @param source the array of double values to find the median from. Must not be {@code null} or empty.
@@ -930,7 +930,7 @@ public final class Median {
      * or when a different ordering is desired. Arrays of four or more elements are copied and sorted;
      * shorter inputs use the selection paths described in the class documentation.</p>
      *
-     * <p><strong>Note:</strong> {@code cmp} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
+     * <p><strong>Note:</strong> {@code comparator} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
      * contains {@code null} elements.</p>
      *
@@ -949,11 +949,11 @@ public final class Median {
      *
      * @param <T> the type of elements in the array.
      * @param source the array of objects to find the median from. Must not be {@code null} or empty.
-     * @param cmp the comparator used for ordering elements; must not be {@code null}.
+     * @param comparator the comparator used for ordering elements; must not be {@code null}.
      * @return a {@code Pair} containing the median value(s). For odd-length arrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length arrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if {@code cmp} is
+     * @throws IllegalArgumentException if the specified array is {@code null} or empty, or if {@code comparator} is
      *         {@code null}.
      * @throws ClassCastException if the selected elements cannot be compared with each other by the chosen ordering
      * @throws NullPointerException if the comparator is invoked for a selected null element and does not accept nulls
@@ -961,12 +961,12 @@ public final class Median {
      * @see #of(Comparable[])
      * @see N#lowerMedian(Object[], Comparator)
      */
-    public static <T> Pair<T, Nullable<T>> of(final T[] source, final Comparator<? super T> cmp)
+    public static <T> Pair<T, Nullable<T>> of(final T[] source, final Comparator<? super T> comparator)
             throws IllegalArgumentException, ClassCastException, NullPointerException {
         N.checkArgNotEmpty(source, "The specified array 'source' cannot be null or empty");
-        N.checkArgNotNull(cmp, cs.cmp);
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return of(source, 0, source.length, cmp);
+        return of(source, 0, source.length, comparator);
     }
 
     /**
@@ -978,7 +978,7 @@ public final class Median {
      * one or two elements are compared directly; three-element ranges delegate to {@link N#lowerMedian}.
      * Larger ranges are copied and the copy is sorted.</p>
      *
-     * <p><strong>Note:</strong> {@code cmp} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
+     * <p><strong>Note:</strong> {@code comparator} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
      * contains {@code null} elements.</p>
      *
@@ -1001,7 +1001,7 @@ public final class Median {
      *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the array to consider.
      *                Must be greater than fromIndex and not exceed array length.
-     * @param cmp the comparator used for ordering elements; must not be {@code null}.
+     * @param comparator the comparator used for ordering elements; must not be {@code null}.
      * @return a {@code Pair} containing the median value(s). For odd-length subarrays, the {@code left}
      *         contains the median and {@code right} is empty. For even-length subarrays, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -1010,14 +1010,14 @@ public final class Median {
      *                                   validated before the emptiness check, so an out-of-range index raises
      *                                   this rather than the empty-input {@code IllegalArgumentException}.
      * @throws IllegalArgumentException if the specified array is {@code null} or empty, if the (in-range)
-     *         {@code toIndex - fromIndex} is less than 1, or if {@code cmp} is {@code null}.
+     *         {@code toIndex - fromIndex} is less than 1, or if {@code comparator} is {@code null}.
      * @throws ClassCastException if the selected elements cannot be compared with each other by the chosen ordering
      * @throws NullPointerException if the comparator is invoked for a selected null element and does not accept nulls
      * @see #of(Object[], Comparator)
      * @see #of(Comparable[], int, int)
      * @see N#lowerMedian(Object[], int, int, Comparator)
      */
-    public static <T> Pair<T, Nullable<T>> of(final T[] source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
+    public static <T> Pair<T, Nullable<T>> of(final T[] source, final int fromIndex, final int toIndex, final Comparator<? super T> comparator)
             throws IndexOutOfBoundsException, IllegalArgumentException, ClassCastException, NullPointerException {
         N.checkFromToIndex(fromIndex, toIndex, N.len(source));
 
@@ -1025,7 +1025,7 @@ public final class Median {
             throw new IllegalArgumentException("Source array is null/empty, or the range is empty: toIndex - fromIndex must be >= 1");
         }
 
-        N.checkArgNotNull(cmp, cs.cmp);
+        N.checkArgNotNull(comparator, cs.comparator);
 
         final int len = toIndex - fromIndex;
 
@@ -1033,15 +1033,15 @@ public final class Median {
             // Nullable preserves a present null upper median separately from an absent odd-size counterpart.
             return Pair.of(source[fromIndex], Nullable.empty());
         } else if (len == 2) {
-            return cmp.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], Nullable.of(source[fromIndex + 1]))
+            return comparator.compare(source[fromIndex], source[fromIndex + 1]) <= 0 ? Pair.of(source[fromIndex], Nullable.of(source[fromIndex + 1]))
                     : Pair.of(source[fromIndex + 1], Nullable.of(source[fromIndex]));
         } else if (len == 3) {
-            return Pair.of(N.lowerMedian(source, fromIndex, toIndex, cmp), Nullable.empty());
+            return Pair.of(N.lowerMedian(source, fromIndex, toIndex, comparator), Nullable.empty());
         } else {
             // Sort a copy to preserve the source and allow null-tolerant comparators. The stable sort
             // also preserves encounter order among values that the comparator considers equal.
             final T[] copy = N.copyOfRange(source, fromIndex, toIndex);
-            N.sort(copy, cmp);
+            N.sort(copy, comparator);
 
             return len % 2 == 0 ? Pair.of(copy[len / 2 - 1], Nullable.of(copy[len / 2])) : Pair.of(copy[len / 2], Nullable.empty());
         }
@@ -1096,7 +1096,7 @@ public final class Median {
      * <p>Copies of four or more elements are sorted; shorter copies use the selection paths described
      * in the class documentation. The input collection is not modified.</p>
      *
-     * <p><strong>Note:</strong> {@code cmp} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
+     * <p><strong>Note:</strong> {@code comparator} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
      * contains {@code null} elements.</p>
      *
@@ -1115,11 +1115,11 @@ public final class Median {
      *
      * @param <T> the type of elements in the collection.
      * @param source the collection of objects to find the median from. Must not be {@code null} or empty.
-     * @param cmp the comparator used for ordering elements; must not be {@code null}.
+     * @param comparator the comparator used for ordering elements; must not be {@code null}.
      * @return a {@code Pair} containing the median value(s). For odd-size collections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size collections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
-     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if {@code cmp} is
+     * @throws IllegalArgumentException if the specified collection is {@code null} or empty, or if {@code comparator} is
      *         {@code null}.
      * @throws ClassCastException if the selected elements cannot be compared with each other by the chosen ordering
      * @throws NullPointerException if the comparator is invoked for a selected null element and does not accept nulls
@@ -1128,13 +1128,13 @@ public final class Median {
      * @see N#lowerMedian(Collection, Comparator)
      * @see Iterables#lowerMedian(Collection, Comparator)
      */
-    public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> source, final Comparator<? super T> cmp)
+    public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> source, final Comparator<? super T> comparator)
             throws IllegalArgumentException, ClassCastException, NullPointerException {
         if (N.isEmpty(source)) {
             throw new IllegalArgumentException("Source collection is null or empty");
         }
 
-        N.checkArgNotNull(cmp, cs.cmp);
+        N.checkArgNotNull(comparator, cs.comparator);
 
         final List<T> copy = new ArrayList<>(source);
         final int len = copy.size();
@@ -1148,11 +1148,11 @@ public final class Median {
         } else if (len == 2) {
             final T first = copy.get(0);
             final T second = copy.get(1);
-            return cmp.compare(first, second) <= 0 ? Pair.of(first, Nullable.of(second)) : Pair.of(second, Nullable.of(first));
+            return comparator.compare(first, second) <= 0 ? Pair.of(first, Nullable.of(second)) : Pair.of(second, Nullable.of(first));
         } else if (len == 3) {
-            return Pair.of(N.lowerMedian(copy, cmp), Nullable.empty());
+            return Pair.of(N.lowerMedian(copy, comparator), Nullable.empty());
         } else {
-            copy.sort(cmp);
+            copy.sort(comparator);
 
             return len % 2 == 0 ? Pair.of(copy.get(len / 2 - 1), Nullable.of(copy.get(len / 2))) : Pair.of(copy.get(len / 2), Nullable.empty());
         }
@@ -1220,7 +1220,7 @@ public final class Median {
      * collection using the specified indices. The selected values are then copied for median selection;
      * elements outside the target range are not stored.</p>
      *
-     * <p><strong>Note:</strong> {@code cmp} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
+     * <p><strong>Note:</strong> {@code comparator} must not be {@code null}; an {@code IllegalArgumentException} is thrown if it is.
      * A custom comparator that does not handle nulls may throw {@code NullPointerException} when the input
      * contains {@code null} elements.</p>
      *
@@ -1243,7 +1243,7 @@ public final class Median {
      *                  Must be non-negative and less than toIndex.
      * @param toIndex the ending index (exclusive) of the range within the collection to consider.
      *                Must be greater than fromIndex and not exceed collection size.
-     * @param cmp the comparator used for ordering elements; must not be {@code null}.
+     * @param comparator the comparator used for ordering elements; must not be {@code null}.
      * @return a {@code Pair} containing the median value(s). For odd-size subcollections, the {@code left}
      *         contains the median and {@code right} is empty. For even-size subcollections, the {@code left}
      *         contains the smaller median and {@code right} contains the larger median.
@@ -1252,23 +1252,23 @@ public final class Median {
      *                                   validated before the emptiness check, so an out-of-range index raises
      *                                   this rather than the empty-input {@code IllegalArgumentException}.
      * @throws IllegalArgumentException if the specified collection is {@code null} or empty, if the (in-range)
-     *         {@code toIndex - fromIndex} is less than 1, or if {@code cmp} is {@code null}.
+     *         {@code toIndex - fromIndex} is less than 1, or if {@code comparator} is {@code null}.
      * @throws ClassCastException if the selected elements cannot be compared with each other by the chosen ordering
      * @throws NullPointerException if the comparator is invoked for a selected null element and does not accept nulls
      * @see #of(Collection, Comparator)
      * @see #of(Collection, int, int)
      * @see N#lowerMedian(Collection, int, int, Comparator)
      */
-    public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex, final Comparator<? super T> cmp)
-            throws IndexOutOfBoundsException, IllegalArgumentException, ClassCastException, NullPointerException {
+    public static <T> Pair<T, Nullable<T>> of(final Collection<? extends T> source, final int fromIndex, final int toIndex,
+            final Comparator<? super T> comparator) throws IndexOutOfBoundsException, IllegalArgumentException, ClassCastException, NullPointerException {
         N.checkFromToIndex(fromIndex, toIndex, N.size(source));
 
         if (N.isEmpty(source) || fromIndex >= toIndex) {
             throw new IllegalArgumentException("Source collection is null/empty, or the range is empty: toIndex - fromIndex must be >= 1"); //NOSONAR
         }
 
-        N.checkArgNotNull(cmp, cs.cmp);
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return of(N.slice(source, fromIndex, toIndex), cmp);
+        return of(N.slice(source, fromIndex, toIndex), comparator);
     }
 }

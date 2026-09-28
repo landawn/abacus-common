@@ -1333,4 +1333,89 @@ public class ParallelArrayShortStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    @Test
+    public void testReduceAndCollectWithArraySplitStrategyFollowEncounterOrder() {
+        final short[] source = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        final ParallelSettings ps = ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build();
+
+        // "last element wins" is associative but not commutative: ARRAY slices are contiguous and combined in slice order
+        assertEquals((short) 9, ShortStream.of(source).parallel(ps).reduce((a, b) -> b).get());
+        assertEquals((short) 9, ShortStream.of(source).parallel(ps).reduce((short) -1, (a, b) -> b));
+
+        final List<Short> collected = ShortStream.of(source).parallel(ps).collect(ArrayList::new, (c, e) -> c.add(e), ArrayList::addAll);
+        assertEquals(Arrays.asList((short) 0, (short) 1, (short) 2, (short) 3, (short) 4, (short) 5, (short) 6, (short) 7, (short) 8, (short) 9),
+                collected);
+    }
+
+    // ---- perf review 2026-09-26 G102 begin ----
+    // G102-01: findFirst/findLast track the candidate index in primitive locals; pins lowest/highest-index results on both split strategies.
+    @Test
+    public void testFindFirstFindLast_primitiveCandidateTracking() {
+        final short[] source = new short[1000];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = (short) (i * 3 - 1500);
+        }
+
+        final List<ShortPredicate> predicates = Arrays.asList(value -> value % 7 == 0, value -> value > 1400, value -> value < -1400, value -> value == 1497,
+                value -> value == -1500, value -> value == 2, value -> true, value -> false);
+
+        for (final SplitStrategy splitStrategy : new SplitStrategy[] { SplitStrategy.ARRAY, SplitStrategy.ITERATOR }) {
+            for (final int threadNum : new int[] { 2, 3, 4, 7 }) {
+                for (final int[] range : new int[][] { { 0, 1000 }, { 5, 997 }, { 10, 12 } }) {
+                    for (final ShortPredicate predicate : predicates) {
+                        int first = -1;
+                        int last = -1;
+
+                        for (int i = range[0]; i < range[1]; i++) {
+                            if (predicate.test(source[i])) {
+                                if (first < 0) {
+                                    first = i;
+                                }
+
+                                last = i;
+                            }
+                        }
+
+                        final OptionalShort expectedFirst = first < 0 ? OptionalShort.empty() : OptionalShort.of(source[first]);
+                        final OptionalShort expectedLast = last < 0 ? OptionalShort.empty() : OptionalShort.of(source[last]);
+
+                        assertEquals(expectedFirst, new ParallelArrayShortStream(source, range[0], range[1], false, threadNum, splitStrategy, null, false,
+                                new ArrayList<>()).findFirst(predicate::test));
+                        assertEquals(expectedLast, new ParallelArrayShortStream(source, range[0], range[1], false, threadNum, splitStrategy, null, false,
+                                new ArrayList<>()).findLast(predicate::test));
+                    }
+                }
+            }
+
+            for (final boolean last : new boolean[] { false, true }) {
+                final AtomicInteger calls = new AtomicInteger();
+                final ShortStream stream = new ParallelArrayShortStream(source, 0, source.length, false, 4, splitStrategy, null, false, new ArrayList<>());
+
+                assertEquals(OptionalShort.empty(), last ? stream.findLast(value -> calls.incrementAndGet() < 0) : stream.findFirst(value -> calls.incrementAndGet() < 0));
+                assertEquals(source.length, calls.get());
+            }
+
+            final RuntimeException failure = new RuntimeException("find failure");
+
+            assertSame(failure, assertThrows(RuntimeException.class, () -> new ParallelArrayShortStream(source, 0, source.length, false, 4, splitStrategy, null,
+                    false, new ArrayList<>()).findFirst(value -> {
+                        if (value == 0) {
+                            throw failure;
+                        }
+
+                        return false;
+                    })));
+            assertSame(failure, assertThrows(RuntimeException.class, () -> new ParallelArrayShortStream(source, 0, source.length, false, 4, splitStrategy, null,
+                    false, new ArrayList<>()).findLast(value -> {
+                        if (value == 0) {
+                            throw failure;
+                        }
+
+                        return false;
+                    })));
+        }
+    }
+    // ---- perf review 2026-09-26 G102 end ----
 }

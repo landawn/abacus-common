@@ -49,9 +49,10 @@ import com.landawn.abacus.annotation.Beta;
  * permitted by the {@code of(...)} factories, by {@link #copyOf(Map)} and by the default
  * {@link #builder()}. A builder created by {@link #builder(Map)} retains that map's restrictions.
  * {@link #get(Object)} returning {@code null} is therefore not proof that a key is absent;
- * use {@link #containsKey(Object)} to tell the two apart. (The sorted and bidirectional subtypes are
- * stricter: {@link ImmutableSortedMap} rejects a {@code null} key under natural ordering, and
- * {@link ImmutableBiMap} rejects {@code null} keys and values outright.)</p>
+ * use {@link #containsKey(Object)} to tell the two apart. (The sorted subtype and the separate
+ * bidirectional map are stricter: {@link ImmutableSortedMap} rejects a {@code null} key under natural
+ * ordering, and {@link ImmutableBiMap} - which is not an {@code ImmutableMap} - rejects {@code null} keys and
+ * values outright.)</p>
  *
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
@@ -559,8 +560,8 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * mutable.put("a", 1);
      * mutable.put("b", 2);
      * ImmutableMap<String, Integer> immutable = ImmutableMap.copyOf(mutable);
-     * mutable.put("c", 3);                    // Does not affect immutable
-     * System.out.println(immutable.size());   // still prints 2
+     * mutable.put("c", 3);                   // Does not affect immutable
+     * System.out.println(immutable.size());  // still prints 2
      * }</pre>
      *
      * @param <K> the type of keys in the map.
@@ -602,8 +603,8 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * Map<String, Integer> mutable = new HashMap<>();
      * mutable.put("a", 1);
      * ImmutableMap<String, Integer> wrapped = ImmutableMap.wrap(mutable);
-     * mutable.put("b", 2);                  // This change IS visible in wrapped!
-     * System.out.println(wrapped.size());   // prints 2
+     * mutable.put("b", 2);                 // This change IS visible in wrapped!
+     * System.out.println(wrapped.size());  // prints 2
      * }</pre>
      *
      * @param <K> the type of keys in the map.
@@ -673,7 +674,7 @@ public class ImmutableMap<K, V> extends AbstractImmutableMap<K, V> {
      * @param <V> the type of mapped values.
      * @param backedMap the map to be used as the backing storage for the Builder.
      * @return a new Builder instance that will use the provided map.
-     * @throws IllegalArgumentException if backedMap is {@code null}.
+     * @throws IllegalArgumentException if {@code backedMap} is {@code null}.
      */
     public static <K, V> Builder<K, V> builder(final Map<K, V> backedMap) throws IllegalArgumentException {
         N.checkArgNotNull(backedMap, cs.backedMap);

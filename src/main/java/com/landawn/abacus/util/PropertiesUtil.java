@@ -478,7 +478,10 @@ public final class PropertiesUtil {
 
     /**
      * Finds the directory with the specified configuration directory name.
-     * This method searches for the directory in the classpath and file system.
+     * The name is first tried as given (an absolute path, or a path relative to the working directory);
+     * otherwise the directories returned by {@link #getCommonConfigPaths()} and then the working directory
+     * are searched recursively. Only the file system is searched: class-path resources packaged inside a
+     * JAR are not found.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -503,7 +506,10 @@ public final class PropertiesUtil {
 
     /**
      * Finds the file with the specified configuration file name.
-     * This method searches for the file in the classpath and file system.
+     * The name is first tried as given (an absolute path, or a path relative to the working directory);
+     * otherwise the directories returned by {@link #getCommonConfigPaths()} and then the working directory
+     * are searched recursively. Only the file system is searched: class-path resources packaged inside a
+     * JAR are not found.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -633,18 +639,18 @@ public final class PropertiesUtil {
      * // First looks in /app/config/, then searches common paths
      * }</pre>
      *
-     * @param srcFile the source file whose directory will be used as the starting point
+     * @param sourceFile the source file whose directory will be used as the starting point
      * @param targetFileName the name of the file to find
      * @return the found file, or {@code null} if not found
      * @throws IllegalArgumentException if {@code targetFileName} is {@code null} or empty
      */
     @MayReturnNull
-    public static File findFileRelativeTo(final File srcFile, final String targetFileName) throws IllegalArgumentException {
+    public static File findFileRelativeTo(final File sourceFile, final String targetFileName) throws IllegalArgumentException {
         N.checkArgNotEmpty(targetFileName, cs.targetFileName);
         File targetFile = new File(targetFileName);
 
-        if (!targetFile.isAbsolute() && srcFile != null && srcFile.exists()) {
-            final File parent = srcFile.toPath().toAbsolutePath().normalize().toFile().getParentFile();
+        if (!targetFile.isAbsolute() && sourceFile != null && sourceFile.exists()) {
+            final File parent = sourceFile.toPath().toAbsolutePath().normalize().toFile().getParentFile();
             final File exact = new File(parent, targetFileName);
             if (exact.isFile()) {
                 return exact;
@@ -657,8 +663,8 @@ public final class PropertiesUtil {
         }
 
         if (!targetFile.isFile()) {
-            if (targetFile.isAbsolute() && srcFile != null && srcFile.exists()) {
-                targetFile = findFileInDir(targetFileName, srcFile.getParentFile(), false);
+            if (targetFile.isAbsolute() && sourceFile != null && sourceFile.exists()) {
+                targetFile = findFileInDir(targetFileName, sourceFile.getParentFile(), false);
             }
 
             if (targetFile == null || !targetFile.isFile()) {
@@ -684,13 +690,13 @@ public final class PropertiesUtil {
      * }</pre>
      *
      * @param configFileName the name of the file or directory to find (can include relative path)
-     * @param dir the directory to search in
+     * @param directory the directory to search in
      * @param isDir {@code true} if searching for a directory, {@code false} for a file
      * @return the found file or directory, or {@code null} if not found
      * @throws IllegalArgumentException if the target file name is empty or null
      */
     @MayReturnNull
-    public static File findFileInDir(final String configFileName, final File dir, final boolean isDir) throws IllegalArgumentException {
+    public static File findFileInDir(final String configFileName, final File directory, final boolean isDir) throws IllegalArgumentException {
         if (Strings.isEmpty(configFileName)) {
             throw new IllegalArgumentException("target file name cannot be empty or null: " + configFileName);
         }
@@ -706,7 +712,7 @@ public final class PropertiesUtil {
             simpleConfigFileName = simpleConfigFileName.substring(index + 1);
         }
 
-        return findFileInDir(folderPrefix, simpleConfigFileName, dir, isDir, null);
+        return findFileInDir(folderPrefix, simpleConfigFileName, directory, isDir, null);
     }
 
     /**
@@ -714,18 +720,18 @@ public final class PropertiesUtil {
      *
      * @param folderPrefix The prefix of the folder where the search should start.
      * @param configFileName The name of the configuration file to be searched.
-     * @param dir The directory in which to search for the file.
+     * @param directory The directory in which to search for the file.
      * @param isDir Indicates whether the target is a directory.
      * @param foundDir A set of directories that have already been searched.
      * @return The found file as a File object, or {@code null} if the file is not found.
      */
-    private static File findFileInDir(final String folderPrefix, final String configFileName, File dir, final boolean isDir, Set<String> foundDir) {
-        if (dir == null) {
+    private static File findFileInDir(final String folderPrefix, final String configFileName, File directory, final boolean isDir, Set<String> foundDir) {
+        if (directory == null) {
             return null;
         }
 
-        dir = normalizeFilePath(PropertiesUtil.formatPath(dir));
-        final String directoryPath = dir.getPath();
+        directory = normalizeFilePath(PropertiesUtil.formatPath(directory));
+        final String directoryPath = directory.getPath();
 
         if (foundDir == null) {
             foundDir = N.newHashSet();
@@ -735,17 +741,17 @@ public final class PropertiesUtil {
 
         foundDir.add(directoryPath);
 
-        final String absolutePath = dir.getAbsolutePath().replace("%20", " "); //NOSONAR
+        final String absolutePath = directory.getAbsolutePath().replace("%20", " "); //NOSONAR
 
         if (logger.isInfoEnabled()) {
             logger.info("finding file [" + configFileName + "] in directory [" + absolutePath + "] ...");
         }
 
-        if (SVN_NAME.equals(dir.getName()) || GIT_NAME.equals(dir.getName()) || CVS_NAME.equals(dir.getName())) {
+        if (SVN_NAME.equals(directory.getName()) || GIT_NAME.equals(directory.getName()) || CVS_NAME.equals(directory.getName())) {
             return null;
         }
 
-        final File[] files = dir.listFiles();
+        final File[] files = directory.listFiles();
 
         if ((files == null) || (files.length == 0)) {
             return null;
@@ -842,7 +848,8 @@ public final class PropertiesUtil {
      *
      * @param source the file from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws IllegalArgumentException if {@code source} is {@code null}, or a property key or value contains a malformed Unicode escape
+     * @throws IllegalArgumentException if {@code source} is {@code null} or is a directory, or a property key or value contains a
+     *         malformed Unicode escape
      * @throws UncheckedIOException if opening or reading the properties source file fails
      * @see #load(File, boolean)
      * @see #load(InputStream)
@@ -870,7 +877,8 @@ public final class PropertiesUtil {
      * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
      *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
-     * @throws IllegalArgumentException if {@code source} is {@code null}, or a property key or value contains a malformed Unicode escape
+     * @throws IllegalArgumentException if {@code source} is {@code null} or is a directory, or a property key or value contains a
+     *         malformed Unicode escape
      * @throws UncheckedIOException if opening or reading the properties source file fails
      * @see #load(File)
      */
@@ -1027,6 +1035,8 @@ public final class PropertiesUtil {
      * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
      * if absent, the value is kept as a (stripped) {@code String}. Elements with child elements are loaded
      * recursively into nested {@link Properties} instances. Duplicated sibling element names are not supported.
+     * Element names are normalized by {@link Beans#normalizePropName(String)} to form the keys, so {@code <db_url>} is
+     * read as {@code "dbUrl"}, {@code <ID>} as {@code "id"} and {@code <class>} as {@code "clazz"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1036,10 +1046,11 @@ public final class PropertiesUtil {
      *
      * @param source the XML file from which to load the properties.
      * @return a Properties object containing the loaded properties.
-     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} is {@code null} or is a directory
      * @throws ParsingException if the XML cannot be parsed or has no document element
      * @throws UncheckedIOException if opening or reading the properties source file fails
-     * @throws RuntimeException if sibling element names collide after property-name normalization
+     * @throws RuntimeException if the XML parser cannot be created, sibling element names collide after property-name
+     *         normalization, or constructing, converting, or assigning a property value throws a runtime exception
      * @see #loadFromXml(File, boolean)
      * @see #loadFromXml(File, Class)
      */
@@ -1069,10 +1080,11 @@ public final class PropertiesUtil {
      * @param autoRefresh if {@code true}, the properties will be automatically refreshed when the file is modified.
      *                    A background thread checks the file last modification time every second.
      * @return a Properties object containing the loaded properties.
-     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} is {@code null} or is a directory
      * @throws ParsingException if the XML cannot be parsed or has no document element
      * @throws UncheckedIOException if opening or reading the properties source file fails
-     * @throws RuntimeException if sibling element names collide after property-name normalization
+     * @throws RuntimeException if the XML parser cannot be created, sibling element names collide after property-name
+     *         normalization, or constructing, converting, or assigning a property value throws a runtime exception
      * @see #loadFromXml(File)
      */
     public static Properties<String, Object> loadFromXml(final File source, final boolean autoRefresh)
@@ -1085,6 +1097,8 @@ public final class PropertiesUtil {
      * The XML structure should have property names as element names and property values as element content.
      * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
      * if absent, the value is kept as a (stripped) {@code String}.
+     * Element names are normalized by {@link Beans#normalizePropName(String)} to form the keys, so {@code <db_url>} is
+     * read as {@code "dbUrl"}, {@code <ID>} as {@code "id"} and {@code <class>} as {@code "clazz"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1098,7 +1112,8 @@ public final class PropertiesUtil {
      * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
      * @throws UncheckedIOException if reading properties from {@code source} fails
-     * @throws RuntimeException if sibling element names collide after property-name normalization
+     * @throws RuntimeException if the XML parser cannot be created, sibling element names collide after property-name
+     *         normalization, or constructing, converting, or assigning a property value throws a runtime exception
      * @see #loadFromXml(InputStream, Class)
      */
     public static Properties<String, Object> loadFromXml(final InputStream source)
@@ -1111,6 +1126,8 @@ public final class PropertiesUtil {
      * The XML structure should have property names as element names and property values as element content.
      * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
      * if absent, the value is kept as a (stripped) {@code String}.
+     * Element names are normalized by {@link Beans#normalizePropName(String)} to form the keys, so {@code <db_url>} is
+     * read as {@code "dbUrl"}, {@code <ID>} as {@code "id"} and {@code <class>} as {@code "clazz"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1124,7 +1141,8 @@ public final class PropertiesUtil {
      * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
      * @throws UncheckedIOException if reading properties from {@code source} fails
-     * @throws RuntimeException if sibling element names collide after property-name normalization
+     * @throws RuntimeException if the XML parser cannot be created, sibling element names collide after property-name
+     *         normalization, or constructing, converting, or assigning a property value throws a runtime exception
      * @see #loadFromXml(Reader, Class)
      */
     public static Properties<String, Object> loadFromXml(final Reader source)
@@ -1137,6 +1155,8 @@ public final class PropertiesUtil {
      * This allows loading into custom Properties subclasses.
      * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
      * if absent, the value is kept as a (stripped) {@code String}.
+     * Element names are normalized by {@link Beans#normalizePropName(String)} to form the keys, so {@code <db_url>} is
+     * read as {@code "dbUrl"}, {@code <ID>} as {@code "id"} and {@code <class>} as {@code "clazz"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1156,10 +1176,11 @@ public final class PropertiesUtil {
      * @param source the XML file from which to load the properties.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
-     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} is {@code null} or is a directory
      * @throws ParsingException if the XML cannot be parsed or has no document element
      * @throws UncheckedIOException if opening or reading the properties source file fails
-     * @throws RuntimeException if sibling element names collide after property-name normalization
+     * @throws RuntimeException if the XML parser cannot be created, sibling element names collide after property-name
+     *         normalization, or constructing, converting, or assigning a property value throws a runtime exception
      * @see #loadFromXml(File)
      * @see #loadFromXml(File, boolean, Class)
      */
@@ -1200,10 +1221,11 @@ public final class PropertiesUtil {
      *                    A background thread checks the file last modification time every second.
      * @param targetClass the class of the target properties.
      * @return an instance of the target properties class containing the loaded properties.
-     * @throws IllegalArgumentException if {@code source} is {@code null}
+     * @throws IllegalArgumentException if {@code source} is {@code null} or is a directory
      * @throws ParsingException if the XML cannot be parsed or has no document element
      * @throws UncheckedIOException if opening or reading the properties source file fails
-     * @throws RuntimeException if sibling element names collide after property-name normalization
+     * @throws RuntimeException if the XML parser cannot be created, sibling element names collide after property-name
+     *         normalization, or constructing, converting, or assigning a property value throws a runtime exception
      * @see #loadFromXml(File, Class)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final File source, final boolean autoRefresh, final Class<? extends T> targetClass)
@@ -1248,6 +1270,8 @@ public final class PropertiesUtil {
      * This method parses the XML structure and creates an instance of the target class with the loaded properties.
      * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
      * if absent, the value is kept as a (stripped) {@code String}.
+     * Element names are normalized by {@link Beans#normalizePropName(String)} to form the keys, so {@code <db_url>} is
+     * read as {@code "dbUrl"}, {@code <ID>} as {@code "id"} and {@code <class>} as {@code "clazz"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1272,7 +1296,8 @@ public final class PropertiesUtil {
      * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
      * @throws UncheckedIOException if reading properties from {@code source} fails
-     * @throws RuntimeException if sibling element names collide after property-name normalization
+     * @throws RuntimeException if the XML parser cannot be created, sibling element names collide after property-name
+     *         normalization, or constructing, converting, or assigning a property value throws a runtime exception
      * @see #loadFromXml(InputStream)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final InputStream source, final Class<? extends T> targetClass)
@@ -1304,6 +1329,8 @@ public final class PropertiesUtil {
      * This method parses the XML structure and creates an instance of the target class with the loaded properties.
      * An optional {@code type} attribute on an element specifies the data type to convert its text content to;
      * if absent, the value is kept as a (stripped) {@code String}.
+     * Element names are normalized by {@link Beans#normalizePropName(String)} to form the keys, so {@code <db_url>} is
+     * read as {@code "dbUrl"}, {@code <ID>} as {@code "id"} and {@code <class>} as {@code "clazz"}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1328,7 +1355,8 @@ public final class PropertiesUtil {
      * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if the XML cannot be parsed or has no document element
      * @throws UncheckedIOException if reading properties from {@code source} fails
-     * @throws RuntimeException if sibling element names collide after property-name normalization
+     * @throws RuntimeException if the XML parser cannot be created, sibling element names collide after property-name
+     *         normalization, or constructing, converting, or assigning a property value throws a runtime exception
      * @see #loadFromXml(Reader)
      */
     public static <T extends Properties<String, Object>> T loadFromXml(final Reader source, final Class<? extends T> targetClass)
@@ -1367,7 +1395,8 @@ public final class PropertiesUtil {
             final Class<T> inputClass) throws RuntimeException, ParsingException {
 
         // Normalized sibling names are map keys and therefore cannot be represented independently.
-        if (hasDuplicatedPropName(source)) {
+        // Validate the entire document before mutating any existing target, once at the outer boundary.
+        if (isFirstCall && hasDuplicatedPropName(source)) {
             throw new RuntimeException("The source XML document contains sibling element names that collide after property-name normalization.");
         }
 
@@ -1518,7 +1547,8 @@ public final class PropertiesUtil {
      * @param properties the properties to store.
      * @param comments the comments to include as a leading comment line in the stored file; may be {@code null} for no comment.
      * @param output the file to which the properties will be stored. The file is created if it does not already exist.
-     * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; the output file is neither created nor modified
+     * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null} (the output file is then neither created
+     *         nor modified), or if {@code output} is a directory
      * @throws NullPointerException if any key or value is {@code null}; the output file is neither created nor modified
      * @throws UncheckedIOException if opening, writing, or flushing the properties output file fails
      * @see #store(Properties, String, OutputStream)
@@ -1526,8 +1556,6 @@ public final class PropertiesUtil {
      */
     public static void store(final Properties<?, ?> properties, final String comments, final File output)
             throws IllegalArgumentException, NullPointerException, UncheckedIOException {
-        N.checkArgNotNull(output, cs.output);
-
         // Convert (and thereby validate) before touching the file: opening it truncates it, so a rejected
         // argument must not be allowed to destroy an existing file. storeToXml(.., File) validates before
         // opening too, but only partially - it resolves value types only when writeTypeInfo is true - so it
@@ -1535,6 +1563,7 @@ public final class PropertiesUtil {
         // The write below intentionally duplicates store(properties, comments, OutputStream) rather than
         // delegating to it - keep the two bodies in step.
         final java.util.Properties tmp = toJavaProperties(properties);
+        N.checkArgNotNull(output, cs.output);
 
         OutputStream os = null;
 
@@ -1577,9 +1606,8 @@ public final class PropertiesUtil {
      */
     public static void store(final Properties<?, ?> properties, final String comments, final OutputStream output)
             throws IllegalArgumentException, NullPointerException, UncheckedIOException {
-        N.checkArgNotNull(output, cs.output);
-
         final java.util.Properties tmp = toJavaProperties(properties);
+        N.checkArgNotNull(output, cs.output);
 
         try {
             tmp.store(output, comments);
@@ -1619,9 +1647,8 @@ public final class PropertiesUtil {
      */
     public static void store(final Properties<?, ?> properties, final String comments, final Writer output)
             throws IllegalArgumentException, NullPointerException, UncheckedIOException {
-        N.checkArgNotNull(output, cs.output);
-
         final java.util.Properties tmp = toJavaProperties(properties);
+        N.checkArgNotNull(output, cs.output);
 
         try {
             tmp.store(output, comments);
@@ -1663,7 +1690,9 @@ public final class PropertiesUtil {
      * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
      * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
      * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
-     * differs from an empty text value and loads as an empty {@code String}.</p>
+     * differs from an empty text value and loads as an empty {@code String}.
+     * Keys are written verbatim but read back normalized by {@link Beans#normalizePropName(String)}, so a key
+     * such as {@code "user_name"} or {@code "MAX_SIZE"} comes back as {@code "userName"} or {@code "maxSize"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1682,7 +1711,9 @@ public final class PropertiesUtil {
      * @throws IllegalArgumentException if {@code properties} or {@code output} is {@code null}; if the root name
      *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
      *         instances contain a reference cycle; or if {@code writeTypeInfo} is {@code true} and a value has a
-     *         type the loader would not accept. These conditions are checked before anything is written.
+     *         type the loader would not accept. These conditions are checked before anything is written. Also thrown
+     *         if {@code output} is a directory.
+     * @throws IllegalStateException if no DOM implementation is available for validating XML element names
      * @throws NullPointerException if a key for a non-null value is {@code null}
      * @throws UncheckedIOException if opening, writing, or flushing the properties output file fails
      * @see #storeToXml(Properties, String, boolean, OutputStream)
@@ -1690,10 +1721,9 @@ public final class PropertiesUtil {
      * @see #loadFromXml(File)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final File output)
-            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
-        N.checkArgNotNull(output, cs.output);
-
+            throws IllegalArgumentException, IllegalStateException, NullPointerException, UncheckedIOException {
         validateXmlStructure(properties, rootElementName, writeTypeInfo);
+        N.checkArgNotNull(output, cs.output);
 
         OutputStream os = null;
         Writer writer = null;
@@ -1724,7 +1754,9 @@ public final class PropertiesUtil {
      * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
      * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
      * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
-     * differs from an empty text value and loads as an empty {@code String}.</p>
+     * differs from an empty text value and loads as an empty {@code String}.
+     * Keys are written verbatim but read back normalized by {@link Beans#normalizePropName(String)}, so a key
+     * such as {@code "user_name"} or {@code "MAX_SIZE"} comes back as {@code "userName"} or {@code "maxSize"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1745,16 +1777,16 @@ public final class PropertiesUtil {
      *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
      *         instances contain a reference cycle; or if {@code writeTypeInfo} is {@code true} and a value has a
      *         type the loader would not accept. These conditions are checked before anything is written.
+     * @throws IllegalStateException if no DOM implementation is available for validating XML element names
      * @throws NullPointerException if a key for a non-null value is {@code null}
      * @throws UncheckedIOException if writing or flushing properties to {@code output} fails
      * @see #storeToXml(Properties, String, boolean, File)
      * @see #loadFromXml(InputStream)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final OutputStream output)
-            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
-        N.checkArgNotNull(output, cs.output);
-
+            throws IllegalArgumentException, IllegalStateException, NullPointerException, UncheckedIOException {
         validateXmlStructure(properties, rootElementName, writeTypeInfo);
+        N.checkArgNotNull(output, cs.output);
 
         final java.io.OutputStreamWriter writer = IOUtil.newOutputStreamWriter(output, Charsets.UTF_8);
         try {
@@ -1774,7 +1806,9 @@ public final class PropertiesUtil {
      * whitespace from every text value, so a value of {@code "  v  "} is read back as {@code "v"}. An empty
      * nested {@code Properties} round-trips only with {@code writeTypeInfo} {@code true}, which marks it
      * {@code type="Properties"}; written without type information it is {@code <name></name>}, which no longer
-     * differs from an empty text value and loads as an empty {@code String}.</p>
+     * differs from an empty text value and loads as an empty {@code String}.
+     * Keys are written verbatim but read back normalized by {@link Beans#normalizePropName(String)}, so a key
+     * such as {@code "user_name"} or {@code "MAX_SIZE"} comes back as {@code "userName"} or {@code "maxSize"}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1795,16 +1829,16 @@ public final class PropertiesUtil {
      *         or a property key is not a usable, namespace-free XML element name; if nested {@code Properties}
      *         instances contain a reference cycle; or if {@code writeTypeInfo} is {@code true} and a value has a
      *         type the loader would not accept. These conditions are checked before anything is written.
+     * @throws IllegalStateException if no DOM implementation is available for validating XML element names
      * @throws NullPointerException if a key for a non-null value is {@code null}
      * @throws UncheckedIOException if writing or flushing properties to {@code output} fails
      * @see #storeToXml(Properties, String, boolean, File)
      * @see #loadFromXml(Reader)
      */
     public static void storeToXml(final Properties<?, ?> properties, final String rootElementName, final boolean writeTypeInfo, final Writer output)
-            throws IllegalArgumentException, NullPointerException, UncheckedIOException {
-        N.checkArgNotNull(output, cs.output);
-
+            throws IllegalArgumentException, IllegalStateException, NullPointerException, UncheckedIOException {
         validateXmlStructure(properties, rootElementName, writeTypeInfo);
+        N.checkArgNotNull(output, cs.output);
         storeToXml(properties, rootElementName, writeTypeInfo, true, output);
     }
 
@@ -2065,7 +2099,7 @@ public final class PropertiesUtil {
      *
      * @param xml the XML content as a string. Being a character source, any {@code encoding=} declaration
      *        inside it is ignored; the string is parsed as-is.
-     * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
+     * @param sourcePath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
@@ -2074,14 +2108,14 @@ public final class PropertiesUtil {
      * @throws RuntimeException if XML parsing fails, the document has no root element, sibling element names
      *         collide after property-name normalization, or reading XML or writing the generated source fails
      */
-    public static void xmlToJava(final String xml, final String srcPath, final String packageName, final String className, final boolean isPublicField)
+    public static void xmlToJava(final String xml, final String sourcePath, final String packageName, final String className, final boolean isPublicField)
             throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(xml, cs.xml);
 
         // A String is already decoded, so it is a character source: hand it to the parser as a Reader
         // and let any encoding= declaration inside it be ignored, exactly as the Reader overload does.
         // Encoding it to bytes first would let a stale declaration re-decode the text and corrupt it.
-        xmlToJava(new StringReader(xml), srcPath, packageName, className, isPublicField);
+        xmlToJava(new StringReader(xml), sourcePath, packageName, className, isPublicField);
     }
 
     /**
@@ -2106,16 +2140,16 @@ public final class PropertiesUtil {
      * @param xml the XML file from which to generate Java code. It is read as a <i>byte</i> source, so the
      *        document's own {@code encoding=} declaration (or BOM) selects the charset, consistently with
      *        {@link #loadFromXml(File)}.
-     * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
+     * @param sourcePath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
-     * @throws IllegalArgumentException if {@code xml} is {@code null}, a source path or generated Java identifier is invalid, an unsupported type
-     *         is declared, or a nested class would have the same name as an enclosing class.
+     * @throws IllegalArgumentException if {@code xml} is {@code null} or is a directory, a source path or generated Java identifier is
+     *         invalid, an unsupported type is declared, or a nested class would have the same name as an enclosing class.
      * @throws RuntimeException if XML parsing fails, the document has no root element, sibling element names
      *         collide after property-name normalization, or reading XML or writing the generated source fails
      */
-    public static void xmlToJava(final File xml, final String srcPath, final String packageName, final String className, final boolean isPublicField)
+    public static void xmlToJava(final File xml, final String sourcePath, final String packageName, final String className, final boolean isPublicField)
             throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(xml, cs.xml);
 
@@ -2128,7 +2162,7 @@ public final class PropertiesUtil {
             // loadFromXml(File) read the very same file correctly.
             is = IOUtil.newFileInputStream(xml);
 
-            xmlToJava(is, srcPath, packageName, className, isPublicField);
+            xmlToJava(is, sourcePath, packageName, className, isPublicField);
         } finally {
             IOUtil.close(is);
         }
@@ -2157,7 +2191,7 @@ public final class PropertiesUtil {
      * @param xml the InputStream from which to generate Java code; it is not closed by this method. It is
      *        read as a <i>byte</i> source, so the document's own {@code encoding=} declaration (or BOM)
      *        selects the charset.
-     * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
+     * @param sourcePath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
@@ -2166,13 +2200,13 @@ public final class PropertiesUtil {
      * @throws RuntimeException if XML parsing fails, the document has no root element, sibling element names
      *         collide after property-name normalization, or reading XML or writing the generated source fails
      */
-    public static void xmlToJava(final InputStream xml, final String srcPath, final String packageName, final String className, final boolean isPublicField)
+    public static void xmlToJava(final InputStream xml, final String sourcePath, final String packageName, final String className, final boolean isPublicField)
             throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(xml, cs.xml);
 
         // Byte source: pass the raw stream so the parser applies the document's own encoding
         // declaration (and BOM sniffing) rather than a charset chosen here. See xmlToJava(File).
-        xmlToJava(new InputSource(leaveOpen(xml)), srcPath, packageName, className, isPublicField);
+        xmlToJava(new InputSource(leaveOpen(xml)), sourcePath, packageName, className, isPublicField);
     }
 
     /**
@@ -2198,7 +2232,7 @@ public final class PropertiesUtil {
      *
      * @param xml the Reader from which to generate Java code; it is not closed by this method. Being a
      *        character source, any {@code encoding=} declaration in the document is ignored.
-     * @param srcPath the source path where the generated Java code will be saved (e.g., "src/main/java").
+     * @param sourcePath the source path where the generated Java code will be saved (e.g., "src/main/java").
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package.
      * @param className the name of the generated Java class. If {@code null}, uses the normalized and capitalized root element name.
      * @param isPublicField currently has NO effect on the generated source: properties are stored in the inherited {@code Properties} map and no fields are emitted, so the generated class is identical for {@code true} and {@code false}.
@@ -2207,11 +2241,11 @@ public final class PropertiesUtil {
      * @throws RuntimeException if XML parsing fails, the document has no root element, sibling element names
      *         collide after property-name normalization, or reading XML or writing the generated source fails
      */
-    public static void xmlToJava(final Reader xml, final String srcPath, final String packageName, final String className, final boolean isPublicField)
+    public static void xmlToJava(final Reader xml, final String sourcePath, final String packageName, final String className, final boolean isPublicField)
             throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(xml, cs.xml);
 
-        xmlToJava(new InputSource(leaveOpen(xml)), srcPath, packageName, className, isPublicField);
+        xmlToJava(new InputSource(leaveOpen(xml)), sourcePath, packageName, className, isPublicField);
     }
 
     // DOM parsers may close their input. Public stream/reader overloads leave ownership with the caller.
@@ -2239,17 +2273,17 @@ public final class PropertiesUtil {
      * or a character stream (encoding already resolved, declaration ignored).
      *
      * @param xml the parser input; not closed by this method
-     * @param srcPath the source path where the generated Java code will be saved
+     * @param sourcePath the source path where the generated Java code will be saved
      * @param packageName the package name for the generated Java class, or {@code null}/empty for the default package
      * @param className the name of the generated Java class; if {@code null}, the normalized and capitalized XML root name is used
      * @param isPublicField retained for signature compatibility; has no effect on the generated source
-     * @throws IllegalArgumentException if {@code srcPath} is null or empty, or a supplied package or class name is not a valid Java identifier
+     * @throws IllegalArgumentException if {@code sourcePath} is null or empty, or a supplied package or class name is not a valid Java identifier
      * @throws RuntimeException if parsing the XML, validating the generated structure, or writing the Java source fails
      */
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    private static void xmlToJava(final InputSource xml, final String srcPath, final String packageName, String className, final boolean isPublicField)
+    private static void xmlToJava(final InputSource xml, final String sourcePath, final String packageName, String className, final boolean isPublicField)
             throws IllegalArgumentException, RuntimeException {
-        N.checkArgNotEmpty(srcPath, cs.srcPath);
+        N.checkArgNotEmpty(sourcePath, cs.sourcePath);
         validatePackageName(packageName);
 
         final DocumentBuilder docBuilder = XmlUtil.createDOMParser(true, true);
@@ -2288,7 +2322,7 @@ public final class PropertiesUtil {
 
             xmlPropertiesToJava(root, className, isPublicField, "", true, generatedSource);
 
-            final String classFilePath = ClassUtil.makeFolderForPackage(srcPath, Strings.isEmpty(packageName) ? null : packageName);
+            final String classFilePath = ClassUtil.makeFolderForPackage(sourcePath, Strings.isEmpty(packageName) ? null : packageName);
             final File classFile = new File(classFilePath + className + ".java");
 
             writer = IOUtil.newFileWriter(classFile, Charsets.UTF_8);
@@ -2878,12 +2912,12 @@ public final class PropertiesUtil {
         /**
          * Constructs a new {@code Resource}.
          *
-         * @param cls the target class for the resource
+         * @param targetClass the target class for the resource
          * @param file the file representing the resource
          * @param resourceType the type of the resource
          */
-        public Resource(final Class<?> cls, final File file, final ResourceType resourceType) {
-            targetClass = cls;
+        public Resource(final Class<?> targetClass, final File file, final ResourceType resourceType) {
+            this.targetClass = targetClass;
             this.file = normalizeFilePath(file);
             filePath = this.file.getPath();
             this.resourceType = resourceType;

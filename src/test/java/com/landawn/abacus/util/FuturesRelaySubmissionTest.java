@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -33,7 +34,22 @@ class FuturesRelaySubmissionTest extends TestBase {
         final ThreadPoolExecutor executor = (ThreadPoolExecutor) field.get(null);
         final int originalMaximum = executor.getMaximumPoolSize();
         final RejectedExecutionHandler originalHandler = executor.getRejectedExecutionHandler();
+        final long originalKeepAliveNanos = executor.getKeepAliveTime(TimeUnit.NANOSECONDS);
+        // Relay threads left idle by earlier tests stay alive for the pool's 60 s keep-alive and would keep the pool
+        // above the one-thread ceiling this test needs; let them retire quickly while it runs (shortening the
+        // keep-alive interrupts idle workers, which re-poll with the new timeout and exit). A relay still PARKED
+        // in a pending input's get() cannot be retired this way - the wait loop below names it if that ever happens.
+        executor.setKeepAliveTime(20, TimeUnit.MILLISECONDS);
 
+        try {
+            runBothSubmissionFailures(executor, originalMaximum, originalHandler);
+        } finally {
+            executor.setKeepAliveTime(originalKeepAliveNanos, TimeUnit.NANOSECONDS);
+        }
+    }
+
+    private static void runBothSubmissionFailures(final ThreadPoolExecutor executor, final int originalMaximum, final RejectedExecutionHandler originalHandler)
+            throws Exception {
         // Exercise both branches of the submission catch without exhausting machine resources or
         // shutting down the process-wide executor. Always restore its configuration afterwards.
         for (final Throwable failure : List.of(new RejectedExecutionException("relay rejected"), new AssertionError("relay submission failed"))) {
@@ -41,13 +57,16 @@ class FuturesRelaySubmissionTest extends TestBase {
             final CountDownLatch release = new CountDownLatch(1);
             final CountDownLatch exited = new CountDownLatch(1);
             try {
-                executor.setMaximumPoolSize(1);
+                // Wait until the pool is EMPTY (the short keep-alive retires idle relays within a few ms), then let
+                // the blocker create the pool's only thread and cap the pool at that one thread. Capping first and
+                // reusing an idle thread does not work: an idle worker that is just timing out still counts in the
+                // pool size but no longer polls the hand-off queue, so the blocker itself would be rejected.
                 final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-                while ((executor.getPoolSize() > 1 || executor.getActiveCount() > 0) && System.nanoTime() < deadline) {
+                while ((executor.getPoolSize() > 0 || executor.getActiveCount() > 0) && System.nanoTime() < deadline) {
                     Thread.sleep(5);
                 }
-                assertTrue(executor.getPoolSize() <= 1);
-                assertEquals(0, executor.getActiveCount());
+                assertEquals(0, executor.getActiveCount(), "a relay is still parked in a pending input's get() - an earlier test left it behind");
+                assertEquals(0, executor.getPoolSize(), "relay pool still holds " + executor.getPoolSize() + " idle threads");
                 executor.execute(() -> {
                     entered.countDown();
                     try {
@@ -59,6 +78,7 @@ class FuturesRelaySubmissionTest extends TestBase {
                     }
                 });
                 assertTrue(entered.await(2, TimeUnit.SECONDS));
+                executor.setMaximumPoolSize(1);
                 executor.setRejectedExecutionHandler((task, pool) -> {
                     if (failure instanceof Error error) {
                         throw error;
@@ -66,7 +86,11 @@ class FuturesRelaySubmissionTest extends TestBase {
                     throw (RuntimeException) failure;
                 });
 
-                final ContinuableFuture<String> input = ContinuableFuture.completed("winner");
+                // A done FutureTask SUBCLASS is observed through a relay (a completed plain task or
+                // ContinuableFuture.completed(..) would be read inline and never touch the relay pool).
+                final FutureTask<String> input = new FutureTask<>(() -> "winner") {
+                };
+                input.run();
                 final ContinuableFuture<String> any = Futures.anyOf(input);
                 assertSame(failure, assertThrows(failure.getClass(), () -> any.get(1, TimeUnit.SECONDS)));
                 assertFalse(input.isCancelled());

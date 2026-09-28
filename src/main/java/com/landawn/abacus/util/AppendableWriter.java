@@ -192,17 +192,17 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      *
      * @param cbuf the array of characters; must not be {@code null}
      * @param off the offset from which to start writing characters
-     * @param len the number of characters to write
+     * @param length the number of characters to write
      * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
      * @throws IndexOutOfBoundsException if off is negative, or len is negative,
      *         or off+len is greater than the length of the given array
      */
     @Override
-    public void write(final char[] cbuf, final int off, final int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
+    public void write(final char[] cbuf, final int off, final int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
         checkNotClosed();
 
-        appendable.append(CharBuffer.wrap(cbuf), off, off + len);
+        appendable.append(CharBuffer.wrap(cbuf), off, off + length);
     }
 
     /**
@@ -235,16 +235,16 @@ public sealed class AppendableWriter extends Writer permits StringWriter {
      * @param str a string; unlike {@code java.io.Writer}, a {@code null} string is accepted and
      *            treated as the four characters {@code "null"} (Appendable semantics)
      * @param off the offset from which to start writing characters
-     * @param len the number of characters to write
+     * @param length the number of characters to write
      * @throws IOException if this writer is closed, or appending the characters to the wrapped appendable fails
      * @throws IndexOutOfBoundsException if off is negative, or len is negative,
      *         or off+len is greater than the effective sequence length (four when {@code str} is {@code null})
      */
     @Override
-    public void write(final String str, final int off, final int len) throws IOException, IndexOutOfBoundsException {
+    public void write(final String str, final int off, final int length) throws IOException, IndexOutOfBoundsException {
         checkNotClosed();
 
-        appendable.append(str, off, off + len);
+        appendable.append(str, off, off + length);
     }
 
     /**

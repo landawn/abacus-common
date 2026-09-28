@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedLong indexedLong = IndexedLong.of(123456789L, 5);
- * long value = indexedLong.value();   // returns 123456789L
- * int index = indexedLong.index();    // returns 5
+ * long value = indexedLong.value();  // returns 123456789L
+ * int index = indexedLong.index();   // returns 5
  * }</pre>
  *
  * @see Indexed
@@ -137,8 +137,8 @@ public final class IndexedLong extends AbstractIndexed {
      * IndexedLong indexed2 = IndexedLong.of(123456789L, 5);
      * IndexedLong indexed3 = IndexedLong.of(987654321L, 5);
      *
-     * indexed1.equals(indexed2);   // returns true
-     * indexed1.equals(indexed3);   // returns false
+     * indexed1.equals(indexed2);  // returns true
+     * indexed1.equals(indexed3);  // returns false
      * }</pre>
      *
      * @param obj the object to compare with this IndexedLong instance for equality

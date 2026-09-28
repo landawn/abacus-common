@@ -1303,4 +1303,215 @@ public class SetMultimapTest extends TestBase {
             dir.toFile().delete();
         }
     }
+
+    // ---- deep review 2026-09-25 G067 begin ----
+    // G067-01: fromMap(BiMap) mirrored the BiMap, which then rejected an equal value set under a second key
+    @Test
+    public void testFromMap_biMapSource_allowsEqualValueSetsUnderDifferentKeys() {
+        final SetMultimap<String, Integer> multimap = SetMultimap.fromMap(BiMap.of("a", 1, "b", 2));
+
+        multimap.put("c", 1);
+        multimap.put("b", 1);
+
+        assertEquals(Set.of(1), multimap.get("a"));
+        assertEquals(Set.of(1, 2), multimap.get("b"));
+        assertEquals(Set.of(1), multimap.get("c"));
+        assertEquals(3, multimap.keyCount());
+    }
+
+    // G067-01: merge(..) copies its first non-null map with fromMap(..), so a BiMap argument failed the same way
+    @Test
+    public void testMerge_biMapArgument_sharedValue() {
+        final Map<String, Integer> other = new HashMap<>();
+        other.put("b", 1);
+
+        final SetMultimap<String, Integer> merged2 = SetMultimap.merge(BiMap.of("a", 1), other);
+        assertEquals(Set.of(1), merged2.get("a"));
+        assertEquals(Set.of(1), merged2.get("b"));
+
+        final SetMultimap<String, Integer> merged3 = SetMultimap.merge(null, BiMap.of("a", 1), other);
+        assertEquals(Set.of(1), merged3.get("a"));
+        assertEquals(Set.of(1), merged3.get("b"));
+
+        final SetMultimap<String, Integer> mergedAll = SetMultimap.merge(Arrays.asList(BiMap.of("a", 1), other));
+        assertEquals(Set.of(1), mergedAll.get("a"));
+        assertEquals(Set.of(1), mergedAll.get("b"));
+    }
+    // ---- deep review 2026-09-25 G067 end ----
+
+    // ---- bug review 2026-09-27 G069 begin ----
+
+    // G069-01: invert() mirrored a BiMap backing map, which rejected a second inverted key with an equal value set
+    @Test
+    public void testInvert_biMapBackedMultimap() {
+        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, HashSet::new);
+        multimap.putValues("a", Arrays.asList(1, 2));
+        multimap.put("b", 3);
+
+        final SetMultimap<Integer, String> inverted = multimap.invert();
+
+        assertEquals(3, inverted.keyCount());
+        assertEquals(Set.of("a"), inverted.get(1));
+        assertEquals(Set.of("a"), inverted.get(2));
+        assertEquals(Set.of("b"), inverted.get(3));
+    }
+
+    // ---- bug review 2026-09-27 G069 end ----
+
+    // ---- bug review 2026-09-27 verify G121 begin ----
+
+    // invert() of a BiMap-backed multimap: LinkedHashMap backing, keys in the source's encounter order, shared key sets
+    @Test
+    public void testInvert_biMapBacking_linkedHashMapInEncounterOrder() {
+        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, LinkedHashSet::new);
+        multimap.putValues("c", Arrays.asList(5, 1, 2));
+        multimap.putValues("a", Arrays.asList(2, 3));
+        multimap.put("b", 4);
+
+        final List<Integer> expectedKeyOrder = new ArrayList<>();
+        for (final Map.Entry<String, Set<Integer>> entry : multimap) {
+            for (final Integer e : entry.getValue()) {
+                if (!expectedKeyOrder.contains(e)) {
+                    expectedKeyOrder.add(e);
+                }
+            }
+        }
+
+        final SetMultimap<Integer, String> inverted = multimap.invert();
+
+        assertEquals(LinkedHashMap.class, inverted.backingMap.getClass());
+        assertEquals(expectedKeyOrder, new ArrayList<>(inverted.keySet()));
+        assertEquals(Set.of("a", "c"), inverted.get(2));
+        assertEquals(Set.of("c"), inverted.get(5));
+        assertEquals(Set.of("c"), inverted.get(1));
+        assertEquals(Set.of("a"), inverted.get(3));
+        assertEquals(Set.of("b"), inverted.get(4));
+    }
+
+    // invert() of an empty BiMap-backed multimap is empty (LinkedHashMap backing); a HashMap backing still inverts into a HashMap
+    @Test
+    public void testInvert_emptyBiMapBackingAndHashMapBackingUnchanged() {
+        final SetMultimap<Integer, String> emptyInverted = N.<String, Integer> newSetMultimap(BiMap::new, HashSet::new).invert();
+        assertTrue(emptyInverted.isEmpty());
+        assertEquals(LinkedHashMap.class, emptyInverted.backingMap.getClass());
+
+        final SetMultimap<String, Integer> hashBacked = N.newSetMultimap(HashMap::new, HashSet::new);
+        hashBacked.putValues("a", Arrays.asList(1, 2));
+        hashBacked.put("b", 3);
+        final SetMultimap<Integer, String> inverted = hashBacked.invert();
+        assertEquals(HashMap.class, inverted.backingMap.getClass());
+        assertEquals(Set.of("a"), inverted.get(1));
+        assertEquals(Set.of("a"), inverted.get(2));
+        assertEquals(Set.of("b"), inverted.get(3));
+    }
+
+    // toImmutableMap() of a BiMap-backed multimap whose value sets were made equal in place used to throw from a BiMap copy
+    @Test
+    public void testToImmutableMap_biMapBackingWithValueSetsMadeEqual() {
+        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, HashSet::new);
+        multimap.put("a", 1);
+        multimap.put("b", 2);
+        multimap.put("a", 2);
+        multimap.put("b", 1);
+        assertEquals(multimap.get("a"), multimap.get("b"));
+
+        final ImmutableMap<String, ImmutableSet<Integer>> immutable = multimap.toImmutableMap();
+
+        assertEquals(new ArrayList<>(multimap.keySet()), new ArrayList<>(immutable.keySet()));
+        assertEquals(Set.of(1, 2), immutable.get("a"));
+        assertEquals(Set.of(1, 2), immutable.get("b"));
+    }
+
+    // toImmutableMap() of a BiMap-backed multimap with distinct sets, and of a reverse-sorted multimap, is unchanged
+    @Test
+    public void testToImmutableMap_biMapDistinctAndSortedBackingUnchanged() {
+        final SetMultimap<String, Integer> biMapBacked = N.newSetMultimap(BiMap::new, HashSet::new);
+        biMapBacked.putValues("a", Arrays.asList(1, 2));
+        biMapBacked.put("b", 3);
+        final ImmutableMap<String, ImmutableSet<Integer>> fromBiMap = biMapBacked.toImmutableMap();
+        assertEquals(new ArrayList<>(biMapBacked.keySet()), new ArrayList<>(fromBiMap.keySet()));
+        assertEquals(Set.of(1, 2), fromBiMap.get("a"));
+        assertEquals(Set.of(3), fromBiMap.get("b"));
+
+        final SetMultimap<String, Integer> sorted = N.newSetMultimap(() -> new TreeMap<>(Comparator.<String> reverseOrder()), HashSet::new);
+        sorted.put("a", 1);
+        sorted.put("c", 3);
+        sorted.put("b", 2);
+        assertEquals(Arrays.asList("c", "b", "a"), new ArrayList<>(sorted.toImmutableMap().keySet()));
+    }
+
+    // ---- bug review 2026-09-27 verify G121 end ----
+
+    // ---- bug review 2026-09-27 verify G123 begin ----
+
+    // G123-02: toMap() of a BiMap-backed multimap whose value sets were made equal in place used to throw from a BiMap copy
+    @Test
+    public void testToMap_biMapBackingWithValueSetsMadeEqual() {
+        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, HashSet::new);
+        multimap.put("a", 1);
+        multimap.put("b", 2);
+        multimap.put("a", 2);
+        multimap.put("b", 1);
+        assertEquals(multimap.get("a"), multimap.get("b"));
+
+        final Map<String, Set<Integer>> map = multimap.toMap();
+
+        assertEquals(LinkedHashMap.class, map.getClass());
+        assertEquals(new ArrayList<>(multimap.keySet()), new ArrayList<>(map.keySet()));
+        assertEquals(Set.of(1, 2), map.get("a"));
+        assertEquals(Set.of(1, 2), map.get("b"));
+
+        // the copies are independent of the multimap
+        map.get("a").add(3);
+        assertEquals(Set.of(1, 2), multimap.get("a"));
+    }
+
+    // G123-02: toMap() of a BiMap-backed multimap with distinct sets is a LinkedHashMap in the source's encounter order (was a BiMap)
+    @Test
+    public void testToMap_biMapBackingDistinctSets() {
+        final SetMultimap<String, Integer> multimap = N.newSetMultimap(BiMap::new, HashSet::new);
+        multimap.put("c", 3);
+        multimap.putValues("a", Arrays.asList(1, 2));
+
+        final Map<String, Set<Integer>> map = multimap.toMap();
+
+        assertEquals(LinkedHashMap.class, map.getClass());
+        assertEquals(new ArrayList<>(multimap.keySet()), new ArrayList<>(map.keySet()));
+        assertEquals(Set.of(3), map.get("c"));
+        assertEquals(Set.of(1, 2), map.get("a"));
+    }
+
+    // G123-02 neighbours: HashMap, LinkedHashMap and reverse-sorted TreeMap backings are still mirrored by toMap(); toMap(IntFunction) and
+    // copy() of a BiMap backing keep their map
+    @Test
+    public void testToMap_nonBiMapBackingsUnchanged() {
+        final SetMultimap<String, Integer> hashBacked = N.newSetMultimap(HashMap::new, HashSet::new);
+        hashBacked.putValues("a", Arrays.asList(1, 2));
+        hashBacked.put("b", 1);
+        assertEquals(HashMap.class, hashBacked.toMap().getClass());
+        assertEquals(Map.of("a", Set.of(1, 2), "b", Set.of(1)), hashBacked.toMap());
+
+        final SetMultimap<String, Integer> linkedBacked = N.newSetMultimap(LinkedHashMap::new, HashSet::new);
+        linkedBacked.put("z", 1);
+        linkedBacked.put("y", 2);
+        assertEquals(LinkedHashMap.class, linkedBacked.toMap().getClass());
+        assertEquals(Arrays.asList("z", "y"), new ArrayList<>(linkedBacked.toMap().keySet()));
+
+        final SetMultimap<String, Integer> sorted = N.newSetMultimap(() -> new TreeMap<>(Comparator.<String> reverseOrder()), HashSet::new);
+        sorted.put("a", 1);
+        sorted.put("c", 3);
+        sorted.put("b", 2);
+        final Map<String, Set<Integer>> sortedMap = sorted.toMap();
+        assertEquals(TreeMap.class, sortedMap.getClass());
+        assertEquals(Arrays.asList("c", "b", "a"), new ArrayList<>(sortedMap.keySet()));
+
+        final SetMultimap<String, Integer> biMapBacked = N.newSetMultimap(BiMap::new, HashSet::new);
+        biMapBacked.put("a", 1);
+        biMapBacked.put("b", 2);
+        assertEquals(BiMap.class, biMapBacked.toMap(size -> new BiMap<>()).getClass());
+        assertEquals(BiMap.class, biMapBacked.copy().backingMap.getClass());
+    }
+
+    // ---- bug review 2026-09-27 verify G123 end ----
+
 }

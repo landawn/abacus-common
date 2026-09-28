@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedChar indexedChar = IndexedChar.of('A', 0);
- * char value = indexedChar.value();   // returns 'A'
- * int index = indexedChar.index();    // returns 0
+ * char value = indexedChar.value();  // returns 'A'
+ * int index = indexedChar.index();   // returns 0
  * }</pre>
  *
  * @see Indexed
@@ -105,8 +105,8 @@ public final class IndexedChar extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedChar indexed = IndexedChar.of('X', 5);
-     * char v = indexed.value();   // returns 'X'
-     * int i = indexed.index();    // returns 5
+     * char v = indexed.value();  // returns 'X'
+     * int i = indexed.index();   // returns 5
      * }</pre>
      *
      * @return the char value associated with this index
@@ -138,8 +138,8 @@ public final class IndexedChar extends AbstractIndexed {
      * IndexedChar indexed2 = IndexedChar.of('X', 5);
      * IndexedChar indexed3 = IndexedChar.of('Y', 5);
      *
-     * indexed1.equals(indexed2);   // returns true
-     * indexed1.equals(indexed3);   // returns false
+     * indexed1.equals(indexed2);  // returns true
+     * indexed1.equals(indexed3);  // returns false
      * }</pre>
      *
      * @param obj the object to compare with this IndexedChar instance for equality

@@ -26,7 +26,10 @@ public class ExcReviewN8Test extends com.landawn.abacus.TestBase {
         // forward mode
         assertThrows(IndexOutOfBoundsException.class, () -> N.forEach(a, -1, 2, out::add));
         assertThrows(IndexOutOfBoundsException.class, () -> N.forEach(a, 0, 4, out::add));
-        assertThrows(IndexOutOfBoundsException.class, () -> N.forEach(a, -1, -1, out::add));
+        // C-278 (2026-09-24): (-1, -1) is the empty reverse range - the idiom (length - 1, -1) on an empty input - and no
+        // longer an IndexOutOfBoundsException, whatever the length
+        assertDoesNotThrow(() -> N.forEach(a, -1, -1, out::add));
+        assertEquals(0, out.size());
         // reverse mode
         assertThrows(IndexOutOfBoundsException.class, () -> N.forEach(a, 2, -2, out::add));
         assertThrows(IndexOutOfBoundsException.class, () -> N.forEach(a, 4, 0, out::add));

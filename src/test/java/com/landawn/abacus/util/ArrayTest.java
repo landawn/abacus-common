@@ -161,16 +161,137 @@ public class ArrayTest extends ArrayTestSupport {
 
     @Test
     public void testRandom_RandomnessSource() {
-        // Contract pin for the corrected javadoc: Array.random draws from the SecureRandom held by N, which is
-        // NOT the instance IntList.random and the other PrimitiveList random(...) methods use.
-        assertSame(CommonUtil.RAND, N.RAND);
-        assertTrue(N.RAND instanceof java.security.SecureRandom);
-        assertNotSame(N.RAND, IntList.RAND);
-        assertNotSame(N.RAND, LongList.RAND);
-        assertNotSame(N.RAND, DoubleList.RAND);
-        assertNotSame(IntList.RAND, LongList.RAND);
+        // Contract pin for the javadoc: Array.random draws from ThreadLocalRandom.current() (owner decision
+        // 2026-09-26; it used to be a shared SecureRandom held by N). There is no shared generator field any more
+        // (see testRandom_noSharedStaticGenerator); the results must still have the requested length and range
+        // and vary between elements.
+        final int[] values = Array.random(64);
+        assertEquals(64, values.length);
+        boolean hasDistinct = false;
+        for (final int value : values) {
+            hasDistinct |= value != values[0];
+        }
+        assertTrue(hasDistinct);
 
         assertEquals(4, Array.random(4).length);
-        assertEquals(4, Array.random(0, 10, 4).length);
+        final int[] ranged = Array.random(0, 10, 200);
+        assertEquals(200, ranged.length);
+        for (final int value : ranged) {
+            assertTrue(value >= 0 && value < 10, String.valueOf(value));
+        }
     }
+
+    // ---- perf review 2026-09-26 G018 begin ----
+    // G018-01: pins random(int) across the bulk-chunk boundaries - length, freshness and full 32-bit coverage.
+    @Test
+    public void testRandom_chunkBoundariesAndBitCoverage() {
+        final int[] empty1 = Array.random(0);
+        final int[] empty2 = Array.random(0);
+        assertEquals(0, empty1.length);
+        assertNotSame(empty1, empty2);
+
+        for (final int length : new int[] { 1, 2, 3, 2047, 2048, 2049, 4096, 5000 }) {
+            final int[] values = Array.random(length);
+            assertEquals(length, values.length);
+            assertNotSame(values, Array.random(length));
+        }
+
+        final int[] values = Array.random(6000);
+        int orAll = 0;
+        int andAll = -1;
+        boolean hasDistinct = false;
+
+        for (final int value : values) {
+            orAll |= value;
+            andAll &= value;
+            hasDistinct |= value != values[0];
+        }
+
+        // Every bit position is both set and clear somewhere (failure probability ~ 32 * 2^-6000).
+        assertEquals(-1, orAll);
+        assertEquals(0, andAll);
+        assertTrue(hasDistinct);
+
+        // The tail beyond the last full chunk is filled too, not left zero.
+        int tailOr = 0;
+        for (int i = 4096; i < values.length; i++) {
+            tailOr |= values[i];
+        }
+        assertEquals(-1, tailOr);
+    }
+    // ---- perf review 2026-09-26 G018 end ----
+    // ---- perf review 2026-09-26 G115 begin ----
+    // G115-01: the random-value helpers use ThreadLocalRandom.current(); no class keeps a shared static generator field.
+    @Test
+    public void testRandom_noSharedStaticGenerator() throws Exception {
+        final String[] classNames = { "com.landawn.abacus.util.CommonUtil", "com.landawn.abacus.util.N", "com.landawn.abacus.util.BooleanList",
+                "com.landawn.abacus.util.ByteList", "com.landawn.abacus.util.CharList", "com.landawn.abacus.util.ShortList",
+                "com.landawn.abacus.util.IntList", "com.landawn.abacus.util.LongList", "com.landawn.abacus.util.FloatList",
+                "com.landawn.abacus.util.DoubleList", "com.landawn.abacus.util.stream.StreamBase", "com.landawn.abacus.util.stream.Stream",
+                "com.landawn.abacus.util.stream.ByteStream", "com.landawn.abacus.util.stream.CharStream", "com.landawn.abacus.util.stream.ShortStream",
+                "com.landawn.abacus.util.stream.IntStream", "com.landawn.abacus.util.stream.LongStream", "com.landawn.abacus.util.stream.FloatStream",
+                "com.landawn.abacus.util.stream.DoubleStream", "com.landawn.abacus.util.function.Util" };
+
+        for (final String className : classNames) {
+            for (final java.lang.reflect.Field field : Class.forName(className).getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers())) {
+                    assertFalse(java.util.Random.class.isAssignableFrom(field.getType()), className + "." + field.getName());
+                }
+            }
+        }
+    }
+
+    // G115-01: Array.random(..) called from several threads at once - lengths/ranges hold, values vary, threads differ.
+    @Test
+    public void testRandom_concurrentCallers() throws Exception {
+        final int threadCount = 4;
+        final List<Throwable> errors = java.util.Collections.synchronizedList(new java.util.ArrayList<>());
+        final int[][] firstArrays = new int[threadCount][];
+        final Thread[] threads = new Thread[threadCount];
+
+        for (int t = 0; t < threadCount; t++) {
+            final int threadIndex = t;
+
+            threads[t] = new Thread(() -> {
+                try {
+                    for (int round = 0; round < 20; round++) {
+                        final int[] full = Array.random(500);
+                        assertEquals(500, full.length);
+
+                        boolean hasDistinct = false;
+                        for (final int value : full) {
+                            hasDistinct |= value != full[0];
+                        }
+                        assertTrue(hasDistinct);
+
+                        if (round == 0) {
+                            firstArrays[threadIndex] = full;
+                        }
+
+                        final int[] ranged = Array.random(-5, 5, 500);
+                        assertEquals(500, ranged.length);
+                        for (final int value : ranged) {
+                            assertTrue(value >= -5 && value < 5, String.valueOf(value));
+                        }
+
+                        assertEquals(500, Array.random(Integer.MIN_VALUE, Integer.MAX_VALUE, 500).length);
+                    }
+                } catch (final Throwable e) {
+                    errors.add(e);
+                }
+            });
+            threads[t].start();
+        }
+
+        for (final Thread thread : threads) {
+            thread.join();
+        }
+
+        assertTrue(errors.isEmpty(), errors::toString);
+
+        for (int t = 1; t < threadCount; t++) {
+            assertFalse(java.util.Arrays.equals(firstArrays[0], firstArrays[t]), "threads produced identical sequences");
+        }
+    }
+    // ---- perf review 2026-09-26 G115 end ----
 }

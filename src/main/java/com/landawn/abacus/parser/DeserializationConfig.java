@@ -53,10 +53,10 @@ import com.landawn.abacus.util.cs;
  * nesting level. Register the local name (e.g. {@code "city"}) to affect any property or key
  * with that name, at any depth. For example:</p>
  * <pre>{@code
- * config.setValueType("city", String.class);       // applies to a property/key named "city" at any level
- * config.setValueType("model", String.class);      // applies to a property/key named "model" at any level
- * config.setValueType("items", List.class);        // applies to a property/key named "items"
- * config.setValueType("settings", Map.class);      // applies to a property/key named "settings"
+ * config.setValueType("city", String.class);   // applies to a property/key named "city" at any level
+ * config.setValueType("model", String.class);  // applies to a property/key named "model" at any level
+ * config.setValueType("items", List.class);    // applies to a property/key named "items"
+ * config.setValueType("settings", Map.class);  // applies to a property/key named "settings"
  * }</pre>
  *
  * <p>Dotted keys such as {@code "address.city"} are matched only as literal key strings by
@@ -128,8 +128,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <pre>{@code
      * // JSON: {"name": "John", "age": 30, "unknownField": "value"}
      * // Target class only has name and age properties
-     * config.setIgnoreUnmatchedProperty(true);    // unknownField is ignored
-     * config.setIgnoreUnmatchedProperty(false);   // unknownField is rejected, causing an exception
+     * config.setIgnoreUnmatchedProperty(true);   // unknownField is ignored
+     * config.setIgnoreUnmatchedProperty(false);  // unknownField is rejected, causing an exception
      * }</pre>
      *
      * @param ignoreUnmatchedProperty {@code true} to ignore unmatched properties, {@code false} to throw a {@code ParsingException}
@@ -152,8 +152,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Type<Object> none = config.getElementType();  // returns null (not set)
      *
      * config.setElementType(String.class);
-     * Type<String> type = config.getElementType();   // returns the String type
-     * String typeName = type.name();                 // returns "String"
+     * Type<String> type = config.getElementType();  // returns the String type
+     * String typeName = type.name();                // returns "String"
      * }</pre>
      *
      * @param <T> the element type
@@ -233,8 +233,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Type<Object> none = config.getMapKeyType();  // returns null (not set)
      *
      * config.setMapKeyType(String.class);
-     * Type<String> keyType = config.getMapKeyType();   // returns the String key type
-     * String typeName = keyType.name();                // returns "String"
+     * Type<String> keyType = config.getMapKeyType();  // returns the String key type
+     * String typeName = keyType.name();               // returns "String"
      * }</pre>
      *
      * @param <T> the key type
@@ -256,12 +256,12 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * config.setMapValueType(String.class);
      * }</pre>
      *
-     * @param cls the class of map keys
+     * @param targetClass the class of map keys
      * @return this configuration instance for method chaining
      * @throws IllegalArgumentException if the supplied class is {@code null}.
      */
-    public C setMapKeyType(final Class<?> cls) throws IllegalArgumentException {
-        return setMapKeyType(Type.of(cls));
+    public C setMapKeyType(final Class<?> targetClass) throws IllegalArgumentException {
+        return setMapKeyType(Type.of(targetClass));
     }
 
     /**
@@ -272,8 +272,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
      * Type<Long> longType = Type.of(Long.class);
-     * config.setMapKeyType(longType);                // returns this (config) for chaining
-     * String name = config.getMapKeyType().name();   // returns "Long"
+     * config.setMapKeyType(longType);               // returns this (config) for chaining
+     * String name = config.getMapKeyType().name();  // returns "Long"
      * }</pre>
      *
      * @param keyType the type of map keys
@@ -313,8 +313,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Type<Object> none = config.getMapValueType();  // returns null (not set)
      *
      * config.setMapValueType(Integer.class);
-     * Type<Integer> valueType = config.getMapValueType();   // returns the Integer value type
-     * String typeName = valueType.name();                   // returns "Integer"
+     * Type<Integer> valueType = config.getMapValueType();  // returns the Integer value type
+     * String typeName = valueType.name();                  // returns "Integer"
      * }</pre>
      *
      * @param <T> the value type
@@ -337,12 +337,12 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * Map<String, Person> people = parser.deserialize(json, config, Map.class);
      * }</pre>
      *
-     * @param cls the class of map values
+     * @param targetClass the class of map values
      * @return this configuration instance for method chaining
      * @throws IllegalArgumentException if the supplied class is {@code null}.
      */
-    public C setMapValueType(final Class<?> cls) throws IllegalArgumentException {
-        return setMapValueType(Type.of(cls));
+    public C setMapValueType(final Class<?> targetClass) throws IllegalArgumentException {
+        return setMapValueType(Type.of(targetClass));
     }
 
     /**
@@ -353,8 +353,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * <pre>{@code
      * JsonDeserConfig config = new JsonDeserConfig();
      * Type<Integer> intType = Type.of(Integer.class);
-     * config.setMapValueType(intType);                 // returns this (config) for chaining
-     * String name = config.getMapValueType().name();   // returns "Integer"
+     * config.setMapValueType(intType);                // returns this (config) for chaining
+     * String name = config.getMapValueType().name();  // returns "Integer"
      * }</pre>
      *
      * @param valueType the type of map values
@@ -434,7 +434,8 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
      * }</pre>
      *
      * @param <T> the value type
-     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation
+     * @param keyName the property/key name as it appears at its nesting level during deserialization (dotted paths are matched only as literal key strings) - see class documentation;
+     *        may be {@code null} (an unquoted JSON {@code null} map key), which never matches a configured type
      * @param defaultType the type to return if no type is configured for the property
      * @return the type for the specified property, or {@code defaultType} if not configured
      */
@@ -445,7 +446,9 @@ public abstract class DeserializationConfig<C extends DeserializationConfig<C>> 
             ret = (Type<T>) valueTypeMap.get(keyName);
         }
 
-        if (ret == null && beanInfoForValueTypes != null) {
+        // A null key (an unquoted JSON null map key) never names a bean property; BeanInfo.getPropInfo(null)
+        // would reject it with an IllegalArgumentException about an argument the caller never passed.
+        if (ret == null && beanInfoForValueTypes != null && keyName != null) {
             final PropInfo propInfo = beanInfoForValueTypes.getPropInfo(keyName);
 
             if (propInfo != null) {

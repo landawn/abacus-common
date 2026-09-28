@@ -235,6 +235,9 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
     public static CharIterator defer(final Supplier<? extends CharIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends CharIterator>> supplierHolder = Holder.of(iteratorSupplier);
+
         return new CharIterator() {
             private CharIterator iter = null;
             private volatile boolean isInitialized = false;
@@ -273,7 +276,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
                             isInitializing = true;
 
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == this) {
                                     throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
@@ -287,6 +290,7 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;
                             }
@@ -408,8 +412,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b');
-     * Character boxed = iter.next();      // returns 'a' (boxed) — avoid this
-     * char primitive = iter.nextChar();   // returns 'b' — prefer this
+     * Character boxed = iter.next();     // returns 'a' (boxed) — avoid this
+     * char primitive = iter.nextChar();  // returns 'b' — prefer this
      * }</pre>
      *
      * @return the next char value as a {@code Character} object
@@ -428,8 +432,8 @@ public abstract class CharIterator extends ImmutableIterator<Character> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharIterator iter = CharIterator.of('a', 'b', 'c');
-     * char first = iter.nextChar();    // returns 'a'
-     * char second = iter.nextChar();   // returns 'b'
+     * char first = iter.nextChar();   // returns 'a'
+     * char second = iter.nextChar();  // returns 'b'
      * }</pre>
      *
      * @return the next char value

@@ -583,14 +583,14 @@ public class MedianTest extends TestBase {
         assertEquals("The specified array 'source' cannot be null or empty",
                 assertThrows(IllegalArgumentException.class, () -> Median.of((String[]) null, (Comparator<String>) null)).getMessage());
         // with a non-empty array the comparator check is still reached
-        assertEquals("'cmp' cannot be null",
+        assertEquals("'comparator' cannot be null",
                 assertThrows(IllegalArgumentException.class, () -> Median.of(new String[] { "a", "b" }, (Comparator<String>) null)).getMessage());
 
         assertEquals("Source collection is null or empty",
                 assertThrows(IllegalArgumentException.class, () -> Median.of(Collections.<String> emptyList(), (Comparator<String>) null)).getMessage());
         assertEquals("Source collection is null or empty",
                 assertThrows(IllegalArgumentException.class, () -> Median.of((Collection<String>) null, (Comparator<String>) null)).getMessage());
-        assertEquals("'cmp' cannot be null",
+        assertEquals("'comparator' cannot be null",
                 assertThrows(IllegalArgumentException.class, () -> Median.of(Arrays.asList("a", "b"), (Comparator<String>) null)).getMessage());
     }
 }

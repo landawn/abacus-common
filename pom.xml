@@ -5,7 +5,7 @@
 
 	<groupId>com.landawn.abacus</groupId>
 	<artifactId>abacus-common</artifactId>
-	<version>8.1.0</version>
+	<version>8.1.1</version>
 	<packaging>jar</packaging>
 	<name>abacus-common</name>
 	<description>A general programming library in Java/Android. It's easy to learn and simple to use with concise and powerful APIs.</description>
@@ -37,14 +37,14 @@
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.release>21</maven.compiler.release>
 		<lombok.version>1.18.48</lombok.version>
-		<jackson.version>2.22.2</jackson.version>
+		<jackson.version>2.22.3</jackson.version>
 		<jackson.annotations.version>2.22</jackson.annotations.version>
 		<log4j.version>2.26.1</log4j.version>
 		<spring.version>7.0.9</spring.version>
 		<okhttp.version>5.5.0</okhttp.version>
 		<junit.jupiter.version>6.1.3</junit.jupiter.version>
 		<junit.platform.version>6.1.3</junit.platform.version>
-		<mockito.version>5.23.0</mockito.version>
+		<mockito.version>5.24.0</mockito.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
@@ -83,7 +83,7 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.20.0</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -97,27 +97,27 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.6.0</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.22.1</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.22.0</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.19</version>
+			<version>2.0.20</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -132,7 +132,7 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j.version}</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -192,12 +192,26 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
-			<version>8.0.1</version>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.activation</groupId>
+					<artifactId>activation</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>javax.activation</artifactId>
+			<version>1.2.0</version>
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- JAXB discovers its implementation at runtime. -->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
 			<artifactId>jaxb-runtime</artifactId>
@@ -222,14 +236,14 @@
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
-			<version>2.14.3</version>
+			<version>2.14.4</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>bson</artifactId>
-			<version>5.11.1</version>
+			<version>5.13.0</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -248,9 +262,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.lz4</groupId>
+			<groupId>at.yawk.lz4</groupId>
 			<artifactId>lz4-java</artifactId>
-			<version>1.8.1</version>
+			<version>1.12.0</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -282,6 +296,7 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- ASMUtil checks this classpath dependency reflectively. -->
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm</artifactId>
@@ -293,6 +308,13 @@
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp-jvm</artifactId>
 			<version>${okhttp.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.squareup.okio</groupId>
+			<artifactId>okio-jvm</artifactId>
+			<version>3.18.2</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -339,6 +361,13 @@
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Test engines are discovered at runtime. -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>${junit.jupiter.version}</version>
 			<scope>test</scope>
@@ -351,7 +380,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-suite</artifactId>
+			<artifactId>junit-platform-suite-engine</artifactId>
 			<version>${junit.platform.version}</version>
 			<scope>test</scope>
 		</dependency>
@@ -359,6 +388,18 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
 			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.opentest4j</groupId>
+			<artifactId>opentest4j</artifactId>
+			<version>1.3.0</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -388,9 +429,39 @@
 		</dependency>
 	</dependencies>
 
-
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.5.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.5.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.5.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.6.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>3.2.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>3.2.0</version>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -403,7 +474,7 @@
 			          <path>
 			            <groupId>org.projectlombok</groupId>
 			            <artifactId>lombok</artifactId>
-			            <version>1.18.48</version>
+			            <version>${lombok.version}</version>
 			          </path>
 			        </annotationProcessorPaths>
 				</configuration>
@@ -413,8 +484,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>3.4.0</version>
-				<configuration>
-				</configuration>
+
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -425,7 +495,6 @@
 				</executions>
 			</plugin>
 
-
 			<!-- https://bugs.openjdk.java.net/browse/JDK-8281944  -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -434,16 +503,22 @@
 				<configuration>
 					<doctitle>abacus-common</doctitle>
 					<show>public</show>
-			        <source>25</source>
+			        <source>25</source>        <!-- or 21 if using JDK 21 -->
 			        <encoding>UTF-8</encoding>
-			        <doclint>all</doclint>
+			        <doclint>none</doclint>
 					<source>${maven.compiler.source}</source>
 					<detectJavaApiLink>false</detectJavaApiLink>
-					<sourceFileExcludes>
-						<exclude>/com/landawn/abacus/type/**/*.java</exclude>
-						<exclude>/com/landawn/abacus/logging/**/*.java</exclude>
-						<exclude>/com/landawn/abacus/util/cs.java</exclude>
-					</sourceFileExcludes>
+			        <additionalOptions>
+			          -tag implSpec:a:"Implementation Specification:"
+			          -tag implNote:a:"Implementation Note:"
+			          -tag apiNote:a:"API Note:"
+			        </additionalOptions>
+
+				    <!-- ✅ Exclude the entire 'type' package except two files -->
+				    <sourceFileExcludes>
+						<exclude>com/landawn/abacus/util/type/TypeUtils.java</exclude>
+				      <exclude>com/landawn/abacus/util/cs.java</exclude>
+				    </sourceFileExcludes>
 				</configuration>
 				<executions>
 					<execution>
@@ -453,30 +528,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.6.0</version>
-				<configuration>
-					<includes>
-						<include>**/AbacusCommonUnitSuite.java</include>
-					</includes>
-					<useModulePath>false</useModulePath>
-					<testFailureIgnore>true</testFailureIgnore> <!-- set to false if you want failures to fail the build -->
-					<argLine>
-          				-Dfile.encoding=UTF-8
-						--add-opens java.base/java.lang=ALL-UNNAMED
-						--add-opens java.base/java.lang.reflect=ALL-UNNAMED
-						--add-opens java.base/java.io=ALL-UNNAMED
-						--add-opens java.base/sun.nio.ch=ALL-UNNAMED
-						--add-opens java.base/java.nio=ALL-UNNAMED
-						--add-exports java.base/jdk.internal.ref=ALL-UNNAMED
-						--add-exports java.base/sun.nio.ch=ALL-UNNAMED
-						--add-exports jdk.unsupported/sun.misc=ALL-UNNAMED
-					</argLine>
-				</configuration>
 			</plugin>
 
 			<plugin>
@@ -501,6 +552,32 @@
 					</execution>
 				</executions>
 			</plugin>
+
+	        <plugin>
+	          <groupId>org.sonatype.central</groupId>
+	          <artifactId>central-publishing-maven-plugin</artifactId>
+	          <version>0.11.0</version>
+	          <extensions>true</extensions>
+	          <configuration>
+	             <publishingServerId>central</publishingServerId>
+	             <autoPublish>true</autoPublish>
+	          </configuration>
+	        </plugin>
+
+		    <plugin>
+		      <groupId>org.apache.maven.plugins</groupId>
+		      <artifactId>maven-gpg-plugin</artifactId>
+		      <version>3.2.8</version>
+		      <executions>
+		        <execution>
+		          <id>sign-artifacts</id>
+		          <phase>verify</phase> <!-- or deploy -->
+		          <goals>
+		            <goal>sign</goal>
+		          </goals>
+		        </execution>
+		      </executions>
+		    </plugin>
 		</plugins>
 	</build>
 </project>

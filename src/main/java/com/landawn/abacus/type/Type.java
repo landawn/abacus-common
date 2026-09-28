@@ -92,8 +92,8 @@ import com.landawn.abacus.util.cs;
  * <pre>{@code
  * // Basic type operations
  * Type<String> stringType = Type.of(String.class);
- * String value = stringType.valueOf("Hello");   // Parse from string
- * String repr = stringType.stringOf(value);     // Convert to string
+ * String value = stringType.valueOf("Hello");  // Parse from string
+ * String repr = stringType.stringOf(value);    // Convert to string
  *
  * // Generic type handling
  * Type<List<Integer>> listType = Type.of(new TypeReference<List<Integer>>(){});
@@ -101,13 +101,13 @@ import com.landawn.abacus.util.cs;
  *
  * // Database operations
  * Type<Date> dateType = Type.of(Date.class);
- * Date date = dateType.get(resultSet, "created_date");   // Get from ResultSet
- * dateType.set(preparedStmt, 1, date);                   // Set parameter
+ * Date date = dateType.get(resultSet, "created_date");  // Get from ResultSet
+ * dateType.set(preparedStmt, 1, date);                  // Set parameter
  *
  * // Collection/Array conversions
  * Type<int[]> arrayType = Type.of(int[].class);
- * int[] array = arrayType.collectionToArray(Arrays.asList(1, 2, 3));                // Collection to array
- * Collection<Integer> list = arrayType.arrayToCollection(array, ArrayList.class);   // Array to collection
+ * int[] array = arrayType.collectionToArray(Arrays.asList(1, 2, 3));               // Collection to array
+ * Collection<Integer> list = arrayType.arrayToCollection(array, ArrayList.class);  // Array to collection
  *
  * // Type checking and metadata
  * Type<Integer> intType = Type.of(Integer.class);
@@ -175,7 +175,8 @@ public interface Type<T> {
      * @param javaType the Java reflection type
      * @return the corresponding Type instance (never {@code null}; unrecognized types resolve to a
      *         generic {@link Object}-backed handler rather than failing)
-     * @throws IllegalArgumentException if {@code javaType} is {@code null}.
+     * @throws IllegalArgumentException if {@code javaType} is {@code null}, if its type name is structurally invalid, or
+     *         if the handler selected for it (or one of its type arguments) rejects its metadata.
      */
     static <T> Type<T> of(final java.lang.reflect.Type javaType) throws IllegalArgumentException {
         return TypeFactory.getType(javaType);
@@ -195,12 +196,12 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
-     * @param typeRef the type reference
+     * @param typeReference the type reference
      * @return the corresponding Type instance (never {@code null})
-     * @throws IllegalArgumentException if {@code typeRef} is {@code null}.
+     * @throws IllegalArgumentException if {@code typeReference} is {@code null}.
      */
-    static <T> Type<T> of(final TypeReference<T> typeRef) throws IllegalArgumentException {
-        return N.checkArgNotNull(typeRef, cs.typeRef).type();
+    static <T> Type<T> of(final TypeReference<T> typeReference) throws IllegalArgumentException {
+        return N.checkArgNotNull(typeReference, cs.typeReference).type();
     }
 
     /**
@@ -220,13 +221,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the Java type represented by the returned {@code Type} instance
-     * @param cls the class
+     * @param targetClass the class
      * @return the corresponding Type instance (never {@code null}; unrecognized classes resolve to a
      *         generic {@link Object}-backed handler or a bean handler rather than failing)
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}, or if the handler selected for {@code targetClass} rejects
+     *         its metadata (for example, invalid JSON value/creator annotations).
      */
-    static <T> Type<T> of(final Class<? extends T> cls) throws IllegalArgumentException {
-        return TypeFactory.getType(cls);
+    static <T> Type<T> of(final Class<? extends T> targetClass) throws IllegalArgumentException {
+        return TypeFactory.getType(targetClass);
     }
 
     /**
@@ -249,7 +251,8 @@ public interface Type<T> {
      * @param typeName the type name string; must not be {@code null} or empty
      * @return the corresponding Type instance (never {@code null}; unrecognized names resolve to a
      *         generic {@link Object}-backed handler rather than failing)
-     * @throws IllegalArgumentException if {@code typeName} is {@code null} or empty.
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}, empty or blank, if the type name format is
+     *         structurally invalid, or if the handler selected for the type rejects its metadata.
      */
     static <T> Type<T> of(final String typeName) throws IllegalArgumentException {
         return TypeFactory.getType(typeName);
@@ -274,9 +277,11 @@ public interface Type<T> {
      *            {@code Type} for one of those classes
      * @param classes the array of classes; may be {@code null} or empty
      * @return list of corresponding Type instances (never {@code null}; empty when {@code classes} is empty)
+     * @throws IllegalArgumentException if any element of {@code classes} is {@code null}, or if the handler selected
+     *         for one of them rejects its metadata.
      */
     @SafeVarargs
-    static <T> List<Type<T>> ofAll(final Class<? extends T>... classes) {
+    static <T> List<Type<T>> ofAll(final Class<? extends T>... classes) throws IllegalArgumentException {
         return ofAll(Array.asList(classes));
     }
 
@@ -299,8 +304,10 @@ public interface Type<T> {
      *            {@code Type} for one of those classes
      * @param classes the collection of classes; may be {@code null} or empty
      * @return list of corresponding Type instances (never {@code null}; empty when {@code classes} is empty)
+     * @throws IllegalArgumentException if any element of {@code classes} is {@code null}, or if the handler selected
+     *         for one of them rejects its metadata.
      */
-    static <T> List<Type<T>> ofAll(final Collection<Class<? extends T>> classes) {
+    static <T> List<Type<T>> ofAll(final Collection<Class<? extends T>> classes) throws IllegalArgumentException {
         final List<Type<T>> types = new ArrayList<>(N.size(classes));
 
         if (N.notEmpty(classes)) {
@@ -328,14 +335,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for List of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<List<T>> ofList(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<List<T>> ofList(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("List<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("List<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -351,14 +358,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for LinkedList of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<LinkedList<T>> ofLinkedList(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<LinkedList<T>> ofLinkedList(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("LinkedList<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("LinkedList<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -377,15 +384,15 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for List of Map with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<List<Map<K, V>>> ofListOfMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) throws IllegalArgumentException {
+    static <K, V> Type<List<Map<K, V>>> ofListOfMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass) throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("List<Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">>");
+        return TypeFactory.getType("List<Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">>");
     }
 
     /**
@@ -404,16 +411,17 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for List of LinkedHashMap with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<List<Map<K, V>>> ofListOfLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valClass)
+    static <K, V> Type<List<Map<K, V>>> ofListOfLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("List<LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">>");
+        return TypeFactory
+                .getType("List<LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">>");
     }
 
     /**
@@ -430,14 +438,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for Set of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<Set<T>> ofSet(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<Set<T>> ofSet(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("Set<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("Set<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -451,15 +459,15 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for Set of Map with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<Set<Map<K, V>>> ofSetOfMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) throws IllegalArgumentException {
+    static <K, V> Type<Set<Map<K, V>>> ofSetOfMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass) throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("Set<Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">>");
+        return TypeFactory.getType("Set<Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">>");
     }
 
     /**
@@ -473,16 +481,17 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for Set of LinkedHashMap with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<Set<Map<K, V>>> ofSetOfLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valClass)
+    static <K, V> Type<Set<Map<K, V>>> ofSetOfLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("Set<LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">>");
+        return TypeFactory
+                .getType("Set<LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">>");
     }
 
     /**
@@ -494,14 +503,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for LinkedHashSet of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<LinkedHashSet<T>> ofLinkedHashSet(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<LinkedHashSet<T>> ofLinkedHashSet(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("LinkedHashSet<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("LinkedHashSet<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -513,14 +522,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for SortedSet of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<SortedSet<T>> ofSortedSet(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<SortedSet<T>> ofSortedSet(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("SortedSet<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("SortedSet<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -532,14 +541,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for NavigableSet of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<NavigableSet<T>> ofNavigableSet(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<NavigableSet<T>> ofNavigableSet(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("NavigableSet<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("NavigableSet<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -551,14 +560,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for TreeSet of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<TreeSet<T>> ofTreeSet(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<TreeSet<T>> ofTreeSet(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("TreeSet<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("TreeSet<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -570,14 +579,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for Queue of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<Queue<T>> ofQueue(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<Queue<T>> ofQueue(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("Queue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("Queue<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -589,14 +598,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for Deque of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<Deque<T>> ofDeque(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<Deque<T>> ofDeque(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("Deque<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("Deque<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -608,14 +617,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for ArrayDeque of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<ArrayDeque<T>> ofArrayDeque(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<ArrayDeque<T>> ofArrayDeque(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("ArrayDeque<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("ArrayDeque<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -627,14 +636,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for LinkedBlockingQueue of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<LinkedBlockingQueue<T>> ofLinkedBlockingQueue(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<LinkedBlockingQueue<T>> ofLinkedBlockingQueue(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("LinkedBlockingQueue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("LinkedBlockingQueue<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -646,14 +655,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for ConcurrentLinkedQueue of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<ConcurrentLinkedQueue<T>> ofConcurrentLinkedQueue(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("ConcurrentLinkedQueue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("ConcurrentLinkedQueue<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -665,14 +674,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for PriorityQueue of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<PriorityQueue<T>> ofPriorityQueue(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<PriorityQueue<T>> ofPriorityQueue(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("PriorityQueue<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("PriorityQueue<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -718,15 +727,15 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for Map with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<Map<K, V>> ofMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) throws IllegalArgumentException {
+    static <K, V> Type<Map<K, V>> ofMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass) throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
+        return TypeFactory.getType("Map<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">");
     }
 
     /**
@@ -740,16 +749,16 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for LinkedHashMap with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<LinkedHashMap<K, V>> ofLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valClass)
+    static <K, V> Type<LinkedHashMap<K, V>> ofLinkedHashMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
+        return TypeFactory.getType("LinkedHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">");
     }
 
     /**
@@ -763,15 +772,15 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for SortedMap with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<SortedMap<K, V>> ofSortedMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) throws IllegalArgumentException {
+    static <K, V> Type<SortedMap<K, V>> ofSortedMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass) throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("SortedMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
+        return TypeFactory.getType("SortedMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">");
     }
 
     /**
@@ -785,16 +794,16 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for NavigableMap with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<NavigableMap<K, V>> ofNavigableMap(final Class<? extends K> keyClass, final Class<? extends V> valClass)
+    static <K, V> Type<NavigableMap<K, V>> ofNavigableMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("NavigableMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
+        return TypeFactory.getType("NavigableMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">");
     }
 
     /**
@@ -808,15 +817,15 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for TreeMap with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<TreeMap<K, V>> ofTreeMap(final Class<? extends K> keyClass, final Class<? extends V> valClass) throws IllegalArgumentException {
+    static <K, V> Type<TreeMap<K, V>> ofTreeMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass) throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("TreeMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
+        return TypeFactory.getType("TreeMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">");
     }
 
     /**
@@ -830,16 +839,16 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for ConcurrentMap with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<ConcurrentMap<K, V>> ofConcurrentMap(final Class<? extends K> keyClass, final Class<? extends V> valClass)
+    static <K, V> Type<ConcurrentMap<K, V>> ofConcurrentMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("ConcurrentMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
+        return TypeFactory.getType("ConcurrentMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">");
     }
 
     /**
@@ -853,16 +862,16 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <V> the value type
      * @param keyClass the key class
-     * @param valClass the value class
+     * @param valueClass the value class
      * @return Type instance for ConcurrentHashMap with specified key/value types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code valClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code valueClass} is {@code null}
      */
-    static <K, V> Type<ConcurrentHashMap<K, V>> ofConcurrentHashMap(final Class<? extends K> keyClass, final Class<? extends V> valClass)
+    static <K, V> Type<ConcurrentHashMap<K, V>> ofConcurrentHashMap(final Class<? extends K> keyClass, final Class<? extends V> valueClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(valClass, cs.valClass);
+        N.checkArgNotNull(valueClass, cs.valueClass);
 
-        return TypeFactory.getType("ConcurrentHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valClass) + ">");
+        return TypeFactory.getType("ConcurrentHashMap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(valueClass) + ">");
     }
 
     /**
@@ -874,14 +883,14 @@ public interface Type<T> {
      * }</pre>
      *
      * @param <T> the element type
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for Multiset of the specified element type
-     * @throws IllegalArgumentException if {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code elementClass} is {@code null}
      */
-    static <T> Type<Multiset<T>> ofMultiset(final Class<? extends T> eleClass) throws IllegalArgumentException {
-        N.checkArgNotNull(eleClass, cs.eleClass);
+    static <T> Type<Multiset<T>> ofMultiset(final Class<? extends T> elementClass) throws IllegalArgumentException {
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("Multiset<" + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("Multiset<" + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -895,16 +904,16 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <E> the element type
      * @param keyClass the key class
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for ListMultimap with specified key/element types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code elementClass} is {@code null}
      */
-    static <K, E> Type<ListMultimap<K, E>> ofListMultimap(final Class<? extends K> keyClass, final Class<? extends E> eleClass)
+    static <K, E> Type<ListMultimap<K, E>> ofListMultimap(final Class<? extends K> keyClass, final Class<? extends E> elementClass)
             throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(eleClass, cs.eleClass);
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("ListMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("ListMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -918,15 +927,16 @@ public interface Type<T> {
      * @param <K> the key type
      * @param <E> the element type
      * @param keyClass the key class
-     * @param eleClass the element class
+     * @param elementClass the element class
      * @return Type instance for SetMultimap with specified key/element types
-     * @throws IllegalArgumentException if {@code keyClass} or {@code eleClass} is {@code null}
+     * @throws IllegalArgumentException if {@code keyClass} or {@code elementClass} is {@code null}
      */
-    static <K, E> Type<SetMultimap<K, E>> ofSetMultimap(final Class<? extends K> keyClass, final Class<? extends E> eleClass) throws IllegalArgumentException {
+    static <K, E> Type<SetMultimap<K, E>> ofSetMultimap(final Class<? extends K> keyClass, final Class<? extends E> elementClass)
+            throws IllegalArgumentException {
         N.checkArgNotNull(keyClass, cs.keyClass);
-        N.checkArgNotNull(eleClass, cs.eleClass);
+        N.checkArgNotNull(elementClass, cs.elementClass);
 
-        return TypeFactory.getType("SetMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(eleClass) + ">");
+        return TypeFactory.getType("SetMultimap<" + ClassUtil.getCanonicalClassName(keyClass) + ", " + ClassUtil.getCanonicalClassName(elementClass) + ">");
     }
 
     /**
@@ -944,9 +954,9 @@ public interface Type<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type.ofList(String.class).name();               // "List<String>"
-     * Type.of("java.util.List<java.lang.String>").name(); // "List<String>"
-     * Type.of("ArrayList<String>").name();            // "ArrayList<String>"
+     * Type.ofList(String.class).name();                    // "List<String>"
+     * Type.of("java.util.List<java.lang.String>").name();  // "List<String>"
+     * Type.of("ArrayList<String>").name();                 // "ArrayList<String>"
      * }</pre>
      *
      * @return the type name
@@ -967,8 +977,8 @@ public interface Type<T> {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Type.of("ArrayList<String>").declaringName(); // "List<String>"
-     * Type.ofList(String.class).declaringName();    // "List<String>"
+     * Type.of("ArrayList<String>").declaringName();  // "List<String>"
+     * Type.ofList(String.class).declaringName();     // "List<String>"
      * }</pre>
      *
      * @return the declaring name
@@ -1523,14 +1533,14 @@ public interface Type<T> {
      *
      * @param cbuf the character array; may be {@code null}
      * @param offset the starting position within {@code cbuf}
-     * @param len the number of characters to parse from {@code offset}
+     * @param length the number of characters to parse from {@code offset}
      * @return the parsed value, or the result of {@code valueOf((String) null)} when {@code cbuf} is
      *         {@code null} ({@code null} for reference types, the type's default for primitive types;
-     *         typically the same when {@code len == 0}, depending on the concrete implementation)
+     *         typically the same when {@code length == 0}, depending on the concrete implementation)
      * @see #valueOf(String)
      * @see #stringOf(Object)
      */
-    T valueOf(char[] cbuf, int offset, int len);
+    T valueOf(char[] cbuf, int offset, int length);
 
     /**
      * Retrieves a value of this type from a ResultSet at the specified column.
@@ -1557,52 +1567,52 @@ public interface Type<T> {
     /**
      * Sets a parameter value in a PreparedStatement.
      *
-     * @param stmt the PreparedStatement
+     * @param statement the PreparedStatement
      * @param columnIndex the parameter index (1-based); named {@code columnIndex} for historical API
      *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
      *                    {@link ResultSet} column index
      * @param x the value to set
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws NullPointerException if {@code statement} is {@code null}
      * @throws SQLException if a database access error occurs
      */
-    void set(PreparedStatement stmt, int columnIndex, T x) throws NullPointerException, SQLException;
+    void set(PreparedStatement statement, int columnIndex, T x) throws NullPointerException, SQLException;
 
     /**
      * Sets a parameter value in a CallableStatement by name.
      *
-     * @param stmt the CallableStatement
+     * @param statement the CallableStatement
      * @param parameterName the parameter name
      * @param x the value to set
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws NullPointerException if {@code statement} is {@code null}
      * @throws SQLException if a database access error occurs
      */
-    void set(CallableStatement stmt, String parameterName, T x) throws NullPointerException, SQLException;
+    void set(CallableStatement statement, String parameterName, T x) throws NullPointerException, SQLException;
 
     /**
      * Sets a parameter value in a PreparedStatement with SQL type or length hint.
      *
-     * @param stmt the PreparedStatement
+     * @param statement the PreparedStatement
      * @param columnIndex the parameter index (1-based); named {@code columnIndex} for historical API
      *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
      *                    {@link ResultSet} column index
      * @param x the value to set
      * @param sqlTypeOrLength the SQL type constant or length hint
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws NullPointerException if {@code statement} is {@code null}
      * @throws SQLException if a database access error occurs
      */
-    void set(PreparedStatement stmt, int columnIndex, T x, int sqlTypeOrLength) throws NullPointerException, SQLException;
+    void set(PreparedStatement statement, int columnIndex, T x, int sqlTypeOrLength) throws NullPointerException, SQLException;
 
     /**
      * Sets a parameter value in a CallableStatement with SQL type or length hint.
      *
-     * @param stmt the CallableStatement
+     * @param statement the CallableStatement
      * @param parameterName the parameter name
      * @param x the value to set
      * @param sqlTypeOrLength the SQL type constant or length hint
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws NullPointerException if {@code statement} is {@code null}
      * @throws SQLException if a database access error occurs
      */
-    void set(CallableStatement stmt, String parameterName, T x, int sqlTypeOrLength) throws NullPointerException, SQLException;
+    void set(CallableStatement statement, String parameterName, T x, int sqlTypeOrLength) throws NullPointerException, SQLException;
 
     /**
      * Appends a plain, human-readable string representation of a value to an {@code Appendable}

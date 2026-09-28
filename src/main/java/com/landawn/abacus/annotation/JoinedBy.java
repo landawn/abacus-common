@@ -116,7 +116,7 @@ import java.lang.annotation.Target;
  * @Entity
  * public class EmployeeProject {
  *     private Long employeeId;  // employeeId is the FK to Employee
- *     private Long projectId;  // projectId is the FK to Project
+ *     private Long projectId;   // projectId is the FK to Project
  *     private Date assignedDate;
  * }
  * }</pre>

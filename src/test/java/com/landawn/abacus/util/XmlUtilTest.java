@@ -1117,4 +1117,26 @@ public class XmlUtilTest extends TestBase {
 
         assertTrue(thrown.getCause() instanceof java.io.UnsupportedEncodingException);
     }
+
+    @Test
+    public void testWriteCharactersNullOutputNamesOutputParameter() {
+        final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class, () -> XmlUtil.writeCharacters("a<b", (StringBuilder) null));
+        assertTrue(e1.getMessage().contains("'output'"), e1.getMessage());
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class,
+                () -> XmlUtil.writeCharacters(new char[] { 'a' }, 0, 1, (StringBuilder) null));
+        assertTrue(e2.getMessage().contains("'output'"), e2.getMessage());
+        final IllegalArgumentException e3 = assertThrows(IllegalArgumentException.class, () -> XmlUtil.writeCharacters("a<b", (OutputStream) null));
+        assertTrue(e3.getMessage().contains("'output'"), e3.getMessage());
+        final IllegalArgumentException e4 = assertThrows(IllegalArgumentException.class,
+                () -> XmlUtil.writeCharacters(new char[] { 'a' }, 0, 1, (OutputStream) null));
+        assertTrue(e4.getMessage().contains("'output'"), e4.getMessage());
+        final IllegalArgumentException e5 = assertThrows(IllegalArgumentException.class, () -> XmlUtil.writeCharacters("a<b", (Writer) null));
+        assertTrue(e5.getMessage().contains("'output'"), e5.getMessage());
+        final IllegalArgumentException e6 = assertThrows(IllegalArgumentException.class,
+                () -> XmlUtil.writeCharacters(new char[] { 'a' }, 0, 1, (Writer) null));
+        assertTrue(e6.getMessage().contains("'output'"), e6.getMessage());
+        // source and range are still validated before the destination
+        assertThrows(NullPointerException.class, () -> XmlUtil.writeCharacters((char[]) null, 0, 0, (Writer) null));
+        assertThrows(IndexOutOfBoundsException.class, () -> XmlUtil.writeCharacters("abc", -1, 1, (OutputStream) null));
+    }
 }

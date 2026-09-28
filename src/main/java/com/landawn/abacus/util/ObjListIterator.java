@@ -55,10 +55,10 @@ import com.landawn.abacus.util.stream.Stream;
  * ObjListIterator<String> iter = ObjListIterator.of(list);
  *
  * // Bidirectional iteration
- * iter.next();       // returns "a"
- * iter.next();       // returns "b"
- * iter.previous();   // returns "b"
- * iter.previous();   // returns "a"
+ * iter.next();      // returns "a"
+ * iter.next();      // returns "b"
+ * iter.previous();  // returns "b"
+ * iter.previous();  // returns "a"
  *
  * // Skip and limit
  * ObjListIterator<String> sliced = ObjListIterator.of(list).skip(1).limit(2);
@@ -159,9 +159,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<String> iter = ObjListIterator.empty();
-     * boolean fwd = iter.hasNext();       // returns false
-     * boolean bwd = iter.hasPrevious();   // returns false
-     * iter.next();                        // throws NoSuchElementException
+     * boolean fwd = iter.hasNext();      // returns false
+     * boolean bwd = iter.hasPrevious();  // returns false
+     * iter.next();                       // throws NoSuchElementException
      * }</pre>
      *
      * @param <T> the type of elements (not) returned by the iterator
@@ -179,19 +179,19 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjListIterator<String> single = ObjListIterator.just("Hello");
-     * single.hasNext();       // returns true
-     * single.hasPrevious();   // returns false
-     * single.next();          // returns "Hello"
-     * single.hasPrevious();   // returns true
-     * single.hasNext();       // returns false
+     * single.hasNext();      // returns true
+     * single.hasPrevious();  // returns false
+     * single.next();         // returns "Hello"
+     * single.hasPrevious();  // returns true
+     * single.hasNext();      // returns false
      * }</pre>
      *
      * @param <T> the type of the element
-     * @param val the single element to be returned by the iterator
+     * @param value the single element to be returned by the iterator
      * @return an {@code ObjListIterator} containing exactly one element
      */
-    public static <T> ObjListIterator<T> just(final T val) {
-        return of(Collections.singletonList(val));
+    public static <T> ObjListIterator<T> just(final T value) {
+        return of(Collections.singletonList(value));
     }
 
     /**
@@ -268,9 +268,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <pre>{@code
      * List<String> list = Arrays.asList("a", "b", "c");
      * ObjListIterator<String> iter = ObjListIterator.of(list);
-     * iter.next();       // returns "a"
-     * iter.next();       // returns "b"
-     * iter.previous();   // returns "b"
+     * iter.next();      // returns "a"
+     * iter.next();      // returns "b"
+     * iter.previous();  // returns "b"
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -311,46 +311,46 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
-     * @param iter the {@code ListIterator} to wrap
+     * @param iterator the {@code ListIterator} to wrap
      * @return an {@code ObjListIterator} wrapping the given list iterator
      */
-    public static <T> ObjListIterator<T> of(final ListIterator<? extends T> iter) {
-        if (iter == null) {
+    public static <T> ObjListIterator<T> of(final ListIterator<? extends T> iterator) {
+        if (iterator == null) {
             return empty();
         }
 
         return new ObjListIterator<>() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public T next() {
                 // No hasNext() guard: exhaustion is reported by the wrapped list iterator, not normalised to
                 // ERROR_MSG_FOR_NO_SUCH_EX. Pinned by ObjListIteratorTest; see of(ListIterator) first.
-                return iter.next();
+                return iterator.next();
             }
 
             @Override
             public boolean hasPrevious() {
-                return iter.hasPrevious();
+                return iterator.hasPrevious();
             }
 
             @Override
             public T previous() {
                 // No hasPrevious() guard either - same reason as next() above.
-                return iter.previous();
+                return iterator.previous();
             }
 
             @Override
             public int nextIndex() {
-                return iter.nextIndex();
+                return iterator.nextIndex();
             }
 
             @Override
             public int previousIndex() {
-                return iter.previousIndex();
+                return iterator.previousIndex();
             }
 
             /**
@@ -393,9 +393,9 @@ public abstract class ObjListIterator<T> extends ImmutableIterator<T> implements
      * <pre>{@code
      * ObjListIterator<Integer> iter = ObjListIterator.of(Arrays.asList(1, 2, 3, 4, 5));
      * ObjListIterator<Integer> skipped = iter.skip(2);
-     * skipped.next();       // returns 3
-     * skipped.next();       // returns 4
-     * skipped.previous();   // returns 4
+     * skipped.next();      // returns 3
+     * skipped.next();      // returns 4
+     * skipped.previous();  // returns 4
      * }</pre>
      *
      * @param n the number of elements to skip

@@ -478,4 +478,125 @@ public class IteratorByteStreamTest extends TestBase {
         assertEquals(3, seen[0]);
         stream.close();
     }
+
+    // ---- perf review 2026-09-26 G097 begin ----
+    // G097-01: unsorted distinct() uses a 256-slot presence table; pins first-occurrence order, extremes and laziness.
+    @Test
+    public void testDistinct_unsortedPresenceTable() {
+        assertEquals(0, iter().distinct().toArray().length);
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 5, Byte.MIN_VALUE, Byte.MAX_VALUE, 0, -1 },
+                iter((byte) 5, Byte.MIN_VALUE, Byte.MAX_VALUE, (byte) 5, (byte) 0, (byte) -1, Byte.MAX_VALUE, Byte.MIN_VALUE, (byte) 0, (byte) -1)
+                        .distinct()
+                        .toArray());
+
+        final java.util.Random random = new java.util.Random(7);
+        for (final int size : new int[] { 1, 2, 17, 300, 5000 }) {
+            final byte[] data = new byte[size];
+            random.nextBytes(data);
+            final java.util.LinkedHashSet<Byte> expected = new java.util.LinkedHashSet<>();
+            for (final byte b : data) {
+                expected.add(b);
+            }
+            final byte[] expectedArray = new byte[expected.size()];
+            int i = 0;
+            for (final Byte b : expected) {
+                expectedArray[i++] = b;
+            }
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expectedArray, iter(data).distinct().toArray());
+            org.junit.jupiter.api.Assertions.assertArrayEquals(expectedArray, iter(data).parallel(2).distinct().toArray());
+            assertEquals(expected.size(), iter(data).distinct().count());
+        }
+
+        // lazy: only the elements needed to produce two distinct values are pulled
+        final int[] pulled = { 0 };
+        org.junit.jupiter.api.Assertions.assertArrayEquals(new byte[] { 1, 2 },
+                iter((byte) 1, (byte) 1, (byte) 2, (byte) 3, (byte) 4).onEach(value -> pulled[0]++).distinct().limit(2).toArray());
+        assertEquals(3, pulled[0]);
+    }
+
+    // G097-02: unsorted kthLargest(k) counts the 256 byte values; pins ranks with duplicates, extremes and k beyond size.
+    @Test
+    public void testKthLargest_unsortedCountingTable() {
+        final java.util.Random random = new java.util.Random(11);
+        for (final int size : new int[] { 1, 2, 3, 10, 257, 2000 }) {
+            final byte[] data = new byte[size];
+            random.nextBytes(data);
+            if (size > 3) {
+                data[0] = Byte.MIN_VALUE;
+                data[1] = Byte.MAX_VALUE;
+                data[2] = data[3];
+            }
+            final byte[] sorted = data.clone();
+            java.util.Arrays.sort(sorted);
+            for (final int k : new int[] { 1, 2, 3, size / 2 + 1, size - 1, size, size + 1, Integer.MAX_VALUE }) {
+                if (k < 1) {
+                    continue;
+                }
+                final OptionalByte actual = iter(data).kthLargest(k);
+                if (k > size) {
+                    assertFalse(actual.isPresent(), "size=" + size + ", k=" + k);
+                } else {
+                    assertEquals(sorted[size - k], actual.get(), "size=" + size + ", k=" + k);
+                }
+            }
+        }
+
+        assertEquals((byte) 7, iter((byte) 7, (byte) 7, (byte) 7).kthLargest(3).get());
+        assertFalse(iter((byte) 7, (byte) 7, (byte) 7).kthLargest(4).isPresent());
+        assertEquals((byte) -3, iter((byte) -1, (byte) -3, (byte) -2).kthLargest(3).get());
+        assertEquals((byte) -1, iter((byte) 1, (byte) 2, (byte) 3).map(value -> (byte) -value).parallel(2).kthLargest(1).get());
+        assertThrows(IllegalArgumentException.class, () -> iter((byte) 1).kthLargest(0));
+    }
+
+    // G097-02: close handlers run exactly once, on success and on an upstream failure (which keeps propagating).
+    @Test
+    public void testKthLargest_unsortedClosesOnceOnSuccessAndFailure() {
+        final int[] closed = { 0 };
+        assertEquals((byte) 2, iter((byte) 3, (byte) 1, (byte) 2).onClose(() -> closed[0]++).kthLargest(2).get());
+        assertEquals(1, closed[0]);
+
+        closed[0] = 0;
+        final ByteStream failing = iter((byte) 3, (byte) 1, (byte) 2).onClose(() -> closed[0]++).map(value -> {
+            if (value == 2) {
+                throw new IllegalStateException("boom");
+            }
+            return value;
+        });
+        final IllegalStateException e = assertThrows(IllegalStateException.class, () -> failing.kthLargest(1));
+        assertEquals("boom", e.getMessage());
+        assertEquals(1, closed[0]);
+
+        final RuntimeException closeFailure = new RuntimeException("close failed");
+        final ByteStream failingClose = iter((byte) 3, (byte) 1).onClose(() -> {
+            throw closeFailure;
+        });
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> failingClose.kthLargest(1));
+        org.junit.jupiter.api.Assertions.assertSame(closeFailure, thrown);
+    }
+
+    // G097-04: sorted kthLargest(k) ring buffer wraps with a compare instead of '%'; pins ranks on a sorted iterator stream.
+    @Test
+    public void testKthLargest_sortedIteratorRingBufferWrap() {
+        final java.util.Random random = new java.util.Random(5);
+        for (final int size : new int[] { 1, 2, 5, 16, 17, 100, 1000 }) {
+            final byte[] data = new byte[size];
+            random.nextBytes(data);
+            java.util.Arrays.sort(data);
+            for (final int k : new int[] { 1, 2, 3, 7, 16, 17, size - 1, size, size + 1, Integer.MAX_VALUE }) {
+                if (k < 1) {
+                    continue;
+                }
+                // sorted().filter(..) keeps the sorted flag on an iterator-backed stream
+                final ByteStream stream = ByteStream.of(data).sorted().filter(value -> true);
+                assertTrue(stream instanceof IteratorByteStream);
+                final OptionalByte actual = stream.kthLargest(k);
+                if (k > size) {
+                    assertFalse(actual.isPresent(), "size=" + size + ", k=" + k);
+                } else {
+                    assertEquals(data[size - k], actual.get(), "size=" + size + ", k=" + k);
+                }
+            }
+        }
+    }
+    // ---- perf review 2026-09-26 G097 end ----
 }

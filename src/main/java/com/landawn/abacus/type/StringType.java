@@ -29,9 +29,9 @@ package com.landawn.abacus.type;
  * Type<String> stringType = TypeFactory.getType(String.class);
  *
  * // Convert various objects to String
- * String str1 = stringType.valueOf("hello");       // returns "hello"
- * String str2 = stringType.valueOf((Object) 123);  // returns "123"
- * String str3 = stringType.valueOf((String) null); // returns null
+ * String str1 = stringType.valueOf("hello");        // returns "hello"
+ * String str2 = stringType.valueOf((Object) 123);   // returns "123"
+ * String str3 = stringType.valueOf((String) null);  // returns null
  *
  * // Use with database operations (assuming conn is a valid Connection)
  * try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (name) VALUES (?)")) {

@@ -688,7 +688,10 @@ class JsonStringReader extends AbstractJsonReader {
      * token's Java type suffix ({@code 123L}, {@code 1.5f}) is dropped first, and a target whose
      * parser cannot read the token's spelling at all - a fractional token into {@code BigInteger}
      * or an integral slot - converts the cached {@code Number} instead (truncating toward zero)
-     * rather than failing. An unquoted number read into a {@code String} target keeps the token's
+     * rather than failing. Only a token the number fast path cached takes that route: a fractional
+     * token it does not cache (a mantissa above 2<sup>53</sup> such as {@code 0.30000000000000004},
+     * a negative zero, exponent notation) reaches the target's parser as text and therefore throws
+     * {@code NumberFormatException} for an integral target. An unquoted number read into a {@code String} target keeps the token's
      * spelling ({@code 007} stays {@code "007"}, {@code 1.50} stays {@code "1.50"}); an
      * {@code Object} target receives the parsed {@code Number}.</p>
      *
@@ -828,16 +831,16 @@ class JsonStringReader extends AbstractJsonReader {
     }
 
     /**
-     * Returns whether {@code cls} is one of the integral numeric targets whose {@code Type.valueOf(String)}
+     * Returns whether {@code targetClass} is one of the integral numeric targets whose {@code Type.valueOf(String)}
      * rejects a fractional spelling outright: the integral primitives, their wrappers and {@code BigInteger}.
      * A {@code BigDecimal} or floating-point target reads {@code "1.5"} fine and is deliberately not listed.
      *
-     * @param cls the target class
+     * @param targetClass the target class
      * @return {@code true} when a token holding a decimal point cannot be handed to that target's parser
      */
-    private static boolean isIntegralNumberClass(final Class<?> cls) {
-        return cls == int.class || cls == Integer.class || cls == long.class || cls == Long.class || cls == short.class || cls == Short.class
-                || cls == byte.class || cls == Byte.class || cls == BigInteger.class;
+    private static boolean isIntegralNumberClass(final Class<?> targetClass) {
+        return targetClass == int.class || targetClass == Integer.class || targetClass == long.class || targetClass == Long.class || targetClass == short.class
+                || targetClass == Short.class || targetClass == byte.class || targetClass == Byte.class || targetClass == BigInteger.class;
     }
 
     /**

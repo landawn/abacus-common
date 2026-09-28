@@ -101,30 +101,30 @@ public class ClobAsciiStreamType extends InputStreamType {
      * Sets an ASCII {@link java.io.InputStream} as a parameter in a {@link java.sql.PreparedStatement}.
      * The stream is bound via {@link java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream)}.
      *
-     * @param stmt        the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param statement        the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x           the ASCII {@link java.io.InputStream} to bind; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
-        stmt.setAsciiStream(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final InputStream x) throws NullPointerException, SQLException {
+        statement.setAsciiStream(columnIndex, x);
     }
 
     /**
      * Sets an ASCII {@link java.io.InputStream} as a named parameter in a {@link java.sql.CallableStatement}.
      * The stream is bound via {@link java.sql.CallableStatement#setAsciiStream(String, java.io.InputStream)}.
      *
-     * @param stmt          the {@link java.sql.CallableStatement} in which to set the parameter
+     * @param statement          the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x             the ASCII {@link java.io.InputStream} to bind; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
-        stmt.setAsciiStream(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final InputStream x) throws NullPointerException, SQLException {
+        statement.setAsciiStream(parameterName, x);
     }
 
     /**
@@ -132,17 +132,17 @@ public class ClobAsciiStreamType extends InputStreamType {
      * specifying the number of bytes to read.
      * The stream is bound via {@link java.sql.PreparedStatement#setAsciiStream(int, java.io.InputStream, int)}.
      *
-     * @param stmt            the {@link java.sql.PreparedStatement} in which to set the parameter
+     * @param statement            the {@link java.sql.PreparedStatement} in which to set the parameter
      * @param columnIndex     the 1-based parameter index
      * @param x               the ASCII {@link java.io.InputStream} to bind; may be {@code null}
      * @param sqlTypeOrLength the number of bytes to read from the stream
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
+    public void set(final PreparedStatement statement, final int columnIndex, final InputStream x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setAsciiStream(columnIndex, x, sqlTypeOrLength);
+        statement.setAsciiStream(columnIndex, x, sqlTypeOrLength);
     }
 
     /**
@@ -150,17 +150,17 @@ public class ClobAsciiStreamType extends InputStreamType {
      * specifying the number of bytes to read.
      * The stream is bound via {@link java.sql.CallableStatement#setAsciiStream(String, java.io.InputStream, int)}.
      *
-     * @param stmt            the {@link java.sql.CallableStatement} in which to set the parameter
+     * @param statement            the {@link java.sql.CallableStatement} in which to set the parameter
      * @param parameterName   the name of the parameter to set
      * @param x               the ASCII {@link java.io.InputStream} to bind; may be {@code null}
      * @param sqlTypeOrLength the number of bytes to read from the stream
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final InputStream x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final InputStream x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setAsciiStream(parameterName, x, sqlTypeOrLength);
+        statement.setAsciiStream(parameterName, x, sqlTypeOrLength);
     }
 
     /**

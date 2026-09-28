@@ -206,12 +206,11 @@ public final class KahanSummation { // NOSONAR
 
         if (finiteValuesOnly) {
             if (countA > 0 && Double.isFinite(sumA)) {
-                final BigDecimal addedSum = exactBigDecimal(sumA);
-
+                // Exact decimal state is needed only once the ordinary finite sum overflows.
                 if (overflowSafeSum != null) {
-                    overflowSafeSum = overflowSafeSum.add(addedSum);
+                    overflowSafeSum = overflowSafeSum.add(exactBigDecimal(sumA));
                 } else if (!Double.isFinite(simpleSum)) {
-                    activateOverflowSafeSum(previousCount, previousSimpleSum, addedSum);
+                    activateOverflowSafeSum(previousCount, previousSimpleSum, exactBigDecimal(sumA));
                 }
             } else if (countA > 0 || sumA != 0d) {
                 // A non-finite aggregate sum may have come from finite values that
@@ -263,12 +262,14 @@ public final class KahanSummation { // NOSONAR
 
         if (finiteValuesOnly) {
             if (otherCount > 0 && otherFiniteValuesOnly) {
-                final BigDecimal otherAggregate = otherOverflowSafeSum != null ? otherOverflowSafeSum
-                        : exactCompensatedSum(otherSum, otherCorrection, otherSimpleSum);
-
+                // Avoid constructing exact terms on the normal double-only path.
                 if (overflowSafeSum != null) {
+                    final BigDecimal otherAggregate = otherOverflowSafeSum != null ? otherOverflowSafeSum
+                            : exactCompensatedSum(otherSum, otherCorrection, otherSimpleSum);
                     overflowSafeSum = overflowSafeSum.add(otherAggregate);
                 } else if (otherOverflowSafeSum != null || !Double.isFinite(simpleSum)) {
+                    final BigDecimal otherAggregate = otherOverflowSafeSum != null ? otherOverflowSafeSum
+                            : exactCompensatedSum(otherSum, otherCorrection, otherSimpleSum);
                     activateOverflowSafeSum(previousCount, previousSimpleSum, otherAggregate);
                 }
             } else if (otherCount > 0 || otherSimpleSum != 0d) {
@@ -306,6 +307,13 @@ public final class KahanSummation { // NOSONAR
      * <p>
      * If the result is NaN and the simple sum is infinite, returns the simple sum instead.
      * This handles edge cases where the compensation might produce NaN.
+     *
+     * <p>Unlike {@link #average()}, this method has no overflow-safe fallback: once the running sum of
+     * finite values overflows, the result stays infinite even if later values cancel the excess, so it can
+     * depend on the order in which the values were added. For example,
+     * {@code KahanSummation.of(Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE).sum()} returns
+     * {@code Infinity}, whereas the same values added in the order {@code (MAX, -MAX, MAX)} give
+     * {@code Double.MAX_VALUE}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

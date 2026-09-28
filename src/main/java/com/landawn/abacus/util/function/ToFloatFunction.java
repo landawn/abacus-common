@@ -39,8 +39,8 @@ public interface ToFloatFunction<T> extends Throwables.ToFloatFunction<T, Runtim
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Float boxed = 3.14f;
-     * float primitive = ToFloatFunction.UNBOX.applyAsFloat(boxed);     // returns 3.14f
-     * float defaultValue = ToFloatFunction.UNBOX.applyAsFloat(null);   // returns 0.0f
+     * float primitive = ToFloatFunction.UNBOX.applyAsFloat(boxed);    // returns 3.14f
+     * float defaultValue = ToFloatFunction.UNBOX.applyAsFloat(null);  // returns 0.0f
      * }</pre>
      *
      */

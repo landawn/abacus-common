@@ -1541,4 +1541,20 @@ public class WebUtilTest extends TestBase {
 
         return count;
     }
+
+    // ---- deep review 2026-09-25 G004 begin ----
+    // G004-01: a short-option cluster OPENED by -G (-Gd, -Gs) was silently ignored instead of rejected like -G / -sG.
+    @Test
+    public void testCurlToHttpRequestCode_clusterStartingWithGetFlagIsRejected() {
+        final String target = "http://localhost:18080/x";
+
+        for (final String command : new String[] { "curl -Gd 'q=1' " + target, "curl -Gs " + target + " -d 'q=1'", "curl -sGd 'q=1' " + target,
+                "curl " + target + " -GL" }) {
+            assertTrue(assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToHttpRequestCode(command)).getMessage()
+                    .contains("Unsupported curl option '-G'"), command);
+            assertTrue(assertThrows(IllegalArgumentException.class, () -> WebUtil.curlToOkHttpRequestCode(command)).getMessage()
+                    .contains("Unsupported curl option '-G'"), command);
+        }
+    }
+    // ---- deep review 2026-09-25 G004 end ----
 }

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -34,10 +36,13 @@ public interface IntSupplier extends Throwables.IntSupplier<RuntimeException>, j
      */
     IntSupplier ZERO = () -> 0;
     /**
-     * A supplier that draws random {@code int} values from the internal random number generator.
+     * A supplier that draws random {@code int} values from the full {@code int} range.
      * Successive values are not guaranteed to be distinct.
+     * Values come from the calling thread's {@link ThreadLocalRandom#current()} and are <b>not</b>
+     * cryptographically secure; use {@link java.security.SecureRandom} directly when unpredictable values are
+     * required.
      */
-    IntSupplier RANDOM = Util.RAND_INT::nextInt;
+    IntSupplier RANDOM = () -> ThreadLocalRandom.current().nextInt();
 
     /**
      * Gets an int result.

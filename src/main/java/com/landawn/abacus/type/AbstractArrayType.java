@@ -84,11 +84,13 @@ public abstract class AbstractArrayType<T> extends AbstractType<T> {
      * @param collClass the class of the collection to create
      *                  (e.g., {@code ArrayList.class}, {@code HashSet.class})
      * @return the new collection populated with the array elements, or {@code null} if {@code array} is {@code null}
-     * @throws IllegalArgumentException if {@code collClass} cannot be instantiated.
+     * @throws IllegalArgumentException if {@code array} is non-null and {@code collClass} is {@code null}, does not implement
+     *         {@link Collection}, or has no supported factory or construction path
+     * @throws RuntimeException if the selected collection factory or reflective constructor fails while creating the collection
      */
     @MayReturnNull
     @Override
-    public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) throws IllegalArgumentException {
+    public <E> Collection<E> arrayToCollection(final T array, final Class<?> collClass) throws IllegalArgumentException, RuntimeException {
         if (array == null) {
             return null; // NOSONAR
         }

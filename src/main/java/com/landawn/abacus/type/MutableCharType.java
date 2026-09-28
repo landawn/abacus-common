@@ -145,18 +145,18 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The character is stored as a single-character string (SQL {@code VARCHAR}) value.
      * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#VARCHAR}) is set.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the {@code MutableChar} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final MutableChar x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final MutableChar x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.VARCHAR);
+            statement.setNull(columnIndex, Types.VARCHAR);
         } else {
-            stmt.setString(columnIndex, String.valueOf(x.value()));
+            statement.setString(columnIndex, String.valueOf(x.value()));
         }
     }
 
@@ -165,18 +165,18 @@ public class MutableCharType extends AbstractType<MutableChar> {
      * The character is stored as a single-character string (SQL {@code VARCHAR}) value.
      * If {@code x} is {@code null}, SQL {@code NULL} ({@link java.sql.Types#VARCHAR}) is set.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the {@code MutableChar} value to set, or {@code null} to set SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final MutableChar x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final MutableChar x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.VARCHAR);
+            statement.setNull(parameterName, Types.VARCHAR);
         } else {
-            stmt.setString(parameterName, String.valueOf(x.value()));
+            statement.setString(parameterName, String.valueOf(x.value()));
         }
     }
 

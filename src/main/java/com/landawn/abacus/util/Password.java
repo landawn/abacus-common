@@ -168,8 +168,8 @@ public final class Password {
      * Password password = new Password("SHA-256");
      * String digest = password.digest("myPassword");
      *
-     * boolean matches = password.isEqual("myPassword", digest);         // returns true
-     * boolean notMatches = password.isEqual("wrongPassword", digest);   // returns false
+     * boolean matches = password.isEqual("myPassword", digest);        // returns true
+     * boolean notMatches = password.isEqual("wrongPassword", digest);  // returns false
      * }</pre>
      *
      * @param plainPassword the plain-text password to verify; may be {@code null}
@@ -216,8 +216,8 @@ public final class Password {
      * Password p2 = new Password("SHA-256");
      * Password p3 = new Password("MD5");
      *
-     * p1.equals(p2);   // returns true
-     * p1.equals(p3);   // returns false
+     * p1.equals(p2);  // returns true
+     * p1.equals(p3);  // returns false
      * }</pre>
      *
      * @param obj the object to compare with

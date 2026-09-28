@@ -230,6 +230,9 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
     public static IntIterator defer(final Supplier<? extends IntIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends IntIterator>> supplierHolder = Holder.of(iteratorSupplier);
+
         return new IntIterator() {
             private IntIterator iter = null;
             private volatile boolean isInitialized = false;
@@ -268,7 +271,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                             isInitializing = true;
 
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == this) {
                                     throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
@@ -282,6 +285,7 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;
                             }
@@ -395,8 +399,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2);
-     * Integer boxed = iter.next();      // returns 1 (boxed) — avoid this
-     * int primitive = iter.nextInt();   // returns 2 — prefer this
+     * Integer boxed = iter.next();     // returns 1 (boxed) — avoid this
+     * int primitive = iter.nextInt();  // returns 2 — prefer this
      * }</pre>
      *
      * @return the next element in the iteration as a boxed Integer
@@ -415,8 +419,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3);
-     * int first = iter.nextInt();    // returns 1
-     * int second = iter.nextInt();   // returns 2
+     * int first = iter.nextInt();   // returns 1
+     * int second = iter.nextInt();  // returns 2
      * }</pre>
      *
      * @return the next int value
@@ -431,8 +435,8 @@ public abstract class IntIterator extends ImmutableIterator<Integer> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntIterator iter = IntIterator.of(1, 2, 3, 4, 5);
-     * IntIterator skipped = iter.skip(2);   // Skips 1 and 2
-     * skipped.nextInt();                    // returns 3
+     * IntIterator skipped = iter.skip(2);  // Skips 1 and 2
+     * skipped.nextInt();                   // returns 3
      *
      * // Skip more than available
      * IntIterator iter2 = IntIterator.of(1, 2);

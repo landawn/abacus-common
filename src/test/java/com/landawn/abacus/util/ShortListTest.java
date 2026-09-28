@@ -2128,9 +2128,9 @@ public class ShortListTest extends ShortListTestSupport {
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
         assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
     }
 
     @Test
@@ -2223,4 +2223,291 @@ public class ShortListTest extends ShortListTestSupport {
         assertTrue(f.retainAll(ShortList.of((short) 1)));
         assertEquals(1, f.size());
     }
+
+    // ---- perf review 2026-09-26 G071 begin ----
+
+    private static short[] randomShortsG071(final Random random, final int length, final int range) {
+        final short[] a = new short[length];
+
+        for (int i = 0; i < length; i++) {
+            a[i] = range >= 65536 ? (short) random.nextInt(65536) : (short) (random.nextInt(range) - range / 2);
+        }
+
+        if (length > 3 && range >= 65536) {
+            a[0] = Short.MIN_VALUE;
+            a[1] = Short.MAX_VALUE;
+            a[2] = (short) -1;
+            a[3] = (short) 64;
+        }
+
+        return a;
+    }
+
+    private static java.util.Set<Short> boxedSetG071(final short[] a) {
+        final java.util.Set<Short> set = new java.util.HashSet<>();
+
+        for (final short e : a) {
+            set.add(e);
+        }
+
+        return set;
+    }
+
+    private static short[] filterG071(final short[] a, final java.util.Set<Short> set, final boolean keepIfContained) {
+        final ShortList result = new ShortList();
+
+        for (final short e : a) {
+            if (set.contains(e) == keepIfContained) {
+                result.add(e);
+            }
+        }
+
+        return result.toArray();
+    }
+
+    private static java.util.Map<Short, Integer> countsG071(final short[] a) {
+        final java.util.Map<Short, Integer> counts = new java.util.HashMap<>();
+
+        for (final short e : a) {
+            counts.merge(e, 1, Integer::sum);
+        }
+
+        return counts;
+    }
+
+    private static boolean takeG071(final java.util.Map<Short, Integer> counts, final short e) {
+        final Integer count = counts.get(e);
+
+        if (count == null || count == 0) {
+            return false;
+        }
+
+        counts.put(e, count - 1);
+        return true;
+    }
+
+    private static short[][] multisetReferenceG071(final short[] a, final short[] b) {
+        final ShortList intersection = new ShortList();
+        final ShortList difference = new ShortList();
+        final ShortList symmetricDifference = new ShortList();
+
+        java.util.Map<Short, Integer> counts = countsG071(b);
+        for (final short e : a) {
+            if (takeG071(counts, e)) {
+                intersection.add(e);
+            } else {
+                difference.add(e);
+            }
+        }
+
+        counts = countsG071(b);
+        for (final short e : a) {
+            if (!takeG071(counts, e)) {
+                symmetricDifference.add(e);
+            }
+        }
+        for (final short e : b) {
+            if (takeG071(counts, e)) {
+                symmetricDifference.add(e);
+            }
+        }
+
+        return new short[][] { intersection.toArray(), difference.toArray(), symmetricDifference.toArray() };
+    }
+
+    // G071-01: the unsorted removeDuplicates path (hash set up to 64 elements, 8 KB bit set above) must keep the first
+    // occurrence of every value in order and zero the vacated tail, exactly like the boxed LinkedHashSet reference.
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testRemoveDuplicates_unsortedMatchesBoxedReference() {
+        final Random random = new Random(71);
+        final int[] lengths = { 2, 3, 10, 63, 64, 65, 66, 100, 1000, 5000 };
+        final int[] ranges = { 4, 200, 65536 };
+
+        for (int round = 0; round < 20; round++) {
+            for (final int length : lengths) {
+                for (final int range : ranges) {
+                    final short[] source = randomShortsG071(random, length, range);
+                    final java.util.LinkedHashSet<Short> expected = new java.util.LinkedHashSet<>();
+
+                    for (final short e : source) {
+                        expected.add(e);
+                    }
+
+                    final ShortList list = ShortList.of(source.clone());
+                    final boolean sorted = list.isSorted();
+                    final boolean changed = list.removeDuplicates();
+
+                    assertEquals(expected.size() < length, changed, "length=" + length + ", range=" + range + ", sorted=" + sorted);
+                    assertEquals(new ArrayList<>(expected), list.boxed(), "length=" + length + ", range=" + range);
+
+                    for (int i = list.size(); i < length; i++) {
+                        assertEquals((short) 0, list.internalArray()[i], "tail not zeroed at " + i);
+                    }
+                }
+            }
+        }
+
+        // Every short value twice (second copy reversed): exactly the first copy survives, in order.
+        final short[] all = new short[2 * 65536];
+        for (int i = 0; i < 65536; i++) {
+            all[i] = (short) (i + Short.MIN_VALUE + 12345);
+            all[2 * 65536 - 1 - i] = all[i];
+        }
+        final ShortList list = ShortList.of(all.clone());
+        assertTrue(list.removeDuplicates());
+        assertEquals(65536, list.size());
+        assertArrayEquals(java.util.Arrays.copyOf(all, 65536), list.toArray());
+    }
+
+    // G071-02: removeAll/retainAll (hash set or bit set of the argument), containsAll/disjoint/containsAny (hash set or bit set
+    // of this list) and the linear path must all agree with a boxed-set reference, for both overloads and around every threshold.
+    @Test
+    public void testBulkMembershipOps_matchBoxedReference() {
+        final Random random = new Random(7171);
+        final int[] lengths = { 0, 1, 3, 4, 9, 10, 11, 60, 64, 65, 70, 200, 256, 257, 300, 1000 };
+        final int[] ranges = { 8, 300, 65536 };
+
+        for (final int lengthA : lengths) {
+            for (final int lengthB : lengths) {
+                for (final int range : ranges) {
+                    final short[] a = randomShortsG071(random, lengthA, range);
+                    final short[] b = random.nextInt(4) == 0 && lengthA > 0 && lengthB > 0
+                            ? java.util.Arrays.copyOfRange(a, 0, Math.min(lengthA, lengthB)) // contained case
+                            : randomShortsG071(random, lengthB, range);
+                    final String msg = "a=" + lengthA + ", b=" + lengthB + ", range=" + range;
+                    final java.util.Set<Short> setA = boxedSetG071(a);
+                    final java.util.Set<Short> setB = boxedSetG071(b);
+                    final short[] expectedRemoveAll = lengthB == 0 ? a : filterG071(a, setB, false);
+                    final short[] expectedRetainAll = filterG071(a, setB, true);
+                    final boolean expectedContainsAll = setA.containsAll(setB);
+                    final boolean expectedDisjoint = java.util.Collections.disjoint(setA, setB);
+
+                    ShortList list = ShortList.of(a.clone());
+                    assertEquals(expectedRemoveAll.length != a.length, list.removeAll(ShortList.of(b.clone())), msg);
+                    assertArrayEquals(expectedRemoveAll, list.toArray(), msg);
+
+                    list = ShortList.of(a.clone());
+                    assertEquals(expectedRemoveAll.length != a.length, list.removeAll(b.clone()), msg);
+                    assertArrayEquals(expectedRemoveAll, list.toArray(), msg);
+
+                    list = ShortList.of(a.clone());
+                    assertEquals(expectedRetainAll.length != a.length, list.retainAll(ShortList.of(b.clone())), msg);
+                    assertArrayEquals(expectedRetainAll, list.toArray(), msg);
+
+                    list = ShortList.of(a.clone());
+                    assertEquals(expectedRetainAll.length != a.length, list.retainAll(b.clone()), msg);
+                    assertArrayEquals(expectedRetainAll, list.toArray(), msg);
+
+                    final ShortList listA = ShortList.of(a.clone());
+                    assertEquals(expectedContainsAll, listA.containsAll(ShortList.of(b)), msg);
+                    assertEquals(expectedContainsAll, listA.containsAll(b), msg);
+                    assertEquals(expectedDisjoint, listA.disjoint(ShortList.of(b)), msg);
+                    assertEquals(expectedDisjoint, listA.disjoint(b), msg);
+                    assertEquals(!expectedDisjoint, listA.containsAny(ShortList.of(b)), msg);
+                    assertEquals(!expectedDisjoint, listA.containsAny(b), msg);
+                    assertArrayEquals(a, listA.toArray(), msg);
+                }
+            }
+        }
+    }
+
+    // G071-02: self-aliased and shared-backing-array arguments must still see the argument's original membership.
+    @Test
+    public void testBulkMembershipOps_selfAndSharedArrayArguments() {
+        final Random random = new Random(717171);
+
+        for (final int length : new int[] { 5, 64, 65, 300, 2000 }) {
+            final short[] source = randomShortsG071(random, length, 500);
+
+            ShortList list = ShortList.of(source.clone());
+            assertEquals(length > 0, list.removeAll(list));
+            assertEquals(0, list.size());
+
+            list = ShortList.of(source.clone());
+            assertFalse(list.retainAll(list));
+            assertArrayEquals(source, list.toArray());
+            assertTrue(list.containsAll(list));
+            assertFalse(list.disjoint(list));
+
+            // other wraps the SAME array but only its first half: compaction of `list` must not change other's membership.
+            final short[] shared = source.clone();
+            final int half = length / 2;
+            final java.util.Set<Short> firstHalf = boxedSetG071(java.util.Arrays.copyOf(source, half));
+            list = ShortList.of(shared, length);
+            final ShortList other = ShortList.of(shared, half);
+            list.removeAll(other);
+            assertArrayEquals(filterG071(source, firstHalf, false), list.toArray(), "removeAll length=" + length);
+
+            final short[] shared2 = source.clone();
+            list = ShortList.of(shared2, length);
+            list.retainAll(ShortList.of(shared2, half));
+            assertArrayEquals(filterG071(source, firstHalf, true), list.toArray(), "retainAll length=" + length);
+        }
+    }
+
+    // G071-03: intersection/difference/symmetricDifference (boxed Multiset up to 1024 elements of b, int[65536] count table above)
+    // must match a boxed counting reference, incl. the order of b's surviving occurrences in symmetricDifference.
+    @Test
+    public void testMultisetOps_matchBoxedReference() {
+        final Random random = new Random(71717171);
+        final int[] lengths = { 0, 1, 5, 100, 1023, 1024, 1025, 1100, 3000 };
+        final int[] ranges = { 16, 2000, 65536 };
+
+        for (final int lengthA : lengths) {
+            for (final int lengthB : lengths) {
+                for (final int range : ranges) {
+                    final short[] a = randomShortsG071(random, lengthA, range);
+                    final short[] b = randomShortsG071(random, lengthB, range);
+                    final String msg = "a=" + lengthA + ", b=" + lengthB + ", range=" + range;
+                    final short[][] expected = multisetReferenceG071(a, b);
+                    final ShortList listA = ShortList.of(a.clone());
+
+                    assertArrayEquals(expected[0], listA.intersection(ShortList.of(b.clone())).toArray(), msg);
+                    assertArrayEquals(expected[0], listA.intersection(b.clone()).toArray(), msg);
+                    assertArrayEquals(expected[1], listA.difference(ShortList.of(b.clone())).toArray(), msg);
+                    assertArrayEquals(expected[1], listA.difference(b.clone()).toArray(), msg);
+                    assertArrayEquals(expected[2], listA.symmetricDifference(ShortList.of(b.clone())).toArray(), msg);
+                    assertArrayEquals(expected[2], listA.symmetricDifference(b.clone()).toArray(), msg);
+                    assertArrayEquals(a, listA.toArray(), msg);
+                }
+            }
+        }
+
+        for (final int length : new int[] { 3, 1500 }) {
+            final short[] a = randomShortsG071(random, length, 100);
+            final ShortList list = ShortList.of(a.clone());
+            assertArrayEquals(a, list.intersection(list).toArray());
+            assertEquals(0, list.difference(list).size());
+            assertEquals(0, list.symmetricDifference(list).size());
+        }
+
+        // The documented partial-cancellation example, on both sides of the threshold.
+        assertArrayEquals(new short[] { 2, 1 }, ShortList.of((short) 2).symmetricDifference(ShortList.of((short) 2, (short) 1, (short) 2)).toArray());
+        final short[] big = new short[1500];
+        java.util.Arrays.fill(big, (short) 2);
+        big[1] = 1;
+        // one 2 cancels; the 1,499 survivors are b's earliest occurrences in index order: [2, 1, 2, 2, ...]
+        assertArrayEquals(java.util.Arrays.copyOf(big, 1500 - 1), ShortList.of((short) 2).symmetricDifference(ShortList.of(big)).toArray());
+    }
+
+    // G071-04: toMultiset() with the capped multiset supplier still counts every occurrence of a large list.
+    @Test
+    public void testToMultiset_largeListCountsEveryOccurrence() {
+        final Random random = new Random(7);
+        final short[] a = randomShortsG071(random, 70000, 65536);
+        final java.util.Map<Short, Integer> expected = countsG071(a);
+        final Multiset<Short> multiset = ShortList.of(a).toMultiset();
+
+        assertEquals(a.length, multiset.size());
+        assertEquals(expected.size(), multiset.countOfDistinctElements());
+
+        for (final java.util.Map.Entry<Short, Integer> entry : expected.entrySet()) {
+            assertEquals(entry.getValue().intValue(), multiset.getCount(entry.getKey()));
+        }
+
+        assertEquals(3, ShortList.of((short) 1, (short) 1, (short) 1).toMultiset().getCount((short) 1));
+    }
+
+    // ---- perf review 2026-09-26 G071 end ----
 }

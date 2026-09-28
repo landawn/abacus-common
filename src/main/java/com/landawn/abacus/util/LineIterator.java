@@ -249,7 +249,7 @@ public final class LineIterator extends ObjIterator<String> implements AutoClose
      * @see #of(InputStream)
      */
     public static LineIterator of(final InputStream input, final Charset encoding) throws IllegalArgumentException {
-        N.checkArgNotNull(input, cs.inputStream);
+        N.checkArgNotNull(input, cs.input);
         N.checkArgNotNull(encoding, cs.encoding);
 
         return new LineIterator(IOUtil.createReader(input, encoding));

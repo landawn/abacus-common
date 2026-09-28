@@ -296,14 +296,14 @@ public final class IntFunctions {
      * }</pre>
      *
      * @param <T> the type of the result produced by the function
-     * @param func the {@code IntFunction} to return unchanged
+     * @param function the {@code IntFunction} to return unchanged
      * @return the same {@code IntFunction} instance passed as the argument
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
-    public static <T> IntFunction<T> of(IntFunction<T> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T> IntFunction<T> of(IntFunction<T> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return func;
+        return function;
     }
 
     /**
@@ -315,9 +315,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<boolean[]> arrayCreator = IntFunctions.ofBooleanArray();
-     * boolean[] array = arrayCreator.apply(10);   // returns new boolean[10]
-     * boolean[] empty = arrayCreator.apply(0);    // returns new boolean[0]
-     * arrayCreator.apply(-1);                     // throws NegativeArraySizeException
+     * boolean[] array = arrayCreator.apply(10);  // returns new boolean[10]
+     * boolean[] empty = arrayCreator.apply(0);   // returns new boolean[0]
+     * arrayCreator.apply(-1);                    // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code boolean[]} of that length
@@ -335,9 +335,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<char[]> arrayCreator = IntFunctions.ofCharArray();
-     * char[] array = arrayCreator.apply(10);   // returns new char[10]
-     * char[] empty = arrayCreator.apply(0);    // returns new char[0]
-     * arrayCreator.apply(-1);                  // throws NegativeArraySizeException
+     * char[] array = arrayCreator.apply(10);  // returns new char[10]
+     * char[] empty = arrayCreator.apply(0);   // returns new char[0]
+     * arrayCreator.apply(-1);                 // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code char[]} of that length
@@ -355,9 +355,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<byte[]> arrayCreator = IntFunctions.ofByteArray();
-     * byte[] array = arrayCreator.apply(10);   // returns new byte[10]
-     * byte[] empty = arrayCreator.apply(0);    // returns new byte[0]
-     * arrayCreator.apply(-1);                  // throws NegativeArraySizeException
+     * byte[] array = arrayCreator.apply(10);  // returns new byte[10]
+     * byte[] empty = arrayCreator.apply(0);   // returns new byte[0]
+     * arrayCreator.apply(-1);                 // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code byte[]} of that length
@@ -375,9 +375,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<short[]> arrayCreator = IntFunctions.ofShortArray();
-     * short[] array = arrayCreator.apply(10);   // returns new short[10]
-     * short[] empty = arrayCreator.apply(0);    // returns new short[0]
-     * arrayCreator.apply(-1);                   // throws NegativeArraySizeException
+     * short[] array = arrayCreator.apply(10);  // returns new short[10]
+     * short[] empty = arrayCreator.apply(0);   // returns new short[0]
+     * arrayCreator.apply(-1);                  // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code short[]} of that length
@@ -395,9 +395,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<int[]> arrayCreator = IntFunctions.ofIntArray();
-     * int[] array = arrayCreator.apply(10);   // returns new int[10]
-     * int[] empty = arrayCreator.apply(0);    // returns new int[0]
-     * arrayCreator.apply(-1);                 // throws NegativeArraySizeException
+     * int[] array = arrayCreator.apply(10);  // returns new int[10]
+     * int[] empty = arrayCreator.apply(0);   // returns new int[0]
+     * arrayCreator.apply(-1);                // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code int[]} of that length
@@ -415,9 +415,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<long[]> arrayCreator = IntFunctions.ofLongArray();
-     * long[] array = arrayCreator.apply(10);   // returns new long[10]
-     * long[] empty = arrayCreator.apply(0);    // returns new long[0]
-     * arrayCreator.apply(-1);                  // throws NegativeArraySizeException
+     * long[] array = arrayCreator.apply(10);  // returns new long[10]
+     * long[] empty = arrayCreator.apply(0);   // returns new long[0]
+     * arrayCreator.apply(-1);                 // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code long[]} of that length
@@ -435,9 +435,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<float[]> arrayCreator = IntFunctions.ofFloatArray();
-     * float[] array = arrayCreator.apply(10);   // returns new float[10]
-     * float[] empty = arrayCreator.apply(0);    // returns new float[0]
-     * arrayCreator.apply(-1);                   // throws NegativeArraySizeException
+     * float[] array = arrayCreator.apply(10);  // returns new float[10]
+     * float[] empty = arrayCreator.apply(0);   // returns new float[0]
+     * arrayCreator.apply(-1);                  // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code float[]} of that length
@@ -455,9 +455,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<double[]> arrayCreator = IntFunctions.ofDoubleArray();
-     * double[] array = arrayCreator.apply(10);   // returns new double[10]
-     * double[] empty = arrayCreator.apply(0);    // returns new double[0]
-     * arrayCreator.apply(-1);                    // throws NegativeArraySizeException
+     * double[] array = arrayCreator.apply(10);  // returns new double[10]
+     * double[] empty = arrayCreator.apply(0);   // returns new double[0]
+     * arrayCreator.apply(-1);                   // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code double[]} of that length
@@ -475,9 +475,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<String[]> arrayCreator = IntFunctions.ofStringArray();
-     * String[] array = arrayCreator.apply(10);   // returns new String[10]
-     * String[] empty = arrayCreator.apply(0);    // returns new String[0]
-     * arrayCreator.apply(-1);                    // throws NegativeArraySizeException
+     * String[] array = arrayCreator.apply(10);  // returns new String[10]
+     * String[] empty = arrayCreator.apply(0);   // returns new String[0]
+     * arrayCreator.apply(-1);                   // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code String[]} of that length
@@ -495,9 +495,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Object[]> arrayCreator = IntFunctions.ofObjectArray();
-     * Object[] array = arrayCreator.apply(10);   // returns new Object[10]
-     * Object[] empty = arrayCreator.apply(0);    // returns new Object[0]
-     * arrayCreator.apply(-1);                    // throws NegativeArraySizeException
+     * Object[] array = arrayCreator.apply(10);  // returns new Object[10]
+     * Object[] empty = arrayCreator.apply(0);   // returns new Object[0]
+     * arrayCreator.apply(-1);                   // throws NegativeArraySizeException
      * }</pre>
      *
      * @return an {@code IntFunction} that, given a length, creates a new {@code Object[]} of that length
@@ -515,8 +515,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<BooleanList> listCreator = IntFunctions.ofBooleanList();
-     * BooleanList list = listCreator.apply(10);   // returns empty BooleanList with capacity 10
-     * BooleanList empty = listCreator.apply(0);   // returns empty BooleanList with capacity 0
+     * BooleanList list = listCreator.apply(10);  // returns empty BooleanList with capacity 10
+     * BooleanList empty = listCreator.apply(0);  // returns empty BooleanList with capacity 0
      * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code BooleanList}
@@ -535,8 +535,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<CharList> listCreator = IntFunctions.ofCharList();
-     * CharList list = listCreator.apply(10);   // returns empty CharList with capacity 10
-     * CharList empty = listCreator.apply(0);   // returns empty CharList with capacity 0
+     * CharList list = listCreator.apply(10);  // returns empty CharList with capacity 10
+     * CharList empty = listCreator.apply(0);  // returns empty CharList with capacity 0
      * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code CharList}
@@ -555,8 +555,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<ByteList> listCreator = IntFunctions.ofByteList();
-     * ByteList list = listCreator.apply(10);   // returns empty ByteList with capacity 10
-     * ByteList empty = listCreator.apply(0);   // returns empty ByteList with capacity 0
+     * ByteList list = listCreator.apply(10);  // returns empty ByteList with capacity 10
+     * ByteList empty = listCreator.apply(0);  // returns empty ByteList with capacity 0
      * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ByteList}
@@ -575,8 +575,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<ShortList> listCreator = IntFunctions.ofShortList();
-     * ShortList list = listCreator.apply(10);   // returns empty ShortList with capacity 10
-     * ShortList empty = listCreator.apply(0);   // returns empty ShortList with capacity 0
+     * ShortList list = listCreator.apply(10);  // returns empty ShortList with capacity 10
+     * ShortList empty = listCreator.apply(0);  // returns empty ShortList with capacity 0
      * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code ShortList}
@@ -595,8 +595,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<IntList> listCreator = IntFunctions.ofIntList();
-     * IntList list = listCreator.apply(10);   // returns empty IntList with capacity 10
-     * IntList empty = listCreator.apply(0);   // returns empty IntList with capacity 0
+     * IntList list = listCreator.apply(10);  // returns empty IntList with capacity 10
+     * IntList empty = listCreator.apply(0);  // returns empty IntList with capacity 0
      * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code IntList}
@@ -615,8 +615,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<LongList> listCreator = IntFunctions.ofLongList();
-     * LongList list = listCreator.apply(10);   // returns empty LongList with capacity 10
-     * LongList empty = listCreator.apply(0);   // returns empty LongList with capacity 0
+     * LongList list = listCreator.apply(10);  // returns empty LongList with capacity 10
+     * LongList empty = listCreator.apply(0);  // returns empty LongList with capacity 0
      * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code LongList}
@@ -635,8 +635,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<FloatList> listCreator = IntFunctions.ofFloatList();
-     * FloatList list = listCreator.apply(10);   // returns empty FloatList with capacity 10
-     * FloatList empty = listCreator.apply(0);   // returns empty FloatList with capacity 0
+     * FloatList list = listCreator.apply(10);  // returns empty FloatList with capacity 10
+     * FloatList empty = listCreator.apply(0);  // returns empty FloatList with capacity 0
      * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code FloatList}
@@ -655,8 +655,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<DoubleList> listCreator = IntFunctions.ofDoubleList();
-     * DoubleList list = listCreator.apply(10);   // returns empty DoubleList with capacity 10
-     * DoubleList empty = listCreator.apply(0);   // returns empty DoubleList with capacity 0
+     * DoubleList list = listCreator.apply(10);  // returns empty DoubleList with capacity 10
+     * DoubleList empty = listCreator.apply(0);  // returns empty DoubleList with capacity 0
      * }</pre>
      *
      * @return an {@code IntFunction} that, given an initial capacity, creates a new {@code DoubleList}
@@ -676,8 +676,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<List<String>> listCreator = IntFunctions.ofList();
-     * List<String> list = listCreator.apply(100);   // returns ArrayList with capacity 100
-     * List<String> empty = listCreator.apply(0);    // returns ArrayList with capacity 0
+     * List<String> list = listCreator.apply(100);  // returns ArrayList with capacity 100
+     * List<String> empty = listCreator.apply(0);   // returns ArrayList with capacity 0
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -699,8 +699,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<LinkedList<String>> listCreator = IntFunctions.ofLinkedList();
-     * LinkedList<String> list = listCreator.apply(100);   // returns empty LinkedList (capacity ignored)
-     * LinkedList<String> empty = listCreator.apply(0);    // returns empty LinkedList
+     * LinkedList<String> list = listCreator.apply(100);  // returns empty LinkedList (capacity ignored)
+     * LinkedList<String> empty = listCreator.apply(0);   // returns empty LinkedList
      * }</pre>
      *
      * @param <T> the type of elements in the list
@@ -722,8 +722,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Set<String>> setCreator = IntFunctions.ofSet();
-     * Set<String> set = setCreator.apply(100);   // returns HashSet sized for 100 elements
-     * Set<String> empty = setCreator.apply(0);   // returns HashSet with capacity 0
+     * Set<String> set = setCreator.apply(100);  // returns HashSet sized for 100 elements
+     * Set<String> empty = setCreator.apply(0);  // returns HashSet with capacity 0
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -745,8 +745,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Set<String>> setCreator = IntFunctions.ofLinkedHashSet();
-     * Set<String> set = setCreator.apply(100);   // returns LinkedHashSet sized for 100 elements
-     * Set<String> empty = setCreator.apply(0);   // returns LinkedHashSet with capacity 0
+     * Set<String> set = setCreator.apply(100);  // returns LinkedHashSet sized for 100 elements
+     * Set<String> empty = setCreator.apply(0);  // returns LinkedHashSet with capacity 0
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -767,8 +767,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<SortedSet<String>> setCreator = IntFunctions.ofSortedSet();
-     * SortedSet<String> set = setCreator.apply(100);   // returns TreeSet (capacity ignored)
-     * SortedSet<String> empty = setCreator.apply(0);   // returns empty TreeSet
+     * SortedSet<String> set = setCreator.apply(100);  // returns TreeSet (capacity ignored)
+     * SortedSet<String> empty = setCreator.apply(0);  // returns empty TreeSet
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -790,8 +790,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<NavigableSet<String>> setCreator = IntFunctions.ofNavigableSet();
-     * NavigableSet<String> set = setCreator.apply(100);   // returns TreeSet (capacity ignored)
-     * NavigableSet<String> empty = setCreator.apply(0);   // returns empty TreeSet
+     * NavigableSet<String> set = setCreator.apply(100);  // returns TreeSet (capacity ignored)
+     * NavigableSet<String> empty = setCreator.apply(0);  // returns empty TreeSet
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -812,8 +812,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<TreeSet<String>> setCreator = IntFunctions.ofTreeSet();
-     * TreeSet<String> set = setCreator.apply(100);   // returns empty TreeSet (capacity ignored)
-     * TreeSet<String> empty = setCreator.apply(0);   // returns empty TreeSet
+     * TreeSet<String> set = setCreator.apply(100);  // returns empty TreeSet (capacity ignored)
+     * TreeSet<String> empty = setCreator.apply(0);  // returns empty TreeSet
      * }</pre>
      *
      * @param <T> the type of elements in the set
@@ -834,8 +834,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Queue<String>> queueCreator = IntFunctions.ofQueue();
-     * Queue<String> queue = queueCreator.apply(100);   // returns LinkedList as Queue (capacity ignored)
-     * Queue<String> empty = queueCreator.apply(0);     // returns empty LinkedList as Queue
+     * Queue<String> queue = queueCreator.apply(100);  // returns LinkedList as Queue (capacity ignored)
+     * Queue<String> empty = queueCreator.apply(0);    // returns empty LinkedList as Queue
      * }</pre>
      *
      * @param <T> the type of elements in the queue
@@ -857,8 +857,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Deque<String>> dequeCreator = IntFunctions.ofDeque();
-     * Deque<String> deque = dequeCreator.apply(100);   // returns LinkedList as Deque (capacity ignored)
-     * Deque<String> empty = dequeCreator.apply(0);     // returns empty LinkedList as Deque
+     * Deque<String> deque = dequeCreator.apply(100);  // returns LinkedList as Deque (capacity ignored)
+     * Deque<String> empty = dequeCreator.apply(0);    // returns empty LinkedList as Deque
      * }</pre>
      *
      * @param <T> the type of elements in the deque
@@ -879,8 +879,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<ArrayDeque<String>> dequeCreator = IntFunctions.ofArrayDeque();
-     * ArrayDeque<String> deque = dequeCreator.apply(100);   // returns ArrayDeque with capacity 100
-     * ArrayDeque<String> empty = dequeCreator.apply(0);     // returns ArrayDeque with capacity 0
+     * ArrayDeque<String> deque = dequeCreator.apply(100);  // returns ArrayDeque with capacity 100
+     * ArrayDeque<String> empty = dequeCreator.apply(0);    // returns ArrayDeque with capacity 0
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the ArrayDeque
@@ -901,9 +901,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<LinkedBlockingQueue<String>> queueCreator = IntFunctions.ofLinkedBlockingQueue();
-     * LinkedBlockingQueue<String> queue = queueCreator.apply(100);   // returns LinkedBlockingQueue with capacity 100
-     * LinkedBlockingQueue<String> bounded = queueCreator.apply(1);   // returns LinkedBlockingQueue with capacity 1
-     * queueCreator.apply(0);                                         // throws IllegalArgumentException (capacity must be >= 1)
+     * LinkedBlockingQueue<String> queue = queueCreator.apply(100);  // returns LinkedBlockingQueue with capacity 100
+     * LinkedBlockingQueue<String> bounded = queueCreator.apply(1);  // returns LinkedBlockingQueue with capacity 1
+     * queueCreator.apply(0);                                        // throws IllegalArgumentException (capacity must be >= 1)
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the LinkedBlockingQueue
@@ -924,9 +924,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<ArrayBlockingQueue<String>> queueCreator = IntFunctions.ofArrayBlockingQueue();
-     * ArrayBlockingQueue<String> queue = queueCreator.apply(100);   // returns ArrayBlockingQueue with capacity 100
-     * ArrayBlockingQueue<String> bounded = queueCreator.apply(1);   // returns ArrayBlockingQueue with capacity 1
-     * queueCreator.apply(0);                                        // throws IllegalArgumentException (capacity must be >= 1)
+     * ArrayBlockingQueue<String> queue = queueCreator.apply(100);  // returns ArrayBlockingQueue with capacity 100
+     * ArrayBlockingQueue<String> bounded = queueCreator.apply(1);  // returns ArrayBlockingQueue with capacity 1
+     * queueCreator.apply(0);                                       // throws IllegalArgumentException (capacity must be >= 1)
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the ArrayBlockingQueue
@@ -947,9 +947,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<LinkedBlockingDeque<String>> dequeCreator = IntFunctions.ofLinkedBlockingDeque();
-     * LinkedBlockingDeque<String> deque = dequeCreator.apply(100);   // returns LinkedBlockingDeque with capacity 100
-     * LinkedBlockingDeque<String> bounded = dequeCreator.apply(1);   // returns LinkedBlockingDeque with capacity 1
-     * dequeCreator.apply(0);                                         // throws IllegalArgumentException (capacity must be >= 1)
+     * LinkedBlockingDeque<String> deque = dequeCreator.apply(100);  // returns LinkedBlockingDeque with capacity 100
+     * LinkedBlockingDeque<String> bounded = dequeCreator.apply(1);  // returns LinkedBlockingDeque with capacity 1
+     * dequeCreator.apply(0);                                        // throws IllegalArgumentException (capacity must be >= 1)
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the LinkedBlockingDeque
@@ -971,8 +971,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<ConcurrentLinkedQueue<String>> queueCreator = IntFunctions.ofConcurrentLinkedQueue();
-     * ConcurrentLinkedQueue<String> queue = queueCreator.apply(100);   // returns ConcurrentLinkedQueue (capacity ignored)
-     * ConcurrentLinkedQueue<String> empty = queueCreator.apply(0);     // returns empty ConcurrentLinkedQueue
+     * ConcurrentLinkedQueue<String> queue = queueCreator.apply(100);  // returns ConcurrentLinkedQueue (capacity ignored)
+     * ConcurrentLinkedQueue<String> empty = queueCreator.apply(0);    // returns empty ConcurrentLinkedQueue
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the ConcurrentLinkedQueue
@@ -993,9 +993,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<PriorityQueue<String>> queueCreator = IntFunctions.ofPriorityQueue();
-     * PriorityQueue<String> queue = queueCreator.apply(100);   // returns PriorityQueue with capacity 100
-     * PriorityQueue<String> small = queueCreator.apply(1);     // returns PriorityQueue with capacity 1
-     * queueCreator.apply(0);                                   // throws IllegalArgumentException (capacity must be >= 1)
+     * PriorityQueue<String> queue = queueCreator.apply(100);  // returns PriorityQueue with capacity 100
+     * PriorityQueue<String> small = queueCreator.apply(1);    // returns PriorityQueue with capacity 1
+     * queueCreator.apply(0);                                  // throws IllegalArgumentException (capacity must be >= 1)
      * }</pre>
      *
      * @param <T> the type of elements to be stored in the PriorityQueue
@@ -1017,8 +1017,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Map<String, Integer>> mapCreator = IntFunctions.ofMap();
-     * Map<String, Integer> map = mapCreator.apply(100);   // returns HashMap sized for 100 entries
-     * Map<String, Integer> empty = mapCreator.apply(0);   // returns HashMap with capacity 0
+     * Map<String, Integer> map = mapCreator.apply(100);  // returns HashMap sized for 100 entries
+     * Map<String, Integer> empty = mapCreator.apply(0);  // returns HashMap with capacity 0
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1041,8 +1041,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Map<String, Integer>> mapCreator = IntFunctions.ofLinkedHashMap();
-     * Map<String, Integer> map = mapCreator.apply(100);   // returns LinkedHashMap sized for 100 entries
-     * Map<String, Integer> empty = mapCreator.apply(0);   // returns LinkedHashMap with capacity 0
+     * Map<String, Integer> map = mapCreator.apply(100);  // returns LinkedHashMap sized for 100 entries
+     * Map<String, Integer> empty = mapCreator.apply(0);  // returns LinkedHashMap with capacity 0
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1065,8 +1065,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<IdentityHashMap<String, Integer>> mapCreator = IntFunctions.ofIdentityHashMap();
-     * IdentityHashMap<String, Integer> map = mapCreator.apply(100);   // returns IdentityHashMap sized for 100 entries
-     * IdentityHashMap<String, Integer> empty = mapCreator.apply(0);   // returns IdentityHashMap with capacity 0
+     * IdentityHashMap<String, Integer> map = mapCreator.apply(100);  // returns IdentityHashMap sized for 100 entries
+     * IdentityHashMap<String, Integer> empty = mapCreator.apply(0);  // returns IdentityHashMap with capacity 0
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1089,8 +1089,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<SortedMap<String, Integer>> mapCreator = IntFunctions.ofSortedMap();
-     * SortedMap<String, Integer> map = mapCreator.apply(100);   // returns TreeMap (capacity ignored)
-     * SortedMap<String, Integer> empty = mapCreator.apply(0);   // returns empty TreeMap
+     * SortedMap<String, Integer> map = mapCreator.apply(100);  // returns TreeMap (capacity ignored)
+     * SortedMap<String, Integer> empty = mapCreator.apply(0);  // returns empty TreeMap
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1114,8 +1114,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<NavigableMap<String, Integer>> mapCreator = IntFunctions.ofNavigableMap();
-     * NavigableMap<String, Integer> map = mapCreator.apply(100);   // returns TreeMap (capacity ignored)
-     * NavigableMap<String, Integer> empty = mapCreator.apply(0);   // returns empty TreeMap
+     * NavigableMap<String, Integer> map = mapCreator.apply(100);  // returns TreeMap (capacity ignored)
+     * NavigableMap<String, Integer> empty = mapCreator.apply(0);  // returns empty TreeMap
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1138,8 +1138,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<TreeMap<String, Integer>> mapCreator = IntFunctions.ofTreeMap();
-     * TreeMap<String, Integer> map = mapCreator.apply(100);   // returns empty TreeMap (capacity ignored)
-     * TreeMap<String, Integer> empty = mapCreator.apply(0);   // returns empty TreeMap
+     * TreeMap<String, Integer> map = mapCreator.apply(100);  // returns empty TreeMap (capacity ignored)
+     * TreeMap<String, Integer> empty = mapCreator.apply(0);  // returns empty TreeMap
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1162,8 +1162,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<ConcurrentMap<String, Integer>> mapCreator = IntFunctions.ofConcurrentMap();
-     * ConcurrentMap<String, Integer> map = mapCreator.apply(100);   // returns ConcurrentHashMap with capacity 100
-     * ConcurrentMap<String, Integer> empty = mapCreator.apply(0);   // returns ConcurrentHashMap with capacity 0
+     * ConcurrentMap<String, Integer> map = mapCreator.apply(100);  // returns ConcurrentHashMap with capacity 100
+     * ConcurrentMap<String, Integer> empty = mapCreator.apply(0);  // returns ConcurrentHashMap with capacity 0
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1185,8 +1185,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<ConcurrentHashMap<String, Integer>> mapCreator = IntFunctions.ofConcurrentHashMap();
-     * ConcurrentHashMap<String, Integer> map = mapCreator.apply(100);   // returns ConcurrentHashMap with capacity 100
-     * ConcurrentHashMap<String, Integer> empty = mapCreator.apply(0);   // returns ConcurrentHashMap with capacity 0
+     * ConcurrentHashMap<String, Integer> map = mapCreator.apply(100);  // returns ConcurrentHashMap with capacity 100
+     * ConcurrentHashMap<String, Integer> empty = mapCreator.apply(0);  // returns ConcurrentHashMap with capacity 0
      * }</pre>
      *
      * @param <K> the type of keys maintained by the map
@@ -1208,8 +1208,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<BiMap<String, Integer>> mapCreator = IntFunctions.ofBiMap();
-     * BiMap<String, Integer> map = mapCreator.apply(100);   // returns BiMap with capacity 100
-     * BiMap<String, Integer> empty = mapCreator.apply(0);   // returns BiMap with capacity 0
+     * BiMap<String, Integer> map = mapCreator.apply(100);  // returns BiMap with capacity 100
+     * BiMap<String, Integer> empty = mapCreator.apply(0);  // returns BiMap with capacity 0
      * }</pre>
      *
      * @param <K> the type of keys maintained by the BiMap
@@ -1230,8 +1230,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<Multiset<String>> multisetCreator = IntFunctions.ofMultiset();
-     * Multiset<String> multiset = multisetCreator.apply(100);   // returns Multiset with capacity 100
-     * Multiset<String> empty = multisetCreator.apply(0);        // returns Multiset with capacity 0
+     * Multiset<String> multiset = multisetCreator.apply(100);  // returns Multiset with capacity 100
+     * Multiset<String> empty = multisetCreator.apply(0);       // returns Multiset with capacity 0
      * }</pre>
      *
      * @param <T> the type of elements in the Multiset
@@ -1252,8 +1252,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<ListMultimap<String, Integer>> multimapCreator = IntFunctions.ofListMultimap();
-     * ListMultimap<String, Integer> multimap = multimapCreator.apply(100);   // returns ListMultimap with capacity 100
-     * ListMultimap<String, Integer> empty = multimapCreator.apply(0);        // returns ListMultimap with capacity 0
+     * ListMultimap<String, Integer> multimap = multimapCreator.apply(100);  // returns ListMultimap with capacity 100
+     * ListMultimap<String, Integer> empty = multimapCreator.apply(0);       // returns ListMultimap with capacity 0
      * }</pre>
      *
      * @param <K> the type of keys maintained by the multimap
@@ -1274,8 +1274,8 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<SetMultimap<String, Integer>> multimapCreator = IntFunctions.ofSetMultimap();
-     * SetMultimap<String, Integer> multimap = multimapCreator.apply(100);   // returns SetMultimap with capacity 100
-     * SetMultimap<String, Integer> empty = multimapCreator.apply(0);        // returns SetMultimap with capacity 0
+     * SetMultimap<String, Integer> multimap = multimapCreator.apply(100);  // returns SetMultimap with capacity 100
+     * SetMultimap<String, Integer> empty = multimapCreator.apply(0);       // returns SetMultimap with capacity 0
      * }</pre>
      *
      * @param <K> the type of keys maintained by the multimap
@@ -1298,9 +1298,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<DisposableObjArray> func = IntFunctions.ofDisposableArray();
-     * DisposableObjArray array1 = func.apply(10);   // returns a DisposableObjArray of length 10
-     * DisposableObjArray array2 = func.apply(20);   // returns the same instance (length ignored)
-     * assert array1 == array2;                      // same instance reused
+     * DisposableObjArray array1 = func.apply(10);  // returns a DisposableObjArray of length 10
+     * DisposableObjArray array2 = func.apply(20);  // returns the same instance (length ignored)
+     * assert array1 == array2;                     // same instance reused
      * }</pre>
      *
      * <p>The returned function throws {@link NegativeArraySizeException} if its length argument is negative
@@ -1318,12 +1318,12 @@ public final class IntFunctions {
 
             /**
              * {@inheritDoc}
-             * @throws NegativeArraySizeException if {@code len} is negative and no backing array has yet been initialized
+             * @throws NegativeArraySizeException if {@code length} is negative and no backing array has yet been initialized
              */
             @Override
-            public DisposableObjArray apply(final int len) throws NegativeArraySizeException {
+            public DisposableObjArray apply(final int length) throws NegativeArraySizeException {
                 if (ret == null) {
-                    ret = DisposableObjArray.wrap(new Object[len]);
+                    ret = DisposableObjArray.wrap(new Object[length]);
                 }
 
                 return ret;
@@ -1347,9 +1347,9 @@ public final class IntFunctions {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntFunction<DisposableArray<String>> func = IntFunctions.ofDisposableArray(String.class);
-     * DisposableArray<String> array1 = func.apply(10);   // returns typed DisposableArray
-     * DisposableArray<String> array2 = func.apply(20);   // returns the same instance (length ignored)
-     * assert array1 == array2;                           // same instance reused
+     * DisposableArray<String> array1 = func.apply(10);  // returns typed DisposableArray
+     * DisposableArray<String> array2 = func.apply(20);  // returns the same instance (length ignored)
+     * assert array1 == array2;                          // same instance reused
      * }</pre>
      *
      * <p>The returned function throws {@link NegativeArraySizeException} if its length argument is negative
@@ -1376,13 +1376,13 @@ public final class IntFunctions {
 
             /**
              * {@inheritDoc}
-             * @throws NegativeArraySizeException if {@code len} is negative and no backing array has yet been initialized
+             * @throws NegativeArraySizeException if {@code length} is negative and no backing array has yet been initialized
              * @throws IllegalArgumentException if no backing array has yet been initialized and {@code componentType} already has 255 array dimensions
              */
             @Override
-            public DisposableArray<T> apply(final int len) throws NegativeArraySizeException, IllegalArgumentException {
+            public DisposableArray<T> apply(final int length) throws NegativeArraySizeException, IllegalArgumentException {
                 if (ret == null) {
-                    ret = DisposableArray.wrap(N.newArray(componentType, len));
+                    ret = DisposableArray.wrap(N.newArray(componentType, length));
                 }
 
                 return ret;
@@ -1446,8 +1446,8 @@ public final class IntFunctions {
      *
      * // Only Collection classes are accepted, so a non-Collection argument is a compile error;
      * // the "not a Collection" check below guards raw-typed calls.
-     * IntFunctions.ofCollection(java.util.AbstractSequentialList.class);   // throws IllegalArgumentException (abstract, no usable creator)
-     * IntFunctions.ofCollection(null);                                     // throws IllegalArgumentException
+     * IntFunctions.ofCollection(java.util.AbstractSequentialList.class);  // throws IllegalArgumentException (abstract, no usable creator)
+     * IntFunctions.ofCollection(null);                                    // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
@@ -1711,6 +1711,19 @@ public final class IntFunctions {
     }
 
     /**
+     * Wraps a caller-registered creator so a {@code null} result fails at the factory with a
+     * {@code NullPointerException}, the same rule as {@code Suppliers}' registered suppliers, instead of
+     * surfacing later as an unrelated error in whichever caller consumed the container.
+     *
+     * @param <T> the created type
+     * @param creator the registered creator, not {@code null}
+     * @return a creator that rejects a {@code null} result
+     */
+    private static <T> IntFunction<T> registeredCreator(final java.util.function.IntFunction<T> creator) {
+        return size -> N.requireNonNull(creator.apply(size), "The registered creator returned null");
+    }
+
+    /**
      * Registers a custom {@code IntFunction} creator for the specified {@code Collection} target class.
      *
      * <p>The registered creator will be used by {@link #ofCollection(Class)} to create instances of
@@ -1721,9 +1734,9 @@ public final class IntFunctions {
      * // Register a custom collection creator
      * boolean registered = IntFunctions.registerForCollection(MyCollection.class, MyCollection::new);
      * // Attempting to register a built-in class throws IllegalArgumentException
-     * IntFunctions.registerForCollection(ArrayList.class, ArrayList::new);   // throws IllegalArgumentException
-     * IntFunctions.registerForCollection(null, ArrayList::new);              // throws IllegalArgumentException
-     * IntFunctions.registerForCollection(ArrayList.class, null);             // throws IllegalArgumentException
+     * IntFunctions.registerForCollection(ArrayList.class, ArrayList::new);  // throws IllegalArgumentException
+     * IntFunctions.registerForCollection(null, ArrayList::new);             // throws IllegalArgumentException
+     * IntFunctions.registerForCollection(ArrayList.class, null);            // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
@@ -1732,9 +1745,13 @@ public final class IntFunctions {
      * @param <T> the type of Collection to register
      * @param targetClass the {@code Class} object representing the {@code Collection} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
-     * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
+     * @return {@code true} if the registration was successful, {@code false} if a creator was already cached or registered
+     *         for this class (a previous {@link #ofCollection(Class)} call for {@code targetClass} caches the creator it
+     *         discovers, so a later registration is rejected)
      * @throws IllegalArgumentException if {@code targetClass} or {@code creator} is {@code null}, if {@code targetClass}
      *         is not a {@code Collection} class, or if {@code targetClass} is a built-in class.
+     *         A {@code null} result of {@code creator} is reported later, when the registered creator is used, as a
+     *         {@code NullPointerException} ("The registered creator returned null").
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Collection> boolean registerForCollection(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -1749,7 +1766,7 @@ public final class IntFunctions {
 
         // Atomic publication: a check-then-put pair could overwrite a concurrent registration while still
         // reporting failure. Matches the hardened Suppliers.registerForCollection.
-        return collectionCreatorPool.get(targetClass).compareAndSet(null, Fn.from(creator));
+        return collectionCreatorPool.get(targetClass).compareAndSet(null, registeredCreator(creator));
     }
 
     /**
@@ -1763,9 +1780,9 @@ public final class IntFunctions {
      * // Register a custom map creator
      * boolean registered = IntFunctions.registerForMap(MyMap.class, MyMap::new);
      * // Attempting to register a built-in class throws IllegalArgumentException
-     * IntFunctions.registerForMap(HashMap.class, HashMap::new);   // throws IllegalArgumentException
-     * IntFunctions.registerForMap(null, HashMap::new);            // throws IllegalArgumentException
-     * IntFunctions.registerForMap(HashMap.class, null);           // throws IllegalArgumentException
+     * IntFunctions.registerForMap(HashMap.class, HashMap::new);  // throws IllegalArgumentException
+     * IntFunctions.registerForMap(null, HashMap::new);           // throws IllegalArgumentException
+     * IntFunctions.registerForMap(HashMap.class, null);          // throws IllegalArgumentException
      * }</pre>
      *
      * <p>Cached factories have the target class lifetime. Holding a returned factory or explicitly capturing other
@@ -1774,9 +1791,13 @@ public final class IntFunctions {
      * @param <T> the type of Map to register
      * @param targetClass the {@code Class} object representing the {@code Map} type to register, must not be {@code null}
      * @param creator the {@code IntFunction} that creates instances of the target class with the specified capacity, must not be {@code null}
-     * @return {@code true} if the registration was successful, {@code false} if a creator was already registered for this class
+     * @return {@code true} if the registration was successful, {@code false} if a creator was already cached or registered
+     *         for this class (a previous {@link #ofMap(Class)} call for {@code targetClass} caches the creator it
+     *         discovers, so a later registration is rejected)
      * @throws IllegalArgumentException if {@code targetClass} or {@code creator} is {@code null}, if {@code targetClass}
      *         is not a {@code Map} class, or if {@code targetClass} is a built-in class.
+     *         A {@code null} result of {@code creator} is reported later, when the registered creator is used, as a
+     *         {@code NullPointerException} ("The registered creator returned null").
      */
     @SuppressWarnings("rawtypes")
     public static <T extends Map> boolean registerForMap(final Class<T> targetClass, final java.util.function.IntFunction<T> creator)
@@ -1791,7 +1812,7 @@ public final class IntFunctions {
 
         // Atomic publication: a check-then-put pair could overwrite a concurrent registration while still
         // reporting failure. Matches the hardened Suppliers.registerForMap.
-        return mapCreatorPool.get(targetClass).compareAndSet(null, Fn.from(creator));
+        return mapCreatorPool.get(targetClass).compareAndSet(null, registeredCreator(creator));
     }
 
     /**

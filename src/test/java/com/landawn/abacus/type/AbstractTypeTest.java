@@ -368,4 +368,86 @@ public class AbstractTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("1234567890123456789x".toCharArray(), 0, 20));
     }
 
+
+    // ---- bug review 2026-09-27 G114 begin ----
+
+    // G114-05: a malformed token ending in a type-suffix letter reported only that letter ("null" -> "l").
+    @Test
+    public void testParseIntAndParseLong_suffixErrorMessageNamesWholeToken() {
+        assertEquals("Invalid numeric String: \"null\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("[null]".toCharArray(), 1, 4)).getMessage());
+        assertEquals("Invalid numeric String: \"12aL\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("12aL".toCharArray(), 0, 4)).getMessage());
+        assertEquals("Invalid numeric String: \"L\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("L".toCharArray(), 0, 1)).getMessage());
+        assertEquals("Invalid numeric String: \"null\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("[null]".toCharArray(), 1, 4)).getMessage());
+        assertEquals("Invalid numeric String: \"-d\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("-d".toCharArray(), 0, 2)).getMessage());
+    }
+
+    // ---- bug review 2026-09-27 G114 end ----
+
+    // ---- bug review 2026-09-27 verify G119 begin ----
+
+    // parseInt/parseLong(char[]): a suffixed token rejected by the digit loop also names the whole token; unsuffixed tokens unchanged.
+    @Test
+    public void testParseIntAndParseLong_suffixedTokenRejectedInDigitLoopNamesWholeToken() {
+        assertEquals("Invalid numeric String: \"a1L\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("a1L".toCharArray(), 0, 3)).getMessage());
+        assertEquals("Invalid numeric String: \"1-2d\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("[1-2d]".toCharArray(), 1, 4)).getMessage());
+        assertEquals("Invalid numeric String: \"x1\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("x1".toCharArray(), 0, 2)).getMessage());
+        assertEquals("Invalid numeric String: \"x\"", assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("x".toCharArray(), 0, 1)).getMessage());
+    }
+
+    // parseInt/parseLong(char[]): valid tokens, with or without a suffix, at an offset and on the long fallback path, still parse.
+    @Test
+    public void testParseIntAndParseLong_validSuffixedTokensUnaffected() {
+        assertEquals(12, AbstractType.parseInt("[12L]".toCharArray(), 1, 3));
+        assertEquals(-5, AbstractType.parseInt("-5d".toCharArray(), 0, 3));
+        assertEquals(7, AbstractType.parseInt("7F".toCharArray(), 0, 2));
+        assertEquals(1234567890, AbstractType.parseInt("1234567890L".toCharArray(), 0, 11));
+        assertEquals(1234567890123L, AbstractType.parseLong("x1234567890123Lx".toCharArray(), 1, 14));
+        assertEquals(-3L, AbstractType.parseLong("-3l".toCharArray(), 0, 3));
+        assertEquals(42L, AbstractType.parseLong("42".toCharArray(), 0, 2));
+    }
+
+    // ---- bug review 2026-09-27 verify G119 end ----
+
+    // ---- bug review 2026-09-27 verify G123 begin ----
+
+    // G123-03: a suffixed token long enough for the Numbers.toInt/toLong fallback reported the token without its suffix.
+    @Test
+    public void testParseIntAndParseLong_suffixedFallbackTokenErrorMessageNamesWholeToken() {
+        assertEquals("Invalid numeric String: \"12345678x9L\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("12345678x9L".toCharArray(), 0, 11)).getMessage());
+        assertEquals("Invalid numeric String: \"12345678.5d\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("[12345678.5d]".toCharArray(), 1, 11)).getMessage());
+        assertEquals("Invalid numeric String: \"123456789012345678x9L\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("123456789012345678x9L".toCharArray(), 0, 21)).getMessage());
+        assertEquals("Invalid numeric String: \"123456789012345678.5f\"",
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("[123456789012345678.5f]".toCharArray(), 1, 21)).getMessage());
+    }
+
+    // G123-03 neighbours: unsuffixed fallback failures keep the Numbers message, overflow stays ArithmeticException (suffix or not),
+    // and valid suffixed fallback tokens still parse.
+    @Test
+    public void testParseIntAndParseLong_fallbackPathOtherwiseUnchanged() {
+        assertEquals(assertThrows(NumberFormatException.class, () -> com.landawn.abacus.util.Numbers.toInt("12345678x9")).getMessage(),
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseInt("12345678x9".toCharArray(), 0, 10)).getMessage());
+        assertEquals(assertThrows(NumberFormatException.class, () -> com.landawn.abacus.util.Numbers.toLong("1234567890123456789x")).getMessage(),
+                assertThrows(NumberFormatException.class, () -> AbstractType.parseLong("1234567890123456789x".toCharArray(), 0, 20)).getMessage());
+
+        assertEquals(assertThrows(ArithmeticException.class, () -> com.landawn.abacus.util.Numbers.toInt("2147483648")).getMessage(),
+                assertThrows(ArithmeticException.class, () -> AbstractType.parseInt("2147483648L".toCharArray(), 0, 11)).getMessage());
+        assertThrows(ArithmeticException.class, () -> AbstractType.parseInt("-2147483649d".toCharArray(), 0, 12));
+        assertEquals(assertThrows(ArithmeticException.class, () -> com.landawn.abacus.util.Numbers.toLong("9223372036854775808")).getMessage(),
+                assertThrows(ArithmeticException.class, () -> AbstractType.parseLong("9223372036854775808L".toCharArray(), 0, 20)).getMessage());
+        assertThrows(ArithmeticException.class, () -> AbstractType.parseLong("9223372036854775808".toCharArray(), 0, 19));
+
+        assertEquals(1234567890, AbstractType.parseInt("[1234567890L]".toCharArray(), 1, 11));
+        assertEquals(-1234567890, AbstractType.parseInt("-1234567890d".toCharArray(), 0, 12));
+        assertEquals(1234567890123456789L, AbstractType.parseLong("1234567890123456789L".toCharArray(), 0, 20));
+        assertEquals(Long.MIN_VALUE, AbstractType.parseLong("-9223372036854775808l".toCharArray(), 0, 21));
+    }
+
+    // ---- bug review 2026-09-27 verify G123 end ----
 }

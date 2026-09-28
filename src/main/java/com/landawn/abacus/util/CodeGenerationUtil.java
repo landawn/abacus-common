@@ -338,7 +338,7 @@ public final class CodeGenerationUtil {
      * <code>// &lt;auto-generated-prop-name-table:<i>name</i>&gt;</code> and
      * <code>// &lt;/auto-generated-prop-name-table:<i>name</i>&gt;</code> marker comments.
      *
-     * <p>When {@code srcDir} is not empty, this method loads the entity source file, removes the
+     * <p>When {@code sourceDirectory} is not empty, this method loads the entity source file, removes the
      * previously generated interface of the same name, and inserts the new one before the entity's
      * closing brace. Removal only ever deletes:
      * <ul>
@@ -369,7 +369,7 @@ public final class CodeGenerationUtil {
      *
      * @param entityClass the entity class that contributes bean property names; must not be {@code null}
      * @param propNameTableClassName interface name for generated constants; must be a valid Java type name
-     * @param srcDir source root directory; if {@code null} or empty, source is not written
+     * @param sourceDirectory source root directory; if {@code null} or empty, source is not written
      * @return generated Java source that declares the inner interface and constants, wrapped in the
      *         marker comments described above
      * @throws IllegalArgumentException if {@code entityClass} is {@code null}, or {@code propNameTableClassName} is not a valid Java type name, or is
@@ -388,7 +388,7 @@ public final class CodeGenerationUtil {
      *         or the source changes before replacement.
      */
     @Beta
-    public static String generatePropNameTableClass(final Class<?> entityClass, final String propNameTableClassName, final String srcDir)
+    public static String generatePropNameTableClass(final Class<?> entityClass, final String propNameTableClassName, final String sourceDirectory)
             throws IllegalArgumentException, UncheckedIOException, IllegalStateException {
         N.checkArgNotNull(entityClass, cs.entityClass);
         checkJavaTypeIdentifier(propNameTableClassName, cs.propNameTableClassName);
@@ -453,9 +453,9 @@ public final class CodeGenerationUtil {
 
         final String ret = sb.toString();
 
-        if (Strings.isNotEmpty(srcDir)) {
+        if (Strings.isNotEmpty(sourceDirectory)) {
 
-            String packageDir = srcDir;
+            String packageDir = sourceDirectory;
             final String packageName = ClassUtil.getPackageName(entityClass);
 
             if (Strings.isNotEmpty(packageName)) {
@@ -821,21 +821,21 @@ public final class CodeGenerationUtil {
      * @param propNameTableClassName top-level interface name to generate; must be a valid Java type name
      * @param propNameTableClassPackageName package for generated source; if {@code null} or empty,
      *        uses the first entity's package; otherwise it must be a valid dot-separated Java package name
-     * @param srcDir source root directory; if {@code null} or empty, source is not written
+     * @param sourceDirectory source root directory; if {@code null} or empty, source is not written
      * @return generated Java source for the standalone property-name table
      * @throws IllegalArgumentException if {@code entityClasses} is null, empty, contains null, or has no usable class after filtering interfaces and
      *         Lombok builder classes, or generated property fields have invalid or duplicate Java identifiers, or {@code propNameTableClassName} is not a
      *         valid Java type name, or the nonempty package name contains an invalid Java identifier.
-     * @throws UncheckedIOException if creating or writing the generated source file throws an {@link IOException} when {@code srcDir} is nonempty.
+     * @throws UncheckedIOException if creating or writing the generated source file throws an {@link IOException} when {@code sourceDirectory} is nonempty.
      */
     public static String generatePropNameTableClasses(final Collection<Class<?>> entityClasses, final String propNameTableClassName,
-            final String propNameTableClassPackageName, final String srcDir) throws IllegalArgumentException, UncheckedIOException {
+            final String propNameTableClassPackageName, final String sourceDirectory) throws IllegalArgumentException, UncheckedIOException {
 
         final PropNameTableCodeConfig codeConfig = PropNameTableCodeConfig.builder()
                 .entityClasses(entityClasses)
                 .className(propNameTableClassName)
                 .packageName(propNameTableClassPackageName)
-                .srcDir(srcDir)
+                .srcDir(sourceDirectory)
                 .propNameConverter(identityPropNameConverter)
                 .build();
 
@@ -1612,11 +1612,11 @@ public final class CodeGenerationUtil {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * PropNameTableCodeConfig config = new PropNameTableCodeConfig();
-         * config.getEntityClasses();                             // returns null (object fields default to null)
-         * config.isGenerateSnakeCase();                          // returns false (boolean flags default to false)
+         * config.getEntityClasses();     // returns null (object fields default to null)
+         * config.isGenerateSnakeCase();  // returns false (boolean flags default to false)
          *
-         * config.setClassName("S").setGenerateSnakeCase(true);   // returns this (chainable setters)
-         * config.getClassName();                                 // returns "S"
+         * config.setClassName("S").setGenerateSnakeCase(true);  // returns this (chainable setters)
+         * config.getClassName();                                // returns "S"
          * }</pre>
          *
          */

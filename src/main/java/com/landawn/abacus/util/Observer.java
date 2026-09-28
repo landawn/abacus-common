@@ -27,11 +27,10 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -73,6 +72,10 @@ import java.util.function.Predicate;
  * operator state, and delivers at most one terminal callback. Normal completion flushes downstream
  * buffers within their limits; errors discard pending values. Caller-owned queues are not closed.
  * Already-running caller code, including iterator methods and callbacks, must return cooperatively.</p>
+ * <p>Outside Android, queue and iterator sources run each subscription on its own platform daemon thread.
+ * There is no fixed source-thread limit; each active source occupies an OS thread, including while waiting.
+ * Timer and interval sources use the scheduled executors. Distinct operators retain their uniqueness
+ * history during an active subscription and release it when the subscription terminates.</p>
  * <p>A fatal {@link Error} also stops the subscription and releases timed state, then propagates
  * unchanged from the failing task. It does not invoke an additional terminal callback. Failures
  * while submitting or starting source work likewise release resources before propagating.</p>
@@ -113,7 +116,7 @@ public abstract class Observer<T> {
     };
 
     /**
-     * Shared thread pool used to execute the asynchronous emission loop for
+     * Shared executor used to execute each asynchronous emission loop on its own platform daemon thread for
      * {@link BlockingQueueObserver} and {@link IteratorObserver} subscriptions.
      * On Android, delegates to {@link AndroidUtil#getThreadPoolExecutor()}.
      */
@@ -130,14 +133,12 @@ public abstract class Observer<T> {
         if (IOUtil.IS_PLATFORM_ANDROID) {
             asyncExecutor = AndroidUtil.getThreadPoolExecutor();
         } else {
-            final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(//
-                    N.max(64, IOUtil.CPU_CORES * 8), // coreThreadPoolSize
-                    N.max(128, IOUtil.CPU_CORES * 16), // // maxThreadPoolSize
-                    180L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), daemonThreadFactory("abacus-observer-async-"));
-
-            asyncExecutor = threadPoolExecutor;
-
-            stopOnJvmExit(threadPoolExecutor);
+            // Queue sources can wait indefinitely, so each subscription needs its own thread. Callbacks
+            // run under eventGate and can block; platform threads avoid pinning virtual-thread carriers
+            // on JDK 21-23. This deliberately costs one OS thread per active source.
+            final ExecutorService sourceExecutor = Executors.newThreadPerTaskExecutor(daemonThreadFactory("abacus-observer-async-"));
+            asyncExecutor = sourceExecutor;
+            stopOnJvmExit(sourceExecutor);
         }
     }
 
@@ -664,14 +665,14 @@ public abstract class Observer<T> {
      * }</pre>
      *
      * @param <T> the type of elements in the iterator
-     * @param iter the Iterator to create an Observer from
+     * @param iterator the Iterator to create an Observer from
      * @return a new Observer that emits elements from the iterator
-     * @throws IllegalArgumentException if {@code iter} is {@code null}.
+     * @throws IllegalArgumentException if {@code iterator} is {@code null}.
      */
-    public static <T> Observer<T> of(final Iterator<? extends T> iter) throws IllegalArgumentException {
-        N.checkArgNotNull(iter, cs.iterator);
+    public static <T> Observer<T> of(final Iterator<? extends T> iterator) throws IllegalArgumentException {
+        N.checkArgNotNull(iterator, cs.iterator);
 
-        return new IteratorObserver<>(iter);
+        return new IteratorObserver<>(iterator);
     }
 
     /**
@@ -839,7 +840,10 @@ public abstract class Observer<T> {
         return this;
     }
 
-    private Observer<T> debounceInternal(final long intervalDurationInMillis) {
+    /**
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     */
+    private Observer<T> debounceInternal(final long intervalDurationInMillis) throws IllegalArgumentException {
         return debounceInternal(intervalDurationInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -870,6 +874,9 @@ public abstract class Observer<T> {
         return this;
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}
+     */
     private Observer<T> debounceInternal(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(intervalDuration >= 0, "Interval cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
@@ -1052,7 +1059,10 @@ public abstract class Observer<T> {
         return this;
     }
 
-    private Observer<T> throttleFirstInternal(final long intervalDurationInMillis) {
+    /**
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     */
+    private Observer<T> throttleFirstInternal(final long intervalDurationInMillis) throws IllegalArgumentException {
         return throttleFirstInternal(intervalDurationInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -1087,6 +1097,9 @@ public abstract class Observer<T> {
         return this;
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}
+     */
     private Observer<T> throttleFirstInternal(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(intervalDuration >= 0, "Interval cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
@@ -1193,6 +1206,10 @@ public abstract class Observer<T> {
      * window. A pending item from an incomplete window is discarded on completion or error.
      * Also known as "sample" in some reactive libraries.
      *
+     * <p>Unlike RxJava's periodic {@code sample}, windows are not aligned to a fixed clock: a window opens
+     * when an item arrives while no item is pending, and the latest item received in it is emitted when the
+     * window closes. No window is open, and nothing is emitted, while no items arrive.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * mousePositionObserver
@@ -1214,14 +1231,18 @@ public abstract class Observer<T> {
         return this;
     }
 
-    private Observer<T> throttleLastInternal(final long intervalDurationInMillis) {
+    /**
+     * @throws IllegalArgumentException if {@code intervalDurationInMillis} is negative
+     */
+    private Observer<T> throttleLastInternal(final long intervalDurationInMillis) throws IllegalArgumentException {
         return throttleLastInternal(intervalDurationInMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Applies throttleLast operator that emits the most recent item after each full sampling
      * window. A pending item from an incomplete window is discarded on completion or error.
-     * The duration can be specified with custom time units.
+     * The duration can be specified with custom time units. Windows follow the same item-triggered
+     * timing as {@link #throttleLast(long)}: each one opens when an item arrives while none is pending.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1244,6 +1265,9 @@ public abstract class Observer<T> {
         return this;
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code intervalDuration} is negative or {@code unit} is {@code null}
+     */
     private Observer<T> throttleLastInternal(final long intervalDuration, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(intervalDuration >= 0, "Interval cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
@@ -1381,7 +1405,10 @@ public abstract class Observer<T> {
         return this;
     }
 
-    private Observer<T> delayInternal(final long delayInMillis) {
+    /**
+     * @throws IllegalArgumentException if {@code delayInMillis} is negative
+     */
+    private Observer<T> delayInternal(final long delayInMillis) throws IllegalArgumentException {
         return delayInternal(delayInMillis, TimeUnit.MILLISECONDS);
     }
 
@@ -1411,6 +1438,9 @@ public abstract class Observer<T> {
         return this;
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code delay} is negative or {@code unit} is {@code null}
+     */
     private Observer<T> delayInternal(final long delay, final TimeUnit unit) throws IllegalArgumentException {
         N.checkArgument(delay >= 0, "Delay cannot be negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
@@ -1665,7 +1695,12 @@ public abstract class Observer<T> {
 
     private Observer<T> distinctInternal() {
         dispatcher.append(new Dispatcher<>() {
-            private final Set<T> set = N.newHashSet();
+            private Set<T> set = N.newHashSet();
+
+            {
+                // Terminal cleanup holds eventGate, after the last delivery has finished using the set.
+                terminationActions.add(() -> set = null);
+            }
 
             @Override
             public void onNext(final Object param) {
@@ -1685,8 +1720,8 @@ public abstract class Observer<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Observer.of(Arrays.asList("apple", "banana", "apricot", "blueberry"))
-     *     .distinctBy(s -> s.charAt(0))  // distinct by first letter
-     *     .observe(System.out::println); // prints apple, banana
+     *     .distinctBy(s -> s.charAt(0))   // distinct by first letter
+     *     .observe(System.out::println);  // prints apple, banana
      * }</pre>
      *
      * @param keyExtractor function to extract the key used to determine uniqueness; key
@@ -1709,7 +1744,12 @@ public abstract class Observer<T> {
         N.checkArgNotNull(keyExtractor, cs.keyExtractor);
 
         dispatcher.append(new Dispatcher<>() {
-            private final Set<Object> set = N.newHashSet();
+            private Set<Object> set = N.newHashSet();
+
+            {
+                // Release the backing table as well as its keys when this single-use pipeline finishes.
+                terminationActions.add(() -> set = null);
+            }
 
             @Override
             public void onNext(final Object param) {
@@ -1891,7 +1931,10 @@ public abstract class Observer<T> {
         return nextStage(() -> ownerForStage().bufferInternal(timespan, unit));
     }
 
-    private Observer<List<T>> bufferInternal(final long timespan, final TimeUnit unit) {
+    /**
+     * @throws IllegalArgumentException if {@code timespan} is zero or negative or {@code unit} is {@code null}
+     */
+    private Observer<List<T>> bufferInternal(final long timespan, final TimeUnit unit) throws IllegalArgumentException {
         return bufferInternal(timespan, unit, Integer.MAX_VALUE);
     }
 
@@ -1928,6 +1971,9 @@ public abstract class Observer<T> {
         return nextStage(() -> ownerForStage().bufferInternal(timespan, unit, count));
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code timespan} or {@code count} is zero or negative, or {@code unit} is {@code null}
+     */
     private Observer<List<T>> bufferInternal(final long timespan, final TimeUnit unit, final int count) throws IllegalArgumentException {
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
         N.checkArgNotNull(unit, "Time unit cannot be null");
@@ -2091,7 +2137,10 @@ public abstract class Observer<T> {
         return nextStage(() -> ownerForStage().bufferInternal(timespan, timeskip, unit));
     }
 
-    private Observer<List<T>> bufferInternal(final long timespan, final long timeskip, final TimeUnit unit) {
+    /**
+     * @throws IllegalArgumentException if {@code timespan} or {@code timeskip} is zero or negative, or {@code unit} is {@code null}
+     */
+    private Observer<List<T>> bufferInternal(final long timespan, final long timeskip, final TimeUnit unit) throws IllegalArgumentException {
         return bufferInternal(timespan, timeskip, unit, Integer.MAX_VALUE);
     }
 
@@ -2132,6 +2181,10 @@ public abstract class Observer<T> {
         return nextStage(() -> ownerForStage().bufferInternal(timespan, timeskip, unit, count));
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code timespan}, {@code timeskip}, or {@code count} is zero or negative,
+     *         or {@code unit} is {@code null}
+     */
     private Observer<List<T>> bufferInternal(final long timespan, final long timeskip, final TimeUnit unit, final int count) throws IllegalArgumentException {
         N.checkArgument(timespan > 0, "timespan cannot be 0 or negative");
         N.checkArgument(timeskip > 0, "timeskip cannot be 0 or negative");
@@ -2351,7 +2404,6 @@ public abstract class Observer<T> {
      * @param action the action to perform on each item
      * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if {@code action} is {@code null}.
-    
      * @see #observe(Consumer, Consumer)
      * @see #observe(Consumer, Consumer, Runnable)
      */
@@ -2379,7 +2431,6 @@ public abstract class Observer<T> {
      * @param onError the action to perform on error
      * @throws IllegalStateException if this stage has been replaced or the pipeline has already been subscribed
      * @throws IllegalArgumentException if any of {@code action}, {@code onError} is {@code null}.
-    
      * @see #observe(Consumer, Consumer, Runnable)
      */
     public void observe(final Consumer<? super T> action, final Consumer<? super Exception> onError) throws IllegalStateException, IllegalArgumentException {
@@ -2631,8 +2682,8 @@ public abstract class Observer<T> {
         /** The iterator from which items are pulled during subscription. */
         private final Iterator<? extends T> iter;
 
-        IteratorObserver(final Iterator<? extends T> iter) {
-            this.iter = iter;
+        IteratorObserver(final Iterator<? extends T> iterator) {
+            this.iter = iterator;
         }
 
         /**

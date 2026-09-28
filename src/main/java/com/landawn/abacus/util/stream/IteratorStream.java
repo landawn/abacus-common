@@ -14,12 +14,12 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -49,6 +49,7 @@ import com.landawn.abacus.util.CharIterator;
 import com.landawn.abacus.util.DoubleIterator;
 import com.landawn.abacus.util.FloatIterator;
 import com.landawn.abacus.util.Holder;
+import com.landawn.abacus.util.IntFunctions;
 import com.landawn.abacus.util.IntIterator;
 import com.landawn.abacus.util.LongIterator;
 import com.landawn.abacus.util.Multimap;
@@ -84,6 +85,15 @@ class IteratorStream<T> extends AbstractStream<T> {
      * externally once this stream has been created.
      */
     final ObjIteratorEx<T> elements;
+
+    /**
+     * Largest chunk/window size for which {@code split}/{@code sliding} pre-size the list they read a chunk or
+     * window into to exactly that size. A larger size is only an upper bound (e.g. {@code split(Integer.MAX_VALUE)}
+     * on a 3-element source), so the list starts at this capacity and grows only for chunks that actually hold more
+     * elements. Either way a default-factory chunk that ends up holding fewer elements than its capacity (the last
+     * chunk, a short source, or a grown list) is trimmed before it is emitted, so no emitted list keeps spare capacity.
+     */
+    private static final int EXACT_PRESIZE_THRESHOLD = 1 << 16;
 
     //    Optional<T> head;
     //    Stream<T> tail;
@@ -1650,7 +1660,12 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgPositive(chunkSize, cs.chunkSize);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
+        final boolean isDefaultFactory = collectionSupplier == IntFunctions.ofList();
+
         return newStream(new ObjIteratorEx<>() { //NOSONAR
+            // Reused read buffer for a non-default collectionSupplier (see toChunkCollection).
+            private ArrayList<T> scratch = null;
+
             @Override
             public boolean hasNext() {
                 return elements.hasNext();
@@ -1662,12 +1677,20 @@ class IteratorStream<T> extends AbstractStream<T> {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final C result = collectionSupplier.apply(chunkSize);
-                int cnt = 0;
+                // Read the chunk first and size the container from the actual count (as ArrayStream does): the
+                // chunk size is only an upper bound, and pre-sizing to it (e.g. split(Integer.MAX_VALUE)) ran out
+                // of memory for a 3-element source. A bounded supplier such as ofArrayBlockingQueue still gets a
+                // capacity >= the number of elements it receives.
+                final ArrayList<T> chunk = chunkBuffer(isDefaultFactory ? null : scratch, chunkSize);
 
-                while (cnt < chunkSize && elements.hasNext()) {
-                    result.add(elements.next());
-                    cnt++;
+                while (chunk.size() < chunkSize && elements.hasNext()) {
+                    chunk.add(elements.next());
+                }
+
+                final C result = toChunkCollection(chunk, collectionSupplier, isDefaultFactory);
+
+                if (!isDefaultFactory) {
+                    scratch = releaseChunkBuffer(chunk);
                 }
 
                 return result;
@@ -1751,6 +1774,9 @@ class IteratorStream<T> extends AbstractStream<T> {
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private T next = (T) NONE;
             private boolean preCondition = false;
+            // The element that ended the previous group has already been tested (its result is the flipped
+            // preCondition), so the predicate is evaluated exactly once per element, as in Seq.split(Predicate).
+            private boolean nextTested = false;
 
             @Override
             public boolean hasNext() {
@@ -1763,7 +1789,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final C result = collectionSupplier.get();
+                final C result = N.requireNonNull(collectionSupplier.get(), "collectionSupplier returned null");
                 boolean isFirst = true;
 
                 if (next == NONE) {
@@ -1773,13 +1799,21 @@ class IteratorStream<T> extends AbstractStream<T> {
                 while (next != NONE) {
                     if (isFirst) {
                         result.add(next);
-                        preCondition = predicate.test(next);
+
+                        if (nextTested) {
+                            nextTested = false;
+                        } else {
+                            preCondition = predicate.test(next);
+                        }
+
                         next = elements.hasNext() ? elements.next() : (T) NONE;
                         isFirst = false;
                     } else if (predicate.test(next) == preCondition) {
                         result.add(next);
                         next = elements.hasNext() ? elements.next() : (T) NONE;
                     } else {
+                        preCondition = !preCondition;
+                        nextTested = true;
                         break;
                     }
                 }
@@ -1805,6 +1839,9 @@ class IteratorStream<T> extends AbstractStream<T> {
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private T next = (T) NONE;
             private boolean preCondition = false;
+            // The element that ended the previous group has already been tested (its result is the flipped
+            // preCondition), so the predicate is evaluated exactly once per element, as in Seq.split(Predicate).
+            private boolean nextTested = false;
 
             @Override
             public boolean hasNext() {
@@ -1827,14 +1864,21 @@ class IteratorStream<T> extends AbstractStream<T> {
                 while (next != NONE) {
                     if (isFirst) {
                         accumulator.accept(container, next);
-                        preCondition = predicate.test(next);
+
+                        if (nextTested) {
+                            nextTested = false;
+                        } else {
+                            preCondition = predicate.test(next);
+                        }
+
                         next = elements.hasNext() ? elements.next() : (T) NONE;
                         isFirst = false;
                     } else if (predicate.test(next) == preCondition) {
                         accumulator.accept(container, next);
                         next = elements.hasNext() ? elements.next() : (T) NONE;
                     } else {
-
+                        preCondition = !preCondition;
+                        nextTested = true;
                         break;
                     }
                 }
@@ -1853,9 +1897,18 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgument(windowSize > 0 && increment > 0, "windowSize=%s and increment=%s must be bigger than 0", windowSize, increment);
         checkArgNotNull(collectionSupplier, cs.collectionSupplier);
 
+        final boolean isDefaultFactory = collectionSupplier == IntFunctions.ofList();
+
         return newStream(new ObjIteratorEx<>() { //NOSONAR
-            private Deque<T> queue = null;
+            /**
+             * The elements shared with the next window. An ArrayDeque rather than a LinkedList, so no node is
+             * allocated per element; ArrayDeque rejects null, so a null element is stored as the private NONE
+             * sentinel and restored when it is copied into a window.
+             */
+            private Deque<Object> queue = null;
             private int remainingGap = 0;
+            // Reused read buffer for a non-default collectionSupplier (see toChunkCollection).
+            private ArrayList<T> scratch = null;
 
             @Override
             public boolean hasNext() {
@@ -1871,6 +1924,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return elements.hasNext(); // || (queue != null && !queue.isEmpty());
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public C next() throws NoSuchElementException {
                 if (!hasNext()) {
@@ -1878,16 +1932,19 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 if (queue == null) {
-                    queue = new LinkedList<>();
+                    queue = new ArrayDeque<>();
                 }
 
-                final C result = collectionSupplier.apply(windowSize);
+                // Collect the window first and size the container from the actual count - see split(int, IntFunction).
+                final ArrayList<T> result = chunkBuffer(isDefaultFactory ? null : scratch, windowSize);
                 int cnt = 0;
 
                 if (queue.size() > 0 && increment < windowSize) {
                     cnt = queue.size();
 
-                    result.addAll(queue);
+                    for (final Object e : queue) {
+                        result.add(e == NONE ? null : (T) e);
+                    }
 
                     if (queue.size() <= increment) {
                         queue.clear();
@@ -1906,13 +1963,19 @@ class IteratorStream<T> extends AbstractStream<T> {
                     cnt++;
 
                     if (cnt > increment) {
-                        queue.add(next);
+                        queue.add(next == null ? NONE : next);
                     }
                 }
 
                 remainingGap = Math.max(0, increment - windowSize);
 
-                return result;
+                final C window = toChunkCollection(result, collectionSupplier, isDefaultFactory);
+
+                if (!isDefaultFactory) {
+                    scratch = releaseChunkBuffer(result);
+                }
+
+                return window;
             }
 
             @Override
@@ -1962,14 +2025,15 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 if (queue == null) {
-                    queue = new LinkedList<>();
+                    queue = new ArrayDeque<>();
                 }
 
                 final int countToKeepInQueue = windowSize - increment;
                 int cnt = queue.size();
 
                 while (cnt++ < countToKeepInQueue && elements.hasNext()) {
-                    queue.add(elements.next());
+                    final T next = elements.next();
+                    queue.add(next == null ? NONE : next);
                 }
             }
         }, false, null);
@@ -1987,7 +2051,12 @@ class IteratorStream<T> extends AbstractStream<T> {
         final Function<Object, R> finisher = (Function<Object, R>) collector.finisher();
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
-            private Deque<T> queue = null;
+            /**
+             * The elements shared with the next window. An ArrayDeque rather than a LinkedList, so no node is
+             * allocated per element; ArrayDeque rejects null, so a null element is stored as the private NONE
+             * sentinel and restored when it is copied into a window.
+             */
+            private Deque<Object> queue = null;
             private int remainingGap = 0;
 
             @Override
@@ -2004,6 +2073,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return elements.hasNext(); // || (queue != null && !queue.isEmpty());
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public R next() throws NoSuchElementException {
                 if (!hasNext()) {
@@ -2011,7 +2081,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 if (increment < windowSize && queue == null) {
-                    queue = new LinkedList<>();
+                    queue = new ArrayDeque<>();
                 }
 
                 final Object container = supplier.get();
@@ -2020,8 +2090,8 @@ class IteratorStream<T> extends AbstractStream<T> {
                 if (increment < windowSize && queue.size() > 0) {
                     cnt = queue.size();
 
-                    for (final T e : queue) {
-                        accumulator.accept(container, e);
+                    for (final Object e : queue) {
+                        accumulator.accept(container, e == NONE ? null : (T) e);
                     }
 
                     if (queue.size() <= increment) {
@@ -2041,7 +2111,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     cnt++;
 
                     if (cnt > increment) {
-                        queue.add(next);
+                        queue.add(next == null ? NONE : next);
                     }
                 }
 
@@ -2097,14 +2167,15 @@ class IteratorStream<T> extends AbstractStream<T> {
                 }
 
                 if (queue == null) {
-                    queue = new LinkedList<>();
+                    queue = new ArrayDeque<>();
                 }
 
                 final int countToKeepInQueue = windowSize - increment;
                 int cnt = queue.size();
 
                 while (cnt++ < countToKeepInQueue && elements.hasNext()) {
-                    queue.add(elements.next());
+                    final T next = elements.next();
+                    queue.add(next == null ? NONE : next);
                 }
             }
         }, false, null);
@@ -2296,7 +2367,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             private T[] aar = null;
             private int cursor = 0;
             private int to;
-            private LinkedList<T> queue;
+            private ArrayList<T> window;
+            // Index of the oldest retained value once full; preserve it across failed source pulls.
+            private int windowCursor;
             private Queue<Holder<T>> heap;
 
             @Override
@@ -2368,19 +2441,30 @@ class IteratorStream<T> extends AbstractStream<T> {
                 if (!initialized) {
                     // Keep the window/heap across retries so a failed source read does not drop already-accepted candidates.
                     if (isSorted() && isSameComparator(comparator, comparator())) {
-                        if (queue == null) {
-                            queue = new LinkedList<>();
+                        if (window == null) {
+                            window = new ArrayList<>(Math.min(n, 16));
                         }
 
                         while (elements.hasNext()) {
-                            if (queue.size() >= n) {
-                                queue.poll();
+                            final T next = elements.next();
+                            if (window.size() < n) {
+                                window.add(next);
+                            } else {
+                                window.set(windowCursor, next);
+                                if (++windowCursor == n) {
+                                    windowCursor = 0;
+                                }
                             }
-
-                            queue.offer(elements.next());
                         }
 
-                        aar = queue.toArray((T[]) new Object[queue.size()]);
+                        aar = (T[]) new Object[window.size()];
+                        int outputIndex = 0;
+                        for (int i = windowCursor; i < window.size(); i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
+                        for (int i = 0; i < windowCursor; i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
                     } else {
                         final Comparator<? super T> cmp = comparator;
                         // Do not preallocate from the caller-supplied limit. The source may be tiny
@@ -2417,7 +2501,7 @@ class IteratorStream<T> extends AbstractStream<T> {
                     }
 
                     to = aar.length;
-                    queue = null;
+                    window = null;
                     heap = null;
                     initialized = true;
                 }
@@ -2471,6 +2555,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             onComplete.run();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2498,6 +2585,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                     }
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2535,6 +2625,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                     }
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2575,6 +2668,9 @@ class IteratorStream<T> extends AbstractStream<T> {
 
                 isFirst = false;
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2621,6 +2717,9 @@ class IteratorStream<T> extends AbstractStream<T> {
 
                 isFirst = false;
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2632,6 +2731,12 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         try {
             return elements.toArray(N.EMPTY_OBJECT_ARRAY);
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -2659,6 +2764,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2686,6 +2794,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2698,13 +2809,16 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.next());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2722,6 +2836,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2734,13 +2851,16 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<T> result = supplier.get();
+            final Multiset<T> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.next());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2758,7 +2878,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
             T next = null;
 
             while (elements.hasNext()) {
@@ -2767,6 +2887,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2783,7 +2906,7 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
             T next = null;
 
             while (elements.hasNext()) {
@@ -2792,6 +2915,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2806,12 +2932,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param accumulator a function that combines the running result with the next element
      * @return an Optional containing the result of folding all elements left-to-right,
      *         or an empty Optional if the stream is empty
-     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the result of the reduction is {@code null}
      */
     @Override
-    public Optional<T> foldLeft(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> foldLeft(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -2828,6 +2954,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return Optional.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2860,6 +2989,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2874,12 +3006,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param accumulator the function to combine elements right-to-left
      * @return an Optional containing the result of folding all elements right-to-left,
      *         or an empty Optional if the stream is empty
-     * @throws NullPointerException if the final reduction result is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the final reduction result is {@code null}
      */
     @Override
-    public Optional<T> foldRight(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> foldRight(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -2922,12 +3054,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      *                    elements
      * @return an Optional describing the reduction result, or an empty Optional if the stream
      *         is empty
-     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the result of the reduction is {@code null}
      */
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -2976,10 +3108,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
      *         {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -2987,13 +3121,16 @@ class IteratorStream<T> extends AbstractStream<T> {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 accumulator.accept(result, elements.next());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3028,6 +3165,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return finisher.apply(container);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3077,7 +3217,16 @@ class IteratorStream<T> extends AbstractStream<T> {
                 return iter.next();
             }
 
-            private Deque<T> deque;
+            /**
+             * The tail is kept in a ring buffer rather than a LinkedList, so no node is allocated per element: once
+             * {@code window} holds {@code n} elements, each further element overwrites the oldest slot ({@code head}).
+             * {@code headDropped} marks the oldest slot as already evicted before the next source read, exactly
+             * like the former {@code pollFirst()} before {@code elements.next()}, so a failed read leaves the same
+             * partial tail for a retry.
+             */
+            private ArrayList<T> window;
+            private int head;
+            private boolean headDropped;
 
             private void init() {
                 if (initialized) {
@@ -3086,19 +3235,39 @@ class IteratorStream<T> extends AbstractStream<T> {
 
                 // Keep a partial tail across retries so a failed source read does not NPE, and do not
                 // close the parent here: the result stream's close handlers already close it.
-                if (deque == null) {
-                    deque = new LinkedList<>();
+                if (window == null) {
+                    window = new ArrayList<>(Math.min(n, 16));
                 }
 
                 while (elements.hasNext()) {
-                    if (deque.size() >= n) {
-                        deque.pollFirst();
+                    if (window.size() >= n) {
+                        headDropped = true;
                     }
 
-                    deque.offerLast(elements.next());
+                    final T next = elements.next();
+
+                    if (headDropped) {
+                        window.set(head, next);
+                        headDropped = false;
+
+                        if (++head == n) {
+                            head = 0;
+                        }
+                    } else {
+                        window.add(next);
+                    }
                 }
 
-                iter = deque.iterator();
+                // In place, oldest first: moves the element at head to index 0.
+                java.util.Collections.rotate(window, -head);
+                head = 0;
+
+                if (headDropped) {
+                    window.remove(0);
+                    headDropped = false;
+                }
+
+                iter = window.iterator();
                 initialized = true;
             }
         }, isSorted(), comparator());
@@ -3127,30 +3296,38 @@ class IteratorStream<T> extends AbstractStream<T> {
         }
 
         return newStream(new ObjIteratorEx<>() { //NOSONAR
-            private Deque<T> deque = null;
+            /**
+             * An ArrayDeque rather than a LinkedList: no node is allocated per element passing through. ArrayDeque
+             * rejects null, so a null element is stored as the private NONE sentinel and restored on the way out.
+             */
+            private Deque<Object> deque = null;
 
             @Override
             public boolean hasNext() {
                 if (deque == null) {
-                    deque = new LinkedList<>();
+                    deque = new ArrayDeque<>();
                 }
 
                 while (deque.size() < n && elements.hasNext()) {
-                    deque.offerLast(elements.next());
+                    final T next = elements.next();
+                    deque.offerLast(next == null ? NONE : next);
                 }
 
                 return elements.hasNext();
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             public T next() throws NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                deque.offerLast(elements.next());
+                final T next = elements.next();
+                deque.offerLast(next == null ? NONE : next);
 
-                return deque.pollFirst();
+                final Object first = deque.pollFirst();
+                return first == NONE ? null : (T) first;
             }
 
         }, isSorted(), comparator());
@@ -3165,12 +3342,12 @@ class IteratorStream<T> extends AbstractStream<T> {
      *
      * @param comparator the comparator used to compare elements
      * @return an Optional containing the minimum element, or an empty Optional if the stream is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
-    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3193,6 +3370,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return Optional.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3202,33 +3382,27 @@ class IteratorStream<T> extends AbstractStream<T> {
      * Returns an Optional containing the maximum element of this stream according to the given
      * comparator, or an empty Optional if the stream is empty.
      *
-     * <p>This is a terminal operation. When the stream is sorted according to the given comparator,
-     * the last element is returned by scanning to the end of the iterator. The stream is closed
-     * after this call.
+     * <p>This is a terminal operation. Every element is compared (there is no sorted-stream shortcut), and ties
+     * resolve to the first maximal element. The stream is closed after this call.
      *
      * @param comparator the comparator used to compare elements
      * @return an Optional containing the maximum element, or an empty Optional if the stream is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
-    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
 
         try {
+            // No sorted shortcut here: ties resolve to the FIRST maximal element (JDK max, Collections.max,
+            // Collectors.max, maxBy), and an iterator cannot find the start of the trailing tie run without comparing
+            // every adjacent pair - no cheaper than the scan below.
             if (!elements.hasNext()) {
                 return Optional.empty();
-            } else if (isSorted() && isSameComparator(comparator, comparator())) {
-                T next = null;
-
-                while (elements.hasNext()) {
-                    next = elements.next();
-                }
-
-                return Optional.of(next);
             }
 
             T candidate = elements.next();
@@ -3242,13 +3416,17 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return Optional.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Optional<T> kthLargest(final int k, Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> kthLargest(final int k, Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgPositive(k, cs.k);
@@ -3258,17 +3436,35 @@ class IteratorStream<T> extends AbstractStream<T> {
             if (!elements.hasNext()) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator, comparator())) {
-                final LinkedList<T> queue = new LinkedList<>();
+                // Ring buffer of the last k elements (as in the primitive streams) instead of a LinkedList, so no node
+                // is allocated per element; once full, window[idx] is the oldest of the last k elements.
+                Object[] window = null;
+                int idx = 0;
+                int size = 0;
 
                 while (elements.hasNext()) {
-                    if (queue.size() >= k) {
-                        queue.poll();
+                    final T next = elements.next();
+
+                    if (window == null) {
+                        window = new Object[Math.min(k, 16)];
                     }
 
-                    queue.offer(elements.next());
+                    if (size < k) {
+                        if (size == window.length) {
+                            window = java.util.Arrays.copyOf(window, (int) Math.min(k, (long) window.length * 2));
+                        }
+
+                        window[size++] = next;
+                    } else {
+                        window[idx] = next;
+
+                        if (++idx == k) {
+                            idx = 0;
+                        }
+                    }
                 }
 
-                return queue.size() < k ? Optional.empty() : Optional.of(queue.peek());
+                return size < k ? Optional.empty() : Optional.of((T) window[idx]);
             }
 
             final Comparator<? super T> cmp = comparator;
@@ -3294,6 +3490,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return queue.size() < k ? Optional.empty() : Optional.of(queue.peek().value());
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3313,6 +3512,9 @@ class IteratorStream<T> extends AbstractStream<T> {
 
         try {
             return elements.count();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3344,6 +3546,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return true;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3378,6 +3583,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3412,6 +3620,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3437,6 +3648,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3453,14 +3667,14 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against
      * @return an Optional containing the first matching element, or an empty Optional if none match
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws a checked exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3475,6 +3689,9 @@ class IteratorStream<T> extends AbstractStream<T> {
                     return Optional.of(e);
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3492,14 +3709,14 @@ class IteratorStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against
      * @return an Optional containing the last matching element, or an empty Optional if none match
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws a checked exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3517,6 +3734,9 @@ class IteratorStream<T> extends AbstractStream<T> {
             }
 
             return result == NONE ? Optional.empty() : Optional.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3787,5 +4007,75 @@ class IteratorStream<T> extends AbstractStream<T> {
     @Override
     protected boolean isEmpty() {
         return !elements.hasNext();
+    }
+
+    /**
+     * Returns the empty list that {@code split}/{@code sliding} read the next chunk or window into.
+     *
+     * @param <T> the element type
+     * @param scratch the reusable buffer of a non-default factory, or {@code null} to allocate a new list
+     * @param maxSize the chunk or window size (an upper bound of the element count)
+     * @return an empty list, exactly pre-sized to {@code maxSize} when that is at most {@link #EXACT_PRESIZE_THRESHOLD}
+     */
+    private static <T> ArrayList<T> chunkBuffer(final ArrayList<T> scratch, final int maxSize) {
+        if (scratch != null) {
+            // Reset before filling, not only after a successful copy: a previous read may have failed half-way.
+            scratch.clear();
+            return scratch;
+        }
+
+        return new ArrayList<>(Math.min(maxSize, EXACT_PRESIZE_THRESHOLD));
+    }
+
+    /**
+     * Empties a buffer whose elements have been copied into a caller-supplied collection and returns it for reuse,
+     * or {@code null} if it held more than {@link #EXACT_PRESIZE_THRESHOLD} elements, so that an unusually large
+     * backing array is not kept alive for the rest of the traversal.
+     *
+     * @param <T> the element type
+     * @param buffer the buffer whose contents have been copied
+     * @return {@code buffer} (now empty), or {@code null}
+     */
+    private static <T> ArrayList<T> releaseChunkBuffer(final ArrayList<T> buffer) {
+        if (buffer.size() > EXACT_PRESIZE_THRESHOLD) {
+            return null;
+        }
+
+        buffer.clear();
+        return buffer;
+    }
+
+    /**
+     * Converts a chunk/window read by {@code split}/{@code sliding} into the collection type requested by
+     * {@code collectionSupplier}, which receives the exact number of elements of that chunk. The default factory
+     * ({@link IntFunctions#ofList()}) would just create an {@code ArrayList}, so the list is returned as is, trimmed to
+     * its size: a full chunk of an exactly pre-sized list has no spare capacity (the trim is then a no-op), while a
+     * short chunk (the last one, or a source shorter than {@code maxSize}) or a list grown beyond
+     * {@link #EXACT_PRESIZE_THRESHOLD} is copied once into an exactly sized array. Any other factory gets the elements
+     * copied from {@code chunk}, which the caller may then reuse.
+     *
+     * @param <T> the element type
+     * @param <C> the collection type
+     * @param chunk the elements of the chunk, in encounter order
+     * @param collectionSupplier creates the collection from the element count
+     * @param isDefaultFactory whether {@code collectionSupplier} is {@link IntFunctions#ofList()}
+     * @return the chunk as a {@code C}
+     * @throws NullPointerException if {@code collectionSupplier} returns {@code null}
+     */
+    @SuppressWarnings("unchecked")
+    private static <T, C extends Collection<T>> C toChunkCollection(final ArrayList<T> chunk, final IntFunction<? extends C> collectionSupplier,
+            final boolean isDefaultFactory) throws NullPointerException {
+        if (isDefaultFactory) {
+            // Unconditional (a no-op for a full, exactly pre-sized chunk): maxSize is only an upper bound, so a short
+            // chunk would otherwise keep up to min(maxSize, EXACT_PRESIZE_THRESHOLD) - size spare slots for as long as
+            // the caller retains it.
+            chunk.trimToSize();
+
+            return (C) chunk;
+        }
+
+        final C result = N.requireNonNull(collectionSupplier.apply(chunk.size()), "collectionSupplier returned null");
+        result.addAll(chunk);
+        return result;
     }
 }

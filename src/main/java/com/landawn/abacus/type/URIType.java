@@ -232,15 +232,15 @@ public class URIType extends AbstractType<URI> {
      * type.set(stmt, 1, URI.create("https://example.com"));   // Set URI at parameter index 1
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the value in
+     * @param statement the PreparedStatement to set the value in
      * @param columnIndex the parameter index (1-based) where to set the URI value
      * @param x the URI value to set, or {@code null} for SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final URI x) throws NullPointerException, SQLException {
-        stmt.setString(columnIndex, stringOf(x));
+    public void set(final PreparedStatement statement, final int columnIndex, final URI x) throws NullPointerException, SQLException {
+        statement.setString(columnIndex, stringOf(x));
     }
 
     /**
@@ -257,14 +257,14 @@ public class URIType extends AbstractType<URI> {
      * type.set(stmt, "homepage", URI.create("https://example.com"));   // Set URI by parameter name
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the value in
+     * @param statement the CallableStatement to set the value in
      * @param parameterName the name of the parameter where to set the URI value
      * @param x the URI value to set, or {@code null} for SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final URI x) throws NullPointerException, SQLException {
-        stmt.setString(parameterName, stringOf(x));
+    public void set(final CallableStatement statement, final String parameterName, final URI x) throws NullPointerException, SQLException {
+        statement.setString(parameterName, stringOf(x));
     }
 }

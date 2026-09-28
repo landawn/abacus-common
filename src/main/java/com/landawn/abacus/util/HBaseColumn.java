@@ -304,14 +304,14 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @param cmp the comparator used for ordering; must not be {@code null}.
+     * @param comparator the comparator used for ordering; must not be {@code null}.
      * @return a {@link SortedSet} containing the HBaseColumn
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final Comparator<HBaseColumn<?>> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final Comparator<HBaseColumn<?>> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        final SortedSet<HBaseColumn<T>> set = new TreeSet<>(cmp);
+        final SortedSet<HBaseColumn<T>> set = new TreeSet<>(comparator);
 
         set.add(HBaseColumn.valueOf(value));
 
@@ -349,15 +349,15 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @param cmp the comparator used for ordering; must not be {@code null}.
+     * @param comparator the comparator used for ordering; must not be {@code null}.
      * @return a {@link SortedSet} containing the HBaseColumn
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final long version, final Comparator<HBaseColumn<?>> cmp)
+    public static <T> SortedSet<HBaseColumn<T>> asSortedSet(final T value, final long version, final Comparator<HBaseColumn<?>> comparator)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        final SortedSet<HBaseColumn<T>> set = new TreeSet<>(cmp);
+        final SortedSet<HBaseColumn<T>> set = new TreeSet<>(comparator);
 
         set.add(HBaseColumn.valueOf(value, version));
 
@@ -437,14 +437,14 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      *
      * @param <T> the type of the column value
      * @param value the column value
-     * @param cmp the comparator used for ordering; must not be {@code null}.
+     * @param comparator the comparator used for ordering; must not be {@code null}.
      * @return a {@link SortedMap} with the version as key and the HBaseColumn as value
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final Comparator<Long> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final Comparator<Long> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<>(cmp);
+        final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<>(comparator);
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value);
 
         map.put(hbaseColumn.version(), hbaseColumn);
@@ -483,15 +483,15 @@ public final class HBaseColumn<T> implements Comparable<HBaseColumn<T>> {
      * @param <T> the type of the column value
      * @param value the column value
      * @param version the version timestamp
-     * @param cmp the comparator used for ordering; must not be {@code null}.
+     * @param comparator the comparator used for ordering; must not be {@code null}.
      * @return a {@link SortedMap} with the version as key and the HBaseColumn as value
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final long version, final Comparator<Long> cmp)
+    public static <T> SortedMap<Long, HBaseColumn<T>> asSortedMap(final T value, final long version, final Comparator<Long> comparator)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<>(cmp);
+        final SortedMap<Long, HBaseColumn<T>> map = new TreeMap<>(comparator);
         final HBaseColumn<T> hbaseColumn = HBaseColumn.valueOf(value, version);
 
         map.put(hbaseColumn.version(), hbaseColumn);

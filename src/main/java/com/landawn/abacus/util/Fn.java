@@ -272,7 +272,7 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * // Exception-safe operations
  * List<URL> urls = stringUrls.stream()
- *     .map(Fn.ff(URL::new, null))  // returns null for invalid URLs
+ *     .map(Fn.ff((String s) -> new URL(s), (URL) null))  // returns null for invalid URLs
  *     .filter(Objects::nonNull)
  *     .collect(Collectors.toList());
  * }</pre>
@@ -329,10 +329,46 @@ import com.landawn.abacus.util.stream.Stream;
  * <p><b>Exception Handling Strategy:</b>
  * <ul>
  *   <li><b>Safe Wrappers:</b> Convert exception-throwing operations to safe variants with default values</li>
- *   <li><b>Exception Conversion:</b> Transform checked exceptions to runtime exceptions when appropriate</li>
+ *   <li><b>Exception Conversion:</b> Transform checked exceptions to runtime exceptions when appropriate
+ *       (see <a href="#exception-conversion">Exception conversion by the throwing adapters</a>)</li>
  *   <li><b>Graceful Degradation:</b> Provide meaningful default behavior when operations fail</li>
  *   <li><b>Error Logging:</b> Resource-closing helpers log suppressed closing exceptions</li>
  * </ul>
+ *
+ * <p id="exception-conversion"><b>Exception conversion by the throwing adapters:</b> the plain adapters
+ * {@code ss}, {@code pp}, {@code cc}, {@code ff}, {@code rr}, {@code jc2c}, {@code jc2r} and
+ * {@link Entries#ff(Throwables.BiFunction) Entries.ff}/{@code pp}/{@code cc} catch every {@code Exception} (but not an
+ * {@code Error}) the delegate throws and rethrow it through {@link ExceptionUtil#toRuntimeException(Exception, boolean)}.
+ * That is the conversion {@code Throwables.*.unchecked()} uses too, except that {@code unchecked()} catches every
+ * {@code Throwable}, so an {@code Error} thrown directly by the delegate reaches its caller wrapped in a
+ * {@code RuntimeException} there, but unchanged here:</p>
+ * <ul>
+ *   <li>a wrapper exception with a cause - {@link java.util.concurrent.ExecutionException},
+ *       {@link java.lang.reflect.InvocationTargetException} or {@link java.lang.reflect.UndeclaredThrowableException},
+ *       even though the last one is itself unchecked - is unwrapped (repeatedly) before conversion, so an
+ *       {@code UndeclaredThrowableException} wrapping an {@code IOException} surfaces as an
+ *       {@link com.landawn.abacus.exception.UncheckedIOException}, and one wrapping an
+ *       {@code IllegalStateException} surfaces as that {@code IllegalStateException};</li>
+ *   <li>any other {@code RuntimeException} is rethrown unchanged (same instance), unless a mapper has been registered
+ *       for its class (or a superclass) with {@link ExceptionUtil#registerRuntimeExceptionMapper(Class, java.util.function.Function)};
+ *       then the mapper's result is thrown instead;</li>
+ *   <li>a checked exception is wrapped in a runtime exception ({@code IOException} becomes {@code UncheckedIOException},
+ *       or whatever a registered mapper returns for its class); an {@code InterruptedException} also restores the
+ *       current thread's interrupt status - unless it was reached by unwrapping an {@code ExecutionException}: that
+ *       interruption was raised on the task's thread and leaves this thread's flag alone, while one found under an
+ *       {@code InvocationTargetException} or {@code UndeclaredThrowableException} does restore it (see
+ *       {@link ExceptionUtil#toRuntimeException(Throwable, boolean, boolean)});</li>
+ *   <li>an {@code Error} thrown directly is not caught and propagates unchanged; an {@code Error} found by unwrapping
+ *       a wrapper is wrapped in a {@code RuntimeException}.</li>
+ * </ul>
+ * <p>Only {@code jc2c} has an identity fast path: an argument that already is an abacus
+ * {@link com.landawn.abacus.util.function.Callable} is returned as is, so what it throws reaches the caller with
+ * <b>no</b> conversion at all (an {@code UndeclaredThrowableException} is not unwrapped, a registered mapper is not
+ * applied). {@code jc2r} and the other adapters above always wrap, even an argument that already is the unchecked
+ * abacus type.</p>
+ * <p>The {@code defaultOnError} overloads such as {@link #ff(Throwables.Function, Object)} are different: they rethrow
+ * every {@code RuntimeException} (wrappers included, registered mappers not applied) and {@code Error} untouched and
+ * map only checked exceptions to the default value.</p>
  *
  * <p><b>Integration with Java Streams:</b>
  * <ul>
@@ -635,8 +671,8 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Supplier<String> cached = Fn.memoize(() -> expensiveOp());
-     * cached.get();   // invokes expensiveOp() and caches the result
-     * cached.get();   // returns the cached result (expensiveOp not called again)
+     * cached.get();  // invokes expensiveOp() and caches the result
+     * cached.get();  // returns the cached result (expensiveOp not called again)
      * }</pre>
      *
      * <p><b>Thread Safety:</b> The returned supplier is thread-safe: the delegate is invoked at most once on
@@ -656,11 +692,11 @@ public final class Fn {
     }
 
     /**
-     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
-     *
      * Creates a memoizing supplier that caches the result of the delegate supplier and automatically
      * expires the cached value after a specified duration. This implementation is thread-safe and
      * provides automatic cache invalidation based on time.
+     *
+     * <p>Note: It's copied from Google Guava under Apache License 2.0 and may be modified.</p>
      *
      * <p>This method is particularly useful for expensive computations or I/O operations that:
      * <ul>
@@ -817,8 +853,8 @@ public final class Fn {
      * // note: Duration here is com.landawn.abacus.util.Duration, not java.time.Duration
      * Supplier<Integer> cached = Fn.memoizeWithExpiration(calls::incrementAndGet, Duration.ofMinutes(10));
      *
-     * cached.get();                                              // returns 1 (delegate invoked once within the window)
-     * cached.get();                                              // returns 1 (cached value reused; delegate not called again)
+     * cached.get();  // returns 1 (delegate invoked once within the window)
+     * cached.get();  // returns 1 (cached value reused; delegate not called again)
      *
      * Fn.memoizeWithExpiration(() -> 1, Duration.ofMillis(0));   // throws IllegalArgumentException (duration must be positive)
      * }</pre>
@@ -860,6 +896,13 @@ public final class Fn {
      * keys still wait for one another, and the underlying function runs while that lock is held. Do not memoize a
      * function that blocks waiting on another thread through this method.
      *
+     * <p><b>Deadlock hazard:</b> because the lock is held for the whole computation, a function that calls back into
+     * the <i>same</i> memoized function from <i>other</i> threads and waits for them - for example through a parallel
+     * stream inside the function ({@code n -> IntStream.range(0, n).parallel().map(i -> memo.apply(i)).sum()}) -
+     * <b>hangs forever</b>: the worker threads block on the lock the calling thread holds while it waits for them.
+     * Nothing is thrown and nothing is logged. Recursion on the calling thread itself is fine (the lock is
+     * reentrant); only cross-thread re-entry deadlocks.
+     *
      * <p><b>Recursion:</b> A function that re-enters the memoized function with the <i>same</i> input throws
      * {@link IllegalStateException}. That input stays poisoned for the rest of the enclosing computation, so a
      * function that swallows the exception still cannot publish a value for it: the call for that input fails and
@@ -888,24 +931,24 @@ public final class Fn {
      *     return IntStream.rangeClosed(1, n).reduce(1, (a, b) -> a * b);
      * });
      *
-     * System.out.println(factorial.apply(5));   // Prints "Computing factorial of 5", returns 120
-     * System.out.println(factorial.apply(5));   // returns 120 immediately (cached, no computation)
+     * System.out.println(factorial.apply(5));  // Prints "Computing factorial of 5", returns 120
+     * System.out.println(factorial.apply(5));  // returns 120 immediately (cached, no computation)
      *
      * // Works with null inputs and outputs
      * Function<String, String> processor = Fn.memoize(s -> s == null ? null : s.toUpperCase());
-     * processor.apply(null);   // Computes and caches null -> null
-     * processor.apply(null);   // returns cached null without re-executing
+     * processor.apply(null);  // Computes and caches null -> null
+     * processor.apply(null);  // returns cached null without re-executing
      * }</pre>
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
-     * @param func the function whose results should be memoized
+     * @param function the function whose results should be memoized
      * @return a memoized version of the function that caches results based on input values
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see ConcurrentHashMap
      */
-    public static <T, R> Function<T, R> memoize(final java.util.function.Function<? super T, ? extends R> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T, R> Function<T, R> memoize(final java.util.function.Function<? super T, ? extends R> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
         return new Function<>() {
             private final R none = (R) NONE;
@@ -976,7 +1019,7 @@ public final class Fn {
                 }
 
                 try {
-                    final R computed = func.apply(key);
+                    final R computed = function.apply(key);
                     final Map<T, IllegalStateException> failures = recursiveFailures.get();
                     final IllegalStateException failure = failures == null ? null : failures.get(key);
 
@@ -1048,7 +1091,7 @@ public final class Fn {
     static final Predicate<Object[]> IS_EMPTY_ARRAY = value -> value == null || value.length == 0;
 
     @SuppressWarnings("rawtypes")
-    static final Predicate<Collection> IS_EMPTY_COLLECTION = value -> value == null || value.size() == 0;
+    static final Predicate<Collection> IS_EMPTY_COLLECTION = value -> value == null || value.isEmpty();
 
     @SuppressWarnings("rawtypes")
     static final Predicate<Map> IS_EMPTY_MAP = value -> value == null || value.isEmpty();
@@ -1056,7 +1099,7 @@ public final class Fn {
     static final Predicate<Object[]> NOT_EMPTY_ARRAY = value -> value != null && value.length > 0;
 
     @SuppressWarnings("rawtypes")
-    static final Predicate<Collection> NOT_EMPTY_COLLECTION = value -> value != null && value.size() > 0;
+    static final Predicate<Collection> NOT_EMPTY_COLLECTION = value -> value != null && !value.isEmpty();
 
     @SuppressWarnings("rawtypes")
     static final Predicate<Map> NOT_EMPTY_MAP = value -> value != null && !value.isEmpty();
@@ -1382,6 +1425,11 @@ public final class Fn {
      * Returns a Runnable that shuts down the specified ExecutorService.
      * The returned Runnable ensures the service is shut down only once, even if called multiple times.
      *
+     * <p>Only a {@link ExecutorService#shutdown()} call that returns normally is recorded. If it throws
+     * (for example a {@code SecurityException}), the exception propagates to the caller of {@code run()} and the
+     * next {@code run()} calls {@code shutdown()} again. This differs from {@link #close(AutoCloseable)} and the
+     * other {@code close*} runnables, which never retry a failed close.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.shutdown(executor).run();
@@ -1426,6 +1474,12 @@ public final class Fn {
      *
      * <p>Only the invocation that actually performs the shutdown waits for termination. Any later or
      * concurrent invocation returns immediately without waiting.</p>
+     *
+     * <p>Only a {@link ExecutorService#shutdown()} call that returns normally is recorded. If it throws
+     * (for example a {@code SecurityException}), the exception propagates to the caller of {@code run()} without
+     * waiting for termination, and the next {@code run()} calls {@code shutdown()} again (and waits if that call
+     * succeeds). This differs from {@link #close(AutoCloseable)} and the other {@code close*} runnables, which never
+     * retry a failed close.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1615,8 +1669,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.sleep(100).accept("x");   // sleeps 100ms, then returns normally
-     * Fn.sleep(0).accept("x");     // no sleep, returns immediately
+     * Fn.sleep(100).accept("x");  // sleeps 100ms, then returns normally
+     * Fn.sleep(0).accept("x");    // no sleep, returns immediately
      * }</pre>
      *
      * @param <T> the type of the input (ignored)
@@ -1636,8 +1690,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.sleepUninterruptibly(500).accept("x");   // sleeps 500ms uninterruptibly
-     * Fn.sleepUninterruptibly(0).accept("x");     // no sleep, returns immediately
+     * Fn.sleepUninterruptibly(500).accept("x");  // sleeps 500ms uninterruptibly
+     * Fn.sleepUninterruptibly(0).accept("x");    // no sleep, returns immediately
      * }</pre>
      *
      * @param <T> the type of the input (ignored)
@@ -1716,8 +1770,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.println("=").accept("key", "value");     // prints "key=value"
-     * Fn.println(": ").accept("name", "Alice");   // prints "name: Alice"
+     * Fn.println("=").accept("key", "value");    // prints "key=value"
+     * Fn.println(": ").accept("name", "Alice");  // prints "name: Alice"
      * }</pre>
      *
      * @param <T> the type of the first input
@@ -1766,9 +1820,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.toStr().apply("hello");   // returns "hello"
-     * Fn.toStr().apply(123);       // returns "123"
-     * Fn.toStr().apply(null);      // returns "null"
+     * Fn.toStr().apply("hello");  // returns "hello"
+     * Fn.toStr().apply(123);      // returns "123"
+     * Fn.toStr().apply(null);     // returns "null"
      * }</pre>
      *
      * @param <T> the type of the input
@@ -1784,8 +1838,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.toLowerCase().apply("Hello World");   // returns "hello world"
-     * Fn.toLowerCase().apply("ABC");           // returns "abc"
+     * Fn.toLowerCase().apply("Hello World");  // returns "hello world"
+     * Fn.toLowerCase().apply("ABC");          // returns "abc"
      * }</pre>
      *
      * @return a {@code UnaryOperator} that converts strings to lower case
@@ -1800,8 +1854,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.toUpperCase().apply("hello");   // returns "HELLO"
-     * Fn.toUpperCase().apply("WORLD");   // returns "WORLD"
+     * Fn.toUpperCase().apply("hello");  // returns "HELLO"
+     * Fn.toUpperCase().apply("WORLD");  // returns "WORLD"
      * }</pre>
      *
      * @return a {@code UnaryOperator} that converts strings to upper case
@@ -1816,8 +1870,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.toCamelCase().apply("hello_world");   // returns "helloWorld"
-     * Fn.toCamelCase().apply("HELLO_WORLD");   // returns "helloWorld"
+     * Fn.toCamelCase().apply("hello_world");  // returns "helloWorld"
+     * Fn.toCamelCase().apply("HELLO_WORLD");  // returns "helloWorld"
      * }</pre>
      *
      * @return a UnaryOperator that converts strings to camel case
@@ -1832,8 +1886,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.toSnakeCase().apply("helloWorld");   // returns "hello_world"
-     * Fn.toSnakeCase().apply("HelloWorld");   // returns "hello_world"
+     * Fn.toSnakeCase().apply("helloWorld");  // returns "hello_world"
+     * Fn.toSnakeCase().apply("HelloWorld");  // returns "hello_world"
      * }</pre>
      *
      * @return a UnaryOperator that converts strings to lower case with underscores
@@ -1863,8 +1917,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.toJson().apply(myObject);   // returns JSON string
-     * Fn.toJson().apply(null);       // returns "" (an empty string, not the text "null")
+     * Fn.toJson().apply(myObject);  // returns JSON string
+     * Fn.toJson().apply(null);      // returns "" (an empty string, not the text "null")
      * }</pre>
      *
      * @param <T> the type of the input object
@@ -1896,9 +1950,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.identity().apply("hello");   // returns "hello"
-     * Fn.identity().apply(42);        // returns 42
-     * Fn.identity().apply(null);      // returns null
+     * Fn.identity().apply("hello");  // returns "hello"
+     * Fn.identity().apply(42);       // returns 42
+     * Fn.identity().apply(null);     // returns null
      * }</pre>
      *
      * @param <T> the type of the input and output
@@ -2022,8 +2076,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.unwrap().apply(Wrapper.of("hello"));   // returns "hello"
-     * Fn.unwrap().apply(Wrapper.of(null));      // returns null
+     * Fn.unwrap().apply(Wrapper.of("hello"));  // returns "hello"
+     * Fn.unwrap().apply(Wrapper.of(null));     // returns null
      * }</pre>
      *
      * @param <T> the wrapped type
@@ -2040,8 +2094,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.key().apply(Map.entry("name","Alice"));   // returns "name"
-     * Fn.key().apply(Map.entry(1,"one"));          // returns 1
+     * Fn.key().apply(Map.entry("name","Alice"));  // returns "name"
+     * Fn.key().apply(Map.entry(1,"one"));         // returns 1
      * }</pre>
      *
      * @param <K> the key type
@@ -2059,8 +2113,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.value().apply(Map.entry("name","Alice"));   // returns "Alice"
-     * Fn.value().apply(Map.entry(1,"one"));          // returns "one"
+     * Fn.value().apply(Map.entry("name","Alice"));  // returns "Alice"
+     * Fn.value().apply(Map.entry(1,"one"));         // returns "one"
      * }</pre>
      *
      * @param <K> the key type
@@ -2078,8 +2132,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.left().apply(Pair.of("left","right"));   // returns "left"
-     * Fn.left().apply(Pair.of(1,2));              // returns 1
+     * Fn.left().apply(Pair.of("left","right"));  // returns "left"
+     * Fn.left().apply(Pair.of(1,2));             // returns 1
      * }</pre>
      *
      * @param <L> the left element type
@@ -2097,8 +2151,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.right().apply(Pair.of("left","right"));   // returns "right"
-     * Fn.right().apply(Pair.of(1,2));              // returns 2
+     * Fn.right().apply(Pair.of("left","right"));  // returns "right"
+     * Fn.right().apply(Pair.of(1,2));             // returns 2
      * }</pre>
      *
      * @param <L> the left element type
@@ -2270,8 +2324,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.pair().apply("left","right");   // returns Pair.of("left","right")
-     * Fn.pair().apply(1,2);              // returns Pair.of(1,2)
+     * Fn.pair().apply("left","right");  // returns Pair.of("left","right")
+     * Fn.pair().apply(1,2);             // returns Pair.of(1,2)
      * }</pre>
      *
      * @param <L> the left element type
@@ -2382,9 +2436,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.trim().apply("  hello  ");   // returns "hello"
-     * Fn.trim().apply("   ");         // returns ""
-     * Fn.trim().apply(null);          // returns null
+     * Fn.trim().apply("  hello  ");  // returns "hello"
+     * Fn.trim().apply("   ");        // returns ""
+     * Fn.trim().apply(null);         // returns null
      * }</pre>
      *
      * @return a UnaryOperator that trims strings, mapping {@code null} to {@code null}
@@ -2399,8 +2453,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.trimToEmpty().apply("  hello  ");   // returns "hello"
-     * Fn.trimToEmpty().apply(null);          // returns ""
+     * Fn.trimToEmpty().apply("  hello  ");  // returns "hello"
+     * Fn.trimToEmpty().apply(null);         // returns ""
      * }</pre>
      *
      * @return a UnaryOperator that trims strings to empty
@@ -2415,8 +2469,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.trimToNull().apply("  hello  ");   // returns "hello"
-     * Fn.trimToNull().apply("   ");         // returns null
+     * Fn.trimToNull().apply("  hello  ");  // returns "hello"
+     * Fn.trimToNull().apply("   ");        // returns null
      * }</pre>
      *
      * @return a UnaryOperator that trims strings to null
@@ -2432,8 +2486,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.strip().apply("  hello  ");   // returns "hello"
-     * Fn.strip().apply(null);          // returns null
+     * Fn.strip().apply("  hello  ");  // returns "hello"
+     * Fn.strip().apply(null);         // returns null
      * }</pre>
      *
      * @return a UnaryOperator that strips strings
@@ -2448,8 +2502,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.stripToEmpty().apply("  hello  ");   // returns "hello"
-     * Fn.stripToEmpty().apply(null);          // returns ""
+     * Fn.stripToEmpty().apply("  hello  ");  // returns "hello"
+     * Fn.stripToEmpty().apply(null);         // returns ""
      * }</pre>
      *
      * @return a UnaryOperator that strips strings to empty
@@ -2464,8 +2518,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.stripToNull().apply("  hello  ");   // returns "hello"
-     * Fn.stripToNull().apply("  ");          // returns null
+     * Fn.stripToNull().apply("  hello  ");  // returns "hello"
+     * Fn.stripToNull().apply("  ");         // returns null
      * }</pre>
      *
      * @return a UnaryOperator that strips strings to null
@@ -2480,8 +2534,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.nullToEmpty().apply("hello");   // returns "hello"
-     * Fn.nullToEmpty().apply(null);      // returns ""
+     * Fn.nullToEmpty().apply("hello");  // returns "hello"
+     * Fn.nullToEmpty().apply(null);     // returns ""
      * }</pre>
      *
      * @return a UnaryOperator that converts {@code null} to empty string
@@ -2496,8 +2550,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.nullToEmptyList().apply(List.of("a"));   // returns [a]
-     * Fn.nullToEmptyList().apply(null);           // returns []
+     * Fn.nullToEmptyList().apply(List.of("a"));  // returns [a]
+     * Fn.nullToEmptyList().apply(null);          // returns []
      * }</pre>
      *
      * @param <T> the element type
@@ -2514,8 +2568,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.nullToEmptySet().apply(Set.of("a"));   // returns [a]
-     * Fn.nullToEmptySet().apply(null);          // returns []
+     * Fn.nullToEmptySet().apply(Set.of("a"));  // returns [a]
+     * Fn.nullToEmptySet().apply(null);         // returns []
      * }</pre>
      *
      * @param <T> the element type
@@ -2532,8 +2586,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.nullToEmptyMap().apply(Map.of("k","v"));   // returns {k=v}
-     * Fn.nullToEmptyMap().apply(null);              // returns {}
+     * Fn.nullToEmptyMap().apply(Map.of("k","v"));  // returns {k=v}
+     * Fn.nullToEmptyMap().apply(null);             // returns {}
      * }</pre>
      *
      * @param <K> the key type
@@ -2552,8 +2606,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.len().apply(new String[]{"a","b","c"});   // returns 3
-     * Fn.len().apply(new String[0]);               // returns 0
+     * Fn.len().apply(new String[]{"a","b","c"});  // returns 3
+     * Fn.len().apply(new String[0]);              // returns 0
      * }</pre>
      *
      * @param <T> the array element type
@@ -2570,8 +2624,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.length().apply("hello");   // returns 5
-     * Fn.length().apply("");        // returns 0
+     * Fn.length().apply("hello");  // returns 5
+     * Fn.length().apply("");       // returns 0
      * }</pre>
      *
      * @param <T> the CharSequence type
@@ -2588,8 +2642,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.size().apply(List.of(1,2,3));      // returns 3
-     * Fn.size().apply(new ArrayList<>());   // returns 0
+     * Fn.size().apply(List.of(1,2,3));     // returns 3
+     * Fn.size().apply(new ArrayList<>());  // returns 0
      * }</pre>
      *
      * @param <T> the Collection type
@@ -2607,8 +2661,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.mapSize().apply(Map.of("a",1,"b",2));   // returns 2
-     * Fn.mapSize().apply(new HashMap<>());       // returns 0
+     * Fn.mapSize().apply(Map.of("a",1,"b",2));  // returns 2
+     * Fn.mapSize().apply(new HashMap<>());      // returns 0
      * }</pre>
      *
      * @param <T> the Map type
@@ -2629,21 +2683,21 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.cast(Number.class).apply(123);       // returns 123 as Number
-     * Fn.cast(String.class).apply("hello");   // returns "hello" as String
+     * Fn.cast(Number.class).apply(123);      // returns 123 as Number
+     * Fn.cast(String.class).apply("hello");  // returns "hello" as String
      * }</pre>
      *
      * @param <T> the source type
      * @param <U> the target type
-     * @param clazz the class to cast to
+     * @param targetClass the class to cast to
      * @return a Function that performs type casting
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see Class#cast(Object)
      */
-    public static <T, U> Function<T, U> cast(final Class<U> clazz) throws IllegalArgumentException {
-        N.checkArgNotNull(clazz, cs.clazz);
+    public static <T, U> Function<T, U> cast(final Class<U> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return clazz::cast;
+        return targetClass::cast;
     }
 
     /**
@@ -2689,9 +2743,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isNull().test(null);      // returns true
-     * Fn.isNull().test("hello");   // returns false
-     * Fn.isNull().test(0);         // returns false
+     * Fn.isNull().test(null);     // returns true
+     * Fn.isNull().test("hello");  // returns false
+     * Fn.isNull().test(0);        // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2707,8 +2761,8 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Map.Entry<String, String>> hasNullValue = Fn.isNull(Map.Entry::getValue);
-     * hasNullValue.test(N.newEntry("a", null));   // returns true
-     * hasNullValue.test(Map.entry("a", "x"));     // returns false
+     * hasNullValue.test(N.newEntry("a", null));  // returns true
+     * hasNullValue.test(Map.entry("a", "x"));    // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2716,7 +2770,7 @@ public final class Fn {
      * @return a Predicate that tests if the extracted value is null
      * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      */
-    public static <T> Predicate<T> isNull(final java.util.function.Function<T, ?> valueExtractor) throws IllegalArgumentException {
+    public static <T> Predicate<T> isNull(final java.util.function.Function<? super T, ?> valueExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         return t -> valueExtractor.apply(t) == null;
@@ -2727,9 +2781,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isEmpty().test("");        // returns true
-     * Fn.isEmpty().test(null);      // returns true
-     * Fn.isEmpty().test("hello");   // returns false
+     * Fn.isEmpty().test("");       // returns true
+     * Fn.isEmpty().test(null);     // returns true
+     * Fn.isEmpty().test("hello");  // returns false
      * }</pre>
      *
      * @param <T> the CharSequence type
@@ -2746,9 +2800,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Map.Entry<String, String>> hasEmptyValue = Fn.isEmpty(Map.Entry::getValue);
-     * hasEmptyValue.test(Map.entry("a", ""));      // returns true
-     * hasEmptyValue.test(N.newEntry("a", null));   // returns true
-     * hasEmptyValue.test(Map.entry("a", "x"));     // returns false
+     * hasEmptyValue.test(Map.entry("a", ""));     // returns true
+     * hasEmptyValue.test(N.newEntry("a", null));  // returns true
+     * hasEmptyValue.test(Map.entry("a", "x"));    // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2756,7 +2810,8 @@ public final class Fn {
      * @return a Predicate that tests if the extracted value is empty
      * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      */
-    public static <T> Predicate<T> isEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) throws IllegalArgumentException {
+    public static <T> Predicate<T> isEmpty(final java.util.function.Function<? super T, ? extends CharSequence> valueExtractor)
+            throws IllegalArgumentException {
         N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         return t -> Strings.isEmpty(valueExtractor.apply(t));
@@ -2767,10 +2822,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isBlank().test("   ");     // returns true
-     * Fn.isBlank().test("");        // returns true
-     * Fn.isBlank().test(null);      // returns true
-     * Fn.isBlank().test("hello");   // returns false
+     * Fn.isBlank().test("   ");    // returns true
+     * Fn.isBlank().test("");       // returns true
+     * Fn.isBlank().test(null);     // returns true
+     * Fn.isBlank().test("hello");  // returns false
      * }</pre>
      *
      * @param <T> the CharSequence type
@@ -2787,9 +2842,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Map.Entry<String, String>> hasBlankValue = Fn.isBlank(Map.Entry::getValue);
-     * hasBlankValue.test(Map.entry("a", "   "));     // returns true
-     * hasBlankValue.test(N.newEntry("a", null));     // returns true
-     * hasBlankValue.test(Map.entry("a", "hello"));   // returns false
+     * hasBlankValue.test(Map.entry("a", "   "));    // returns true
+     * hasBlankValue.test(N.newEntry("a", null));    // returns true
+     * hasBlankValue.test(Map.entry("a", "hello"));  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2797,7 +2852,8 @@ public final class Fn {
      * @return a Predicate that tests if the extracted value is blank
      * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      */
-    public static <T> Predicate<T> isBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) throws IllegalArgumentException {
+    public static <T> Predicate<T> isBlank(final java.util.function.Function<? super T, ? extends CharSequence> valueExtractor)
+            throws IllegalArgumentException {
         N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         return t -> Strings.isBlank(valueExtractor.apply(t));
@@ -2808,9 +2864,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isEmptyArray().test(new String[0]);       // returns true
-     * Fn.isEmptyArray().test(new Integer[]{});     // returns true
-     * Fn.isEmptyArray().test(new String[]{"a"});   // returns false
+     * Fn.isEmptyArray().test(new String[0]);      // returns true
+     * Fn.isEmptyArray().test(new Integer[]{});    // returns true
+     * Fn.isEmptyArray().test(new String[]{"a"});  // returns false
      * }</pre>
      *
      * @param <T> the array element type
@@ -2827,9 +2883,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isEmptyCollection().test(List.of());           // returns true
-     * Fn.isEmptyCollection().test(new ArrayList<>());   // returns true
-     * Fn.isEmptyCollection().test(List.of("a"));        // returns false
+     * Fn.isEmptyCollection().test(List.of());          // returns true
+     * Fn.isEmptyCollection().test(new ArrayList<>());  // returns true
+     * Fn.isEmptyCollection().test(List.of("a"));       // returns false
      * }</pre>
      *
      * @param <T> the Collection type
@@ -2846,9 +2902,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isEmptyMap().test(Map.of());          // returns true
-     * Fn.isEmptyMap().test(new HashMap<>());   // returns true
-     * Fn.isEmptyMap().test(Map.of("a",1));     // returns false
+     * Fn.isEmptyMap().test(Map.of());         // returns true
+     * Fn.isEmptyMap().test(new HashMap<>());  // returns true
+     * Fn.isEmptyMap().test(Map.of("a",1));    // returns false
      * }</pre>
      *
      * @param <T> the Map type
@@ -2884,8 +2940,8 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Map.Entry<String, String>> hasValue = Fn.notNull(Map.Entry::getValue);
-     * hasValue.test(Map.entry("a", "x"));     // returns true
-     * hasValue.test(N.newEntry("a", null));   // returns false
+     * hasValue.test(Map.entry("a", "x"));    // returns true
+     * hasValue.test(N.newEntry("a", null));  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2893,7 +2949,7 @@ public final class Fn {
      * @return a Predicate that tests if the extracted value is not null
      * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      */
-    public static <T> Predicate<T> notNull(final java.util.function.Function<T, ?> valueExtractor) throws IllegalArgumentException {
+    public static <T> Predicate<T> notNull(final java.util.function.Function<? super T, ?> valueExtractor) throws IllegalArgumentException {
         N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         return t -> valueExtractor.apply(t) != null;
@@ -2924,9 +2980,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Map.Entry<String, String>> hasNonEmptyValue = Fn.notEmpty(Map.Entry::getValue);
-     * hasNonEmptyValue.test(Map.entry("a", "hello"));   // returns true
-     * hasNonEmptyValue.test(Map.entry("a", ""));        // returns false
-     * hasNonEmptyValue.test(N.newEntry("a", null));     // returns false
+     * hasNonEmptyValue.test(Map.entry("a", "hello"));  // returns true
+     * hasNonEmptyValue.test(Map.entry("a", ""));       // returns false
+     * hasNonEmptyValue.test(N.newEntry("a", null));    // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2934,7 +2990,8 @@ public final class Fn {
      * @return a Predicate that tests if the extracted value is not empty
      * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      */
-    public static <T> Predicate<T> notEmpty(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) throws IllegalArgumentException {
+    public static <T> Predicate<T> notEmpty(final java.util.function.Function<? super T, ? extends CharSequence> valueExtractor)
+            throws IllegalArgumentException {
         N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         return t -> Strings.isNotEmpty(valueExtractor.apply(t));
@@ -2945,10 +3002,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notBlank().test("hello");   // returns true
-     * Fn.notBlank().test(" a ");     // returns true
-     * Fn.notBlank().test("   ");     // returns false
-     * Fn.notBlank().test(null);      // returns false
+     * Fn.notBlank().test("hello");  // returns true
+     * Fn.notBlank().test(" a ");    // returns true
+     * Fn.notBlank().test("   ");    // returns false
+     * Fn.notBlank().test(null);     // returns false
      * }</pre>
      *
      * @param <T> the CharSequence type
@@ -2965,9 +3022,9 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Map.Entry<String, String>> hasNonBlankValue = Fn.notBlank(Map.Entry::getValue);
-     * hasNonBlankValue.test(Map.entry("a", "hello"));   // returns true
-     * hasNonBlankValue.test(Map.entry("a", "   "));     // returns false
-     * hasNonBlankValue.test(N.newEntry("a", null));     // returns false
+     * hasNonBlankValue.test(Map.entry("a", "hello"));  // returns true
+     * hasNonBlankValue.test(Map.entry("a", "   "));    // returns false
+     * hasNonBlankValue.test(N.newEntry("a", null));    // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2975,7 +3032,8 @@ public final class Fn {
      * @return a Predicate that tests if the extracted value is not blank
      * @throws IllegalArgumentException if {@code valueExtractor} is {@code null}.
      */
-    public static <T> Predicate<T> notBlank(final java.util.function.Function<T, ? extends CharSequence> valueExtractor) throws IllegalArgumentException {
+    public static <T> Predicate<T> notBlank(final java.util.function.Function<? super T, ? extends CharSequence> valueExtractor)
+            throws IllegalArgumentException {
         N.checkArgNotNull(valueExtractor, cs.valueExtractor);
 
         return t -> Strings.isNotBlank(valueExtractor.apply(t));
@@ -2986,9 +3044,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notEmptyArray().test(new String[]{"a"});    // returns true
-     * Fn.notEmptyArray().test(new Integer[]{1,2});   // returns true
-     * Fn.notEmptyArray().test(new String[0]);        // returns false
+     * Fn.notEmptyArray().test(new String[]{"a"});   // returns true
+     * Fn.notEmptyArray().test(new Integer[]{1,2});  // returns true
+     * Fn.notEmptyArray().test(new String[0]);       // returns false
      * }</pre>
      *
      * @param <T> the array element type
@@ -3005,9 +3063,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notEmptyCollection().test(List.of("a"));   // returns true
-     * Fn.notEmptyCollection().test(Set.of(1,2));    // returns true
-     * Fn.notEmptyCollection().test(List.of());      // returns false
+     * Fn.notEmptyCollection().test(List.of("a"));  // returns true
+     * Fn.notEmptyCollection().test(Set.of(1,2));   // returns true
+     * Fn.notEmptyCollection().test(List.of());     // returns false
      * }</pre>
      *
      * @param <T> the Collection type
@@ -3024,9 +3082,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notEmptyMap().test(Map.of("a",1));         // returns true
-     * Fn.notEmptyMap().test(Map.of("x",1,"y",2));   // returns true
-     * Fn.notEmptyMap().test(Map.of());              // returns false
+     * Fn.notEmptyMap().test(Map.of("a",1));        // returns true
+     * Fn.notEmptyMap().test(Map.of("x",1,"y",2));  // returns true
+     * Fn.notEmptyMap().test(Map.of());             // returns false
      * }</pre>
      *
      * @param <T> the Map type
@@ -3043,9 +3101,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isFile().test(new File("/path/to/file.txt"));   // returns true if file exists
-     * Fn.isFile().test(new File("/path/to/dir"));        // returns false
-     * Fn.isFile().test(null);                            // returns false
+     * Fn.isFile().test(new File("/path/to/file.txt"));  // returns true if file exists
+     * Fn.isFile().test(new File("/path/to/dir"));       // returns false
+     * Fn.isFile().test(null);                           // returns false
      * }</pre>
      *
      * @return a Predicate that tests if Files are regular files
@@ -3060,9 +3118,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.isDirectory().test(new File("/path/to/dir"));        // returns true if directory
-     * Fn.isDirectory().test(new File("/path/to/file.txt"));   // returns false
-     * Fn.isDirectory().test(null);                            // returns false
+     * Fn.isDirectory().test(new File("/path/to/dir"));       // returns true if directory
+     * Fn.isDirectory().test(new File("/path/to/file.txt"));  // returns false
+     * Fn.isDirectory().test(null);                           // returns false
      * }</pre>
      *
      * @return a Predicate that tests if Files are directories
@@ -3078,9 +3136,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.equal("hello").test("hello");   // returns true
-     * Fn.equal("hello").test("world");   // returns false
-     * Fn.equal("hello").test(null);      // returns false
+     * Fn.equal("hello").test("hello");  // returns true
+     * Fn.equal("hello").test("world");  // returns false
+     * Fn.equal("hello").test(null);     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -3097,9 +3155,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.eqOr("a","b").test("a");   // returns true
-     * Fn.eqOr("a","b").test("b");   // returns true
-     * Fn.eqOr("a","b").test("c");   // returns false
+     * Fn.eqOr("a","b").test("a");  // returns true
+     * Fn.eqOr("a","b").test("b");  // returns true
+     * Fn.eqOr("a","b").test("c");  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -3116,9 +3174,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.eqOr("a", "b", "c").test("c");   // returns true
-     * Fn.eqOr("a", "b", "c").test("a");   // returns true
-     * Fn.eqOr("a", "b", "c").test("d");   // returns false
+     * Fn.eqOr("a", "b", "c").test("c");  // returns true
+     * Fn.eqOr("a", "b", "c").test("a");  // returns true
+     * Fn.eqOr("a", "b", "c").test("d");  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -3137,9 +3195,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notEqual("hello").test("world");   // returns true
-     * Fn.notEqual("hello").test("hello");   // returns false
-     * Fn.notEqual("hello").test(null);      // returns true
+     * Fn.notEqual("hello").test("world");  // returns true
+     * Fn.notEqual("hello").test("hello");  // returns false
+     * Fn.notEqual("hello").test(null);     // returns true
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -3156,9 +3214,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.greaterThan(5).test(10);   // returns true
-     * Fn.greaterThan(5).test(5);    // returns false
-     * Fn.greaterThan(5).test(3);    // returns false
+     * Fn.greaterThan(5).test(10);  // returns true
+     * Fn.greaterThan(5).test(5);   // returns false
+     * Fn.greaterThan(5).test(3);   // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3179,9 +3237,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.greaterThanOrEqual(5).test(10);   // returns true
-     * Fn.greaterThanOrEqual(5).test(5);    // returns true
-     * Fn.greaterThanOrEqual(5).test(3);    // returns false
+     * Fn.greaterThanOrEqual(5).test(10);  // returns true
+     * Fn.greaterThanOrEqual(5).test(5);   // returns true
+     * Fn.greaterThanOrEqual(5).test(3);   // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3202,9 +3260,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.lessThan(5).test(3);    // returns true
-     * Fn.lessThan(5).test(5);    // returns false
-     * Fn.lessThan(5).test(10);   // returns false
+     * Fn.lessThan(5).test(3);   // returns true
+     * Fn.lessThan(5).test(5);   // returns false
+     * Fn.lessThan(5).test(10);  // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3225,9 +3283,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.lessThanOrEqual(5).test(3);    // returns true
-     * Fn.lessThanOrEqual(5).test(5);    // returns true
-     * Fn.lessThanOrEqual(5).test(10);   // returns false
+     * Fn.lessThanOrEqual(5).test(3);   // returns true
+     * Fn.lessThanOrEqual(5).test(5);   // returns true
+     * Fn.lessThanOrEqual(5).test(10);  // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3249,9 +3307,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.gtAndLt(5,15).test(10);   // returns true
-     * Fn.gtAndLt(5,15).test(5);    // returns false
-     * Fn.gtAndLt(5,15).test(15);   // returns false
+     * Fn.gtAndLt(5,15).test(10);  // returns true
+     * Fn.gtAndLt(5,15).test(5);   // returns false
+     * Fn.gtAndLt(5,15).test(15);  // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3274,9 +3332,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.geAndLt(5,15).test(5);    // returns true
-     * Fn.geAndLt(5,15).test(10);   // returns true
-     * Fn.geAndLt(5,15).test(15);   // returns false
+     * Fn.geAndLt(5,15).test(5);   // returns true
+     * Fn.geAndLt(5,15).test(10);  // returns true
+     * Fn.geAndLt(5,15).test(15);  // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3299,9 +3357,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.geAndLe(5,15).test(5);    // returns true
-     * Fn.geAndLe(5,15).test(15);   // returns true
-     * Fn.geAndLe(5,15).test(4);    // returns false
+     * Fn.geAndLe(5,15).test(5);   // returns true
+     * Fn.geAndLe(5,15).test(15);  // returns true
+     * Fn.geAndLe(5,15).test(4);   // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3324,9 +3382,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.gtAndLe(5,15).test(15);   // returns true
-     * Fn.gtAndLe(5,15).test(10);   // returns true
-     * Fn.gtAndLe(5,15).test(5);    // returns false
+     * Fn.gtAndLe(5,15).test(15);  // returns true
+     * Fn.gtAndLe(5,15).test(10);  // returns true
+     * Fn.gtAndLe(5,15).test(5);   // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3349,9 +3407,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.between(5,15).test(10);   // returns true
-     * Fn.between(5,15).test(5);    // returns false
-     * Fn.between(5,15).test(15);   // returns false
+     * Fn.between(5,15).test(10);  // returns true
+     * Fn.between(5,15).test(5);   // returns false
+     * Fn.between(5,15).test(15);  // returns false
      * }</pre>
      *
      * <p>Comparison goes through {@link N#compare(Comparable, Comparable)}, which is {@code null}-safe and orders
@@ -3375,9 +3433,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.in(Set.of("a","b")).test("a");   // returns true
-     * Fn.in(List.of(1,2,3)).test(2);      // returns true
-     * Fn.in(List.of(1,2,3)).test(5);      // returns false
+     * Fn.in(Set.of("a","b")).test("a");  // returns true
+     * Fn.in(List.of(1,2,3)).test(2);     // returns true
+     * Fn.in(List.of(1,2,3)).test(5);     // returns false
      * }</pre>
      *
      * <p>Membership is evaluated live: every call to {@code test(...)} consults {@code c} as it is at
@@ -3406,9 +3464,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notIn(List.of("a","b")).test("c");   // returns true
-     * Fn.notIn(Set.of(1,2)).test(5);          // returns true
-     * Fn.notIn(List.of("a","b")).test("a");   // returns false
+     * Fn.notIn(List.of("a","b")).test("c");  // returns true
+     * Fn.notIn(Set.of(1,2)).test(5);         // returns true
+     * Fn.notIn(List.of("a","b")).test("a");  // returns false
      * }</pre>
      *
      * <p>Membership is evaluated live: every call to {@code test(...)} consults {@code c} as it is at
@@ -3436,22 +3494,22 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.instanceOf(String.class).test("hello");   // returns true
-     * Fn.instanceOf(Number.class).test(123);       // returns true
-     * Fn.instanceOf(String.class).test(123);       // returns false
-     * Fn.instanceOf(Integer.class).test(null);     // returns false
+     * Fn.instanceOf(String.class).test("hello");  // returns true
+     * Fn.instanceOf(Number.class).test(123);      // returns true
+     * Fn.instanceOf(String.class).test(123);      // returns false
+     * Fn.instanceOf(Integer.class).test(null);    // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
-     * @param clazz the class to test instance membership
+     * @param targetClass the class to test instance membership
      * @return a Predicate that tests if objects are instances of clazz
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see Class#isInstance(Object)
      */
-    public static <T> Predicate<T> instanceOf(final Class<?> clazz) throws IllegalArgumentException {
-        N.checkArgNotNull(clazz, cs.clazz);
+    public static <T> Predicate<T> instanceOf(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return clazz::isInstance;
+        return targetClass::isInstance;
     }
 
     /**
@@ -3459,26 +3517,26 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.subtypeOf(Number.class).test(Integer.class);   // returns true
-     * Fn.subtypeOf(Number.class).test(Double.class);    // returns true
-     * Fn.subtypeOf(Integer.class).test(Number.class);   // returns false
-     * Fn.subtypeOf(String.class).test(Integer.class);   // returns false
+     * Fn.subtypeOf(Number.class).test(Integer.class);  // returns true
+     * Fn.subtypeOf(Number.class).test(Double.class);   // returns true
+     * Fn.subtypeOf(Integer.class).test(Number.class);  // returns false
+     * Fn.subtypeOf(String.class).test(Integer.class);  // returns false
      * }</pre>
      *
      * <p>Unlike {@link #instanceOf(Class)}, which tests {@code false} for {@code null}, the returned
      * predicate throws a {@link NullPointerException} for a {@code null} input - that is what
      * {@link Class#isAssignableFrom(Class)} does with a {@code null} argument.</p>
      *
-     * @param clazz the superclass to test against
+     * @param targetClass the superclass to test against
      * @return a Predicate that tests if classes are subtypes of clazz
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      * @see Class#isAssignableFrom(Class)
      * @see #instanceOf(Class)
      */
-    public static Predicate<Class<?>> subtypeOf(final Class<?> clazz) throws IllegalArgumentException {
-        N.checkArgNotNull(clazz, cs.clazz);
+    public static Predicate<Class<?>> subtypeOf(final Class<?> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return clazz::isAssignableFrom;
+        return targetClass::isAssignableFrom;
     }
 
     /**
@@ -3486,10 +3544,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.startsWith("Hello").test("Hello World");   // returns true
-     * Fn.startsWith("Pre").test("Prefix");          // returns true
-     * Fn.startsWith("Hello").test("World");         // returns false
-     * Fn.startsWith("Hello").test("");              // returns false
+     * Fn.startsWith("Hello").test("Hello World");  // returns true
+     * Fn.startsWith("Pre").test("Prefix");         // returns true
+     * Fn.startsWith("Hello").test("World");        // returns false
+     * Fn.startsWith("Hello").test("");             // returns false
      * }</pre>
      *
      * @param prefix the prefix to test for
@@ -3508,10 +3566,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.endsWith("World").test("Hello World");   // returns true
-     * Fn.endsWith("ing").test("Running");         // returns true
-     * Fn.endsWith("World").test("Hello");         // returns false
-     * Fn.endsWith("ing").test("");                // returns false
+     * Fn.endsWith("World").test("Hello World");  // returns true
+     * Fn.endsWith("ing").test("Running");        // returns true
+     * Fn.endsWith("World").test("Hello");        // returns false
+     * Fn.endsWith("ing").test("");               // returns false
      * }</pre>
      *
      * @param suffix the suffix to test for
@@ -3530,10 +3588,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.contains("abc").test("xyz abc def");   // returns true
-     * Fn.contains("hello").test("hello");       // returns true
-     * Fn.contains("abc").test("xyz def");       // returns false
-     * Fn.contains("abc").test("");              // returns false
+     * Fn.contains("abc").test("xyz abc def");  // returns true
+     * Fn.contains("hello").test("hello");      // returns true
+     * Fn.contains("abc").test("xyz def");      // returns false
+     * Fn.contains("abc").test("");             // returns false
      * }</pre>
      *
      * @param valueToFind the substring to search for
@@ -3552,10 +3610,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notStartsWith("Hello").test("World");         // returns true
-     * Fn.notStartsWith("Hello").test("");              // returns true
-     * Fn.notStartsWith("Hello").test("Hello World");   // returns false
-     * Fn.notStartsWith("Pre").test("Prefix");          // returns false
+     * Fn.notStartsWith("Hello").test("World");        // returns true
+     * Fn.notStartsWith("Hello").test("");             // returns true
+     * Fn.notStartsWith("Hello").test("Hello World");  // returns false
+     * Fn.notStartsWith("Pre").test("Prefix");         // returns false
      * }</pre>
      *
      * @param prefix the prefix to test against
@@ -3574,10 +3632,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notEndsWith("ing").test("Hello");           // returns true
-     * Fn.notEndsWith("ing").test("");                // returns true
-     * Fn.notEndsWith("ing").test("Running");         // returns false
-     * Fn.notEndsWith("World").test("Hello World");   // returns false
+     * Fn.notEndsWith("ing").test("Hello");          // returns true
+     * Fn.notEndsWith("ing").test("");               // returns true
+     * Fn.notEndsWith("ing").test("Running");        // returns false
+     * Fn.notEndsWith("World").test("Hello World");  // returns false
      * }</pre>
      *
      * @param suffix the suffix to test against
@@ -3596,10 +3654,10 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.notContains("abc").test("xyz def");         // returns true
-     * Fn.notContains("abc").test("");                // returns true
-     * Fn.notContains("abc").test("xyz abc def");     // returns false
-     * Fn.notContains("hello").test("hello world");   // returns false
+     * Fn.notContains("abc").test("xyz def");        // returns true
+     * Fn.notContains("abc").test("");               // returns true
+     * Fn.notContains("abc").test("xyz abc def");    // returns false
+     * Fn.notContains("hello").test("hello world");  // returns false
      * }</pre>
      *
      * @param str the substring to test against
@@ -3614,21 +3672,32 @@ public final class Fn {
     }
 
     /**
-     * Returns a Predicate that tests if a CharSequence contains a match for the specified Pattern.
+     * Returns a Predicate that tests whether a CharSequence <b>contains</b> a match of the specified Pattern
+     * ({@link Matcher#find()}, like {@link Pattern#asPredicate()}) - <b>not</b> whether the whole input matches it.
+     *
+     * <p>Despite its name, this is not {@link String#matches(String)} / {@link Matcher#matches()}: a digits-only
+     * pattern such as {@code \d+} accepts {@code "a1"} because the input contains a digit. For whole-string
+     * validation use {@link Pattern#asMatchPredicate()} or {@link RegExUtil#matches(String, Pattern)}, or anchor the
+     * pattern ({@code ^\d+$}).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.matches(Pattern.compile("\\d+")).test("123");       // returns true
-     * Fn.matches(Pattern.compile("[a-z]+")).test("hello");   // returns true
-     * Fn.matches(Pattern.compile("\\d+")).test("abc");       // returns false
+     * Fn.matches(Pattern.compile("\\d+")).test("123");        // returns true
+     * Fn.matches(Pattern.compile("[a-z]+")).test("hello");    // returns true
+     * Fn.matches(Pattern.compile("\\d+")).test("abc");        // returns false
+     * Fn.matches(Pattern.compile("\\d+")).test("a1");         // returns true (contains a match; not a whole-string match)
+     * Pattern.compile("\\d+").asMatchPredicate().test("a1");  // returns false (whole-string match)
      * }</pre>
      *
-     * @param pattern the Pattern to match against
+     * @param pattern the Pattern to search for
      * @return a Predicate that tests if CharSequences contain a match for the pattern (a partial match is
      *         enough); a {@code null} input tests {@code false}
      * @throws IllegalArgumentException if {@code pattern} is {@code null}.
      * @see Pattern#matcher(CharSequence)
      * @see Matcher#find()
+     * @see Pattern#asPredicate()
+     * @see Pattern#asMatchPredicate()
+     * @see RegExUtil#matches(String, Pattern)
      */
     public static Predicate<CharSequence> matches(final Pattern pattern) throws IllegalArgumentException {
         N.checkArgNotNull(pattern, cs.pattern);
@@ -3641,9 +3710,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<String, String>equal().test("hello", "hello");   // returns true
-     * Fn.<String, String>equal().test("hello", "world");   // returns false
-     * Fn.<String, String>equal().test("hello", null);      // returns false
+     * Fn.<String, String>equal().test("hello", "hello");  // returns true
+     * Fn.<String, String>equal().test("hello", "world");  // returns false
+     * Fn.<String, String>equal().test("hello", null);     // returns false
      * }</pre>
      *
      * @param <T> the type of the first object
@@ -3660,9 +3729,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<String, String>notEqual().test("hello", "world");   // returns true
-     * Fn.<String, String>notEqual().test("hello", "hello");   // returns false
-     * Fn.<String, String>notEqual().test("hello", null);      // returns true
+     * Fn.<String, String>notEqual().test("hello", "world");  // returns true
+     * Fn.<String, String>notEqual().test("hello", "hello");  // returns false
+     * Fn.<String, String>notEqual().test("hello", null);     // returns true
      * }</pre>
      *
      * @param <T> the type of the first object
@@ -3679,9 +3748,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<Integer>greaterThan().test(10, 5);   // returns true
-     * Fn.<Integer>greaterThan().test(5, 5);    // returns false
-     * Fn.<Integer>greaterThan().test(3, 5);    // returns false
+     * Fn.<Integer>greaterThan().test(10, 5);  // returns true
+     * Fn.<Integer>greaterThan().test(5, 5);   // returns false
+     * Fn.<Integer>greaterThan().test(3, 5);   // returns false
      * }</pre>
      *
      * @param <T> the type of objects that may be compared
@@ -3697,9 +3766,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<Integer>greaterThanOrEqual().test(10, 5);   // returns true
-     * Fn.<Integer>greaterThanOrEqual().test(5, 5);    // returns true
-     * Fn.<Integer>greaterThanOrEqual().test(3, 5);    // returns false
+     * Fn.<Integer>greaterThanOrEqual().test(10, 5);  // returns true
+     * Fn.<Integer>greaterThanOrEqual().test(5, 5);   // returns true
+     * Fn.<Integer>greaterThanOrEqual().test(3, 5);   // returns false
      * }</pre>
      *
      * @param <T> the type of objects that may be compared
@@ -3715,9 +3784,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<Integer>lessThan().test(3, 5);    // returns true
-     * Fn.<Integer>lessThan().test(5, 5);    // returns false
-     * Fn.<Integer>lessThan().test(10, 5);   // returns false
+     * Fn.<Integer>lessThan().test(3, 5);   // returns true
+     * Fn.<Integer>lessThan().test(5, 5);   // returns false
+     * Fn.<Integer>lessThan().test(10, 5);  // returns false
      * }</pre>
      *
      * @param <T> the type of objects that may be compared
@@ -3733,9 +3802,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<Integer>lessThanOrEqual().test(3, 5);    // returns true
-     * Fn.<Integer>lessThanOrEqual().test(5, 5);    // returns true
-     * Fn.<Integer>lessThanOrEqual().test(10, 5);   // returns false
+     * Fn.<Integer>lessThanOrEqual().test(3, 5);   // returns true
+     * Fn.<Integer>lessThanOrEqual().test(5, 5);   // returns true
+     * Fn.<Integer>lessThanOrEqual().test(10, 5);  // returns false
      * }</pre>
      *
      * @param <T> the type of objects that may be compared
@@ -3751,9 +3820,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.not(Fn.isNull()).test("hello");          // returns true
-     * Fn.not(Fn.isEmpty()).test("x");             // returns true
-     * Fn.not(Fn.alwaysTrue()).test("anything");   // returns false
+     * Fn.not(Fn.isNull()).test("hello");         // returns true
+     * Fn.not(Fn.isEmpty()).test("x");            // returns true
+     * Fn.not(Fn.alwaysTrue()).test("anything");  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -3761,7 +3830,7 @@ public final class Fn {
      * @return a Predicate that returns the opposite of the input predicate
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      */
-    public static <T> Predicate<T> not(final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
+    public static <T> Predicate<T> not(final java.util.function.Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return t -> !predicate.test(t);
@@ -3772,9 +3841,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.not((BiPredicate<String, String>) String::equals).test("a", "a");              // returns false
-     * Fn.not((BiPredicate<String, String>) String::equals).test("a", "b");              // returns true
-     * Fn.not((BiPredicate<String, Integer>) (s, n) -> s.length() == n).test("ab", 3);   // returns true
+     * Fn.not((BiPredicate<String, String>) String::equals).test("a", "a");             // returns false
+     * Fn.not((BiPredicate<String, String>) String::equals).test("a", "b");             // returns true
+     * Fn.not((BiPredicate<String, Integer>) (s, n) -> s.length() == n).test("ab", 3);  // returns true
      * }</pre>
      *
      * @param <T> the type of the first input to the predicate
@@ -3783,7 +3852,7 @@ public final class Fn {
      * @return a BiPredicate that returns the opposite of the input bi-predicate
      * @throws IllegalArgumentException if {@code biPredicate} is {@code null}.
      */
-    public static <T, U> BiPredicate<T, U> not(final java.util.function.BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
+    public static <T, U> BiPredicate<T, U> not(final java.util.function.BiPredicate<? super T, ? super U> biPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
         return (t, u) -> !biPredicate.test(t, u);
@@ -3794,9 +3863,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.not((TriPredicate<Integer, Integer, Integer>) (a, b, c) -> a + b == c).test(1, 1, 2);             // returns false
-     * Fn.not((TriPredicate<Integer, Integer, Integer>) (a, b, c) -> a + b == c).test(1, 1, 3);             // returns true
-     * Fn.not((TriPredicate<String, String, String>) (a, b, c) -> (a + b).equals(c)).test("a", "b", "z");   // returns true
+     * Fn.not((TriPredicate<Integer, Integer, Integer>) (a, b, c) -> a + b == c).test(1, 1, 2);            // returns false
+     * Fn.not((TriPredicate<Integer, Integer, Integer>) (a, b, c) -> a + b == c).test(1, 1, 3);            // returns true
+     * Fn.not((TriPredicate<String, String, String>) (a, b, c) -> (a + b).equals(c)).test("a", "b", "z");  // returns true
      * }</pre>
      *
      * @param <A> the type of the first input to the predicate
@@ -3806,7 +3875,7 @@ public final class Fn {
      * @return a TriPredicate that returns the opposite of the input tri-predicate
      * @throws IllegalArgumentException if {@code triPredicate} is {@code null}.
      */
-    public static <A, B, C> TriPredicate<A, B, C> not(final TriPredicate<A, B, C> triPredicate) throws IllegalArgumentException {
+    public static <A, B, C> TriPredicate<A, B, C> not(final TriPredicate<? super A, ? super B, ? super C> triPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
         return (a, b, c) -> !triPredicate.test(a, b, c);
@@ -3817,8 +3886,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.and(() -> 1 > 0, () -> 2 > 1).getAsBoolean();   // returns true
-     * Fn.and(() -> true, () -> false).getAsBoolean();    // returns false
+     * Fn.and(() -> 1 > 0, () -> 2 > 1).getAsBoolean();  // returns true
+     * Fn.and(() -> true, () -> false).getAsBoolean();   // returns false
      * }</pre>
      *
      * @param first the first boolean supplier
@@ -3839,8 +3908,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.and(() -> true, () -> true, () -> true).getAsBoolean();    // returns true
-     * Fn.and(() -> true, () -> false, () -> true).getAsBoolean();   // returns false
+     * Fn.and(() -> true, () -> true, () -> true).getAsBoolean();   // returns true
+     * Fn.and(() -> true, () -> false, () -> true).getAsBoolean();  // returns false
      * }</pre>
      *
      * @param first the first boolean supplier
@@ -3863,8 +3932,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.and((String s) -> !s.isEmpty(), s -> s.length() < 5).test("abc");       // returns true
-     * Fn.and((String s) -> !s.isEmpty(), s -> s.length() < 5).test("toolong");   // returns false
+     * Fn.and((String s) -> !s.isEmpty(), s -> s.length() < 5).test("abc");      // returns true
+     * Fn.and((String s) -> !s.isEmpty(), s -> s.length() < 5).test("toolong");  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -3886,8 +3955,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.and((String s) -> !s.isEmpty(), s -> s.length() < 9, s -> s.startsWith("a")).test("abc");   // returns true
-     * Fn.and((String s) -> !s.isEmpty(), s -> s.length() < 9, s -> s.startsWith("a")).test("xyz");   // returns false
+     * Fn.and((String s) -> !s.isEmpty(), s -> s.length() < 9, s -> s.startsWith("a")).test("abc");  // returns true
+     * Fn.and((String s) -> !s.isEmpty(), s -> s.length() < 9, s -> s.startsWith("a")).test("xyz");  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -3909,25 +3978,28 @@ public final class Fn {
     /**
      * Returns a Predicate that performs logical AND on all predicates in the collection.
      *
-     * <p>The collection is copied, so later changes to it do not affect the returned predicate. (Reading it live
+     * <p>The collection is copied, so later changes to it do not affect the returned predicate, and a {@code null}
+     * element is rejected here rather than when the returned predicate first reaches it. (Reading it live
      * would let an emptied collection silently turn this into {@link #alwaysTrue()}, and would make the returned
      * predicate unsafe to share with threads that mutate the collection.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.and(N.asList((Predicate<String>) s -> !s.isEmpty(), s -> s.length() < 5)).test("abc");   // returns true
-     * Fn.and(N.asList((Predicate<String>) s -> !s.isEmpty(), s -> s.length() < 5)).test("");      // returns false
+     * Fn.and(N.asList((Predicate<String>) s -> !s.isEmpty(), s -> s.length() < 5)).test("abc");  // returns true
+     * Fn.and(N.asList((Predicate<String>) s -> !s.isEmpty(), s -> s.length() < 5)).test("");     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param c the collection of predicates
      * @return a Predicate that returns {@code true} only if all predicates return true
-     * @throws IllegalArgumentException if the collection is {@code null} or empty.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty, or contains a {@code null} element.
      */
     public static <T> Predicate<T> and(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
 
         final List<? extends java.util.function.Predicate<? super T>> predicates = new ArrayList<>(c);
+
+        N.checkElementNotNull(predicates, cs.c);
 
         return t -> {
             for (final java.util.function.Predicate<? super T> p : predicates) {
@@ -3945,8 +4017,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.and((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0).test("ab", 2);   // returns true
-     * Fn.and((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0).test("ab", 3);   // returns false
+     * Fn.and((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0).test("ab", 2);  // returns true
+     * Fn.and((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0).test("ab", 3);  // returns false
      * }</pre>
      *
      * @param <T> the type of the first input to the predicate
@@ -3969,8 +4041,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.and((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0, (s, n) -> n < 9).test("ab", 2);   // returns true
-     * Fn.and((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0, (s, n) -> n < 9).test("ab", 3);   // returns false
+     * Fn.and((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0, (s, n) -> n < 9).test("ab", 2);  // returns true
+     * Fn.and((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0, (s, n) -> n < 9).test("ab", 3);  // returns false
      * }</pre>
      *
      * @param <T> the type of the first input to the predicate
@@ -3994,14 +4066,15 @@ public final class Fn {
     /**
      * Returns a BiPredicate that performs logical AND on all bi-predicates in the list.
      *
-     * <p>The collection is copied, so later changes to it do not affect the returned predicate. (Reading it live
+     * <p>The collection is copied, so later changes to it do not affect the returned predicate, and a {@code null}
+     * element is rejected here rather than when the returned predicate first reaches it. (Reading it live
      * would let an emptied collection silently turn this into {@link #alwaysTrue()}, and would make the returned
      * predicate unsafe to share with threads that mutate the collection.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.and(N.asList((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0)).test("ab", 2);   // returns true
-     * Fn.and(N.asList((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0)).test("ab", 3);   // returns false
+     * Fn.and(N.asList((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0)).test("ab", 2);  // returns true
+     * Fn.and(N.asList((BiPredicate<String, Integer>) (s, n) -> s.length() == n, (s, n) -> n > 0)).test("ab", 3);  // returns false
      * }</pre>
      *
      * <p>This overload takes a {@code List}, not the {@code Collection} that the
@@ -4013,12 +4086,14 @@ public final class Fn {
      * @param <U> the type of the second input to the predicate
      * @param c the list of bi-predicates
      * @return a BiPredicate that returns {@code true} only if all bi-predicates return true
-     * @throws IllegalArgumentException if the list is {@code null} or empty.
+     * @throws IllegalArgumentException if the list is {@code null} or empty, or contains a {@code null} element.
      */
     public static <T, U> BiPredicate<T, U> and(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
 
         final List<? extends java.util.function.BiPredicate<? super T, ? super U>> predicates = new ArrayList<>(c);
+
+        N.checkElementNotNull(predicates, cs.c);
 
         return (t, u) -> {
             for (final java.util.function.BiPredicate<? super T, ? super U> p : predicates) {
@@ -4036,8 +4111,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.or(() -> false, () -> true).getAsBoolean();    // returns true
-     * Fn.or(() -> false, () -> false).getAsBoolean();   // returns false
+     * Fn.or(() -> false, () -> true).getAsBoolean();   // returns true
+     * Fn.or(() -> false, () -> false).getAsBoolean();  // returns false
      * }</pre>
      *
      * @param first the first boolean supplier
@@ -4058,8 +4133,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.or(() -> false, () -> false, () -> true).getAsBoolean();    // returns true
-     * Fn.or(() -> false, () -> false, () -> false).getAsBoolean();   // returns false
+     * Fn.or(() -> false, () -> false, () -> true).getAsBoolean();   // returns true
+     * Fn.or(() -> false, () -> false, () -> false).getAsBoolean();  // returns false
      * }</pre>
      *
      * @param first the first boolean supplier
@@ -4082,8 +4157,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.or((String s) -> s.isEmpty(), s -> s.length() > 3).test("hello");   // returns true
-     * Fn.or((String s) -> s.isEmpty(), s -> s.length() > 3).test("ab");      // returns false
+     * Fn.or((String s) -> s.isEmpty(), s -> s.length() > 3).test("hello");  // returns true
+     * Fn.or((String s) -> s.isEmpty(), s -> s.length() > 3).test("ab");     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -4105,8 +4180,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.or((String s) -> s.isEmpty(), s -> s.equals("x"), s -> s.length() > 3).test("hello");   // returns true
-     * Fn.or((String s) -> s.isEmpty(), s -> s.equals("x"), s -> s.length() > 3).test("ab");      // returns false
+     * Fn.or((String s) -> s.isEmpty(), s -> s.equals("x"), s -> s.length() > 3).test("hello");  // returns true
+     * Fn.or((String s) -> s.isEmpty(), s -> s.equals("x"), s -> s.length() > 3).test("ab");     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -4128,25 +4203,28 @@ public final class Fn {
     /**
      * Returns a Predicate that performs logical OR on all predicates in the collection.
      *
-     * <p>The collection is copied, so later changes to it do not affect the returned predicate. (Reading it live
+     * <p>The collection is copied, so later changes to it do not affect the returned predicate, and a {@code null}
+     * element is rejected here rather than when the returned predicate first reaches it. (Reading it live
      * would let an emptied collection silently turn this into {@link #alwaysFalse()}, and would make the returned
      * predicate unsafe to share with threads that mutate the collection.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.or(N.asList((Predicate<String>) String::isEmpty, s -> s.length() > 3)).test("hello");   // returns true
-     * Fn.or(N.asList((Predicate<String>) String::isEmpty, s -> s.length() > 3)).test("ab");      // returns false
+     * Fn.or(N.asList((Predicate<String>) String::isEmpty, s -> s.length() > 3)).test("hello");  // returns true
+     * Fn.or(N.asList((Predicate<String>) String::isEmpty, s -> s.length() > 3)).test("ab");     // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
      * @param c the collection of predicates
      * @return a Predicate that returns {@code true} if any predicate returns true
-     * @throws IllegalArgumentException if the collection is {@code null} or empty.
+     * @throws IllegalArgumentException if the collection is {@code null} or empty, or contains a {@code null} element.
      */
     public static <T> Predicate<T> or(final Collection<? extends java.util.function.Predicate<? super T>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
 
         final List<? extends java.util.function.Predicate<? super T>> predicates = new ArrayList<>(c);
+
+        N.checkElementNotNull(predicates, cs.c);
 
         return t -> {
             for (final java.util.function.Predicate<? super T> p : predicates) {
@@ -4164,8 +4242,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.or((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0).test("", 5);      // returns true
-     * Fn.or((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0).test("ab", -1);   // returns false
+     * Fn.or((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0).test("", 5);     // returns true
+     * Fn.or((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0).test("ab", -1);  // returns false
      * }</pre>
      *
      * @param <T> the type of the first input to the predicate
@@ -4188,8 +4266,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.or((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n < 0, (s, n) -> n > 0).test("", 5);     // returns true
-     * Fn.or((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n < 0, (s, n) -> n > 0).test("ab", 0);   // returns false
+     * Fn.or((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n < 0, (s, n) -> n > 0).test("", 5);    // returns true
+     * Fn.or((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n < 0, (s, n) -> n > 0).test("ab", 0);  // returns false
      * }</pre>
      *
      * @param <T> the type of the first input to the predicate
@@ -4213,14 +4291,15 @@ public final class Fn {
     /**
      * Returns a BiPredicate that performs logical OR on all bi-predicates in the list.
      *
-     * <p>The collection is copied, so later changes to it do not affect the returned predicate. (Reading it live
+     * <p>The collection is copied, so later changes to it do not affect the returned predicate, and a {@code null}
+     * element is rejected here rather than when the returned predicate first reaches it. (Reading it live
      * would let an emptied collection silently turn this into {@link #alwaysFalse()}, and would make the returned
      * predicate unsafe to share with threads that mutate the collection.)</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.or(N.asList((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0)).test("", 5);      // returns true
-     * Fn.or(N.asList((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0)).test("ab", -1);   // returns false
+     * Fn.or(N.asList((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0)).test("", 5);     // returns true
+     * Fn.or(N.asList((BiPredicate<String, Integer>) (s, n) -> s.isEmpty(), (s, n) -> n > 0)).test("ab", -1);  // returns false
      * }</pre>
      *
      * <p>This overload takes a {@code List}, not the {@code Collection} that the
@@ -4232,12 +4311,14 @@ public final class Fn {
      * @param <U> the type of the second input to the predicate
      * @param c the list of bi-predicates
      * @return a BiPredicate that returns {@code true} if any bi-predicate returns true
-     * @throws IllegalArgumentException if the list is {@code null} or empty.
+     * @throws IllegalArgumentException if the list is {@code null} or empty, or contains a {@code null} element.
      */
     public static <T, U> BiPredicate<T, U> or(final List<? extends java.util.function.BiPredicate<? super T, ? super U>> c) throws IllegalArgumentException {
         N.checkArgNotEmpty(c, cs.c);
 
         final List<? extends java.util.function.BiPredicate<? super T, ? super U>> predicates = new ArrayList<>(c);
+
+        N.checkElementNotNull(predicates, cs.c);
 
         return (t, u) -> {
             for (final java.util.function.BiPredicate<? super T, ? super U> p : predicates) {
@@ -4255,8 +4336,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<Integer, String> testByKey(k -> k > 5).test(Map.entry(10, "v"));       // returns true
-     * Fn.<String, String> testByKey(k -> k != null).test(Map.entry("k", "v"));   // returns true
+     * Fn.<Integer, String> testByKey(k -> k > 5).test(Map.entry(10, "v"));      // returns true
+     * Fn.<String, String> testByKey(k -> k != null).test(Map.entry("k", "v"));  // returns true
      * }</pre>
      *
      * @param <K> the key type
@@ -4276,8 +4357,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<String, Integer> testByValue(v -> v > 50).test(Map.entry("k", 100));          // returns true
-     * Fn.<String, String> testByValue(String::isEmpty).test(Map.entry("k", ""));        // returns true
+     * Fn.<String, Integer> testByValue(v -> v > 50).test(Map.entry("k", 100));    // returns true
+     * Fn.<String, String> testByValue(String::isEmpty).test(Map.entry("k", ""));  // returns true
      * }</pre>
      *
      * @param <K> the key type
@@ -4343,15 +4424,15 @@ public final class Fn {
      * @param <K> the key type
      * @param <V> the value type
      * @param <R> the result type
-     * @param func the function to apply to the key
+     * @param function the function to apply to the key
      * @return a Function that transforms Map.Entry keys
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final java.util.function.Function<? super K, ? extends R> func)
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByKey(final java.util.function.Function<? super K, ? extends R> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
-        return entry -> func.apply(entry.getKey());
+        return entry -> function.apply(entry.getKey());
     }
 
     /**
@@ -4365,15 +4446,15 @@ public final class Fn {
      * @param <K> the key type
      * @param <V> the value type
      * @param <R> the result type
-     * @param func the function to apply to the value
+     * @param function the function to apply to the value
      * @return a Function that transforms Map.Entry values
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final java.util.function.Function<? super V, ? extends R> func)
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyByValue(final java.util.function.Function<? super V, ? extends R> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
-        return entry -> func.apply(entry.getValue());
+        return entry -> function.apply(entry.getValue());
     }
 
     /**
@@ -4388,15 +4469,15 @@ public final class Fn {
      * @param <K> the key type
      * @param <V> the value type
      * @param <KK> the new key type
-     * @param func the function to transform the key
+     * @param function the function to transform the key
      * @return a Function that creates new Map.Entry with transformed key
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
-    public static <K, V, KK> Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapKey(final java.util.function.Function<? super K, ? extends KK> func)
+    public static <K, V, KK> Function<Map.Entry<K, V>, Map.Entry<KK, V>> mapKey(final java.util.function.Function<? super K, ? extends KK> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
-        return entry -> new ImmutableEntry<>(func.apply(entry.getKey()), entry.getValue());
+        return entry -> new ImmutableEntry<>(function.apply(entry.getKey()), entry.getValue());
     }
 
     /**
@@ -4411,15 +4492,15 @@ public final class Fn {
      * @param <K> the key type
      * @param <V> the value type
      * @param <VV> the new value type
-     * @param func the function to transform the value
+     * @param function the function to transform the value
      * @return a Function that creates new Map.Entry with transformed value
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
-    public static <K, V, VV> Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapValue(final java.util.function.Function<? super V, ? extends VV> func)
+    public static <K, V, VV> Function<Map.Entry<K, V>, Map.Entry<K, VV>> mapValue(final java.util.function.Function<? super V, ? extends VV> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
-        return entry -> new ImmutableEntry<>(entry.getKey(), func.apply(entry.getValue()));
+        return entry -> new ImmutableEntry<>(entry.getKey(), function.apply(entry.getValue()));
     }
 
     /**
@@ -4517,18 +4598,18 @@ public final class Fn {
      * @param <K> the type of the map key
      * @param <V> the type of the map value
      * @param <R> the type of the result produced by the function
-     * @param func the bi-function to apply to key and value together
+     * @param function the bi-function to apply to key and value together
      * @return a Function that transforms Map.Entry by extracting and applying the function to its key and value
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see #testKeyVal(java.util.function.BiPredicate)
      * @see #acceptKeyVal(java.util.function.BiConsumer)
      * @see Entries#f(java.util.function.BiFunction)
      */
-    public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> func)
+    public static <K, V, R> Function<Map.Entry<K, V>, R> applyKeyVal(final java.util.function.BiFunction<? super K, ? super V, ? extends R> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
-        return entry -> func.apply(entry.getKey(), entry.getValue());
+        return entry -> function.apply(entry.getKey(), entry.getValue());
     }
 
     /**
@@ -4652,6 +4733,11 @@ public final class Fn {
      * <p>This method provides null-safe mapping to collections. When the input is {@code null}, an empty list
      * is returned instead of throwing a NullPointerException or returning {@code null}.
      *
+     * <p>Only a {@code null} <i>input</i> is replaced: for a non-{@code null} input the mapper's result is returned
+     * as-is, so a mapper that returns {@code null} still makes the function return {@code null}. The empty list
+     * returned for a {@code null} input is the shared immutable {@link N#emptyList()}, whereas a mapper result keeps
+     * whatever mutability the mapper gave it.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Function<String, Collection<Character>> toChars =
@@ -4659,19 +4745,20 @@ public final class Fn {
      *         .mapToObj(c -> (char) c)
      *         .collect(Collectors.toList()));
      *
-     * Collection<Character> result1 = toChars.apply("hello");   // returns [h, e, l, l, o]
-     * Collection<Character> result2 = toChars.apply(null);      // returns []
+     * Collection<Character> result1 = toChars.apply("hello");  // returns [h, e, l, l, o]
+     * Collection<Character> result2 = toChars.apply(null);     // returns []
      * }</pre>
      *
      * @param <T> the type of the input
      * @param <R> the element type of the result collection
      * @param mapper the function to apply to {@code non-null} inputs
-     * @return a Function that safely handles {@code null} inputs
+     * @return a Function that returns an immutable empty list for a {@code null} input and the mapper's result
+     *         (possibly {@code null}) otherwise
      * @throws IllegalArgumentException if {@code mapper} is {@code null}.
      * @see #applyIfNotNullOrDefault(java.util.function.Function, java.util.function.Function, Object)
      */
     @Beta
-    public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<T, ? extends Collection<R>> mapper)
+    public static <T, R> Function<T, Collection<R>> applyIfNotNullOrEmpty(final java.util.function.Function<? super T, ? extends Collection<R>> mapper)
             throws IllegalArgumentException {
         N.checkArgNotNull(mapper, cs.mapper);
 
@@ -4693,8 +4780,8 @@ public final class Fn {
      *     address -> address.getStreet().length(),
      *     0);
      *
-     * Integer length1 = getStreetLength.apply(personWithAddress);      // returns 10
-     * Integer length2 = getStreetLength.apply(personWithoutAddress);   // returns 0
+     * Integer length1 = getStreetLength.apply(personWithAddress);     // returns 10
+     * Integer length2 = getStreetLength.apply(personWithoutAddress);  // returns 0
      * }</pre>
      *
      * @param <A> the type of the input
@@ -4707,8 +4794,8 @@ public final class Fn {
      * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB} is {@code null}.
      * @see #applyIfNotNullOrElseGet(java.util.function.Function, java.util.function.Function, java.util.function.Supplier)
      */
-    public static <A, B, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, ? extends R> mapperB, final R defaultValue) throws IllegalArgumentException {
+    public static <A, B, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<? super A, ? extends B> mapperA,
+            final java.util.function.Function<? super B, ? extends R> mapperB, final R defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(mapperA, cs.mapperA);
         N.checkArgNotNull(mapperB, cs.mapperB);
 
@@ -4732,8 +4819,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.applyIfNotNullOrDefault((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> "v" + n, "none").apply("hello");   // returns "v10"
-     * Fn.applyIfNotNullOrDefault((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> "v" + n, "none").apply(null);      // returns "none"
+     * Fn.applyIfNotNullOrDefault((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> "v" + n, "none").apply("hello");  // returns "v10"
+     * Fn.applyIfNotNullOrDefault((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> "v" + n, "none").apply(null);     // returns "none"
      * }</pre>
      *
      * @param <A> the type of the input
@@ -4747,9 +4834,9 @@ public final class Fn {
      * @return a Function with null-safe chaining
      * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC} is {@code null}.
      */
-    public static <A, B, C, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC, final R defaultValue)
-            throws IllegalArgumentException {
+    public static <A, B, C, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<? super A, ? extends B> mapperA,
+            final java.util.function.Function<? super B, ? extends C> mapperB, final java.util.function.Function<? super C, ? extends R> mapperC,
+            final R defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(mapperA, cs.mapperA);
         N.checkArgNotNull(mapperB, cs.mapperB);
         N.checkArgNotNull(mapperC, cs.mapperC);
@@ -4780,8 +4867,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.applyIfNotNullOrDefault((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> n + 1, (Integer n) -> "v" + n, "none").apply("hello");   // returns "v11"
-     * Fn.applyIfNotNullOrDefault((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> n + 1, (Integer n) -> "v" + n, "none").apply(null);      // returns "none"
+     * Fn.applyIfNotNullOrDefault((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> n + 1, (Integer n) -> "v" + n, "none").apply("hello");  // returns "v11"
+     * Fn.applyIfNotNullOrDefault((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> n + 1, (Integer n) -> "v" + n, "none").apply(null);     // returns "none"
      * }</pre>
      *
      * @param <A> the type of the input
@@ -4798,9 +4885,9 @@ public final class Fn {
      * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC},
      *         {@code mapperD} is {@code null}.
      */
-    public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
-            final java.util.function.Function<D, ? extends R> mapperD, final R defaultValue) throws IllegalArgumentException {
+    public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrDefault(final java.util.function.Function<? super A, ? extends B> mapperA,
+            final java.util.function.Function<? super B, ? extends C> mapperB, final java.util.function.Function<? super C, ? extends D> mapperC,
+            final java.util.function.Function<? super D, ? extends R> mapperD, final R defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(mapperA, cs.mapperA);
         N.checkArgNotNull(mapperB, cs.mapperB);
         N.checkArgNotNull(mapperC, cs.mapperC);
@@ -4838,8 +4925,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> "v" + n, () -> "none").apply("hello");   // returns "v5"
-     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> "v" + n, () -> "none").apply(null);      // returns "none"
+     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> "v" + n, () -> "none").apply("hello");  // returns "v5"
+     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> "v" + n, () -> "none").apply(null);     // returns "none"
      * }</pre>
      *
      * @param <A> the type of the input
@@ -4851,8 +4938,8 @@ public final class Fn {
      * @return a Function with null-safe chaining
      * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code supplier} is {@code null}.
      */
-    public static <A, B, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, ? extends R> mapperB, final java.util.function.Supplier<? extends R> supplier)
+    public static <A, B, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<? super A, ? extends B> mapperA,
+            final java.util.function.Function<? super B, ? extends R> mapperB, final java.util.function.Supplier<? extends R> supplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(mapperA, cs.mapperA);
         N.checkArgNotNull(mapperB, cs.mapperB);
@@ -4878,8 +4965,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> "v" + n, () -> "none").apply("hello");   // returns "v10"
-     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> "v" + n, () -> "none").apply(null);      // returns "none"
+     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> "v" + n, () -> "none").apply("hello");  // returns "v10"
+     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> "v" + n, () -> "none").apply(null);     // returns "none"
      * }</pre>
      *
      * @param <A> the type of the input
@@ -4894,8 +4981,8 @@ public final class Fn {
      * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC},
      *         {@code supplier} is {@code null}.
      */
-    public static <A, B, C, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, ? extends R> mapperC,
+    public static <A, B, C, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<? super A, ? extends B> mapperA,
+            final java.util.function.Function<? super B, ? extends C> mapperB, final java.util.function.Function<? super C, ? extends R> mapperC,
             final java.util.function.Supplier<? extends R> supplier) throws IllegalArgumentException {
         N.checkArgNotNull(mapperA, cs.mapperA);
         N.checkArgNotNull(mapperB, cs.mapperB);
@@ -4928,8 +5015,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> n + 1, (Integer n) -> "v" + n, () -> "none").apply("hello");   // returns "v11"
-     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> n + 1, (Integer n) -> "v" + n, () -> "none").apply(null);      // returns "none"
+     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> n + 1, (Integer n) -> "v" + n, () -> "none").apply("hello");  // returns "v11"
+     * Fn.applyIfNotNullOrElseGet((String s) -> s.length(), (Integer n) -> n * 2, (Integer n) -> n + 1, (Integer n) -> "v" + n, () -> "none").apply(null);     // returns "none"
      * }</pre>
      *
      * @param <A> the type of the input
@@ -4946,9 +5033,9 @@ public final class Fn {
      * @throws IllegalArgumentException if any of {@code mapperA}, {@code mapperB}, {@code mapperC},
      *         {@code mapperD}, {@code supplier} is {@code null}.
      */
-    public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<A, B> mapperA,
-            final java.util.function.Function<B, C> mapperB, final java.util.function.Function<C, D> mapperC,
-            final java.util.function.Function<D, ? extends R> mapperD, final java.util.function.Supplier<? extends R> supplier)
+    public static <A, B, C, D, R> Function<A, R> applyIfNotNullOrElseGet(final java.util.function.Function<? super A, ? extends B> mapperA,
+            final java.util.function.Function<? super B, ? extends C> mapperB, final java.util.function.Function<? super C, ? extends D> mapperC,
+            final java.util.function.Function<? super D, ? extends R> mapperD, final java.util.function.Supplier<? extends R> supplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(mapperA, cs.mapperA);
         N.checkArgNotNull(mapperB, cs.mapperB);
@@ -4997,28 +5084,28 @@ public final class Fn {
      *     c -> c.getTotalPurchases() * 0.1,
      *     0.0);
      *
-     * Double discount1 = getDiscount.apply(highValueCustomer);   // returns 15.0
-     * Double discount2 = getDiscount.apply(lowValueCustomer);    // returns 0.0
+     * Double discount1 = getDiscount.apply(highValueCustomer);  // returns 15.0
+     * Double discount2 = getDiscount.apply(lowValueCustomer);   // returns 0.0
      * }</pre>
      *
      * @param <T> the type of the input
      * @param <R> the result type
      * @param predicate the condition to test
-     * @param func the function to apply when predicate is {@code true}
+     * @param function the function to apply when predicate is {@code true}
      * @param defaultValue the value to return when predicate is false
      * @return a Function that conditionally applies transformation
-     * @throws IllegalArgumentException if any of {@code predicate}, {@code func} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code predicate}, {@code function} is {@code null}.
      * @see #applyIfOrElseGet(java.util.function.Predicate, java.util.function.Function, java.util.function.Supplier)
      */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseDefault(final java.util.function.Predicate<? super T> predicate,
-            final java.util.function.Function<? super T, ? extends R> func, final R defaultValue) throws IllegalArgumentException {
+            final java.util.function.Function<? super T, ? extends R> function, final R defaultValue) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
         return t -> {
             if (predicate.test(t)) {
-                return func.apply(t);
+                return function.apply(t);
             } else {
                 return defaultValue;
             }
@@ -5046,23 +5133,23 @@ public final class Fn {
      * @param <T> the type of the input
      * @param <R> the result type
      * @param predicate the condition to test
-     * @param func the function to apply when predicate is {@code true}
+     * @param function the function to apply when predicate is {@code true}
      * @param supplier the supplier for the value when predicate is {@code false}
      * @return a Function that conditionally applies transformation
-     * @throws IllegalArgumentException if any of {@code predicate}, {@code func}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code predicate}, {@code function}, {@code supplier} is {@code null}.
      * @see #applyIfOrElseDefault(java.util.function.Predicate, java.util.function.Function, Object)
      */
     @Beta
     public static <T, R> Function<T, R> applyIfOrElseGet(final java.util.function.Predicate<? super T> predicate,
-            final java.util.function.Function<? super T, ? extends R> func, final java.util.function.Supplier<? extends R> supplier)
+            final java.util.function.Function<? super T, ? extends R> function, final java.util.function.Supplier<? extends R> supplier)
             throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
         N.checkArgNotNull(supplier, cs.supplier);
 
         return t -> {
             if (predicate.test(t)) {
-                return func.apply(t);
+                return function.apply(t);
             } else {
                 return supplier.get();
             }
@@ -5103,15 +5190,29 @@ public final class Fn {
     /**
      * Returns a ToByteFunction that parses Strings to byte values.
      *
-     * <p>This method provides a reusable function for parsing string representations of byte values.
-     * It can be used in stream operations to convert strings to bytes.
+     * <p>Each string is converted with {@link Numbers#toByte(String)}, whose rules differ from
+     * {@link Byte#parseByte(String)}:
+     * <ul>
+     *   <li>{@code null} or an empty string is converted to {@code 0} instead of throwing;</li>
+     *   <li>a hexadecimal value with a {@code 0x}, {@code 0X} or {@code #} prefix (optionally signed) is accepted, e.g.
+     *       {@code "0x10"} gives {@code 16}; a leading zero does not mean octal ({@code "010"} gives {@code 10});</li>
+     *   <li>a trailing {@code L} or {@code l} suffix is accepted ({@code "1L"} gives {@code 1});</li>
+     *   <li>the string is not trimmed: leading or trailing whitespace ({@code " 1"}), a decimal point ({@code "1.5"}) or an
+     *       exponent ({@code "1e3"}) makes the returned function throw {@link NumberFormatException};</li>
+     *   <li>a well-formed value outside the {@code byte} range makes the returned function throw {@link ArithmeticException},
+     *       not {@code NumberFormatException}.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * byte b = Fn.parseByte().applyAsByte("127");   // returns 127
+     * byte b = Fn.parseByte().applyAsByte("127");  // returns 127
+     * Fn.parseByte().applyAsByte(null);            // returns 0
+     * Fn.parseByte().applyAsByte("0x10");          // returns 16
+     * Fn.parseByte().applyAsByte("128");           // throws ArithmeticException
      * }</pre>
      *
-     * @return a ToByteFunction that parses strings to byte values
+     * @return a ToByteFunction that parses strings to byte values; its {@code applyAsByte} throws {@link NumberFormatException} for a
+     *         malformed string and {@link ArithmeticException} for a value outside the {@code byte} range
      * @see Numbers#toByte(String)
      * @see #parseShort()
      * @see #parseInt()
@@ -5123,15 +5224,26 @@ public final class Fn {
     /**
      * Returns a ToShortFunction that parses Strings to short values.
      *
-     * <p>This method provides a reusable function for parsing string representations of short values.
-     * It can be used in stream operations to convert strings to shorts.
+     * <p>Each string is converted with {@link Numbers#toShort(String)}, whose rules differ from
+     * {@link Short#parseShort(String)}:
+     * <ul>
+     *   <li>{@code null} or an empty string is converted to {@code 0} instead of throwing;</li>
+     *   <li>a hexadecimal value with a {@code 0x}, {@code 0X} or {@code #} prefix (optionally signed) is accepted, e.g.
+     *       {@code "0x10"} gives {@code 16}; a leading zero does not mean octal ({@code "010"} gives {@code 10});</li>
+     *   <li>a trailing {@code L} or {@code l} suffix is accepted ({@code "1L"} gives {@code 1});</li>
+     *   <li>the string is not trimmed: leading or trailing whitespace ({@code " 1"}), a decimal point ({@code "1.5"}) or an
+     *       exponent ({@code "1e3"}) makes the returned function throw {@link NumberFormatException};</li>
+     *   <li>a well-formed value outside the {@code short} range makes the returned function throw {@link ArithmeticException},
+     *       not {@code NumberFormatException}.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * short s = Fn.parseShort().applyAsShort("32767");   // returns 32767
      * }</pre>
      *
-     * @return a ToShortFunction that parses strings to short values
+     * @return a ToShortFunction that parses strings to short values; its {@code applyAsShort} throws {@link NumberFormatException} for a
+     *         malformed string and {@link ArithmeticException} for a value outside the {@code short} range
      * @see Numbers#toShort(String)
      * @see #parseByte()
      * @see #parseInt()
@@ -5143,8 +5255,18 @@ public final class Fn {
     /**
      * Returns a ToIntFunction that parses Strings to int values.
      *
-     * <p>This method provides a reusable function for parsing string representations of integer values.
-     * It can be used in stream operations to convert strings to integers.
+     * <p>Each string is converted with {@link Numbers#toInt(String)}, whose rules differ from
+     * {@link Integer#parseInt(String)}:
+     * <ul>
+     *   <li>{@code null} or an empty string is converted to {@code 0} instead of throwing;</li>
+     *   <li>a hexadecimal value with a {@code 0x}, {@code 0X} or {@code #} prefix (optionally signed) is accepted, e.g.
+     *       {@code "0x10"} gives {@code 16}; a leading zero does not mean octal ({@code "010"} gives {@code 10});</li>
+     *   <li>a trailing {@code L} or {@code l} suffix is accepted ({@code "1L"} gives {@code 1});</li>
+     *   <li>the string is not trimmed: leading or trailing whitespace ({@code " 1"}), a decimal point ({@code "1.5"}) or an
+     *       exponent ({@code "1e3"}) makes the returned function throw {@link NumberFormatException};</li>
+     *   <li>a well-formed value outside the {@code int} range makes the returned function throw {@link ArithmeticException},
+     *       not {@code NumberFormatException}.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5152,9 +5274,14 @@ public final class Fn {
      * int sum = numberStrings.stream()
      *     .mapToInt(Fn.parseInt())
      *     .sum();  // = 60
+     *
+     * Fn.parseInt().applyAsInt("");    // returns 0
+     * Fn.parseInt().applyAsInt("1L");  // returns 1
+     * Fn.parseInt().applyAsInt(" 1");  // throws NumberFormatException (not trimmed)
      * }</pre>
      *
-     * @return a ToIntFunction that parses strings to int values
+     * @return a ToIntFunction that parses strings to int values; its {@code applyAsInt} throws {@link NumberFormatException} for a
+     *         malformed string and {@link ArithmeticException} for a value outside the {@code int} range
      * @see Numbers#toInt(String)
      * @see #parseLong()
      * @see #parseDouble()
@@ -5166,8 +5293,18 @@ public final class Fn {
     /**
      * Returns a ToLongFunction that parses Strings to long values.
      *
-     * <p>This method provides a reusable function for parsing string representations of long values.
-     * It can be used in stream operations to convert strings to longs.
+     * <p>Each string is converted with {@link Numbers#toLong(String)}, whose rules differ from
+     * {@link Long#parseLong(String)}:
+     * <ul>
+     *   <li>{@code null} or an empty string is converted to {@code 0} instead of throwing;</li>
+     *   <li>a hexadecimal value with a {@code 0x}, {@code 0X} or {@code #} prefix (optionally signed) is accepted, e.g.
+     *       {@code "0x10"} gives {@code 16}; a leading zero does not mean octal ({@code "010"} gives {@code 10});</li>
+     *   <li>a trailing {@code L} or {@code l} suffix is accepted ({@code "1L"} gives {@code 1});</li>
+     *   <li>the string is not trimmed: leading or trailing whitespace ({@code " 1"}), a decimal point ({@code "1.5"}) or an
+     *       exponent ({@code "1e3"}) makes the returned function throw {@link NumberFormatException};</li>
+     *   <li>a well-formed value outside the {@code long} range makes the returned function throw {@link ArithmeticException},
+     *       not {@code NumberFormatException}.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5177,7 +5314,8 @@ public final class Fn {
      *     .sum();  // = 6000000
      * }</pre>
      *
-     * @return a ToLongFunction that parses strings to long values
+     * @return a ToLongFunction that parses strings to long values; its {@code applyAsLong} throws {@link NumberFormatException} for a
+     *         malformed string and {@link ArithmeticException} for a value outside the {@code long} range
      * @see Numbers#toLong(String)
      * @see #parseInt()
      * @see #parseDouble()
@@ -5189,17 +5327,28 @@ public final class Fn {
     /**
      * Returns a ToFloatFunction that parses Strings to float values.
      *
-     * <p>This method provides a reusable function for parsing string representations of float values.
-     * It can be used to convert strings to floats.
+     * <p>Each string is converted with {@link Numbers#toFloat(String)}, whose rules differ from
+     * {@link Float#parseFloat(String)}:
+     * <ul>
+     *   <li>{@code null} or an empty string is converted to {@code 0.0} instead of throwing;</li>
+     *   <li>leading and trailing whitespace is ignored ({@code " 1.5 "} gives {@code 1.5}), but a blank string such as
+     *       {@code " "} makes the returned function throw {@link NumberFormatException};</li>
+     *   <li>exponents, a trailing {@code f}/{@code F}/{@code d}/{@code D} suffix, {@code "NaN"} and {@code "Infinity"} are
+     *       accepted, and so is a hexadecimal floating-point literal with a binary exponent ({@code "0x1p3"} gives
+     *       {@code 8.0}); a hexadecimal integer literal ({@code "0x10"}), a {@code #}-prefixed string ({@code "#10"}) or an
+     *       {@code L}-suffixed string ({@code "1L"}) makes it throw {@code NumberFormatException};</li>
+     *   <li>a magnitude beyond the {@code float} range yields an infinity; no {@link ArithmeticException} is thrown.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ToFloatFunction<String> floatParser = Fn.parseFloat();
-     * float result1 = floatParser.applyAsFloat("1.5");   // returns 1.5f
-     * float result2 = floatParser.applyAsFloat("2.5");   // returns 2.5f
+     * float result1 = floatParser.applyAsFloat("1.5");  // returns 1.5f
+     * float result2 = floatParser.applyAsFloat("2.5");  // returns 2.5f
      * }</pre>
      *
-     * @return a ToFloatFunction that parses strings to float values
+     * @return a ToFloatFunction that parses strings to float values; its {@code applyAsFloat} throws {@link NumberFormatException} for a
+     *         malformed string
      * @see Numbers#toFloat(String)
      * @see #parseDouble()
      * @see #parseInt()
@@ -5211,8 +5360,18 @@ public final class Fn {
     /**
      * Returns a ToDoubleFunction that parses Strings to double values.
      *
-     * <p>This method provides a reusable function for parsing string representations of double values.
-     * It can be used in stream operations to convert strings to doubles.
+     * <p>Each string is converted with {@link Numbers#toDouble(String)}, whose rules differ from
+     * {@link Double#parseDouble(String)}:
+     * <ul>
+     *   <li>{@code null} or an empty string is converted to {@code 0.0} instead of throwing;</li>
+     *   <li>leading and trailing whitespace is ignored ({@code " 1.5 "} gives {@code 1.5}), but a blank string such as
+     *       {@code " "} makes the returned function throw {@link NumberFormatException};</li>
+     *   <li>exponents, a trailing {@code f}/{@code F}/{@code d}/{@code D} suffix, {@code "NaN"} and {@code "Infinity"} are
+     *       accepted, and so is a hexadecimal floating-point literal with a binary exponent ({@code "0x1p3"} gives
+     *       {@code 8.0}); a hexadecimal integer literal ({@code "0x10"}), a {@code #}-prefixed string ({@code "#10"}) or an
+     *       {@code L}-suffixed string ({@code "1L"}) makes it throw {@code NumberFormatException};</li>
+     *   <li>a magnitude beyond the {@code double} range yields an infinity; no {@link ArithmeticException} is thrown.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -5220,9 +5379,15 @@ public final class Fn {
      * double total = priceStrings.stream()
      *     .mapToDouble(Fn.parseDouble())
      *     .sum();  // = 89.97
+     *
+     * Fn.parseDouble().applyAsDouble(null);     // returns 0.0
+     * Fn.parseDouble().applyAsDouble(" 1.5 ");  // returns 1.5 (trimmed)
+     * Fn.parseDouble().applyAsDouble("0x1p3");  // returns 8.0 (hexadecimal floating-point literal)
+     * Fn.parseDouble().applyAsDouble("0x10");   // throws NumberFormatException
      * }</pre>
      *
-     * @return a ToDoubleFunction that parses strings to double values
+     * @return a ToDoubleFunction that parses strings to double values; its {@code applyAsDouble} throws {@link NumberFormatException} for a
+     *         malformed string
      * @see Numbers#toDouble(String)
      * @see #parseInt()
      * @see #parseFloat()
@@ -5233,7 +5398,7 @@ public final class Fn {
 
     /**
      * Returns a Function that creates Number objects from Strings.
-     * Returns {@code null} for empty strings. The type of Number returned depends on the string format.
+     * Returns {@code null} for {@code null} or empty strings. The type of Number returned depends on the string format.
      *
      * <p>This method automatically detects the appropriate numeric type (Integer, Long, Float, Double, etc.)
      * based on the string representation. It's useful when the numeric type is not known in advance.
@@ -5264,12 +5429,21 @@ public final class Fn {
      * (Integer, Long, Double, etc.). It can be used in stream operations to convert numbers to ints.
      * A {@code null} argument yields {@code 0}.
      *
+     * <p>Narrowing follows {@link Number#intValue()} and never throws: an out-of-range {@code Long} or
+     * {@code BigInteger} silently keeps only its low-order 32 bits ({@code 3_000_000_000L} gives {@code -1294967296}),
+     * and a {@code Double} or {@code Float} is truncated toward zero and saturates at the {@code int} range
+     * ({@code 1e10} gives {@link Integer#MAX_VALUE}, {@code NaN} gives {@code 0}). Unlike {@link #parseInt()}, no
+     * {@link ArithmeticException} is thrown for an out-of-range value.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Number> numbers = Arrays.asList(10.5, 20L, 30);
      * int sum = numbers.stream()
      *     .mapToInt(Fn.numToInt())
      *     .sum();  // = 60 (10 + 20 + 30)
+     *
+     * Fn.numToInt().applyAsInt(3_000_000_000L);  // returns -1294967296 (wraps, no exception)
+     * Fn.numToInt().applyAsInt(1e10);            // returns 2147483647 (saturates)
      * }</pre>
      *
      * @param <T> the Number type
@@ -5290,12 +5464,20 @@ public final class Fn {
      * (Integer, Long, Double, etc.). It can be used in stream operations to convert numbers to longs.
      * A {@code null} argument yields {@code 0}.
      *
+     * <p>Narrowing follows {@link Number#longValue()} and never throws: an out-of-range {@code BigInteger} silently
+     * keeps only its low-order 64 bits ({@code 2^64 + 5} gives {@code 5}), and a {@code Double} or {@code Float} is
+     * truncated toward zero and saturates at the {@code long} range ({@code 1e30} gives {@link Long#MAX_VALUE},
+     * {@code NaN} gives {@code 0}). Unlike {@link #parseLong()}, no {@link ArithmeticException} is thrown for an
+     * out-of-range value.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * List<Number> numbers = Arrays.asList(100, 200.5, 300L);
      * long total = numbers.stream()
      *     .mapToLong(Fn.numToLong())
      *     .sum();  // = 600
+     *
+     * Fn.numToLong().applyAsLong(1e30);   // returns 9223372036854775807 (saturates, no exception)
      * }</pre>
      *
      * @param <T> the Number type
@@ -5372,7 +5554,8 @@ public final class Fn {
 
             @Override
             public boolean test(final T t) {
-                return counter.getAndUpdate(i -> i > 0 ? i - 1 : 0) > 0;
+                // The counter never increases, so once it reads 0 the CAS below could only return 0; skip it.
+                return counter.get() > 0 && counter.getAndUpdate(i -> i > 0 ? i - 1 : 0) > 0;
             }
         };
     }
@@ -5488,7 +5671,7 @@ public final class Fn {
      */
     @Beta
     @Stateful
-    public static <T> Predicate<T> limitThenFilter(final int limit, final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
+    public static <T> Predicate<T> limitThenFilter(final int limit, final java.util.function.Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNegative(limit, cs.limit);
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -5497,7 +5680,8 @@ public final class Fn {
 
             @Override
             public boolean test(final T t) {
-                return counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0 && predicate.test(t);
+                // The counter never increases, so once it reads 0 the CAS below could only return 0; skip it.
+                return counter.get() > 0 && counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0 && predicate.test(t);
             }
         };
     }
@@ -5507,26 +5691,39 @@ public final class Fn {
      * consume more than {@code limit} slots, but which calls consume them is scheduling-dependent and the
      * supplied predicate must itself support concurrent invocation.
      *
-     * <p>The bi-predicate limits the number of element pairs that can pass through. Once the limit is reached,
-     * all subsequent pairs will fail the test.
+     * <p>This is the two-argument form of {@link #limitThenFilter(int, java.util.function.Predicate)}: every
+     * invocation first consumes one of the {@code limit} slots and only then tests the pair, so the limit bounds
+     * the number of pairs that are <i>tested</i>, not the number that <i>pass</i>:
+     * <ol>
+     *   <li>First, check if the limit has been reached (using an internal counter)</li>
+     *   <li>If within limit, then apply the bi-predicate to test the pair</li>
+     *   <li>Once the limit is exhausted, all subsequent pairs automatically fail (return false) without being tested</li>
+     * </ol>
+     *
+     * <p>A pair that is tested and fails still uses up its slot. Use
+     * {@link #filterThenLimit(java.util.function.BiPredicate, int)} to accept the first {@code limit} <i>matching</i> pairs.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiPredicate<String, Integer> p = Fn.limitThenFilter(5, (s, n) -> n > 0);
-     * // Limits first, then applies predicate
-     * Fn.limitThenFilter(0, (s, n) -> true).test("x", 1);        // returns false (limit 0)
+     * BiPredicate<String, Integer> p = Fn.limitThenFilter(2, (s, n) -> n > 0);
+     * p.test("a", 1);   // returns true  (1st slot, pair matches)
+     * p.test("b", -2);  // returns false (2nd slot, pair does not match)
+     * p.test("c", 3);   // returns false (limit exhausted, pair not tested)
+     *
+     * Fn.limitThenFilter(0, (s, n) -> true).test("x", 1);   // returns false (limit 0)
      * }</pre>
      *
      * @param <T> the type of the first input to the bi-predicate
      * @param <U> the type of the second input to the bi-predicate
-     * @param limit the maximum number of element pairs that can pass the bi-predicate
-     * @param predicate the bi-predicate to test element pairs after checking the limit
-     * @return a stateful {@code BiPredicate} that admits at most {@code limit} invocations before testing them
+     * @param limit the maximum number of element pairs to test (must be non-negative)
+     * @param predicate the bi-predicate to apply to the pairs within the limit
+     * @return a stateful {@code BiPredicate} that tests at most {@code limit} pairs using the provided bi-predicate
      * @throws IllegalArgumentException if {@code limit} is negative, or if {@code predicate} is {@code null}.
+     * @see #filterThenLimit(java.util.function.BiPredicate, int)
      */
     @Beta
     @Stateful
-    public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final java.util.function.BiPredicate<T, U> predicate)
+    public static <T, U> BiPredicate<T, U> limitThenFilter(final int limit, final java.util.function.BiPredicate<? super T, ? super U> predicate)
             throws IllegalArgumentException {
         N.checkArgNotNegative(limit, cs.limit);
         N.checkArgNotNull(predicate, cs.predicate);
@@ -5536,7 +5733,8 @@ public final class Fn {
 
             @Override
             public boolean test(final T t, final U u) {
-                return counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0 && predicate.test(t, u);
+                // The counter never increases, so once it reads 0 the CAS below could only return 0; skip it.
+                return counter.get() > 0 && counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0 && predicate.test(t, u);
             }
         };
     }
@@ -5560,11 +5758,11 @@ public final class Fn {
      * @param predicate the predicate to test elements before applying the limit
      * @param limit the maximum number of elements that pass the predicate to allow through
      * @return a stateful {@code Predicate} that accepts at most {@code limit} matching invocations
-     * @throws IllegalArgumentException if {@code limit} is negative, or if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}, or if {@code limit} is negative.
      */
     @Beta
     @Stateful
-    public static <T> Predicate<T> filterThenLimit(final java.util.function.Predicate<T> predicate, final int limit) throws IllegalArgumentException {
+    public static <T> Predicate<T> filterThenLimit(final java.util.function.Predicate<? super T> predicate, final int limit) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
         N.checkArgNotNegative(limit, cs.limit);
 
@@ -5573,7 +5771,8 @@ public final class Fn {
 
             @Override
             public boolean test(final T t) {
-                return predicate.test(t) && counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0;
+                // The counter never increases, so once it reads 0 the CAS below could only return 0; skip it.
+                return predicate.test(t) && counter.get() > 0 && counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0;
             }
         };
     }
@@ -5598,11 +5797,11 @@ public final class Fn {
      * @param predicate the bi-predicate to test element pairs before applying the limit
      * @param limit the maximum number of element pairs that pass the bi-predicate to allow through
      * @return a stateful {@code BiPredicate} that accepts at most {@code limit} matching invocations
-     * @throws IllegalArgumentException if {@code limit} is negative, or if {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if {@code predicate} is {@code null}, or if {@code limit} is negative.
      */
     @Beta
     @Stateful
-    public static <T, U> BiPredicate<T, U> filterThenLimit(final java.util.function.BiPredicate<T, U> predicate, final int limit)
+    public static <T, U> BiPredicate<T, U> filterThenLimit(final java.util.function.BiPredicate<? super T, ? super U> predicate, final int limit)
             throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
         N.checkArgNotNegative(limit, cs.limit);
@@ -5612,7 +5811,8 @@ public final class Fn {
 
             @Override
             public boolean test(final T t, final U u) {
-                return predicate.test(t, u) && counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0;
+                // The counter never increases, so once it reads 0 the CAS below could only return 0; skip it.
+                return predicate.test(t, u) && counter.get() > 0 && counter.getAndUpdate(i -> i > 0 ? i - 1 : i) > 0;
             }
         };
     }
@@ -5630,9 +5830,9 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Predicate<Object> p = Fn.timeLimit(5000);   // 5 seconds, counted from this line
-     * p.test("data");                             // returns true within 5 sec, false after
-     * Fn.timeLimit(0).test("data");               // returns false (zero time limit)
+     * Predicate<Object> p = Fn.timeLimit(5000);  // 5 seconds, counted from this line
+     * p.test("data");                            // returns true within 5 sec, false after
+     * Fn.timeLimit(0).test("data");              // returns false (zero time limit)
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -5669,8 +5869,8 @@ public final class Fn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Object> p = Fn.timeLimit(Duration.ofSeconds(5));
-     * p.test("data");                                    // returns true within 5 sec, false after
-     * Fn.timeLimit(Duration.ofMillis(0)).test("data");   // returns false (zero time limit)
+     * p.test("data");                                   // returns true within 5 sec, false after
+     * Fn.timeLimit(Duration.ofMillis(0)).test("data");  // returns false (zero time limit)
      * }</pre>
      *
      * <p>As with {@link #timeLimit(long)}, the window opens when this method is called rather than on first use.
@@ -5685,6 +5885,7 @@ public final class Fn {
     @Stateful
     public static <T> Predicate<T> timeLimit(final Duration duration) throws IllegalArgumentException {
         N.checkArgNotNull(duration, cs.duration);
+        N.checkArgNotNegative(duration.toMillis(), cs.duration);
 
         return timeLimit(duration.toMillis());
     }
@@ -5738,10 +5939,13 @@ public final class Fn {
     @Beta
     @SequentialOnly
     @Stateful
-    public static <T> Predicate<T> indexed(final IntObjPredicate<T> predicate) throws IllegalArgumentException {
+    @SuppressWarnings("unchecked")
+    public static <T> Predicate<T> indexed(final IntObjPredicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
-        return Predicates.indexed(predicate);
+        // Safe: the predicate only consumes T values, so an IntObjPredicate<? super T> can stand in for an
+        // IntObjPredicate<T>; Predicates.indexed keeps its exact signature.
+        return Predicates.indexed((IntObjPredicate<T>) predicate);
     }
 
     /**
@@ -5966,8 +6170,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.max(Comparator.<Integer> naturalOrder()).apply(5, 10);              // returns 10
-     * Fn.max(Comparator.<String> naturalOrder()).apply("apple", "banana");   // returns "banana"
+     * Fn.max(Comparator.<Integer> naturalOrder()).apply(5, 10);             // returns 10
+     * Fn.max(Comparator.<String> naturalOrder()).apply("apple", "banana");  // returns "banana"
      * }</pre>
      *
      * @param <T> the type of the operands and result
@@ -6062,6 +6266,10 @@ public final class Fn {
      * is less than, equal to, or greater than the target. This is useful for sorting or filtering
      * based on comparison to a reference value.
      *
+     * <p>The comparison is {@link N#compare(Comparable, Comparable)}: {@code null} is treated as less than any
+     * non-{@code null} value and equal to {@code null}, so neither a {@code null} input nor a {@code null} target
+     * throws {@code NullPointerException}. For example {@code Fn.compareTo(5).apply(null)} returns a negative value.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Find all values greater than a threshold
@@ -6093,23 +6301,23 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.compareTo(0, Comparator.<Integer> naturalOrder()).apply(5);    // returns 1
-     * Fn.compareTo(0, Comparator.<Integer> naturalOrder()).apply(-3);   // returns -1
-     * Fn.compareTo(0, Comparator.<Integer> naturalOrder()).apply(0);    // returns 0
+     * Fn.compareTo(0, Comparator.<Integer> naturalOrder()).apply(5);   // returns 1
+     * Fn.compareTo(0, Comparator.<Integer> naturalOrder()).apply(-3);  // returns -1
+     * Fn.compareTo(0, Comparator.<Integer> naturalOrder()).apply(0);   // returns 0
      * }</pre>
      *
      * @param <T> the type of the values
      * @param target the value to compare against
-     * @param cmp the Comparator to use. Must not be {@code null}.
+     * @param comparator the Comparator to use. Must not be {@code null}.
      * @return a Function that compares its input to the target using the comparator
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      * @see #compareTo(Comparable)
      * @see #compare(Comparator)
      */
-    public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> Function<T, Integer> compareTo(final T target, final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        return t -> cmp.compare(t, target);
+        return t -> comparator.compare(t, target);
     }
 
     /**
@@ -6118,10 +6326,14 @@ public final class Fn {
      * <p>The function returns a negative integer, zero, or a positive integer as the first
      * argument is less than, equal to, or greater than the second.
      *
+     * <p>The comparison is {@link N#compare(Comparable, Comparable)}: {@code null} is treated as less than any
+     * non-{@code null} value and equal to {@code null}; no {@code NullPointerException} is thrown.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.<String> compare().apply("apple", "banana");   // returns a negative value
-     * Fn.<Integer> compare().apply(5, 5);               // returns 0
+     * Fn.<String> compare().apply("apple", "banana");  // returns a negative value
+     * Fn.<Integer> compare().apply(5, 5);              // returns 0
+     * Fn.<Integer> compare().apply(null, 5);           // returns a negative value (null sorts first)
      * }</pre>
      *
      * @param <T> the type of the Comparable values
@@ -6140,33 +6352,41 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.compare(Comparator.<String> naturalOrder()).apply("apple", "banana");   // returns a negative int
-     * Fn.compare(Comparator.<Integer> naturalOrder()).apply(5, 5);               // returns 0
+     * Fn.compare(Comparator.<String> naturalOrder()).apply("apple", "banana");  // returns a negative int
+     * Fn.compare(Comparator.<Integer> naturalOrder()).apply(5, 5);              // returns 0
      * }</pre>
      *
      * @param <T> the type of the values
-     * @param cmp the Comparator to use. Must not be {@code null}.
+     * @param comparator the Comparator to use. Must not be {@code null}.
      * @return a BiFunction that compares two values using the comparator
-     * @throws IllegalArgumentException if {@code cmp} is {@code null}.
+     * @throws IllegalArgumentException if {@code comparator} is {@code null}.
      */
-    public static <T> BiFunction<T, T, Integer> compare(final Comparator<? super T> cmp) throws IllegalArgumentException {
-        N.checkArgNotNull(cmp, cs.cmp);
+    public static <T> BiFunction<T, T, Integer> compare(final Comparator<? super T> comparator) throws IllegalArgumentException {
+        N.checkArgNotNull(comparator, cs.comparator);
 
-        if (cmp == Comparators.naturalOrder()) { // NOSONAR
+        if (comparator == Comparators.naturalOrder()) { // NOSONAR
             return (BiFunction<T, T, Integer>) COMPARE;
         }
 
-        return cmp::compare;
+        return comparator::compare;
     }
 
     /**
      * Returns a Function that gets the result from a Future, returning the default value on error.
      *
-     * <p>If the {@code Future} throws an {@link InterruptedException} or an
-     * {@link java.util.concurrent.ExecutionException}, the function returns {@code defaultValue} instead of
-     * propagating. An {@code InterruptedException} additionally restores the current thread's interrupt status.
-     * Unchecked failures are <b>not</b> converted: in particular a
-     * {@link java.util.concurrent.CancellationException} from a cancelled task propagates to the caller.
+     * <p>The outcomes are:
+     * <ul>
+     *   <li>the task threw an {@link Exception} (checked or unchecked, delivered by {@code get()} as an
+     *       {@link java.util.concurrent.ExecutionException}): the function returns {@code defaultValue};</li>
+     *   <li>the task threw an {@link Error} (for example {@code AssertionError}, {@code OutOfMemoryError} or
+     *       {@code StackOverflowError}): the failure is <b>not</b> turned into {@code defaultValue}; it is rethrown
+     *       exactly as {@link #futureGet()} rethrows it (wrapped in a {@code RuntimeException} whose cause is the
+     *       {@code Error});</li>
+     *   <li>the wait was interrupted: the function returns {@code defaultValue} and restores the current thread's
+     *       interrupt status;</li>
+     *   <li>{@code get()} itself threw an unchecked exception, in particular a
+     *       {@link java.util.concurrent.CancellationException} from a cancelled task: it propagates unchanged.</li>
+     * </ul>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -6179,10 +6399,9 @@ public final class Fn {
      * }</pre>
      *
      * @param <T> the type of the Future's result
-     * @param defaultValue the value to return if the {@code Future} completed with an
-     *                     {@link java.util.concurrent.ExecutionException} or the wait was interrupted
-     * @return a Function that gets the {@code Future}'s result, or {@code defaultValue} if the task failed
-     *         or the wait was interrupted
+     * @param defaultValue the value to return if the task failed with an {@code Exception} or the wait was interrupted
+     * @return a Function that gets the {@code Future}'s result, or {@code defaultValue} if the task failed with an
+     *         {@code Exception} or the wait was interrupted
      * @see #futureGet()
      */
     @Beta
@@ -6194,6 +6413,12 @@ public final class Fn {
                 Thread.currentThread().interrupt();
                 return defaultValue;
             } catch (ExecutionException e) {
+                // A task that died with an Error (OOM, StackOverflowError, AssertionError, ...) is not an ordinary
+                // "failed" result: surface it the same way futureGet() does instead of hiding it behind defaultValue.
+                if (e.getCause() instanceof Error) {
+                    throw ExceptionUtil.toRuntimeException(e, true);
+                }
+
                 return defaultValue;
             }
         };
@@ -6257,16 +6482,16 @@ public final class Fn {
      * }</pre>
      *
      * @param <T> the type of the result of the function
-     * @param func the function to convert
+     * @param function the function to convert
      * @return an IntFunction instance
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T> IntFunction<T> from(final java.util.function.IntFunction<? extends T> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T> IntFunction<T> from(final java.util.function.IntFunction<? extends T> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return func instanceof IntFunction ? ((IntFunction) func) : func::apply;
+        return function instanceof IntFunction ? ((IntFunction) function) : function::apply;
     }
 
     /**
@@ -6423,16 +6648,16 @@ public final class Fn {
      * }</pre>
      *
      * @param <T> the type of the operand and result of the operator
-     * @param op the unary operator to convert
+     * @param operator the unary operator to convert
      * @return a UnaryOperator instance
-     * @throws IllegalArgumentException if {@code op} is {@code null}.
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T> UnaryOperator<T> from(final java.util.function.UnaryOperator<T> op) throws IllegalArgumentException {
-        N.checkArgNotNull(op, cs.op);
+    public static <T> UnaryOperator<T> from(final java.util.function.UnaryOperator<T> operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
-        return op instanceof UnaryOperator ? ((UnaryOperator) op) : op::apply;
+        return operator instanceof UnaryOperator ? ((UnaryOperator) operator) : operator::apply;
     }
 
     /**
@@ -6446,16 +6671,16 @@ public final class Fn {
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
-     * @param op the binary operator to convert
+     * @param operator the binary operator to convert
      * @return a BinaryOperator instance
-     * @throws IllegalArgumentException if {@code op} is {@code null}.
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T> BinaryOperator<T> from(final java.util.function.BinaryOperator<T> op) throws IllegalArgumentException {
-        N.checkArgNotNull(op, cs.op);
+    public static <T> BinaryOperator<T> from(final java.util.function.BinaryOperator<T> operator) throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
-        return op instanceof BinaryOperator ? ((BinaryOperator) op) : op::apply;
+        return operator instanceof BinaryOperator ? ((BinaryOperator) operator) : operator::apply;
     }
 
     /**
@@ -6506,9 +6731,9 @@ public final class Fn {
      * @param <A> the type of the input argument
      * @param <T> the type of the result
      * @param a the input argument
-     * @param func the function to apply to the argument
+     * @param function the function to apply to the argument
      * @return a supplier that computes the result by applying the function to the argument
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see #s(Supplier)
      * @see #ss(com.landawn.abacus.util.Throwables.Supplier)
      * @see #ss(Object, com.landawn.abacus.util.Throwables.Function)
@@ -6517,10 +6742,10 @@ public final class Fn {
      * @see IntFunctions#of(IntFunction)
      */
     @Beta
-    public static <A, T> Supplier<T> s(final A a, final Function<? super A, ? extends T> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <A, T> Supplier<T> s(final A a, final Function<? super A, ? extends T> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return () -> func.apply(a);
+        return () -> function.apply(a);
     }
 
     /**
@@ -6582,8 +6807,8 @@ public final class Fn {
      * String text = "runtime error occurred";
      * Predicate<String> textContains = Fn.p(text, String::contains);
      *
-     * boolean result = textContains.test("error");      // returns true
-     * boolean result2 = textContains.test("missing");   // returns false
+     * boolean result = textContains.test("error");     // returns true
+     * boolean result2 = textContains.test("missing");  // returns false
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the bi-predicate
@@ -6615,8 +6840,8 @@ public final class Fn {
      * Predicate<Integer> containsErrorBetween =
      *     Fn.p(text, 0, (str, start, end) -> str.substring(start, end).contains("error"));
      *
-     * boolean result = containsErrorBetween.test(5);    // returns true ("error")
-     * boolean result2 = containsErrorBetween.test(4);   // returns false ("erro")
+     * boolean result = containsErrorBetween.test(5);   // returns true ("error")
+     * boolean result2 = containsErrorBetween.test(4);  // returns false ("erro")
      * }</pre>
      *
      * @param <A> the type of the first fixed argument to the tri-predicate
@@ -6679,8 +6904,8 @@ public final class Fn {
      * BiPredicate<Integer, Integer> containsErrorBetween =
      *     Fn.p(text, (str, start, end) -> str.substring(start, end).contains("error"));
      *
-     * boolean result = containsErrorBetween.test(0, 5);     // returns true ("error")
-     * boolean result2 = containsErrorBetween.test(6, 13);   // returns false ("message")
+     * boolean result = containsErrorBetween.test(0, 5);    // returns true ("error")
+     * boolean result2 = containsErrorBetween.test(6, 13);  // returns false ("message")
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the tri-predicate
@@ -6776,8 +7001,8 @@ public final class Fn {
      * List<String> myList = new ArrayList<>();
      * Consumer<String> addToMyList = Fn.c(myList, (list, item) -> list.add(item));
      *
-     * addToMyList.accept("first");    // Adds "first" to myList
-     * addToMyList.accept("second");   // Adds "second" to myList
+     * addToMyList.accept("first");   // Adds "first" to myList
+     * addToMyList.accept("second");  // Adds "second" to myList
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the bi-consumer
@@ -7187,6 +7412,10 @@ public final class Fn {
      * <p>This method is useful for converting suppliers that throw checked exceptions into standard suppliers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.ss(() -> "hello").get();                              // returns "hello"
@@ -7218,6 +7447,10 @@ public final class Fn {
      * to a fixed value, resulting in a supplier that requires no parameters.
      * Any checked exceptions thrown by the function will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.ss("123", (String s) -> Integer.parseInt(s)).get();   // returns 123
@@ -7226,19 +7459,19 @@ public final class Fn {
      * @param <A> the type of the fixed argument to the function
      * @param <T> the type of the result
      * @param a the fixed value to use as the argument to the function
-     * @param func the throwable function to apply with the fixed argument
+     * @param function the throwable function to apply with the fixed argument
      * @return a supplier that computes the result by applying the function to the argument
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see #ss(Throwables.Supplier)
      */
     @Beta
-    public static <A, T> Supplier<T> ss(final A a, final Throwables.Function<? super A, ? extends T, ? extends Exception> func)
+    public static <A, T> Supplier<T> ss(final A a, final Throwables.Function<? super A, ? extends T, ? extends Exception> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
         return () -> {
             try {
-                return func.apply(a);
+                return function.apply(a);
             } catch (final Exception e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -7250,6 +7483,10 @@ public final class Fn {
      *
      * <p>This method is useful for converting predicates that throw checked exceptions into standard predicates
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
+     *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -7264,7 +7501,7 @@ public final class Fn {
      * @see #pp(Object, Object, Throwables.TriPredicate)
      */
     @Beta
-    public static <T> Predicate<T> pp(final Throwables.Predicate<T, ? extends Exception> predicate) throws IllegalArgumentException {
+    public static <T> Predicate<T> pp(final Throwables.Predicate<? super T, ? extends Exception> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return value -> {
@@ -7283,6 +7520,10 @@ public final class Fn {
      * to a fixed value, resulting in a predicate that only requires the second parameter.
      * Any checked exceptions thrown by the bi-predicate will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.pp("hello", (String a, String b) -> a.equals(b)).test("hello");   // returns true
@@ -7298,7 +7539,8 @@ public final class Fn {
      * @see #pp(Object, Object, Throwables.TriPredicate)
      */
     @Beta
-    public static <A, T> Predicate<T> pp(final A a, final Throwables.BiPredicate<A, T, ? extends Exception> biPredicate) throws IllegalArgumentException {
+    public static <A, T> Predicate<T> pp(final A a, final Throwables.BiPredicate<? super A, ? super T, ? extends Exception> biPredicate)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
         return t -> {
@@ -7317,6 +7559,10 @@ public final class Fn {
      * to fixed values, resulting in a predicate that only requires the third parameter.
      * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.pp(1, 2, (Integer a, Integer b, Integer c) -> a + b == c).test(3);   // returns true
@@ -7334,8 +7580,8 @@ public final class Fn {
      * @see #pp(Throwables.Predicate)
      */
     @Beta
-    public static <A, B, T> Predicate<T> pp(final A a, final B b, final Throwables.TriPredicate<A, B, T, ? extends Exception> triPredicate)
-            throws IllegalArgumentException {
+    public static <A, B, T> Predicate<T> pp(final A a, final B b,
+            final Throwables.TriPredicate<? super A, ? super B, ? super T, ? extends Exception> triPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
         return t -> {
@@ -7354,6 +7600,10 @@ public final class Fn {
      * without explicit try-catch blocks. Any checked exception thrown by the bi-predicate will be caught and
      * wrapped in a runtime exception.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.pp((String a, Integer b) -> a.length() == b).test("abc", 3);   // returns true
@@ -7369,7 +7619,8 @@ public final class Fn {
      * @see #pp(Object, Object, Throwables.TriPredicate)
      */
     @Beta
-    public static <T, U> BiPredicate<T, U> pp(final Throwables.BiPredicate<T, U, ? extends Exception> biPredicate) throws IllegalArgumentException {
+    public static <T, U> BiPredicate<T, U> pp(final Throwables.BiPredicate<? super T, ? super U, ? extends Exception> biPredicate)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
         return (t, u) -> {
@@ -7388,6 +7639,10 @@ public final class Fn {
      * to a fixed value, resulting in a bi-predicate that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-predicate will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.pp("a", (String x, String y, String z) -> (x + y).equals(z)).test("b", "ab");   // returns true
@@ -7404,7 +7659,7 @@ public final class Fn {
      * @see #pp(Throwables.TriPredicate)
      */
     @Beta
-    public static <A, T, U> BiPredicate<T, U> pp(final A a, final Throwables.TriPredicate<A, T, U, ? extends Exception> triPredicate)
+    public static <A, T, U> BiPredicate<T, U> pp(final A a, final Throwables.TriPredicate<? super A, ? super T, ? super U, ? extends Exception> triPredicate)
             throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
@@ -7424,6 +7679,10 @@ public final class Fn {
      * without explicit try-catch blocks. Any checked exception thrown by the tri-predicate will be caught and
      * wrapped in a runtime exception.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.pp((Integer a, Integer b, Integer c) -> a + b == c).test(1, 2, 3);   // returns true
@@ -7439,7 +7698,8 @@ public final class Fn {
      * @see #pp(Throwables.BiPredicate)
      */
     @Beta
-    public static <A, B, C> TriPredicate<A, B, C> pp(final Throwables.TriPredicate<A, B, C, ? extends Exception> triPredicate) throws IllegalArgumentException {
+    public static <A, B, C> TriPredicate<A, B, C> pp(final Throwables.TriPredicate<? super A, ? super B, ? super C, ? extends Exception> triPredicate)
+            throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
         return (a, b, c) -> {
@@ -7457,6 +7717,10 @@ public final class Fn {
      * <p>This method is useful for converting consumers that throw checked exceptions into standard consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.cc((String s) -> System.out.println(s)).accept("hello");   // prints hello
@@ -7470,7 +7734,7 @@ public final class Fn {
      * @see #cc(Object, Object, Throwables.TriConsumer)
      */
     @Beta
-    public static <T> Consumer<T> cc(final Throwables.Consumer<T, ? extends Exception> consumer) throws IllegalArgumentException {
+    public static <T> Consumer<T> cc(final Throwables.Consumer<? super T, ? extends Exception> consumer) throws IllegalArgumentException {
         N.checkArgNotNull(consumer, cs.consumer);
 
         return t -> {
@@ -7489,6 +7753,10 @@ public final class Fn {
      * to a fixed value, resulting in a consumer that only requires the second parameter.
      * Any checked exceptions thrown by the bi-consumer will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.cc("[", (String pre, String s) -> System.out.println(pre + s)).accept("hi");   // prints [hi
@@ -7504,7 +7772,8 @@ public final class Fn {
      * @see #cc(Object, Object, Throwables.TriConsumer)
      */
     @Beta
-    public static <A, T> Consumer<T> cc(final A a, final Throwables.BiConsumer<A, T, ? extends Exception> biConsumer) throws IllegalArgumentException {
+    public static <A, T> Consumer<T> cc(final A a, final Throwables.BiConsumer<? super A, ? super T, ? extends Exception> biConsumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
         return t -> {
@@ -7523,6 +7792,10 @@ public final class Fn {
      * to fixed values, resulting in a consumer that only requires the third parameter.
      * Any checked exceptions thrown by the tri-consumer will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.cc("[", "]", (String a, String b, String s) -> System.out.println(a + s + b)).accept("hi");   // prints [hi]
@@ -7540,7 +7813,7 @@ public final class Fn {
      * @see #cc(Object, Throwables.BiConsumer)
      */
     @Beta
-    public static <A, B, T> Consumer<T> cc(final A a, final B b, final Throwables.TriConsumer<A, B, T, ? extends Exception> triConsumer)
+    public static <A, B, T> Consumer<T> cc(final A a, final B b, final Throwables.TriConsumer<? super A, ? super B, ? super T, ? extends Exception> triConsumer)
             throws IllegalArgumentException {
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
@@ -7559,6 +7832,10 @@ public final class Fn {
      * <p>This method is useful for converting bi-consumers that throw checked exceptions into standard bi-consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.cc((String a, String b) -> System.out.println(a + b)).accept("x", "y");   // prints xy
@@ -7573,7 +7850,8 @@ public final class Fn {
      * @see #cc(Object, Throwables.TriConsumer)
      */
     @Beta
-    public static <T, U> BiConsumer<T, U> cc(final Throwables.BiConsumer<T, U, ? extends Exception> biConsumer) throws IllegalArgumentException {
+    public static <T, U> BiConsumer<T, U> cc(final Throwables.BiConsumer<? super T, ? super U, ? extends Exception> biConsumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
         return (t, u) -> {
@@ -7592,6 +7870,10 @@ public final class Fn {
      * to a fixed value, resulting in a bi-consumer that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-consumer will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.cc("[", (String pre, String a, String b) -> System.out.println(pre + a + b)).accept("x", "y");   // prints [xy
@@ -7608,7 +7890,7 @@ public final class Fn {
      * @see #cc(Throwables.TriConsumer)
      */
     @Beta
-    public static <A, T, U> BiConsumer<T, U> cc(final A a, final Throwables.TriConsumer<A, T, U, ? extends Exception> triConsumer)
+    public static <A, T, U> BiConsumer<T, U> cc(final A a, final Throwables.TriConsumer<? super A, ? super T, ? super U, ? extends Exception> triConsumer)
             throws IllegalArgumentException {
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
@@ -7627,6 +7909,10 @@ public final class Fn {
      * <p>This method is useful for converting tri-consumers that throw checked exceptions into standard tri-consumers
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.cc((String a, String b, String c) -> System.out.println(a + b + c)).accept("x", "y", "z");   // prints xyz
@@ -7642,7 +7928,8 @@ public final class Fn {
      * @see #cc(Throwables.BiConsumer)
      */
     @Beta
-    public static <A, B, C> TriConsumer<A, B, C> cc(final Throwables.TriConsumer<A, B, C, ? extends Exception> triConsumer) throws IllegalArgumentException {
+    public static <A, B, C> TriConsumer<A, B, C> cc(final Throwables.TriConsumer<? super A, ? super B, ? super C, ? extends Exception> triConsumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
         return (a, b, c) -> {
@@ -7660,10 +7947,14 @@ public final class Fn {
      * <p>This method is useful for converting functions that throw checked exceptions into standard functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff((String s) -> Integer.parseInt(s)).apply("123");   // returns 123
-     * Fn.ff((String s) -> s.toUpperCase()).apply("abc");       // returns "ABC"
+     * Fn.ff((String s) -> Integer.parseInt(s)).apply("123");  // returns 123
+     * Fn.ff((String s) -> s.toUpperCase()).apply("abc");      // returns "ABC"
      * }</pre>
      *
      * @param <T> the type of the input to the function
@@ -7675,7 +7966,7 @@ public final class Fn {
      * @see #ff(Object, Throwables.BiFunction)
      */
     @Beta
-    public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function) throws IllegalArgumentException {
+    public static <T, R> Function<T, R> ff(final Throwables.Function<? super T, ? extends R, ? extends Exception> function) throws IllegalArgumentException {
         N.checkArgNotNull(function, cs.function);
 
         return t -> {
@@ -7697,8 +7988,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff((String s) -> Integer.parseInt(s), -1).apply("123");   // returns 123
-     * Fn.ff((String s) -> { if ("abc".equals(s)) throw new IOException("bad number"); return Integer.parseInt(s); }, -1).apply("abc");   // returns -1 (checked exception -> default)
+     * Fn.ff((String s) -> Integer.parseInt(s), -1).apply("123");                                                                        // returns 123
+     * Fn.ff((String s) -> { if ("abc".equals(s)) throw new IOException("bad number"); return Integer.parseInt(s); }, -1).apply("abc");  // returns -1 (checked exception -> default)
      * }</pre>
      *
      * @param <T> the type of the input to the function
@@ -7712,7 +8003,7 @@ public final class Fn {
      * @see #cc(Throwables.Consumer)
      */
     @Beta
-    public static <T, R> Function<T, R> ff(final Throwables.Function<T, ? extends R, ? extends Exception> function, final R defaultOnError)
+    public static <T, R> Function<T, R> ff(final Throwables.Function<? super T, ? extends R, ? extends Exception> function, final R defaultOnError)
             throws IllegalArgumentException {
         N.checkArgNotNull(function, cs.function);
 
@@ -7737,10 +8028,14 @@ public final class Fn {
      * to a fixed value, resulting in a function that only requires the second parameter.
      * Any checked exceptions thrown by the bi-function will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff("Hello, ", (String a, String b) -> a + b).apply("World");   // returns "Hello, World"
-     * Fn.ff("a", (String a, String b) -> a + b).apply("bc");            // returns "abc"
+     * Fn.ff("Hello, ", (String a, String b) -> a + b).apply("World");  // returns "Hello, World"
+     * Fn.ff("a", (String a, String b) -> a + b).apply("bc");           // returns "abc"
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the bi-function
@@ -7754,7 +8049,8 @@ public final class Fn {
      * @see #ff(Object, Object, Throwables.TriFunction)
      */
     @Beta
-    public static <A, T, R> Function<T, R> ff(final A a, final Throwables.BiFunction<A, T, R, ? extends Exception> biFunction) throws IllegalArgumentException {
+    public static <A, T, R> Function<T, R> ff(final A a, final Throwables.BiFunction<? super A, ? super T, ? extends R, ? extends Exception> biFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biFunction, cs.biFunction);
 
         return t -> {
@@ -7773,10 +8069,14 @@ public final class Fn {
      * to fixed values, resulting in a function that only requires the third parameter.
      * Any checked exceptions thrown by the tri-function will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff("a", "b", (String x, String y, String z) -> x + y + z).apply("c");   // returns "abc"
-     * Fn.ff("1", "2", (String x, String y, String z) -> x + y + z).apply("3");   // returns "123"
+     * Fn.ff("a", "b", (String x, String y, String z) -> x + y + z).apply("c");  // returns "abc"
+     * Fn.ff("1", "2", (String x, String y, String z) -> x + y + z).apply("3");  // returns "123"
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the tri-function
@@ -7792,8 +8092,8 @@ public final class Fn {
      * @see #ff(Object, Throwables.BiFunction)
      */
     @Beta
-    public static <A, B, T, R> Function<T, R> ff(final A a, final B b, final Throwables.TriFunction<A, B, T, R, ? extends Exception> triFunction)
-            throws IllegalArgumentException {
+    public static <A, B, T, R> Function<T, R> ff(final A a, final B b,
+            final Throwables.TriFunction<? super A, ? super B, ? super T, ? extends R, ? extends Exception> triFunction) throws IllegalArgumentException {
         N.checkArgNotNull(triFunction, cs.triFunction);
 
         return t -> {
@@ -7811,10 +8111,14 @@ public final class Fn {
      * <p>This method is useful for converting bi-functions that throw checked exceptions into standard bi-functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff((String a, Integer b) -> a.length() + b).apply("hi", 3);   // returns 5
-     * Fn.ff((String a, String b) -> a + b).apply("ab", "c");           // returns "abc"
+     * Fn.ff((String a, Integer b) -> a.length() + b).apply("hi", 3);  // returns 5
+     * Fn.ff((String a, String b) -> a + b).apply("ab", "c");          // returns "abc"
      * }</pre>
      *
      * @param <T> the type of the first input to the bi-function
@@ -7827,7 +8131,8 @@ public final class Fn {
      * @see #ff(Throwables.BiFunction, Object)
      */
     @Beta
-    public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction) throws IllegalArgumentException {
+    public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> biFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biFunction, cs.biFunction);
 
         return (t, u) -> {
@@ -7849,8 +8154,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff((String s, String t) -> Integer.parseInt(s) + Integer.parseInt(t), -1).apply("1", "2");   // returns 3
-     * Fn.ff((String s, String t) -> { if ("x".equals(s)) throw new IOException("bad number"); return Integer.parseInt(s) + Integer.parseInt(t); }, -1).apply("x", "2");   // returns -1 (checked exception -> default)
+     * Fn.ff((String s, String t) -> Integer.parseInt(s) + Integer.parseInt(t), -1).apply("1", "2");                                                                      // returns 3
+     * Fn.ff((String s, String t) -> { if ("x".equals(s)) throw new IOException("bad number"); return Integer.parseInt(s) + Integer.parseInt(t); }, -1).apply("x", "2");  // returns -1 (checked exception -> default)
      * }</pre>
      *
      * @param <T> the type of the first input to the bi-function
@@ -7864,8 +8169,8 @@ public final class Fn {
      * @see #ff(Throwables.Function, Object)
      */
     @Beta
-    public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<T, U, R, ? extends Exception> biFunction, final R defaultOnError)
-            throws IllegalArgumentException {
+    public static <T, U, R> BiFunction<T, U, R> ff(final Throwables.BiFunction<? super T, ? super U, ? extends R, ? extends Exception> biFunction,
+            final R defaultOnError) throws IllegalArgumentException {
         N.checkArgNotNull(biFunction, cs.biFunction);
 
         return (t, u) -> {
@@ -7889,10 +8194,14 @@ public final class Fn {
      * to a fixed value, resulting in a bi-function that only requires the second and third parameters.
      * Any checked exceptions thrown by the tri-function will be converted to runtime exceptions.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff("a", (String x, String y, String z) -> x + y + z).apply("b", "c");   // returns "abc"
-     * Fn.ff("1", (String x, String y, String z) -> x + y + z).apply("2", "3");   // returns "123"
+     * Fn.ff("a", (String x, String y, String z) -> x + y + z).apply("b", "c");  // returns "abc"
+     * Fn.ff("1", (String x, String y, String z) -> x + y + z).apply("2", "3");  // returns "123"
      * }</pre>
      *
      * @param <A> the type of the fixed first argument to the tri-function
@@ -7907,8 +8216,8 @@ public final class Fn {
      * @see #ff(Throwables.TriFunction)
      */
     @Beta
-    public static <A, T, U, R> BiFunction<T, U, R> ff(final A a, final Throwables.TriFunction<A, T, U, R, ? extends Exception> triFunction)
-            throws IllegalArgumentException {
+    public static <A, T, U, R> BiFunction<T, U, R> ff(final A a,
+            final Throwables.TriFunction<? super A, ? super T, ? super U, ? extends R, ? extends Exception> triFunction) throws IllegalArgumentException {
         N.checkArgNotNull(triFunction, cs.triFunction);
 
         return (t, u) -> {
@@ -7926,10 +8235,14 @@ public final class Fn {
      * <p>This method is useful for converting tri-functions that throw checked exceptions into standard tri-functions
      * that can be used in functional programming contexts without the need for explicit exception handling.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff((String a, String b, String c) -> a + b + c).apply("a", "b", "c");   // returns "abc"
-     * Fn.ff((String a, String b, String c) -> a + b + c).apply("1", "2", "3");   // returns "123"
+     * Fn.ff((String a, String b, String c) -> a + b + c).apply("a", "b", "c");  // returns "abc"
+     * Fn.ff((String a, String b, String c) -> a + b + c).apply("1", "2", "3");  // returns "123"
      * }</pre>
      *
      * @param <A> the type of the first input to the tri-function
@@ -7943,8 +8256,8 @@ public final class Fn {
      * @see #ff(Throwables.BiFunction)
      */
     @Beta
-    public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction)
-            throws IllegalArgumentException {
+    public static <A, B, C, R> TriFunction<A, B, C, R> ff(
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, ? extends Exception> triFunction) throws IllegalArgumentException {
         N.checkArgNotNull(triFunction, cs.triFunction);
 
         return (a, b, c) -> {
@@ -7966,8 +8279,8 @@ public final class Fn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fn.ff((String a, String b, String c) -> Integer.parseInt(a) + Integer.parseInt(b) + Integer.parseInt(c), -1).apply("1", "2", "3");   // returns 6
-     * Fn.ff((String a, String b, String c) -> { if ("x".equals(a)) throw new IOException("bad number"); return Integer.parseInt(a) + Integer.parseInt(b) + Integer.parseInt(c); }, -1).apply("x", "2", "3");   // returns -1 (checked exception -> default)
+     * Fn.ff((String a, String b, String c) -> Integer.parseInt(a) + Integer.parseInt(b) + Integer.parseInt(c), -1).apply("1", "2", "3");                                                                      // returns 6
+     * Fn.ff((String a, String b, String c) -> { if ("x".equals(a)) throw new IOException("bad number"); return Integer.parseInt(a) + Integer.parseInt(b) + Integer.parseInt(c); }, -1).apply("x", "2", "3");  // returns -1 (checked exception -> default)
      * }</pre>
      *
      * @param <A> the type of the first input to the tri-function
@@ -7982,7 +8295,8 @@ public final class Fn {
      * @see #ff(Throwables.BiFunction, Object)
      */
     @Beta
-    public static <A, B, C, R> TriFunction<A, B, C, R> ff(final Throwables.TriFunction<A, B, C, R, ? extends Exception> triFunction, final R defaultOnError)
+    public static <A, B, C, R> TriFunction<A, B, C, R> ff(
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ? extends R, ? extends Exception> triFunction, final R defaultOnError)
             throws IllegalArgumentException {
         N.checkArgNotNull(triFunction, cs.triFunction);
 
@@ -8020,7 +8334,7 @@ public final class Fn {
      * @see #p(Predicate)
      */
     @Beta
-    public static <T> Predicate<T> sp(final Object mutex, final java.util.function.Predicate<T> predicate) throws IllegalArgumentException {
+    public static <T> Predicate<T> sp(final Object mutex, final java.util.function.Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(predicate, cs.predicate);
 
@@ -8052,7 +8366,7 @@ public final class Fn {
      * @see #sp(Object, java.util.function.Predicate)
      */
     @Beta
-    public static <A, T> Predicate<T> sp(final Object mutex, final A a, final java.util.function.BiPredicate<A, T> biPredicate)
+    public static <A, T> Predicate<T> sp(final Object mutex, final A a, final java.util.function.BiPredicate<? super A, ? super T> biPredicate)
             throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biPredicate, cs.biPredicate);
@@ -8084,7 +8398,8 @@ public final class Fn {
      * @see #sp(Object, TriPredicate)
      */
     @Beta
-    public static <T, U> BiPredicate<T, U> sp(final Object mutex, final java.util.function.BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
+    public static <T, U> BiPredicate<T, U> sp(final Object mutex, final java.util.function.BiPredicate<? super T, ? super U> biPredicate)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
@@ -8117,7 +8432,8 @@ public final class Fn {
      * @see #sp(Object, java.util.function.BiPredicate)
      */
     @Beta
-    public static <A, B, C> TriPredicate<A, B, C> sp(final Object mutex, final TriPredicate<A, B, C> triPredicate) throws IllegalArgumentException {
+    public static <A, B, C> TriPredicate<A, B, C> sp(final Object mutex, final TriPredicate<? super A, ? super B, ? super C> triPredicate)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
@@ -8148,7 +8464,7 @@ public final class Fn {
      * @see #c(Consumer)
      */
     @Beta
-    public static <T> Consumer<T> sc(final Object mutex, final java.util.function.Consumer<T> consumer) throws IllegalArgumentException {
+    public static <T> Consumer<T> sc(final Object mutex, final java.util.function.Consumer<? super T> consumer) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(consumer, cs.consumer);
 
@@ -8180,7 +8496,8 @@ public final class Fn {
      * @see #sc(Object, java.util.function.Consumer)
      */
     @Beta
-    public static <A, T> Consumer<T> sc(final Object mutex, final A a, final java.util.function.BiConsumer<A, T> biConsumer) throws IllegalArgumentException {
+    public static <A, T> Consumer<T> sc(final Object mutex, final A a, final java.util.function.BiConsumer<? super A, ? super T> biConsumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
@@ -8211,7 +8528,8 @@ public final class Fn {
      * @see #sc(Object, java.util.function.Consumer)
      */
     @Beta
-    public static <T, U> BiConsumer<T, U> sc(final Object mutex, final java.util.function.BiConsumer<T, U> biConsumer) throws IllegalArgumentException {
+    public static <T, U> BiConsumer<T, U> sc(final Object mutex, final java.util.function.BiConsumer<? super T, ? super U> biConsumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
@@ -8244,7 +8562,8 @@ public final class Fn {
      * @see #sc(Object, java.util.function.BiConsumer)
      */
     @Beta
-    public static <A, B, C> TriConsumer<A, B, C> sc(final Object mutex, final TriConsumer<A, B, C> triConsumer) throws IllegalArgumentException {
+    public static <A, B, C> TriConsumer<A, B, C> sc(final Object mutex, final TriConsumer<? super A, ? super B, ? super C> triConsumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
@@ -8276,7 +8595,8 @@ public final class Fn {
      * @see #f(Function)
      */
     @Beta
-    public static <T, R> Function<T, R> sf(final Object mutex, final java.util.function.Function<T, ? extends R> function) throws IllegalArgumentException {
+    public static <T, R> Function<T, R> sf(final Object mutex, final java.util.function.Function<? super T, ? extends R> function)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(function, cs.function);
 
@@ -8309,7 +8629,7 @@ public final class Fn {
      * @see #sf(Object, java.util.function.Function)
      */
     @Beta
-    public static <A, T, R> Function<T, R> sf(final Object mutex, final A a, final java.util.function.BiFunction<A, T, R> biFunction)
+    public static <A, T, R> Function<T, R> sf(final Object mutex, final A a, final java.util.function.BiFunction<? super A, ? super T, ? extends R> biFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biFunction, cs.biFunction);
@@ -8343,7 +8663,7 @@ public final class Fn {
      * @see #sf(Object, TriFunction)
      */
     @Beta
-    public static <T, U, R> BiFunction<T, U, R> sf(final Object mutex, final java.util.function.BiFunction<T, U, R> biFunction)
+    public static <T, U, R> BiFunction<T, U, R> sf(final Object mutex, final java.util.function.BiFunction<? super T, ? super U, ? extends R> biFunction)
             throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biFunction, cs.biFunction);
@@ -8378,7 +8698,8 @@ public final class Fn {
      * @see #sf(Object, java.util.function.BiFunction)
      */
     @Beta
-    public static <A, B, C, R> TriFunction<A, B, C, R> sf(final Object mutex, final TriFunction<A, B, C, R> triFunction) throws IllegalArgumentException {
+    public static <A, B, C, R> TriFunction<A, B, C, R> sf(final Object mutex, final TriFunction<? super A, ? super B, ? super C, ? extends R> triFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(triFunction, cs.triFunction);
 
@@ -8589,17 +8910,17 @@ public final class Fn {
      * }</pre>
      *
      * @param <T> the type of the input to the function
-     * @param func the function to convert to a consumer
+     * @param function the function to convert to a consumer
      * @return a consumer that executes the function and discards its return value
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(java.util.function.Consumer)
      */
     @Beta
-    public static <T> Consumer<T> f2c(final java.util.function.Function<? super T, ?> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T> Consumer<T> f2c(final java.util.function.Function<? super T, ?> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return func::apply;
+        return function::apply;
     }
 
     /**
@@ -8615,17 +8936,17 @@ public final class Fn {
      *
      * @param <T> the type of the first input to the bi-function
      * @param <U> the type of the second input to the bi-function
-     * @param func the bi-function to convert to a bi-consumer
+     * @param function the bi-function to convert to a bi-consumer
      * @return a bi-consumer that executes the bi-function and discards its return value
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(java.util.function.BiConsumer)
      */
     @Beta
-    public static <T, U> BiConsumer<T, U> f2c(final java.util.function.BiFunction<? super T, ? super U, ?> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T, U> BiConsumer<T, U> f2c(final java.util.function.BiFunction<? super T, ? super U, ?> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return func::apply;
+        return function::apply;
     }
 
     /**
@@ -8642,17 +8963,17 @@ public final class Fn {
      * @param <A> the type of the first input to the tri-function
      * @param <B> the type of the second input to the tri-function
      * @param <C> the type of the third input to the tri-function
-     * @param func the tri-function to convert to a tri-consumer
+     * @param function the tri-function to convert to a tri-consumer
      * @return a tri-consumer that executes the tri-function and discards its return value
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      * @see #c2f(TriConsumer)
      */
     @Beta
-    public static <A, B, C> TriConsumer<A, B, C> f2c(final TriFunction<? super A, ? super B, ? super C, ?> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <A, B, C> TriConsumer<A, B, C> f2c(final TriFunction<? super A, ? super B, ? super C, ?> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return func::apply;
+        return function::apply;
     }
 
     /**
@@ -8662,6 +8983,10 @@ public final class Fn {
      * <p>This method allows you to use runnables that throw checked exceptions in contexts
      * that expect standard Runnable interfaces, such as thread creation or executor services.
      * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
+     *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8692,6 +9017,10 @@ public final class Fn {
      * <p>This method allows you to use callables that throw checked exceptions in contexts
      * that expect standard {@code Callable} interfaces.
      * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
+     *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -8933,6 +9262,18 @@ public final class Fn {
      * the abacus framework's Callable interface, handling exception conversion.
      * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
+     * <p>If {@code callable} already is an abacus {@link Callable} (for example a lambda whose static type is
+     * {@code com.landawn.abacus.util.function.Callable}), it is returned as is and <b>no</b> conversion takes place: what
+     * it throws reaches the caller unchanged, so an {@code UndeclaredThrowableException} wrapping an {@code IOException}
+     * stays an {@code UndeclaredThrowableException} (whereas {@link #jc2r(java.util.concurrent.Callable)} given the same
+     * argument throws an {@code UncheckedIOException}), and a mapper registered with
+     * {@link ExceptionUtil#registerRuntimeExceptionMapper(Class, java.util.function.Function)} is not applied.</p>
+     *
+     * <p>Any other {@code callable} is wrapped, and its exceptions are converted as described in
+     * <a href="#exception-conversion">Exception conversion by the throwing adapters</a>: an ordinary
+     * {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as {@code UndeclaredThrowableException}
+     * is unwrapped first, so the caller may see its cause's conversion instead; an {@code Error} propagates unchanged.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.jc2c(() -> "result").call();                            // returns "result"
@@ -8969,6 +9310,10 @@ public final class Fn {
      * <p>This method is useful when you have a Java callable but need an abacus {@code Runnable}.
      * See {@link #p(Predicate)} for the full list of shorthand abbreviations.</p>
      *
+     * <p>Exceptions are converted as described in <a href="#exception-conversion">Exception conversion by the
+     * throwing adapters</a>: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+     * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Fn.jc2r(() -> "ignored").run();                            // invokes the callable, result discarded
@@ -8997,6 +9342,11 @@ public final class Fn {
      *
      * <p>This operator is useful in collectors and map operations where duplicate keys should be
      * treated as an error condition rather than being silently merged.</p>
+     *
+     * <p>A {@code BinaryOperator} only receives the two colliding <i>values</i>, never the key, so the
+     * {@code IllegalStateException} message names the values only:
+     * {@code "Duplicate key (attempted merging values a and b)"}. Code that knows the key (a collector's
+     * accumulator, for example) has to report it itself.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -9354,10 +9704,14 @@ public final class Fn {
          * Adapts a Throwables.BiFunction to work with Map.Entry by extracting key and value, wrapping exceptions.
          * The returned function applies the BiFunction to the entry's key and value, converting checked exceptions to runtime exceptions.
          *
+         * <p>Exceptions are converted as described under <i>Exception conversion by the throwing adapters</i> in the
+         * {@link Fn} class Javadoc: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+         * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * Entries.ff((com.landawn.abacus.util.Throwables.BiFunction<String, Integer, Integer, Exception>) (k, v) -> Integer.parseInt(k) + v).apply(new AbstractMap.SimpleEntry<>("10", 5));   // returns 15
-         * Entries.ff((com.landawn.abacus.util.Throwables.BiFunction<String, Integer, Integer, Exception>) (k, v) -> Integer.parseInt(k) + v).apply(new AbstractMap.SimpleEntry<>("20", 2));   // returns 22
+         * Entries.ff((com.landawn.abacus.util.Throwables.BiFunction<String, Integer, Integer, Exception>) (k, v) -> Integer.parseInt(k) + v).apply(new AbstractMap.SimpleEntry<>("10", 5));  // returns 15
+         * Entries.ff((com.landawn.abacus.util.Throwables.BiFunction<String, Integer, Integer, Exception>) (k, v) -> Integer.parseInt(k) + v).apply(new AbstractMap.SimpleEntry<>("20", 2));  // returns 22
          * }</pre>
          *
          * @param <K> the type of keys in the entry
@@ -9383,6 +9737,10 @@ public final class Fn {
         /**
          * Adapts a Throwables.BiPredicate to work with Map.Entry by extracting key and value, wrapping exceptions.
          * The returned predicate tests the entry by applying the BiPredicate to its key and value, converting checked exceptions to runtime exceptions.
+         *
+         * <p>Exceptions are converted as described under <i>Exception conversion by the throwing adapters</i> in the
+         * {@link Fn} class Javadoc: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+         * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -9411,6 +9769,10 @@ public final class Fn {
         /**
          * Adapts a Throwables.BiConsumer to work with Map.Entry by extracting key and value, wrapping exceptions.
          * The returned consumer accepts the entry by applying the BiConsumer to its key and value, converting checked exceptions to runtime exceptions.
+         *
+         * <p>Exceptions are converted as described under <i>Exception conversion by the throwing adapters</i> in the
+         * {@link Fn} class Javadoc: an ordinary {@code RuntimeException} is normally rethrown unchanged, but a wrapper such as
+         * {@code UndeclaredThrowableException} is unwrapped first, so the caller may see its cause's conversion instead.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -9654,8 +10016,8 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.isZero().test((char) 0);   // returns true (null char)
-         * FC.isZero().test('a');        // returns false
+         * FC.isZero().test((char) 0);  // returns true (null char)
+         * FC.isZero().test('a');       // returns false
          * }</pre>
          *
          * @return a CharPredicate that returns {@code true} if the character is {@code '\0'} (code point 0)
@@ -9670,9 +10032,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.isWhitespace().test(' ');    // returns true
-         * FC.isWhitespace().test('\t');   // returns true (tab)
-         * FC.isWhitespace().test('a');    // returns false
+         * FC.isWhitespace().test(' ');   // returns true
+         * FC.isWhitespace().test('\t');  // returns true (tab)
+         * FC.isWhitespace().test('a');   // returns false
          * }</pre>
          *
          * @return a CharPredicate that returns {@code true} if the character is whitespace
@@ -9686,9 +10048,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.equal().test('a', 'a');   // returns true
-         * FC.equal().test('a', 'b');   // returns false
-         * FC.equal().test('b', 'b');   // returns true
+         * FC.equal().test('a', 'a');  // returns true
+         * FC.equal().test('a', 'b');  // returns false
+         * FC.equal().test('b', 'b');  // returns true
          * }</pre>
          *
          * @return a CharBiPredicate that returns {@code true} if the two characters are equal
@@ -9702,9 +10064,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.notEqual().test('a', 'b');   // returns true
-         * FC.notEqual().test('a', 'a');   // returns false
-         * FC.notEqual().test('x', 'y');   // returns true
+         * FC.notEqual().test('a', 'b');  // returns true
+         * FC.notEqual().test('a', 'a');  // returns false
+         * FC.notEqual().test('x', 'y');  // returns true
          * }</pre>
          *
          * @return a CharBiPredicate that returns {@code true} if the two characters are not equal
@@ -9718,9 +10080,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.greaterThan().test('b', 'a');   // returns true
-         * FC.greaterThan().test('a', 'a');   // returns false
-         * FC.greaterThan().test('a', 'b');   // returns false
+         * FC.greaterThan().test('b', 'a');  // returns true
+         * FC.greaterThan().test('a', 'a');  // returns false
+         * FC.greaterThan().test('a', 'b');  // returns false
          * }</pre>
          *
          * @return a CharBiPredicate that returns {@code true} if the first character is greater than the second
@@ -9734,9 +10096,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.greaterThanOrEqual().test('b', 'a');   // returns true
-         * FC.greaterThanOrEqual().test('a', 'a');   // returns true
-         * FC.greaterThanOrEqual().test('a', 'b');   // returns false
+         * FC.greaterThanOrEqual().test('b', 'a');  // returns true
+         * FC.greaterThanOrEqual().test('a', 'a');  // returns true
+         * FC.greaterThanOrEqual().test('a', 'b');  // returns false
          * }</pre>
          *
          * @return a CharBiPredicate that returns {@code true} if the first character is greater than or equal to the second
@@ -9750,9 +10112,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.lessThan().test('a', 'b');   // returns true
-         * FC.lessThan().test('a', 'a');   // returns false
-         * FC.lessThan().test('b', 'a');   // returns false
+         * FC.lessThan().test('a', 'b');  // returns true
+         * FC.lessThan().test('a', 'a');  // returns false
+         * FC.lessThan().test('b', 'a');  // returns false
          * }</pre>
          *
          * @return a CharBiPredicate that returns {@code true} if the first character is less than the second
@@ -9766,9 +10128,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.lessThanOrEqual().test('a', 'b');   // returns true
-         * FC.lessThanOrEqual().test('a', 'a');   // returns true
-         * FC.lessThanOrEqual().test('b', 'a');   // returns false
+         * FC.lessThanOrEqual().test('a', 'b');  // returns true
+         * FC.lessThanOrEqual().test('a', 'a');  // returns true
+         * FC.lessThanOrEqual().test('b', 'a');  // returns false
          * }</pre>
          *
          * @return a CharBiPredicate that returns {@code true} if the first character is less than or equal to the second
@@ -9781,13 +10143,17 @@ public final class Fn {
          * Returns a ToCharFunction that converts a Character object to a primitive char.
          * This function unboxes the Character wrapper to its primitive value.
          *
+         * <p>Unlike Java auto-unboxing, a {@code null} input does not throw {@code NullPointerException}: it is
+         * silently converted to {@code '\0'}, so {@code null} and a genuine {@code '\0'} cannot be told apart in the result.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FC.unbox().applyAsChar('a');   // returns 'a'
          * FC.unbox().applyAsChar('Z');   // returns 'Z'
+         * FC.unbox().applyAsChar(null);  // returns '\0'
          * }</pre>
          *
-         * @return a ToCharFunction that unboxes Character to char
+         * @return a ToCharFunction that unboxes Character to char, mapping {@code null} to {@code '\0'}
          */
         @SuppressWarnings("SameReturnValue")
         public static ToCharFunction<Character> unbox() {
@@ -9858,8 +10224,8 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FC.len().apply(new char[]{'a', 'b', 'c'});   // returns 3
-         * FC.len().apply(new char[0]);                 // returns 0
+         * FC.len().apply(new char[]{'a', 'b', 'c'});  // returns 3
+         * FC.len().apply(new char[0]);                // returns 0
          * }</pre>
          *
          * @return a Function that returns the length of a char array or 0 if null
@@ -9955,9 +10321,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.positive().test((byte)5);    // returns true
-         * FB.positive().test((byte)0);    // returns false
-         * FB.positive().test((byte)-5);   // returns false
+         * FB.positive().test((byte)5);   // returns true
+         * FB.positive().test((byte)0);   // returns false
+         * FB.positive().test((byte)-5);  // returns false
          * }</pre>
          *
          * @return a BytePredicate that returns {@code true} if the byte is greater than 0
@@ -9971,9 +10337,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.notNegative().test((byte) 5);    // returns true
-         * FB.notNegative().test((byte) 0);    // returns true
-         * FB.notNegative().test((byte) -1);   // returns false
+         * FB.notNegative().test((byte) 5);   // returns true
+         * FB.notNegative().test((byte) 0);   // returns true
+         * FB.notNegative().test((byte) -1);  // returns false
          * }</pre>
          *
          * @return a BytePredicate that returns {@code true} if the byte is greater than or equal to 0
@@ -9987,9 +10353,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.equal().test((byte) 1, (byte) 1);   // returns true
-         * FB.equal().test((byte) 1, (byte) 2);   // returns false
-         * FB.equal().test((byte) 2, (byte) 2);   // returns true
+         * FB.equal().test((byte) 1, (byte) 1);  // returns true
+         * FB.equal().test((byte) 1, (byte) 2);  // returns false
+         * FB.equal().test((byte) 2, (byte) 2);  // returns true
          * }</pre>
          *
          * @return a ByteBiPredicate that returns {@code true} if the two bytes are equal
@@ -10003,9 +10369,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.notEqual().test((byte) 1, (byte) 2);   // returns true
-         * FB.notEqual().test((byte) 1, (byte) 1);   // returns false
-         * FB.notEqual().test((byte) 2, (byte) 1);   // returns true
+         * FB.notEqual().test((byte) 1, (byte) 2);  // returns true
+         * FB.notEqual().test((byte) 1, (byte) 1);  // returns false
+         * FB.notEqual().test((byte) 2, (byte) 1);  // returns true
          * }</pre>
          *
          * @return a ByteBiPredicate that returns {@code true} if the two bytes are not equal
@@ -10019,9 +10385,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.greaterThan().test((byte) 2, (byte) 1);   // returns true
-         * FB.greaterThan().test((byte) 1, (byte) 1);   // returns false
-         * FB.greaterThan().test((byte) 1, (byte) 2);   // returns false
+         * FB.greaterThan().test((byte) 2, (byte) 1);  // returns true
+         * FB.greaterThan().test((byte) 1, (byte) 1);  // returns false
+         * FB.greaterThan().test((byte) 1, (byte) 2);  // returns false
          * }</pre>
          *
          * @return a ByteBiPredicate that returns {@code true} if the first byte is greater than the second
@@ -10035,9 +10401,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.greaterThanOrEqual().test((byte) 2, (byte) 1);   // returns true
-         * FB.greaterThanOrEqual().test((byte) 1, (byte) 1);   // returns true
-         * FB.greaterThanOrEqual().test((byte) 1, (byte) 2);   // returns false
+         * FB.greaterThanOrEqual().test((byte) 2, (byte) 1);  // returns true
+         * FB.greaterThanOrEqual().test((byte) 1, (byte) 1);  // returns true
+         * FB.greaterThanOrEqual().test((byte) 1, (byte) 2);  // returns false
          * }</pre>
          *
          * @return a ByteBiPredicate that returns {@code true} if the first byte is greater than or equal to the second
@@ -10051,9 +10417,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.lessThan().test((byte) 1, (byte) 2);   // returns true
-         * FB.lessThan().test((byte) 1, (byte) 1);   // returns false
-         * FB.lessThan().test((byte) 2, (byte) 1);   // returns false
+         * FB.lessThan().test((byte) 1, (byte) 2);  // returns true
+         * FB.lessThan().test((byte) 1, (byte) 1);  // returns false
+         * FB.lessThan().test((byte) 2, (byte) 1);  // returns false
          * }</pre>
          *
          * @return a ByteBiPredicate that returns {@code true} if the first byte is less than the second
@@ -10067,9 +10433,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.lessThanOrEqual().test((byte) 1, (byte) 2);   // returns true
-         * FB.lessThanOrEqual().test((byte) 1, (byte) 1);   // returns true
-         * FB.lessThanOrEqual().test((byte) 2, (byte) 1);   // returns false
+         * FB.lessThanOrEqual().test((byte) 1, (byte) 2);  // returns true
+         * FB.lessThanOrEqual().test((byte) 1, (byte) 1);  // returns true
+         * FB.lessThanOrEqual().test((byte) 2, (byte) 1);  // returns false
          * }</pre>
          *
          * @return a ByteBiPredicate that returns {@code true} if the first byte is less than or equal to the second
@@ -10082,13 +10448,17 @@ public final class Fn {
          * Returns a ToByteFunction that converts a Byte object to a primitive byte.
          * This function unboxes the Byte wrapper to its primitive value.
          *
+         * <p>Unlike Java auto-unboxing, a {@code null} input does not throw {@code NullPointerException}: it is
+         * silently converted to {@code 0}, so {@code null} and a genuine {@code 0} cannot be told apart in the result.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.unbox().applyAsByte((byte) 5);   // returns 5
-         * FB.unbox().applyAsByte((byte) 7);   // returns 7
+         * FB.unbox().applyAsByte((byte) 5);  // returns 5
+         * FB.unbox().applyAsByte((byte) 7);  // returns 7
+         * FB.unbox().applyAsByte(null);      // returns 0
          * }</pre>
          *
-         * @return a ToByteFunction that unboxes Byte to byte
+         * @return a ToByteFunction that unboxes Byte to byte, mapping {@code null} to {@code 0}
          */
         @SuppressWarnings("SameReturnValue")
         public static ToByteFunction<Byte> unbox() {
@@ -10159,8 +10529,8 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.len().apply(new byte[]{1, 2, 3});   // returns 3
-         * FB.len().apply(new byte[0]);           // returns 0
+         * FB.len().apply(new byte[]{1, 2, 3});  // returns 3
+         * FB.len().apply(new byte[0]);          // returns 0
          * }</pre>
          *
          * @return a Function that returns the length of a byte array or 0 if null
@@ -10180,9 +10550,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.sum().apply(new byte[]{1,2,3});   // returns 6
-         * FI.sum().apply(new int[]{1,2,3});    // returns 6
-         * FL.sum().apply(new long[]{});        // returns 0
+         * FB.sum().apply(new byte[]{1,2,3});  // returns 6
+         * FI.sum().apply(new int[]{1,2,3});   // returns 6
+         * FL.sum().apply(new long[]{});       // returns 0
          * }</pre>
          *
          * @return a Function that returns the sum of byte array elements, or 0 if the array is {@code null} or empty
@@ -10200,9 +10570,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.average().apply(new byte[]{1,2,3});   // returns 2.0
-         * FI.average().apply(new int[]{1,2});      // returns 1.5
-         * FD.average().apply(new double[]{});      // returns 0.0
+         * FB.average().apply(new byte[]{1,2,3});  // returns 2.0
+         * FI.average().apply(new int[]{1,2});     // returns 1.5
+         * FD.average().apply(new double[]{});     // returns 0.0
          * }</pre>
          *
          * @return a Function that returns the average of byte array elements
@@ -10298,9 +10668,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.positive().test((short) 5);    // returns true
-         * FS.positive().test((short) 0);    // returns false
-         * FS.positive().test((short) -5);   // returns false
+         * FS.positive().test((short) 5);   // returns true
+         * FS.positive().test((short) 0);   // returns false
+         * FS.positive().test((short) -5);  // returns false
          * }</pre>
          *
          * @return a ShortPredicate that returns {@code true} if the short is greater than 0
@@ -10314,9 +10684,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.notNegative().test((short) 5);    // returns true
-         * FS.notNegative().test((short) 0);    // returns true
-         * FS.notNegative().test((short) -1);   // returns false
+         * FS.notNegative().test((short) 5);   // returns true
+         * FS.notNegative().test((short) 0);   // returns true
+         * FS.notNegative().test((short) -1);  // returns false
          * }</pre>
          *
          * @return a ShortPredicate that returns {@code true} if the short is greater than or equal to 0
@@ -10330,9 +10700,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.equal().test((short) 1, (short) 1);   // returns true
-         * FS.equal().test((short) 1, (short) 2);   // returns false
-         * FS.equal().test((short) 2, (short) 2);   // returns true
+         * FS.equal().test((short) 1, (short) 1);  // returns true
+         * FS.equal().test((short) 1, (short) 2);  // returns false
+         * FS.equal().test((short) 2, (short) 2);  // returns true
          * }</pre>
          *
          * @return a ShortBiPredicate that returns {@code true} if the two shorts are equal
@@ -10346,9 +10716,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.notEqual().test((short) 1, (short) 2);   // returns true
-         * FS.notEqual().test((short) 1, (short) 1);   // returns false
-         * FS.notEqual().test((short) 2, (short) 1);   // returns true
+         * FS.notEqual().test((short) 1, (short) 2);  // returns true
+         * FS.notEqual().test((short) 1, (short) 1);  // returns false
+         * FS.notEqual().test((short) 2, (short) 1);  // returns true
          * }</pre>
          *
          * @return a ShortBiPredicate that returns {@code true} if the two shorts are not equal
@@ -10362,9 +10732,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.greaterThan().test((short) 2, (short) 1);   // returns true
-         * FS.greaterThan().test((short) 1, (short) 1);   // returns false
-         * FS.greaterThan().test((short) 1, (short) 2);   // returns false
+         * FS.greaterThan().test((short) 2, (short) 1);  // returns true
+         * FS.greaterThan().test((short) 1, (short) 1);  // returns false
+         * FS.greaterThan().test((short) 1, (short) 2);  // returns false
          * }</pre>
          *
          * @return a ShortBiPredicate that returns {@code true} if the first short is greater than the second
@@ -10378,9 +10748,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.greaterThanOrEqual().test((short) 2, (short) 1);   // returns true
-         * FS.greaterThanOrEqual().test((short) 1, (short) 1);   // returns true
-         * FS.greaterThanOrEqual().test((short) 1, (short) 2);   // returns false
+         * FS.greaterThanOrEqual().test((short) 2, (short) 1);  // returns true
+         * FS.greaterThanOrEqual().test((short) 1, (short) 1);  // returns true
+         * FS.greaterThanOrEqual().test((short) 1, (short) 2);  // returns false
          * }</pre>
          *
          * @return a ShortBiPredicate that returns {@code true} if the first short is greater than or equal to the second
@@ -10394,9 +10764,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.lessThan().test((short) 1, (short) 2);   // returns true
-         * FS.lessThan().test((short) 1, (short) 1);   // returns false
-         * FS.lessThan().test((short) 2, (short) 1);   // returns false
+         * FS.lessThan().test((short) 1, (short) 2);  // returns true
+         * FS.lessThan().test((short) 1, (short) 1);  // returns false
+         * FS.lessThan().test((short) 2, (short) 1);  // returns false
          * }</pre>
          *
          * @return a ShortBiPredicate that returns {@code true} if the first short is less than the second
@@ -10410,9 +10780,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.lessThanOrEqual().test((short) 1, (short) 2);   // returns true
-         * FS.lessThanOrEqual().test((short) 1, (short) 1);   // returns true
-         * FS.lessThanOrEqual().test((short) 2, (short) 1);   // returns false
+         * FS.lessThanOrEqual().test((short) 1, (short) 2);  // returns true
+         * FS.lessThanOrEqual().test((short) 1, (short) 1);  // returns true
+         * FS.lessThanOrEqual().test((short) 2, (short) 1);  // returns false
          * }</pre>
          *
          * @return a ShortBiPredicate that returns {@code true} if the first short is less than or equal to the second
@@ -10425,13 +10795,17 @@ public final class Fn {
          * Returns a ToShortFunction that converts a Short object to a primitive short.
          * This function unboxes the Short wrapper to its primitive value.
          *
+         * <p>Unlike Java auto-unboxing, a {@code null} input does not throw {@code NullPointerException}: it is
+         * silently converted to {@code 0}, so {@code null} and a genuine {@code 0} cannot be told apart in the result.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.unbox().applyAsShort((short) 5);   // returns 5
-         * FS.unbox().applyAsShort((short) 7);   // returns 7
+         * FS.unbox().applyAsShort((short) 5);  // returns 5
+         * FS.unbox().applyAsShort((short) 7);  // returns 7
+         * FS.unbox().applyAsShort(null);       // returns 0
          * }</pre>
          *
-         * @return a ToShortFunction that unboxes Short to short
+         * @return a ToShortFunction that unboxes Short to short, mapping {@code null} to {@code 0}
          */
         @SuppressWarnings("SameReturnValue")
         public static ToShortFunction<Short> unbox() {
@@ -10502,8 +10876,8 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.len().apply(new short[]{1, 2, 3});   // returns 3
-         * FS.len().apply(new short[0]);           // returns 0
+         * FS.len().apply(new short[]{1, 2, 3});  // returns 3
+         * FS.len().apply(new short[0]);          // returns 0
          * }</pre>
          *
          * @return a Function that returns the length of a short array or 0 if null
@@ -10523,10 +10897,10 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.sum().apply(new short[]{1,2,3});   // returns 6
-         * FB.sum().apply(new byte[]{1,2,3});    // returns 6
-         * FI.sum().apply(new int[]{1,2,3});     // returns 6
-         * FL.sum().apply(new long[]{});         // returns 0
+         * FS.sum().apply(new short[]{1,2,3});  // returns 6
+         * FB.sum().apply(new byte[]{1,2,3});   // returns 6
+         * FI.sum().apply(new int[]{1,2,3});    // returns 6
+         * FL.sum().apply(new long[]{});        // returns 0
          * }</pre>
          *
          * @return a Function that returns the sum of short array elements, or 0 if the array is {@code null} or empty
@@ -10544,10 +10918,10 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FS.average().apply(new short[]{1,2,3});   // returns 2.0
-         * FB.average().apply(new byte[]{1,2,3});    // returns 2.0
-         * FI.average().apply(new int[]{1,2});       // returns 1.5
-         * FD.average().apply(new double[]{});       // returns 0.0
+         * FS.average().apply(new short[]{1,2,3});  // returns 2.0
+         * FB.average().apply(new byte[]{1,2,3});   // returns 2.0
+         * FI.average().apply(new int[]{1,2});      // returns 1.5
+         * FD.average().apply(new double[]{});      // returns 0.0
          * }</pre>
          *
          * @return a Function that returns the average of short array elements
@@ -10643,9 +11017,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.positive().test(5);    // returns true
-         * FI.positive().test(0);    // returns false
-         * FI.positive().test(-5);   // returns false
+         * FI.positive().test(5);   // returns true
+         * FI.positive().test(0);   // returns false
+         * FI.positive().test(-5);  // returns false
          * }</pre>
          *
          * @return an IntPredicate that returns {@code true} if the int is greater than 0
@@ -10659,9 +11033,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.notNegative().test(5);    // returns true
-         * FI.notNegative().test(0);    // returns true
-         * FI.notNegative().test(-1);   // returns false
+         * FI.notNegative().test(5);   // returns true
+         * FI.notNegative().test(0);   // returns true
+         * FI.notNegative().test(-1);  // returns false
          * }</pre>
          *
          * @return an IntPredicate that returns {@code true} if the int is greater than or equal to 0
@@ -10675,9 +11049,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.equal().test(1, 1);   // returns true
-         * FI.equal().test(1, 2);   // returns false
-         * FI.equal().test(2, 2);   // returns true
+         * FI.equal().test(1, 1);  // returns true
+         * FI.equal().test(1, 2);  // returns false
+         * FI.equal().test(2, 2);  // returns true
          * }</pre>
          *
          * @return an IntBiPredicate that returns {@code true} if the two ints are equal
@@ -10691,9 +11065,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.notEqual().test(1, 2);   // returns true
-         * FI.notEqual().test(1, 1);   // returns false
-         * FI.notEqual().test(2, 1);   // returns true
+         * FI.notEqual().test(1, 2);  // returns true
+         * FI.notEqual().test(1, 1);  // returns false
+         * FI.notEqual().test(2, 1);  // returns true
          * }</pre>
          *
          * @return an IntBiPredicate that returns {@code true} if the two ints are not equal
@@ -10707,9 +11081,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.greaterThan().test(2, 1);   // returns true
-         * FI.greaterThan().test(1, 1);   // returns false
-         * FI.greaterThan().test(1, 2);   // returns false
+         * FI.greaterThan().test(2, 1);  // returns true
+         * FI.greaterThan().test(1, 1);  // returns false
+         * FI.greaterThan().test(1, 2);  // returns false
          * }</pre>
          *
          * @return an IntBiPredicate that returns {@code true} if the first int is greater than the second
@@ -10723,9 +11097,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.greaterThanOrEqual().test(2, 1);   // returns true
-         * FI.greaterThanOrEqual().test(1, 1);   // returns true
-         * FI.greaterThanOrEqual().test(1, 2);   // returns false
+         * FI.greaterThanOrEqual().test(2, 1);  // returns true
+         * FI.greaterThanOrEqual().test(1, 1);  // returns true
+         * FI.greaterThanOrEqual().test(1, 2);  // returns false
          * }</pre>
          *
          * @return an IntBiPredicate that returns {@code true} if the first int is greater than or equal to the second
@@ -10739,9 +11113,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.lessThan().test(1, 2);   // returns true
-         * FI.lessThan().test(1, 1);   // returns false
-         * FI.lessThan().test(2, 1);   // returns false
+         * FI.lessThan().test(1, 2);  // returns true
+         * FI.lessThan().test(1, 1);  // returns false
+         * FI.lessThan().test(2, 1);  // returns false
          * }</pre>
          *
          * @return an IntBiPredicate that returns {@code true} if the first int is less than the second
@@ -10755,9 +11129,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.lessThanOrEqual().test(1, 2);   // returns true
-         * FI.lessThanOrEqual().test(1, 1);   // returns true
-         * FI.lessThanOrEqual().test(2, 1);   // returns false
+         * FI.lessThanOrEqual().test(1, 2);  // returns true
+         * FI.lessThanOrEqual().test(1, 1);  // returns true
+         * FI.lessThanOrEqual().test(2, 1);  // returns false
          * }</pre>
          *
          * @return an IntBiPredicate that returns {@code true} if the first int is less than or equal to the second
@@ -10770,13 +11144,17 @@ public final class Fn {
          * Returns a ToIntFunction that converts an Integer object to a primitive int.
          * This function unboxes the Integer wrapper to its primitive value.
          *
+         * <p>Unlike Java auto-unboxing, a {@code null} input does not throw {@code NullPointerException}: it is
+         * silently converted to {@code 0}, so {@code null} and a genuine {@code 0} cannot be told apart in the result.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.unbox().applyAsInt(5);   // returns 5
-         * FI.unbox().applyAsInt(7);   // returns 7
+         * FI.unbox().applyAsInt(5);     // returns 5
+         * FI.unbox().applyAsInt(7);     // returns 7
+         * FI.unbox().applyAsInt(null);  // returns 0
          * }</pre>
          *
-         * @return a ToIntFunction that unboxes Integer to int
+         * @return a ToIntFunction that unboxes Integer to int, mapping {@code null} to {@code 0}
          */
         @SuppressWarnings("SameReturnValue")
         public static ToIntFunction<Integer> unbox() {
@@ -10847,8 +11225,8 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FI.len().apply(new int[]{1, 2, 3});   // returns 3
-         * FI.len().apply(new int[0]);           // returns 0
+         * FI.len().apply(new int[]{1, 2, 3});  // returns 3
+         * FI.len().apply(new int[0]);          // returns 0
          * }</pre>
          *
          * @return a Function that returns the length of an int array or 0 if null
@@ -10862,14 +11240,18 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in an int array.
-         * The sum is computed using long arithmetic; the returned function throws an
-         * {@code ArithmeticException} if the sum overflows an int.
+         * The exact total is accumulated in a {@code long} and narrowed with {@link Numbers#toIntExact(long)}, so the
+         * returned function throws {@link ArithmeticException} only if the <i>final</i> total is outside the
+         * {@code int} range; an intermediate running sum beyond that range does not matter as long as later elements
+         * bring the total back into range.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.sum().apply(new byte[]{1,2,3});   // returns 6
-         * FI.sum().apply(new int[]{1,2,3});    // returns 6
-         * FL.sum().apply(new long[]{});        // returns 0
+         * FB.sum().apply(new byte[]{1,2,3});                    // returns 6
+         * FI.sum().apply(new int[]{1,2,3});                     // returns 6
+         * FI.sum().apply(new int[]{Integer.MAX_VALUE, 1, -1});  // returns 2147483647
+         * FI.sum().apply(new int[]{Integer.MAX_VALUE, 1});      // throws ArithmeticException
+         * FL.sum().apply(new long[]{});                         // returns 0
          * }</pre>
          *
          * @return a Function that returns the sum of int array elements, or 0 if the array is {@code null} or empty
@@ -10887,9 +11269,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.average().apply(new byte[]{1,2,3});   // returns 2.0
-         * FI.average().apply(new int[]{1,2});      // returns 1.5
-         * FD.average().apply(new double[]{});      // returns 0.0
+         * FB.average().apply(new byte[]{1,2,3});  // returns 2.0
+         * FI.average().apply(new int[]{1,2});     // returns 1.5
+         * FD.average().apply(new double[]{});     // returns 0.0
          * }</pre>
          *
          * @return a Function that returns the average of int array elements
@@ -10985,9 +11367,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.positive().test(5L);    // returns true
-         * FL.positive().test(0L);    // returns false
-         * FL.positive().test(-5L);   // returns false
+         * FL.positive().test(5L);   // returns true
+         * FL.positive().test(0L);   // returns false
+         * FL.positive().test(-5L);  // returns false
          * }</pre>
          *
          * @return a LongPredicate that returns {@code true} if the long is greater than 0
@@ -11001,9 +11383,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.notNegative().test(5L);    // returns true
-         * FL.notNegative().test(0L);    // returns true
-         * FL.notNegative().test(-1L);   // returns false
+         * FL.notNegative().test(5L);   // returns true
+         * FL.notNegative().test(0L);   // returns true
+         * FL.notNegative().test(-1L);  // returns false
          * }</pre>
          *
          * @return a LongPredicate that returns {@code true} if the long is greater than or equal to 0
@@ -11017,9 +11399,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.equal().test(1L, 1L);   // returns true
-         * FL.equal().test(1L, 2L);   // returns false
-         * FL.equal().test(2L, 2L);   // returns true
+         * FL.equal().test(1L, 1L);  // returns true
+         * FL.equal().test(1L, 2L);  // returns false
+         * FL.equal().test(2L, 2L);  // returns true
          * }</pre>
          *
          * @return a LongBiPredicate that returns {@code true} if the two longs are equal
@@ -11033,9 +11415,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.notEqual().test(1L, 2L);   // returns true
-         * FL.notEqual().test(1L, 1L);   // returns false
-         * FL.notEqual().test(2L, 1L);   // returns true
+         * FL.notEqual().test(1L, 2L);  // returns true
+         * FL.notEqual().test(1L, 1L);  // returns false
+         * FL.notEqual().test(2L, 1L);  // returns true
          * }</pre>
          *
          * @return a LongBiPredicate that returns {@code true} if the two longs are not equal
@@ -11049,9 +11431,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.greaterThan().test(2L, 1L);   // returns true
-         * FL.greaterThan().test(1L, 1L);   // returns false
-         * FL.greaterThan().test(1L, 2L);   // returns false
+         * FL.greaterThan().test(2L, 1L);  // returns true
+         * FL.greaterThan().test(1L, 1L);  // returns false
+         * FL.greaterThan().test(1L, 2L);  // returns false
          * }</pre>
          *
          * @return a LongBiPredicate that returns {@code true} if the first long is greater than the second
@@ -11065,9 +11447,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.greaterThanOrEqual().test(2L, 1L);   // returns true
-         * FL.greaterThanOrEqual().test(1L, 1L);   // returns true
-         * FL.greaterThanOrEqual().test(1L, 2L);   // returns false
+         * FL.greaterThanOrEqual().test(2L, 1L);  // returns true
+         * FL.greaterThanOrEqual().test(1L, 1L);  // returns true
+         * FL.greaterThanOrEqual().test(1L, 2L);  // returns false
          * }</pre>
          *
          * @return a LongBiPredicate that returns {@code true} if the first long is greater than or equal to the second
@@ -11081,9 +11463,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.lessThan().test(1L, 2L);   // returns true
-         * FL.lessThan().test(1L, 1L);   // returns false
-         * FL.lessThan().test(2L, 1L);   // returns false
+         * FL.lessThan().test(1L, 2L);  // returns true
+         * FL.lessThan().test(1L, 1L);  // returns false
+         * FL.lessThan().test(2L, 1L);  // returns false
          * }</pre>
          *
          * @return a LongBiPredicate that returns {@code true} if the first long is less than the second
@@ -11097,9 +11479,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.lessThanOrEqual().test(1L, 2L);   // returns true
-         * FL.lessThanOrEqual().test(1L, 1L);   // returns true
-         * FL.lessThanOrEqual().test(2L, 1L);   // returns false
+         * FL.lessThanOrEqual().test(1L, 2L);  // returns true
+         * FL.lessThanOrEqual().test(1L, 1L);  // returns true
+         * FL.lessThanOrEqual().test(2L, 1L);  // returns false
          * }</pre>
          *
          * @return a LongBiPredicate that returns {@code true} if the first long is less than or equal to the second
@@ -11112,13 +11494,17 @@ public final class Fn {
          * Returns a ToLongFunction that converts a Long object to a primitive long.
          * This function unboxes the Long wrapper to its primitive value.
          *
+         * <p>Unlike Java auto-unboxing, a {@code null} input does not throw {@code NullPointerException}: it is
+         * silently converted to {@code 0L}, so {@code null} and a genuine {@code 0L} cannot be told apart in the result.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.unbox().applyAsLong(5L);   // returns 5
-         * FL.unbox().applyAsLong(7L);   // returns 7
+         * FL.unbox().applyAsLong(5L);    // returns 5
+         * FL.unbox().applyAsLong(7L);    // returns 7
+         * FL.unbox().applyAsLong(null);  // returns 0
          * }</pre>
          *
-         * @return a ToLongFunction that unboxes Long to long
+         * @return a ToLongFunction that unboxes Long to long, mapping {@code null} to {@code 0L}
          */
         @SuppressWarnings("SameReturnValue")
         public static ToLongFunction<Long> unbox() {
@@ -11189,8 +11575,8 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.len().apply(new long[]{1, 2, 3});   // returns 3
-         * FL.len().apply(new long[0]);           // returns 0
+         * FL.len().apply(new long[]{1, 2, 3});  // returns 3
+         * FL.len().apply(new long[0]);          // returns 0
          * }</pre>
          *
          * @return a Function that returns the length of a long array or 0 if null
@@ -11204,13 +11590,15 @@ public final class Fn {
 
         /**
          * Returns a Function that calculates the sum of all elements in a long array.
-         * The sum is returned as a Long.
+         * The sum is returned as a Long. Unlike {@code FB.sum()}, {@code FS.sum()} and {@code FI.sum()}, which throw
+         * {@link ArithmeticException} on overflow, no overflow check is performed: the {@code long} total silently
+         * wraps around, as documented by {@link N#sum(long...)}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.sum().apply(new byte[]{1,2,3});   // returns 6
-         * FI.sum().apply(new int[]{1,2,3});    // returns 6
-         * FL.sum().apply(new long[]{});        // returns 0
+         * FL.sum().apply(new long[]{1, 2, 3});            // returns 6
+         * FL.sum().apply(new long[]{Long.MAX_VALUE, 1});  // returns -9223372036854775808 (wraps)
+         * FL.sum().apply(new long[]{});                   // returns 0
          * }</pre>
          *
          * @return a Function that returns the sum of long array elements, or 0 if the array is {@code null} or empty
@@ -11228,10 +11616,10 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FL.average().apply(new long[]{1,2,3});   // returns 2.0
-         * FB.average().apply(new byte[]{1,2,3});   // returns 2.0
-         * FI.average().apply(new int[]{1,2});      // returns 1.5
-         * FD.average().apply(new double[]{});      // returns 0.0
+         * FL.average().apply(new long[]{1,2,3});  // returns 2.0
+         * FB.average().apply(new byte[]{1,2,3});  // returns 2.0
+         * FI.average().apply(new int[]{1,2});     // returns 1.5
+         * FD.average().apply(new double[]{});     // returns 0.0
          * }</pre>
          *
          * @return a Function that returns the average of long array elements
@@ -11346,9 +11734,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.positive().test(5.0f);    // returns true
-         * FF.positive().test(0.0f);    // returns false
-         * FF.positive().test(-5.0f);   // returns false
+         * FF.positive().test(5.0f);   // returns true
+         * FF.positive().test(0.0f);   // returns false
+         * FF.positive().test(-5.0f);  // returns false
          * }</pre>
          *
          * @return a FloatPredicate that returns {@code true} if the float is greater than 0
@@ -11364,9 +11752,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.notNegative().test(5.0f);    // returns true
-         * FF.notNegative().test(0.0f);    // returns true
-         * FF.notNegative().test(-1.0f);   // returns false
+         * FF.notNegative().test(5.0f);   // returns true
+         * FF.notNegative().test(0.0f);   // returns true
+         * FF.notNegative().test(-1.0f);  // returns false
          * }</pre>
          *
          * @return a FloatPredicate that returns {@code true} if the float is greater than or equal to 0
@@ -11382,9 +11770,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.equal().test(1.5f, 1.5f);   // returns true
-         * FF.equal().test(1.5f, 2.5f);   // returns false
-         * FF.equal().test(2.5f, 2.5f);   // returns true
+         * FF.equal().test(1.5f, 1.5f);  // returns true
+         * FF.equal().test(1.5f, 2.5f);  // returns false
+         * FF.equal().test(2.5f, 2.5f);  // returns true
          * }</pre>
          *
          * @return a FloatBiPredicate that returns {@code true} if the two floats are equal
@@ -11400,9 +11788,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.notEqual().test(1.5f, 2.5f);   // returns true
-         * FF.notEqual().test(1.5f, 1.5f);   // returns false
-         * FF.notEqual().test(2.5f, 1.5f);   // returns true
+         * FF.notEqual().test(1.5f, 2.5f);  // returns true
+         * FF.notEqual().test(1.5f, 1.5f);  // returns false
+         * FF.notEqual().test(2.5f, 1.5f);  // returns true
          * }</pre>
          *
          * @return a FloatBiPredicate that returns {@code true} if the two floats are not equal
@@ -11418,9 +11806,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.greaterThan().test(2.5f, 1.5f);   // returns true
-         * FF.greaterThan().test(1.5f, 1.5f);   // returns false
-         * FF.greaterThan().test(1.5f, 2.5f);   // returns false
+         * FF.greaterThan().test(2.5f, 1.5f);  // returns true
+         * FF.greaterThan().test(1.5f, 1.5f);  // returns false
+         * FF.greaterThan().test(1.5f, 2.5f);  // returns false
          * }</pre>
          *
          * @return a FloatBiPredicate that returns {@code true} if the first float is greater than the second
@@ -11436,9 +11824,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.greaterThanOrEqual().test(2.5f, 1.5f);   // returns true
-         * FF.greaterThanOrEqual().test(1.5f, 1.5f);   // returns true
-         * FF.greaterThanOrEqual().test(1.5f, 2.5f);   // returns false
+         * FF.greaterThanOrEqual().test(2.5f, 1.5f);  // returns true
+         * FF.greaterThanOrEqual().test(1.5f, 1.5f);  // returns true
+         * FF.greaterThanOrEqual().test(1.5f, 2.5f);  // returns false
          * }</pre>
          *
          * @return a FloatBiPredicate that returns {@code true} if the first float is greater than or equal to the second
@@ -11454,9 +11842,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.lessThan().test(1.5f, 2.5f);   // returns true
-         * FF.lessThan().test(1.5f, 1.5f);   // returns false
-         * FF.lessThan().test(2.5f, 1.5f);   // returns false
+         * FF.lessThan().test(1.5f, 2.5f);  // returns true
+         * FF.lessThan().test(1.5f, 1.5f);  // returns false
+         * FF.lessThan().test(2.5f, 1.5f);  // returns false
          * }</pre>
          *
          * @return a FloatBiPredicate that returns {@code true} if the first float is less than the second
@@ -11472,9 +11860,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.lessThanOrEqual().test(1.5f, 2.5f);   // returns true
-         * FF.lessThanOrEqual().test(1.5f, 1.5f);   // returns true
-         * FF.lessThanOrEqual().test(2.5f, 1.5f);   // returns false
+         * FF.lessThanOrEqual().test(1.5f, 2.5f);  // returns true
+         * FF.lessThanOrEqual().test(1.5f, 1.5f);  // returns true
+         * FF.lessThanOrEqual().test(2.5f, 1.5f);  // returns false
          * }</pre>
          *
          * @return a FloatBiPredicate that returns {@code true} if the first float is less than or equal to the second
@@ -11487,13 +11875,17 @@ public final class Fn {
          * Returns a ToFloatFunction that converts a Float object to a primitive float.
          * This function unboxes the Float wrapper to its primitive value.
          *
+         * <p>Unlike Java auto-unboxing, a {@code null} input does not throw {@code NullPointerException}: it is
+         * silently converted to {@code 0.0f}, so {@code null} and a genuine {@code 0.0f} cannot be told apart in the result.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.unbox().applyAsFloat(5.5f);   // returns 5.5
-         * FF.unbox().applyAsFloat(7.5f);   // returns 7.5
+         * FF.unbox().applyAsFloat(5.5f);  // returns 5.5
+         * FF.unbox().applyAsFloat(7.5f);  // returns 7.5
+         * FF.unbox().applyAsFloat(null);  // returns 0.0
          * }</pre>
          *
-         * @return a ToFloatFunction that unboxes Float to float
+         * @return a ToFloatFunction that unboxes Float to float, mapping {@code null} to {@code 0.0f}
          */
         @SuppressWarnings("SameReturnValue")
         public static ToFloatFunction<Float> unbox() {
@@ -11564,8 +11956,8 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.len().apply(new float[]{1, 2, 3});   // returns 3
-         * FF.len().apply(new float[0]);           // returns 0
+         * FF.len().apply(new float[]{1, 2, 3});  // returns 3
+         * FF.len().apply(new float[0]);          // returns 0
          * }</pre>
          *
          * @return a Function that returns the length of a float array or 0 if null
@@ -11583,10 +11975,10 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.sum().apply(new float[]{1,2,3});   // returns 6.0f
-         * FB.sum().apply(new byte[]{1,2,3});    // returns 6
-         * FI.sum().apply(new int[]{1,2,3});     // returns 6
-         * FL.sum().apply(new long[]{});         // returns 0
+         * FF.sum().apply(new float[]{1,2,3});  // returns 6.0f
+         * FB.sum().apply(new byte[]{1,2,3});   // returns 6
+         * FI.sum().apply(new int[]{1,2,3});    // returns 6
+         * FL.sum().apply(new long[]{});        // returns 0
          * }</pre>
          *
          * @return a Function that returns the sum of float array elements, or 0 if the array is {@code null} or empty
@@ -11604,10 +11996,10 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FF.average().apply(new float[]{1,2,3});   // returns 2.0
-         * FB.average().apply(new byte[]{1,2,3});    // returns 2.0
-         * FI.average().apply(new int[]{1,2});       // returns 1.5
-         * FD.average().apply(new double[]{});       // returns 0.0
+         * FF.average().apply(new float[]{1,2,3});  // returns 2.0
+         * FB.average().apply(new byte[]{1,2,3});   // returns 2.0
+         * FI.average().apply(new int[]{1,2});      // returns 1.5
+         * FD.average().apply(new double[]{});      // returns 0.0
          * }</pre>
          *
          * @return a Function that returns the average of float array elements as a Double
@@ -11722,9 +12114,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.positive().test(5.0);    // returns true
-         * FD.positive().test(0.0);    // returns false
-         * FD.positive().test(-5.0);   // returns false
+         * FD.positive().test(5.0);   // returns true
+         * FD.positive().test(0.0);   // returns false
+         * FD.positive().test(-5.0);  // returns false
          * }</pre>
          *
          * @return a DoublePredicate that returns {@code true} if the double is greater than 0
@@ -11740,9 +12132,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.notNegative().test(5.0);    // returns true
-         * FD.notNegative().test(0.0);    // returns true
-         * FD.notNegative().test(-1.0);   // returns false
+         * FD.notNegative().test(5.0);   // returns true
+         * FD.notNegative().test(0.0);   // returns true
+         * FD.notNegative().test(-1.0);  // returns false
          * }</pre>
          *
          * @return a DoublePredicate that returns {@code true} if the double is greater than or equal to 0
@@ -11758,9 +12150,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.equal().test(1.5, 1.5);   // returns true
-         * FD.equal().test(1.5, 2.5);   // returns false
-         * FD.equal().test(2.5, 2.5);   // returns true
+         * FD.equal().test(1.5, 1.5);  // returns true
+         * FD.equal().test(1.5, 2.5);  // returns false
+         * FD.equal().test(2.5, 2.5);  // returns true
          * }</pre>
          *
          * @return a DoubleBiPredicate that returns {@code true} if the two doubles are equal
@@ -11776,9 +12168,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.notEqual().test(1.5, 2.5);   // returns true
-         * FD.notEqual().test(1.5, 1.5);   // returns false
-         * FD.notEqual().test(2.5, 1.5);   // returns true
+         * FD.notEqual().test(1.5, 2.5);  // returns true
+         * FD.notEqual().test(1.5, 1.5);  // returns false
+         * FD.notEqual().test(2.5, 1.5);  // returns true
          * }</pre>
          *
          * @return a DoubleBiPredicate that returns {@code true} if the two doubles are not equal
@@ -11794,9 +12186,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.greaterThan().test(2.5, 1.5);   // returns true
-         * FD.greaterThan().test(1.5, 1.5);   // returns false
-         * FD.greaterThan().test(1.5, 2.5);   // returns false
+         * FD.greaterThan().test(2.5, 1.5);  // returns true
+         * FD.greaterThan().test(1.5, 1.5);  // returns false
+         * FD.greaterThan().test(1.5, 2.5);  // returns false
          * }</pre>
          *
          * @return a DoubleBiPredicate that returns {@code true} if the first double is greater than the second
@@ -11812,9 +12204,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.greaterThanOrEqual().test(2.5, 1.5);   // returns true
-         * FD.greaterThanOrEqual().test(1.5, 1.5);   // returns true
-         * FD.greaterThanOrEqual().test(1.5, 2.5);   // returns false
+         * FD.greaterThanOrEqual().test(2.5, 1.5);  // returns true
+         * FD.greaterThanOrEqual().test(1.5, 1.5);  // returns true
+         * FD.greaterThanOrEqual().test(1.5, 2.5);  // returns false
          * }</pre>
          *
          * @return a DoubleBiPredicate that returns {@code true} if the first double is greater than or equal to the second
@@ -11830,9 +12222,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.lessThan().test(1.5, 2.5);   // returns true
-         * FD.lessThan().test(1.5, 1.5);   // returns false
-         * FD.lessThan().test(2.5, 1.5);   // returns false
+         * FD.lessThan().test(1.5, 2.5);  // returns true
+         * FD.lessThan().test(1.5, 1.5);  // returns false
+         * FD.lessThan().test(2.5, 1.5);  // returns false
          * }</pre>
          *
          * @return a DoubleBiPredicate that returns {@code true} if the first double is less than the second
@@ -11848,9 +12240,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.lessThanOrEqual().test(1.5, 2.5);   // returns true
-         * FD.lessThanOrEqual().test(1.5, 1.5);   // returns true
-         * FD.lessThanOrEqual().test(2.5, 1.5);   // returns false
+         * FD.lessThanOrEqual().test(1.5, 2.5);  // returns true
+         * FD.lessThanOrEqual().test(1.5, 1.5);  // returns true
+         * FD.lessThanOrEqual().test(2.5, 1.5);  // returns false
          * }</pre>
          *
          * @return a DoubleBiPredicate that returns {@code true} if the first double is less than or equal to the second
@@ -11863,13 +12255,17 @@ public final class Fn {
          * Returns a ToDoubleFunction that converts a Double object to a primitive double.
          * This function unboxes the Double wrapper to its primitive value.
          *
+         * <p>Unlike Java auto-unboxing, a {@code null} input does not throw {@code NullPointerException}: it is
+         * silently converted to {@code 0.0}, so {@code null} and a genuine {@code 0.0} cannot be told apart in the result.
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * FD.unbox().applyAsDouble(5.5);   // returns 5.5
          * FD.unbox().applyAsDouble(7.5);   // returns 7.5
+         * FD.unbox().applyAsDouble(null);  // returns 0.0
          * }</pre>
          *
-         * @return a ToDoubleFunction that unboxes Double to double
+         * @return a ToDoubleFunction that unboxes Double to double, mapping {@code null} to {@code 0.0}
          */
         @SuppressWarnings("SameReturnValue")
         public static ToDoubleFunction<Double> unbox() {
@@ -11940,8 +12336,8 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.len().apply(new double[]{1, 2, 3});   // returns 3
-         * FD.len().apply(new double[0]);           // returns 0
+         * FD.len().apply(new double[]{1, 2, 3});  // returns 3
+         * FD.len().apply(new double[0]);          // returns 0
          * }</pre>
          *
          * @return a Function that returns the length of a double array or 0 if null
@@ -11959,10 +12355,10 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FD.sum().apply(new double[]{1,2,3});   // returns 6.0
-         * FB.sum().apply(new byte[]{1,2,3});     // returns 6
-         * FI.sum().apply(new int[]{1,2,3});      // returns 6
-         * FL.sum().apply(new long[]{});          // returns 0
+         * FD.sum().apply(new double[]{1,2,3});  // returns 6.0
+         * FB.sum().apply(new byte[]{1,2,3});    // returns 6
+         * FI.sum().apply(new int[]{1,2,3});     // returns 6
+         * FL.sum().apply(new long[]{});         // returns 0
          * }</pre>
          *
          * @return a Function that returns the sum of double array elements, or 0 if the array is {@code null} or empty
@@ -11980,9 +12376,9 @@ public final class Fn {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * FB.average().apply(new byte[]{1,2,3});   // returns 2.0
-         * FI.average().apply(new int[]{1,2});      // returns 1.5
-         * FD.average().apply(new double[]{});      // returns 0.0
+         * FB.average().apply(new byte[]{1,2,3});  // returns 2.0
+         * FI.average().apply(new int[]{1,2});     // returns 1.5
+         * FD.average().apply(new double[]{});     // returns 0.0
          * }</pre>
          *
          * @return a Function that returns the average of double array elements

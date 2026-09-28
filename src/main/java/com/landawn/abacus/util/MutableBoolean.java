@@ -246,8 +246,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(false);
-     * boolean updated = flag.setIf(v -> !v, true);   // returns true, value is now true
-     * updated = flag.setIf(v -> !v, false);          // returns false, value remains true
+     * boolean updated = flag.setIf(v -> !v, true);  // returns true, value is now true
+     * updated = flag.setIf(v -> !v, false);         // returns false, value remains true
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw
@@ -338,8 +338,8 @@ public final class MutableBoolean implements Mutable, Serializable, Comparable<M
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableBoolean flag = MutableBoolean.of(true);
-     * flag.negate();   // value is now false
-     * flag.negate();   // value is now true again
+     * flag.negate();  // value is now false
+     * flag.negate();  // value is now true again
      * }</pre>
      *
      */

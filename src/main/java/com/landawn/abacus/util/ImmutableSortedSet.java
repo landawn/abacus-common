@@ -275,8 +275,8 @@ public class ImmutableSortedSet<E> extends ImmutableSet<E> implements SortedSet<
      * ImmutableSortedSet<String> set = ImmutableSortedSet.of(
      *     "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
      * );
-     * System.out.println(set.first());   // prints Fri
-     * System.out.println(set.last());    // prints Wed
+     * System.out.println(set.first());  // prints Fri
+     * System.out.println(set.last());   // prints Wed
      * }</pre>
      *
      * @param <E> the element type; must extend {@code Comparable<? super E>}

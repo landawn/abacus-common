@@ -32,7 +32,8 @@ import com.landawn.abacus.util.Throwables;
 public interface FloatToLongFunction extends Throwables.FloatToLongFunction<RuntimeException> { //NOSONAR
     /**
      * A default function that converts a float value to long through narrowing primitive conversion (casting).
-     * This truncates the decimal portion and may result in precision loss for large float values.
+     * This truncates the decimal portion; float values outside the long range are clamped rather than overflowing (see note below).
+     * Apart from the dropped fraction, in-range values lose no precision: any float of magnitude 2^23 or more is already a whole number.
      *
      * <p>Note: For float values outside the long range [-2^63, 2^63-1], the result is clamped to
      * {@code Long.MAX_VALUE} or {@code Long.MIN_VALUE}. Special float values are converted as
@@ -51,8 +52,8 @@ public interface FloatToLongFunction extends Throwables.FloatToLongFunction<Runt
      *
      * // Widen first to select Math.round(double), which returns long rather than int.
      * FloatToLongFunction round = value -> Math.round((double) value);
-     * long rounded = round.applyAsLong(3.7f); // Returns 4L
-     * long large = round.applyAsLong(3_000_000_000f); // Returns 3_000_000_000L
+     * long rounded = round.applyAsLong(3.7f);          // Returns 4L
+     * long large = round.applyAsLong(3_000_000_000f);  // Returns 3_000_000_000L
      * }</pre>
      *
      * @param value the float function argument

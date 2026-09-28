@@ -16,7 +16,10 @@ package com.landawn.abacus.util;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.Writer;
+
+import com.landawn.abacus.annotation.Internal;
 
 /**
  * An abstract base class for writers that perform automatic character escaping based on
@@ -50,6 +53,20 @@ import java.io.Writer;
  * @see BufferedCsvWriter
  */
 public abstract sealed class CharacterWriter extends BufferedWriter permits BufferedJsonWriter, BufferedXmlWriter, BufferedCsvWriter {
+
+    private static final Class<?> NULL_WRITER_CLASS = Writer.nullWriter().getClass();
+
+    /**
+     * Indicates whether writing can invoke application-defined destination code. Internal buffers and
+     * exact JDK StringWriter/null-writer instances cannot call back into a value being serialized.
+     * This does not make the writer thread-safe and does not describe callbacks in serialization configs.
+     *
+     * @return {@code true} when writes cannot call application-defined destination methods
+     */
+    @Internal
+    public final boolean isWriteCallbackFree() {
+        return out == null || out.getClass() == StringWriter.class || out.getClass() == NULL_WRITER_CLASS;
+    }
 
     /**
      * The character replacement table used for escaping.
@@ -114,8 +131,8 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // In a JSON writer where " is escaped as \"
-     * writer.writeCharacter('"');   // Writes: \"
-     * writer.writeCharacter('A');   // Writes: A (no escaping needed)
+     * writer.writeCharacter('"');  // Writes: \"
+     * writer.writeCharacter('A');  // Writes: A (no escaping needed)
      * }</pre>
      *
      * @param ch the character to write
@@ -193,18 +210,18 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * @param cbuf the character array containing data to write; must not be {@code null}
      * @param off the start offset in the array; must be non-negative and not greater than {@code cbuf.length}
-     * @param len the number of characters to write; must be non-negative and {@code off + len} must not exceed {@code cbuf.length}
+     * @param length the number of characters to write; must be non-negative and {@code off + len} must not exceed {@code cbuf.length}
      * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len} exceeds {@code cbuf.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + len} exceeds {@code cbuf.length}
      */
-    public void writeCharacter(final char[] cbuf, final int off, int len) throws IOException, NullPointerException, IndexOutOfBoundsException {
+    public void writeCharacter(final char[] cbuf, final int off, int length) throws IOException, NullPointerException, IndexOutOfBoundsException {
         ensureOpen();
         N.requireNonNull(cbuf, cs.cbuf);
 
-        if ((off < 0) || (len < 0) || (off > cbuf.length) || (len > cbuf.length - off)) {
+        if ((off < 0) || (length < 0) || (off > cbuf.length) || (length > cbuf.length - off)) {
             throw new IndexOutOfBoundsException();
-        } else if (len == 0) {
+        } else if (length == 0) {
             return;
         }
 
@@ -212,7 +229,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
         int i = off;
         int from = off;
 
-        for (final int end = off + len; i < end; i++) {
+        for (final int end = off + length; i < end; i++) {
             ch = cbuf[i];
 
             //noinspection StatementWithEmptyBody
@@ -243,7 +260,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.writeCharacter("Hello \"World\"");   // Writes escaped version
+     * writer.writeCharacter("Hello \"World\"");  // Writes escaped version
      * writer.writeCharacter((String) null);      // Writes: null
      * }</pre>
      *
@@ -264,7 +281,7 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * <p>Only the specified portion of the string is processed for escaping.
      * Characters outside the specified range are neither copied nor written.
      * If {@code str} is {@code null}, the literal text {@code "null"} is used as the source,
-     * and {@code off}/{@code len} apply to that four-character array.</p>
+     * and {@code off}/{@code length} apply to that four-character array.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -275,22 +292,22 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      * @param str the string containing data to write; if {@code null}, the literal {@code "null"} is used
      * @param off the start offset in the string (or in {@code "null"} when {@code str} is {@code null});
      *            must be non-negative and not greater than the effective string length
-     * @param len the number of characters to write; must be non-negative and {@code off + len} must
+     * @param length the number of characters to write; must be non-negative and {@code off + len} must
      *            not exceed the effective string length
      * @throws IOException if this writer is closed, or writing escaped characters to the underlying writer fails
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or {@code off + len}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or {@code off + len}
      *         exceeds the effective string length
      */
-    public void writeCharacter(final String str, final int off, final int len) throws IOException, IndexOutOfBoundsException {
+    public void writeCharacter(final String str, final int off, final int length) throws IOException, IndexOutOfBoundsException {
         if (str == null) {
-            write(Strings.NULL_CHAR_ARRAY, off, len);
+            write(Strings.NULL_CHAR_ARRAY, off, length);
         } else {
             ensureOpen();
-            if (off < 0 || len < 0 || off > str.length() || len > str.length() - off) {
+            if (off < 0 || length < 0 || off > str.length() || length > str.length() - off) {
                 throw new IndexOutOfBoundsException();
             }
             // Scan only the requested range and write unescaped runs directly from the original String.
-            final int end = off + len;
+            final int end = off + length;
             int from = off;
             for (int i = off; i < end; i++) {
                 final char ch = str.charAt(i);
@@ -317,8 +334,8 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String hex = getHexString(0x1F);    // returns "&#x1f;"
-     * String hex2 = getHexString(0xA9);   // returns "&#xa9;"
+     * String hex = getHexString(0x1F);   // returns "&#x1f;"
+     * String hex2 = getHexString(0xA9);  // returns "&#xa9;"
      * }</pre>
      *
      * @param ch the character code to convert
@@ -337,8 +354,8 @@ public abstract sealed class CharacterWriter extends BufferedWriter permits Buff
      *
      * <p><b>Usage Examples:</b></p>
      * <pre><code>
-     * String unicode = getCharNum((char) 0x2028);   // returns "&#92;u2028"
-     * String ctrl = getCharNum((char) 0x01);        // returns "&#92;u0001"
+     * String unicode = getCharNum((char) 0x2028);  // returns "&#92;u2028"
+     * String ctrl = getCharNum((char) 0x01);       // returns "&#92;u0001"
      * </code></pre>
      *
      * @param ch the character to convert

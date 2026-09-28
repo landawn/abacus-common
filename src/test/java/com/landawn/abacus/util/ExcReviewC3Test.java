@@ -24,14 +24,14 @@ public class ExcReviewC3Test extends TestBase {
         // Validation is now in parameter order: srcClass (p1) before converter (p2).
         final BiFunction<Object, Class<?>, Object> converter = (v, t) -> v;
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.registerConverter(null, converter));
-        assertTrue(e.getMessage().contains("srcClass"), e.getMessage());
+        assertTrue(e.getMessage().contains("sourceClass"), e.getMessage());
     }
 
     @Test
     public void registerConverter_bothNull_isReportedAsSrcClass() {
         // Baseline checked 'converter' first, so (null, null) named the second parameter.
         final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.registerConverter(null, null));
-        assertTrue(e.getMessage().contains("srcClass"), e.getMessage());
+        assertTrue(e.getMessage().contains("sourceClass"), e.getMessage());
         assertEquals(false, e.getMessage().contains("converter"), e.getMessage());
     }
 

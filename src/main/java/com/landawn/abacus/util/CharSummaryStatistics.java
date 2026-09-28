@@ -34,9 +34,9 @@ import com.landawn.abacus.util.function.CharConsumer;
  * stats.accept('A');
  * stats.accept('B');
  * stats.accept('C');
- * System.out.println("Count: " + stats.getCount());   // prints Count: 3
- * System.out.println("Min: " + stats.getMin());       // prints Min: A
- * System.out.println("Max: " + stats.getMax());       // prints Max: C
+ * System.out.println("Count: " + stats.getCount());  // prints Count: 3
+ * System.out.println("Min: " + stats.getMin());      // prints Min: A
+ * System.out.println("Max: " + stats.getMax());      // prints Max: C
  * }</pre>
  *
  * @see CharConsumer
@@ -150,9 +150,9 @@ public class CharSummaryStatistics implements CharConsumer {
      * stats2.accept('Z');
      *
      * stats1.combine(stats2);
-     * System.out.println(stats1.getCount());   // prints 4
-     * System.out.println(stats1.getMin());     // prints A
-     * System.out.println(stats1.getMax());     // prints Z
+     * System.out.println(stats1.getCount());  // prints 4
+     * System.out.println(stats1.getMin());    // prints A
+     * System.out.println(stats1.getMax());    // prints Z
      * }</pre>
      *
      * @param other another {@code CharSummaryStatistics} to combine with this one; must not be {@code null}
@@ -237,10 +237,10 @@ public class CharSummaryStatistics implements CharConsumer {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
-     * stats.accept('A');                    // UTF-16 code-unit value 65
-     * stats.accept('B');                    // UTF-16 code-unit value 66
-     * stats.accept('C');                    // UTF-16 code-unit value 67
-     * System.out.println(stats.getSum());   // prints 198
+     * stats.accept('A');                   // UTF-16 code-unit value 65
+     * stats.accept('B');                   // UTF-16 code-unit value 66
+     * stats.accept('C');                   // UTF-16 code-unit value 67
+     * System.out.println(stats.getSum());  // prints 198
      * }</pre>
      *
      * @return the sum of values, as a {@code long}
@@ -259,10 +259,10 @@ public class CharSummaryStatistics implements CharConsumer {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharSummaryStatistics stats = new CharSummaryStatistics();
-     * stats.accept('A');                        // UTF-16 code-unit value 65
-     * stats.accept('B');                        // UTF-16 code-unit value 66
-     * stats.accept('C');                        // UTF-16 code-unit value 67
-     * System.out.println(stats.getAverage());   // prints 66.0
+     * stats.accept('A');                       // UTF-16 code-unit value 65
+     * stats.accept('B');                       // UTF-16 code-unit value 66
+     * stats.accept('C');                       // UTF-16 code-unit value 67
+     * System.out.println(stats.getAverage());  // prints 66.0
      * }</pre>
      *
      * @return the arithmetic mean of numeric UTF-16 code-unit values as a {@code double}, or {@code 0.0} if none

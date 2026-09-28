@@ -78,11 +78,11 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * Used internally by the factory method {@link #of(Object, Object)} and permitted subclasses.
      *
      * @param key the key used for hashing and equality comparisons (can be {@code null}).
-     * @param val the value associated with the key (can be {@code null}).
+     * @param value the value associated with the key (can be {@code null}).
      */
-    Keyed(final K key, final T val) {
+    Keyed(final K key, final T value) {
         this.key = key;
-        this.val = val;
+        this.val = value;
     }
 
     /**
@@ -91,7 +91,7 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * <p>This factory method provides a convenient way to create instances without
      * directly calling the constructor. The resulting container retains the supplied references.</p>
      *
-     * <p>Both {@code key} and {@code val} can be {@code null}. However, be aware that
+     * <p>Both {@code key} and {@code value} can be {@code null}. However, be aware that
      * a {@code null} key will result in a hash code of 0 and may affect collection behavior.</p>
      *
      * <p><b>Usage Examples:</b></p>
@@ -103,11 +103,11 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * @param <K> the type of the key.
      * @param <T> the type of the value.
      * @param key the key used for hashing and equality comparisons (can be {@code null}).
-     * @param val the value associated with the key (can be {@code null}).
+     * @param value the value associated with the key (can be {@code null}).
      * @return a new {@code Keyed} instance containing the specified key-value pair.
      */
-    public static <K, T> Keyed<K, T> of(final K key, final T val) {
-        return new Keyed<>(key, val);
+    public static <K, T> Keyed<K, T> of(final K key, final T value) {
+        return new Keyed<>(key, value);
     }
 
     /**
@@ -197,8 +197,8 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      * Keyed<String, Integer> k2 = Keyed.of("key", 200);
      * Keyed<String, Integer> k3 = Keyed.of("other", 100);
      *
-     * k1.equals(k2);   // returns true - same key, different values
-     * k1.equals(k3);   // returns false - different keys
+     * k1.equals(k2);  // returns true - same key, different values
+     * k1.equals(k3);  // returns false - different keys
      * }</pre>
      *
      * @param obj the reference object with which to compare.
@@ -230,9 +230,9 @@ public sealed class Keyed<K, T> implements Immutable permits IndexedKeyed {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Keyed.of("abc", 123).toString();      // "{key=abc, val=123}"
-     * Keyed.of(null, "value").toString();   // "{key=null, val=value}"
-     * Keyed.of("key", null).toString();     // "{key=key, val=null}"
+     * Keyed.of("abc", 123).toString();     // "{key=abc, val=123}"
+     * Keyed.of(null, "value").toString();  // "{key=null, val=value}"
+     * Keyed.of("key", null).toString();    // "{key=key, val=null}"
      * }</pre>
      *
      * @return a string representation of this object in the format "{key=&lt;key&gt;, val=&lt;value&gt;}".

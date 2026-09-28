@@ -140,29 +140,29 @@ public class BytesType extends AbstractType<byte[]> {
      * Sets a {@code byte[]} parameter on a {@link java.sql.PreparedStatement} at the specified position.
      * Delegates to {@link java.sql.PreparedStatement#setBytes(int, byte[])}.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code byte[]} value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws NullPointerException, SQLException {
-        stmt.setBytes(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final byte[] x) throws NullPointerException, SQLException {
+        statement.setBytes(columnIndex, x);
     }
 
     /**
      * Sets a named {@code byte[]} parameter on a {@link java.sql.CallableStatement}.
      * Delegates to {@link java.sql.CallableStatement#setBytes(String, byte[])}.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code byte[]} value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws NullPointerException, SQLException {
-        stmt.setBytes(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final byte[] x) throws NullPointerException, SQLException {
+        statement.setBytes(parameterName, x);
     }
 }

@@ -212,11 +212,13 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      *
      * @param obj the object to serialize (may be {@code null})
      * @param output the writer to write to (must not be {@code null})
+     * @throws UnsupportedOperationException if the parser does not support character-stream output (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UncheckedIOException if writing serialized data to {@code output} or flushing buffered output fails
      * @throws RuntimeException if the selected parser or a value/property type handler cannot serialize the supplied object.
      */
-    void serialize(Object obj, Writer output) throws IllegalArgumentException, UncheckedIOException, RuntimeException;
+    void serialize(Object obj, Writer output) throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Serializes an object to a writer using custom configuration.
@@ -237,11 +239,13 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param obj the object to serialize (may be {@code null})
      * @param config the serialization configuration to use (may be {@code null} for default behavior)
      * @param output the writer to write to (must not be {@code null})
+     * @throws UnsupportedOperationException if the parser does not support character-stream output (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code output} is {@code null}.
      * @throws UncheckedIOException if writing serialized data to {@code output} or flushing buffered output fails
      * @throws RuntimeException if the selected parser or a value/property type handler cannot serialize the supplied object.
      */
-    void serialize(Object obj, SC config, Writer output) throws IllegalArgumentException, UncheckedIOException, RuntimeException;
+    void serialize(Object obj, SC config, Writer output) throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Deserializes an object from a string representation.
@@ -558,11 +562,14 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source the reader to read from (must not be {@code null})
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
+     * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if reading serialized data from {@code source} fails
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
-    <T> T deserialize(Reader source, Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException, RuntimeException;
+    <T> T deserialize(Reader source, Type<? extends T> targetType)
+            throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Deserializes an object from a reader.
@@ -582,11 +589,14 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param source the reader to read from (must not be {@code null})
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
+     * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if reading serialized data from {@code source} fails
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
-    <T> T deserialize(Reader source, Class<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException, RuntimeException;
+    <T> T deserialize(Reader source, Class<? extends T> targetType)
+            throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Deserializes an object from a reader using custom configuration.
@@ -611,11 +621,14 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the type of the object to create (must not be {@code null})
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
+     * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if reading serialized data from {@code source} fails
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
-    <T> T deserialize(Reader source, DC config, Type<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException, RuntimeException;
+    <T> T deserialize(Reader source, DC config, Type<? extends T> targetType)
+            throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 
     /**
      * Deserializes an object from a reader using custom configuration.
@@ -640,9 +653,12 @@ public interface Parser<SC extends SerializationConfig<?>, DC extends Deserializ
      * @param config the deserialization configuration to use (may be {@code null} for default behavior)
      * @param targetType the class of the object to create (must not be {@code null})
      * @return the deserialized object instance; empty-input handling is defined by the concrete parser
+     * @throws UnsupportedOperationException if the parser does not support character-stream input (the Avro parser always throws it, before
+     *         validating the arguments)
      * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
      * @throws UncheckedIOException if reading serialized data from {@code source} fails
      * @throws RuntimeException if the input cannot be decoded as the requested type by the selected parser or its value converters.
      */
-    <T> T deserialize(Reader source, DC config, Class<? extends T> targetType) throws IllegalArgumentException, UncheckedIOException, RuntimeException;
+    <T> T deserialize(Reader source, DC config, Class<? extends T> targetType)
+            throws UnsupportedOperationException, IllegalArgumentException, UncheckedIOException, RuntimeException;
 }

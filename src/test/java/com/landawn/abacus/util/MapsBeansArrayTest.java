@@ -947,7 +947,9 @@ public class MapsBeansArrayTest extends TestBase {
                     flags.add(f.getName());
                 }
             }
-            assertEquals(CommonUtil.asList("deepCopyUnsupported", "shallowCopyUnsupported"), flags, "deep and shallow must be tracked separately");
+            // C-416 (2026-09-24): deep-copy failures are no longer memoized (a data-dependent Kryo failure used to
+            // switch the whole class to XML copying for good), so only the shallow flag remains.
+            assertEquals(CommonUtil.asList("shallowCopyUnsupported"), flags, "only the shallow-copy verdict is per class");
         }
 
         @Test

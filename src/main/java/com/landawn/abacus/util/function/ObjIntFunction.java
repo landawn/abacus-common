@@ -50,8 +50,8 @@ public interface ObjIntFunction<T, R> extends Throwables.ObjIntFunction<T, R, Ru
      *     str.repeat(times);
      *
      * List<String> items = List.of("a", "b", "c");
-     * String element = getAtIndex.apply(items, 2);   // Returns "c"
-     * String repeated = repeat.apply("Hello", 3);    // Returns "HelloHelloHello"
+     * String element = getAtIndex.apply(items, 2);  // Returns "c"
+     * String repeated = repeat.apply("Hello", 3);   // Returns "HelloHelloHello"
      * }</pre>
      *
      * @param t the first function argument

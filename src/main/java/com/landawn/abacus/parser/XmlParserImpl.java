@@ -23,8 +23,10 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.stream.StreamFilter;
@@ -55,6 +57,7 @@ import com.landawn.abacus.util.NamingPolicy;
 import com.landawn.abacus.util.Objectory;
 import com.landawn.abacus.util.SK;
 import com.landawn.abacus.util.Strings;
+import com.landawn.abacus.util.Tuple.Tuple2;
 import com.landawn.abacus.util.XmlUtil;
 import com.landawn.abacus.util.cs;
 
@@ -165,7 +168,8 @@ final class XmlParserImpl extends AbstractXmlParser {
         this.parserType = parserType;
     }
 
-    XmlParserImpl(final XmlParserType parserType, final XmlSerConfig xsc, final XmlDeserConfig xdc, final java.util.Set<Class<?>> allowedTypeClasses) {
+    XmlParserImpl(final XmlParserType parserType, final XmlSerConfig xsc, final XmlDeserConfig xdc, final java.util.Set<Class<?>> allowedTypeClasses)
+            throws IllegalArgumentException, NullPointerException {
         super(xsc, xdc, allowedTypeClasses);
         this.parserType = parserType;
     }
@@ -710,7 +714,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     // would quote/escape everything and produce <metadata>"{\"k\":\"v\"}"</metadata>.
                     writeRawJson(bw, serializeEmbeddedJson(propValue, config));
                 } else if (unwrapped) {
-                    writeUnwrappedValue(bw, propInfo.jsonXmlType.elementType(), propValue, config, "Property '" + propName + "'");
+                    writeUnwrappedValue(bw, propInfo.jsonXmlType.elementType(), propValue, config, "Property", propName);
                 } else if (propInfo.hasFormat) {
                     propInfo.writePropValue(bw, propValue, config);
                 } else {
@@ -1274,8 +1278,8 @@ final class XmlParserImpl extends AbstractXmlParser {
                 final Object unwrapped = unwrapOptional(value);
 
                 if (unwrapped != null) {
-                    writeUnwrappedValue(bw, valueType.isOptionalOrNullable() ? valueType.elementType() : valueType, unwrapped, config,
-                            propInfo == null ? "Value" : "Property '" + propInfo.name + "'");
+                    writeUnwrappedValue(bw, valueType.isOptionalOrNullable() ? valueType.elementType() : valueType, unwrapped, config, "Value",
+                            propInfo == null ? null : propInfo.name);
                 }
             } else {
                 if (propInfo != null && propInfo.hasFormat) {
@@ -1327,11 +1331,21 @@ final class XmlParserImpl extends AbstractXmlParser {
         } else {
             write(value, config, nextIndentation, serializedObjects, bw, false);
 
-            if (isPrettyFormat) {
+            // A declared type that is not serializable (an Object property) may hold a scalar at runtime, which
+            // write() emits as bare element text: a trailing line break here would become part of that value
+            // (<any>abc\n    </any> read back as "abc\n    "). Only a structured value gets the closing indentation.
+            if (isPrettyFormat && !isBareScalar(value)) {
                 bw.write(IOUtil.LINE_SEPARATOR_UNIX);
                 bw.write(propIndentation);
             }
         }
+    }
+
+    // Whether write(value, ...) writes the value as element text rather than as a nested element.
+    private static boolean isBareScalar(final Object value) {
+        final Type<Object> type = Type.of(value.getClass());
+
+        return type.serializationType() == SerializationType.SERIALIZABLE && !type.isObjectArray() && !type.isCollection();
     }
 
     /**
@@ -1808,6 +1822,8 @@ final class XmlParserImpl extends AbstractXmlParser {
     @Override
     public <T> T deserialize(final File source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes)
             throws IllegalArgumentException, UncheckedIOException, ParsingException {
+        N.checkArgNotNull(source, cs.source);
+
         InputStream is = null;
 
         try {
@@ -1851,12 +1867,13 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      * @throws UncheckedIOException if the DOM backend reports an {@code IOException} while reading XML from {@code source}
      */
     @Override
     public <T> T deserialize(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return read(source, config, nodeTypes, null, false);
     }
 
@@ -1888,12 +1905,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null} and this parser uses {@link XmlParserType#StAX} (the
+     *         {@link XmlParserType#DOM} backend reports a {@code null} reader as an {@code UncheckedIOException})
      * @throws ParsingException if no matching type is found in nodeTypes or XML is malformed
      * @throws UncheckedIOException if the DOM backend reports an {@code IOException} while reading XML from {@code source}
      */
     @Override
     public <T> T deserialize(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes)
-            throws ParsingException, UncheckedIOException {
+            throws IllegalArgumentException, ParsingException, UncheckedIOException {
         return read(source, config, nodeTypes, null, false);
     }
 
@@ -1924,7 +1943,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration (may be {@code null} for default behavior)
      * @param nodeTypes mapping of XML element names to their corresponding types; must not be {@code null}
      * @return the deserialized object of type {@code T}
-     * @throws IllegalArgumentException if {@code source} or {@code targetType} is {@code null}
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if no matching type is found in nodeTypes or XML structure is invalid
      */
     @SuppressWarnings("unchecked")
@@ -1971,13 +1990,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      *        processing instructions follows the root element; {@code false} for a caller-supplied stream that
      *        may stay open and may carry further documents
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null}
      * @throws ParsingException if no target type can be resolved, the parser type is unsupported,
      *         or the XML is malformed
      * @throws UncheckedIOException if the DOM backend reports an {@code IOException} while reading XML from {@code source}
      */
     @SuppressWarnings("unchecked")
     protected <T> T read(final InputStream source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType,
-            final boolean boundedSource) throws ParsingException, UncheckedIOException {
+            final boolean boundedSource) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final XmlDeserConfig configToUse = check(config);
 
         switch (parserType) {
@@ -2083,13 +2103,15 @@ final class XmlParserImpl extends AbstractXmlParser {
      *        processing instructions follows the root element; {@code false} for a caller-supplied reader that
      *        may stay open and may carry further documents
      * @return the deserialized object of type {@code T}
+     * @throws IllegalArgumentException if {@code source} is {@code null} and this parser uses {@link XmlParserType#StAX} (the
+     *         {@link XmlParserType#DOM} backend reports a {@code null} reader as an {@code UncheckedIOException})
      * @throws ParsingException if no target type can be resolved, the parser type is unsupported,
      *         or the XML is malformed
      * @throws UncheckedIOException if the DOM backend reports an {@code IOException} while reading XML from {@code source}
      */
     @SuppressWarnings("unchecked")
     protected <T> T read(final Reader source, final XmlDeserConfig config, final Map<String, Type<?>> nodeTypes, Type<? extends T> targetType,
-            final boolean boundedSource) throws ParsingException, UncheckedIOException {
+            final boolean boundedSource) throws IllegalArgumentException, ParsingException, UncheckedIOException {
         final XmlDeserConfig configToUse = check(config);
 
         switch (parserType) {
@@ -2187,11 +2209,14 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param config the deserialization configuration
      * @param targetType the type of the object to create
      * @return the deserialized object of type {@code T}
+     * @throws ParsingException if the XML nesting depth exceeds the allowed maximum, a type attribute is not allowed, an unmatched
+     *         property is rejected, the element structure is invalid, the XML ends prematurely, or the target class cannot be parsed as an
+     *         array, collection, map, or bean
      * @throws XMLStreamException if advancing {@code xmlReader} through element names, attributes or values encounters malformed XML or
      *         cannot read its underlying input
      */
     protected <T> T readByStreamParser(final XMLStreamReader xmlReader, final XmlDeserConfig config, final Type<? extends T> targetType)
-            throws XMLStreamException {
+            throws ParsingException, XMLStreamException {
         return readByStreamParser(xmlReader, config, null, null, targetType);
     }
 
@@ -2208,9 +2233,12 @@ final class XmlParserImpl extends AbstractXmlParser {
      *
      * <p>This implementation also filters out processing instructions, so that text separated by one is
      * coalesced instead of truncated.</p>
+     *
+     * @throws IllegalArgumentException if {@code br} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot create the reader over {@code br} or its filtering wrapper
      */
     @Override
-    protected XMLStreamReader createXMLStreamReader(final Reader br) {
+    protected XMLStreamReader createXMLStreamReader(final Reader br) throws IllegalArgumentException, RuntimeException {
         return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(br), NO_COMMENT_OR_PI);
     }
 
@@ -2219,9 +2247,12 @@ final class XmlParserImpl extends AbstractXmlParser {
      *
      * <p>This implementation also filters out processing instructions, so that text separated by one is
      * coalesced instead of truncated.</p>
+     *
+     * @throws IllegalArgumentException if {@code is} is {@code null}
+     * @throws RuntimeException if the StAX provider cannot create the reader over {@code is} or its filtering wrapper
      */
     @Override
-    protected XMLStreamReader createXMLStreamReader(final InputStream is) {
+    protected XMLStreamReader createXMLStreamReader(final InputStream is) throws IllegalArgumentException, RuntimeException {
         return XmlUtil.createFilteredStreamReader(XmlUtil.createXMLStreamReader(is), NO_COMMENT_OR_PI);
     }
 
@@ -2274,12 +2305,12 @@ final class XmlParserImpl extends AbstractXmlParser {
     }
 
     /**
+     * @throws ParsingException if a type attribute is not allowed, an unmatched property is rejected, element structure is invalid, the XML ends prematurely, or the target class cannot be parsed as an array, collection, map, or bean
      * @throws XMLStreamException if advancing the XML stream reader fails
-     * @throws ParsingException if an unmatched property is rejected, element structure is invalid, the XML ends prematurely, or the target class cannot be parsed as an array, collection, map, or bean
      */
     @SuppressWarnings({ "null", "deprecation" })
     private <T> T readByStreamParserBody(final XMLStreamReader xmlReader, final XmlDeserConfig config, PropInfo propInfo, Type<?> propType, Type<?> targetType)
-            throws XMLStreamException, ParsingException {
+            throws ParsingException, XMLStreamException {
         if (xmlReader.getEventType() == XMLStreamConstants.START_ELEMENT) {
             final Type<?> attributeType = resolvePresentTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE));
             if (attributeType != null) {
@@ -2335,7 +2366,10 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 propName = resolveElementName(xmlReader);
                                 propInfo = beanInfo.getPropInfo(propName);
 
-                                if (propName != null && ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                                // Ignored by the element name OR by the property it resolves to: getPropInfo also matches
+                                // case and naming-policy variants (<firstname>, <first_name>), which bound an ignored property.
+                                if (propName != null && ignoredClassPropNames != null
+                                        && (ignoredClassPropNames.contains(propName) || (propInfo != null && ignoredClassPropNames.contains(propInfo.name)))) {
                                     // Clear propInfo so the ignored property's content is skipped the same way as an
                                     // unmatched property; otherwise the CHARACTERS handler would call valueOf on the
                                     // unresolved (null or stale) propType.
@@ -2384,10 +2418,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         }
 
                                     } else {
-                                        @SuppressWarnings("rawtypes")
-                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.javaType())
-                                                ? N.newCollection((Class<Collection>) propType.javaType())
-                                                : new ArrayList<>();
+                                        final Collection<Object> c = newPropCollection(propType);
 
                                         final Type<?> propEleType = getPropEleType(propType);
 
@@ -2401,11 +2432,15 @@ final class XmlParserImpl extends AbstractXmlParser {
                                                 // mixed array/collection value.
                                                 c.add(readScalarElement(xmlReader, propType.elementType()));
                                             } else {
-                                                c.add(readByStreamParser(xmlReader, configToUse, null, propType, propEleType));
+                                                // A nested array/collection element is read like the root ARRAY/COLLECTION
+                                                // branches read theirs, with its own type as the declared type: given the
+                                                // outer propType, the nested reader took the outer element type as its own.
+                                                c.add(readByStreamParser(xmlReader, configToUse, null, isContainerType(propEleType) ? propEleType : propType,
+                                                        propEleType));
                                             }
                                         } while (xmlReader.hasNext() && nextStructuralEvent(xmlReader) == XMLStreamConstants.START_ELEMENT);
 
-                                        propValue = propType.isArray() ? collectionToArray(c, propType) : c;
+                                        propValue = propType.isArray() ? collectionToArray(c, propType) : finishPropCollection(c, propType);
                                     }
                                 }
 
@@ -2448,7 +2483,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         sb.append(xmlReader.getText());
                                     } while (isTextEvent(event = xmlReader.next()));
 
-                                    if (sb != null && sb.length() > text.length()) {
+                                    // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
+                                    // buffer left non-empty made the next coalescing drop its own first chunk (x<![CDATA[]]> then y..z read "xz").
+                                    if (sb != null) {
                                         text = sb.toString();
                                         sb.setLength(0);
                                     }
@@ -2538,8 +2575,13 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
+                // Immutable* targets are filled through a mutable stand-in and wrapped on return, and an EnumMap needs its
+                // key enum, as in JsonParserImpl.readMap: N.newMap would hand back a plain HashMap/TreeMap for all of them.
+                final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(targetClass);
+
                 @SuppressWarnings("rawtypes")
-                final Map<Object, Object> map = N.newMap((Class<Map>) targetClass);
+                final Map<Object, Object> map = EnumMap.class.isAssignableFrom(targetClass) ? newEnumMap(keyType, XmlDeserConfig.class)
+                        : creatorAndConverter != null ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass) : N.newMap((Class<Map>) targetClass);
 
                 for (int event = xmlReader.next(); xmlReader
                         .hasNext(); event = advanceEvent ? xmlReader.next() : xmlReader.getEventType(), advanceEvent = true) {
@@ -2565,7 +2607,12 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                                 if (propType == null) {
-                                    propType = attributeType == null ? valueType : attributeType;
+                                    // the declared value type wins over a RAW runtime type attribute
+                                    // (writeTypeInfo records `type="java.util.EnumMap<Object, Object>"` / `type="ImmutableList<Object>"`
+                                    // for a map value), as the ENTITY branch and the DOM reader already do. Taking the attribute
+                                    // as-is dropped the key enum of a declared EnumMap<K, V> value ("EnumMap requires an enum key
+                                    // type") and the element type of a declared ImmutableList<E> value (elements read as maps).
+                                    propType = chooseDeclaredType(attributeType, valueType);
                                 }
                             } else {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2589,10 +2636,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         }
 
                                     } else {
-                                        @SuppressWarnings("rawtypes")
-                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.javaType())
-                                                ? N.newCollection((Class<Collection>) propType.javaType())
-                                                : new ArrayList<>();
+                                        final Collection<Object> c = newPropCollection(propType);
 
                                         final Type<?> propEleType = getPropEleType(propType);
 
@@ -2606,11 +2650,12 @@ final class XmlParserImpl extends AbstractXmlParser {
                                                 // mixed array/collection value.
                                                 c.add(readScalarElement(xmlReader, propType.elementType()));
                                             } else {
-                                                c.add(readByStreamParser(xmlReader, configToUse, null, propType, propEleType));
+                                                c.add(readByStreamParser(xmlReader, configToUse, null, isContainerType(propEleType) ? propEleType : propType,
+                                                        propEleType));
                                             }
                                         } while (xmlReader.hasNext() && nextStructuralEvent(xmlReader) == XMLStreamConstants.START_ELEMENT);
 
-                                        propValue = propType.isArray() ? collectionToArray(c, propType) : c;
+                                        propValue = propType.isArray() ? collectionToArray(c, propType) : finishPropCollection(c, propType);
                                     }
                                 }
 
@@ -2655,7 +2700,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     sb.append(xmlReader.getText());
                                 } while (isTextEvent(event = xmlReader.next()));
 
-                                if (sb != null && sb.length() > text.length()) {
+                                // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
+                                // buffer left non-empty made the next coalescing drop its own first chunk (x<![CDATA[]]> then y..z read "xz").
+                                if (sb != null) {
                                     text = sb.toString();
                                     sb.setLength(0);
                                 }
@@ -2686,7 +2733,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                         case XMLStreamConstants.END_ELEMENT: {
                             if (propName == null) {
-                                return (T) map;
+                                return (T) (creatorAndConverter == null ? map : creatorAndConverter._2.apply(map));
                             } else {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
                                     // ignore;
@@ -2745,7 +2792,12 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                                 if (propType == null) {
-                                    propType = attributeType == null ? valueType : attributeType;
+                                    // the declared value type wins over a RAW runtime type attribute
+                                    // (writeTypeInfo records `type="java.util.EnumMap<Object, Object>"` / `type="ImmutableList<Object>"`
+                                    // for a map value), as the ENTITY branch and the DOM reader already do. Taking the attribute
+                                    // as-is dropped the key enum of a declared EnumMap<K, V> value ("EnumMap requires an enum key
+                                    // type") and the element type of a declared ImmutableList<E> value (elements read as maps).
+                                    propType = chooseDeclaredType(attributeType, valueType);
                                 }
                             } else {
                                 if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
@@ -2769,10 +2821,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         }
 
                                     } else {
-                                        @SuppressWarnings("rawtypes")
-                                        final Collection<Object> c = Collection.class.isAssignableFrom(propType.javaType())
-                                                ? N.newCollection((Class<Collection>) propType.javaType())
-                                                : new ArrayList<>();
+                                        final Collection<Object> c = newPropCollection(propType);
 
                                         final Type<?> propEleType = getPropEleType(propType);
 
@@ -2786,11 +2835,12 @@ final class XmlParserImpl extends AbstractXmlParser {
                                                 // mixed array/collection value.
                                                 c.add(readScalarElement(xmlReader, propType.elementType()));
                                             } else {
-                                                c.add(readByStreamParser(xmlReader, configToUse, null, propType, propEleType));
+                                                c.add(readByStreamParser(xmlReader, configToUse, null, isContainerType(propEleType) ? propEleType : propType,
+                                                        propEleType));
                                             }
                                         } while (xmlReader.hasNext() && nextStructuralEvent(xmlReader) == XMLStreamConstants.START_ELEMENT);
 
-                                        propValue = propType.isArray() ? collectionToArray(c, propType) : c;
+                                        propValue = propType.isArray() ? collectionToArray(c, propType) : finishPropCollection(c, propType);
                                     }
                                 }
 
@@ -2836,7 +2886,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     sb.append(xmlReader.getText());
                                 } while (isTextEvent(event = xmlReader.next()));
 
-                                if (sb != null && sb.length() > text.length()) {
+                                // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
+                                // buffer left non-empty made the next coalescing drop its own first chunk (x<![CDATA[]]> then y..z read "xz").
+                                if (sb != null) {
                                     text = sb.toString();
                                     sb.setLength(0);
                                 }
@@ -2950,7 +3002,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                                         sb.append(xmlReader.getText());
                                     } while (isTextEvent(event = xmlReader.next()));
 
-                                    if (sb != null && sb.length() > text.length()) {
+                                    // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
+                                    // buffer left non-empty made the next coalescing drop its own first chunk (x<![CDATA[]]> then y..z read "xz").
+                                    if (sb != null) {
                                         text = sb.toString();
                                         sb.setLength(0);
                                     }
@@ -3009,8 +3063,13 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
+                // Immutable* targets are filled through a mutable stand-in and wrapped on return, as in
+                // JsonParserImpl.readCollection: N.newCollection would hand back a plain ArrayList/HashSet/TreeSet.
+                final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(targetClass);
+
                 @SuppressWarnings("rawtypes")
-                final Collection<Object> result = N.newCollection((Class<Collection>) targetClass);
+                final Collection<Object> result = creatorAndConverter != null ? (Collection<Object>) creatorAndConverter._1.apply(targetClass)
+                        : N.newCollection((Class<Collection>) targetClass);
 
                 for (int event = xmlReader.next(); xmlReader.hasNext(); event = xmlReader.next()) {
                     switch (event) {
@@ -3055,7 +3114,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                                     sb.append(xmlReader.getText());
                                 } while (isTextEvent(event = xmlReader.next()));
 
-                                if (sb != null && sb.length() > text.length()) {
+                                // Always take the coalesced text and reset the buffer: an empty CDATA chunk adds no length, and a
+                                // buffer left non-empty made the next coalescing drop its own first chunk (x<![CDATA[]]> then y..z read "xz").
+                                if (sb != null) {
                                     text = sb.toString();
                                     sb.setLength(0);
                                 }
@@ -3071,7 +3132,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                                 if (propValue != null) {
                                     return (T) propValue;
                                 } else {
-                                    return (T) result;
+                                    return (T) (creatorAndConverter == null ? result : creatorAndConverter._2.apply(result));
                                 }
                             }
 
@@ -3082,7 +3143,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                             if (propValue != null) {
                                 return (T) propValue;
                             } else {
-                                return (T) result;
+                                return (T) (creatorAndConverter == null ? result : creatorAndConverter._2.apply(result));
                             }
                         }
 
@@ -3157,10 +3218,11 @@ final class XmlParserImpl extends AbstractXmlParser {
      *        the matching {@code END_ELEMENT}
      * @param eleType the declared element type, or {@code null}
      * @return the converted text; an element with no text is converted from the empty string, as in the DOM backend
+     * @throws ParsingException if the element carries a nonblank {@code type} attribute that is not allowed
      * @throws XMLStreamException if advancing {@code xmlReader} through the scalar element encounters malformed XML or cannot read its
      *         underlying input
      */
-    private Object readScalarElement(final XMLStreamReader xmlReader, final Type<?> eleType) throws XMLStreamException {
+    private Object readScalarElement(final XMLStreamReader xmlReader, final Type<?> eleType) throws ParsingException, XMLStreamException {
         Type<?> valueType = xmlReader.getAttributeCount() > 0 ? resolvePresentTypeAttribute(getAttribute(xmlReader, XmlConstants.TYPE)) : null;
 
         if (valueType == null || valueType.isObject()) {
@@ -3226,7 +3288,7 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @return the decoded empty enum token, or the type's default value
      * @throws RuntimeException if an annotated enum codec rejects the empty token
      */
-    private static Object emptyElementValue(final Type<?> type, final boolean isNullValue) {
+    private static Object emptyElementValue(final Type<?> type, final boolean isNullValue) throws RuntimeException {
         // An annotated enum can own the empty token. Only an explicit null marker bypasses its codec;
         // other scalar types keep the StAX reader's established empty-element defaults.
         return !isNullValue && type.javaType().isEnum() ? type.valueOf(Strings.EMPTY) : type.defaultValue();
@@ -3247,19 +3309,36 @@ final class XmlParserImpl extends AbstractXmlParser {
     /**
      * Returns whether {@code type} carries a type argument or element type more specific than {@code Object}.
      *
+     * <p>A type argument that is itself a generic container counts only when its own type arguments are concrete:
+     * the runtime type attribute of an array of EnumMaps is {@code java.util.EnumMap[]}, whose only argument (its
+     * element type) is the raw {@code EnumMap<Object, Object>}, and it must not be preferred over a declared
+     * {@code EnumMap<TimeUnit, String>[]}.</p>
+     *
      * @param type the type to inspect
      * @return {@code true} if the type describes its elements
      */
     private static boolean hasConcreteTypeParameters(final Type<?> type) {
         for (final Type<?> parameterType : type.parameterTypes()) {
-            if (!parameterType.isObject()) {
+            if (isConcreteTypeArgument(parameterType)) {
                 return true;
             }
         }
 
         final Type<?> elementType = type.elementType();
 
-        return elementType != null && !elementType.isObject();
+        return elementType != null && isConcreteTypeArgument(elementType);
+    }
+
+    /**
+     * Returns whether a type argument adds information: it is not {@code Object} and, when it is generic itself,
+     * carries concrete arguments of its own (a raw {@code EnumMap<Object, Object>} or
+     * {@code ImmutableList<Object>} argument adds nothing).
+     *
+     * @param typeArgument the type argument or element type to inspect
+     * @return {@code true} if the argument is more specific than {@code Object}
+     */
+    private static boolean isConcreteTypeArgument(final Type<?> typeArgument) {
+        return !typeArgument.isObject() && (typeArgument.parameterTypes().isEmpty() || hasConcreteTypeParameters(typeArgument));
     }
 
     /**
@@ -3271,6 +3350,11 @@ final class XmlParserImpl extends AbstractXmlParser {
      * The element type is worth more than the implementation class, so the attribute's concrete class is given
      * up in that case: {@code type="LinkedList"} on a declared {@code List<Inner>} yields the declared type's
      * container (an {@code ArrayList}) holding {@code Inner}s rather than a {@code LinkedList} of maps.</p>
+     *
+     * <p>The rule applies to the root element, to bean properties and to map values
+     * on the StAX path as well: a map value written with type info carries its raw runtime type
+     * ({@code type="java.util.EnumMap<Object, Object>"}), which must not replace a declared
+     * {@code EnumMap<K, V>} or {@code ImmutableList<E>} value type.</p>
      *
      * @param attrType the type resolved from the {@code type} attribute, or {@code null} if there is none
      * @param declaredType the declared property, value or element type, or {@code null}
@@ -3500,7 +3584,9 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                     propInfo = beanInfo.getPropInfo(propName);
 
-                    if (ignoredClassPropNames != null && ignoredClassPropNames.contains(propName)) {
+                    // Same rule as the StAX reader: a case or naming-policy variant of an ignored property's name is ignored too.
+                    if (ignoredClassPropNames != null
+                            && (ignoredClassPropNames.contains(propName) || (propInfo != null && ignoredClassPropNames.contains(propInfo.name)))) {
                         continue;
                     }
 
@@ -3562,7 +3648,11 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                final Map<Object, Object> mResult = newPropInstance(targetClass, node);
+                // Same creation as the StAX reader above: Immutable* via a mutable stand-in, EnumMap keyed by its enum.
+                final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(targetClass);
+
+                final Map<Object, Object> mResult = EnumMap.class.isAssignableFrom(targetClass) ? newEnumMap(keyType, XmlDeserConfig.class)
+                        : creatorAndConverter != null ? (Map<Object, Object>) creatorAndConverter._1.apply(targetClass) : newPropInstance(targetClass, node);
 
                 propNodes = node.getChildNodes();
                 propNodeLength = getNodeLength(propNodes);
@@ -3612,7 +3702,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     mResult.put(isStringKey ? propName : keyType.valueOf(propName), propValue);
                 }
 
-                return (T) mResult;
+                return (T) (creatorAndConverter == null ? mResult : creatorAndConverter._2.apply(mResult));
             }
 
             case MAP_ENTITY: {
@@ -3737,7 +3827,11 @@ final class XmlParserImpl extends AbstractXmlParser {
                         propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                         if (propType == null) {
-                            propType = ignoreTypeInfo ? eleType : Type.of(getConcreteClass(eleNode, eleType.javaType()));
+                            // keep the declared element type (with its type arguments) when the element's
+                            // attribute is the raw runtime type of the declared class, as the MAP branch does through
+                            // resolveDeclaredType: Type.of(concrete class) dropped the key enum of a declared EnumMap<K, V>
+                            // element and the element type of a declared ImmutableList<E> element.
+                            propType = ignoreTypeInfo ? eleType : resolveDeclaredType(eleNode, eleType);
                         }
 
                         if (propType.javaType() == Object.class) {
@@ -3779,7 +3873,11 @@ final class XmlParserImpl extends AbstractXmlParser {
                     }
                 }
 
-                final Collection<Object> result = newPropInstance(targetClass, node);
+                // Same creation as the StAX reader above: Immutable* targets via a mutable stand-in, wrapped on return.
+                final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(targetClass);
+
+                final Collection<Object> result = creatorAndConverter != null ? (Collection<Object>) creatorAndConverter._1.apply(targetClass)
+                        : newPropInstance(targetClass, node);
 
                 final NodeList eleNodes = node.getChildNodes();
                 Node eleNode = null;
@@ -3810,7 +3908,9 @@ final class XmlParserImpl extends AbstractXmlParser {
                     propType = hasPropTypes ? configToUse.getValueType(propName) : null;
 
                     if (propType == null) {
-                        propType = ignoreTypeInfo ? eleType : Type.of(getConcreteClass(eleNode, eleType.javaType()));
+                        // same as the ARRAY branch above - keep the declared element type when the
+                        // attribute is the raw runtime type of the declared class (EnumMap<K, V>, ImmutableList<E>).
+                        propType = ignoreTypeInfo ? eleType : resolveDeclaredType(eleNode, eleType);
                     }
 
                     if (propType.javaType() == Object.class) {
@@ -3824,7 +3924,7 @@ final class XmlParserImpl extends AbstractXmlParser {
                     result.add(propValue);
                 }
 
-                return (T) result;
+                return (T) (creatorAndConverter == null ? result : creatorAndConverter._2.apply(result));
             }
 
             default:
@@ -3853,8 +3953,9 @@ final class XmlParserImpl extends AbstractXmlParser {
      *
      * @param node the node to inspect
      * @return {@code true} if the node stands for a {@code null} value
+     * @throws ParsingException if the node is a {@code null} marker carrying a nonblank {@code type} attribute that is not allowed
      */
-    private boolean isNullNode(final Node node) {
+    private boolean isNullNode(final Node node) throws ParsingException {
         if (!Boolean.parseBoolean(XmlUtil.getAttribute(node, XmlConstants.IS_NULL))) {
             return false;
         }
@@ -3901,8 +4002,9 @@ final class XmlParserImpl extends AbstractXmlParser {
      * @param node the {@code <e>} element
      * @param eleType the declared element type, or {@code null}
      * @return the converted value
+     * @throws ParsingException if the element carries a nonblank {@code type} attribute that is not allowed
      */
-    private Object readScalarNode(final Node node, final Type<?> eleType) {
+    private Object readScalarNode(final Node node, final Type<?> eleType) throws ParsingException {
         Type<?> valueType = resolvePresentTypeAttribute(XmlUtil.getAttribute(node, XmlConstants.TYPE));
 
         if (valueType == null || valueType.isObject()) {
@@ -3930,10 +4032,7 @@ final class XmlParserImpl extends AbstractXmlParser {
 
                 propValue = readByDOMParser(propNode, config, propType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType);
             } else {
-                @SuppressWarnings("rawtypes")
-                final Collection<Object> coll = Collection.class.isAssignableFrom(propType.javaType())
-                        ? N.newCollection((Class<Collection>) propType.javaType())
-                        : new ArrayList<>();
+                final Collection<Object> coll = newPropCollection(propType);
 
                 final Type<?> propEleType = getPropEleType(propType);
 
@@ -3954,16 +4053,61 @@ final class XmlParserImpl extends AbstractXmlParser {
                         // <e> wrapper written by writeElement for a scalar element of a mixed array/collection;
                         // read through the generic element type it would be given as a map otherwise.
                         coll.add(readScalarNode(subPropNode, propType.elementType()));
+                    } else if (isContainerType(propEleType)) {
+                        // A nested array/collection element (List<List<Bean>>, Bean[][]) is read the way the root
+                        // ARRAY/COLLECTION branches read theirs: its own children are its elements, and a raw runtime
+                        // type attribute (type="ArrayList<Object>") does not replace the declared element type.
+                        coll.add(getPropValue(subPropNode, config, propName, ignoreTypeInfo ? propEleType : resolveDeclaredType(subPropNode, propEleType), null,
+                                checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType));
                     } else {
                         coll.add(readByDOMParser(subPropNode, config, propEleType, checkedAttr, isTagByPropertyName, ignoreTypeInfo, false, inputType));
                     }
                 }
 
-                propValue = propType.isArray() ? collectionToArray(coll, propType) : coll;
+                propValue = propType.isArray() ? collectionToArray(coll, propType) : finishPropCollection(coll, propType);
             }
         }
 
         return propValue;
+    }
+
+    /**
+     * Creates the collection that gathers the element children of a collection- or array-typed property.
+     * An {@code Immutable*} property type gets the mutable stand-in registered in
+     * {@code mapOfCreatorAndConverterForTargetType} (wrapped afterwards by {@link #finishPropCollection}), since
+     * {@code N.newCollection} would hand back a plain {@code ArrayList}/{@code HashSet} the property cannot hold.
+     *
+     * @param propType the property's collection or array type
+     * @return a new, empty, mutable collection
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static Collection<Object> newPropCollection(final Type<?> propType) {
+        final Class<?> propClass = propType.javaType();
+
+        if (!Collection.class.isAssignableFrom(propClass)) {
+            return new ArrayList<>();
+        }
+
+        final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = mapOfCreatorAndConverterForTargetType.get(propClass);
+
+        return creatorAndConverter != null ? (Collection<Object>) creatorAndConverter._1.apply(propClass) : N.newCollection((Class<Collection>) propClass);
+    }
+
+    /**
+     * Converts a collection filled by {@link #newPropCollection} to the property's type: the {@code Immutable*}
+     * wrapper for an immutable property type, the collection itself otherwise.
+     *
+     * @param collection the filled collection
+     * @param propType the property's collection type
+     * @return the value to set on the property
+     */
+    private static Object finishPropCollection(final Collection<Object> collection, final Type<?> propType) {
+        final Class<?> propClass = propType.javaType();
+        final Tuple2<Function<Class<?>, Object>, Function<Object, Object>> creatorAndConverter = Collection.class.isAssignableFrom(propClass)
+                ? mapOfCreatorAndConverterForTargetType.get(propClass)
+                : null;
+
+        return creatorAndConverter == null ? collection : creatorAndConverter._2.apply(collection);
     }
 
     /**
@@ -3993,14 +4137,22 @@ final class XmlParserImpl extends AbstractXmlParser {
     private Type<?> getPropEleType(final Type<?> propType) {
         Type<?> propEleType = null;
 
-        if (propType.javaType().isArray() && (propType.elementType().isBean() || propType.elementType().isMap())) {
+        // A nested object array or collection element type is kept as well: falling back to mapType read each inner
+        // <list>/<array> element of a List<List<Bean>> or Bean[][] value as a map and silently lost its beans.
+        if (propType.javaType().isArray() && (propType.elementType().isBean() || propType.elementType().isMap() || isContainerType(propType.elementType()))) {
             propEleType = propType.elementType();
-        } else if (propType.parameterTypes().size() == 1 && (propType.parameterTypes().get(0).isBean() || propType.parameterTypes().get(0).isMap())) {
+        } else if (propType.parameterTypes().size() == 1 && (propType.parameterTypes().get(0).isBean() || propType.parameterTypes().get(0).isMap()
+                || isContainerType(propType.parameterTypes().get(0)))) {
             propEleType = propType.parameterTypes().get(0);
         } else {
             propEleType = mapType;
         }
 
         return propEleType;
+    }
+
+    // An object array or collection element type is itself read element by element, not as a bean or map.
+    private static boolean isContainerType(final Type<?> type) {
+        return type.isObjectArray() || type.isCollection();
     }
 }

@@ -864,8 +864,9 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         final Object src = new String[] { "a", "b", "c", "d" };
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copy((Object) null, 0, dest, 0, 1));
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.copy(src, 0, (Object) null, 0, 1));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copy((Object) null, 0, dest, 0, 0));
-        assertThrows(NullPointerException.class, () -> CommonUtil.copy(src, 0, (Object) null, 0, 0));
+        // C-120 (2026-09-24): a null array with length 0 is a no-op, as in the typed overloads
+        assertDoesNotThrow(() -> CommonUtil.copy((Object) null, 0, dest, 0, 0));
+        assertDoesNotThrow(() -> CommonUtil.copy(src, 0, (Object) null, 0, 0));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.copy("abc", 0, dest, 0, 1));
         assertThrows(IllegalArgumentException.class, () -> CommonUtil.copy(src, 0, "abc", 0, 1));
         CommonUtil.copy(src, 1, dest, 0, 2);
@@ -940,4 +941,252 @@ public class CommonUtilTest extends CommonUtilTestSupport {
         assertArrayEquals(new int[] { 10, 20, 30 }, a);
     }
 
+
+    @Test
+    public void testNewDataset_rowsFirstRowShapeDecidesColumns() {
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList(new HashMap<String, Object>())));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList(new HashMap<String, Object>()), null));
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList("not a row")));
+
+        final Map<String, Object> first = new HashMap<>();
+        first.put("a", 1);
+        final Dataset ds = CommonUtil.newDataset(Arrays.asList(first, new Object[] { 2 }));
+        assertEquals(Arrays.asList("a"), ds.columnNames());
+        assertEquals(Arrays.asList(1, 2), ds.getColumn("a"));
+
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList(first, new Object[] { 2, 3 })));
+    }
+
+    @Test
+    public void testContainsSameElements_FloatDouble_NaNAndSignedZero() {
+        assertTrue(CommonUtil.containsSameElements(new float[] { Float.NaN, 1.0f }, new float[] { 1.0f, Float.NaN }));
+        assertFalse(CommonUtil.containsSameElements(new float[] { 0.0f }, new float[] { -0.0f }));
+        assertTrue(CommonUtil.containsSameElements(new double[] { Double.NaN, 1.0 }, new double[] { 1.0, Double.NaN }));
+        assertFalse(CommonUtil.containsSameElements(new double[] { 0.0 }, new double[] { -0.0 }));
+    }
+
+    @Test
+    public void testNewSetFromMapNullMapThrowsIae() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> CommonUtil.newSetFromMap(null));
+        assertEquals("'map' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testNewSetFromMapNonEmptyMapThrowsIae() {
+        final Map<String, Boolean> map = new HashMap<>();
+        map.put("a", Boolean.TRUE);
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newSetFromMap(map));
+        assertTrue(CommonUtil.newSetFromMap(new HashMap<String, Boolean>()).isEmpty());
+    }
+
+    @Test
+    public void testValueOfNullTargetTypeMessageNamesTargetType() {
+        final IllegalArgumentException e1 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.valueOf("1", null));
+        assertEquals("'targetType' cannot be null", e1.getMessage());
+        final IllegalArgumentException e2 = assertThrows(IllegalArgumentException.class, () -> CommonUtil.valueOf(null, null));
+        assertEquals("'targetType' cannot be null", e2.getMessage());
+    }
+
+    // ---- perf review 2026-09-26 G029 begin ----
+
+    /**
+     * Reference semantics of the primitive containsSameElements overloads: equal length and equal per-value counts,
+     * values compared as by the boxed type's equals().
+     */
+    private static boolean g029SameCounts(final List<?> a, final List<?> b) {
+        if (a.size() != b.size()) {
+            return false;
+        }
+
+        final Map<Object, Integer> counts = new HashMap<>();
+
+        for (final Object e : a) {
+            counts.merge(e, 1, Integer::sum);
+        }
+
+        for (final Object e : b) {
+            final Integer c = counts.get(e);
+
+            if (c == null) {
+                return false;
+            }
+
+            if (c == 1) {
+                counts.remove(e);
+            } else {
+                counts.put(e, c - 1);
+            }
+        }
+
+        return counts.isEmpty();
+    }
+
+    // G029-01: sorted-copy comparison must match the boxed-Multiset semantics for every primitive overload.
+    @Test
+    public void testContainsSameElements_primitiveDifferentialAgainstCounts() {
+        final Random rnd = new Random(20260926L);
+        final float[] floatPool = { 0.0f, -0.0f, Float.NaN, Float.intBitsToFloat(0x7fc00001), Float.intBitsToFloat(0xffc00000), 1.5f,
+                Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.MIN_VALUE, -Float.MAX_VALUE };
+        final double[] doublePool = { 0.0, -0.0, Double.NaN, Double.longBitsToDouble(0x7ff8000000000001L), Double.longBitsToDouble(0xfff8000000000000L), 1.5,
+                Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.MIN_VALUE, -Double.MAX_VALUE };
+
+        for (int round = 0; round < 3000; round++) {
+            final int lenA = rnd.nextInt(7);
+            final int lenB = rnd.nextInt(4) == 0 ? rnd.nextInt(7) : lenA;
+            final int range = 1 + rnd.nextInt(4);
+
+            final char[] ca = new char[lenA], cb = new char[lenB];
+            final byte[] ba = new byte[lenA], bb = new byte[lenB];
+            final short[] sa = new short[lenA], sb = new short[lenB];
+            final int[] ia = new int[lenA], ib = new int[lenB];
+            final long[] la = new long[lenA], lb = new long[lenB];
+            final float[] fa = new float[lenA], fb = new float[lenB];
+            final double[] da = new double[lenA], db = new double[lenB];
+
+            for (int k = 0; k < 2; k++) {
+                final int len = k == 0 ? lenA : lenB;
+
+                for (int i = 0; i < len; i++) {
+                    final int v = rnd.nextInt(range) - 1;
+                    final int f = rnd.nextInt(Math.min(floatPool.length, range + 3));
+                    (k == 0 ? ca : cb)[i] = (char) (v == -1 ? 65535 : v);
+                    (k == 0 ? ba : bb)[i] = (byte) (v == -1 ? -128 : v);
+                    (k == 0 ? sa : sb)[i] = (short) (v == -1 ? Short.MIN_VALUE : v);
+                    (k == 0 ? ia : ib)[i] = v == -1 ? Integer.MIN_VALUE : v;
+                    (k == 0 ? la : lb)[i] = v == -1 ? Long.MAX_VALUE : v;
+                    (k == 0 ? fa : fb)[i] = floatPool[f];
+                    (k == 0 ? da : db)[i] = doublePool[f];
+                }
+            }
+
+            final char[] caCopy = ca.clone();
+            final int[] ibCopy = ib.clone();
+            final float[] faCopy = fa.clone();
+            final double[] dbCopy = db.clone();
+
+            assertEquals(g029SameCounts(CharList.of(ca).boxed(), CharList.of(cb).boxed()), CommonUtil.containsSameElements(ca, cb));
+            assertEquals(g029SameCounts(ByteList.of(ba).boxed(), ByteList.of(bb).boxed()), CommonUtil.containsSameElements(ba, bb));
+            assertEquals(g029SameCounts(ShortList.of(sa).boxed(), ShortList.of(sb).boxed()), CommonUtil.containsSameElements(sa, sb));
+            assertEquals(g029SameCounts(IntList.of(ia).boxed(), IntList.of(ib).boxed()), CommonUtil.containsSameElements(ia, ib));
+            assertEquals(g029SameCounts(LongList.of(la).boxed(), LongList.of(lb).boxed()), CommonUtil.containsSameElements(la, lb));
+            assertEquals(g029SameCounts(FloatList.of(fa).boxed(), FloatList.of(fb).boxed()), CommonUtil.containsSameElements(fa, fb));
+            assertEquals(g029SameCounts(DoubleList.of(da).boxed(), DoubleList.of(db).boxed()), CommonUtil.containsSameElements(da, db));
+
+            // the arguments are never reordered
+            assertArrayEquals(caCopy, ca);
+            assertArrayEquals(ibCopy, ib);
+            assertEquals(Arrays.toString(faCopy), Arrays.toString(fa));
+            assertEquals(Arrays.toString(dbCopy), Arrays.toString(db));
+        }
+    }
+
+    // G029-01: explicit edge cases of the primitive containsSameElements overloads.
+    @Test
+    public void testContainsSameElements_primitiveEdgeCases() {
+        assertTrue(CommonUtil.containsSameElements((int[]) null, (int[]) null));
+        assertTrue(CommonUtil.containsSameElements((long[]) null, new long[0]));
+        assertTrue(CommonUtil.containsSameElements(new double[0], (double[]) null));
+        assertFalse(CommonUtil.containsSameElements((int[]) null, new int[] { 1 }));
+        assertFalse(CommonUtil.containsSameElements(new char[] { 'a' }, (char[]) null));
+        assertFalse(CommonUtil.containsSameElements(new byte[] { 1, 2 }, new byte[] { 1 }));
+
+        final short[] same = { 3, 1, 2 };
+        assertTrue(CommonUtil.containsSameElements(same, same));
+        assertArrayEquals(new short[] { 3, 1, 2 }, same);
+
+        assertTrue(CommonUtil.containsSameElements(new int[] { 7 }, new int[] { 7 }));
+        assertFalse(CommonUtil.containsSameElements(new int[] { 7 }, new int[] { 8 }));
+        assertTrue(CommonUtil.containsSameElements(new long[] { Long.MIN_VALUE, Long.MAX_VALUE, 0 }, new long[] { 0, Long.MIN_VALUE, Long.MAX_VALUE }));
+
+        // Float/Double.equals semantics: every NaN matches every NaN, 0.0 and -0.0 differ
+        assertTrue(CommonUtil.containsSameElements(new float[] { Float.intBitsToFloat(0x7fc00001), 0.0f, -0.0f }, new float[] { -0.0f, Float.NaN, 0.0f }));
+        assertFalse(CommonUtil.containsSameElements(new float[] { -0.0f, -0.0f }, new float[] { 0.0f, -0.0f }));
+        assertTrue(CommonUtil.containsSameElements(new double[] { Double.longBitsToDouble(0xfff8000000000000L), -0.0, 0.0 },
+                new double[] { 0.0, -0.0, Double.NaN }));
+        assertFalse(CommonUtil.containsSameElements(new double[] { Double.NaN, 1.0 }, new double[] { 1.0, 1.0 }));
+    }
+
+    // G029-02: lastEntry of a LinkedHashMap is read from the end of the entry set; it must still be the map's own entry.
+    @Test
+    public void testLastEntry_linkedHashMapReturnsLiveLastEntry() {
+        final Map<String, Integer> linked = new java.util.LinkedHashMap<>();
+        linked.put("b", 1);
+        linked.put(null, null);
+        linked.put("a", 3);
+
+        Map.Entry<String, Integer> expected = null;
+
+        for (final Map.Entry<String, Integer> e : linked.entrySet()) {
+            expected = e;
+        }
+
+        final Map.Entry<String, Integer> last = CommonUtil.lastEntry(linked).orElseThrow();
+        assertSame(expected, last);
+        assertEquals("a", last.getKey());
+        assertEquals(3, last.setValue(30));
+        assertEquals(30, linked.get("a"));
+
+        linked.remove("a");
+        final Map.Entry<String, Integer> nullKeyed = CommonUtil.lastEntry(linked).orElseThrow();
+        assertNull(nullKeyed.getKey());
+        assertNull(nullKeyed.getValue());
+
+        final Map<String, Integer> single = new java.util.LinkedHashMap<>();
+        single.put("x", 1);
+        assertEquals("x", CommonUtil.lastEntry(single).orElseThrow().getKey());
+        single.clear();
+        assertFalse(CommonUtil.lastEntry(single).isPresent());
+    }
+
+    // G029-02: reading the last entry must not reorder an access-ordered LinkedHashMap.
+    @Test
+    public void testLastEntry_accessOrderedLinkedHashMapKeepsOrder() {
+        final Map<String, Integer> lru = new java.util.LinkedHashMap<>(16, 0.75f, true);
+        lru.put("a", 1);
+        lru.put("b", 2);
+        lru.put("c", 3);
+
+        assertEquals("c", CommonUtil.lastEntry(lru).orElseThrow().getKey());
+        assertEquals(Arrays.asList("a", "b", "c"), new ArrayList<>(lru.keySet()));
+
+        lru.get("a");
+        assertEquals("a", CommonUtil.lastEntry(lru).orElseThrow().getKey());
+        assertEquals(Arrays.asList("b", "c", "a"), new ArrayList<>(lru.keySet()));
+    }
+
+    // G029-02: maps without a reverse traversal still return the last entry of their iteration order.
+    @Test
+    public void testLastEntry_unorderedAndWrappedMaps() {
+        final Map<Integer, String> hash = new HashMap<>();
+
+        for (int i = 0; i < 50; i++) {
+            hash.put(i * 37, "v" + i);
+        }
+
+        Map.Entry<Integer, String> expectedHash = null;
+
+        for (final Map.Entry<Integer, String> e : hash.entrySet()) {
+            expectedHash = e;
+        }
+
+        assertSame(expectedHash, CommonUtil.lastEntry(hash).orElseThrow());
+
+        final Map<String, Integer> linked = new java.util.LinkedHashMap<>();
+        linked.put("p", 1);
+        linked.put("q", 2);
+        final Map<String, Integer> wrapped = Collections.unmodifiableMap(linked);
+        assertEquals("q", CommonUtil.lastEntry(wrapped).orElseThrow().getKey());
+        assertThrows(UnsupportedOperationException.class, () -> CommonUtil.lastEntry(wrapped).orElseThrow().setValue(5));
+
+        final Map<String, Integer> concurrent = new java.util.concurrent.ConcurrentHashMap<>(linked);
+        Map.Entry<String, Integer> expectedConcurrent = null;
+
+        for (final Map.Entry<String, Integer> e : concurrent.entrySet()) {
+            expectedConcurrent = e;
+        }
+
+        assertEquals(expectedConcurrent, CommonUtil.lastEntry(concurrent).orElseThrow());
+    }
+
+    // ---- perf review 2026-09-26 G029 end ----
 }

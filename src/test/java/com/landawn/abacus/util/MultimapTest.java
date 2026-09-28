@@ -2523,4 +2523,33 @@ public class MultimapTest extends MultimapTestSupport {
         assertEquals(51, upperValue.hashCode());
         assertEquals(19, lowerValue.hashCode());
     }
+
+    @Test
+    public void testClassTypedConstructorNullMapTypeMessageNamesMapType() {
+        final IllegalArgumentException listEx = assertThrows(IllegalArgumentException.class,
+                () -> CommonUtil.newListMultimap((Class<? extends Map>) null, ArrayList.class));
+        assertEquals("'mapType' cannot be null", listEx.getMessage());
+
+        final IllegalArgumentException setEx = assertThrows(IllegalArgumentException.class,
+                () -> CommonUtil.newSetMultimap((Class<? extends Map>) null, HashSet.class));
+        assertEquals("'mapType' cannot be null", setEx.getMessage());
+    }
+
+    @Test
+    public void testClassTypedConstructorNullValueTypeMessageNamesValueType() {
+        final IllegalArgumentException listEx = assertThrows(IllegalArgumentException.class,
+                () -> CommonUtil.newListMultimap(HashMap.class, (Class<? extends List>) null));
+        assertEquals("'valueType' cannot be null", listEx.getMessage());
+
+        final IllegalArgumentException setEx = assertThrows(IllegalArgumentException.class,
+                () -> CommonUtil.newSetMultimap(HashMap.class, (Class<? extends Set>) null));
+        assertEquals("'valueType' cannot be null", setEx.getMessage());
+    }
+
+    @Test
+    public void testClassTypedConstructorBothTypesNullReportsMapTypeFirst() {
+        final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> CommonUtil.newListMultimap((Class<? extends Map>) null, (Class<? extends List>) null));
+        assertEquals("'mapType' cannot be null", ex.getMessage());
+    }
 }

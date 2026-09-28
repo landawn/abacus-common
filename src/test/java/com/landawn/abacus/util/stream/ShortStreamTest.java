@@ -4246,4 +4246,384 @@ public class ShortStreamTest extends TestBase {
         assertThrows(NoSuchElementException.class, iter::nextShort);
         assertEquals(1, conditionCalls.get());
     }
+
+    // ---- perf review 2026-09-26 G088 begin ----
+    private static short[] g088DistinctOracle(final short[] values, final int fromIndex, final int toIndex) {
+        final java.util.LinkedHashSet<Short> set = new java.util.LinkedHashSet<>();
+
+        for (int i = fromIndex; i < toIndex; i++) {
+            set.add(values[i]);
+        }
+
+        final short[] result = new short[set.size()];
+        int index = 0;
+
+        for (final Short value : set) {
+            result[index++] = value;
+        }
+
+        return result;
+    }
+
+    // G088-01: unsorted ArrayShortStream.distinct keeps first occurrences in encounter order, incl. sign/word boundaries
+    @Test
+    public void testDistinct_unsortedArray_boundaryValues() {
+        final short[] boundaryValues = { 0, -1, Short.MAX_VALUE, Short.MIN_VALUE, -1, 63, 64, -64, -65, 127, 128, -128, -129, 255, 256, Short.MIN_VALUE,
+                0, Short.MAX_VALUE, 64, 63, (short) -32767, (short) 32766, -1, 1, 1 };
+
+        // the short input (below 256 elements) and the long input (at least 256 elements) take different tracking paths
+        g088CheckDistinct(boundaryValues);
+
+        final short[] repeated = new short[boundaryValues.length * 12];
+        for (int i = 0; i < repeated.length; i++) {
+            repeated[i] = boundaryValues[(i * 7) % boundaryValues.length];
+        }
+        g088CheckDistinct(repeated);
+
+        final short[] sizes255And256 = new short[256];
+        for (int i = 0; i < sizes255And256.length; i++) {
+            sizes255And256[i] = (short) ((i % 97) * 677 - 32768);
+        }
+        g088CheckDistinct(Arrays.copyOf(sizes255And256, 255));
+        g088CheckDistinct(sizes255And256);
+    }
+
+    private static void g088CheckDistinct(final short[] values) {
+        final short[] expected = g088DistinctOracle(values, 0, values.length);
+
+        assertArrayEquals(expected, ShortStream.of(values).distinct().toArray());
+        assertEquals(expected.length, ShortStream.of(values).distinct().count());
+        assertArrayEquals(Arrays.copyOfRange(expected, 3, expected.length), ShortStream.of(values).distinct().skip(3).toArray());
+        assertArrayEquals(Arrays.copyOf(expected, 3), ShortStream.of(values).distinct().limit(3).toArray());
+        assertArrayEquals(g088DistinctOracle(values, 2, 19), ShortStream.of(values, 2, 19).distinct().toArray());
+        assertArrayEquals(g088DistinctOracle(values, 1, values.length - 1), ShortStream.of(values, 1, values.length - 1).distinct().toArray());
+
+        final ShortIterator iter = ShortStream.of(values).distinct().iterator();
+        for (final short value : expected) {
+            assertTrue(iter.hasNext());
+            assertEquals(value, iter.nextShort());
+        }
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextShort);
+    }
+
+    // G088-01: every distinct() call gets its own seen-set; a large random input matches the LinkedHashSet oracle
+    @Test
+    public void testDistinct_unsortedArray_randomMatchesOracle() {
+        final Random random = new Random(20260926L);
+        final short[] fullRange = new short[50_000];
+        final short[] narrowRange = new short[50_000];
+
+        for (int i = 0; i < fullRange.length; i++) {
+            fullRange[i] = (short) random.nextInt();
+            narrowRange[i] = (short) (random.nextInt(300) - 150);
+        }
+
+        assertArrayEquals(g088DistinctOracle(fullRange, 0, fullRange.length), ShortStream.of(fullRange).distinct().toArray());
+        assertArrayEquals(g088DistinctOracle(narrowRange, 0, narrowRange.length), ShortStream.of(narrowRange).distinct().toArray());
+        assertArrayEquals(g088DistinctOracle(narrowRange, 0, narrowRange.length), ShortStream.of(narrowRange).distinct().toArray());
+        assertEquals(N.toList((short) 7, (short) -7), ShortStream.of((short) 7, (short) -7, (short) 7, (short) -7).distinct().toList());
+        assertEquals(0, ShortStream.of(new short[0]).distinct().count());
+    }
+    // ---- perf review 2026-09-26 G088 end ----
+    // ---- perf review 2026-09-26 G105 begin ----
+    // G105-01: pins the column-major order of flatten(short[][], true) for jagged input with null/empty/short rows
+    @Test
+    public void testFlattenVertically_jaggedNullEmptyRowsMatchesColumnMajorReference() {
+        final Random random = new Random(20260926L);
+
+        for (int round = 0; round < 300; round++) {
+            final int rows = 2 + random.nextInt(8);
+            final short[][] a = new short[rows][];
+
+            for (int r = 0; r < rows; r++) {
+                final int kind = random.nextInt(6);
+                a[r] = kind == 0 ? null : new short[kind == 1 ? 0 : random.nextInt(7)];
+
+                if (a[r] != null) {
+                    for (int c = 0; c < a[r].length; c++) {
+                        a[r][c] = (short) (random.nextInt(2000) - 1000);
+                    }
+                }
+            }
+
+            int maxLen = 0;
+
+            for (final short[] row : a) {
+                maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+            }
+
+            final ShortList expected = new ShortList();
+
+            for (int c = 0; c < maxLen; c++) {
+                for (final short[] row : a) {
+                    if (row != null && c < row.length) {
+                        expected.add(row[c]);
+                    }
+                }
+            }
+
+            assertArrayEquals(expected.toArray(), ShortStream.flatten(a, true).toArray());
+            assertEquals(expected.size(), ShortStream.flatten(a, true).count());
+
+            if (expected.size() > 1) {
+                assertArrayEquals(expected.copy(1, expected.size()).toArray(), ShortStream.flatten(a, true).skip(1).toArray());
+            }
+        }
+    }
+
+    // G105-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
+    @Test
+    public void testFlattenVertically_iteratorExhaustionAndLongRow() {
+        final short[][] a = { null, { 1 }, {}, { 2, 3, 4 }, null, { 5, 6 } };
+        final ShortIterator iter = ShortStream.flatten(a, true).iterator();
+        final ShortList actual = new ShortList();
+
+        while (iter.hasNext()) {
+            actual.add(iter.nextShort());
+        }
+
+        assertArrayEquals(new short[] { 1, 2, 5, 3, 6, 4 }, actual.toArray());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextShort);
+        assertFalse(iter.hasNext());
+
+        final short[][] jagged = new short[201][];
+
+        for (int i = 0; i < 200; i++) {
+            jagged[i] = i % 3 == 0 ? null : new short[] { (short) (100 + i) };
+        }
+
+        jagged[200] = new short[5000];
+
+        for (int i = 0; i < 5000; i++) {
+            jagged[200][i] = (short) (i % 1000);
+        }
+
+        final short[] result = ShortStream.flatten(jagged, true).toArray();
+        final ShortList expected = new ShortList();
+
+        for (int i = 0; i < 200; i++) {
+            if (jagged[i] != null) {
+                expected.add(jagged[i][0]);
+            }
+        }
+
+        for (int i = 0; i < 5000; i++) {
+            expected.add(jagged[200][i]);
+        }
+
+        assertArrayEquals(expected.toArray(), result);
+        assertArrayEquals(new short[0], ShortStream.flatten(new short[][] { null, {}, null }, true).toArray());
+    }
+    // ---- perf review 2026-09-26 G105 end ----
+    // ---- perf review 2026-09-26 G112 begin ----
+    // G112-01: bulk count()/toShortList()/toArray() of concat(List<short[]>) / concat(short[]...) - null/empty arrays, skip into/at/after a
+    // segment, short (element-wise) and long (bulk copy) segments, fresh results, lazy read of the list, same list traversal calls
+    @Test
+    public void testConcatListOfArrays_bulkOpsMatchElementwise_G112() {
+        final short[] a = new short[20];
+        final short[] b = new short[40];
+        final short[] c = { (short) 1, (short) 2, (short) 3 };
+        for (int i = 0; i < a.length; i++) {
+            a[i] = (short) (10 + i);
+        }
+        for (int i = 0; i < b.length; i++) {
+            b[i] = (short) (100 + i);
+        }
+        final List<short[]> list = Arrays.asList(null, a, null, new short[0], c, b, c, new short[0]);
+        final short[] all = new short[66];
+        System.arraycopy(a, 0, all, 0, 20);
+        System.arraycopy(c, 0, all, 20, 3);
+        System.arraycopy(b, 0, all, 23, 40);
+        System.arraycopy(c, 0, all, 63, 3);
+
+        for (final int n : new int[] { 0, 1, 5, 19, 20, 21, 22, 23, 24, 40, 62, 63, 64, 65, 66, 70 }) {
+            final short[] expected = Arrays.copyOfRange(all, Math.min(n, all.length), all.length);
+            assertArrayEquals(expected, ShortStream.concat(list).skip(n).toArray(), "skip " + n);
+            assertEquals(expected.length, ShortStream.concat(list).skip(n).count(), "skip " + n);
+            final ShortList xl = ShortStream.concat(list).skip(n).toShortList();
+            assertArrayEquals(expected, xl.toArray(), "skip " + n);
+            xl.add((short) 7);
+            assertEquals(expected.length + 1, xl.size());
+        }
+
+        assertArrayEquals(all, ShortStream.concat(a, c, b, c).toArray());
+        assertEquals(66, ShortStream.concat(a, null, c, b, c).count());
+
+        final List<short[]> empties = Arrays.asList(null, new short[0]);
+        assertEquals(0, ShortStream.concat(empties).toArray().length);
+        assertEquals(0, ShortStream.concat(empties).count());
+        final ShortList emptyList = ShortStream.concat(empties).toShortList();
+        emptyList.add((short) 9);
+        assertEquals(1, emptyList.size());
+
+        final short[] result = ShortStream.concat(Arrays.asList(b)).toArray();
+        assertArrayEquals(b, result);
+        assertFalse(result == b);
+        result[0] = (short) 0;
+        assertEquals((short) 100, b[0]);
+
+        // the list is read when the terminal operation runs; close handlers still run
+        final List<short[]> live = new ArrayList<>(Arrays.asList(new short[] { (short) 1 }, new short[] { (short) 2 }));
+        final ShortStream stream = ShortStream.concat(live);
+        live.set(1, b);
+        final AtomicInteger closed = new AtomicInteger();
+        assertEquals(41, stream.onClose(closed::incrementAndGet).count());
+        assertEquals(1, closed.get());
+
+        // partially consumed iterator, then drained in bulk
+        final ShortIterator iter = ShortStream.concat(list).iterator();
+        assertEquals((short) 10, iter.nextShort());
+        assertArrayEquals(Arrays.copyOfRange(all, 1, all.length), iter.toArray());
+        assertFalse(iter.hasNext());
+
+        // the list iterator is advanced exactly as element-by-element iteration advances it
+        final int[] calls = new int[2];
+        final List<short[]> counting = new ArrayList<short[]>(list) {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public java.util.Iterator<short[]> iterator() {
+                final java.util.Iterator<short[]> it = super.iterator();
+
+                return new java.util.Iterator<short[]>() {
+                    @Override
+                    public boolean hasNext() {
+                        calls[0]++;
+                        return it.hasNext();
+                    }
+
+                    @Override
+                    public short[] next() {
+                        calls[1]++;
+                        return it.next();
+                    }
+                };
+            }
+        };
+
+        assertArrayEquals(all, ShortStream.concat(counting).toArray());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+        calls[0] = calls[1] = 0;
+        assertEquals(66, ShortStream.concat(counting).count());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+        calls[0] = calls[1] = 0;
+        assertEquals(66, ShortStream.concat(counting).toShortList().size());
+        assertEquals(9, calls[0]);
+        assertEquals(8, calls[1]);
+    }
+    // ---- perf review 2026-09-26 G112 end ----
+    // ---- perf review 2026-09-26 G114 begin ----
+    private static short[] flattenVerticallyReferenceG114(final short[][] a) {
+        final ShortList ret = new ShortList();
+        int maxLen = 0;
+
+        for (final short[] row : a) {
+            maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+        }
+
+        for (int col = 0; col < maxLen; col++) {
+            for (final short[] row : a) {
+                if (row != null && col < row.length) {
+                    ret.add(row[col]);
+                }
+            }
+        }
+
+        return ret.toArray();
+    }
+
+    private static void assertFlattenVerticallyMatchesReferenceG114(final short[][] a, final int skip) {
+        final short[] expected = flattenVerticallyReferenceG114(a);
+        final String message = Arrays.deepToString(a);
+        assertArrayEquals(expected, ShortStream.flatten(a, true).toArray(), message);
+        assertEquals(expected.length, ShortStream.flatten(a, true).count(), message);
+        assertArrayEquals(Arrays.copyOfRange(expected, Math.min(skip, expected.length), expected.length), ShortStream.flatten(a, true).skip(skip).toArray(),
+                message);
+
+        final ShortIterator iter = ShortStream.flatten(a, true).iterator();
+
+        for (final short element : expected) {
+            assertTrue(iter.hasNext());
+            assertEquals(element, iter.nextShort());
+        }
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextShort);
+        assertFalse(iter.hasNext());
+    }
+
+    // G114-01: flatten(short[][], true) keeps the original walk for dense input and uses a compacted row walk when
+    // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
+    @Test
+    public void testFlattenVertically_denseAndSparseWalksMatchColumnMajorReference() {
+        final Random random = new Random(114);
+
+        for (int round = 0; round < 400; round++) {
+            // kind 0: dense jagged, 1: mostly null/empty rows plus a few long ones, 2: rectangular, 3: one long row among empty/null rows
+            final int kind = round % 4;
+            final int rows = 2 + random.nextInt(kind == 1 || kind == 3 ? 40 : 8);
+            final int width = 1 + random.nextInt(6);
+            final int longRow = random.nextInt(rows);
+            final short[][] a = new short[rows][];
+
+            for (int i = 0; i < rows; i++) {
+                final int len;
+
+                if (kind == 0) {
+                    len = random.nextInt(7) - 1;
+                } else if (kind == 1) {
+                    len = random.nextInt(6) == 0 ? random.nextInt(40) : random.nextInt(3) - 1;
+                } else if (kind == 2) {
+                    len = width;
+                } else {
+                    len = i == longRow ? 1 + random.nextInt(60) : random.nextInt(2) - 1;
+                }
+
+                if (len >= 0) {
+                    a[i] = new short[len];
+
+                    for (int j = 0; j < len; j++) {
+                        a[i][j] = (short) (i * 100 + j);
+                    }
+                }
+            }
+
+            assertFlattenVerticallyMatchesReferenceG114(a, random.nextInt(rows * 3 + 2));
+        }
+
+        // rows * longest row == 4 * elements keeps the original walk; one more empty row switches to the compacted walk
+        final short[][] boundary = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {} };
+        final short[][] boundaryPlusOne = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {}, {} };
+        assertArrayEquals(new short[] { 1, 5, 2, 6, 3, 7, 4, 8 }, ShortStream.flatten(boundary, true).toArray());
+        assertArrayEquals(new short[] { 1, 5, 2, 6, 3, 7, 4, 8 }, ShortStream.flatten(boundaryPlusOne, true).toArray());
+
+        for (int skip = 0; skip <= 9; skip++) {
+            assertFlattenVerticallyMatchesReferenceG114(boundary, skip);
+            assertFlattenVerticallyMatchesReferenceG114(boundaryPlusOne, skip);
+        }
+
+        // sparse: rows drop out of the compacted walk at different columns
+        final short[][] sparse = { null, {}, { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, {}, {}, { 10, 11 }, {}, null, {}, {}, { 12, 13, 14, 15 }, {} };
+        assertArrayEquals(new short[] { 1, 10, 12, 2, 11, 13, 3, 14, 4, 15, 5, 6, 7, 8, 9 }, ShortStream.flatten(sparse, true).toArray());
+        assertFlattenVerticallyMatchesReferenceG114(sparse, 4);
+
+        // one long row among 999 null rows (first and last position)
+        final short[][] oneLongRow = new short[1000][];
+        oneLongRow[999] = new short[5000];
+
+        for (int j = 0; j < 5000; j++) {
+            oneLongRow[999][j] = (short) j;
+        }
+
+        assertArrayEquals(oneLongRow[999], ShortStream.flatten(oneLongRow, true).toArray());
+        oneLongRow[0] = oneLongRow[999];
+        oneLongRow[999] = null;
+        assertFlattenVerticallyMatchesReferenceG114(oneLongRow, 4999);
+        assertEquals(0, ShortStream.flatten(new short[][] { null, {}, null, {} }, true).count());
+    }
+    // ---- perf review 2026-09-26 G114 end ----
 }

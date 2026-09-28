@@ -152,4 +152,23 @@ public class PrimitiveLongListTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
     }
 
+    // ---- deep review 2026-09-25 G016 begin ----
+    // G016-01: a LongList written with writeLongAsString (["1", "2"]) must be readable back, as a value and as a bean property.
+    @Test
+    public void testValueOf_quotedElementsFromWriteLongAsString() {
+        final com.landawn.abacus.parser.JsonSerConfig config = com.landawn.abacus.parser.JsonSerConfig.create().setWriteLongAsString(true);
+        final LongList list = LongList.of(9007199254740993L, -2L);
+
+        assertEquals(list, type.valueOf("[\"9007199254740993\", \"-2\"]"));
+
+        assertEquals(list, com.landawn.abacus.util.N.fromJson("[\"9007199254740993\", \"-2\"]", LongList.class));
+
+        final java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("ids", list);
+        final String mapJson = com.landawn.abacus.util.N.toJson(map, config);
+        assertEquals("{\"ids\": [\"9007199254740993\", \"-2\"]}", mapJson);
+        final java.util.Map<String, LongList> back = com.landawn.abacus.util.N.fromJson(mapJson, Type.<java.util.Map<String, LongList>> of("Map<String, LongList>"));
+        assertEquals(list, back.get("ids"));
+    }
+    // ---- deep review 2026-09-25 G016 end ----
 }

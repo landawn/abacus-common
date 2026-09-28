@@ -505,12 +505,14 @@ public class CsvAsyncReflectTest extends TestBase {
     public void b14_domainLiteralRejectsBracketsAndBackslash() {
         final Pattern matcher = RegExUtil.EMAIL_ADDRESS_RFC_5322_MATCHER;
 
-        // A well-formed general address literal still matches.
-        assertTrue(RegExUtil.matches("a@[1.2.3.x:abc]", matcher));
+        // A well-formed general address literal still matches (C-002, 2026-09-24: the tag:content literal is an alternative
+        // to the IPv4 literal, not a 4th-octet alternative, so the old "1.2.3.x:abc" form is no longer accepted).
+        assertTrue(RegExUtil.matches("a@[x:abc]", matcher));
+        assertFalse(RegExUtil.matches("a@[1.2.3.x:abc]", matcher));
 
-        // ... but the three characters that must be escaped inside a domain literal are now rejected.
-        assertFalse(RegExUtil.matches("a@[1.2.3.x:a]b]", matcher), "']' must not be admitted inside a domain literal");
-        assertFalse(RegExUtil.matches("a@[1.2.3.x:a[b]", matcher), "'[' must not be admitted inside a domain literal");
+        // ... but the three characters that must be escaped inside a domain literal are rejected.
+        assertFalse(RegExUtil.matches("a@[x:a]b]", matcher), "']' must not be admitted inside a domain literal");
+        assertFalse(RegExUtil.matches("a@[x:a[b]", matcher), "'[' must not be admitted inside a domain literal");
     }
 
     @Test

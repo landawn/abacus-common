@@ -14,11 +14,11 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.IntSummaryStatistics;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -147,8 +147,8 @@ class IteratorIntStream extends AbstractIntStream {
      *
      * IteratorIntStream stream = new IteratorIntStream(sortedIterator, true, closeHandlers);
      * try {
-     *     OptionalInt min = stream.min();            // returns the first element (optimized for sorted input)
-     *     System.out.println("Min: " + min.get());   // prints 1
+     *     OptionalInt min = stream.min();           // returns the first element (optimized for sorted input)
+     *     System.out.println("Min: " + min.get());  // prints 1
      * } finally {
      *     stream.close();
      * }
@@ -1242,7 +1242,9 @@ class IteratorIntStream extends AbstractIntStream {
             private int[] aar;
             private int cursor = 0;
             private int to;
-            private LinkedList<Integer> queue;
+            private IntList window;
+            // Index of the oldest retained value once full; preserve it across failed source pulls.
+            private int windowCursor;
             private Queue<Integer> heap;
 
             @Override
@@ -1313,19 +1315,30 @@ class IteratorIntStream extends AbstractIntStream {
                 if (!initialized) {
                     // Keep the window/heap across retries so a failed source read does not drop already-accepted candidates.
                     if (isSorted() && isSameComparator(comparator, comparator())) {
-                        if (queue == null) {
-                            queue = new LinkedList<>();
+                        if (window == null) {
+                            window = new IntList(Math.min(n, 16));
                         }
 
                         while (elements.hasNext()) {
-                            if (queue.size() >= n) {
-                                queue.poll();
+                            final int next = elements.nextInt();
+                            if (window.size() < n) {
+                                window.add(next);
+                            } else {
+                                window.set(windowCursor, next);
+                                if (++windowCursor == n) {
+                                    windowCursor = 0;
+                                }
                             }
-
-                            queue.offer(elements.nextInt());
                         }
 
-                        aar = Array.unbox(queue.toArray(N.EMPTY_INT_OBJ_ARRAY));
+                        aar = new int[window.size()];
+                        int outputIndex = 0;
+                        for (int i = windowCursor; i < window.size(); i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
+                        for (int i = 0; i < windowCursor; i++) {
+                            aar[outputIndex++] = window.get(i);
+                        }
                     } else {
                         final Comparator<? super Integer> cmp = comparator;
                         if (heap == null) {
@@ -1350,7 +1363,7 @@ class IteratorIntStream extends AbstractIntStream {
                     }
 
                     to = aar.length;
-                    queue = null;
+                    window = null;
                     heap = null;
                     initialized = true;
                 }
@@ -1389,6 +1402,9 @@ class IteratorIntStream extends AbstractIntStream {
             while (elements.hasNext()) {
                 action.accept(elements.nextInt());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1400,6 +1416,12 @@ class IteratorIntStream extends AbstractIntStream {
 
         try {
             return elements.toArray();
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1413,6 +1435,9 @@ class IteratorIntStream extends AbstractIntStream {
 
         try {
             return elements.toList();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1433,19 +1458,23 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public <C extends Collection<Integer>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Integer>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextInt());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1459,19 +1488,23 @@ class IteratorIntStream extends AbstractIntStream {
     }
 
     @Override
-    public Multiset<Integer> toMultiset(final Supplier<? extends Multiset<Integer>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Integer> toMultiset(final Supplier<? extends Multiset<Integer>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Integer> result = supplier.get();
+            final Multiset<Integer> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 result.add(elements.nextInt());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1480,7 +1513,7 @@ class IteratorIntStream extends AbstractIntStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.IntFunction<? extends K, E> keyMapper,
             final Throwables.IntFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1489,7 +1522,7 @@ class IteratorIntStream extends AbstractIntStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
             int next = 0;
 
             while (elements.hasNext()) {
@@ -1498,6 +1531,9 @@ class IteratorIntStream extends AbstractIntStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1506,7 +1542,7 @@ class IteratorIntStream extends AbstractIntStream {
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.IntFunction<? extends K, E> keyMapper,
             final Collector<? super Integer, ?, D> downstream, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1514,7 +1550,7 @@ class IteratorIntStream extends AbstractIntStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Integer> downstreamAccumulator = (BiConsumer<Object, ? super Integer>) downstream.accumulator();
@@ -1527,7 +1563,7 @@ class IteratorIntStream extends AbstractIntStream {
 
             while (elements.hasNext()) {
                 next = elements.nextInt();
-                key = checkArgNotNull(keyMapper.apply(next), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(next), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1542,6 +1578,9 @@ class IteratorIntStream extends AbstractIntStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1561,6 +1600,9 @@ class IteratorIntStream extends AbstractIntStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1584,6 +1626,9 @@ class IteratorIntStream extends AbstractIntStream {
             }
 
             return OptionalInt.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1591,7 +1636,7 @@ class IteratorIntStream extends AbstractIntStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjIntConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1599,13 +1644,16 @@ class IteratorIntStream extends AbstractIntStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             while (elements.hasNext()) {
                 accumulator.accept(result, elements.nextInt());
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1634,6 +1682,9 @@ class IteratorIntStream extends AbstractIntStream {
             }
 
             return OptionalInt.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1668,6 +1719,9 @@ class IteratorIntStream extends AbstractIntStream {
             }
 
             return OptionalInt.of(candidate);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1698,7 +1752,10 @@ class IteratorIntStream extends AbstractIntStream {
                         window[size++] = v;
                     } else {
                         window[idx] = v;
-                        idx = (idx + 1) % k;
+                        // Wrap with a compare instead of a per-element integer division ('%' by a non-constant k).
+                        if (++idx == k) {
+                            idx = 0;
+                        }
                     }
                 }
                 if (size < k) {
@@ -1715,6 +1772,9 @@ class IteratorIntStream extends AbstractIntStream {
             final Optional<Integer> optional = boxed().kthLargest(k, INT_COMPARATOR);
 
             return optional.isPresent() ? OptionalInt.of(optional.get()) : OptionalInt.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1726,12 +1786,36 @@ class IteratorIntStream extends AbstractIntStream {
 
         try {
             long sum = 0;
+            long carry = 0; // number of times 'sum' wrapped, in units of 2^64 (signed)
 
             while (elements.hasNext()) {
-                sum += elements.nextInt();
+                // An iterator-backed stream can hold more than 2^32 elements, so the long accumulator itself can wrap.
+                // Math.addExact threw "long overflow" as soon as a PARTIAL sum left the long range,
+                // even when the exact total fits the documented int. Same wrap-safe accumulation as average(): detect the
+                // wrap with the addExact bit test (no exception, no allocation per element) and count it, so the exact
+                // total is carry * 2^64 + sum and the documented ArithmeticException is thrown only for a total outside
+                // the int range.
+                final int value = elements.nextInt();
+                final long r = sum + value;
+
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
+                }
+
+                sum = r;
+            }
+
+            if (carry != 0) {
+                // The exact total carry * 2^64 + sum (with sum in the long range) is at least 2^63 in magnitude, so it
+                // cannot fit an int; same message as Math.toIntExact below. Reaching this branch takes more than
+                // 2^32 elements, which no unit test can afford (see PrimitiveStreamsReview20260925Test).
+                throw new ArithmeticException("integer overflow");
             }
 
             return Numbers.toIntExact(sum);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1747,14 +1831,32 @@ class IteratorIntStream extends AbstractIntStream {
             }
 
             long sum = 0;
+            long carry = 0; // number of times 'sum' wrapped, in units of 2^64 (signed)
             long count = 0;
 
             do {
-                sum += elements.nextInt();
+                // More than 2^32 int elements can wrap the long accumulator. Detect the wrap with the addExact bit test
+                // (no exception, no allocation per element) and count it, so the exact total is carry * 2^64 + sum.
+                // A try/catch around Math.addExact cannot be used: the iterator itself may throw ArithmeticException.
+                final int value = elements.nextInt();
+                final long r = sum + value;
+
+                if (((sum ^ r) & (value ^ r)) < 0) {
+                    carry += value < 0 ? -1 : 1;
+                }
+
+                sum = r;
                 count++;
             } while (elements.hasNext());
 
-            return OptionalDouble.of(((double) sum) / count);
+            if (carry == 0) {
+                return OptionalDouble.of(((double) sum) / count);
+            }
+
+            return OptionalDouble.of(BigInteger.valueOf(carry).shiftLeft(64).add(BigInteger.valueOf(sum)).doubleValue() / count);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1766,6 +1868,9 @@ class IteratorIntStream extends AbstractIntStream {
 
         try {
             return elements.count();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1783,6 +1888,9 @@ class IteratorIntStream extends AbstractIntStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1800,6 +1908,9 @@ class IteratorIntStream extends AbstractIntStream {
                     return true;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1819,6 +1930,9 @@ class IteratorIntStream extends AbstractIntStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1838,6 +1952,9 @@ class IteratorIntStream extends AbstractIntStream {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1859,6 +1976,9 @@ class IteratorIntStream extends AbstractIntStream {
                     return OptionalInt.of(e);
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1891,6 +2011,9 @@ class IteratorIntStream extends AbstractIntStream {
             }
 
             return hasResult ? OptionalInt.of(result) : OptionalInt.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

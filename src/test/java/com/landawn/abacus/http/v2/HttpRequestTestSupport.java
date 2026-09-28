@@ -203,6 +203,16 @@ public abstract class HttpRequestTestSupport extends TestBase {
         return field.get(request);
     }
 
+    /**
+     * The connect timeout the request will execute with: that of its own client builder when it has one
+     * (for example because the shared per-timeout client pool is full), else that of its shared client.
+     */
+    protected static java.util.Optional<java.time.Duration> connectTimeoutOf(final HttpRequest request) throws Exception {
+        final HttpClient.Builder clientBuilder = (HttpClient.Builder) field(request, "clientBuilder");
+
+        return clientBuilder != null ? clientBuilder.build().connectTimeout() : ((HttpClient) field(request, "httpClient")).connectTimeout();
+    }
+
     protected static byte[] gzip(final String text) throws IOException {
         final ByteArrayOutputStream compressed = new ByteArrayOutputStream();
 

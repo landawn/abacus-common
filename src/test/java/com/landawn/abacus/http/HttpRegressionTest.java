@@ -52,6 +52,8 @@ import com.landawn.abacus.util.ContinuableFuture;
 import com.landawn.abacus.util.IOUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Regression coverage for the 2026-09-02 review of {@code HttpClient}, {@code HttpRequest},
@@ -1689,5 +1691,38 @@ public class HttpRegressionTest extends TestBase {
 
         // Sequential re-execution stays fine once the slot is free again.
         assertEquals("slow", request.get(String.class));
+    }
+
+    @Test
+    public void testJsonBodySerializationFailureLeavesContentTypeUnchanged() {
+        final Map<String, Object> unserializable = new HashMap<>() {
+            @Override
+            public Set<Map.Entry<String, Object>> entrySet() {
+                throw new IllegalStateException("boom");
+            }
+        };
+        unserializable.put("a", 1);
+
+        final HttpRequest request = HttpRequest.url("http://localhost:1/never-connected").xmlBody("<a/>");
+
+        assertThrows(IllegalStateException.class, () -> request.jsonBody(unserializable));
+        // the XML body configured earlier must not be relabelled as JSON
+        assertEquals(HttpHeaders.Values.APPLICATION_XML, request.checkSettings().getContentType());
+    }
+
+    @Test
+    public void testXmlBodySerializationFailureLeavesContentTypeUnchanged() {
+        final Map<String, Object> unserializable = new HashMap<>() {
+            @Override
+            public Set<Map.Entry<String, Object>> entrySet() {
+                throw new IllegalStateException("boom");
+            }
+        };
+        unserializable.put("a", 1);
+
+        final HttpRequest request = HttpRequest.url("http://localhost:1/never-connected").jsonBody("{\"a\":1}");
+
+        assertThrows(IllegalStateException.class, () -> request.xmlBody(unserializable));
+        assertEquals(HttpHeaders.Values.APPLICATION_JSON, request.checkSettings().getContentType());
     }
 }

@@ -105,9 +105,9 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * HttpSettings settings = new HttpSettings();   // all values at their defaults
-     * settings.setConnectTimeout(5000);             // connect timeout = 5000 ms
-     * settings.useCaches(false);                    // caching disabled (the default)
+     * HttpSettings settings = new HttpSettings();  // all values at their defaults
+     * settings.setConnectTimeout(5000);            // connect timeout = 5000 ms
+     * settings.useCaches(false);                   // caching disabled (the default)
      * }</pre>
      *
      * @see #create()
@@ -180,8 +180,8 @@ public final class HttpSettings {
      * settings.setConnectTimeout(5000);
      *
      * // Set different timeouts for connection and read operations
-     * settings.setConnectTimeout(5000)   // 5s to establish connection
-     *         .setReadTimeout(10000);    // 10s to read response
+     * settings.setConnectTimeout(5000)  // 5s to establish connection
+     *         .setReadTimeout(10000);   // 10s to read response
      * }</pre>
      *
      * @param connectTimeout the connection timeout in milliseconds (0 = not set; the client-level default applies)
@@ -359,8 +359,8 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.useCaches(false);   // false disables caching (default)
-     * settings.useCaches(true);    // true enables caching
+     * settings.useCaches(false);  // false disables caching (default)
+     * settings.useCaches(true);   // true enables caching
      * }</pre>
      *
      * @param useCaches {@code true} to use caches, {@code false} otherwise
@@ -411,8 +411,8 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.doInput(true);    // true enables input (default)
-     * settings.doInput(false);   // false disables input (rare)
+     * settings.doInput(true);   // true enables input (default)
+     * settings.doInput(false);  // false disables input (rare)
      * }</pre>
      *
      * @param doInput {@code true} if the connection will be used for input
@@ -467,8 +467,8 @@ public final class HttpSettings {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * settings.doOutput(true);    // true enables output (default)
-     * settings.doOutput(false);   // suppresses a configured POST/PUT/PATCH request body
+     * settings.doOutput(true);   // true enables output (default)
+     * settings.doOutput(false);  // suppresses a configured POST/PUT/PATCH request body
      * }</pre>
      *
      * @param doOutput {@code true} if the connection will be used for output
@@ -523,8 +523,8 @@ public final class HttpSettings {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
-     *     .setOneWayRequest(true);                   // enable fire-and-forget
-     * settings.isOneWayRequest();                    // returns true
+     *     .setOneWayRequest(true);  // enable fire-and-forget
+     * settings.isOneWayRequest();   // returns true
      * }</pre>
      *
      * @param isOneWayRequest {@code true} for one-way requests
@@ -628,7 +628,10 @@ public final class HttpSettings {
      * fmt.getContentType();                          // returns "application/json"
      * }</pre>
      *
-     * @return The Content-Type header value, or {@code null} if not set and no content format is configured
+     * @return The Content-Type header value; otherwise the content type derived from the configured content format;
+     *         {@code null} if there is no such header and the configured format (if any) carries no content type
+     *         ({@link ContentFormat#NONE}, {@link ContentFormat#KRYO} and the compression-only formats such as
+     *         {@link ContentFormat#GZIP})
      */
     public String getContentType() {
         final String contentType = HttpUtil.getContentType(headers);
@@ -688,7 +691,9 @@ public final class HttpSettings {
      * fmt.getContentEncoding();                      // returns "gzip"
      * }</pre>
      *
-     * @return The Content-Encoding header value, or {@code null} if not set and no content format is configured
+     * @return The Content-Encoding header value; otherwise the content encoding derived from the configured content
+     *         format; {@code null} if there is no such header and the configured format (if any) carries no content
+     *         encoding (for example {@link ContentFormat#NONE} or an uncompressed format such as {@link ContentFormat#JSON})
      */
     public String getContentEncoding() {
         final String contentEncoding = HttpUtil.getContentEncoding(headers);
@@ -782,8 +787,8 @@ public final class HttpSettings {
      * <pre>{@code
      * HttpSettings settings = HttpSettings.create()
      *     .headers("Accept", "application/json", "User-Agent", "MyApp/1.0");
-     * settings.headers().get("Accept");       // returns "application/json"
-     * settings.headers().get("User-Agent");   // returns "MyApp/1.0"
+     * settings.headers().get("Accept");      // returns "application/json"
+     * settings.headers().get("User-Agent");  // returns "MyApp/1.0"
      * }</pre>
      *
      * @param name1 the first header name
@@ -795,6 +800,9 @@ public final class HttpSettings {
      * @see HttpHeaders
      */
     public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2) throws IllegalArgumentException {
+        N.checkArgNotNull(name1, cs.name1);
+        N.checkArgNotNull(name2, cs.name2);
+
         headers().set(name1, value1);
         headers().set(name2, value2);
 
@@ -811,9 +819,9 @@ public final class HttpSettings {
      *     "Accept", "application/json",
      *     "User-Agent", "MyApp/1.0",
      *     "X-Request-Id", "abc-123");
-     * settings.headers().get("Accept");         // returns "application/json"
-     * settings.headers().get("User-Agent");     // returns "MyApp/1.0"
-     * settings.headers().get("X-Request-Id");   // returns "abc-123"
+     * settings.headers().get("Accept");        // returns "application/json"
+     * settings.headers().get("User-Agent");    // returns "MyApp/1.0"
+     * settings.headers().get("X-Request-Id");  // returns "abc-123"
      * }</pre>
      *
      * @param name1 the first header name
@@ -828,6 +836,10 @@ public final class HttpSettings {
      */
     public HttpSettings headers(final String name1, final Object value1, final String name2, final Object value2, final String name3, final Object value3)
             throws IllegalArgumentException {
+        N.checkArgNotNull(name1, cs.name1);
+        N.checkArgNotNull(name2, cs.name2);
+        N.checkArgNotNull(name3, cs.name3);
+
         headers().set(name1, value1);
         headers().set(name2, value2);
         headers().set(name3, value3);
@@ -851,9 +863,9 @@ public final class HttpSettings {
      *     "Accept", "application/json",
      *     "User-Agent", "MyApp/1.0"
      * );
-     * settings.headers(headers);          // merges the three entries in
-     * settings.headers().get("Old");      // still "value" (kept, not in the map)
-     * settings.headers().get("Accept");   // "application/json" (added/overwritten)
+     * settings.headers(headers);         // merges the three entries in
+     * settings.headers().get("Old");     // still "value" (kept, not in the map)
+     * settings.headers().get("Accept");  // "application/json" (added/overwritten)
      * }</pre>
      *
      * @param headers a map containing header names and values to merge in; must not be {@code null}
@@ -882,9 +894,9 @@ public final class HttpSettings {
      * HttpHeaders custom = HttpHeaders.create().set("Accept", "application/json");
      * HttpSettings settings = HttpSettings.create().header("Old", "value");
      *
-     * settings.setHeaders(custom);        // replaces all prior headers
-     * settings.headers().get("Accept");   // returns "application/json"
-     * settings.headers().get("Old");      // returns null (cleared)
+     * settings.setHeaders(custom);       // replaces all prior headers
+     * settings.headers().get("Accept");  // returns "application/json"
+     * settings.headers().get("Old");     // returns null (cleared)
      * }</pre>
      *
      * @param headers the HttpHeaders to set (replacing all existing headers); {@code null} clears all headers

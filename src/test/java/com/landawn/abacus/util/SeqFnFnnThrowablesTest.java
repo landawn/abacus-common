@@ -638,9 +638,9 @@ public class SeqFnFnnThrowablesTest extends TestBase {
         assertMessageNames(() -> Fn.contains(null), "valueToFind");
         assertMessageNames(() -> Fn.notContains(null), "str");
         assertMessageNames(() -> Fn.matches(null), "pattern");
-        assertMessageNames(() -> Fn.instanceOf(null), "clazz");
-        assertMessageNames(() -> Fn.subtypeOf(null), "clazz");
-        assertMessageNames(() -> Fn.cast(null), "clazz");
+        assertMessageNames(() -> Fn.instanceOf(null), "targetClass");
+        assertMessageNames(() -> Fn.subtypeOf(null), "targetClass");
+        assertMessageNames(() -> Fn.cast(null), "targetClass");
         assertMessageNames(() -> Fn.in(null), "c");
         assertMessageNames(() -> Fn.notIn(null), "c");
         assertMessageNames(() -> Fn.println(null), "separator");

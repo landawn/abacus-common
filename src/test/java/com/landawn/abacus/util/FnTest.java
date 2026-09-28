@@ -656,4 +656,157 @@ public class FnTest extends FnTestSupport {
         assertEquals("FAILED", result.get());
         assertTrue(interruptRestored.get());
     }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testFfWithTypedNullDefaultReturnsNullForMalformedUrl() {
+        final List<java.net.URL> urls = java.util.stream.Stream.of("http://example.com", "not a url")
+                .map(Fn.ff((String s) -> new java.net.URL(s), (java.net.URL) null))
+                .collect(java.util.stream.Collectors.toList());
+
+        assertEquals(2, urls.size());
+        assertEquals("http://example.com", urls.get(0).toString());
+        assertNull(urls.get(1));
+    }
+
+    @Test
+    public void testFlSumWrapsSilentlyOnLongOverflow() {
+        assertEquals(Long.MIN_VALUE, Fn.FL.sum().apply(new long[] { Long.MAX_VALUE, 1L }).longValue());
+        assertThrows(ArithmeticException.class, () -> Fn.FI.sum().apply(new int[] { Integer.MAX_VALUE, 1 }));
+    }
+
+    @Test
+    public void testCreateNumberReturnsNullForNullOrEmptyString() {
+        assertNull(Fn.createNumber().apply(null));
+        assertNull(Fn.createNumber().apply(""));
+        assertEquals(Integer.valueOf(42), Fn.createNumber().apply("42"));
+    }
+
+    // ---- perf review 2026-09-26 G039 begin ----
+    // G039-01: atMost keeps returning false after exhaustion (fast path skips the CAS), incl. count 0
+    @Test
+    public void testAtMost_exhaustionPinned() {
+        final Predicate<String> zero = Fn.atMost(0);
+        for (int i = 0; i < 5; i++) {
+            assertFalse(zero.test("x"));
+        }
+        final Predicate<String> two = Fn.atMost(2);
+        final List<Boolean> results = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            results.add(two.test(null));
+        }
+        assertEquals(List.of(true, true, false, false, false, false), results);
+    }
+
+    // G039-01: limitThenFilter never invokes the predicate once the limit is used up
+    @Test
+    public void testLimitThenFilter_predicateCallsPinned() {
+        final List<Integer> seen = new ArrayList<>();
+        final Predicate<Integer> p = Fn.limitThenFilter(3, n -> {
+            seen.add(n);
+            return n % 2 == 1;
+        });
+        final List<Boolean> results = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            results.add(p.test(i));
+        }
+        assertEquals(List.of(true, false, true, false, false, false, false), results);
+        assertEquals(List.of(1, 2, 3), seen);
+
+        final List<String> seenPairs = new ArrayList<>();
+        final BiPredicate<String, Integer> bp = Fn.limitThenFilter(2, (String s, Integer n) -> {
+            seenPairs.add(s + n);
+            return n > 0;
+        });
+        assertTrue(bp.test("a", 1));
+        assertFalse(bp.test("b", -1));
+        assertFalse(bp.test("c", 1));
+        assertFalse(bp.test("d", 1));
+        assertEquals(List.of("a1", "b-1"), seenPairs);
+
+        final List<Integer> seenZero = new ArrayList<>();
+        final Predicate<Integer> none = Fn.limitThenFilter(0, n -> seenZero.add(n));
+        assertFalse(none.test(1));
+        assertFalse(none.test(2));
+        assertTrue(seenZero.isEmpty());
+    }
+
+    // G039-01: filterThenLimit still invokes the predicate for every element after the limit is used up
+    @Test
+    public void testFilterThenLimit_predicateCallsPinned() {
+        final List<Integer> seen = new ArrayList<>();
+        final Predicate<Integer> p = Fn.filterThenLimit(n -> {
+            seen.add(n);
+            return n % 2 == 0;
+        }, 2);
+        final List<Boolean> results = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            results.add(p.test(i));
+        }
+        assertEquals(List.of(false, true, false, true, false, false, false), results);
+        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7), seen);
+
+        final List<String> seenPairs = new ArrayList<>();
+        final BiPredicate<String, Integer> bp = Fn.filterThenLimit((String s, Integer n) -> {
+            seenPairs.add(s + n);
+            return n > 0;
+        }, 1);
+        assertFalse(bp.test("a", -1));
+        assertTrue(bp.test("b", 1));
+        assertFalse(bp.test("c", 1));
+        assertFalse(bp.test("d", -1));
+        assertEquals(List.of("a-1", "b1", "c1", "d-1"), seenPairs);
+
+        final List<Integer> seenZero = new ArrayList<>();
+        final Predicate<Integer> none = Fn.filterThenLimit(n -> seenZero.add(n), 0);
+        assertFalse(none.test(1));
+        assertFalse(none.test(2));
+        assertEquals(List.of(1, 2), seenZero);
+    }
+
+    // G039-01: concurrent callers never accept more than the limit, and accept exactly the limit in total
+    @Test
+    public void testAtMost_concurrentExactLimit() throws Exception {
+        final int threads = 4;
+        final int perThread = 20_000;
+        final int limit = 1_000;
+        final Predicate<Integer> atMost = Fn.atMost(limit);
+        final Predicate<Integer> ltf = Fn.limitThenFilter(limit, n -> true);
+        final Predicate<Integer> ftl = Fn.filterThenLimit(n -> true, limit);
+        final java.util.concurrent.atomic.AtomicInteger acceptedAtMost = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger acceptedLtf = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger acceptedFtl = new java.util.concurrent.atomic.AtomicInteger();
+        final ExecutorService executor = Executors.newFixedThreadPool(threads);
+        try {
+            final CountDownLatch start = new CountDownLatch(1);
+            final List<java.util.concurrent.Future<?>> futures = new ArrayList<>();
+            for (int k = 0; k < threads; k++) {
+                futures.add(executor.submit(() -> {
+                    start.await();
+                    for (int i = 0; i < perThread; i++) {
+                        if (atMost.test(i)) {
+                            acceptedAtMost.incrementAndGet();
+                        }
+                        if (ltf.test(i)) {
+                            acceptedLtf.incrementAndGet();
+                        }
+                        if (ftl.test(i)) {
+                            acceptedFtl.incrementAndGet();
+                        }
+                    }
+                    return null;
+                }));
+            }
+            start.countDown();
+            for (final java.util.concurrent.Future<?> f : futures) {
+                f.get(60, TimeUnit.SECONDS);
+            }
+        } finally {
+            executor.shutdownNow();
+        }
+        assertEquals(limit, acceptedAtMost.get());
+        assertEquals(limit, acceptedLtf.get());
+        assertEquals(limit, acceptedFtl.get());
+    }
+    // ---- perf review 2026-09-26 G039 end ----
 }

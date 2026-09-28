@@ -156,6 +156,7 @@ import com.landawn.abacus.util.function.UnaryOperator;
 import com.landawn.abacus.util.stream.Stream.WindowHandler;
 
 import com.landawn.abacus.TestBase;
+import java.util.concurrent.Executor;
 
 public class StreamTest extends AbstractTest {
 
@@ -15973,4 +15974,272 @@ public class StreamTest extends AbstractTest {
         mapped.close();
         assertTrue(okClosed.get(), "closing the result must release the upstream");
     }
+
+    @Test
+    public void testOnEachSaveToLineNullOutputStreamRejectedOnFirstPull() {
+        // The null output is not validated when the operation is added; it is rejected when the first element is pulled.
+        final Stream<String> s = Stream.of("a", "b").onEachSave(e -> e, (java.io.OutputStream) null);
+        assertThrows(IllegalArgumentException.class, s::count);
+        assertEquals(0, Stream.<String> empty().onEachSave(e -> e, (java.io.OutputStream) null).count());
+    }
+
+    @Test
+    public void testOnEachSaveToLineNullWriterRejectedOnFirstPull() {
+        final Stream<String> s = Stream.of("a", "b").onEachSave(e -> e, (java.io.Writer) null);
+        assertThrows(IllegalArgumentException.class, s::count);
+        assertEquals(0, Stream.<String> empty().onEachSave(e -> e, (java.io.Writer) null).count());
+    }
+
+    @Test
+    public void testOnEachSaveWriteNullWriterRejectedOnFirstPull() {
+        final Stream<String> s = Stream.of("a", "b").onEachSave((e, w) -> w.write(e), (java.io.Writer) null);
+        assertThrows(IllegalArgumentException.class, s::count);
+        assertEquals(0, Stream.<String> empty().onEachSave((e, w) -> w.write(e), (java.io.Writer) null).count());
+    }
+
+    @Test
+    public void testSortedByPlacesNullKeysFirst() {
+        final List<String> result = Stream.of("ccc", "a", "bb").sortedBy(s -> s.length() == 1 ? null : s.length()).toList();
+
+        assertEquals(Arrays.asList("a", "bb", "ccc"), result);
+    }
+
+    @Test
+    public void testReverseSortedByPlacesNullKeysLast() {
+        final List<String> result = Stream.of("a", "bb", "ccc").reverseSortedBy(s -> s.length() == 1 ? null : s.length()).toList();
+
+        assertEquals(Arrays.asList("ccc", "bb", "a"), result);
+    }
+
+    @Test
+    public void testGroupByRejectsNullKeyOnTraversal() {
+        final Stream<Map.Entry<Integer, List<String>>> grouped = Stream.of("a", "bb").groupBy(s -> s.length() == 1 ? null : s.length());
+
+        final NullPointerException e = assertThrows(NullPointerException.class, grouped::toList);
+        assertEquals("element cannot be mapped to a null key", e.getMessage());
+    }
+
+
+    @Test
+    public void testCombinationsNegativeLengthThrowsIllegalArgument() {
+        // Array-backed, iterator-backed and parallel streams all reject a negative length with IllegalArgumentException.
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).combinations(-1));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).combinations(-1));
+        assertThrows(IllegalArgumentException.class, () -> Stream.of(1, 2, 3).parallel().combinations(-1));
+    }
+
+    @Test
+    public void testCombinationsLengthAboveSizeThrowsIndexOutOfBounds() {
+        assertThrows(IndexOutOfBoundsException.class, () -> Stream.of(1, 2, 3).combinations(4));
+        assertThrows(IndexOutOfBoundsException.class, () -> Stream.of(Arrays.asList(1, 2, 3).iterator()).combinations(4));
+
+        final List<List<Integer>> all = Stream.of(1, 2, 3).combinations(3).toList();
+        assertEquals(Arrays.asList(Arrays.asList(1, 2, 3)), all);
+    }
+
+    @Test
+    @Timeout(30)
+    public void testFilterWhileAddSubscriberStartsSubscriberOnlyOnFirstFilteredOutElement() throws Exception {
+        final AtomicInteger submitted = new AtomicInteger();
+        final ExecutorService pool = Executors.newSingleThreadExecutor();
+
+        try {
+            final Executor executor = command -> {
+                submitted.incrementAndGet();
+                pool.execute(command);
+            };
+
+            final List<Integer> sentToSubscriber = Collections.synchronizedList(new ArrayList<>());
+
+            try (Stream<Integer> stream = Stream.of(1, 3, 4, 5)
+                    .filterWhileAddSubscriber(x -> x % 2 == 1, s -> s.forEach(sentToSubscriber::add), 64, 30000, executor)) {
+                final Iterator<Integer> iter = stream.iterator();
+
+                assertEquals(1, iter.next());
+                assertEquals(0, submitted.get()); // elements kept by the main stream do not start the subscriber
+                assertEquals(3, iter.next());
+                assertEquals(0, submitted.get());
+                assertEquals(5, iter.next()); // 4 is filtered out and sent to the subscriber
+                assertEquals(1, submitted.get());
+            }
+
+            assertEquals(Arrays.asList(4), sentToSubscriber);
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    @Timeout(30)
+    public void testFilterWhileAddSubscriberStartsSubscriberOnCloseWhenNothingFilteredOut() throws Exception {
+        final AtomicInteger submitted = new AtomicInteger();
+        final ExecutorService pool = Executors.newSingleThreadExecutor();
+
+        try {
+            final Executor executor = command -> {
+                submitted.incrementAndGet();
+                pool.execute(command);
+            };
+
+            final AtomicInteger subscriberCount = new AtomicInteger(-1);
+            final Stream<Integer> stream = Stream.of(1, 3, 5)
+                    .filterWhileAddSubscriber(x -> x % 2 == 1, s -> subscriberCount.set((int) s.count()), 64, 30000, executor);
+            final Iterator<Integer> iter = stream.iterator();
+
+            assertEquals(1, iter.next());
+            assertEquals(3, iter.next());
+            assertEquals(5, iter.next());
+            assertFalse(iter.hasNext());
+            assertEquals(0, submitted.get());
+
+            stream.close();
+
+            assertEquals(1, submitted.get());
+            assertEquals(0, subscriberCount.get());
+        } finally {
+            pool.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testParallelZipTwoStreamsNonPositiveThreadCountLeavesSourcesOpen() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1, 2).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> b = Stream.of(10, 20).onClose(closeCount::incrementAndGet);
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(a, b, (x, y) -> x + y, 0));
+        assertEquals(0, closeCount.get());
+
+        assertEquals(Arrays.asList(11, 22), Stream.zip(a, b, (x, y) -> x + y).toList());
+        assertEquals(2, closeCount.get());
+    }
+
+    @Test
+    public void testParallelZipThreeStreamsNonPositiveThreadCountLeavesSourcesOpen() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1, 2).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> b = Stream.of(10, 20).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> c = Stream.of(100, 200).onClose(closeCount::incrementAndGet);
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(a, b, c, (x, y, z) -> x + y + z, -1));
+        assertEquals(0, closeCount.get());
+
+        assertEquals(Arrays.asList(111, 222), Stream.zip(a, b, c, (x, y, z) -> x + y + z).toList());
+        assertEquals(3, closeCount.get());
+    }
+
+    @Test
+    public void testParallelZipTwoStreamsWithDefaultsNonPositiveThreadCountLeavesSourcesOpen() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1, 2).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> b = Stream.of(10).onClose(closeCount::incrementAndGet);
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(a, b, 0, 0, (x, y) -> x + y, 0));
+        assertEquals(0, closeCount.get());
+
+        assertEquals(Arrays.asList(11, 2), Stream.zip(a, b, 0, 0, (x, y) -> x + y).toList());
+        assertEquals(2, closeCount.get());
+    }
+
+    @Test
+    public void testParallelZipThreeStreamsWithDefaultsNonPositiveThreadCountLeavesSourcesOpen() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> a = Stream.of(1, 2).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> b = Stream.of(10).onClose(closeCount::incrementAndGet);
+        final Stream<Integer> c = Stream.of(100, 200, 300).onClose(closeCount::incrementAndGet);
+
+        assertThrows(IllegalArgumentException.class, () -> Stream.parallelZip(a, b, c, 0, 0, 0, (x, y, z) -> x + y + z, 0));
+        assertEquals(0, closeCount.get());
+
+        assertEquals(Arrays.asList(111, 202, 300), Stream.zip(a, b, c, 0, 0, 0, (x, y, z) -> x + y + z).toList());
+        assertEquals(3, closeCount.get());
+    }
+    // ---- perf review 2026-09-26 G108 begin ----
+    // G108-01: pins the column-major order of flatten(T[][], true) for jagged input with null/empty/short rows and null elements
+    @Test
+    public void testFlattenVertically_jaggedNullRowsAndElementsMatchColumnMajorReference() {
+        final Random rnd = new Random(20260926L);
+
+        for (int round = 0; round < 300; round++) {
+            final int rows = 2 + rnd.nextInt(12);
+            final Integer[][] a = new Integer[rows][];
+            int maxLen = 0;
+
+            for (int r = 0; r < rows; r++) {
+                final int kind = rnd.nextInt(6);
+
+                if (kind == 0) {
+                    a[r] = null;
+                } else {
+                    final int len = kind == 1 ? 0 : rnd.nextInt(kind == 5 ? 40 : 6);
+                    a[r] = new Integer[len];
+
+                    for (int c = 0; c < len; c++) {
+                        a[r][c] = rnd.nextInt(7) == 0 ? null : r * 1000 + c;
+                    }
+
+                    maxLen = Math.max(maxLen, len);
+                }
+            }
+
+            final List<Integer> expected = new ArrayList<>();
+
+            for (int c = 0; c < maxLen; c++) {
+                for (int r = 0; r < rows; r++) {
+                    if (a[r] != null && c < a[r].length) {
+                        expected.add(a[r][c]);
+                    }
+                }
+            }
+
+            assertEquals(expected, Stream.flatten(a, true).toList(), "round " + round);
+            assertEquals(expected.size(), Stream.flatten(a, true).count(), "round " + round);
+            assertEquals(expected.isEmpty() ? expected : expected.subList(1, expected.size()), Stream.flatten(a, true).skip(1).toList(), "round " + round);
+        }
+    }
+
+    // G108-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
+    @Test
+    public void testFlattenVertically_iteratorExhaustionAndLongRow() {
+        final String[][] a = { null, { "a" }, {}, { "b", null, "d" }, null, { "e", "f" } };
+        final Iterator<String> iter = Stream.flatten(a, true).iterator();
+        final List<String> result = new ArrayList<>();
+
+        while (iter.hasNext()) {
+            result.add(iter.next());
+        }
+
+        assertEquals(Arrays.asList("a", "b", "e", null, "f", "d"), result);
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+        assertFalse(iter.hasNext());
+
+        final Integer[][] jagged = new Integer[201][];
+
+        for (int i = 0; i < 200; i++) {
+            jagged[i] = i % 3 == 0 ? null : new Integer[] { i };
+        }
+
+        jagged[200] = new Integer[5000];
+
+        for (int i = 0; i < 5000; i++) {
+            jagged[200][i] = 100000 + i;
+        }
+
+        final List<Integer> expected = new ArrayList<>();
+
+        for (int i = 0; i < 200; i++) {
+            if (jagged[i] != null) {
+                expected.add(jagged[i][0]);
+            }
+        }
+
+        for (int i = 0; i < 5000; i++) {
+            expected.add(jagged[200][i]);
+        }
+
+        assertEquals(expected, Stream.flatten(jagged, true).toList());
+        assertEquals(0, Stream.flatten(new Integer[][] { null, {}, null }, true).count());
+    }
+    // ---- perf review 2026-09-26 G108 end ----
 }

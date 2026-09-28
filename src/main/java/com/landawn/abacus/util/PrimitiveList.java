@@ -87,8 +87,8 @@ import com.landawn.abacus.annotation.Beta;
  * // Set operations for data analysis
  * IntList set1 = IntList.of(1, 2, 3, 4);
  * IntList set2 = IntList.of(3, 4, 5, 6);
- * IntList intersection = set1.intersection(set2);   // returns [3, 4]
- * IntList difference = set1.difference(set2);       // returns [1, 2]
+ * IntList intersection = set1.intersection(set2);  // returns [3, 4]
+ * IntList difference = set1.difference(set2);      // returns [1, 2]
  *
  * // Efficient sorting and searching
  * numbers.sort();
@@ -579,8 +579,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param toIndex the ending index (exclusive) of the range to be moved
      * @param newPositionAfterMove the zero-based index where the first element of the range will be placed after the move;
      *      must be between 0 and size() - lengthOfRange, inclusive.
-     * @throws IndexOutOfBoundsException if any index is out of bounds or if
-     *         newPositionAfterMove would cause elements to be moved outside the list
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code fromIndex > toIndex}, or {@code toIndex > size()},
+     *         or if {@code newPositionAfterMove < 0} or {@code newPositionAfterMove > size() - (toIndex - fromIndex)}
      */
     public abstract void moveRange(int fromIndex, int toIndex, int newPositionAfterMove) throws IndexOutOfBoundsException;
 
@@ -1199,11 +1199,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * // list now contains elements in a random order determined by the seed
      * }</pre>
      *
-     * @param rnd the source of randomness to use for shuffling.
+     * @param random the source of randomness to use for shuffling.
      *            Must not be {@code null}.
-     * @throws IllegalArgumentException if {@code rnd} is {@code null}.
+     * @throws IllegalArgumentException if {@code random} is {@code null}.
      */
-    public abstract void shuffle(final Random rnd) throws IllegalArgumentException;
+    public abstract void shuffle(final Random random) throws IllegalArgumentException;
 
     /**
      * Swaps the elements at the specified positions in this list.
@@ -1280,12 +1280,12 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * IntList list = IntList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
      *
      * // Forward stepping
-     * IntList copy1 = list.copy(0, 10, 2);    // returns [0, 2, 4, 6, 8]
-     * IntList copy2 = list.copy(1, 8, 3);     // returns [1, 4, 7]
+     * IntList copy1 = list.copy(0, 10, 2);  // returns [0, 2, 4, 6, 8]
+     * IntList copy2 = list.copy(1, 8, 3);   // returns [1, 4, 7]
      *
      * // Reverse stepping
-     * IntList copy3 = list.copy(8, 2, -2);    // returns [8, 6, 4]
-     * IntList copy4 = list.copy(9, -1, -3);   // returns [9, 6, 3, 0]
+     * IntList copy3 = list.copy(8, 2, -2);   // returns [8, 6, 4]
+     * IntList copy4 = list.copy(9, -1, -3);  // returns [9, 6, 3, 0]
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to copy.
@@ -1297,10 +1297,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *             Positive values select elements in forward direction,
      *             negative values select elements in reverse direction.
      * @return a new PrimitiveList containing the selected elements
-     * @throws IllegalArgumentException if step is zero.
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if {@code fromIndex < 0}, {@code toIndex < -1}, or {@code max(fromIndex, toIndex) > size()};
+     *         {@code toIndex == -1} is permitted for reverse traversal
+     * @throws IllegalArgumentException if {@code step} is zero.
      */
-    public abstract L copy(final int fromIndex, final int toIndex, final int step) throws IllegalArgumentException, IndexOutOfBoundsException;
+    public abstract L copy(final int fromIndex, final int toIndex, final int step) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Splits this list into consecutive chunks of the specified size and returns them as a List of PrimitiveLists.
@@ -1349,10 +1350,10 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      *                Must be &gt;= fromIndex and &lt;= size().
      * @param chunkSize the desired size of each chunk. Must be greater than 0.
      * @return a List containing the PrimitiveList chunks
-     * @throws IllegalArgumentException if chunkSize &lt;= 0.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IllegalArgumentException if chunkSize &lt;= 0.
      */
-    public abstract List<L> split(final int fromIndex, final int toIndex, final int chunkSize) throws IllegalArgumentException, IndexOutOfBoundsException;
+    public abstract List<L> split(final int fromIndex, final int toIndex, final int chunkSize) throws IndexOutOfBoundsException, IllegalArgumentException;
 
     /**
      * Trims the capacity of this PrimitiveList instance to be the list's current size.
@@ -1533,8 +1534,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4, 5);
-     * List<Integer> boxed = list.toList(1, 4);   // returns [2, 3, 4] as a List<Integer>
-     * list.toList(1, 10);                        // throws IndexOutOfBoundsException (toIndex > size)
+     * List<Integer> boxed = list.toList(1, 4);  // returns [2, 3, 4] as a List<Integer>
+     * list.toList(1, 10);                       // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to convert
@@ -1609,11 +1610,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Collection instance with the given initial capacity.
      *                 The supplier receives the number of elements that will be added.
      * @return a Collection containing all elements from this list as boxed objects
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      * @throws RuntimeException if the supplier throws an exception during Collection creation
+     * @throws UnsupportedOperationException if this list is non-empty and the supplied collection does not support adding elements
      * @see #toCollection(int, int, IntFunction)
      */
-    public <C extends Collection<B>> C toCollection(final IntFunction<? extends C> supplier) throws IllegalArgumentException, RuntimeException {
+    public <C extends Collection<B>> C toCollection(final IntFunction<? extends C> supplier)
+            throws IllegalArgumentException, NullPointerException, RuntimeException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         return toCollection(0, size(), supplier);
@@ -1627,8 +1631,8 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 3, 4, 5);
-     * LinkedList<Integer> coll = list.toCollection(1, 4, size -> new LinkedList<>());   // returns [2, 3, 4]
-     * list.toCollection(1, 10, size -> new LinkedList<>());                             // throws IndexOutOfBoundsException (toIndex > size)
+     * LinkedList<Integer> coll = list.toCollection(1, 4, size -> new LinkedList<>());  // returns [2, 3, 4]
+     * list.toCollection(1, 10, size -> new LinkedList<>());                            // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
      * @param <C> the type of Collection to create, must extend Collection&lt;B&gt;
@@ -1637,12 +1641,14 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * @param supplier a function that creates a new Collection instance of the desired type with the given initial capacity
      * @return a Collection populated with elements from the specified range in encounter order;
      *         its iteration order and duplicate handling depend on the supplied collection
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      * @throws RuntimeException if the supplier throws an exception during Collection creation
+     * @throws UnsupportedOperationException if the selected range is non-empty and the supplied collection does not support adding elements
      */
     public abstract <C extends Collection<B>> C toCollection(final int fromIndex, final int toIndex, final IntFunction<? extends C> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, NullPointerException, RuntimeException, UnsupportedOperationException;
 
     /**
      * Returns a Multiset containing all elements from this list converted to their boxed type.
@@ -1652,9 +1658,9 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 2, 3, 1);
      * Multiset<Integer> ms = list.toMultiset();
-     * ms.getCount(1);   // returns 2
-     * ms.getCount(2);   // returns 2
-     * ms.getCount(3);   // returns 1
+     * ms.getCount(1);  // returns 2
+     * ms.getCount(2);  // returns 2
+     * ms.getCount(3);  // returns 1
      * }</pre>
      *
      * @return a Multiset containing all elements from this primitive list with their occurrence counts
@@ -1670,11 +1676,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 2, 3, 1);
-     * Multiset<Integer> ms = list.toMultiset(1, 4);   // covers elements [2, 2, 3]
-     * ms.getCount(2);                                 // returns 2
-     * ms.getCount(3);                                 // returns 1
-     * ms.getCount(1);                                 // returns 0 (outside the range)
-     * list.toMultiset(1, 10);                         // throws IndexOutOfBoundsException (toIndex > size)
+     * Multiset<Integer> ms = list.toMultiset(1, 4);  // covers elements [2, 2, 3]
+     * ms.getCount(2);                                // returns 2
+     * ms.getCount(3);                                // returns 1
+     * ms.getCount(1);                                // returns 0 (outside the range)
+     * list.toMultiset(1, 10);                        // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to convert
@@ -1699,17 +1705,19 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 2, 3);
      * Multiset<Integer> ms = list.toMultiset(size -> new Multiset<>());
-     * ms.getCount(1);   // returns 1
-     * ms.getCount(2);   // returns 2
-     * ms.getCount(3);   // returns 1
+     * ms.getCount(1);  // returns 1
+     * ms.getCount(2);  // returns 2
+     * ms.getCount(3);  // returns 1
      * }</pre>
      *
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing all elements from this primitive list with their occurrence counts
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null},
+     *         or if adding the elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
-    public Multiset<B> toMultiset(final IntFunction<Multiset<B>> supplier) throws IllegalArgumentException, RuntimeException {
+    public Multiset<B> toMultiset(final IntFunction<Multiset<B>> supplier) throws IllegalArgumentException, NullPointerException, RuntimeException {
         N.checkArgNotNull(supplier, cs.supplier);
 
         return toMultiset(0, size(), supplier);
@@ -1723,23 +1731,25 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IntList list = IntList.of(1, 2, 2, 3, 1);
-     * Multiset<Integer> ms = list.toMultiset(1, 4, size -> new Multiset<>());   // covers elements [2, 2, 3]
-     * ms.getCount(2);                                                           // returns 2
-     * ms.getCount(3);                                                           // returns 1
-     * ms.getCount(1);                                                           // returns 0 (outside the range)
-     * list.toMultiset(1, 10, size -> new Multiset<>());                         // throws IndexOutOfBoundsException (toIndex > size)
+     * Multiset<Integer> ms = list.toMultiset(1, 4, size -> new Multiset<>());  // covers elements [2, 2, 3]
+     * ms.getCount(2);                                                          // returns 2
+     * ms.getCount(3);                                                          // returns 1
+     * ms.getCount(1);                                                          // returns 0 (outside the range)
+     * list.toMultiset(1, 10, size -> new Multiset<>());                        // throws IndexOutOfBoundsException (toIndex > size)
      * }</pre>
      *
      * @param fromIndex the starting index (inclusive) of the range to convert
      * @param toIndex the ending index (exclusive) of the range to convert
      * @param supplier a function that creates a new Multiset instance with the given initial capacity
      * @return a Multiset containing elements from the specified range with their occurrence counts
-     * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if {@code supplier} returns {@code null}.
      * @throws IndexOutOfBoundsException if fromIndex &lt; 0, toIndex &gt; size(), or fromIndex &gt; toIndex
+     * @throws IllegalArgumentException if {@code supplier} is {@code null},
+     *         or if adding the selected elements would exceed {@link Integer#MAX_VALUE} occurrences for an element in the supplied multiset
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      * @throws RuntimeException if the supplier throws an exception during Multiset creation
      */
     public abstract Multiset<B> toMultiset(final int fromIndex, final int toIndex, final IntFunction<Multiset<B>> supplier)
-            throws IllegalArgumentException, IndexOutOfBoundsException, RuntimeException;
+            throws IndexOutOfBoundsException, IllegalArgumentException, NullPointerException, RuntimeException;
 
     /**
      * Returns an iterator over the elements in this primitive list.
@@ -1750,11 +1760,11 @@ public abstract class PrimitiveList<B, A, L extends PrimitiveList<B, A, L>> impl
      * <pre>{@code
      * IntList list = IntList.of(10, 20, 30);
      * Iterator<Integer> it = list.iterator();
-     * it.hasNext();   // returns true
-     * it.next();      // returns 10
-     * it.next();      // returns 20
-     * it.next();      // returns 30
-     * it.hasNext();   // returns false
+     * it.hasNext();  // returns true
+     * it.next();     // returns 10
+     * it.next();     // returns 20
+     * it.next();     // returns 30
+     * it.hasNext();  // returns false
      * }</pre>
      *
      * @return an {@code Iterator} over the boxed elements of type {@code B} in this list,

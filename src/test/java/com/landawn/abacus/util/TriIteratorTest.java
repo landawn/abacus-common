@@ -399,10 +399,10 @@ public class TriIteratorTest extends TestBase {
         assertTrue(linked.left() instanceof LinkedList);
         Triple<List<Integer>, List<String>, List<Boolean>> empty = TriIterator.<Integer, String, Boolean> empty().unzipToLists(ArrayList::new);
         assertTrue(empty.left().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().unzipToLists(() -> null));
+        assertThrows(NullPointerException.class, () -> TriIterator.empty().unzipToLists(() -> null));
 
         TriIterator<Integer, String, Boolean> source = sample();
-        assertThrows(IllegalArgumentException.class, () -> source.unzipToCollections(ArrayList::new, () -> null, ArrayList::new));
+        assertThrows(NullPointerException.class, () -> source.unzipToCollections(ArrayList::new, () -> null, ArrayList::new));
         assertTrue(source.hasNext());
     }
 
@@ -417,7 +417,7 @@ public class TriIteratorTest extends TestBase {
         assertEquals(1, ordered.left().iterator().next());
         Triple<Set<Integer>, Set<String>, Set<Boolean>> empty = TriIterator.<Integer, String, Boolean> empty().unzipToSets(HashSet::new);
         assertTrue(empty.left().isEmpty());
-        assertThrows(IllegalArgumentException.class, () -> TriIterator.empty().unzipToSets(() -> null));
+        assertThrows(NullPointerException.class, () -> TriIterator.empty().unzipToSets(() -> null));
     }
 
     @Test

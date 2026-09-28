@@ -474,7 +474,7 @@ public class IndexMedianTryRetryFixesTest extends TestBase {
     public void b8_nullFromTheSupplierNamesTheSupplier() {
         final Throwables.Supplier<StringWriter, Exception> nullSupplier = () -> null;
 
-        final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> Try.with(nullSupplier).run(w -> w.write("x")));
+        final NullPointerException thrown = assertThrows(NullPointerException.class, () -> Try.with(nullSupplier).run(w -> w.write("x")));
 
         assertTrue(thrown.getMessage().contains("targetResourceSupplier"), "message was: " + thrown.getMessage());
         assertFalse(thrown.getMessage().contains("'targetResource'"), "message was: " + thrown.getMessage());

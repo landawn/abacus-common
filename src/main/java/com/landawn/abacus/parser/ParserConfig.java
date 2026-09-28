@@ -94,16 +94,16 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * }
      * }</pre>
      *
-     * @param cls the class to get ignored properties for
+     * @param targetClass the class to get ignored properties for
      * @return collection of ignored property names, or {@code null} if none are configured
      */
     @MayReturnNull
-    public Collection<String> getIgnoredPropNames(final Class<?> cls) {
+    public Collection<String> getIgnoredPropNames(final Class<?> targetClass) {
         if (ignoredBeanPropNameMap == null) {
             return null; // NOSONAR
         }
 
-        Collection<String> result = ignoredBeanPropNameMap.get(cls);
+        Collection<String> result = ignoredBeanPropNameMap.get(targetClass);
 
         if (result == null) {
             result = ignoredBeanPropNameMap.get(Object.class);
@@ -129,8 +129,8 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * <pre>{@code
      * config.setIgnoredPropNames(Set.of("internalId", "version", "deleted"));
      *
-     * config.setIgnoredPropNames((Set<String>) null);            // no global ignores, but getIgnoredPropNames() is {Object.class=null}
-     * config.setIgnoredPropNames((Map<Class<?>, Set<String>>) null);   // getIgnoredPropNames() is null again
+     * config.setIgnoredPropNames((Set<String>) null);                 // no global ignores, but getIgnoredPropNames() is {Object.class=null}
+     * config.setIgnoredPropNames((Map<Class<?>, Set<String>>) null);  // getIgnoredPropNames() is null again
      * }</pre>
      *
      * @param ignoredPropNames set of property names to ignore globally; {@code null} keeps an (empty) entry for {@code Object.class}
@@ -156,22 +156,22 @@ public abstract class ParserConfig<C extends ParserConfig<C>> implements Cloneab
      * config.setIgnoredPropNames(User.class, Set.of("password", "salt"));
      * config.setIgnoredPropNames(Order.class, Set.of("internalNotes"));
      *
-     * config.setIgnoredPropNames(Set.of("version"));                 // global
-     * config.setIgnoredPropNames(Audit.class, Set.of());             // Audit ignores nothing (overrides the global set)
-     * config.setIgnoredPropNames(User.class, null);                  // User falls back to the global set: ["version"]
+     * config.setIgnoredPropNames(Set.of("version"));      // global
+     * config.setIgnoredPropNames(Audit.class, Set.of());  // Audit ignores nothing (overrides the global set)
+     * config.setIgnoredPropNames(User.class, null);       // User falls back to the global set: ["version"]
      * }</pre>
      *
-     * @param cls the class to set ignored properties for
+     * @param targetClass the class to set ignored properties for
      * @param ignoredPropNames set of property names to ignore for this class; an empty set overrides the global set with "nothing", {@code null} removes the class-specific override so the global set applies again
      * @return this configuration instance for method chaining
      * @throws UnsupportedOperationException if the previously supplied ignored-property map does not support adding or replacing the entry.
      */
-    public C setIgnoredPropNames(final Class<?> cls, final Set<String> ignoredPropNames) throws UnsupportedOperationException {
+    public C setIgnoredPropNames(final Class<?> targetClass, final Set<String> ignoredPropNames) throws UnsupportedOperationException {
         if (ignoredBeanPropNameMap == null) {
             ignoredBeanPropNameMap = new HashMap<>();
         }
 
-        ignoredBeanPropNameMap.put(cls, ignoredPropNames);
+        ignoredBeanPropNameMap.put(targetClass, ignoredPropNames);
 
         return (C) this;
     }

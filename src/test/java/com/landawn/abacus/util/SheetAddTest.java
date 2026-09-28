@@ -394,4 +394,50 @@ public class SheetAddTest extends SheetTestSupport {
         assertEquals("[nope] are not all included in this sheet with row key set: [row1, row2, row3]",
                 assertThrows(IllegalArgumentException.class, () -> sheet.putAll(foreignPlain)).getMessage());
     }
+    // ---- perf review 2026-09-26 G070 begin ----
+    // G070-01: an all-null new column (null or empty argument) is presized; pin contents, order and later growth.
+    @Test
+    public void testAddColumn_nullOrEmptyColumnAtEveryPosition() {
+        final Sheet<String, String, Integer> initialized = Sheet.rows(Arrays.asList("r1", "r2", "r3"), Arrays.asList("c1", "c2"),
+                new Integer[][] { { 1, 2 }, { 3, 4 }, { 5, 6 } });
+        initialized.addColumn(1, "mid", null);
+        initialized.addColumn(0, "first", Collections.emptyList());
+        initialized.addColumn("last", null);
+        initialized.addColumn(initialized.columnCount(), "appended", Collections.emptyList());
+        assertEquals(Arrays.asList("first", "c1", "mid", "c2", "last", "appended"), new ArrayList<>(initialized.columnKeySet()));
+        assertEquals(Arrays.asList(null, 1, null, 2, null, null), new ArrayList<>(initialized.rowValues("r1")));
+        assertEquals(Arrays.asList(null, 5, null, 6, null, null), new ArrayList<>(initialized.rowValues("r3")));
+        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(initialized.columnValues("mid")));
+
+        // the new columns keep growing correctly afterwards
+        initialized.addRow("r4", Arrays.asList(7, 8, 9, 10, 11, 12));
+        initialized.addRow(0, "r0", null);
+        assertEquals(Arrays.asList(null, null, null, null, 12), new ArrayList<>(initialized.columnValues("appended")));
+        assertEquals(Arrays.asList(null, null, null, null, 9), new ArrayList<>(initialized.columnValues("mid")));
+        assertEquals(Arrays.asList(null, 1, 3, 5, 8), new ArrayList<>(initialized.columnValues("c1")));
+
+        // uninitialized sheet: addColumn initializes it with all-null columns
+        final Sheet<String, String, Integer> uninitialized = new Sheet<>(Arrays.asList("r1", "r2"), Arrays.asList("c1"));
+        uninitialized.addColumn(0, "x", null);
+        uninitialized.addColumn("y", Collections.emptyList());
+        assertEquals(Arrays.asList("x", "c1", "y"), new ArrayList<>(uninitialized.columnKeySet()));
+        assertEquals(Arrays.asList(null, null, null), new ArrayList<>(uninitialized.rowValues("r2")));
+        uninitialized.set("r2", "y", 42);
+        assertEquals(Integer.valueOf(42), uninitialized.get("r2", "y"));
+        assertNull(uninitialized.get("r1", "y"));
+
+        // zero rows: the new columns are empty and still accept rows
+        final Sheet<String, String, Integer> noRows = new Sheet<>(Collections.<String> emptyList(), Arrays.asList("c1", "c2"));
+        noRows.addColumn(1, "mid", null);
+        noRows.addColumn("end", Collections.emptyList());
+        assertEquals(0, noRows.rowCount());
+        assertEquals(0, noRows.columnValues("mid").size());
+        for (int i = 0; i < 20; i++) {
+            noRows.addRow("r" + i, Arrays.asList(i, i + 1, i + 2, i + 3));
+        }
+        assertEquals(20, noRows.rowCount());
+        assertEquals(Integer.valueOf(19 + 1), noRows.get("r19", "mid"));
+        assertEquals(Integer.valueOf(19 + 3), noRows.get("r19", "end"));
+    }
+    // ---- perf review 2026-09-26 G070 end ----
 }

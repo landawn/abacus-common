@@ -150,18 +150,22 @@ public final class ExceptionUtil {
      * );
      * }</pre>
      *
+     * <p><b>BREAKING (1.1.2):</b> classes of the JDK's own {@code java.*}/{@code jdk.*} modules are now rejected as
+     * built-in even when their package does not start with {@code "java."} or {@code "javax."} (for example
+     * {@code sun.security.validator.ValidatorException} or {@code com.sun.jdi.VMDisconnectedException}); earlier
+     * releases accepted such registrations.</p>
+     *
      * @param <E> the type of exception to map
      * @param exceptionClass the class of the exception to map; must not be {@code null} and must not be a built-in class
      * @param runtimeExceptionMapper the function that converts the exception to RuntimeException; must not be {@code null}
      * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
      *         if {@code exceptionClass} is a built-in class (package starting with {@code "java."}, {@code "javax."}
-     *         or {@code "com.landawn.abacus."}), or if a mapper is already registered for {@code exceptionClass}.
+     *         or {@code "com.landawn.abacus."}, or a class of a JDK module such as {@code java.base} or {@code jdk.unsupported}),
+     *         or if a mapper is already registered for {@code exceptionClass}.
      * @see #registerRuntimeExceptionMapper(Class, Function, boolean)
      */
     public static <E extends Throwable> void registerRuntimeExceptionMapper(final Class<E> exceptionClass,
             final Function<E, RuntimeException> runtimeExceptionMapper) throws IllegalArgumentException {
-        N.checkArgNotNull(runtimeExceptionMapper, cs.runtimeExceptionMapper);
-
         registerRuntimeExceptionMapper(exceptionClass, runtimeExceptionMapper, false);
     }
 
@@ -179,6 +183,11 @@ public final class ExceptionUtil {
      * );
      * }</pre>
      *
+     * <p><b>BREAKING (1.1.2):</b> classes of the JDK's own {@code java.*}/{@code jdk.*} modules are now rejected as
+     * built-in even when their package does not start with {@code "java."} or {@code "javax."} (for example
+     * {@code sun.security.validator.ValidatorException} or {@code com.sun.jdi.VMDisconnectedException}); earlier
+     * releases accepted such registrations.</p>
+     *
      * @param <E> the type of exception to map
      * @param exceptionClass the class of the exception to map; must not be {@code null} and must not be a built-in class
      * @param runtimeExceptionMapper the function that converts the exception to RuntimeException; must not be {@code null}
@@ -186,7 +195,8 @@ public final class ExceptionUtil {
      *              The check-and-register operation is atomic for concurrent registrations of the same class.
      * @throws IllegalArgumentException if {@code exceptionClass} or {@code runtimeExceptionMapper} is {@code null},
      *         if {@code exceptionClass} is a built-in class (package starting with {@code "java."}, {@code "javax."}
-     *         or {@code "com.landawn.abacus."}), or if {@code force} is {@code false} and a mapper is already
+     *         or {@code "com.landawn.abacus."}, or a class of a JDK module such as {@code java.base} or {@code jdk.unsupported}),
+     *         or if {@code force} is {@code false} and a mapper is already
      *         registered for {@code exceptionClass}.
      */
     @SuppressWarnings("rawtypes")
@@ -196,8 +206,9 @@ public final class ExceptionUtil {
         N.checkArgNotNull(runtimeExceptionMapper, cs.runtimeExceptionMapper);
 
         if (N.isBuiltinClass(exceptionClass)) {
-            throw new IllegalArgumentException("Can't register Exception class with package starting with \"java.\", \"javax.\", \"com.landawn.abacus\": "
-                    + exceptionClass.getPackage().getName());
+            throw new IllegalArgumentException(
+                    "Can't register built-in Exception class (a JDK module class, or a package starting with \"java.\", \"javax.\", \"com.landawn.abacus\"): "
+                            + exceptionClass.getPackage().getName());
         }
 
         final Function<Throwable, RuntimeException> mapper = (Function) runtimeExceptionMapper;
@@ -310,6 +321,12 @@ public final class ExceptionUtil {
      * Converts the specified Throwable to a RuntimeException with full control over behavior.
      * Provides options to handle InterruptedException and Error cases.
      *
+     * <p>{@link ExecutionException}, {@link InvocationTargetException} and {@link UndeclaredThrowableException}
+     * wrappers with a non-{@code null} cause are unwrapped first (repeatedly), and both flags and the conversion
+     * apply to the innermost cause. Consequently an {@code UndeclaredThrowableException} that has a cause is not
+     * returned as is, although it is a {@code RuntimeException}: {@code new UndeclaredThrowableException(new IOException())}
+     * converts to an {@link UncheckedIOException}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwable failure = new IOException("read failed");
@@ -321,7 +338,7 @@ public final class ExceptionUtil {
      *        An {@code InterruptedException} reached by unwrapping an {@link ExecutionException} was raised on another
      *        thread and never interrupts this one, whatever this flag says
      * @param throwIfItIsError whether to throw the throwable if it is an {@code Error}
-     * @return the converted runtime exception, or the original instance if it is already a {@code RuntimeException}
+     * @return the converted runtime exception, or the (unwrapped) instance itself if it is already a {@code RuntimeException}
      * @throws IllegalArgumentException if {@code e} is {@code null}
      * @throws Error if {@code throwIfItIsError} is true and the exception remaining after unwrapping execution, invocation, or undeclared-throwable wrappers is an {@code Error}
      */
@@ -402,9 +419,13 @@ public final class ExceptionUtil {
      * }</pre>
      *
      * @param e the exception to unwrap; must not be {@code null}
-     * @return the unwrapped cause if {@code e} is a recognized wrapper (e.g. {@link com.landawn.abacus.exception.UncheckedException},
-     *         {@link java.util.concurrent.ExecutionException}, or {@link java.lang.reflect.InvocationTargetException})
-     *         whose cause is a checked (non-runtime) exception; otherwise returns {@code e} itself.
+     * @return the checked cause if {@code e} is a recognized runtime wrapper (e.g.
+     *         {@link com.landawn.abacus.exception.UncheckedException}) whose cause is a checked (non-runtime) exception.
+     *         An {@link java.util.concurrent.ExecutionException} or {@link java.lang.reflect.InvocationTargetException}
+     *         whose cause is an {@code Exception} is always unwrapped, and that cause is examined in turn: so for such a
+     *         wrapper the result may be a {@code RuntimeException} cause (for example
+     *         {@code new ExecutionException(new IllegalStateException())} yields the {@code IllegalStateException}),
+     *         never the wrapper itself. In every other case {@code e} itself is returned.
      * @throws IllegalArgumentException if {@code e} is {@code null}
      * @throws NullPointerException if a registered exception mapper invoked to identify the wrapper returns {@code null}
      */

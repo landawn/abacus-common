@@ -206,8 +206,8 @@ public final class MutableShort extends Number implements Comparable<MutableShor
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * MutableShort num = MutableShort.of((short)10);
-     * boolean updated = num.setIf(v -> v < 15, (short)20);   // returns true, value is now 20
-     * updated = num.setIf(v -> v < 15, (short)30);           // returns false, value remains 20
+     * boolean updated = num.setIf(v -> v < 15, (short)20);  // returns true, value is now 20
+     * updated = num.setIf(v -> v < 15, (short)30);          // returns false, value remains 20
      * }</pre>
      *
      * @param <E> the type of exception the predicate may throw

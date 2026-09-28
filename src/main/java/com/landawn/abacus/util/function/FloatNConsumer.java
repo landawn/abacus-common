@@ -53,10 +53,10 @@ public interface FloatNConsumer {
      * sumFloats.accept(1.0f, 2.0f, 3.0f);  // Prints "Sum: 6.0"
      * }</pre>
      *
-     * @param args the float values to be processed. May be empty, in which case
+     * @param arguments the float values to be processed. May be empty, in which case
      *             the consumer should handle the empty array appropriately.
      */
-    void accept(float... args);
+    void accept(float... arguments);
 
     /**
      * Returns a composed {@code FloatNConsumer} that performs, in sequence, this

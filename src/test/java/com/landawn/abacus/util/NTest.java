@@ -64,6 +64,7 @@ import com.landawn.abacus.util.function.Predicate;
 import com.landawn.abacus.util.stream.Stream;
 
 import testfixtures.entity.extendDirty.basic.Account;
+import com.landawn.abacus.exception.ParsingException;
 
 public class NTest extends NTestSupport {
     @Test
@@ -2908,4 +2909,456 @@ public class NTest extends NTestSupport {
         // 10% is followed directly by 15%: there is no constant for every integer percent between 1% and 99%.
         assertEquals(constants.indexOf(Percentage._10) + 1, constants.indexOf(Percentage._15));
     }
+
+    @Test
+    public void testStreamJson_unquotedScalarRootThrowsParsingException() {
+        final Type<Map<String, Object>> mapType = new TypeReference<Map<String, Object>>() {
+        }.type();
+
+        assertThrows(ParsingException.class, () -> N.streamJson("123", mapType));
+        assertThrows(ParsingException.class, () -> N.streamJson("null", mapType));
+        assertThrows(ParsingException.class, () -> N.streamJson(new StringReader("true"), mapType));
+        assertThrows(ParsingException.class, () -> N.streamJson(new ByteArrayInputStream("123".getBytes(StandardCharsets.UTF_8)), mapType));
+
+        assertThrows(UnsupportedOperationException.class, () -> N.streamJson("{\"a\":1}", mapType));
+        assertThrows(UnsupportedOperationException.class, () -> N.streamJson("\"abc\"", mapType));
+        assertThrows(UnsupportedOperationException.class, () -> N.streamJson(new StringReader("{}"), mapType));
+    }
+
+    @Test
+    public void testFromXml_listOfStringsElementWrapper() {
+        final Type<List<String>> listType = new TypeReference<List<String>>() {
+        }.type();
+        final String xml = "<list><e>Alice</e><e>Bob</e></list>";
+
+        assertEquals(Arrays.asList("Alice", "Bob"), N.fromXml(xml, listType));
+        assertEquals(Arrays.asList("Alice", "Bob"), N.fromXml(xml, XmlDeserConfig.create().setIgnoreUnmatchedProperty(true), listType));
+    }
+
+    @Test
+    public void testFormatXml_listOfStringsCompactForm() {
+        final Type<List<String>> listType = new TypeReference<List<String>>() {
+        }.type();
+        final String xml = "<list><e>Alice</e><e>Bob</e></list>";
+        final String expected = "<list>[&quot;Alice&quot;, &quot;Bob&quot;]</list>";
+
+        assertEquals(expected, N.formatXml(xml, listType));
+        assertEquals(expected, N.formatXml(xml, XmlSerConfig.create().setIndentation("  "), listType));
+    }
+
+    @Test
+    public void testXmlToJson_documentedExampleOutput() {
+        assertEquals("{\"name\": \"Alice\", \"age\": \"25\"}", N.xmlToJson("<person><name>Alice</name><age>25</age></person>"));
+    }
+
+    // ---- deep review 2026-09-25 G055 begin ----
+
+    // G055-01: frequencyMap(T[], Supplier) wrapped a pre-populated count to a negative value; its Iterable/Iterator siblings throw.
+    @Test
+    public void testFrequencyMap_arraySupplierCountOverflowThrows() {
+        final java.util.function.Supplier<Map<String, Integer>> full = () -> new HashMap<>(Map.of("a", Integer.MAX_VALUE));
+        assertThrows(ArithmeticException.class, () -> N.frequencyMap(new String[] { "a" }, full));
+
+        final java.util.function.Supplier<Map<String, Integer>> almostFull = () -> new HashMap<>(Map.of("a", Integer.MAX_VALUE - 1));
+        assertEquals(Integer.MAX_VALUE, N.frequencyMap(new String[] { "a" }, almostFull).get("a"));
+        assertEquals(Integer.valueOf(2), N.frequencyMap(new String[] { "a", "b", "a" }, HashMap::new).get("a"));
+    }
+
+    // ---- deep review 2026-09-25 G055 end ----
+    // ---- deep review 2026-09-25 G059 begin ----
+
+    // G059-01: the eight fromXml(.., Class) overloads reported a null targetType as 'targetClass' (the parser's name), unlike
+    // their fromJson twins and the fromXml(.., Type) overloads, which all name N's own parameter 'targetType'.
+    @Test
+    public void testFromXml_nullTargetTypeClassOverloadsNameTargetType() {
+        final Class<Object> nullType = null;
+        final XmlDeserConfig cfg = XmlDeserConfig.create();
+        final List<org.junit.jupiter.api.function.Executable> calls = Arrays.asList(() -> N.fromXml("<a/>", nullType),
+                () -> N.fromXml("<a/>", cfg, nullType), () -> N.fromXml(new File("no-such-file.xml"), nullType),
+                () -> N.fromXml(new File("no-such-file.xml"), cfg, nullType),
+                () -> N.fromXml(new ByteArrayInputStream("<a/>".getBytes(StandardCharsets.UTF_8)), nullType),
+                () -> N.fromXml(new ByteArrayInputStream("<a/>".getBytes(StandardCharsets.UTF_8)), cfg, nullType),
+                () -> N.fromXml(new StringReader("<a/>"), nullType), () -> N.fromXml(new StringReader("<a/>"), cfg, nullType));
+
+        for (final org.junit.jupiter.api.function.Executable call : calls) {
+            final IllegalArgumentException ex = org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, call);
+            assertEquals("'targetType' cannot be null", ex.getMessage());
+        }
+
+        // the Type overloads already used N's name
+        assertEquals("'targetType' cannot be null",
+                org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> N.fromXml("<a/>", (Type<Object>) null)).getMessage());
+    }
+
+    // ---- deep review 2026-09-25 G059 end ----
+
+    // ---- perf review 2026-09-26 G056 begin ----
+
+    private static int[] referenceDistinct(final int[] a, final int fromIndex, final int toIndex) {
+        final Set<Integer> set = new LinkedHashSet<>();
+        for (int i = fromIndex; i < toIndex; i++) {
+            set.add(a[i]);
+        }
+        return set.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    private static long[] referenceDistinct(final long[] a, final int fromIndex, final int toIndex) {
+        final Set<Long> set = new LinkedHashSet<>();
+        for (int i = fromIndex; i < toIndex; i++) {
+            set.add(a[i]);
+        }
+        return set.stream().mapToLong(Long::longValue).toArray();
+    }
+
+    private static float[] referenceDistinct(final float[] a, final int fromIndex, final int toIndex) {
+        final Set<Float> set = new LinkedHashSet<>();
+        for (int i = fromIndex; i < toIndex; i++) {
+            set.add(a[i]);
+        }
+        final float[] result = new float[set.size()];
+        int n = 0;
+        for (final Float e : set) {
+            result[n++] = e;
+        }
+        return result;
+    }
+
+    private static double[] referenceDistinct(final double[] a, final int fromIndex, final int toIndex) {
+        final Set<Double> set = new LinkedHashSet<>();
+        for (int i = fromIndex; i < toIndex; i++) {
+            set.add(a[i]);
+        }
+        return set.stream().mapToDouble(Double::doubleValue).toArray();
+    }
+
+    private static void assertSameBits(final float[] expected, final float[] actual) {
+        assertEquals(expected.length, actual.length);
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(Float.floatToRawIntBits(expected[i]), Float.floatToRawIntBits(actual[i]), "index " + i);
+        }
+    }
+
+    private static void assertSameBits(final double[] expected, final double[] actual) {
+        assertEquals(expected.length, actual.length);
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(Double.doubleToRawLongBits(expected[i]), Double.doubleToRawLongBits(actual[i]), "index " + i);
+        }
+    }
+
+    // G056-01: unsorted int/long removeDuplicates/distinct/containsDuplicates use an unboxed hash set - pins first-occurrence order and results
+    @Test
+    public void testRemoveDuplicates_unsortedIntLongPrimitiveSetPinning() {
+        final java.util.Random rnd = new java.util.Random(20260926L);
+
+        for (final int size : new int[] { 2, 3, 4, 5, 63, 64, 65, 200, 5000 }) {
+            for (final int range : new int[] { 2, Math.max(2, size / 2), Integer.MAX_VALUE }) {
+                final int[] ints = new int[size];
+                final long[] longs = new long[size];
+                for (int i = 0; i < size; i++) {
+                    ints[i] = range == Integer.MAX_VALUE ? rnd.nextInt() : rnd.nextInt(range) * 65536; // multiples of 2^16 stress the hash
+                    longs[i] = range == Integer.MAX_VALUE ? rnd.nextLong() : ((long) rnd.nextInt(range)) << 32;
+                }
+
+                final int[] intsCopy = ints.clone();
+                assertArrayEquals(referenceDistinct(ints, 0, size), N.removeDuplicates(ints, false));
+                assertArrayEquals(referenceDistinct(ints, 0, size), N.distinct(ints));
+                assertArrayEquals(referenceDistinct(ints, 1, size), N.removeDuplicates(ints, 1, size, false));
+                assertArrayEquals(referenceDistinct(longs, 0, size), N.removeDuplicates(longs, false));
+                assertArrayEquals(referenceDistinct(longs, 1, size), N.removeDuplicates(longs, 1, size, false));
+                assertArrayEquals(intsCopy, ints); // input untouched
+
+                assertEquals(referenceDistinct(ints, 0, size).length != size, N.containsDuplicates(ints, false));
+                assertEquals(referenceDistinct(longs, 0, size).length != size, N.containsDuplicates(longs, false));
+            }
+        }
+
+        // all-distinct: a fresh copy, never the input
+        final int[] distinctInts = { 5, -1, 0, Integer.MIN_VALUE, Integer.MAX_VALUE };
+        final int[] result = N.removeDuplicates(distinctInts, false);
+        assertArrayEquals(distinctInts, result);
+        assertTrue(result != distinctInts);
+        assertArrayEquals(new int[] { -1, 0 }, N.removeDuplicates(distinctInts, 1, 3, false));
+        assertArrayEquals(new long[] { 0L, 7L, Long.MIN_VALUE }, N.removeDuplicates(new long[] { 0L, 7L, 0L, Long.MIN_VALUE, 7L, Long.MIN_VALUE }, false));
+        assertArrayEquals(new int[] { 0 }, N.removeDuplicates(new int[] { 0, 0, 0, 0 }, false));
+        assertArrayEquals(new int[0], N.removeDuplicates(new int[] { 1, 2 }, 1, 1, false));
+
+        // containsDuplicates: duplicate after the set has to grow past its initial capacity of 64
+        final int[] growing = new int[1000];
+        final long[] growingLongs = new long[1000];
+        for (int i = 0; i < growing.length; i++) {
+            growing[i] = i * 31;
+            growingLongs[i] = i * 31L << 20;
+        }
+        assertFalse(N.containsDuplicates(growing, false));
+        assertFalse(N.containsDuplicates(growingLongs, false));
+        growing[999] = growing[3];
+        growingLongs[999] = growingLongs[3];
+        assertTrue(N.containsDuplicates(growing, false));
+        assertTrue(N.containsDuplicates(growingLongs, false));
+        assertTrue(N.containsDuplicates(new int[] { 0, 1, 2, 0 }, false));
+        assertFalse(N.containsDuplicates(new long[] { 0L, 1L, 2L, -1L }, false));
+    }
+
+    // G056-01: unsorted float/double paths keep Float.equals/Double.equals semantics (NaNs equal, -0.0 != 0.0, first NaN's bits kept)
+    @Test
+    public void testRemoveDuplicates_unsortedFloatDoubleEqualsSemanticsPinning() {
+        final float otherFloatNaN = Float.intBitsToFloat(0x7fc00001);
+        final float[] floats = { 1.5f, otherFloatNaN, -0.0f, 0.0f, Float.NaN, 1.5f, -0.0f, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY,
+                Float.POSITIVE_INFINITY };
+        assertSameBits(referenceDistinct(floats, 0, floats.length), N.removeDuplicates(floats, false));
+        assertSameBits(new float[] { 1.5f, otherFloatNaN, -0.0f, 0.0f, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY },
+                N.removeDuplicates(floats, false));
+        assertSameBits(referenceDistinct(floats, 2, 6), N.removeDuplicates(floats, 2, 6, false));
+        assertTrue(N.containsDuplicates(new float[] { otherFloatNaN, 1f, 2f, Float.NaN }, false));
+        assertFalse(N.containsDuplicates(new float[] { -0.0f, 1f, 2f, 0.0f }, false));
+
+        final double otherDoubleNaN = Double.longBitsToDouble(0x7ff8000000000001L);
+        final double[] doubles = { 2.5, otherDoubleNaN, 0.0, -0.0, Double.NaN, 2.5, 0.0, Double.MIN_VALUE, Double.MAX_VALUE, Double.MIN_VALUE };
+        assertSameBits(referenceDistinct(doubles, 0, doubles.length), N.removeDuplicates(doubles, false));
+        assertSameBits(new double[] { 2.5, otherDoubleNaN, 0.0, -0.0, Double.MIN_VALUE, Double.MAX_VALUE }, N.removeDuplicates(doubles, false));
+        assertSameBits(referenceDistinct(doubles, 1, 5), N.removeDuplicates(doubles, 1, 5, false));
+        assertTrue(N.containsDuplicates(new double[] { otherDoubleNaN, 1d, 2d, Double.NaN }, false));
+        assertFalse(N.containsDuplicates(new double[] { -0.0, 1d, 2d, 0.0 }, false));
+
+        final java.util.Random rnd = new java.util.Random(26L);
+        for (final int size : new int[] { 4, 100, 3000 }) {
+            final float[] f = new float[size];
+            final double[] d = new double[size];
+            for (int i = 0; i < size; i++) {
+                f[i] = rnd.nextInt(size / 2 + 1) / 4f;
+                d[i] = rnd.nextInt(size / 2 + 1) / 8d;
+            }
+            assertSameBits(referenceDistinct(f, 0, size), N.removeDuplicates(f, false));
+            assertSameBits(referenceDistinct(d, 0, size), N.distinct(d));
+            assertEquals(referenceDistinct(f, 0, size).length != size, N.containsDuplicates(f, false));
+            assertEquals(referenceDistinct(d, 0, size).length != size, N.containsDuplicates(d, false));
+        }
+    }
+
+    // G056-01: the primitive key sets move to a boxed set instead of growing past 2^30 slots; exercise that fallback directly
+    @Test
+    public void testRemoveDuplicates_primitiveKeySetBoxedFallback() throws Exception {
+        for (final String name : new String[] { "IntKeySet", "LongKeySet" }) {
+            final boolean isInt = name.equals("IntKeySet");
+            final Class<?> cls;
+            try {
+                cls = Class.forName("com.landawn.abacus.util.N$" + name);
+            } catch (final ClassNotFoundException e) {
+                org.junit.jupiter.api.Assumptions.abort("internal helper " + name + " not present in this build"); // pre-optimisation build
+                return;
+            }
+            final java.lang.reflect.Constructor<?> ctor = cls.getDeclaredConstructor(int.class);
+            ctor.setAccessible(true);
+            final Object set = ctor.newInstance(2);
+            final java.lang.reflect.Method add = cls.getDeclaredMethod("add", isInt ? int.class : long.class);
+            add.setAccessible(true);
+            final java.lang.reflect.Method grow = cls.getDeclaredMethod("grow");
+            grow.setAccessible(true);
+            final java.lang.reflect.Field shift = cls.getDeclaredField("shift");
+            shift.setAccessible(true);
+
+            assertTrue((Boolean) add.invoke(set, isInt ? (Object) 7 : (Object) 7L));
+            assertTrue((Boolean) add.invoke(set, isInt ? (Object) (-3) : (Object) (-3L)));
+            assertFalse((Boolean) add.invoke(set, isInt ? (Object) 7 : (Object) 7L));
+
+            shift.setInt(set, (isInt ? 32 : 64) - 30); // pretend the table is already 2^30 slots: the next growth must go boxed
+            grow.invoke(set);
+
+            assertFalse((Boolean) add.invoke(set, isInt ? (Object) 7 : (Object) 7L));
+            assertFalse((Boolean) add.invoke(set, isInt ? (Object) (-3) : (Object) (-3L)));
+            assertTrue((Boolean) add.invoke(set, isInt ? (Object) 0 : (Object) 0L));
+            assertFalse((Boolean) add.invoke(set, isInt ? (Object) 0 : (Object) 0L));
+        }
+    }
+
+    // G056-02: sumToBigInteger accumulates in a long and carries into the BigInteger only on overflow - pins exact results
+    @Test
+    public void testSumToBigInteger_longCarryPinning() {
+        final java.util.Random rnd = new java.util.Random(9L);
+
+        for (final int size : new int[] { 1, 2, 3, 17, 1000 }) {
+            final long[] a = new long[size];
+            for (int i = 0; i < size; i++) {
+                switch (i % 4) {
+                    case 0 -> a[i] = rnd.nextLong();
+                    case 1 -> a[i] = Long.MAX_VALUE - rnd.nextInt(3);
+                    case 2 -> a[i] = Long.MIN_VALUE + rnd.nextInt(3);
+                    default -> a[i] = rnd.nextInt();
+                }
+            }
+
+            java.math.BigInteger expected = java.math.BigInteger.ZERO;
+            for (final long v : a) {
+                expected = expected.add(java.math.BigInteger.valueOf(v));
+            }
+            assertEquals(expected, N.sumToBigInteger(a));
+
+            java.math.BigInteger expectedTail = java.math.BigInteger.ZERO;
+            for (int i = size / 2; i < size; i++) {
+                expectedTail = expectedTail.add(java.math.BigInteger.valueOf(a[i]));
+            }
+            assertEquals(expectedTail, N.sumToBigInteger(a, size / 2, size));
+        }
+
+        final java.math.BigInteger max = java.math.BigInteger.valueOf(Long.MAX_VALUE);
+        final java.math.BigInteger min = java.math.BigInteger.valueOf(Long.MIN_VALUE);
+        assertEquals(max.multiply(java.math.BigInteger.valueOf(3)), N.sumToBigInteger(Long.MAX_VALUE, Long.MAX_VALUE, Long.MAX_VALUE));
+        assertEquals(min.multiply(java.math.BigInteger.valueOf(3)), N.sumToBigInteger(Long.MIN_VALUE, Long.MIN_VALUE, Long.MIN_VALUE));
+        assertEquals(java.math.BigInteger.valueOf(-1), N.sumToBigInteger(Long.MAX_VALUE, Long.MIN_VALUE));
+        assertEquals(max.add(java.math.BigInteger.ONE), N.sumToBigInteger(Long.MAX_VALUE, 1L));
+        assertEquals(max.subtract(java.math.BigInteger.ONE), N.sumToBigInteger(Long.MAX_VALUE, 1L, -1L, -1L));
+        assertEquals(min.subtract(java.math.BigInteger.ONE), N.sumToBigInteger(Long.MIN_VALUE, -1L));
+        assertEquals(java.math.BigInteger.ZERO, N.sumToBigInteger(0L, 0L));
+        assertEquals(java.math.BigInteger.ZERO, N.sumToBigInteger(new long[] { 5L }, 1, 1));
+    }
+
+    // ---- perf review 2026-09-26 G056 end ----
+    // ---- perf review 2026-09-26 G058 begin ----
+    // G058-01: top(.., keepEncounterOrder=true) must make the same comparator calls, in the same order, on every input form.
+    @Test
+    public void testTopKeepEncounterOrder_pinsComparatorCallSequence() {
+        final Integer[] a = { 4, null, 7, 1, 7, 3, null, 9, 2, 7, 0, 5 };
+        final String expectedLog = "7:null,1:null,7:7,null:3,7:1,7:1,3:7,3:1,1:null,1:9,3:7,7:3,9:7,3:2,3:7,7:7,9:7,7:9,7:7,7:0";
+
+        for (int form = 0; form < 3; form++) {
+            final List<String> log = new ArrayList<>();
+            final Comparator<Integer> cmp = (x, y) -> {
+                log.add(x + ":" + y);
+                return Comparator.<Integer> nullsFirst(Comparator.naturalOrder()).compare(x, y);
+            };
+
+            final List<Integer> result;
+
+            if (form == 0) {
+                result = N.top(a, 1, 11, 4, cmp, true);
+            } else if (form == 1) {
+                result = N.top(new ArrayList<>(Arrays.asList(a)), 1, 11, 4, cmp, true);
+            } else {
+                result = N.top(new LinkedList<>(Arrays.asList(a)), 1, 11, 4, cmp, true);
+            }
+
+            assertEquals(Arrays.asList(7, 7, 9, 7), result, "form " + form);
+            assertEquals(expectedLog, String.join(",", log), "form " + form);
+        }
+    }
+
+    // G058-01: top(.., keepEncounterOrder=true) against a reference selection (distinct values) on array, RandomAccess and sequential inputs.
+    @Test
+    public void testTopKeepEncounterOrder_matchesReferenceOnAllInputForms() {
+        final java.util.Random random = new java.util.Random(58);
+
+        for (int round = 0; round < 200; round++) {
+            final int len = random.nextInt(40);
+            final List<Integer> values = new ArrayList<>();
+
+            for (int i = 0; i < len; i++) {
+                values.add(i * 7 % 101 - 50);
+            }
+
+            Collections.shuffle(values, random);
+
+            final Integer[] a = values.toArray(new Integer[0]);
+            final int fromIndex = len == 0 ? 0 : random.nextInt(len + 1);
+            final int toIndex = fromIndex + (len - fromIndex == 0 ? 0 : random.nextInt(len - fromIndex + 1));
+            final int n = random.nextInt(12);
+            final Comparator<Integer> cmp = round % 2 == 0 ? Comparator.naturalOrder() : Comparator.reverseOrder();
+
+            final List<Integer> range = new ArrayList<>(values.subList(fromIndex, toIndex));
+            final List<Integer> sorted = new ArrayList<>(range);
+            sorted.sort(cmp.reversed());
+            final Set<Integer> selected = new HashSet<>(sorted.subList(0, Math.min(n, sorted.size())));
+            final List<Integer> expected = new ArrayList<>();
+
+            for (final Integer e : range) {
+                if (selected.contains(e)) {
+                    expected.add(e);
+                }
+            }
+
+            assertEquals(expected, N.top(a, fromIndex, toIndex, n, cmp, true));
+            assertEquals(expected, N.top(values, fromIndex, toIndex, n, cmp, true));
+            assertEquals(expected, N.top(new LinkedList<>(values), fromIndex, toIndex, n, cmp, true));
+            assertEquals(expected, N.top(new LinkedHashSet<>(values), fromIndex, toIndex, n, cmp, true));
+        }
+    }
+
+    // G058-02: groupBy(.., Collector) creates exactly one downstream container per distinct key, for Iterable and Iterator inputs.
+    @Test
+    public void testGroupByCollector_supplierCalledOncePerDistinctKey() {
+        final AtomicInteger created = new AtomicInteger();
+        final java.util.stream.Collector<String, List<String>, String> collector = java.util.stream.Collector.of(() -> {
+            created.incrementAndGet();
+            return new ArrayList<>();
+        }, List::add, (x, y) -> {
+            x.addAll(y);
+            return x;
+        }, list -> String.join("|", list));
+        final List<String> input = Arrays.asList("a1", "b1", "a2", "c1", "b2", "a3");
+
+        final Map<Character, String> fromIterable = N.groupBy(input, s -> s.charAt(0), collector);
+        assertEquals(3, created.get());
+        assertEquals("{a=a1|a2|a3, b=b1|b2, c=c1}", fromIterable.toString());
+
+        created.set(0);
+        final Map<Character, String> fromIterator = N.groupBy(input.iterator(), s -> s.charAt(0), collector, java.util.TreeMap::new);
+        assertEquals(3, created.get());
+        assertEquals("{a=a1|a2|a3, b=b1|b2, c=c1}", fromIterator.toString());
+
+        created.set(0);
+        assertTrue(N.groupBy(Collections.<String> emptyList(), s -> s.charAt(0), collector).isEmpty());
+        assertTrue(N.groupBy(Collections.<String> emptyIterator(), s -> s.charAt(0), collector).isEmpty());
+        assertEquals(0, created.get());
+    }
+    // ---- perf review 2026-09-26 G058 end ----
+
+    // ---- perf review 2026-09-26 G113 begin ----
+
+    // G113-04 (OPEN, code unchanged): multi-key Dataset intersection/difference consume one occurrence of b per matching row of a.
+    @Test
+    public void testIntersectionDifference_datasetMultiKeyOccurrences_pinned() {
+        final Dataset a = Dataset.rows(Arrays.asList("k1", "k2", "v"), new Object[][] { { new int[] { 1 }, 1, "x" }, { new int[] { 1 }, 1, "y" },
+                { new int[] { 1 }, 1, "z" }, { "b", 2, "w" }, { null, null, "n" }, { "c", 3, "q" } });
+        final Dataset b = Dataset.rows(Arrays.asList("k1", "k2"),
+                new Object[][] { { new int[] { 1 }, 1 }, { new int[] { 1 }, 1 }, { null, null }, { "d", 4 }, { "b", 3 } });
+        final List<String> keys = Arrays.asList("k1", "k2");
+
+        assertEquals(Arrays.asList("x", "y", "n"), N.intersection(a, b, keys).copyColumn("v"));
+        assertEquals(Arrays.asList("z", "w", "q"), N.difference(a, b, keys).copyColumn("v"));
+        assertEquals(Arrays.asList("k1", "k2", "v"), N.intersection(a, b, keys).columnNames());
+
+        // an empty b and an empty a
+        final Dataset emptyB = Dataset.rows(Arrays.asList("k1", "k2"), new Object[0][]);
+        assertEquals(0, N.intersection(a, emptyB, keys).size());
+        assertEquals(6, N.difference(a, emptyB, keys).size());
+        assertEquals(0, N.intersection(Dataset.rows(Arrays.asList("k1", "k2", "v"), new Object[0][]), b, keys).size());
+
+        // more distinct keys than the object-array pool holds; repeated calls give the same results
+        final Object[][] rowsA = new Object[300][];
+        final Object[][] rowsB = new Object[200][];
+
+        for (int i = 0; i < rowsA.length; i++) {
+            rowsA[i] = new Object[] { "k" + (i % 250), i % 250, i };
+        }
+
+        for (int i = 0; i < rowsB.length; i++) {
+            rowsB[i] = new Object[] { "k" + i, i };
+        }
+
+        final Dataset bigA = Dataset.rows(Arrays.asList("k1", "k2", "v"), rowsA);
+        final Dataset bigB = Dataset.rows(Arrays.asList("k1", "k2"), rowsB);
+
+        for (int round = 0; round < 2; round++) {
+            final Dataset retained = N.intersection(bigA, bigB, keys);
+            assertEquals(200, retained.size());
+            assertEquals(0, (Integer) retained.copyColumn("v").get(0));
+            assertEquals(199, (Integer) retained.copyColumn("v").get(199));
+
+            final Dataset removed = N.difference(bigA, bigB, keys);
+            assertEquals(100, removed.size());
+            assertEquals(200, (Integer) removed.copyColumn("v").get(0));
+            assertEquals(299, (Integer) removed.copyColumn("v").get(99));
+        }
+    }
+
+    // ---- perf review 2026-09-26 G113 end ----
 }

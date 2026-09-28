@@ -21,6 +21,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.annotation.JsonXmlCreator;
 import com.landawn.abacus.annotation.JsonXmlValue;
 import com.landawn.abacus.parser.ParserFactory;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SingleValueGenericTypeTest extends TestBase {
     private static final List<BigDecimal> DECIMALS = Arrays.asList(new BigDecimal("1.2300"), new BigDecimal("12345678901234567890.123456789"),
@@ -452,5 +453,25 @@ public class SingleValueGenericTypeTest extends TestBase {
         public static <U extends List<BigDecimal>> NestedBoundBox<U> of(U value) {
             return new NestedBoundBox<>(value);
         }
+    }
+
+
+    @Test
+    public void boundViolationMessageRendersRebuiltTypeArgumentsReadably() {
+        final String boxName = SingleValueGenericTypeTest.BoundedBox.class.getName();
+
+        // The offending argument must be printed as a Java type name, not as the internal record's
+        // generated toString() (which printed the argument array as "[Ljava.lang.reflect.Type;@...").
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(boxName + "<List<String>>"));
+        assertTrue(e.getMessage().endsWith(": java.util.List<java.lang.String>"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(boxName + "<List<String>[]>"));
+        assertTrue(e.getMessage().endsWith(": java.util.List<java.lang.String>[]"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(boxName + "<? extends String>"));
+        assertTrue(e.getMessage().endsWith(": ? extends java.lang.String"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> TypeFactory.getType(boxName + "<? super String>"));
+        assertTrue(e.getMessage().endsWith(": ? super java.lang.String"), e.getMessage());
     }
 }

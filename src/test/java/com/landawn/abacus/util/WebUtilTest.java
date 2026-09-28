@@ -13,6 +13,10 @@ import com.landawn.abacus.http.HttpMethod;
 import com.landawn.abacus.http.HttpUtil;
 import com.landawn.abacus.http.OkHttpRequest;
 import com.landawn.abacus.http.WebUtil;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import com.sun.net.httpserver.HttpServer;
 
 public class WebUtilTest extends TestBase {
 
@@ -660,5 +664,33 @@ public class WebUtilTest extends TestBase {
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.contains(".post();"));
+    }
+
+    @Test
+    public void testCreateCurlLoggingOkHttpRequestLogsSingleLineDataRawCommand() throws Exception {
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/users", exchange -> {
+            exchange.getRequestBody().readAllBytes();
+            exchange.sendResponseHeaders(200, -1);
+            exchange.close();
+        });
+        server.start();
+
+        try {
+            final String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort();
+            final List<String> logged = new ArrayList<>();
+
+            WebUtil.createCurlLoggingOkHttpRequest(baseUrl + "/users", logged::add)
+                    .header("Authorization", "Bearer token123")
+                    .header("Content-Type", "application/json")
+                    .jsonBody("{\"key\":\"value\"}")
+                    .post(String.class);
+
+            Assertions.assertEquals(1, logged.size());
+            Assertions.assertEquals("\ncurl -X POST '" + baseUrl + "/users' --globoff -H 'authorization: Bearer token123'"
+                    + " -H 'content-type: application/json' --data-raw '{\"key\":\"value\"}'\n", logged.get(0));
+        } finally {
+            server.stop(0);
+        }
     }
 }

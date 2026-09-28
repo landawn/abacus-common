@@ -156,20 +156,20 @@ public final class BooleanCharType extends AbstractType<Boolean> {
 
     /**
      * Parses a character array sub-sequence to a {@link Boolean}.
-     * Returns {@link Boolean#TRUE} only if {@code len} is {@code 1} and the character at
+     * Returns {@link Boolean#TRUE} only if {@code length} is {@code 1} and the character at
      * {@code cbuf[offset]} is {@code 'Y'} or {@code 'y'}; returns {@link Boolean#FALSE} otherwise,
-     * including when {@code cbuf} is {@code null} or {@code len} is {@code 0}.
+     * including when {@code cbuf} is {@code null} or {@code length} is {@code 0}.
      *
      * @param cbuf the character array; may be {@code null}
      * @param offset the 0-based start position within {@code cbuf}
-     * @param len the number of characters to examine
+     * @param length the number of characters to examine
      * @return {@link Boolean#TRUE} if the single character is {@code 'Y'} or {@code 'y'},
      *         {@link Boolean#FALSE} otherwise
-     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code len} is one, and {@code offset} is outside the array.
+     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code length} is one, and {@code offset} is outside the array.
      */
     @Override
-    public Boolean valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException {
-        return (cbuf == null || len == 0) ? Boolean.FALSE : ((len == 1 && (cbuf[offset] == 'Y' || cbuf[offset] == 'y')) ? Boolean.TRUE : Boolean.FALSE);
+    public Boolean valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException {
+        return (cbuf == null || length == 0) ? Boolean.FALSE : ((length == 1 && (cbuf[offset] == 'Y' || cbuf[offset] == 'y')) ? Boolean.TRUE : Boolean.FALSE);
     }
 
     /**
@@ -211,18 +211,18 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * Converts {@code true} to the string {@code "Y"} and {@code false} to {@code "N"}.
      * A {@code null} value is stored as SQL NULL ({@link java.sql.Types#VARCHAR}).
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code Boolean} value to set; {@code null} is stored as SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Boolean x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Boolean x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, java.sql.Types.VARCHAR);
+            statement.setNull(columnIndex, java.sql.Types.VARCHAR);
         } else {
-            stmt.setString(columnIndex, x ? Y : N);
+            statement.setString(columnIndex, x ? Y : N);
         }
     }
 
@@ -231,18 +231,18 @@ public final class BooleanCharType extends AbstractType<Boolean> {
      * Converts {@code true} to the string {@code "Y"} and {@code false} to {@code "N"}.
      * A {@code null} value is stored as SQL NULL ({@link java.sql.Types#VARCHAR}).
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code Boolean} value to set; {@code null} is stored as SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Boolean x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Boolean x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, java.sql.Types.VARCHAR);
+            statement.setNull(parameterName, java.sql.Types.VARCHAR);
         } else {
-            stmt.setString(parameterName, x ? Y : N);
+            statement.setString(parameterName, x ? Y : N);
         }
     }
 

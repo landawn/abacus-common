@@ -114,10 +114,20 @@ import com.landawn.abacus.util.stream.Stream;
  * }</pre>
  *
  * <p><b>Naming Convention:</b>
- * {@code Fnn} is {@link Fn} for {@link Throwables} interfaces: every factory here mirrors the {@code Fn} factory of
- * the same name, but produces (and accepts) the exception-declaring {@code Throwables.*} variant instead of the
+ * {@code Fnn} is {@link Fn} for {@link Throwables} interfaces: most factories here mirror the {@code Fn} factory of
+ * the same name, but produce (and accept) the exception-declaring {@code Throwables.*} variant instead of the
  * unchecked {@code com.landawn.abacus.util.function.*} one. Use {@code Fn} with
  * {@link com.landawn.abacus.util.stream.Stream} and {@code Fnn} with {@link Seq}.
+ *
+ * <p>The double-letter adapters {@code pp()}, {@code cc()}, {@code ff()} and {@code rr()} (including
+ * {@code cc(Callable)}) are the exception: they go the <i>opposite</i> way. {@code Fn.pp}/{@code cc}/{@code ff}/{@code rr}
+ * accept a {@code Throwables.*} delegate and return an unchecked abacus interface that converts checked exceptions;
+ * {@code Fnn.pp}/{@code cc}/{@code ff}/{@code rr} accept an unchecked abacus (or, for partial application, JDK)
+ * interface and return it as - or wrap it in - a {@code Throwables.*} interface, with no exception conversion.
+ * So a lambda that throws a checked exception can be passed to {@code Fn.pp(..)} but not to {@code Fnn.pp(..)}; use
+ * {@link #p(Throwables.Predicate)}, {@link #c(Throwables.Consumer)}, {@link #f(Throwables.Function)} or
+ * {@link #r(Throwables.Runnable)} for that. {@code r2jr()}, {@code c2jc()} and {@code throwIOException()} have no
+ * {@code Fn} counterpart.
  *
  * <p><b>Method Categories:</b>
  * <ul>
@@ -280,7 +290,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Memory Management:</b>
  * <ul>
- *   <li>Memoized functions may retain references to cached results - consider weak references for large objects</li>
+ *   <li>Memoized functions hold strong references to every cached result; none of them supports weak or soft values,
+ *       so use an external cache with weak/soft values when large results must remain collectable</li>
  *   <li>Rate limiters maintain shared timing state and must be reused when invocations should share one rate</li>
  *   <li>Synchronized wrappers add minimal overhead but may prevent some JVM optimizations</li>
  *   <li>Function memoization is unbounded; use a bounded external cache when the key space is unbounded</li>
@@ -288,8 +299,8 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>The exception-type parameter {@code E} has two different bounds.</b>
  * The factories that <i>adapt a lambda you supply</i> - {@code f}, {@code p}, {@code c}, {@code s},
- * {@code testByKey}, the {@code memoize*} and {@code synchronized*} wrappers, and so on - are declared
- * {@code <E extends Throwable>}. The <i>constant</i> factories are declared {@code <E extends Exception>}:
+ * {@code testByKey}, the {@code memoize*} wrappers, the synchronized wrappers {@code sp}/{@code sc}/{@code sf}, and so on - are declared
+ * {@code <E extends Throwable>}. Most <i>constant</i> factories are declared {@code <E extends Exception>}:
  * {@code identity()}, {@code alwaysTrue()}/{@code alwaysFalse()}, {@code isNull()}/{@code notNull()},
  * {@code isEmpty*()}/{@code notEmpty*()}, {@code isBlank()}/{@code notBlank()}, {@code toStr()},
  * {@code key()}/{@code value()}/{@code entry()}/{@code pair()}/{@code triple()}/{@code tuple1()}..{@code tuple3()},
@@ -297,14 +308,20 @@ import com.landawn.abacus.util.stream.Stream;
  * {@code sleepUninterruptibly(..)}, {@code rateLimiter(..)}, {@code throwException(Supplier)},
  * {@code closeQuietly(..)} and the three {@code *Merger()} factories.
  *
+ * <p>The exceptions are eight constant binary operators that are declared {@code <E extends Throwable>}:
+ * {@code selectFirst()}, {@code selectSecond()}, {@code min()}, {@code max()}, {@code minByKey()},
+ * {@code minByValue()}, {@code maxByKey()} and {@code maxByValue()}. Note that {@code selectFirst()} behaves like
+ * {@code ignoringMerger()} and {@code selectSecond()} like {@code replacingMerger()}, but only the {@code select*}
+ * spelling can be used where a {@code Throwable}-bounded operator is expected.
+ *
  * <p>Passing one of the {@code Exception}-bounded factories where a {@code Throwable}-bounded function is
  * expected does <b>not</b> compile - {@code javac} reports
  * {@code inference variable E has incompatible bounds}. Write the lambda directly, or route it through one
  * of the {@code Throwable}-bounded adapters:
  * <pre>{@code
  * Throwables.Iterator<String, Throwable> it = Throwables.Iterator.of(N.asList("a", "b"));
- * it.map(v -> v);                        // ok - a lambda infers E from the target
- * it.map(Fnn.f(v -> v));                 // ok - f(..) is <E extends Throwable>
+ * it.map(v -> v);         // ok - a lambda infers E from the target
+ * it.map(Fnn.f(v -> v));  // ok - f(..) is <E extends Throwable>
  *
  * Throwables.Iterator<String, Exception> checked = Throwables.Iterator.of(N.asList("a", "b"));
  * checked.map(Fnn.<String, Exception> identity());   // ok - the pipeline's own bound is Exception
@@ -381,8 +398,8 @@ public final class Fnn {
      * // Read and cache immutable configuration text on first use
      * Throwables.Supplier<String, IOException> schemaSupplier = Fnn.memoize(
      *     () -> java.nio.file.Files.readString(java.nio.file.Path.of("schema.sql")));
-     * String schema1 = schemaSupplier.get();   // reads the file
-     * String schema2 = schemaSupplier.get();   // returns the same cached text
+     * String schema1 = schemaSupplier.get();  // reads the file
+     * String schema2 = schemaSupplier.get();  // returns the same cached text
      * }</pre>
      *
      * @param <T> the type of results supplied by this supplier
@@ -565,6 +582,12 @@ public final class Fnn {
      * threads computing two <i>different</i> keys still wait for one another, and the underlying function runs while
      * that lock is held. Do not memoize a function that blocks waiting on another thread through this method.</p>
      *
+     * <p><b>Deadlock hazard:</b> because the lock is held for the whole computation, a function that calls back into
+     * the <i>same</i> memoized function from <i>other</i> threads and waits for them - for example through a parallel
+     * stream inside the function - <b>hangs forever</b>: the worker threads block on the lock the calling thread holds
+     * while it waits for them. Nothing is thrown and nothing is logged. Recursion on the calling thread itself is
+     * fine (the lock is reentrant); only cross-thread re-entry deadlocks.</p>
+     *
      * <p><b>Null Handling:</b> The function correctly handles {@code null} input values and {@code null}
      * return values. {@code null} inputs are cached separately from {@code non-null} inputs, and {@code null} results are
      * distinguished from cache misses using a sentinel value.</p>
@@ -600,16 +623,16 @@ public final class Fnn {
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
      * @param <E> the type of exception that may be thrown by the function
-     * @param func the function to memoize
+     * @param function the function to memoize
      * @return a memoized version of the function that caches results by input value
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see #memoize(Throwables.Supplier)
      * @see #memoizeWithExpiration(Throwables.Supplier, long, TimeUnit)
      * @see ConcurrentHashMap
      */
-    public static <T, R, E extends Throwable> Throwables.Function<T, R, E> memoize(final Throwables.Function<? super T, ? extends R, E> func)
+    public static <T, R, E extends Throwable> Throwables.Function<T, R, E> memoize(final Throwables.Function<? super T, ? extends R, E> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
         return new Throwables.Function<>() {
             private final R none = (R) Fn.NONE;
@@ -679,7 +702,7 @@ public final class Fnn {
                 }
 
                 try {
-                    final R computed = func.apply(key);
+                    final R computed = function.apply(key);
                     final Map<T, IllegalStateException> failures = recursiveFailures.get();
                     final IllegalStateException failure = failures == null ? null : failures.get(key);
 
@@ -748,8 +771,9 @@ public final class Fnn {
      * Throwables.Function<String, String, IOException> mapper =
      *     shouldTransform ? Fnn.ff(customTransform) : Fnn.identity();
      *
-     * // In stream operations
-     * stream.map(Fnn.identity()); // No-op transformation
+     * // In Seq operations (Fnn is meant for Seq; use Fn with Stream)
+     * Seq<String, IOException> seq = Seq.of("a", "b");
+     * seq.map(Fnn.identity());   // No-op transformation
      * }</pre>
      *
      * @param <T> the type of the input and output of the function
@@ -773,8 +797,9 @@ public final class Fnn {
      * Throwables.Predicate<String, IOException> filter =
      *     enableFiltering ? Fnn.pp(customFilter) : Fnn.alwaysTrue();
      *
-     * // Accept all elements in stream
-     * stream.filter(Fnn.alwaysTrue());
+     * // Accept all elements of a Seq (Fnn is meant for Seq; use Fn with Stream)
+     * Seq<String, IOException> seq = Seq.of("a", "b");
+     * seq.filter(Fnn.alwaysTrue());
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -797,8 +822,9 @@ public final class Fnn {
      * Throwables.Predicate<String, IOException> filter =
      *     enableFiltering ? Fnn.pp(customFilter) : Fnn.alwaysFalse();
      *
-     * // Reject all elements in stream
-     * stream.filter(Fnn.alwaysFalse()); // Results in empty stream
+     * // Reject all elements of a Seq (Fnn is meant for Seq; use Fn with Stream)
+     * Seq<String, IOException> seq = Seq.of("a", "b");
+     * seq.filter(Fnn.alwaysFalse());   // Results in an empty Seq
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -1114,9 +1140,11 @@ public final class Fnn {
      * // Use as default callback
      * Throwables.Runnable<IOException> callback =
      *     needsCallback ? Fnn.r(actualCallback) : Fnn.emptyAction();
+     * callback.run();   // does nothing when needsCallback is false
      *
-     * // No-op operation in stream
-     * actions.forEach(action -> action.run());
+     * // Placeholder for an optional hook
+     * Throwables.Runnable<IOException> onClose = Fnn.emptyAction();
+     * onClose.run();    // does nothing, never throws
      * }</pre>
      *
      * @param <E> the type of exception that may be thrown (though none will be)
@@ -1271,8 +1299,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Consumer<String, Exception> sleeper = Fnn.sleep(100);
-     * sleeper.accept("hello");     // sleeps 100ms, returns normally
-     * Fnn.sleep(0).accept(null);   // no sleep, returns immediately
+     * sleeper.accept("hello");    // sleeps 100ms, returns normally
+     * Fnn.sleep(0).accept(null);  // no sleep, returns immediately
      * }</pre>
      *
      * @param <T> the type of the input to the consumer
@@ -1296,8 +1324,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Consumer<String, Exception> sleeper = Fnn.sleepUninterruptibly(100);
-     * sleeper.accept("hello");                    // sleeps 100ms uninterruptibly
-     * Fnn.sleepUninterruptibly(0).accept(null);   // no sleep, returns immediately
+     * sleeper.accept("hello");                   // sleeps 100ms uninterruptibly
+     * Fnn.sleepUninterruptibly(0).accept(null);  // no sleep, returns immediately
      * }</pre>
      *
      * @param <T> the type of the input to the consumer
@@ -1320,8 +1348,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Consumer<String, Exception> limiter = Fnn.rateLimiter(10.0);
-     * limiter.accept("request1");   // acquires permit, may block
-     * limiter.accept("request2");   // acquires permit, may block
+     * limiter.accept("request1");  // acquires permit, may block
+     * limiter.accept("request2");  // acquires permit, may block
      * }</pre>
      *
      * @param <T> the type of the input to the consumer
@@ -1379,8 +1407,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Consumer<AutoCloseable, Exception> closer = Fnn.close();
-     * closer.accept(new StringReader("data"));   // closes the reader
-     * closer.accept(null);                       // no-op, does not throw
+     * closer.accept(new StringReader("data"));  // closes the reader
+     * closer.accept(null);                      // no-op, does not throw
      * }</pre>
      *
      * @param <T> the type of {@code AutoCloseable} accepted by the consumer
@@ -1400,8 +1428,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Consumer<AutoCloseable, Exception> closer = Fnn.closeQuietly();
-     * closer.accept(new StringReader("data"));   // closes quietly, any exception suppressed
-     * closer.accept(null);                       // no-op, does not throw
+     * closer.accept(new StringReader("data"));  // closes quietly, any exception suppressed
+     * closer.accept(null);                      // no-op, does not throw
      * }</pre>
      *
      * @param <T> the type of {@code AutoCloseable} accepted by the consumer
@@ -1460,8 +1488,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Filter null elements in a stream
-     * stream.filter(Fnn.isNull());
+     * // Keep only the null elements of a Seq (Fnn is meant for Seq; use Fn with Stream)
+     * Seq<String, IOException> seq = Seq.of("a", null, "b");
+     * seq.filter(Fnn.isNull());   // Seq of [null]
      *
      * // Compose with other predicates
      * Throwables.Predicate<String, Exception> isNullOrEmpty = t -> t == null || t.isEmpty();
@@ -1488,8 +1517,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * // Filter out empty strings in a throwable stream pipeline
-     * stream.filter(Fnn.<String, IOException>isEmpty().negate());
+     * // Filter out empty strings in a Seq pipeline (Fnn is meant for Seq; use Fn with Stream)
+     * Seq<String, IOException> seq = Seq.of("a", "", "b");
+     * seq.filter(Fnn.<String, IOException>isEmpty().negate());   // Seq of ["a", "b"]
      * }</pre>
      *
      * @param <T> the type of CharSequence
@@ -1509,10 +1539,10 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<CharSequence, Exception>isBlank().test("");        // returns true
-     * Fnn.<CharSequence, Exception>isBlank().test("  ");      // returns true
-     * Fnn.<CharSequence, Exception>isBlank().test(null);      // returns true
-     * Fnn.<CharSequence, Exception>isBlank().test("hello");   // returns false
+     * Fnn.<CharSequence, Exception>isBlank().test("");       // returns true
+     * Fnn.<CharSequence, Exception>isBlank().test("  ");     // returns true
+     * Fnn.<CharSequence, Exception>isBlank().test(null);     // returns true
+     * Fnn.<CharSequence, Exception>isBlank().test("hello");  // returns false
      * }</pre>
      *
      * @param <T> the type of CharSequence
@@ -1531,9 +1561,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>isEmptyArray().test(new String[]{});      // returns true
-     * Fnn.<String, Exception>isEmptyArray().test(null);                // returns true
-     * Fnn.<String, Exception>isEmptyArray().test(new String[]{"a"});   // returns false
+     * Fnn.<String, Exception>isEmptyArray().test(new String[]{});     // returns true
+     * Fnn.<String, Exception>isEmptyArray().test(null);               // returns true
+     * Fnn.<String, Exception>isEmptyArray().test(new String[]{"a"});  // returns false
      * }</pre>
      *
      * @param <T> the component type of the array
@@ -1553,9 +1583,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<Collection, Exception>isEmptyCollection().test(new ArrayList<>());   // returns true
-     * Fnn.<Collection, Exception>isEmptyCollection().test(null);                // returns true
-     * Fnn.<Collection, Exception>isEmptyCollection().test(List.of("a"));        // returns false
+     * Fnn.<Collection, Exception>isEmptyCollection().test(new ArrayList<>());  // returns true
+     * Fnn.<Collection, Exception>isEmptyCollection().test(null);               // returns true
+     * Fnn.<Collection, Exception>isEmptyCollection().test(List.of("a"));       // returns false
      * }</pre>
      *
      * @param <T> the type of Collection
@@ -1575,9 +1605,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<Map, Exception>isEmptyMap().test(new HashMap<>());   // returns true
-     * Fnn.<Map, Exception>isEmptyMap().test(null);              // returns true
-     * Fnn.<Map, Exception>isEmptyMap().test(Map.of("a", 1));    // returns false
+     * Fnn.<Map, Exception>isEmptyMap().test(new HashMap<>());  // returns true
+     * Fnn.<Map, Exception>isEmptyMap().test(null);             // returns true
+     * Fnn.<Map, Exception>isEmptyMap().test(Map.of("a", 1));   // returns false
      * }</pre>
      *
      * @param <T> the type of Map
@@ -1596,8 +1626,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>notNull().test("hello");   // returns true
-     * Fnn.<String, Exception>notNull().test(null);      // returns false
+     * Fnn.<String, Exception>notNull().test("hello");  // returns true
+     * Fnn.<String, Exception>notNull().test(null);     // returns false
      * }</pre>
      *
      * <p><b>Marked {@link Beta}:</b> only this {@code Throwables} spelling is provisional; the equivalent
@@ -1621,9 +1651,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>notEmpty().test("hello");   // returns true
-     * Fnn.<String, Exception>notEmpty().test("");        // returns false
-     * Fnn.<String, Exception>notEmpty().test(null);      // returns false
+     * Fnn.<String, Exception>notEmpty().test("hello");  // returns true
+     * Fnn.<String, Exception>notEmpty().test("");       // returns false
+     * Fnn.<String, Exception>notEmpty().test(null);     // returns false
      * }</pre>
      *
      * @param <T> the type of the CharSequence to test
@@ -1643,10 +1673,10 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>notBlank().test("hello");   // returns true
-     * Fnn.<String, Exception>notBlank().test("  ");      // returns false
-     * Fnn.<String, Exception>notBlank().test("");        // returns false
-     * Fnn.<String, Exception>notBlank().test(null);      // returns false
+     * Fnn.<String, Exception>notBlank().test("hello");  // returns true
+     * Fnn.<String, Exception>notBlank().test("  ");     // returns false
+     * Fnn.<String, Exception>notBlank().test("");       // returns false
+     * Fnn.<String, Exception>notBlank().test(null);     // returns false
      * }</pre>
      *
      * @param <T> the type of the CharSequence to test
@@ -1665,9 +1695,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>notEmptyArray().test(new String[]{"a"});   // returns true
-     * Fnn.<String, Exception>notEmptyArray().test(new String[]{});      // returns false
-     * Fnn.<String, Exception>notEmptyArray().test(null);                // returns false
+     * Fnn.<String, Exception>notEmptyArray().test(new String[]{"a"});  // returns true
+     * Fnn.<String, Exception>notEmptyArray().test(new String[]{});     // returns false
+     * Fnn.<String, Exception>notEmptyArray().test(null);               // returns false
      * }</pre>
      *
      * @param <T> the component type of the array
@@ -1687,9 +1717,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<Collection, Exception>notEmptyCollection().test(List.of("a"));        // returns true
-     * Fnn.<Collection, Exception>notEmptyCollection().test(new ArrayList<>());   // returns false
-     * Fnn.<Collection, Exception>notEmptyCollection().test(null);                // returns false
+     * Fnn.<Collection, Exception>notEmptyCollection().test(List.of("a"));       // returns true
+     * Fnn.<Collection, Exception>notEmptyCollection().test(new ArrayList<>());  // returns false
+     * Fnn.<Collection, Exception>notEmptyCollection().test(null);               // returns false
      * }</pre>
      *
      * @param <T> the type of the Collection to test
@@ -1710,9 +1740,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<Map, Exception>notEmptyMap().test(Map.of("a", 1));    // returns true
-     * Fnn.<Map, Exception>notEmptyMap().test(new HashMap<>());   // returns false
-     * Fnn.<Map, Exception>notEmptyMap().test(null);              // returns false
+     * Fnn.<Map, Exception>notEmptyMap().test(Map.of("a", 1));   // returns true
+     * Fnn.<Map, Exception>notEmptyMap().test(new HashMap<>());  // returns false
+     * Fnn.<Map, Exception>notEmptyMap().test(null);             // returns false
      * }</pre>
      *
      * @param <T> the type of the Map to test
@@ -1757,8 +1787,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.BinaryOperator<String, Exception> merger = Fnn.ignoringMerger();
-     * merger.apply("first", "second");   // returns "first"
-     * merger.apply("a", "b");            // returns "a"
+     * merger.apply("first", "second");  // returns "first"
+     * merger.apply("a", "b");           // returns "a"
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -1780,8 +1810,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.BinaryOperator<String, Exception> merger = Fnn.replacingMerger();
-     * merger.apply("first", "second");   // returns "second"
-     * merger.apply("a", "b");            // returns "b"
+     * merger.apply("first", "second");  // returns "second"
+     * merger.apply("a", "b");           // returns "b"
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -1801,9 +1831,9 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Integer, Exception>testByKey(k -> k.startsWith("a")).test(new AbstractMap.SimpleEntry<>("apple", 1));   // returns true
-     * Fnn.<String, Integer, Exception>testByKey(k -> k.length() > 3).test(Map.entry("hello", 1));                          // returns true
-     * Fnn.<String, Integer, Exception>testByKey(k -> k.length() > 3).test(Map.entry("hi", 2));                             // returns false
+     * Fnn.<String, Integer, Exception>testByKey(k -> k.startsWith("a")).test(new AbstractMap.SimpleEntry<>("apple", 1));  // returns true
+     * Fnn.<String, Integer, Exception>testByKey(k -> k.length() > 3).test(Map.entry("hello", 1));                         // returns true
+     * Fnn.<String, Integer, Exception>testByKey(k -> k.length() > 3).test(Map.entry("hi", 2));                            // returns false
      * }</pre>
      *
      * @param <K> the type of the key
@@ -1827,8 +1857,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Integer, Exception>testByValue(v -> v > 0).test(Map.entry("a", 5));    // returns true
-     * Fnn.<String, Integer, Exception>testByValue(v -> v > 0).test(Map.entry("a", -1));   // returns false
+     * Fnn.<String, Integer, Exception>testByValue(v -> v > 0).test(Map.entry("a", 5));   // returns true
+     * Fnn.<String, Integer, Exception>testByValue(v -> v > 0).test(Map.entry("a", -1));  // returns false
      * }</pre>
      *
      * @param <K> the type of the key
@@ -1902,24 +1932,24 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Integer, Integer, Exception>applyByKey(k -> k.length()).apply(Map.entry("hello", 1));    // returns 5
-     * Fnn.<String, Integer, String, Exception>applyByKey(String::toUpperCase).apply(Map.entry("abc", 2));   // returns "ABC"
+     * Fnn.<String, Integer, Integer, Exception>applyByKey(k -> k.length()).apply(Map.entry("hello", 1));   // returns 5
+     * Fnn.<String, Integer, String, Exception>applyByKey(String::toUpperCase).apply(Map.entry("abc", 2));  // returns "ABC"
      * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <R> the type of the result
      * @param <E> the type of the exception that may be thrown
-     * @param func the function to apply to the entry's key
+     * @param function the function to apply to the entry's key
      * @return a Function that transforms Map.Entry objects by applying a function to their keys
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see Map.Entry#getKey()
      */
     public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByKey(
-            final Throwables.Function<? super K, ? extends R, E> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+            final Throwables.Function<? super K, ? extends R, E> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return entry -> func.apply(entry.getKey());
+        return entry -> function.apply(entry.getKey());
     }
 
     /**
@@ -1928,24 +1958,24 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Integer, String, Exception>applyByValue(v -> "val:" + v).apply(Map.entry("a", 42));   // returns "val:42"
-     * Fnn.<String, Integer, Integer, Exception>applyByValue(v -> v * 2).apply(Map.entry("a", 5));        // returns 10
+     * Fnn.<String, Integer, String, Exception>applyByValue(v -> "val:" + v).apply(Map.entry("a", 42));  // returns "val:42"
+     * Fnn.<String, Integer, Integer, Exception>applyByValue(v -> v * 2).apply(Map.entry("a", 5));       // returns 10
      * }</pre>
      *
      * @param <K> the type of the key
      * @param <V> the type of the value
      * @param <R> the type of the result
      * @param <E> the type of the exception that may be thrown
-     * @param func the function to apply to the entry's value
+     * @param function the function to apply to the entry's value
      * @return a Function that transforms Map.Entry objects by applying a function to their values
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see Map.Entry#getValue()
      */
     public static <K, V, R, E extends Throwable> Throwables.Function<Map.Entry<K, V>, R, E> applyByValue(
-            final Throwables.Function<? super V, ? extends R, E> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+            final Throwables.Function<? super V, ? extends R, E> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return entry -> func.apply(entry.getValue());
+        return entry -> function.apply(entry.getValue());
     }
 
     /** The Constant RETURN_FIRST. */
@@ -1957,8 +1987,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>selectFirst().apply("a", "b");   // returns "a"
-     * Fnn.<Integer, Exception>selectFirst().apply(1, 2);      // returns 1
+     * Fnn.<String, Exception>selectFirst().apply("a", "b");  // returns "a"
+     * Fnn.<Integer, Exception>selectFirst().apply(1, 2);     // returns 1
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -1980,8 +2010,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>selectSecond().apply("a", "b");   // returns "b"
-     * Fnn.<Integer, Exception>selectSecond().apply(1, 2);      // returns 2
+     * Fnn.<String, Exception>selectSecond().apply("a", "b");  // returns "b"
+     * Fnn.<Integer, Exception>selectSecond().apply(1, 2);     // returns 2
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -2007,8 +2037,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<Integer, Exception>min().apply(3, 5);      // returns 3
-     * Fnn.<String, Exception>min().apply("a", "b");   // returns "a"
+     * Fnn.<Integer, Exception>min().apply(3, 5);     // returns 3
+     * Fnn.<String, Exception>min().apply("a", "b");  // returns "a"
      * }</pre>
      *
      * @param <T> the type of the Comparable operands and result
@@ -2027,8 +2057,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<Integer, Exception> min(Comparator.<Integer> naturalOrder()).apply(3, 5);   // returns 3
-     * Fnn.<Integer, Exception> min(Comparator.<Integer> reverseOrder()).apply(3, 5);   // returns 5
+     * Fnn.<Integer, Exception> min(Comparator.<Integer> naturalOrder()).apply(3, 5);  // returns 3
+     * Fnn.<Integer, Exception> min(Comparator.<Integer> reverseOrder()).apply(3, 5);  // returns 5
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -2053,8 +2083,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>minBy(String::length).apply("hi", "hello");   // returns "hi"
-     * Fnn.<String, Exception>minBy(String::length).apply("ab", "cd");      // returns "ab" (equal length, first returned)
+     * Fnn.<String, Exception>minBy(String::length).apply("hi", "hello");  // returns "hi"
+     * Fnn.<String, Exception>minBy(String::length).apply("ab", "cd");     // returns "ab" (equal length, first returned)
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -2149,8 +2179,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<Integer, Exception>max().apply(3, 5);      // returns 5
-     * Fnn.<String, Exception>max().apply("a", "b");   // returns "b"
+     * Fnn.<Integer, Exception>max().apply(3, 5);     // returns 5
+     * Fnn.<String, Exception>max().apply("a", "b");  // returns "b"
      * }</pre>
      *
      * @param <T> the type of the Comparable operands and result
@@ -2169,8 +2199,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<Integer, Exception> max(Comparator.<Integer> naturalOrder()).apply(3, 5);   // returns 5
-     * Fnn.<Integer, Exception> max(Comparator.<Integer> reverseOrder()).apply(3, 5);   // returns 3
+     * Fnn.<Integer, Exception> max(Comparator.<Integer> naturalOrder()).apply(3, 5);  // returns 5
+     * Fnn.<Integer, Exception> max(Comparator.<Integer> reverseOrder()).apply(3, 5);  // returns 3
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -2195,8 +2225,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Exception>maxBy(String::length).apply("hi", "hello");   // returns "hello"
-     * Fnn.<String, Exception>maxBy(String::length).apply("ab", "cd");      // returns "ab" (equal length, first returned)
+     * Fnn.<String, Exception>maxBy(String::length).apply("hi", "hello");  // returns "hello"
+     * Fnn.<String, Exception>maxBy(String::length).apply("ab", "cd");     // returns "ab" (equal length, first returned)
      * }</pre>
      *
      * @param <T> the type of the operands and result of the operator
@@ -2228,8 +2258,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Integer, Exception>maxByKey().apply(Map.entry("a", 1), Map.entry("b", 2));   // returns Entry("b",2)
-     * Fnn.<String, Integer, Exception>maxByKey().apply(Map.entry("x", 1), Map.entry("x", 2));   // returns Entry("x",1)
+     * Fnn.<String, Integer, Exception>maxByKey().apply(Map.entry("a", 1), Map.entry("b", 2));  // returns Entry("b",2)
+     * Fnn.<String, Integer, Exception>maxByKey().apply(Map.entry("x", 1), Map.entry("x", 2));  // returns Entry("x",1)
      * }</pre>
      *
      * @param <K> the type of the Comparable key
@@ -2258,8 +2288,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.<String, Integer, Exception>maxByValue().apply(Map.entry("a", 1), Map.entry("b", 2));   // returns Entry("b",2)
-     * Fnn.<String, Integer, Exception>maxByValue().apply(Map.entry("a", 5), Map.entry("b", 5));   // returns Entry("a",5)
+     * Fnn.<String, Integer, Exception>maxByValue().apply(Map.entry("a", 1), Map.entry("b", 2));  // returns Entry("b",2)
+     * Fnn.<String, Integer, Exception>maxByValue().apply(Map.entry("a", 5), Map.entry("b", 5));  // returns Entry("a",5)
      * }</pre>
      *
      * @param <K> the type of the key
@@ -2280,8 +2310,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.not((Throwables.Predicate<String, Exception>) s -> s.isEmpty()).test("");        // returns false
-     * Fnn.not((Throwables.Predicate<String, Exception>) s -> s.isEmpty()).test("hello");   // returns true
+     * Fnn.not((Throwables.Predicate<String, Exception>) s -> s.isEmpty()).test("");       // returns false
+     * Fnn.not((Throwables.Predicate<String, Exception>) s -> s.isEmpty()).test("hello");  // returns true
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2291,7 +2321,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @see Predicate#negate()
      */
-    public static <T, E extends Throwable> Throwables.Predicate<T, E> not(final Throwables.Predicate<T, E> predicate) throws IllegalArgumentException {
+    public static <T, E extends Throwable> Throwables.Predicate<T, E> not(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return t -> !predicate.test(t);
@@ -2303,8 +2333,8 @@ public final class Fnn {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Fnn.not((Throwables.BiPredicate<String, Integer, Exception>) (s, i) -> s.length() > i).test("hi", 5);      // returns true
-     * Fnn.not((Throwables.BiPredicate<String, Integer, Exception>) (s, i) -> s.length() > i).test("hello", 3);   // returns false
+     * Fnn.not((Throwables.BiPredicate<String, Integer, Exception>) (s, i) -> s.length() > i).test("hi", 5);     // returns true
+     * Fnn.not((Throwables.BiPredicate<String, Integer, Exception>) (s, i) -> s.length() > i).test("hello", 3);  // returns false
      * }</pre>
      *
      * @param <T> the type of the first argument to the predicate
@@ -2315,7 +2345,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code biPredicate} is {@code null}.
      * @see BiPredicate#negate()
      */
-    public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> not(final Throwables.BiPredicate<T, U, E> biPredicate)
+    public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> not(final Throwables.BiPredicate<? super T, ? super U, E> biPredicate)
             throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
@@ -2340,8 +2370,8 @@ public final class Fnn {
      * @return a TriPredicate that represents the logical negation of the given tri-predicate
      * @throws IllegalArgumentException if {@code triPredicate} is {@code null}.
      */
-    public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> not(final Throwables.TriPredicate<A, B, C, E> triPredicate)
-            throws IllegalArgumentException {
+    public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> not(
+            final Throwables.TriPredicate<? super A, ? super B, ? super C, E> triPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
         return (a, b, c) -> !triPredicate.test(a, b, c);
@@ -2359,10 +2389,10 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Predicate<String, Exception> pred = Fnn.atMost(2);
-     * pred.test("a");   // returns true (first call)
-     * pred.test("b");   // returns true (second call)
-     * pred.test("c");   // returns false (count exhausted)
-     * Fnn.atMost(-1);   // throws IllegalArgumentException
+     * pred.test("a");  // returns true (first call)
+     * pred.test("b");  // returns true (second call)
+     * pred.test("c");  // returns false (count exhausted)
+     * Fnn.atMost(-1);  // throws IllegalArgumentException
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -2382,7 +2412,9 @@ public final class Fnn {
 
             @Override
             public boolean test(final T t) {
-                return counter.getAndUpdate(i -> i > 0 ? i - 1 : 0) > 0;
+                // The counter never grows, so once it reads 0 the answer is final: a plain volatile read
+                // avoids a CAS (and, in parallel use, cache-line contention) on every exhausted call.
+                return counter.get() > 0 && counter.getAndUpdate(i -> i > 0 ? i - 1 : 0) > 0;
             }
         };
     }
@@ -2426,18 +2458,18 @@ public final class Fnn {
      *
      * @param <T> the type of the result of the function
      * @param <E> the type of the exception that may be thrown
-     * @param func the Java IntFunction to convert
+     * @param function the Java IntFunction to convert
      * @return a Throwables.IntFunction that delegates to the given function
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see java.util.function.IntFunction
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T, E extends Throwable> Throwables.IntFunction<T, E> from(final java.util.function.IntFunction<? extends T> func)
+    public static <T, E extends Throwable> Throwables.IntFunction<T, E> from(final java.util.function.IntFunction<? extends T> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
-        return func instanceof Throwables.IntFunction ? ((Throwables.IntFunction) func) : func::apply;
+        return function instanceof Throwables.IntFunction ? ((Throwables.IntFunction) function) : function::apply;
     }
 
     /**
@@ -2618,17 +2650,18 @@ public final class Fnn {
      *
      * @param <T> the type of the operand and result of the operator
      * @param <E> the type of the exception that may be thrown
-     * @param op the Java UnaryOperator to convert
+     * @param operator the Java UnaryOperator to convert
      * @return a Throwables.UnaryOperator that delegates to the given operator
-     * @throws IllegalArgumentException if {@code op} is {@code null}.
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      * @see java.util.function.UnaryOperator
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T, E extends Throwable> Throwables.UnaryOperator<T, E> from(final java.util.function.UnaryOperator<T> op) throws IllegalArgumentException {
-        N.checkArgNotNull(op, cs.op);
+    public static <T, E extends Throwable> Throwables.UnaryOperator<T, E> from(final java.util.function.UnaryOperator<T> operator)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
-        return op instanceof Throwables.UnaryOperator ? ((Throwables.UnaryOperator) op) : op::apply;
+        return operator instanceof Throwables.UnaryOperator ? ((Throwables.UnaryOperator) operator) : operator::apply;
     }
 
     /**
@@ -2644,17 +2677,18 @@ public final class Fnn {
      *
      * @param <T> the type of the operands and result of the operator
      * @param <E> the type of the exception that may be thrown
-     * @param op the Java BinaryOperator to convert
+     * @param operator the Java BinaryOperator to convert
      * @return a Throwables.BinaryOperator that delegates to the given operator
-     * @throws IllegalArgumentException if {@code op} is {@code null}.
+     * @throws IllegalArgumentException if {@code operator} is {@code null}.
      * @see java.util.function.BinaryOperator
      */
     @Beta
     @SuppressWarnings("rawtypes")
-    public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> from(final java.util.function.BinaryOperator<T> op) throws IllegalArgumentException {
-        N.checkArgNotNull(op, cs.op);
+    public static <T, E extends Throwable> Throwables.BinaryOperator<T, E> from(final java.util.function.BinaryOperator<T> operator)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(operator, cs.operator);
 
-        return op instanceof Throwables.BinaryOperator ? ((Throwables.BinaryOperator) op) : op::apply;
+        return operator instanceof Throwables.BinaryOperator ? ((Throwables.BinaryOperator) operator) : operator::apply;
     }
 
     /**
@@ -2695,16 +2729,16 @@ public final class Fnn {
      * @param <T> the type of the result
      * @param <E> the type of the exception that may be thrown
      * @param a the fixed argument to apply to the function
-     * @param func the function to partially apply
+     * @param function the function to partially apply
      * @return a Supplier that applies the function to the fixed argument
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      */
     @Beta
-    public static <A, T, E extends Throwable> Throwables.Supplier<T, E> s(final A a, final Throwables.Function<? super A, ? extends T, E> func)
+    public static <A, T, E extends Throwable> Throwables.Supplier<T, E> s(final A a, final Throwables.Function<? super A, ? extends T, E> function)
             throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+        N.checkArgNotNull(function, cs.function);
 
-        return () -> func.apply(a);
+        return () -> function.apply(a);
     }
 
     /**
@@ -3299,7 +3333,7 @@ public final class Fnn {
      * @see #from(java.util.function.Predicate)
      */
     @Beta
-    public static <T, E extends Throwable> Throwables.Predicate<T, E> pp(final Predicate<T> predicate) throws IllegalArgumentException {
+    public static <T, E extends Throwable> Throwables.Predicate<T, E> pp(final Predicate<? super T> predicate) throws IllegalArgumentException {
         N.checkArgNotNull(predicate, cs.predicate);
 
         return (Throwables.Predicate<T, E>) predicate;
@@ -3325,7 +3359,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code biPredicate} is {@code null}.
      */
     @Beta
-    public static <A, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final java.util.function.BiPredicate<A, T> biPredicate)
+    public static <A, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final java.util.function.BiPredicate<? super A, ? super T> biPredicate)
             throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
@@ -3354,8 +3388,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triPredicate} is {@code null}.
      */
     @Beta
-    public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final B b, final TriPredicate<A, B, T> triPredicate)
-            throws IllegalArgumentException {
+    public static <A, B, T, E extends Throwable> Throwables.Predicate<T, E> pp(final A a, final B b,
+            final TriPredicate<? super A, ? super B, ? super T> triPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
         return t -> triPredicate.test(a, b, t);
@@ -3371,8 +3405,8 @@ public final class Fnn {
      * <pre>{@code
      * com.landawn.abacus.util.function.BiPredicate<String, Integer> biPred = (s, len) -> s.length() == len;
      * Throwables.BiPredicate<String, Integer, IOException> throwablePred = Fnn.pp(biPred);
-     * throwablePred.test("hello", 5);                // returns true
-     * throwablePred.test("hello", 3);                // returns false
+     * throwablePred.test("hello", 5);  // returns true
+     * throwablePred.test("hello", 3);  // returns false
      * }</pre>
      *
      * @param <T> the type of the first argument to the predicate
@@ -3384,7 +3418,8 @@ public final class Fnn {
      * @see #from(java.util.function.BiPredicate)
      */
     @Beta
-    public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final BiPredicate<T, U> biPredicate) throws IllegalArgumentException {
+    public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final BiPredicate<? super T, ? super U> biPredicate)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
         return (Throwables.BiPredicate<T, U, E>) biPredicate;
@@ -3399,8 +3434,8 @@ public final class Fnn {
      * <pre>{@code
      * TriPredicate<String, String, String> triPred = (a, t, u) -> (a + t).equals(u);
      * Throwables.BiPredicate<String, String, IOException> biPred = Fnn.pp("foo", triPred);
-     * biPred.test("bar", "foobar");   // returns true
-     * biPred.test("bar", "foobaz");   // returns false
+     * biPred.test("bar", "foobar");  // returns true
+     * biPred.test("bar", "foobaz");  // returns false
      * }</pre>
      *
      * @param <A> the type of the first argument to the TriPredicate
@@ -3413,7 +3448,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triPredicate} is {@code null}.
      */
     @Beta
-    public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final A a, final TriPredicate<A, T, U> triPredicate)
+    public static <A, T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> pp(final A a, final TriPredicate<? super A, ? super T, ? super U> triPredicate)
             throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
@@ -3430,8 +3465,8 @@ public final class Fnn {
      * <pre>{@code
      * TriPredicate<Integer, Integer, Integer> triPred = (a, b, c) -> a + b == c;
      * Throwables.TriPredicate<Integer, Integer, Integer, IOException> throwablePred = Fnn.pp(triPred);
-     * throwablePred.test(2, 3, 5);   // returns true
-     * throwablePred.test(2, 3, 6);   // returns false
+     * throwablePred.test(2, 3, 5);  // returns true
+     * throwablePred.test(2, 3, 6);  // returns false
      * }</pre>
      *
      * @param <A> the type of the first argument to the predicate
@@ -3443,7 +3478,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triPredicate} is {@code null}.
      */
     @Beta
-    public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> pp(final TriPredicate<A, B, C> triPredicate)
+    public static <A, B, C, E extends Throwable> Throwables.TriPredicate<A, B, C, E> pp(final TriPredicate<? super A, ? super B, ? super C> triPredicate)
             throws IllegalArgumentException {
         N.checkArgNotNull(triPredicate, cs.triPredicate);
 
@@ -3471,7 +3506,7 @@ public final class Fnn {
      * @see #from(java.util.function.Consumer)
      */
     @Beta
-    public static <T, E extends Throwable> Throwables.Consumer<T, E> cc(final Consumer<T> consumer) throws IllegalArgumentException {
+    public static <T, E extends Throwable> Throwables.Consumer<T, E> cc(final Consumer<? super T> consumer) throws IllegalArgumentException {
         N.checkArgNotNull(consumer, cs.consumer);
 
         return (Throwables.Consumer<T, E>) consumer;
@@ -3486,8 +3521,8 @@ public final class Fnn {
      * <pre>{@code
      * List<String> sink = new ArrayList<>();
      * Throwables.Consumer<String, IOException> consumer = Fnn.cc(sink, (list, s) -> list.add(s));
-     * consumer.accept("a");   // adds "a" to sink
-     * consumer.accept("b");   // adds "b" to sink, sink is now [a, b]
+     * consumer.accept("a");  // adds "a" to sink
+     * consumer.accept("b");  // adds "b" to sink, sink is now [a, b]
      * }</pre>
      *
      * @param <A> the type of the first argument to the BiConsumer
@@ -3499,7 +3534,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code biConsumer} is {@code null}.
      */
     @Beta
-    public static <A, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final java.util.function.BiConsumer<A, T> biConsumer)
+    public static <A, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final java.util.function.BiConsumer<? super A, ? super T> biConsumer)
             throws IllegalArgumentException {
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
@@ -3529,8 +3564,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triConsumer} is {@code null}.
      */
     @Beta
-    public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final B b, final TriConsumer<A, B, T> triConsumer)
-            throws IllegalArgumentException {
+    public static <A, B, T, E extends Throwable> Throwables.Consumer<T, E> cc(final A a, final B b,
+            final TriConsumer<? super A, ? super B, ? super T> triConsumer) throws IllegalArgumentException {
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
         return t -> triConsumer.accept(a, b, t);
@@ -3559,7 +3594,8 @@ public final class Fnn {
      * @see #from(java.util.function.BiConsumer)
      */
     @Beta
-    public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final BiConsumer<T, U> biConsumer) throws IllegalArgumentException {
+    public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final BiConsumer<? super T, ? super U> biConsumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
         return (Throwables.BiConsumer<T, U, E>) biConsumer;
@@ -3574,8 +3610,8 @@ public final class Fnn {
      * <pre>{@code
      * Map<String, Integer> sink = new HashMap<>();
      * Throwables.BiConsumer<String, Integer, IOException> biConsumer = Fnn.cc(sink, (map, k, v) -> map.put(k, v));
-     * biConsumer.accept("a", 1);   // puts ("a", 1) into sink
-     * biConsumer.accept("b", 2);   // puts ("b", 2) into sink
+     * biConsumer.accept("a", 1);  // puts ("a", 1) into sink
+     * biConsumer.accept("b", 2);  // puts ("b", 2) into sink
      * }</pre>
      *
      * @param <A> the type of the first argument to the TriConsumer
@@ -3588,7 +3624,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triConsumer} is {@code null}.
      */
     @Beta
-    public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final A a, final TriConsumer<A, T, U> triConsumer)
+    public static <A, T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> cc(final A a, final TriConsumer<? super A, ? super T, ? super U> triConsumer)
             throws IllegalArgumentException {
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
@@ -3618,7 +3654,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triConsumer} is {@code null}.
      */
     @Beta
-    public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> cc(final TriConsumer<A, B, C> triConsumer) throws IllegalArgumentException {
+    public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> cc(final TriConsumer<? super A, ? super B, ? super C> triConsumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
         return (Throwables.TriConsumer<A, B, C, E>) triConsumer;
@@ -3646,7 +3683,7 @@ public final class Fnn {
      * @see #from(java.util.function.Function)
      */
     @Beta
-    public static <T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final Function<T, ? extends R> function) throws IllegalArgumentException {
+    public static <T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final Function<? super T, ? extends R> function) throws IllegalArgumentException {
         N.checkArgNotNull(function, cs.function);
 
         return (Throwables.Function<T, R, E>) function;
@@ -3660,8 +3697,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Function<Integer, Integer, IOException> func = Fnn.ff(10, (a, t) -> a + t);
-     * func.apply(5);    // returns 15
-     * func.apply(20);   // returns 30
+     * func.apply(5);   // returns 15
+     * func.apply(20);  // returns 30
      * }</pre>
      *
      * @param <A> the type of the first argument to the BiFunction
@@ -3674,8 +3711,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code biFunction} is {@code null}.
      */
     @Beta
-    public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final java.util.function.BiFunction<A, T, R> biFunction)
-            throws IllegalArgumentException {
+    public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a,
+            final java.util.function.BiFunction<? super A, ? super T, ? extends R> biFunction) throws IllegalArgumentException {
         N.checkArgNotNull(biFunction, cs.biFunction);
 
         return t -> biFunction.apply(a, t);
@@ -3689,8 +3726,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Function<Integer, Integer, IOException> func = Fnn.ff(10, 20, (a, b, t) -> a + b + t);
-     * func.apply(5);   // returns 35
-     * func.apply(0);   // returns 30
+     * func.apply(5);  // returns 35
+     * func.apply(0);  // returns 30
      * }</pre>
      *
      * @param <A> the type of the first argument to the TriFunction
@@ -3705,8 +3742,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triFunction} is {@code null}.
      */
     @Beta
-    public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final B b, final TriFunction<A, B, T, R> triFunction)
-            throws IllegalArgumentException {
+    public static <A, B, T, R, E extends Throwable> Throwables.Function<T, R, E> ff(final A a, final B b,
+            final TriFunction<? super A, ? super B, ? super T, ? extends R> triFunction) throws IllegalArgumentException {
         N.checkArgNotNull(triFunction, cs.triFunction);
 
         return t -> triFunction.apply(a, b, t);
@@ -3735,7 +3772,8 @@ public final class Fnn {
      * @see #from(java.util.function.BiFunction)
      */
     @Beta
-    public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final BiFunction<T, U, R> biFunction) throws IllegalArgumentException {
+    public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final BiFunction<? super T, ? super U, ? extends R> biFunction)
+            throws IllegalArgumentException {
         N.checkArgNotNull(biFunction, cs.biFunction);
 
         return (Throwables.BiFunction<T, U, R, E>) biFunction;
@@ -3749,8 +3787,8 @@ public final class Fnn {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.BiFunction<Integer, Integer, Integer, IOException> biFunc = Fnn.ff(100, (a, t, u) -> a + t + u);
-     * biFunc.apply(2, 3);   // returns 105
-     * biFunc.apply(0, 0);   // returns 100
+     * biFunc.apply(2, 3);  // returns 105
+     * biFunc.apply(0, 0);  // returns 100
      * }</pre>
      *
      * @param <A> the type of the first argument to the TriFunction
@@ -3764,8 +3802,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triFunction} is {@code null}.
      */
     @Beta
-    public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final A a, final TriFunction<A, T, U, R> triFunction)
-            throws IllegalArgumentException {
+    public static <A, T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> ff(final A a,
+            final TriFunction<? super A, ? super T, ? super U, ? extends R> triFunction) throws IllegalArgumentException {
         N.checkArgNotNull(triFunction, cs.triFunction);
 
         return (t, u) -> triFunction.apply(a, t, u);
@@ -3794,8 +3832,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code triFunction} is {@code null}.
      */
     @Beta
-    public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> ff(final TriFunction<A, B, C, R> triFunction)
-            throws IllegalArgumentException {
+    public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> ff(
+            final TriFunction<? super A, ? super B, ? super C, ? extends R> triFunction) throws IllegalArgumentException {
         N.checkArgNotNull(triFunction, cs.triFunction);
 
         return (Throwables.TriFunction<A, B, C, R, E>) triFunction;
@@ -3820,7 +3858,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code predicate} is {@code null}.
      */
     @Beta
-    public static <T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final Throwables.Predicate<T, E> predicate)
+    public static <T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final Throwables.Predicate<? super T, E> predicate)
             throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(predicate, cs.predicate);
@@ -3841,8 +3879,8 @@ public final class Fnn {
      * <pre>{@code
      * Object lock = new Object();
      * Throwables.Predicate<Integer, IOException> pred = Fnn.sp(lock, 10, (a, t) -> t > a);
-     * pred.test(15);   // returns true
-     * pred.test(5);    // returns false
+     * pred.test(15);  // returns true
+     * pred.test(5);   // returns false
      * }</pre>
      *
      * @param <A> the type of the first argument to the BiPredicate
@@ -3855,8 +3893,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biPredicate} is {@code null}.
      */
     @Beta
-    public static <A, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a, final Throwables.BiPredicate<A, T, E> biPredicate)
-            throws IllegalArgumentException {
+    public static <A, T, E extends Throwable> Throwables.Predicate<T, E> sp(final Object mutex, final A a,
+            final Throwables.BiPredicate<? super A, ? super T, E> biPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
@@ -3875,8 +3913,8 @@ public final class Fnn {
      * <pre>{@code
      * Object lock = new Object();
      * Throwables.BiPredicate<String, Integer, IOException> pred = Fnn.sp(lock, (s, len) -> s.length() == len);
-     * pred.test("hello", 5);   // returns true
-     * pred.test("hello", 3);   // returns false
+     * pred.test("hello", 5);  // returns true
+     * pred.test("hello", 3);  // returns false
      * }</pre>
      *
      * @param <T> the type of the first argument to the predicate
@@ -3888,8 +3926,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biPredicate} is {@code null}.
      */
     @Beta
-    public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> sp(final Object mutex, final Throwables.BiPredicate<T, U, E> biPredicate)
-            throws IllegalArgumentException {
+    public static <T, U, E extends Throwable> Throwables.BiPredicate<T, U, E> sp(final Object mutex,
+            final Throwables.BiPredicate<? super T, ? super U, E> biPredicate) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biPredicate, cs.biPredicate);
 
@@ -3909,8 +3947,8 @@ public final class Fnn {
      * List<String> sink = new ArrayList<>();
      * Object lock = sink;
      * Throwables.Consumer<String, IOException> consumer = Fnn.sc(lock, (String s) -> sink.add(s));
-     * consumer.accept("a");   // adds "a" to sink (synchronized on lock)
-     * consumer.accept("b");   // adds "b" to sink, sink is now [a, b]
+     * consumer.accept("a");  // adds "a" to sink (synchronized on lock)
+     * consumer.accept("b");  // adds "b" to sink, sink is now [a, b]
      * }</pre>
      *
      * @param <T> the type of the input to the consumer
@@ -3921,7 +3959,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code consumer} is {@code null}.
      */
     @Beta
-    public static <T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final Throwables.Consumer<T, E> consumer)
+    public static <T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final Throwables.Consumer<? super T, E> consumer)
             throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(consumer, cs.consumer);
@@ -3943,8 +3981,8 @@ public final class Fnn {
      * List<String> sink = new ArrayList<>();
      * Object lock = new Object();
      * Throwables.Consumer<String, IOException> consumer = Fnn.sc(lock, sink, (list, s) -> list.add(s));
-     * consumer.accept("a");   // adds "a" to sink (synchronized on lock)
-     * consumer.accept("b");   // adds "b" to sink, sink is now [a, b]
+     * consumer.accept("a");  // adds "a" to sink (synchronized on lock)
+     * consumer.accept("b");  // adds "b" to sink, sink is now [a, b]
      * }</pre>
      *
      * @param <A> the type of the first argument to the BiConsumer
@@ -3957,8 +3995,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biConsumer} is {@code null}.
      */
     @Beta
-    public static <A, T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final A a, final Throwables.BiConsumer<A, T, E> biConsumer)
-            throws IllegalArgumentException {
+    public static <A, T, E extends Throwable> Throwables.Consumer<T, E> sc(final Object mutex, final A a,
+            final Throwables.BiConsumer<? super A, ? super T, E> biConsumer) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
@@ -3978,8 +4016,8 @@ public final class Fnn {
      * Map<String, Integer> sink = new HashMap<>();
      * Object lock = new Object();
      * Throwables.BiConsumer<String, Integer, IOException> consumer = Fnn.sc(lock, sink::put);
-     * consumer.accept("a", 1);   // puts ("a", 1) into sink (synchronized on lock)
-     * consumer.accept("b", 2);   // puts ("b", 2) into sink
+     * consumer.accept("a", 1);  // puts ("a", 1) into sink (synchronized on lock)
+     * consumer.accept("b", 2);  // puts ("b", 2) into sink
      * }</pre>
      *
      * @param <T> the type of the first argument to the consumer
@@ -3991,8 +4029,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biConsumer} is {@code null}.
      */
     @Beta
-    public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> sc(final Object mutex, final Throwables.BiConsumer<T, U, E> biConsumer)
-            throws IllegalArgumentException {
+    public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> sc(final Object mutex,
+            final Throwables.BiConsumer<? super T, ? super U, E> biConsumer) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
@@ -4011,8 +4049,8 @@ public final class Fnn {
      * <pre>{@code
      * Object lock = new Object();
      * Throwables.Function<String, Integer, IOException> func = Fnn.sf(lock, String::length);
-     * func.apply("hello");   // returns 5
-     * func.apply("");        // returns 0
+     * func.apply("hello");  // returns 5
+     * func.apply("");       // returns 0
      * }</pre>
      *
      * @param <T> the type of the input to the function
@@ -4024,7 +4062,7 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code function} is {@code null}.
      */
     @Beta
-    public static <T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final Throwables.Function<T, ? extends R, E> function)
+    public static <T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final Throwables.Function<? super T, ? extends R, E> function)
             throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(function, cs.function);
@@ -4045,8 +4083,8 @@ public final class Fnn {
      * <pre>{@code
      * Object lock = new Object();
      * Throwables.Function<Integer, Integer, IOException> func = Fnn.sf(lock, 10, (a, t) -> a + t);
-     * func.apply(5);    // returns 15
-     * func.apply(20);   // returns 30
+     * func.apply(5);   // returns 15
+     * func.apply(20);  // returns 30
      * }</pre>
      *
      * @param <A> the type of the first argument to the BiFunction
@@ -4061,7 +4099,7 @@ public final class Fnn {
      */
     @Beta
     public static <A, T, R, E extends Throwable> Throwables.Function<T, R, E> sf(final Object mutex, final A a,
-            final Throwables.BiFunction<A, T, R, E> biFunction) throws IllegalArgumentException {
+            final Throwables.BiFunction<? super A, ? super T, ? extends R, E> biFunction) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biFunction, cs.biFunction);
 
@@ -4080,8 +4118,8 @@ public final class Fnn {
      * <pre>{@code
      * Object lock = new Object();
      * Throwables.BiFunction<Integer, Integer, Integer, IOException> func = Fnn.sf(lock, (a, b) -> a + b);
-     * func.apply(2, 3);     // returns 5
-     * func.apply(10, 20);   // returns 30
+     * func.apply(2, 3);    // returns 5
+     * func.apply(10, 20);  // returns 30
      * }</pre>
      *
      * @param <T> the type of the first argument to the function
@@ -4094,8 +4132,8 @@ public final class Fnn {
      * @throws IllegalArgumentException if {@code mutex} is {@code null}, or if {@code biFunction} is {@code null}.
      */
     @Beta
-    public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> sf(final Object mutex, final Throwables.BiFunction<T, U, R, E> biFunction)
-            throws IllegalArgumentException {
+    public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> sf(final Object mutex,
+            final Throwables.BiFunction<? super T, ? super U, ? extends R, E> biFunction) throws IllegalArgumentException {
         N.checkArgNotNull(mutex, cs.mutex);
         N.checkArgNotNull(biFunction, cs.biFunction);
 
@@ -4125,7 +4163,8 @@ public final class Fnn {
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<T, E> consumer) throws IllegalArgumentException {
+    public static <T, E extends Throwable> Throwables.Function<T, Void, E> c2f(final Throwables.Consumer<? super T, E> consumer)
+            throws IllegalArgumentException {
         N.checkArgNotNull(consumer, cs.consumer);
 
         return t -> {
@@ -4156,7 +4195,7 @@ public final class Fnn {
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <T, R, E extends Throwable> Throwables.Function<T, R, E> c2f(final Throwables.Consumer<T, E> consumer, final R valueToReturn)
+    public static <T, R, E extends Throwable> Throwables.Function<T, R, E> c2f(final Throwables.Consumer<? super T, E> consumer, final R valueToReturn)
             throws IllegalArgumentException {
         N.checkArgNotNull(consumer, cs.consumer);
 
@@ -4188,7 +4227,7 @@ public final class Fnn {
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer)
+    public static <T, U, E extends Throwable> Throwables.BiFunction<T, U, Void, E> c2f(final Throwables.BiConsumer<? super T, ? super U, E> biConsumer)
             throws IllegalArgumentException {
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
@@ -4222,8 +4261,8 @@ public final class Fnn {
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> c2f(final Throwables.BiConsumer<T, U, E> biConsumer, final R valueToReturn)
-            throws IllegalArgumentException {
+    public static <T, U, R, E extends Throwable> Throwables.BiFunction<T, U, R, E> c2f(final Throwables.BiConsumer<? super T, ? super U, E> biConsumer,
+            final R valueToReturn) throws IllegalArgumentException {
         N.checkArgNotNull(biConsumer, cs.biConsumer);
 
         return (t, u) -> {
@@ -4255,8 +4294,8 @@ public final class Fnn {
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer)
-            throws IllegalArgumentException {
+    public static <A, B, C, E extends Throwable> Throwables.TriFunction<A, B, C, Void, E> c2f(
+            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> triConsumer) throws IllegalArgumentException {
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
         return (a, b, c) -> {
@@ -4290,8 +4329,8 @@ public final class Fnn {
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> c2f(final Throwables.TriConsumer<A, B, C, E> triConsumer,
-            final R valueToReturn) throws IllegalArgumentException {
+    public static <A, B, C, R, E extends Throwable> Throwables.TriFunction<A, B, C, R, E> c2f(
+            final Throwables.TriConsumer<? super A, ? super B, ? super C, E> triConsumer, final R valueToReturn) throws IllegalArgumentException {
         N.checkArgNotNull(triConsumer, cs.triConsumer);
 
         return (a, b, c) -> {
@@ -4314,16 +4353,16 @@ public final class Fnn {
      *
      * @param <T> the type of the input to the function/consumer
      * @param <E> the type of the checked exception that may be thrown
-     * @param func the function to convert to a consumer
+     * @param function the function to convert to a consumer
      * @return a Throwables.Consumer that executes the function and ignores its result
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <T, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<T, ?, E> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T, E extends Throwable> Throwables.Consumer<T, E> f2c(final Throwables.Function<? super T, ?, E> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return func::apply;
+        return function::apply;
     }
 
     /**
@@ -4341,16 +4380,17 @@ public final class Fnn {
      * @param <T> the type of the first argument to the function/consumer
      * @param <U> the type of the second argument to the function/consumer
      * @param <E> the type of the checked exception that may be thrown
-     * @param func the BiFunction to convert to a BiConsumer
+     * @param function the BiFunction to convert to a BiConsumer
      * @return a Throwables.BiConsumer that executes the BiFunction and ignores its result
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<T, U, ?, E> func) throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <T, U, E extends Throwable> Throwables.BiConsumer<T, U, E> f2c(final Throwables.BiFunction<? super T, ? super U, ?, E> function)
+            throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return func::apply;
+        return function::apply;
     }
 
     /**
@@ -4369,17 +4409,17 @@ public final class Fnn {
      * @param <B> the type of the second argument to the function/consumer
      * @param <C> the type of the third argument to the function/consumer
      * @param <E> the type of the checked exception that may be thrown
-     * @param func the TriFunction to convert to a TriConsumer
+     * @param function the TriFunction to convert to a TriConsumer
      * @return a Throwables.TriConsumer that executes the TriFunction and ignores its result
-     * @throws IllegalArgumentException if {@code func} is {@code null}.
+     * @throws IllegalArgumentException if {@code function} is {@code null}.
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
      */
     @Beta
-    public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(final Throwables.TriFunction<A, B, C, ?, E> func)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(func, cs.func);
+    public static <A, B, C, E extends Throwable> Throwables.TriConsumer<A, B, C, E> f2c(
+            final Throwables.TriFunction<? super A, ? super B, ? super C, ?, E> function) throws IllegalArgumentException {
+        N.checkArgNotNull(function, cs.function);
 
-        return func::apply;
+        return function::apply;
     }
 
     /**
@@ -4588,6 +4628,22 @@ public final class Fnn {
      * via {@link ExceptionUtil#toRuntimeException(Throwable, boolean)}.
      * This enables using exception-throwing runnables in standard Java contexts.
      *
+     * <p><b>Conversion happens only when a wrapper is created.</b> If {@code runnable} already is a
+     * {@code java.lang.Runnable} - in particular an abacus {@link Runnable}, i.e. any lambda whose static type is
+     * {@code com.landawn.abacus.util.function.Runnable} - it is returned as is, and whatever it throws reaches the
+     * caller with <b>no</b> conversion: an {@code AssertionError} stays an {@code AssertionError}, and an
+     * {@code UndeclaredThrowableException} wrapping an {@code IOException} stays an
+     * {@code UndeclaredThrowableException}.</p>
+     *
+     * <p>For any other {@code runnable}, <b>an {@link Error} is wrapped too:</b> an {@code AssertionError},
+     * {@code StackOverflowError} or {@code OutOfMemoryError} thrown by the runnable reaches the caller as a plain
+     * {@code RuntimeException} whose cause is the {@code Error}, exactly as with {@link Throwables.Runnable#unchecked()}.
+     * An ordinary {@code RuntimeException} is rethrown unchanged unless a mapper has been registered for its class with
+     * {@link ExceptionUtil#registerRuntimeExceptionMapper(Class, java.util.function.Function)} (then the mapper's result
+     * is thrown), and a wrapper such as {@code UndeclaredThrowableException} is unwrapped first. When the runnable throws
+     * only {@code Exception}s and {@code Error}s must propagate unchanged, use {@link Fn#rr(Throwables.Runnable)}
+     * instead, which catches only {@code Exception} and always wraps.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Throwables.Runnable<IOException> throwableRunnable = () -> writeToFile();
@@ -4600,6 +4656,8 @@ public final class Fnn {
      *         re-throwing any exception as an unchecked {@code RuntimeException}
      * @throws IllegalArgumentException if {@code runnable} is {@code null}.
      * @see <a href="#conversion-method-naming">Conversion Method Naming table</a>
+     * @see Throwables.Runnable#unchecked()
+     * @see Fn#rr(Throwables.Runnable)
      */
     public static java.lang.Runnable r2jr(final Throwables.Runnable<?> runnable) throws IllegalArgumentException {
         N.checkArgNotNull(runnable, cs.runnable);

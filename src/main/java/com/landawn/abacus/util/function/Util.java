@@ -13,37 +13,18 @@
  */
 package com.landawn.abacus.util.function;
 
-import java.security.SecureRandom;
-import java.util.Random;
-
 /**
  * Package-private helpers for random primitive values used by supplier defaults in this package.
  *
- * <p>Each primitive category has its own dedicated {@link SecureRandom} instance.
- * {@code SecureRandom} is thread-safe; separate instances avoid sharing one generator across
- * all categories, though concurrent callers of the same instance may still contend.
+ * <p>The {@code RANDOM} supplier constants draw their values from
+ * {@link java.util.concurrent.ThreadLocalRandom#current()} on every call, so concurrent callers do not
+ * share (or contend on) one generator.
  */
 final class Util {
     private Util() {
         // Utility class - prevent instantiation
     }
 
-    /** Shared {@link SecureRandom} for {@code boolean} supplier defaults. */
-    static final Random RAND_BOOLEAN = new SecureRandom();
-    /** Shared {@link SecureRandom} for {@code char} supplier defaults. */
-    static final Random RAND_CHAR = new SecureRandom();
-    /** Shared {@link SecureRandom} for {@code byte} supplier defaults. */
-    static final Random RAND_BYTE = new SecureRandom();
-    /** Shared {@link SecureRandom} for {@code short} supplier defaults. */
-    static final Random RAND_SHORT = new SecureRandom();
-    /** Shared {@link SecureRandom} for {@code int} supplier defaults. */
-    static final Random RAND_INT = new SecureRandom();
-    /** Shared {@link SecureRandom} for {@code long} supplier defaults. */
-    static final Random RAND_LONG = new SecureRandom();
-    /** Shared {@link SecureRandom} for {@code float} supplier defaults. */
-    static final Random RAND_FLOAT = new SecureRandom();
-    /** Shared {@link SecureRandom} for {@code double} supplier defaults. */
-    static final Random RAND_DOUBLE = new SecureRandom();
     /** Bound for random {@code char} generation: {@code Character.MAX_VALUE + 1}. */
     static final int CHAR_MOD = Character.MAX_VALUE + 1;
 }

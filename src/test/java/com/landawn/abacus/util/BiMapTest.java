@@ -710,8 +710,8 @@ public class BiMapTest extends AbstractTest {
     public void testConstructorRejectsNullSuppliersAndNullResults() {
         assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>((Supplier<Map<String, Integer>>) null, HashMap::new));
         assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(HashMap::new, (Supplier<Map<Integer, String>>) null));
-        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(() -> null, HashMap::new));
-        assertThrows(IllegalArgumentException.class, () -> new BiMap<String, Integer>(HashMap::new, () -> null));
+        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(() -> null, HashMap::new));
+        assertThrows(NullPointerException.class, () -> new BiMap<String, Integer>(HashMap::new, () -> null));
     }
 
     @Test
@@ -1102,7 +1102,7 @@ public class BiMapTest extends AbstractTest {
         m.put("a", 1);
         m.put("b", 2);
 
-        assertThrows(IllegalArgumentException.class, () -> m.replaceAll((k, v) -> k.equals("a") ? v + 10 : null));
+        assertThrows(NullPointerException.class, () -> m.replaceAll((k, v) -> k.equals("a") ? v + 10 : null));
 
         // Atomic: the null replacement is detected before any entry is modified.
         assertEquals(1, m.get("a"));
@@ -2251,4 +2251,94 @@ public class BiMapTest extends AbstractTest {
             assertSame(stored, map.inverse().keySet().stream().filter(stored::equals).findFirst().orElseThrow());
         }
     }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testConstructorNullMapTypeNamesTheParameter() {
+        final IllegalArgumentException keyEx = assertThrows(IllegalArgumentException.class, () -> new BiMap<String, String>((Class) null, HashMap.class));
+        assertTrue(keyEx.getMessage().contains("keyMapType"), keyEx.getMessage());
+
+        final IllegalArgumentException valueEx = assertThrows(IllegalArgumentException.class,
+                () -> new BiMap<String, String>(HashMap.class, (Class) null));
+        assertTrue(valueEx.getMessage().contains("valueMapType"), valueEx.getMessage());
+
+        // The key map type is still resolved before the value map type is inspected.
+        final IllegalArgumentException orderEx = assertThrows(IllegalArgumentException.class,
+                () -> new BiMap<String, String>((Class) Object.class, (Class) null));
+        assertTrue(orderEx.getMessage().contains("is not a Map class"), orderEx.getMessage());
+
+        assertNotNull(new BiMap<String, String>(LinkedHashMap.class, TreeMap.class));
+    }
+    // ---- bug review 2026-09-27 G021 begin ----
+    /** A map class with only a sized constructor: Maps.newTargetMap can mirror it, Suppliers.ofMap cannot. */
+    public static class G021IntOnlyConstructorMap<K, V> extends LinkedHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        public G021IntOnlyConstructorMap(final int initialCapacity) {
+            super(initialCapacity);
+        }
+    }
+
+    // G021-01: copyOf threw IllegalArgumentException for a legal map whose class has no no-argument constructor
+    @Test
+    public void testCopyOf_sourceClassWithoutNoArgConstructor() {
+        final G021IntOnlyConstructorMap<String, Integer> source = new G021IntOnlyConstructorMap<>(4);
+        source.put("b", 2);
+        source.put("a", 1);
+
+        final BiMap<String, Integer> biMap = BiMap.copyOf(source);
+
+        assertEquals(source, biMap);
+        assertEquals("[b, a]", biMap.keySet().toString());
+        assertEquals("b", biMap.getByValue(2));
+        assertEquals(biMap, biMap.copy());
+        assertEquals("a", biMap.inverse().copy().get(1));
+        assertThrows(IllegalArgumentException.class, () -> biMap.put("c", 1));
+    }
+    // ---- bug review 2026-09-27 G021 end ----
+    // ---- bug review 2026-09-27 verify G120 begin ----
+    /** An IdentityHashMap subclass WITH a no-argument constructor: copyOf must keep mirroring it. */
+    public static class G120IdentityMap<K, V> extends java.util.IdentityHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        public G120IdentityMap() {
+        }
+    }
+
+    // copyOf of an int-constructor-only source: replaceAll, inverse() puts and ImmutableBiMap.copyOf (which delegates) all work
+    @Test
+    public void testCopyOf_sourceClassWithoutNoArgConstructor_otherPaths() {
+        final G021IntOnlyConstructorMap<String, Integer> source = new G021IntOnlyConstructorMap<>(4);
+        source.put("b", 2);
+        source.put("a", 1);
+
+        final BiMap<String, Integer> biMap = BiMap.copyOf(source);
+        biMap.replaceAll((k, v) -> v * 10);
+        assertEquals("{b=20, a=10}", biMap.toString());
+        assertEquals("a", biMap.getByValue(10));
+
+        biMap.inverse().put(30, "c");
+        assertEquals(Integer.valueOf(30), biMap.get("c"));
+        assertEquals("[b, a, c]", biMap.keySet().toString());
+
+        final ImmutableBiMap<String, Integer> immutable = ImmutableBiMap.copyOf(source);
+        assertEquals(source, immutable);
+        assertEquals("b", immutable.getByValue(2));
+    }
+
+    // neighbour: a source class that does have a no-argument constructor is still mirrored (identity keys survive copy())
+    @Test
+    public void testCopyOf_sourceClassWithNoArgConstructorStillMirrored() {
+        final G120IdentityMap<String, Integer> source = new G120IdentityMap<>();
+        final String k1 = new String("k");
+        final String k2 = new String("k");
+        source.put(k1, 1);
+        source.put(k2, 2);
+
+        final BiMap<String, Integer> biMap = BiMap.copyOf(source);
+        assertEquals(2, biMap.size());
+        assertEquals(2, biMap.copy().size());
+        assertSame(k2, biMap.inverse().copy().get(2));
+    }
+    // ---- bug review 2026-09-27 verify G120 end ----
 }

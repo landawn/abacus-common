@@ -50,12 +50,12 @@ final class GuavaHashFunction implements HashFunction {
     /**
      * Constructs a new GuavaHashFunction wrapping the specified Guava hash function.
      *
-     * @param gHashFunction the Guava hash function to wrap, must not be {@code null}
-     * @throws NullPointerException if {@code gHashFunction} is {@code null}
+     * @param guavaHashFunction the Guava hash function to wrap, must not be {@code null}
+     * @throws NullPointerException if {@code guavaHashFunction} is {@code null}
      */
-    GuavaHashFunction(final com.google.common.hash.HashFunction gHashFunction) throws NullPointerException {
-        N.requireNonNull(gHashFunction, cs.gHashFunction);
-        this.gHashFunction = gHashFunction;
+    GuavaHashFunction(final com.google.common.hash.HashFunction guavaHashFunction) throws NullPointerException {
+        N.requireNonNull(guavaHashFunction, cs.guavaHashFunction);
+        this.gHashFunction = guavaHashFunction;
     }
 
     /**
@@ -76,12 +76,12 @@ final class GuavaHashFunction implements HashFunction {
      * HashFunction wrapped = GuavaHashFunction.wrap(guavaHash);
      * }</pre>
      *
-     * @param gHashFunction the Guava hash function to wrap, must not be {@code null}
+     * @param guavaHashFunction the Guava hash function to wrap, must not be {@code null}
      * @return a new GuavaHashFunction instance wrapping the given function
-     * @throws NullPointerException if {@code gHashFunction} is {@code null}
+     * @throws NullPointerException if {@code guavaHashFunction} is {@code null}
      */
-    static GuavaHashFunction wrap(final com.google.common.hash.HashFunction gHashFunction) throws NullPointerException {
-        return new GuavaHashFunction(gHashFunction);
+    static GuavaHashFunction wrap(final com.google.common.hash.HashFunction guavaHashFunction) throws NullPointerException {
+        return new GuavaHashFunction(guavaHashFunction);
     }
 
     /**
@@ -165,14 +165,14 @@ final class GuavaHashFunction implements HashFunction {
      *
      * @param input the byte array containing the bytes to hash
      * @param off the start offset in the array
-     * @param len the number of bytes to hash
+     * @param length the number of bytes to hash
      * @return the hash code for the requested byte range
      * @throws NullPointerException if {@code input} is {@code null}.
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code input.length}.
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or the requested range exceeds {@code input.length}.
      */
     @Override
-    public HashCode hash(final byte[] input, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException {
-        return gHashFunction.hashBytes(input, off, len);
+    public HashCode hash(final byte[] input, final int off, final int length) throws NullPointerException, IndexOutOfBoundsException {
+        return gHashFunction.hashBytes(input, off, length);
     }
 
     /**

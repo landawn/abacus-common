@@ -95,7 +95,7 @@ class UtilANExceptionReview20260913Test extends TestBase {
     @Test
     void unzipPropagatesSupplierResultAndInsertionFailures() {
         final IntFunction<Collection<?>> nullSupplier = size -> null;
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NullPointerException.class,
                 () -> N.unzip(Collections.<Integer> emptyList(), (Integer value, Pair<Integer, Integer> pair) -> pair.set(value, value), nullSupplier));
         final Collection<Integer> shared = new ArrayList<>();
         assertThrows(IllegalArgumentException.class, () -> N.unzip3(Collections.<Integer> emptyList(),

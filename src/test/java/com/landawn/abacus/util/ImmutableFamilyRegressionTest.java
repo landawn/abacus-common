@@ -242,10 +242,10 @@ public class ImmutableFamilyRegressionTest extends TestBase {
         }
 
         @Test
-        public void aNullReplacementValueIsStillAnIllegalArgument() {
-            // Unchanged: a function that RETURNS null violates BiMap's own non-null value rule.
+        public void aNullReplacementValueIsANullPointerException() {
+            // A function that RETURNS null violates BiMap's own non-null value rule: a NullPointerException.
             final BiMap<String, Integer> map = BiMap.of("a", 1, "b", 2);
-            assertThrows(IllegalArgumentException.class, () -> map.replaceAll((k, v) -> null));
+            assertThrows(NullPointerException.class, () -> map.replaceAll((k, v) -> null));
             assertEquals(BiMap.of("a", 1, "b", 2), map, "a failed replaceAll must leave the map unchanged");
         }
 

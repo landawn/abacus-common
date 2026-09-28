@@ -319,4 +319,95 @@ public class ImmutableMapEntryTypeTest extends TestBase {
         type.appendTo(sw, value);
         return sw.toString();
     }
+
+    // ---- deep review 2026-09-25 G014 begin ----
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static String serializeEntryG014(final Type type, final Object key, final JsonSerConfig config) throws IOException {
+        final BufferedJsonWriter writer = Objectory.createBufferedJsonWriter();
+
+        try {
+            type.serializeTo(writer, new AbstractMap.SimpleImmutableEntry<>(key, "x"), config);
+            return writer.toString();
+        } finally {
+            Objectory.recycle(writer);
+        }
+    }
+
+    // G014-01 (sibling): serializeTo wrote a config-sensitive key (date/time, long, BigDecimal) with stringOf, ignoring the
+    // dateTimeFormat / writeLongAsString / writeBigDecimalAsPlain options the JSON map writer applies to the same key.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testSerializeTo_configSensitiveKeyMatchesMapWriter() throws IOException {
+        final Date key = new Date(1600000000123L);
+        final Type dateKeyType = createType("Map.ImmutableEntry<JUDate, String>");
+        final JsonSerConfig isoTs = JsonSerConfig.create().setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+
+        final String json = serializeEntryG014(dateKeyType, key, isoTs);
+        assertEquals("{\"2020-09-13T12:26:40.123Z\":\"x\"}", json);
+        assertTrue(com.landawn.abacus.util.N.toJson(com.landawn.abacus.util.N.asMap(key, "x"), isoTs).contains("\"2020-09-13T12:26:40.123Z\""));
+        assertEquals(key.getTime(), ((Map.Entry<Date, String>) dateKeyType.valueOf(json)).getKey().getTime());
+
+        // the default config (DateTimeFormat.LONG) keeps the type's own text for a date key, like the map writer
+        assertEquals("{\"2020-09-13T12:26:40Z\":\"x\"}", serializeEntryG014(dateKeyType, key, JsonSerConfig.create()));
+
+        // writeLongAsString keeps a long key quoted even when quoteMapKey is off, like the map writer
+        final Type longKeyType = createType("Map.ImmutableEntry<Long, String>");
+        final JsonSerConfig longAsString = JsonSerConfig.create().setWriteLongAsString(true).setQuoteMapKey(false);
+        assertEquals("{\"5\":\"x\"}", serializeEntryG014(longKeyType, 5L, longAsString));
+        assertEquals("{5:\"x\"}", serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setQuoteMapKey(false)));
+
+        // writeBigDecimalAsPlain applies to a BigDecimal key
+        final Type bigDecimalKeyType = createType("Map.ImmutableEntry<BigDecimal, String>");
+        assertEquals("{\"1000\":\"x\"}",
+                serializeEntryG014(bigDecimalKeyType, new java.math.BigDecimal("1E+3"), JsonSerConfig.create().setWriteBigDecimalAsPlain(true)));
+    }
+
+    // ---- deep review 2026-09-25 G014 end ----
+
+    // ---- bug review 2026-09-27 verify G123 begin ----
+
+    // G123-01: with stringQuotation '\'' a config-sensitive key the type already quoted ('5', an ISO date) was wrapped
+    // in another pair of double quotes ("'5'"), so the entry no longer read back.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testSerializeTo_singleQuotedConfigSensitiveKeyNotDoubleQuoted() throws IOException {
+        final Type longKeyType = createType("Map.ImmutableEntry<Long, String>");
+        final JsonSerConfig longAsString = JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true);
+        final String json = serializeEntryG014(longKeyType, 5L, longAsString);
+        assertEquals("{'5':'x'}", json);
+        assertEquals(5L, ((Map.Entry<Long, String>) longKeyType.valueOf(json)).getKey());
+
+        final Type atomicLongKeyType = createType("Map.ImmutableEntry<AtomicLong, String>");
+        assertEquals("{'7':'x'}", serializeEntryG014(atomicLongKeyType, new java.util.concurrent.atomic.AtomicLong(7),
+                JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true)));
+
+        final Date key = new Date(1600000000123L);
+        final Type dateKeyType = createType("Map.ImmutableEntry<JUDate, String>");
+        final JsonSerConfig isoTs = JsonSerConfig.create().setStringQuotation('\'').setDateTimeFormat(DateTimeFormat.ISO_8601_TIMESTAMP);
+        final String dateJson = serializeEntryG014(dateKeyType, key, isoTs);
+        assertEquals("{'2020-09-13T12:26:40.123Z':'x'}", dateJson);
+        assertEquals(key.getTime(), ((Map.Entry<Date, String>) dateKeyType.valueOf(dateJson)).getKey().getTime());
+    }
+
+    // G123-01 neighbours: '"' and no quotation are unchanged, quoteMapKey off still keeps the type's quotes, and a String key
+    // whose text is wrapped in quotes is still written as a quoted String.
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test
+    public void testSerializeTo_configSensitiveKeyUnderEachStringQuotation() throws IOException {
+        final Type longKeyType = createType("Map.ImmutableEntry<Long, String>");
+        assertEquals("{'5':'x'}",
+                serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true).setQuoteMapKey(false)));
+        assertEquals("{\"5\":\"x\"}", serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setStringQuotation('"').setWriteLongAsString(true)));
+        assertEquals("{\"5\":x}", serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setStringQuotation((char) 0).setWriteLongAsString(true)));
+        assertEquals("{5:x}",
+                serializeEntryG014(longKeyType, 5L, JsonSerConfig.create().setStringQuotation((char) 0).setWriteLongAsString(true).setQuoteMapKey(false)));
+
+        final Type stringKeyType = createType("Map.ImmutableEntry<String, String>");
+        final String json = serializeEntryG014(stringKeyType, "'k'", JsonSerConfig.create().setStringQuotation('\'').setWriteLongAsString(true));
+        assertEquals("{\"'k'\":'x'}", json);
+        assertEquals("'k'", ((Map.Entry<String, String>) stringKeyType.valueOf(json)).getKey());
+    }
+
+    // ---- bug review 2026-09-27 verify G123 end ----
 }

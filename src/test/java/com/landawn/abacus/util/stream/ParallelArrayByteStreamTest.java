@@ -979,4 +979,74 @@ public class ParallelArrayByteStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    @Test
+    public void testReduceAndCollectWithArraySplitStrategyFollowEncounterOrder() {
+        final byte[] source = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        final ParallelSettings ps = ParallelSettings.builder().splitStrategy(SplitStrategy.ARRAY).maxThreadNum(4).build();
+
+        // "last element wins" is associative but not commutative: ARRAY slices are contiguous and combined in slice order
+        assertEquals((byte) 9, ByteStream.of(source).parallel(ps).reduce((a, b) -> b).get());
+        assertEquals((byte) 9, ByteStream.of(source).parallel(ps).reduce((byte) -1, (a, b) -> b));
+
+        final List<Byte> collected = ByteStream.of(source).parallel(ps).collect(ArrayList::new, (c, e) -> c.add(e), ArrayList::addAll);
+        assertEquals(Arrays.asList((byte) 0, (byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5, (byte) 6, (byte) 7, (byte) 8, (byte) 9), collected);
+    }
+
+    // ---- perf review 2026-09-26 G100 begin ----
+    // G100-02: findFirst/findLast over indices > 127 (index no longer boxed per element), both split strategies, full and sub ranges
+    @Test
+    public void testFindFirstFindLast_largeArrayBothSplitStrategies() {
+        final byte[] source = new byte[3000];
+        source[300] = 5;
+        source[301] = 9;
+        source[1700] = 7;
+        source[2600] = 6;
+
+        for (final SplitStrategy strategy : new SplitStrategy[] { SplitStrategy.ARRAY, SplitStrategy.ITERATOR }) {
+            for (final int threads : new int[] { 2, 3, 4, 7 }) {
+                final ParallelSettings ps = ParallelSettings.builder().splitStrategy(strategy).maxThreadNum(threads).build();
+
+                assertEquals(OptionalByte.of((byte) 5), ByteStream.of(source).parallel(ps).findFirst(b -> b != 0));
+                assertEquals(OptionalByte.of((byte) 6), ByteStream.of(source).parallel(ps).findLast(b -> b != 0));
+                assertEquals(OptionalByte.of((byte) 9), ByteStream.of(source, 301, 3000).parallel(ps).findFirst(b -> b != 0));
+                assertEquals(OptionalByte.of((byte) 7), ByteStream.of(source, 0, 2600).parallel(ps).findLast(b -> b != 0));
+                assertEquals(OptionalByte.of((byte) 0), ByteStream.of(source).parallel(ps).findFirst(b -> b == 0));
+                assertEquals(OptionalByte.of((byte) 0), ByteStream.of(source).parallel(ps).findLast(b -> b == 0));
+                assertEquals(OptionalByte.empty(), ByteStream.of(source).parallel(ps).findFirst(b -> b > 9));
+                assertEquals(OptionalByte.empty(), ByteStream.of(source).parallel(ps).findLast(b -> b > 9));
+                assertEquals(OptionalByte.empty(), ByteStream.of(source, 302, 1700).parallel(ps).findFirst(b -> b != 0));
+                assertEquals(OptionalByte.empty(), ByteStream.of(source, 302, 1700).parallel(ps).findLast(b -> b != 0));
+            }
+        }
+    }
+
+    // G100-02: matches at the first and last positions and every element visited once when nothing matches
+    @Test
+    public void testFindFirstFindLast_boundaryMatchesAndVisitCount() {
+        final byte[] source = new byte[1000];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = (byte) (i % 100 + 1);
+        }
+
+        source[0] = -1;
+        source[999] = -2;
+
+        for (final SplitStrategy strategy : new SplitStrategy[] { SplitStrategy.ARRAY, SplitStrategy.ITERATOR }) {
+            final ParallelSettings ps = ParallelSettings.builder().splitStrategy(strategy).maxThreadNum(4).build();
+
+            assertEquals(OptionalByte.of((byte) -1), ByteStream.of(source).parallel(ps).findFirst(b -> b < 0));
+            assertEquals(OptionalByte.of((byte) -2), ByteStream.of(source).parallel(ps).findLast(b -> b < 0));
+
+            final AtomicInteger firstCalls = new AtomicInteger();
+            final AtomicInteger lastCalls = new AtomicInteger();
+
+            assertEquals(OptionalByte.empty(), ByteStream.of(source).parallel(ps).findFirst(b -> firstCalls.incrementAndGet() < 0));
+            assertEquals(OptionalByte.empty(), ByteStream.of(source).parallel(ps).findLast(b -> lastCalls.incrementAndGet() < 0));
+            assertEquals(source.length, firstCalls.get());
+            assertEquals(source.length, lastCalls.get());
+        }
+    }
+    // ---- perf review 2026-09-26 G100 end ----
 }

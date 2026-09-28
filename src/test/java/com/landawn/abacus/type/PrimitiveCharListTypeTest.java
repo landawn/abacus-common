@@ -21,6 +21,7 @@ import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharList;
 import com.landawn.abacus.util.CharacterWriter;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PrimitiveCharListTypeTest extends TestBase {
 
@@ -165,4 +166,13 @@ public class PrimitiveCharListTypeTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertTrue(type.valueOf("[ ]").isEmpty());
     }
 
+
+    @Test
+    public void testValueOfMalformedUnicodeEscapeInQuotedElementThrowsIllegalArgumentException() {
+        final Type<CharList> charListType = TypeFactory.getType(CharList.class);
+
+        assertThrows(IllegalArgumentException.class, () -> charListType.valueOf("['\\u12']"));
+        assertThrows(IllegalArgumentException.class, () -> charListType.valueOf("['a', '\\uZZZZ']"));
+        assertEquals(CharList.of('a', (char) 0xE9), charListType.valueOf("['a', '\\u00E9']"));
+    }
 }

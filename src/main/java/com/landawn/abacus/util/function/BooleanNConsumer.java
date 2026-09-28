@@ -40,10 +40,10 @@ public interface BooleanNConsumer {
      * logger.accept(true, false, true);   // Prints: true false true
      * }</pre>
      *
-     * @param args the input arguments as a variable-length array of {@code boolean} values.
+     * @param arguments the input arguments as a variable-length array of {@code boolean} values.
      *             May be empty but must not be {@code null}.
      */
-    void accept(boolean... args);
+    void accept(boolean... arguments);
 
     /**
      * Returns a composed {@code BooleanNConsumer} that performs, in sequence, this operation followed by the {@code after} operation.

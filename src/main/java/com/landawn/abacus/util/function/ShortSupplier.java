@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.landawn.abacus.util.Throwables;
 
 /**
@@ -36,10 +38,13 @@ public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException
     ShortSupplier ZERO = () -> 0;
     /**
      * A supplier that returns random short values.
-     * Each invocation draws a random short value from the full range of short values using an
-     * internal random number generator. Successive values are not guaranteed to be distinct.
+     * Each invocation draws a random short value from the full range of short values.
+     * Successive values are not guaranteed to be distinct.
+     * Values come from the calling thread's {@link ThreadLocalRandom#current()} and are <b>not</b>
+     * cryptographically secure; use {@link java.security.SecureRandom} directly when unpredictable values are
+     * required.
      */
-    ShortSupplier RANDOM = () -> (short) Util.RAND_SHORT.nextInt();
+    ShortSupplier RANDOM = () -> (short) ThreadLocalRandom.current().nextInt();
 
     /**
      * Gets a short result.
@@ -56,8 +61,8 @@ public interface ShortSupplier extends Throwables.ShortSupplier<RuntimeException
      *     private short count = 0;
      *     public short getAsShort() { return count++; }
      * };
-     * short value3 = counter.getAsShort();   // returns 0
-     * short value4 = counter.getAsShort();   // returns 1
+     * short value3 = counter.getAsShort();  // returns 0
+     * short value4 = counter.getAsShort();  // returns 1
      * }</pre>
      *
      * @return a {@code short} value

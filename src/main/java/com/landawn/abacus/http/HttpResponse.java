@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -101,13 +102,29 @@ public class HttpResponse {
      */
     HttpResponse(final String requestUrl, final long requestSentAtMillis, final long responseReceivedAtMillis, final int statusCode, final String message,
             final Map<String, List<String>> headers, final byte[] body, final ContentFormat bodyFormat, final Charset respCharset) {
+        this(requestUrl, requestSentAtMillis, responseReceivedAtMillis, statusCode, message, headers, body, bodyFormat, respCharset, false);
+    }
+
+    /**
+     * Transfers the client's freshly read body without copying it. The caller must exclusively own the
+     * array and must not read or mutate it after this call. Headers are still copied and public body
+     * accessors remain defensive. A null body retains the ordinary constructor's null-body semantics.
+     */
+    static HttpResponse withOwnedBody(final String requestUrl, final long requestSentAtMillis, final long responseReceivedAtMillis, final int statusCode,
+            final String message, final Map<String, List<String>> headers, final byte[] body, final ContentFormat bodyFormat, final Charset respCharset) {
+        return new HttpResponse(requestUrl, requestSentAtMillis, responseReceivedAtMillis, statusCode, message, headers, body, bodyFormat, respCharset, true);
+    }
+
+    private HttpResponse(final String requestUrl, final long requestSentAtMillis, final long responseReceivedAtMillis, final int statusCode,
+            final String message, final Map<String, List<String>> headers, final byte[] body, final ContentFormat bodyFormat, final Charset respCharset,
+            final boolean ownedBody) {
         this.requestUrl = requestUrl;
         this.requestSentAtMillis = requestSentAtMillis;
         this.responseReceivedAtMillis = responseReceivedAtMillis;
         this.statusCode = statusCode;
         this.message = message;
         this.headers = copyHeaders(headers);
-        this.body = copyBody(body);
+        this.body = ownedBody ? body : copyBody(body);
         this.bodyFormat = bodyFormat == null ? ContentFormat.NONE : bodyFormat;
         this.respCharset = respCharset == null ? HttpUtil.DEFAULT_CHARSET : respCharset;
     }
@@ -226,10 +243,15 @@ public class HttpResponse {
      * Each header name maps to a list of values, as headers can have multiple values.
      * The returned map and its value lists are unmodifiable.
      *
+     * <p>The map is keyed exactly as the server spelled the header names, so {@link Map#get(Object)} is
+     * case-sensitive: a server that sends {@code content-type} is not found by {@code get("Content-Type")}.
+     * A response produced by {@link HttpClient} also carries the HTTP status line under a {@code null} key
+     * (as {@link java.net.HttpURLConnection#getHeaderFields()} reports it), so the key set contains {@code null}.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Map<String, List<String>> headers = response.headers();
-     * List<String> contentType = headers.get("Content-Type");
+     * List<String> contentType = headers.get("Content-Type");   // null if the server sent "content-type"
      * }</pre>
      *
      * @return an unmodifiable map of header names to their values; an empty unmodifiable map if no headers were received (never {@code null})
@@ -265,7 +287,9 @@ public class HttpResponse {
      *   <li>{@code byte[].class} - returns a copy of the raw response bytes</li>
      *   <li>Any other class - deserializes based on content format (JSON, XML, Kryo,
      *       form URL-encoded). For unknown/{@code NONE} content formats a best-effort
-     *       {@link N#convert(Object, Class)} is attempted before falling through to the JSON parser.</li>
+     *       {@link N#convert(Object, Class)} is attempted before falling through to the JSON parser, except for
+     *       array and {@link java.util.Collection} targets, which always go to the JSON parser (as {@link HttpClient}
+     *       does), so a JSON array body served as {@code text/plain} still yields its elements.</li>
      * </ul>
      *
      * <p><b>Usage Examples:</b></p>
@@ -283,7 +307,8 @@ public class HttpResponse {
      * @param <T> The type to deserialize to
      * @param resultClass The class of the expected response object. Must not be {@code null}.
      * @return The deserialized response body, or {@code null} if no body was received
-     * @throws IllegalArgumentException if {@code resultClass} is {@code null}.
+     * @throws IllegalArgumentException if {@code resultClass} is {@code null}, or a non-null body has to be decoded with a parser that is not
+     *         available (an XML body when no XML parser is on the classpath, or a Kryo body when Kryo is not available).
      * @throws RuntimeException if the non-null body cannot be decoded as the requested type by the selected content-format parser or converter.
      */
     @MayReturnNull
@@ -310,7 +335,7 @@ public class HttpResponse {
                 // conversion first via N.convert (handles primitives, enums, dates, etc.) and
                 // fall through to the parser only when N.convert can't handle the target type.
                 final String text = new String(body, respCharset);
-                if (bodyFormat == null || bodyFormat == ContentFormat.NONE) {
+                if ((bodyFormat == null || bodyFormat == ContentFormat.NONE) && !isArrayOrCollection(resultClass)) {
                     try {
                         return N.convert(text, resultClass);
                     } catch (final RuntimeException ignored) {
@@ -345,7 +370,8 @@ public class HttpResponse {
      * @param <T> The type to deserialize to
      * @param resultType The type information including generic parameters. Must not be {@code null}.
      * @return The deserialized response body, or {@code null} if no body was received
-     * @throws IllegalArgumentException if {@code resultType} is {@code null}.
+     * @throws IllegalArgumentException if {@code resultType} is {@code null}, or a non-null body has to be decoded with a parser that is not
+     *         available (a Kryo body when Kryo is not available).
      * @throws RuntimeException if the non-null body cannot be decoded as the requested type by the selected content-format parser or converter.
      */
     @MayReturnNull
@@ -373,7 +399,7 @@ public class HttpResponse {
                 // Same defensive path as body(Class): for NONE / unknown formats, try a String
                 // conversion before falling through to the JSON parser default.
                 final String text = new String(body, respCharset);
-                if (bodyFormat == null || bodyFormat == ContentFormat.NONE) {
+                if ((bodyFormat == null || bodyFormat == ContentFormat.NONE) && !isArrayOrCollection(resultType.javaType())) {
                     try {
                         return N.convert(text, resultType);
                     } catch (final RuntimeException ignored) {
@@ -383,6 +409,12 @@ public class HttpResponse {
                 return HttpUtil.getParser(bodyFormat).deserialize(text, resultType);
             }
         }
+    }
+
+    // N.convert does not reject a String for these targets: it wraps it as the only element whenever the
+    // element type accepts a String, so a JSON array body would come back as a one-element container.
+    private static boolean isArrayOrCollection(final Class<?> cls) {
+        return cls.isArray() || Collection.class.isAssignableFrom(cls);
     }
 
     private static Map<String, List<String>> copyHeaders(final Map<String, List<String>> headers) {

@@ -194,7 +194,7 @@ public class StringsTest extends StringsTestSupport {
 
     @Test
     public void testDefaultIfNull_SupplierNullDefault() {
-        assertThrows(IllegalArgumentException.class, () -> Strings.<String> defaultIfNull(null, () -> null));
+        assertThrows(NullPointerException.class, () -> Strings.<String> defaultIfNull(null, () -> null));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class StringsTest extends StringsTestSupport {
     public void testDefaultIfNullSupplier() {
         assertEquals("supplied", Strings.defaultIfNull((String) null, Fn.s(() -> "supplied")));
         assertEquals("abc", Strings.defaultIfNull("abc", Fn.s(() -> "supplied")));
-        assertThrows(IllegalArgumentException.class, () -> Strings.defaultIfNull((CharSequence) null, (Supplier<? extends CharSequence>) () -> null));
+        assertThrows(NullPointerException.class, () -> Strings.defaultIfNull((CharSequence) null, (Supplier<? extends CharSequence>) () -> null));
         org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> Strings.defaultIfNull("abc", (Supplier<String>) null));
     }
 
@@ -531,8 +531,8 @@ public class StringsTest extends StringsTestSupport {
     public void testAbbreviateMiddle_PreservesSurrogatePairs() {
         final String emoji = "\uD83D\uDE00";
 
-        assertEquals("a.d", Strings.abbreviateMiddle("a" + emoji + "bcd", ".", 4));
-        assertEquals("a.", Strings.abbreviateMiddle("abcd" + emoji, ".", 3));
+        assertEquals("a.cd", Strings.abbreviateMiddle("a" + emoji + "bcd", ".", 4));
+        assertEquals("ab.", Strings.abbreviateMiddle("abcd" + emoji, ".", 3));
     }
 
     @Test
@@ -1350,17 +1350,17 @@ public class StringsTest extends StringsTestSupport {
      */
     @Test
     public void testAbbreviate_lengthErrorMessagesIncludeMaxLength() {
-        assertEquals("maxLength (3) must be at least 4 for an abbrevMarker of length 3",
+        assertEquals("maxLength (3) must be at least 4 for an abbreviationMarker of length 3",
                 assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefg", 3)).getMessage());
-        assertEquals("maxLength (2) must be at least 3 for an abbrevMarker of length 2",
+        assertEquals("maxLength (2) must be at least 3 for an abbreviationMarker of length 2",
                 assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefg", "..", 2)).getMessage());
-        assertEquals("maxLength (0) must be at least 1 when abbrevMarker is empty",
+        assertEquals("maxLength (0) must be at least 1 when abbreviationMarker is empty",
                 assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefg", "", 0)).getMessage());
-        assertEquals("maxLength (6) must be at least 7 for an abbrevMarker of length 3 at offset 5",
+        assertEquals("maxLength (6) must be at least 7 for an abbreviationMarker of length 3 at offset 5",
                 assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefghij", "...", 5, 6)).getMessage());
 
         // offset is clamped to str.length() then shifted left internally; the message must still echo 100.
-        assertEquals("maxLength (6) must be at least 7 for an abbrevMarker of length 3 at offset 100",
+        assertEquals("maxLength (6) must be at least 7 for an abbreviationMarker of length 3 at offset 100",
                 assertThrows(IllegalArgumentException.class, () -> Strings.abbreviate("abcdefghij", "...", 100, 6)).getMessage());
 
         // The message must not embed the marker itself, so its size stays bounded.
@@ -2503,9 +2503,10 @@ public class StringsTest extends StringsTestSupport {
 
     @Test
     public void testStrUtilEmptyNeedleWithOversizedSearchIndex() {
-        // Plain substring search clamps an oversized forward index to the end for an empty needle.
-        assertEquals(2, StrUtil.indexOfToken("ab", "", "", 10));
-        assertEquals(2, StrUtil.indexOfTokenIgnoreCase("ab", "", null, 10));
+        // C-538: an empty or null delimiter is rejected; the plain search is Strings.indexOf("ab", "", 10) == 2.
+        assertEquals(2, Strings.indexOf("ab", "", 10));
+        assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfToken("ab", "", "", 10));
+        assertThrows(IllegalArgumentException.class, () -> StrUtil.indexOfTokenIgnoreCase("ab", "", null, 10));
 
         // Delimited search uses the same clamp, then still requires the position to be an empty field.
         assertEquals(3, StrUtil.indexOfToken("ab,", "", ",", 10));
@@ -3103,4 +3104,435 @@ public class StringsTest extends StringsTestSupport {
         assertEquals("[ab]", Strings.wrapIfMissing("[ab]", "[", "]"));
         assertEquals("[]", Strings.wrapIfMissing("", "[", "]"));
     }
+
+
+    @Test
+    public void testLengthOfCommonPrefix_DoesNotSplitSurrogatePair() {
+        final String grinning = new String(Character.toChars(0x1F600));
+        final String beaming = new String(Character.toChars(0x1F601));
+        assertEquals(grinning.charAt(0), beaming.charAt(0));
+        assertEquals(0, Strings.lengthOfCommonPrefix(grinning, beaming));
+        assertEquals("", Strings.commonPrefix(grinning, beaming));
+        assertEquals(1, Strings.lengthOfCommonPrefix("a" + grinning, "a" + beaming));
+        assertEquals(3, Strings.lengthOfCommonPrefix("a" + grinning, "a" + grinning + "b"));
+    }
+
+    @Test
+    public void testLengthOfCommonSuffix_DoesNotSplitSurrogatePair() {
+        final String grinning = new String(Character.toChars(0x1F600));
+        final String other = new String(Character.toChars(0x1FA00));
+        assertEquals(grinning.charAt(1), other.charAt(1));
+        assertEquals(0, Strings.lengthOfCommonSuffix(grinning, other));
+        assertEquals("", Strings.commonSuffix(grinning, other));
+        assertEquals(1, Strings.lengthOfCommonSuffix(grinning + "z", other + "z"));
+        assertEquals(3, Strings.lengthOfCommonSuffix(grinning + "z", "b" + grinning + "z"));
+    }
+
+    // ---- perf review 2026-09-26 G072 begin ----
+
+    private static byte[] g072ReportingUtf8Encode(final String str) throws java.nio.charset.CharacterCodingException {
+        final java.nio.ByteBuffer encoded = StandardCharsets.UTF_8.newEncoder()
+                .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                .encode(java.nio.CharBuffer.wrap(str));
+        final byte[] result = new byte[encoded.remaining()];
+        encoded.get(result);
+        return result;
+    }
+
+    private static String g072ReportingUtf8Decode(final byte[] bytes) throws java.nio.charset.CharacterCodingException {
+        return StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                .decode(java.nio.ByteBuffer.wrap(bytes))
+                .toString();
+    }
+
+    // G072-01: UTF-8 strict encoding equals the reporting CharsetEncoder for well-formed input (incl. surrogate pairs)
+    @Test
+    public void testGetBytesUtf8Strict_matchesReportingEncoder() throws Exception {
+        final String[] inputs = { "a", "?", "???", "\u0000", "abc 123 ~\u007F", "caf\u00E9", "\u00FF\u0100", "\u4E2D\u6587\u5B57",
+                "\uD83D\uDE00", "x\uD83D\uDE00y\uD801\uDC00", "\uFFFD", "\uFFFF\uFFFE", "\u07FF\u0800", "The quick brown fox".repeat(500),
+                "\u4E2D".repeat(3000) + "a", "a?\uD83D\uDE00", "?".repeat(50) + "\u00E9" };
+
+        for (final String input : inputs) {
+            final byte[] expected = g072ReportingUtf8Encode(input);
+            assertArrayEquals(expected, Strings.getBytesUtf8Strict(input), input);
+            assertArrayEquals(expected, Strings.getBytesStrict(input, StandardCharsets.UTF_8), input);
+            assertArrayEquals(expected, Strings.getBytesStrict(input, Charsets.UTF_8), input);
+            assertArrayEquals(expected, Strings.getBytesStrict(input, java.nio.charset.Charset.forName("UTF-8")), input);
+            assertEquals(java.util.Base64.getEncoder().encodeToString(expected), Strings.base64EncodeStringStrict(input), input);
+            assertEquals(java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(expected),
+                    Strings.base64UrlEncodeStringStrict(input, StandardCharsets.UTF_8), input);
+        }
+
+        final byte[] empty = Strings.getBytesUtf8Strict("");
+        assertEquals(0, empty.length);
+        final byte[] first = Strings.getBytesUtf8Strict("abc");
+        final byte[] second = Strings.getBytesUtf8Strict("abc");
+        assertTrue(first != second);
+        first[0] = 'z';
+        assertArrayEquals("abc".getBytes(StandardCharsets.UTF_8), Strings.getBytesUtf8Strict("abc"));
+        assertNull(Strings.getBytesUtf8Strict(null));
+    }
+
+    // G072-01: malformed UTF-16 still fails with the same exception, message and cause type
+    @Test
+    public void testGetBytesUtf8Strict_loneSurrogates() {
+        final String[] inputs = { "\ud800", "\udc00", "a\ud83d", "\ude00\ud83d", "abc\udfffdef", "\uD83D\uDE00\ud83d", "?\ud800", "\udc00?" };
+
+        for (final String input : inputs) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Strings.getBytesUtf8Strict(input));
+            assertEquals("Input contains malformed UTF-16 or a character not representable in UTF-8", e.getMessage());
+            assertTrue(e.getCause() instanceof java.nio.charset.MalformedInputException, input);
+            assertThrows(IllegalArgumentException.class, () -> Strings.base64EncodeStringStrict(input));
+            assertThrows(IllegalArgumentException.class, () -> Strings.base64UrlEncodeStringStrict(input));
+        }
+
+        assertThrows(NullPointerException.class, () -> Strings.getBytesStrict("a", null));
+    }
+
+    // G072-02: UTF-8 strict decoding equals the reporting CharsetDecoder for well-formed input (incl. a genuine U+FFFD)
+    @Test
+    public void testBase64DecodeToStringStrict_utf8MatchesReportingDecoder() throws Exception {
+        final String[] inputs = { "a", "?", "abc 123", "\u0000", "caf\u00E9", "\u4E2D\u6587", "\uD83D\uDE00", "x\uFFFDy", "\uFFFD", "\uFFFF",
+                "The quick brown fox".repeat(500) };
+
+        for (final String input : inputs) {
+            final byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+            final String expected = g072ReportingUtf8Decode(bytes);
+            assertEquals(input, expected);
+            assertEquals(expected, Strings.base64DecodeToStringStrict(java.util.Base64.getEncoder().encodeToString(bytes)), input);
+            assertEquals(expected, Strings.base64DecodeToStringStrict(java.util.Base64.getEncoder().encodeToString(bytes), StandardCharsets.UTF_8));
+            assertEquals(expected, Strings.base64UrlDecodeToStringStrict(java.util.Base64.getUrlEncoder().encodeToString(bytes), StandardCharsets.UTF_8));
+        }
+    }
+
+    // G072-02: malformed UTF-8 still fails with the same exception, message and cause type
+    @Test
+    public void testBase64DecodeToStringStrict_utf8Malformed() {
+        final byte[][] inputs = { { (byte) 0xFF }, { 'a', (byte) 0xC3 }, { (byte) 0xED, (byte) 0xA0, (byte) 0x80 }, { (byte) 0xC0, (byte) 0x80 },
+                { (byte) 0xF4, (byte) 0x90, (byte) 0x80, (byte) 0x80 }, { (byte) 0xE2, (byte) 0x82 }, { 'a', 'b', (byte) 0x80, 'c' },
+                { (byte) 0xEF, (byte) 0xBF, (byte) 0xBD, (byte) 0xFE } };
+
+        for (final byte[] input : inputs) {
+            final String base64 = java.util.Base64.getEncoder().encodeToString(input);
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Strings.base64DecodeToStringStrict(base64));
+            assertEquals("Input bytes are not valid UTF-8", e.getMessage());
+            assertTrue(e.getCause() instanceof java.nio.charset.CharacterCodingException);
+            assertThrows(IllegalArgumentException.class,
+                    () -> Strings.base64UrlDecodeToStringStrict(java.util.Base64.getUrlEncoder().encodeToString(input), StandardCharsets.UTF_8));
+        }
+
+        assertThrows(NullPointerException.class, () -> Strings.base64DecodeToStringStrict("YQ==", null));
+    }
+
+    // G072-03: toCharArray(StringBuilder) bulk copy returns the same fresh array as the charAt loop
+    @Test
+    public void testToCharArray_stringBuilderAndOtherCharSequences() {
+        final String[] inputs = { "a", "ab", "caf\u00E9", "\uD83D\uDE00x\ud800", "The quick brown fox".repeat(100) };
+
+        for (final String input : inputs) {
+            final StringBuilder sb = new StringBuilder(input.length() + 16).append(input);
+            final char[] fromBuilder = Strings.toCharArray(sb);
+            assertArrayEquals(input.toCharArray(), fromBuilder);
+            assertTrue(fromBuilder != Strings.toCharArray(sb));
+            fromBuilder[0] = '#';
+            assertEquals(input, sb.toString());
+            assertArrayEquals(input.toCharArray(), Strings.toCharArray(new StringBuffer(input)));
+            assertArrayEquals(input.toCharArray(), Strings.toCharArray(java.nio.CharBuffer.wrap(input)));
+        }
+
+        assertTrue(N.EMPTY_CHAR_ARRAY == Strings.toCharArray(new StringBuilder()));
+        assertNull(Strings.toCharArray(null));
+    }
+
+    // G072-04: swapCase non-ASCII path; the per-code-point substring is only built for cased code points
+    @Test
+    public void testSwapCase_unicodeUncasedAndCasedCodePoints() {
+        assertEquals("\u4E2D\u6587 1-2 \uFF01", Strings.swapCase("\u4E2D\u6587 1-2 \uFF01"));
+        assertEquals("\u4E2DAbC\u00C9", Strings.swapCase("\u4E2DaBc\u00E9"));
+        assertEquals("SS\u00E0", Strings.swapCase("\u00DF\u00C0"));
+        assertEquals("i\u0307x", Strings.swapCase("\u0130X"));
+        assertEquals("\u01C6", Strings.swapCase("\u01C5"));
+        assertEquals("\uD801\uDC28\uD801\uDC00", Strings.swapCase("\uD801\uDC00\uD801\uDC28"));
+        assertEquals("\uD83D\uDE00A\ud800b\udc00", Strings.swapCase("\uD83D\uDE00a\ud800B\udc00"));
+        assertEquals("o\u03C3\u03C2 \u03C3", Strings.swapCase("O\u03A3\u03A3 \u03A3"));
+        assertEquals("\u00E9\u4E2D", Strings.swapCase("\u00C9\u4E2D"));
+
+        final int[] pool = { 'a', 'Z', '5', ' ', 0x00e9, 0x00c9, 0x00df, 0x0130, 0x01c5, 0x4e2d, 0x3000, 0x10400, 0x10428, 0x1f600, 0xd800, 0xdc00,
+                0xfb00, 0x0149, 0x0390 };
+        final Random random = new Random(20260926L);
+
+        for (int round = 0; round < 2000; round++) {
+            final StringBuilder input = new StringBuilder();
+            final StringBuilder expected = new StringBuilder();
+
+            for (int i = random.nextInt(12); i >= 0; i--) {
+                final int codePoint = pool[random.nextInt(pool.length)];
+                final String single = new String(Character.toChars(codePoint));
+                input.append(single);
+
+                if (Character.isUpperCase(codePoint) || Character.isTitleCase(codePoint)) {
+                    expected.append(single.toLowerCase(Locale.ROOT));
+                } else if (Character.isLowerCase(codePoint)) {
+                    expected.append(single.toUpperCase(Locale.ROOT));
+                } else {
+                    expected.append(single);
+                }
+            }
+
+            final String text = input.toString();
+
+            if (text.indexOf("\uD800\uDC00") >= 0) {
+                continue;
+            }
+
+            assertEquals(expected.toString(), Strings.swapCase(text), text);
+        }
+    }
+
+    // ---- perf review 2026-09-26 G072 end ----
+    // ---- perf review 2026-09-26 G073 begin ----
+    private static int countMatchesCharReference(final String str, final char ch) {
+        int count = 0;
+
+        for (int i = 0; str != null && i < str.length(); i++) {
+            if (str.charAt(i) == ch) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    // G073-01: countMatches(String, char) switches from indexOf hopping to a plain scan on dense input; pin both regimes.
+    @Test
+    public void testCountMatchesChar_sparseDenseAndMixedRegions() {
+        assertEquals(0, Strings.countMatches(null, ','));
+        assertEquals(0, Strings.countMatches("", ','));
+        assertEquals(1, Strings.countMatches(",", ','));
+        assertEquals(0, Strings.countMatches("abc", '\u4E2D'));
+        assertEquals(1, Strings.countMatches("ab\u4E2D", '\u4E2D'));
+        assertEquals(40, Strings.countMatches(",".repeat(40), ','));
+        assertEquals(7, Strings.countMatches(",".repeat(7), ','));
+        assertEquals(8, Strings.countMatches(",".repeat(8), ','));
+        assertEquals(9, Strings.countMatches(",".repeat(9), ','));
+        assertEquals(40, Strings.countMatches(",".repeat(20) + "x".repeat(1000) + ",".repeat(20), ','));
+        assertEquals(20, Strings.countMatches("x".repeat(1000) + ",".repeat(20), ','));
+        assertEquals(2, Strings.countMatches("\uD83D\uDE00\uD83D\uDE00", '\uD83D'));
+
+        final Random random = new Random(0x6073L);
+        final double[] densities = { 0.0, 0.01, 0.1, 0.24, 0.26, 0.5, 0.9, 1.0 };
+
+        for (int testCase = 0; testCase < 2000; testCase++) {
+            final int length = random.nextInt(testCase < 1000 ? 70 : 600);
+            final StringBuilder sb = new StringBuilder(length);
+            double density = densities[random.nextInt(densities.length)];
+
+            for (int i = 0; i < length; i++) {
+                if (random.nextInt(50) == 0) {
+                    density = densities[random.nextInt(densities.length)];
+                }
+
+                sb.append(random.nextDouble() < density ? ',' : (random.nextInt(20) == 0 ? '\u4E2D' : (char) ('a' + random.nextInt(3))));
+            }
+
+            final String str = sb.toString();
+
+            for (final char ch : new char[] { ',', 'a', '\u4E2D', 'z' }) {
+                assertEquals(countMatchesCharReference(str, ch), Strings.countMatches(str, ch), str);
+            }
+        }
+    }
+
+    private static int minIndexOfAllStringReference(final String str, final int fromIndex, final String... valuesToFind) {
+        if (str == null || fromIndex > str.length() || valuesToFind == null) {
+            return -1;
+        }
+
+        final int from = Math.max(0, fromIndex);
+        int result = -1;
+
+        for (final String value : valuesToFind) {
+            if (value == null) {
+                continue;
+            }
+
+            final int found = value.isEmpty() ? from : str.indexOf(value, from);
+
+            if (found >= 0 && (result < 0 || found < result)) {
+                result = found;
+            }
+        }
+
+        return result;
+    }
+
+    private static int minIndexOfAllCharReference(final String str, final int fromIndex, final char... valuesToFind) {
+        if (str == null || fromIndex > str.length() || valuesToFind == null) {
+            return -1;
+        }
+
+        final int from = Math.max(0, fromIndex);
+        int result = -1;
+
+        for (final char value : valuesToFind) {
+            final int found = str.indexOf(value, from);
+
+            if (found >= 0 && (result < 0 || found < result)) {
+                result = found;
+            }
+        }
+
+        return result;
+    }
+
+    // G073-02: minIndexOfAll bounds each later candidate's search by the current hit; pin matches that straddle the
+    // bound, empty/null/overlong candidates and every fromIndex against an unbounded reference.
+    @Test
+    public void testMinIndexOfAll_boundedSearchMatchesUnboundedReference() {
+        assertEquals(1, Strings.minIndexOfAll("abcd", "c", "bcd"));
+        assertEquals(1, Strings.minIndexOfAll("abcd", "c", "bcde", "bc"));
+        assertEquals(2, Strings.minIndexOfAll("abcd", "c", "bcde", "cd"));
+        assertEquals(0, Strings.minIndexOfAll("abcd", "d", "b", ""));
+        assertEquals(2, Strings.minIndexOfAll("abcd", 2, "d", "zz", "", "c"));
+        assertEquals(1, Strings.minIndexOfAll("aaab", 1, "b", "aab"));
+        assertEquals(3, Strings.minIndexOfAll("aaab", 2, "b", "aab"));
+        assertEquals(1, Strings.minIndexOfAll("aaab", 1, "b", "aa"));
+        assertEquals(1, Strings.minIndexOfAll("abcd", 'c', 'b', 'z'));
+        assertEquals(2, Strings.minIndexOfAll("abcd", 'c', 'd', 'z'));
+        assertEquals(1, Strings.minIndexOfAll("x\u4E2D\u4E2D", 0, 'q', '\u4E2D', 'z'));
+
+        final Random random = new Random(0x6073_02L);
+        final String alphabet = "abcab\u4E2D";
+
+        for (int testCase = 0; testCase < 3000; testCase++) {
+            // Lengths past 256 reach the ranged search, which is used only when the skipped tail is long.
+            final int length = testCase < 2000 ? random.nextInt(12) : 250 + random.nextInt(700);
+            final StringBuilder sb = new StringBuilder(length);
+
+            for (int i = 0; i < length; i++) {
+                sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
+            }
+
+            final String str = sb.toString();
+            final String[] values = new String[1 + random.nextInt(5)];
+
+            for (int i = 0; i < values.length; i++) {
+                final int kind = random.nextInt(10);
+
+                if (kind == 0) {
+                    values[i] = null;
+                } else if (kind == 1) {
+                    values[i] = "";
+                } else {
+                    final int valueLength = 1 + random.nextInt(kind == 2 ? 15 : 4);
+                    final StringBuilder value = new StringBuilder(valueLength);
+
+                    for (int j = 0; j < valueLength; j++) {
+                        value.append((alphabet + "z").charAt(random.nextInt(alphabet.length() + 1)));
+                    }
+
+                    values[i] = value.toString();
+                }
+            }
+
+            final char[] chars = new char[1 + random.nextInt(7)];
+
+            for (int i = 0; i < chars.length; i++) {
+                chars[i] = (alphabet + "z").charAt(random.nextInt(alphabet.length() + 1));
+            }
+
+            for (int fromIndex = -2; fromIndex <= length + 1; fromIndex += length < 20 || fromIndex < 20 ? 1 : 1 + random.nextInt(40)) {
+                assertEquals(minIndexOfAllStringReference(str, fromIndex, values), Strings.minIndexOfAll(str, fromIndex, values), str);
+                assertEquals(minIndexOfAllCharReference(str, fromIndex, chars), Strings.minIndexOfAll(str, fromIndex, chars), str);
+            }
+
+            for (final int fromIndex : new int[] { length - 1, length, length + 1 }) {
+                assertEquals(minIndexOfAllStringReference(str, fromIndex, values), Strings.minIndexOfAll(str, fromIndex, values), str);
+                assertEquals(minIndexOfAllCharReference(str, fromIndex, chars), Strings.minIndexOfAll(str, fromIndex, chars), str);
+            }
+
+            assertEquals(minIndexOfAllStringReference(str, 0, values), Strings.minIndexOfAll(str, values), str);
+            assertEquals(minIndexOfAllCharReference(str, 0, chars), Strings.minIndexOfAll(str, chars), str);
+        }
+
+        final String longStr = "abcd" + "e".repeat(400) + "bcd";
+        assertEquals(1, Strings.minIndexOfAll(longStr, "c", "bcd"));
+        assertEquals(2, Strings.minIndexOfAll(longStr, "c", "cde", "zz"));
+        assertEquals(1, Strings.minIndexOfAll(longStr, "c", "bcde", "abcdX"));
+        assertEquals(2, Strings.minIndexOfAll(longStr, 2, "d", "cd", "abcd"));
+        assertEquals(2, Strings.minIndexOfAll(longStr, 2, "d", ""));
+        assertEquals(0, Strings.minIndexOfAll(longStr, "e", "abcd"));
+        assertEquals(3, Strings.minIndexOfAll(longStr, "e", "de", "abcde".repeat(2)));
+        assertEquals(4, Strings.minIndexOfAll(longStr, "e", "e".repeat(400), "e".repeat(401)));
+        assertEquals(404, Strings.minIndexOfAll(longStr, 5, "bcd", "e".repeat(401), "cd"));
+        assertEquals(3, Strings.minIndexOfAll(longStr, 'd', 'z', 'x'));
+        assertEquals(1, Strings.minIndexOfAll(longStr, 'd', 'z', 'b'));
+    }
+    // ---- perf review 2026-09-26 G073 end ----
+    // ---- perf review 2026-09-26 G075 begin ----
+    // G075-01: the East Asian display-width shortcut must agree with the Unicode 17 property tables it bypasses.
+    @Test
+    public void testCodePointDisplayWidth_commonWideRangesMatchPropertyTables() {
+        final int[][] ranges = { { 0x3041, 0x3096 }, { 0x309B, 0x30FF }, { 0x3400, 0x9FFF }, { 0xAC00, 0xD7A3 }, { 0xFF01, 0xFF5E } };
+        final Strings.DisplayWidthPolicy narrow = new Strings.DisplayWidthPolicy(1, 1);
+
+        for (final int[] range : ranges) {
+            for (int codePoint = range[0]; codePoint <= range[1]; codePoint++) {
+                final String hex = Integer.toHexString(codePoint);
+                assertTrue(Unicode17Data.isEastAsianWideOrFullwidth(codePoint), hex);
+                assertFalse(Unicode17Data.isEmojiPresentation(codePoint), hex);
+                assertFalse(Unicode17Data.isZeroWidthCategory(codePoint), hex);
+
+                if (codePoint < 0xAC00 || codePoint > 0xD7A3) {
+                    assertEquals(Unicode17Data.GCB_OTHER, Unicode17Data.graphemeBreakProperty(codePoint), hex);
+                    assertEquals(Unicode17Data.INCB_NONE, Unicode17Data.indicConjunctBreakProperty(codePoint), hex);
+                    assertFalse(Unicode17Data.isExtendedPictographic(codePoint), hex);
+                }
+
+                assertEquals(2, Strings.codePointDisplayWidth(codePoint), hex);
+                assertEquals(2, Strings.codePointDisplayWidth(codePoint, Strings.DisplayWidthPolicy.CJK), hex);
+                assertEquals(2, Strings.codePointDisplayWidth(codePoint, narrow), hex);
+                assertEquals(2, Strings.displayWidth(new String(Character.toChars(codePoint))), hex);
+            }
+        }
+    }
+
+    // G075-01: code points at the edges of the shortcut ranges and mixed with marks, joiners and surrogates.
+    @Test
+    public void testDisplayWidth_commonWideRangesBoundariesAndClusters() {
+        final int[][] codePoints = { { 0x3040 }, { 0x3097 }, { 0x3098 }, { 0x3099 }, { 0x309A }, { 0x3100 }, { 0x33FF }, { 0xA000 }, { 0xFF00 }, { 0xFF5F },
+                { 0x3399, 0x9FFF, 0xA48C, 0xA48D }, { 0x33FF, 0x3400 }, { 0x9FFF, 0xA000 }, { 0xABFF, 0xAC00, 0xD7A3, 0xD7A4 }, { 0x3099, 0x4E00 },
+                { 0x4E00, 0x3099 }, { 0x4E00, 0x0301 }, { 0x304B, 0x3099 }, { 0x61, 0x4E00, 0x62 }, { 0x30A2, 0xFF9E }, { 0x4E00, 0xFE0F },
+                { 0x3042, 0x200D, 0x3042 }, { 0xAC00, 0x11A8 }, { 0x0915, 0x094D, 0x4E00 }, { 0x3400, 0x9FFF, 0x3041, 0x3096, 0x309B, 0x30FF, 0xFF01, 0xFF5E },
+                { 0x0E01, 0x4E00 }, { 0x4E00, 0x0E33 }, { 0x30AB, 0x309A }, { 0x1F600, 0x4E00 }, { 0x4E00, 0x200D, 0x1F600 }, { 0x0600, 0x4E00 },
+                { 0x4E00, 0xE0001 }, { 0x3040, 0x3097, 0x3098, 0x3099, 0x309A, 0x3100, 0x33FF, 0xA000, 0xFF00, 0xFF5F } };
+        final int[] expected = { 1, 1, 1, 0, 0, 1, 2, 2, 1, 2, 7, 4, 4, 6, 2, 2, 2, 2, 4, 3, 2, 4, 2, 3, 16, 3, 2, 2, 4, 4, 2, 2, 11 };
+        final Strings.DisplayWidthPolicy narrow = new Strings.DisplayWidthPolicy(1, 1);
+
+        assertEquals(codePoints.length, expected.length);
+
+        for (int i = 0; i < codePoints.length; i++) {
+            final StringBuilder sb = new StringBuilder();
+
+            for (final int codePoint : codePoints[i]) {
+                sb.appendCodePoint(codePoint);
+            }
+
+            final String value = sb.toString();
+            final String message = Arrays.toString(codePoints[i]);
+
+            assertEquals(expected[i], Strings.displayWidth(value), message);
+            assertEquals(expected[i], Strings.displayWidth(value, Strings.DisplayWidthPolicy.CJK), message);
+            // An emoji takes the policy's emoji width; everything else here is policy-independent.
+            assertEquals(expected[i] - (value.codePoints().anyMatch(codePoint -> codePoint >= 0x1F000 && codePoint <= 0x1FAFF) ? 1 : 0), Strings.displayWidth(value, narrow), message);
+
+            final String padding = expected[i] < 8 ? Strings.repeat(' ', 8 - expected[i]) : "";
+            assertEquals(value + padding, Strings.padEndToDisplayWidth(value, 8), message);
+            assertEquals(padding + value, Strings.padStartToDisplayWidth(value, 8), message);
+        }
+    }
+    // ---- perf review 2026-09-26 G075 end ----
 }

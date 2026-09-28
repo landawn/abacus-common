@@ -186,30 +186,30 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      *
      * @param cbuf   the character array containing the value; may be {@code null}
      * @param offset the index of the first character to use
-     * @param len    the number of characters to use
-     * @return the parsed Joda date-time value, or {@code null} if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param length    the number of characters to use
+     * @return the parsed Joda date-time value, or {@code null} if {@code cbuf} is {@code null} or {@code length} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      * @throws IllegalArgumentException if the text is not a recognized date-time or numeric form (see {@link #valueOf(String)}), including numeric text outside the {@code long} range
      */
     @MayReturnNull
     @Override
-    public DateTime valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, IllegalArgumentException {
-        if ((cbuf == null) || (len == 0)) {
+    public DateTime valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, IllegalArgumentException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return new DateTime(parseLong(cbuf, offset, len));
+                return new DateTime(parseLong(cbuf, offset, length));
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -251,15 +251,15 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * The {@link DateTime} is converted to a {@link java.sql.Timestamp}.
      * A {@code null} value sets SQL {@code NULL}.
      *
-     * @param stmt the {@link PreparedStatement} in which to set the parameter
+     * @param statement the {@link PreparedStatement} in which to set the parameter
      * @param columnIndex the 1-based parameter index
      * @param x the Joda {@link DateTime} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final DateTime x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(columnIndex, x == null ? null : new Timestamp(x.getMillis()));
+    public void set(final PreparedStatement statement, final int columnIndex, final DateTime x) throws NullPointerException, SQLException {
+        statement.setTimestamp(columnIndex, x == null ? null : new Timestamp(x.getMillis()));
     }
 
     /**
@@ -267,14 +267,14 @@ public class JodaDateTimeType extends AbstractJodaDateTimeType<DateTime> {
      * The {@link DateTime} is converted to a {@link java.sql.Timestamp}.
      * A {@code null} value sets SQL {@code NULL}.
      *
-     * @param stmt the {@link CallableStatement} in which to set the parameter
+     * @param statement the {@link CallableStatement} in which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the Joda {@link DateTime} to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final DateTime x) throws NullPointerException, SQLException {
-        stmt.setTimestamp(parameterName, x == null ? null : new Timestamp(x.getMillis()));
+    public void set(final CallableStatement statement, final String parameterName, final DateTime x) throws NullPointerException, SQLException {
+        statement.setTimestamp(parameterName, x == null ? null : new Timestamp(x.getMillis()));
     }
 }

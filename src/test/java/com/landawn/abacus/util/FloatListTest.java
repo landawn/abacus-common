@@ -2145,9 +2145,9 @@ public class FloatListTest extends FloatListTestSupport {
     @Test
     public void testConversionSuppliersMustProduceCollectionsForEmptyRanges() {
         assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toCollection(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toCollection(0, 0, ignored -> null));
         assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> list.toMultiset(0, 0, ignored -> null));
+        assertThrows(NullPointerException.class, () -> list.toMultiset(0, 0, ignored -> null));
     }
 
     @Test
@@ -2406,4 +2406,158 @@ public class FloatListTest extends FloatListTestSupport {
             assertTrue(parallel.isSorted(), "size=" + size);
         }
     }
+
+    // ---- perf review 2026-09-26 G111 begin ----
+
+    private static boolean sameFloatG111(final float x, final float y) {
+        return Float.compare(x, y) == 0;
+    }
+
+    private static boolean naiveContainsAllG111(final float[] a, final float[] b) {
+        for (final float x : b) {
+            boolean found = false;
+
+            for (final float y : a) {
+                if (sameFloatG111(x, y)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean naiveDisjointG111(final float[] a, final float[] b) {
+        for (final float x : b) {
+            for (final float y : a) {
+                if (sameFloatG111(x, y)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // G111-01: containsAll set path, both orientations, duplicates, NaN == NaN, 0.0f != -0.0f
+    @Test
+    public void testContainsAll_setPathBothOrientationsG111() {
+        final FloatList big = FloatList.of(5, 1, 9, 1, 7, 3, 3, 8, 2, 6, 4, 0, Float.NaN);
+        assertTrue(big.containsAll(FloatList.of(1, 3, 3, 9)));
+        assertTrue(big.containsAll(FloatList.of(0, 0, 0, 0)));
+        assertFalse(big.containsAll(FloatList.of(-0.0f, 1, 3, 9)));
+        assertTrue(big.containsAll(FloatList.of(Float.NaN, 1, 3, 9)));
+        assertTrue(big.containsAll(FloatList.of(Float.intBitsToFloat(0x7fc00001), 1, 3, 9)));
+        assertFalse(big.containsAll(FloatList.of(1, 3, 9, 11)));
+        assertTrue(big.containsAll(big));
+        assertTrue(big.containsAll(big.copy()));
+        assertTrue(big.containsAll(FloatList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 1, 1, Float.NaN)));
+        assertFalse(big.containsAll(FloatList.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 9, 1, 1, Float.NaN)));
+        assertTrue(FloatList.of(1, 2, 3, 4).containsAll(FloatList.of(4, 3, 2, 1, 1, 2, 3, 4, 4, 4)));
+        assertFalse(FloatList.of(1, 2, 3, -0.0f).containsAll(FloatList.of(4, 3, 2, 1, 1, 2, 3, 0.0f, 4, 4)));
+        assertTrue(big.containsAll(new float[] { 0, 0, Float.NaN, 8 }));
+        assertFalse(big.containsAll(new float[] { 0, 0, Float.NaN, -0.0f }));
+    }
+
+    // G111-01: disjoint / containsAny set path, both orientations and self
+    @Test
+    public void testDisjoint_setPathBothOrientationsG111() {
+        final FloatList big = FloatList.of(10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 0.0f);
+        assertTrue(big.disjoint(FloatList.of(1, 2, 3, -0.0f)));
+        assertTrue(FloatList.of(1, 2, 3, -0.0f).disjoint(big));
+        assertFalse(big.disjoint(FloatList.of(1, 2, 3, 20)));
+        assertFalse(FloatList.of(1, 2, 3, 20).disjoint(big));
+        assertFalse(big.disjoint(big));
+        assertTrue(big.disjoint(new float[] { Float.NaN, -1, -2, -3 }));
+        assertFalse(FloatList.of(Float.NaN, 1, 2, 3).disjoint(FloatList.of(-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, Float.NaN)));
+        assertFalse(FloatList.of(-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, Float.NaN).disjoint(FloatList.of(Float.NaN, 1, 2, 3)));
+        assertTrue(big.containsAny(new float[] { -10, -11, -12, 10 }));
+        assertFalse(big.containsAny(FloatList.of(-10, -11, -12, -13, -14, -0.0f)));
+    }
+
+    // G111-01: randomized differential check of containsAll/disjoint/containsAny against a naive nested scan (Float.compare)
+    @Test
+    public void testContainsAllDisjoint_randomizedAgainstNaiveG111() {
+        final float[] specials = { Float.NaN, 0.0f, -0.0f, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.MIN_VALUE, Float.MAX_VALUE };
+        final Random rnd = new Random(20260926L);
+
+        for (int trial = 0; trial < 4000; trial++) {
+            final int maxLength = trial % 10 == 0 ? 300 : 25;
+            final float[] a = new float[rnd.nextInt(maxLength)];
+            final float[] b = new float[rnd.nextInt(maxLength)];
+            final int range = 1 + rnd.nextInt(trial % 10 == 0 ? 400 : 30);
+
+            for (int i = 0; i < a.length; i++) {
+                a[i] = rnd.nextInt(8) == 0 ? specials[rnd.nextInt(specials.length)] : rnd.nextInt(range) - range / 2;
+            }
+
+            for (int i = 0; i < b.length; i++) {
+                b[i] = rnd.nextInt(8) == 0 ? specials[rnd.nextInt(specials.length)] : rnd.nextInt(range) - range / 2;
+            }
+
+            final FloatList la = FloatList.of(a.clone());
+            final FloatList lb = FloatList.of(b.clone());
+            assertEquals(naiveContainsAllG111(a, b), la.containsAll(lb));
+            assertEquals(naiveContainsAllG111(b, a), lb.containsAll(la));
+            assertEquals(naiveContainsAllG111(a, b), la.containsAll(b));
+            assertEquals(naiveDisjointG111(a, b), la.disjoint(lb));
+            assertEquals(naiveDisjointG111(b, a), lb.disjoint(la));
+            assertEquals(naiveDisjointG111(a, b), la.disjoint(b));
+            assertEquals(!naiveDisjointG111(a, b), la.containsAny(lb));
+            assertEquals(!naiveDisjointG111(a, b), la.containsAny(b));
+            assertArrayEquals(a, la.toArray());
+            assertArrayEquals(b, lb.toArray());
+        }
+    }
+
+    // G111-01: removeDuplicates unsorted path keeps first occurrences in order (Float.compare rules) and clears the tail
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testRemoveDuplicates_unsortedKeepsFirstOccurrenceOrderG111() {
+        final FloatList l = FloatList.of(5, 3, 5, Float.NaN, 3, -0.0f, 0.0f, Float.NaN, 5, -0.0f, 1, 1);
+        assertTrue(l.removeDuplicates());
+        assertEquals(FloatList.of(5, 3, Float.NaN, -0.0f, 0.0f, 1), l);
+
+        for (int i = l.size(); i < 12; i++) {
+            assertEquals(0f, l.internalArray()[i]);
+        }
+
+        final FloatList noDup = FloatList.of(3, 1, 2, -0.0f, 0.0f, Float.NaN);
+        assertFalse(noDup.removeDuplicates());
+        assertEquals(FloatList.of(3, 1, 2, -0.0f, 0.0f, Float.NaN), noDup);
+
+        final float[] specials = { Float.NaN, 0.0f, -0.0f };
+        final Random rnd = new Random(7L);
+
+        for (int trial = 0; trial < 1000; trial++) {
+            final float[] a = new float[rnd.nextInt(trial % 10 == 0 ? 400 : 40)];
+
+            for (int i = 0; i < a.length; i++) {
+                a[i] = rnd.nextInt(6) == 0 ? specials[rnd.nextInt(specials.length)] : rnd.nextInt(trial % 10 == 0 ? 300 : 12);
+            }
+
+            final List<Float> expected = new ArrayList<>();
+
+            for (final float x : a) {
+                if (!expected.contains(x)) {
+                    expected.add(x);
+                }
+            }
+
+            final FloatList actual = FloatList.of(a.clone());
+            assertEquals(expected.size() != a.length, actual.removeDuplicates());
+            assertEquals(expected, actual.boxed());
+
+            for (int i = actual.size(); i < a.length; i++) {
+                assertEquals(0f, actual.internalArray()[i]);
+            }
+        }
+    }
+
+    // ---- perf review 2026-09-26 G111 end ----
 }

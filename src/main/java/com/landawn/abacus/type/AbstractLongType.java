@@ -193,27 +193,27 @@ public abstract class AbstractLongType extends NumberType<Number> {
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
-     * @param len the number of characters to read
-     * @return the {@code Long} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param length the number of characters to read
+     * @return the {@code Long} value, or the default value if {@code cbuf} is {@code null} or {@code length} is {@code 0}
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
-     * @throws IllegalArgumentException if {@code cbuf} is non-null, {@code len} is nonzero, and the decimal parsing path receives a negative offset or length.
+     * @throws IllegalArgumentException if {@code cbuf} is non-null, {@code length} is nonzero, and the decimal parsing path receives a negative offset or length.
      * @throws NumberFormatException if the character sequence cannot be parsed as a {@code long}
      * @throws ArithmeticException if the region is a well-formed integer outside the {@code long} range
      */
     @Override
-    public Long valueOf(final char[] cbuf, final int offset, final int len)
+    public Long valueOf(final char[] cbuf, final int offset, final int length)
             throws IndexOutOfBoundsException, IllegalArgumentException, NumberFormatException, ArithmeticException {
-        if ((cbuf == null) || (len == 0)) {
+        if ((cbuf == null) || (length == 0)) {
             return (Long) defaultValue();
         }
 
         // See AbstractIntegerType.valueOf(char[]): the shared fast path cannot parse a hex token, and it must stay
         // hex-blind because the date/time types run their millis guess through it.
-        if (AbstractIntegerType.hasRadixPrefix(cbuf, offset, len)) {
-            return Numbers.toLong(new String(cbuf, offset, len));
+        if (AbstractIntegerType.hasRadixPrefix(cbuf, offset, length)) {
+            return Numbers.toLong(new String(cbuf, offset, length));
         }
 
-        return parseLong(cbuf, offset, len);
+        return parseLong(cbuf, offset, length);
     }
 
     /**
@@ -265,18 +265,18 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * Otherwise, converts the {@code Number} to a {@code long} value.
      * </p>
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Number} value to set as {@code long}, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.BIGINT);
+            statement.setNull(columnIndex, Types.BIGINT);
         } else {
-            stmt.setLong(columnIndex, x.longValue());
+            statement.setLong(columnIndex, x.longValue());
         }
     }
 
@@ -287,18 +287,18 @@ public abstract class AbstractLongType extends NumberType<Number> {
      * Otherwise, converts the {@code Number} to a {@code long} value.
      * </p>
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Number} value to set as {@code long}, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.BIGINT);
+            statement.setNull(parameterName, Types.BIGINT);
         } else {
-            stmt.setLong(parameterName, x.longValue());
+            statement.setLong(parameterName, x.longValue());
         }
     }
 

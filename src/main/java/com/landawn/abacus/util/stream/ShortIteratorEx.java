@@ -219,30 +219,30 @@ public abstract class ShortIteratorEx extends ShortIterator implements IteratorE
      * ShortIteratorEx iterEx = ShortIteratorEx.of(iter);
      * }</pre>
      *
-     * @param iter the ShortIterator to wrap (can be null)
-     * @return the same instance if {@code iter} is already a ShortIteratorEx, a ShortIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
+     * @param iterator the ShortIterator to wrap (can be null)
+     * @return the same instance if {@code iterator} is already a ShortIteratorEx, a ShortIteratorEx wrapping the given iterator, or an empty iterator if {@code iterator} is null
      */
-    public static ShortIteratorEx of(final ShortIterator iter) {
-        if (iter == null) {
+    public static ShortIteratorEx of(final ShortIterator iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ShortIteratorEx) {
-            return ((ShortIteratorEx) iter);
+        } else if (iterator instanceof ShortIteratorEx) {
+            return ((ShortIteratorEx) iterator);
         }
 
         return new ShortIteratorEx() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public short nextShort() throws NoSuchElementException {
-                return iter.nextShort();
+                return iterator.nextShort();
             }
 
             @Override
             public void closeResource() {
-                ObjIteratorEx.closeResource(iter);
+                ObjIteratorEx.closeResource(iterator);
             }
         };
     }
@@ -260,13 +260,13 @@ public abstract class ShortIteratorEx extends ShortIterator implements IteratorE
      * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
      * is unboxed by its next method.</p>
      *
-     * @param iter the Iterator of Short objects (can be null)
+     * @param iterator the Iterator of Short objects (can be null)
      * @return a ShortIteratorEx unwrapping the given iterator, or empty iterator if iter is null
      */
-    public static ShortIteratorEx from(final Iterator<Short> iter) {
-        if (iter == null) {
+    public static ShortIteratorEx from(final Iterator<Short> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ObjIteratorEx<Short> iteratorEx) {
+        } else if (iterator instanceof ObjIteratorEx<Short> iteratorEx) {
 
             return new ShortIteratorEx() {
                 @Override
@@ -313,7 +313,7 @@ public abstract class ShortIteratorEx extends ShortIterator implements IteratorE
             return new ShortIteratorEx() {
                 @Override
                 public boolean hasNext() {
-                    return iter.hasNext();
+                    return iterator.hasNext();
                 }
 
                 /**
@@ -324,12 +324,12 @@ public abstract class ShortIteratorEx extends ShortIterator implements IteratorE
                  */
                 @Override
                 public short nextShort() throws NoSuchElementException, NullPointerException {
-                    return iter.next();
+                    return iterator.next();
                 }
 
                 @Override
                 public void closeResource() {
-                    ObjIteratorEx.closeResource(iter);
+                    ObjIteratorEx.closeResource(iterator);
                 }
             };
         }
@@ -410,8 +410,8 @@ public abstract class ShortIteratorEx extends ShortIterator implements IteratorE
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ShortIteratorEx iter = ShortIteratorEx.of((short) 1, (short) 2);
-     * iter.closeResource();         // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
+     * iter.closeResource();        // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());  // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * ShortIteratorEx iter2 = ShortIteratorEx.of((short) 3, (short) 4);

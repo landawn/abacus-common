@@ -360,4 +360,15 @@ public class StringsRegressionETest extends TestBase {
         assertNull(Strings.substringBetween("Hello", i -> 5, 3));
         assertNull(Strings.substringBetween("Hello", i -> -2, 3));
     }
+
+
+    @Test
+    public void testCapitalize_uppercaseDigraphMapsToTitlecase() {
+        assertEquals(String.valueOf((char) 0x01C5) + "en", Strings.capitalize(String.valueOf((char) 0x01C4) + "en"));
+        assertEquals(String.valueOf((char) 0x01C8), Strings.capitalize(String.valueOf((char) 0x01C7)));
+        assertEquals(String.valueOf((char) 0x01CB), Strings.capitalize(String.valueOf((char) 0x01CA)));
+        assertEquals(String.valueOf((char) 0x01F2), Strings.capitalize(String.valueOf((char) 0x01F1)));
+        final String upper = "Cat";
+        assertSame(upper, Strings.capitalize(upper));
+    }
 }

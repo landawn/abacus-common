@@ -112,8 +112,8 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * <pre>{@code
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s = "hello";
-     * boolean added = set.add(s);        // returns true
-     * boolean addedAgain = set.add(s);   // returns false
+     * boolean added = set.add(s);       // returns true
+     * boolean addedAgain = set.add(s);  // returns false
      * }</pre>
      *
      * @param e element to be added to this set
@@ -299,8 +299,8 @@ public final class IdentityHashSet<T> extends AbstractSet<T> {
      * IdentityHashSet<String> set = new IdentityHashSet<>();
      * String s = "hello";
      * set.add(s);
-     * boolean contains = set.contains(s);                        // returns true
-     * boolean containsNew = set.contains(new String("hello"));   // returns false
+     * boolean contains = set.contains(s);                       // returns true
+     * boolean containsNew = set.contains(new String("hello"));  // returns false
      * }</pre>
      *
      * @param valueToFind element whose presence in this set is to be tested

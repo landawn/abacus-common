@@ -103,7 +103,7 @@ public class SplitterRegressionBTest extends TestBase {
                     () -> Splitter.with(",").splitToCollection("a", nullSupplier), //
                     () -> Splitter.with(",").splitToCollection("a", Integer.class, () -> null), //
                     () -> Splitter.with(",").splitToCollection("a", CommonUtil.typeOf(Integer.class), () -> null) }) {
-                final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call::run);
+                final NullPointerException ex = assertThrows(NullPointerException.class, call::run);
 
                 assertNotNull(ex.getMessage());
                 assertTrue(ex.getMessage().contains("must not return null"), ex.getMessage());
@@ -118,7 +118,7 @@ public class SplitterRegressionBTest extends TestBase {
                     () -> MapSplitter.with(",", "=").splitToMap("a=1", nullSupplier), //
                     () -> MapSplitter.with(",", "=").splitToMap("a=1", String.class, String.class, () -> null), //
                     () -> MapSplitter.with(",", "=").splitToMap("a=1", CommonUtil.typeOf(String.class), CommonUtil.typeOf(String.class), () -> null) }) {
-                final IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, call::run);
+                final NullPointerException ex = assertThrows(NullPointerException.class, call::run);
 
                 assertNotNull(ex.getMessage());
                 assertTrue(ex.getMessage().contains("must not return null"), ex.getMessage());

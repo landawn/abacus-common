@@ -436,8 +436,8 @@ public class JsonSerConfig extends JsonXmlSerConfig<JsonSerConfig> {
      * config.isQuoteMapKey();                       // returns true
      *
      * // map {"str" -> 1, 2 -> 2, true -> 3, null -> 4}
-     * jsonParser.serialize(map, new JsonSerConfig().setQuoteMapKey(false));   // {"str": 1, 2: 2, true: 3, null: 4}
-     * jsonParser.serialize(map, new JsonSerConfig().setQuoteMapKey(true));    // {"str": 1, "2": 2, "true": 3, "null": 4}
+     * jsonParser.serialize(map, new JsonSerConfig().setQuoteMapKey(false));  // {"str": 1, 2: 2, true: 3, null: 4}
+     * jsonParser.serialize(map, new JsonSerConfig().setQuoteMapKey(true));   // {"str": 1, "2": 2, "true": 3, "null": 4}
      * }</pre>
      *
      * @param quoteMapKey {@code true} to quote every map key (default), {@code false} to write numeric, boolean and {@code null} keys bare (String keys stay quoted)

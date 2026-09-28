@@ -661,4 +661,79 @@ public class SpinedBufferTest extends TestBase {
 
         return spine == null ? 0 : java.lang.reflect.Array.getLength(spine);
     }
+    // ---- perf review 2026-09-26 G105 begin ----
+    // G105-02: the default constructors read back the same elements, in order, for every size around the chunk boundaries
+    @Test
+    public void testDefaultConstructor_readBackAcrossChunkBoundaries() {
+        for (final int n : new int[] { 0, 1, 8, 9, 10, 17, 18, 19, 100 }) {
+            final SpinedBuffer<String> buffer = new SpinedBuffer<>();
+            final SpinedBuffer.OfInt intBuffer = new SpinedBuffer.OfInt();
+            final SpinedBuffer.OfLong longBuffer = new SpinedBuffer.OfLong();
+            final SpinedBuffer.OfDouble doubleBuffer = new SpinedBuffer.OfDouble();
+
+            for (int i = 0; i < n; i++) {
+                Assertions.assertTrue(buffer.add(i % 5 == 0 ? null : "e" + i));
+                intBuffer.accept(-i);
+                longBuffer.accept(i * 3L);
+                doubleBuffer.accept(i + 0.5);
+            }
+
+            Assertions.assertEquals(n, buffer.size());
+            Assertions.assertEquals(n, intBuffer.size());
+            Assertions.assertEquals(n, longBuffer.size());
+            Assertions.assertEquals(n, doubleBuffer.size());
+
+            final Iterator<String> iter = buffer.iterator();
+            final IntIterator intIter = intBuffer.iterator();
+            final LongIterator longIter = longBuffer.iterator();
+            final DoubleIterator doubleIter = doubleBuffer.iterator();
+
+            for (int i = 0; i < n; i++) {
+                Assertions.assertEquals(i % 5 == 0 ? null : "e" + i, iter.next());
+                Assertions.assertEquals(-i, intIter.nextInt());
+                Assertions.assertEquals(i * 3L, longIter.nextLong());
+                Assertions.assertEquals(i + 0.5, doubleIter.nextDouble());
+            }
+
+            Assertions.assertFalse(iter.hasNext());
+            Assertions.assertFalse(intIter.hasNext());
+            Assertions.assertFalse(longIter.hasNext());
+            Assertions.assertFalse(doubleIter.hasNext());
+            Assertions.assertThrows(NoSuchElementException.class, iter::next);
+            Assertions.assertThrows(NoSuchElementException.class, intIter::nextInt);
+            Assertions.assertThrows(NoSuchElementException.class, longIter::nextLong);
+            Assertions.assertThrows(NoSuchElementException.class, doubleIter::nextDouble);
+        }
+    }
+
+    // G105-02: an iterator taken from an empty default buffer stays empty after later adds; a new one sees them
+    @Test
+    public void testDefaultConstructor_emptyIteratorThenAdd() {
+        final SpinedBuffer<String> buffer = new SpinedBuffer<>();
+        final Iterator<String> emptyIter = buffer.iterator();
+        buffer.add("a");
+
+        Assertions.assertFalse(emptyIter.hasNext());
+        Assertions.assertEquals(Arrays.asList("a"), new ArrayList<>(buffer));
+
+        final SpinedBuffer.OfInt intBuffer = new SpinedBuffer.OfInt();
+        final IntIterator emptyIntIter = intBuffer.iterator();
+        intBuffer.add(7);
+
+        Assertions.assertFalse(emptyIntIter.hasNext());
+        Assertions.assertEquals(7, intBuffer.iterator().nextInt());
+    }
+
+    // G105-02: the default constructors no longer allocate the first chunk before the first add
+    @Test
+    public void testDefaultConstructor_allocatesFirstChunkLazily() throws Exception {
+        for (final Object buffer : new Object[] { new SpinedBuffer<String>(), new SpinedBuffer.OfInt(), new SpinedBuffer.OfLong(),
+                new SpinedBuffer.OfDouble() }) {
+            final java.lang.reflect.Field field = buffer.getClass().getDeclaredField("curChunk");
+            field.setAccessible(true);
+
+            Assertions.assertEquals(0, java.lang.reflect.Array.getLength(field.get(buffer)), buffer.getClass().getName());
+        }
+    }
+    // ---- perf review 2026-09-26 G105 end ----
 }

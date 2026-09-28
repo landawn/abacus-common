@@ -296,14 +296,14 @@ public final class HttpUtil {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * // Valid headers
-     * boolean valid1 = HttpUtil.isValidHttpHeader("Content-Type", "application/json");       // true
-     * boolean valid2 = HttpUtil.isValidHttpHeader("Authorization", "Bearer token123");       // true
+     * boolean valid1 = HttpUtil.isValidHttpHeader("Content-Type", "application/json");  // true
+     * boolean valid2 = HttpUtil.isValidHttpHeader("Authorization", "Bearer token123");  // true
      *
      * // Invalid headers
-     * boolean invalid1 = HttpUtil.isValidHttpHeader("", "value");                            // false (empty key)
-     * boolean invalid2 = HttpUtil.isValidHttpHeader("Key:Name", "value");                    // false (contains colon)
-     * boolean invalid3 = HttpUtil.isValidHttpHeader("Key\nName", "value");                   // false (contains line separator)
-     * boolean invalid4 = HttpUtil.isValidHttpHeader("Key", "value\nwithout continuation");   // false (unescaped newline)
+     * boolean invalid1 = HttpUtil.isValidHttpHeader("", "value");                           // false (empty key)
+     * boolean invalid2 = HttpUtil.isValidHttpHeader("Key:Name", "value");                   // false (contains colon)
+     * boolean invalid3 = HttpUtil.isValidHttpHeader("Key\nName", "value");                  // false (contains line separator)
+     * boolean invalid4 = HttpUtil.isValidHttpHeader("Key", "value\nwithout continuation");  // false (unescaped newline)
      * }</pre>
      *
      * @param key The header key to validate
@@ -373,11 +373,12 @@ public final class HttpUtil {
      *
      * @param value The header value (can be {@code null}, String, Collection, or any object)
      * @return The header value as a string, or {@code null} if value is null
+     * @throws ArithmeticException if {@code value} is an {@link java.time.Instant} whose epoch-millisecond value overflows a {@code long}
      * @see HttpHeaders#valueOf(Object)
      * @see HttpHeaders#valueOf(String, Object)
      */
     @MayReturnNull
-    public static String readHttpHeaderValue(final Object value) {
+    public static String readHttpHeaderValue(final Object value) throws ArithmeticException {
         if (value == null) {
             return null;
         }
@@ -458,11 +459,11 @@ public final class HttpUtil {
      */
     @MayReturnNull
     public static String getContentType(final HttpSettings httpSettings) {
-        if (httpSettings == null || httpSettings.headers() == null) {
+        if (httpSettings == null || httpSettings.headersOrNull() == null) {
             return null;
         }
 
-        return getContentType(httpSettings.headers());
+        return getContentType(httpSettings.headersOrNull());
     }
 
     /**
@@ -557,11 +558,11 @@ public final class HttpUtil {
      */
     @MayReturnNull
     public static String getContentEncoding(final HttpSettings httpSettings) {
-        if (httpSettings == null || httpSettings.headers() == null) {
+        if (httpSettings == null || httpSettings.headersOrNull() == null) {
             return null;
         }
 
-        return getContentEncoding(httpSettings.headers());
+        return getContentEncoding(httpSettings.headersOrNull());
     }
 
     /**
@@ -656,11 +657,11 @@ public final class HttpUtil {
      */
     @MayReturnNull
     public static String getAccept(final HttpSettings httpSettings) {
-        if (httpSettings == null || httpSettings.headers() == null) {
+        if (httpSettings == null || httpSettings.headersOrNull() == null) {
             return null;
         }
 
-        return getAccept(httpSettings.headers());
+        return getAccept(httpSettings.headersOrNull());
     }
 
     /**
@@ -755,11 +756,11 @@ public final class HttpUtil {
      */
     @MayReturnNull
     public static String getAcceptEncoding(final HttpSettings httpSettings) {
-        if (httpSettings == null || httpSettings.headers() == null) {
+        if (httpSettings == null || httpSettings.headersOrNull() == null) {
             return null;
         }
 
-        return getAcceptEncoding(httpSettings.headers());
+        return getAcceptEncoding(httpSettings.headersOrNull());
     }
 
     /**
@@ -854,11 +855,11 @@ public final class HttpUtil {
      */
     @MayReturnNull
     public static String getAcceptCharset(final HttpSettings httpSettings) {
-        if (httpSettings == null || httpSettings.headers() == null) {
+        if (httpSettings == null || httpSettings.headersOrNull() == null) {
             return null;
         }
 
-        return getAcceptCharset(httpSettings.headers());
+        return getAcceptCharset(httpSettings.headersOrNull());
     }
 
     /**
@@ -896,9 +897,9 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String json = HttpUtil.getContentType(ContentFormat.JSON);          // returns "application/json"
-     * String xmlGzip = HttpUtil.getContentType(ContentFormat.XML_GZIP);   // returns "application/xml"
-     * String none = HttpUtil.getContentType(ContentFormat.NONE);          // returns "" (empty string)
+     * String json = HttpUtil.getContentType(ContentFormat.JSON);         // returns "application/json"
+     * String xmlGzip = HttpUtil.getContentType(ContentFormat.XML_GZIP);  // returns "application/xml"
+     * String none = HttpUtil.getContentType(ContentFormat.NONE);         // returns "" (empty string)
      * }</pre>
      *
      * @param contentFormat The content format
@@ -919,9 +920,9 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String gzip = HttpUtil.getContentEncoding(ContentFormat.JSON_GZIP);   // returns "gzip"
-     * String lz4 = HttpUtil.getContentEncoding(ContentFormat.XML_LZ4);      // returns "lz4"
-     * String none = HttpUtil.getContentEncoding(ContentFormat.JSON);        // returns "" (no compression)
+     * String gzip = HttpUtil.getContentEncoding(ContentFormat.JSON_GZIP);  // returns "gzip"
+     * String lz4 = HttpUtil.getContentEncoding(ContentFormat.XML_LZ4);     // returns "lz4"
+     * String none = HttpUtil.getContentEncoding(ContentFormat.JSON);       // returns "" (no compression)
      * }</pre>
      *
      * @param contentFormat The content format
@@ -1132,16 +1133,17 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Parser<?, ?> jsonParser = HttpUtil.getParser(ContentFormat.JSON);   // a JSON parser
-     * Parser<?, ?> xmlParser = HttpUtil.getParser(ContentFormat.XML);     // an XML parser
-     * Parser<?, ?> defaultParser = HttpUtil.getParser(null);              // the default JSON parser
+     * Parser<?, ?> jsonParser = HttpUtil.getParser(ContentFormat.JSON);  // a JSON parser
+     * Parser<?, ?> xmlParser = HttpUtil.getParser(ContentFormat.XML);    // an XML parser
+     * Parser<?, ?> defaultParser = HttpUtil.getParser(null);             // the default JSON parser
      * }</pre>
      *
      * @param <SC> The serialization config type
      * @param <DC> The deserialization config type
      * @param contentFormat The content format
      * @return The parser for the content format, or the default JSON parser if {@code contentFormat} is {@code null}
-     * @throws IllegalArgumentException if the content format is not supported.
+     * @throws IllegalArgumentException if no parser is available for {@code contentFormat}: an XML format when no XML parser is on
+     *         the classpath, or {@link ContentFormat#KRYO} when Kryo is not available.
      */
     public static <SC extends SerializationConfig<?>, DC extends DeserializationConfig<?>> Parser<SC, DC> getParser(final ContentFormat contentFormat)
             throws IllegalArgumentException {
@@ -1178,8 +1180,8 @@ public final class HttpUtil {
      * @param contentFormat The content format indicating compression
      * @return The wrapped input stream, or the original stream if no decompression is needed.
      *         Returns an empty stream if {@code is} is {@code null}.
-     * @throws UncheckedIOException if a decoder must read a stream header on construction (GZIP) and
-     *         {@code is} is empty or does not start with a valid header
+     * @throws UncheckedIOException if the decoder cannot be constructed over {@code is}: the GZIP header is missing or invalid (for
+     *         example an empty stream), or the Brotli or Snappy decoder fails to initialize from {@code is}
      */
     public static InputStream wrapInputStream(final InputStream is, final ContentFormat contentFormat) throws UncheckedIOException {
         if (is == null) {
@@ -1444,9 +1446,9 @@ public final class HttpUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Charset charset = HttpUtil.getCharset("text/html; charset=ISO-8859-1");   // returns ISO-8859-1
-     * Charset dft = HttpUtil.getCharset("application/json");                    // returns UTF-8 (no charset)
-     * Charset blank = HttpUtil.getCharset(null);                                // returns UTF-8 (default)
+     * Charset charset = HttpUtil.getCharset("text/html; charset=ISO-8859-1");  // returns ISO-8859-1
+     * Charset dft = HttpUtil.getCharset("application/json");                   // returns UTF-8 (no charset)
+     * Charset blank = HttpUtil.getCharset(null);                               // returns UTF-8 (default)
      * }</pre>
      *
      * @param contentType The Content-Type header value; may be {@code null} or empty

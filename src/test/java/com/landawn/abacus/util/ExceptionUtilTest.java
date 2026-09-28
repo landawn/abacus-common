@@ -596,4 +596,30 @@ public class ExceptionUtilTest extends TestBase {
         final Exception named = new Exception();
         assertEquals(named.getClass().getCanonicalName(), ExceptionUtil.getErrorMessage(named));
     }
+
+    @Test
+    public void testTryToGetOriginalCheckedExceptionUnwrapsExecutionExceptionRuntimeCause() {
+        IllegalStateException runtimeCause = new IllegalStateException("task failed");
+        assertSame(runtimeCause, ExceptionUtil.tryToGetOriginalCheckedException(new ExecutionException(runtimeCause)));
+        assertSame(runtimeCause, ExceptionUtil.tryToGetOriginalCheckedException(new InvocationTargetException(runtimeCause)));
+
+        IOException checkedCause = new IOException("io");
+        assertSame(checkedCause,
+                ExceptionUtil.tryToGetOriginalCheckedException(new ExecutionException(new UncheckedIOException(checkedCause))));
+
+        // A wrapper that is not recognized is returned as is.
+        UndeclaredThrowableException undeclared = new UndeclaredThrowableException(checkedCause);
+        assertSame(undeclared, ExceptionUtil.tryToGetOriginalCheckedException(undeclared));
+    }
+
+    @Test
+    public void testToRuntimeExceptionUnwrapsUndeclaredThrowableWithCause() {
+        IOException checkedCause = new IOException("io");
+        RuntimeException converted = ExceptionUtil.toRuntimeException(new UndeclaredThrowableException(checkedCause), false, false);
+        assertInstanceOf(UncheckedIOException.class, converted);
+        assertSame(checkedCause, converted.getCause());
+
+        UndeclaredThrowableException noCause = new UndeclaredThrowableException(null);
+        assertSame(noCause, ExceptionUtil.toRuntimeException(noCause, false, false));
+    }
 }

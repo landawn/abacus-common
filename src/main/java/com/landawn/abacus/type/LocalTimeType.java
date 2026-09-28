@@ -77,7 +77,8 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
     /**
      * Converts a LocalTime object to its ISO-8601 string representation.
      * Uses {@code LocalTime.toString()}, which produces strings such as {@code "10:30"},
-     * {@code "10:30:00"}, or {@code "10:30:00.123456789"} depending on the precision.
+     * {@code "10:30:45"}, or {@code "10:30:00.123456789"} depending on the precision (the seconds field is omitted
+     * when seconds and nanoseconds are both zero, so {@code LocalTime.of(10, 30, 0)} yields {@code "10:30"}).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -220,19 +221,19 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      *
      * @param cbuf The character array containing the LocalTime representation
      * @param offset The starting position in the character array
-     * @param len The number of characters to use
+     * @param length The number of characters to use
      * @return The parsed LocalTime object, or {@code null} if the input is {@code null} or empty
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
      * @throws DateTimeParseException if the text representation is neither a supported millisecond value nor a valid ISO-8601 LocalTime.
      */
     @MayReturnNull
     @Override
-    public LocalTime valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, DateTimeParseException {
-        if ((cbuf == null) || (len == 0)) {
+    public LocalTime valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, DateTimeParseException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -314,18 +315,18 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * }
      * }</pre>
      *
-     * @param stmt The PreparedStatement to set the parameter on
+     * @param statement The PreparedStatement to set the parameter on
      * @param columnIndex The parameter index (1-based) to set
      * @param x The LocalTime value to set, or {@code null} to set SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fallback fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final LocalTime x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final LocalTime x) throws NullPointerException, SQLException {
         try {
-            stmt.setObject(columnIndex, x);
+            statement.setObject(columnIndex, x);
         } catch (final SQLException e) {
-            stmt.setTime(columnIndex, x == null ? null : Time.valueOf(x));
+            statement.setTime(columnIndex, x == null ? null : Time.valueOf(x));
         }
     }
 
@@ -344,18 +345,18 @@ public class LocalTimeType extends AbstractTemporalType<LocalTime> {
      * }
      * }</pre>
      *
-     * @param stmt The CallableStatement to set the parameter on
+     * @param statement The CallableStatement to set the parameter on
      * @param parameterName The name of the parameter to set
      * @param x The LocalTime value to set, or {@code null} to set SQL NULL
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fallback fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final LocalTime x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final LocalTime x) throws NullPointerException, SQLException {
         try {
-            stmt.setObject(parameterName, x);
+            statement.setObject(parameterName, x);
         } catch (final SQLException e) {
-            stmt.setTime(parameterName, x == null ? null : Time.valueOf(x));
+            statement.setTime(parameterName, x == null ? null : Time.valueOf(x));
         }
     }
 }

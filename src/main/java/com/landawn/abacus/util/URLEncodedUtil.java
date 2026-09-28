@@ -32,6 +32,8 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.AbstractMap;
 import java.util.BitSet;
@@ -414,6 +416,8 @@ public final class URLEncodedUtil {
     }
 
     private static final int RADIX = 16;
+
+    private static final char[] UPPER_HEX_DIGITS = "0123456789ABCDEF".toCharArray();
 
     private URLEncodedUtil() {
         // Utility class - prevent instantiation
@@ -1086,6 +1090,9 @@ public final class URLEncodedUtil {
         // always sees a contiguous %XX run holding the characters' complete encoded byte sequence. Emitting
         // individual safe-valued bytes from a multi-byte encoding (e.g. the 0x61 in UTF-16's 00 61) would
         // split a character across the literal/escape boundary and make the run undecodable.
+        final boolean isAsciiSingleByte = Charsets.UTF_8.equals(charset) || Charsets.ISO_8859_1.equals(charset) || Charsets.US_ASCII.equals(charset);
+        CharsetEncoder encoder = null;
+
         for (int i = 0, len = content.length(); i < len;) {
             final char ch = content.charAt(i);
 
@@ -1097,42 +1104,60 @@ public final class URLEncodedUtil {
                 i++;
             } else {
                 int runEnd = i + 1;
+                boolean isAsciiRun = ch < 128;
 
                 while (runEnd < len) {
                     final char next = content.charAt(runEnd);
 
-                    if (next < 128 && (safeChars.get(next) || (blankAsPlus && next == ' '))) {
-                        break;
+                    if (next < 128) {
+                        if (safeChars.get(next) || (blankAsPlus && next == ' ')) {
+                            break;
+                        }
+                    } else {
+                        isAsciiRun = false;
                     }
 
                     runEnd++;
                 }
 
-                final ByteBuffer bb;
+                if (isAsciiRun && isAsciiSingleByte) {
+                    // Each ASCII character encodes to the single byte of the same value in this charset.
+                    for (int j = i; j < runEnd; j++) {
+                        appendPercentEscape(content.charAt(j), output);
+                    }
+                } else {
+                    // CharsetEncoder.encode(CharBuffer) resets the encoder before each run, so one instance serves all runs.
+                    if (encoder == null) {
+                        encoder = charset.newEncoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
+                    }
 
-                try {
-                    bb = charset.newEncoder()
-                            .onMalformedInput(CodingErrorAction.REPORT)
-                            .onUnmappableCharacter(CodingErrorAction.REPORT)
-                            .encode(CharBuffer.wrap(content, i, runEnd));
-                } catch (final CharacterCodingException e) {
-                    throw new IllegalArgumentException(
-                            "Input contains malformed UTF-16 or a character not representable in " + charset.name() + " in the run beginning at index " + i, e);
-                }
+                    final ByteBuffer bb;
 
-                while (bb.hasRemaining()) {
-                    final int b = bb.get() & 0xff;
-                    output.append('%');
+                    try {
+                        bb = encoder.encode(CharBuffer.wrap(content, i, runEnd));
+                    } catch (final CharacterCodingException e) {
+                        throw new IllegalArgumentException(
+                                "Input contains malformed UTF-16 or a character not representable in " + charset.name() + " in the run beginning at index " + i,
+                                e);
+                    }
 
-                    final char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, RADIX));
-                    final char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, RADIX));
-                    output.append(hex1);
-                    output.append(hex2);
+                    while (bb.hasRemaining()) {
+                        appendPercentEscape(bb.get() & 0xff, output);
+                    }
                 }
 
                 i = runEnd;
             }
         }
+    }
+
+    /**
+     * Appends {@code %XX} for the given byte value (0-255), using upper-case hexadecimal digits.
+     */
+    private static void appendPercentEscape(final int byteValue, final Appendable output) throws IOException {
+        output.append('%');
+        output.append(UPPER_HEX_DIGITS[byteValue >> 4]);
+        output.append(UPPER_HEX_DIGITS[byteValue & 0xF]);
     }
 
     /**
@@ -1321,9 +1346,9 @@ public final class URLEncodedUtil {
      *         returns an empty map (from supplier) if {@code urlQuery} is {@code null} or empty. A token
      *         without {@code '='} is stored with a {@code null} value, so the supplied {@code Map} must
      *         tolerate {@code null} values.
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null},
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null},
      *         or if a percent escape or its encoded byte sequence is malformed
-     * @throws NullPointerException if the {@code Map} returned by {@code mapSupplier} does not permit
+     * @throws NullPointerException if {@code mapSupplier} returns {@code null}, or if the {@code Map} returned by {@code mapSupplier} does not permit
      *         {@code null} values (for example {@code Hashtable} or {@code ConcurrentHashMap}) and
      *         {@code urlQuery} contains a token without {@code '='}; use a {@code null}-tolerant
      *         {@code Map} or {@link #decodeToMultimap(String)} instead
@@ -1345,8 +1370,8 @@ public final class URLEncodedUtil {
      * @param mapSupplier supplier for the result map; must not be {@code null} and must not return {@code null}
      * @return the supplied map populated with decoded parameters; a token without {@code '='} is stored
      *         with a {@code null} value, so the supplied {@code Map} must tolerate {@code null} values
-     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null} or returns {@code null}
-     * @throws NullPointerException if the {@code Map} returned by {@code mapSupplier} does not permit
+     * @throws IllegalArgumentException if {@code mapSupplier} is {@code null}
+     * @throws NullPointerException if {@code mapSupplier} returns {@code null}, or if the {@code Map} returned by {@code mapSupplier} does not permit
      *         {@code null} values (for example {@code Hashtable} or {@code ConcurrentHashMap}) and
      *         {@code urlQuery} contains a token without {@code '='}; use a {@code null}-tolerant
      *         {@code Map} or {@link #decodeToMultimap(String)} instead
@@ -1357,14 +1382,14 @@ public final class URLEncodedUtil {
     }
 
     /**
-     * @throws IllegalArgumentException if {@code mapSupplier} is null or returns null, or strict decoding rejects malformed input
-     * @throws NullPointerException if a valueless query parameter is inserted into a map that does not permit null values
+     * @throws IllegalArgumentException if {@code mapSupplier} is null, or strict decoding rejects malformed input
+     * @throws NullPointerException if {@code mapSupplier} returns null, or a valueless query parameter is inserted into a map that does not permit null values
      */
     private static <M extends Map<String, String>> M decode(final String urlQuery, final Charset charset, final Supplier<M> mapSupplier, final boolean strict)
             throws IllegalArgumentException, NullPointerException {
         N.checkArgNotNull(mapSupplier, cs.mapSupplier);
 
-        final M result = N.checkArgNotNull(mapSupplier.get(), "mapSupplier result");
+        final M result = N.requireNonNull(mapSupplier.get(), "mapSupplier result");
 
         if (Strings.isEmpty(urlQuery)) {
             return result;
@@ -1492,7 +1517,11 @@ public final class URLEncodedUtil {
         return decodeToMultimap(urlQuery, charset, false);
     }
 
-    private static ListMultimap<String, String> decodeToMultimap(final String urlQuery, final Charset charset, final boolean strict) {
+    /**
+     * @throws IllegalArgumentException if {@code strict} is {@code true} and a percent escape or its encoded byte sequence is malformed
+     */
+    private static ListMultimap<String, String> decodeToMultimap(final String urlQuery, final Charset charset, final boolean strict)
+            throws IllegalArgumentException {
         final ListMultimap<String, String> result = N.newLinkedListMultimap();
 
         if (Strings.isEmpty(urlQuery)) {
@@ -1541,9 +1570,12 @@ public final class URLEncodedUtil {
      *         {@code ConcurrentNavigableMap.class} also resolve to) and {@code urlQuery} contains a token
      *         without {@code '='}; use a {@code null}-tolerant {@code Map} or
      *         {@link #decodeToMultimap(String)} instead
+     * @throws RuntimeException if {@code targetType} is a bean type whose instance cannot be created or completed (for example
+     *         its constructor or builder throws)
      * @see #decode(String, Charset, Class)
      */
-    public static <T> T decode(final String urlQuery, final Class<? extends T> targetType) throws IllegalArgumentException, NullPointerException {
+    public static <T> T decode(final String urlQuery, final Class<? extends T> targetType)
+            throws IllegalArgumentException, NullPointerException, RuntimeException {
         return decode(urlQuery, IOUtil.DEFAULT_CHARSET, targetType);
     }
 
@@ -1590,10 +1622,12 @@ public final class URLEncodedUtil {
      *         {@code ConcurrentNavigableMap.class} also resolve to) and {@code urlQuery} contains a token
      *         without {@code '='}; use a {@code null}-tolerant {@code Map} or
      *         {@link #decodeToMultimap(String)} instead
+     * @throws RuntimeException if {@code targetType} is a bean type whose instance cannot be created or completed (for example
+     *         its constructor or builder throws)
      * @see #decode(String, Class)
      */
     public static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType)
-            throws IllegalArgumentException, NullPointerException {
+            throws IllegalArgumentException, NullPointerException, RuntimeException {
         return decode(urlQuery, charset, targetType, true);
     }
 
@@ -1604,18 +1638,21 @@ public final class URLEncodedUtil {
      * @param urlQuery the URL query string to decode, may be {@code null} or empty
      * @param targetType the supported bean or map type; must not be {@code null}
      * @return a populated target instance
-     * @throws IllegalArgumentException if {@code targetType} is invalid - including a {@code Map} type for which
-     *         no assignable mutable instance can be created, such as {@link ImmutableMap} or
-     *         {@link java.util.EnumMap} - or a decoded value cannot be converted
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type nor a supported
+     *         bean class, or a {@code Map} type for which no assignable mutable instance can be created (such as
+     *         {@link ImmutableMap} or {@link java.util.EnumMap}), or if a decoded value cannot be converted
      * @throws NullPointerException if the {@code Map} created for {@code targetType} does not permit
      *         {@code null} values (for example {@code Hashtable}, {@code ConcurrentHashMap} or
      *         {@code ConcurrentSkipListMap}, which {@code ConcurrentMap.class} and
      *         {@code ConcurrentNavigableMap.class} also resolve to) and {@code urlQuery} contains a token
      *         without {@code '='}; use a {@code null}-tolerant {@code Map} or
      *         {@link #decodeToMultimap(String)} instead
+     * @throws RuntimeException if {@code targetType} is a bean type whose instance cannot be created or completed (for example
+     *         its constructor or builder throws)
      * @see #decode(String, Class)
      */
-    public static <T> T decodeLenient(final String urlQuery, final Class<? extends T> targetType) throws IllegalArgumentException, NullPointerException {
+    public static <T> T decodeLenient(final String urlQuery, final Class<? extends T> targetType)
+            throws IllegalArgumentException, NullPointerException, RuntimeException {
         return decodeLenient(urlQuery, IOUtil.DEFAULT_CHARSET, targetType);
     }
 
@@ -1628,19 +1665,21 @@ public final class URLEncodedUtil {
      * @param charset the charset used to decode percent-encoded bytes; {@code null} selects UTF-8
      * @param targetType the supported bean or map type; must not be {@code null}
      * @return a populated target instance
-     * @throws IllegalArgumentException if {@code targetType} is invalid - including a {@code Map} type for which
-     *         no assignable mutable instance can be created, such as {@link ImmutableMap} or
-     *         {@link java.util.EnumMap} - or a decoded value cannot be converted
+     * @throws IllegalArgumentException if {@code targetType} is {@code null}, neither a {@code Map} type nor a supported
+     *         bean class, or a {@code Map} type for which no assignable mutable instance can be created (such as
+     *         {@link ImmutableMap} or {@link java.util.EnumMap}), or if a decoded value cannot be converted
      * @throws NullPointerException if the {@code Map} created for {@code targetType} does not permit
      *         {@code null} values (for example {@code Hashtable}, {@code ConcurrentHashMap} or
      *         {@code ConcurrentSkipListMap}, which {@code ConcurrentMap.class} and
      *         {@code ConcurrentNavigableMap.class} also resolve to) and {@code urlQuery} contains a token
      *         without {@code '='}; use a {@code null}-tolerant {@code Map} or
      *         {@link #decodeToMultimap(String)} instead
+     * @throws RuntimeException if {@code targetType} is a bean type whose instance cannot be created or completed (for example
+     *         its constructor or builder throws)
      * @see #decode(String, Charset, Class)
      */
     public static <T> T decodeLenient(final String urlQuery, final Charset charset, final Class<? extends T> targetType)
-            throws IllegalArgumentException, NullPointerException {
+            throws IllegalArgumentException, NullPointerException, RuntimeException {
         return decode(urlQuery, charset, targetType, false);
     }
 
@@ -1648,10 +1687,11 @@ public final class URLEncodedUtil {
      * @throws IllegalArgumentException if {@code targetType} is null, a mutable instance of the requested map type
      *         cannot be created, the target is not a map or bean type, or strict decoding rejects malformed input
      * @throws NullPointerException if a valueless query parameter is inserted into a map that does not permit null values
+     * @throws RuntimeException if a bean target cannot be created or completed
      */
     @SuppressWarnings("rawtypes")
     private static <T> T decode(final String urlQuery, final Charset charset, final Class<? extends T> targetType, final boolean strict)
-            throws IllegalArgumentException, NullPointerException {
+            throws IllegalArgumentException, NullPointerException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         if (Map.class.isAssignableFrom(targetType)) {
@@ -1708,9 +1748,10 @@ public final class URLEncodedUtil {
      * @param strict {@code true} to reject a malformed percent escape with an
      *        {@link IllegalArgumentException}; {@code false} to pass it through unchanged
      * @param action receives each decoded name and its value, or {@code null} for a valueless token
+     * @throws IllegalArgumentException if {@code strict} is {@code true} and a percent escape or its encoded byte sequence is malformed
      */
     private static void forEachDecodedQueryParameter(final String urlQuery, final Charset charset, final boolean strict,
-            final BiConsumer<String, String> action) {
+            final BiConsumer<String, String> action) throws IllegalArgumentException {
         final int len = urlQuery.length();
         int tokenStart = 0;
         // The first '=' of the current token, tracked while the token is being scanned. Looking it up with
@@ -1781,9 +1822,12 @@ public final class URLEncodedUtil {
      * @param targetType the class of the bean to create and populate; must not be {@code null}.
      * @return an instance of type T with properties populated from the parameter map;
      *         returns an empty instance if {@code parameters} is {@code null} or empty.
-     * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean type.
+     * @throws IllegalArgumentException if {@code targetType} is {@code null} or not a supported bean type, or a parameter value
+     *         cannot be converted to its property type.
+     * @throws RuntimeException if the bean instance cannot be created or completed (for example its constructor or builder throws)
      */
-    public static <T> T convertToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType) throws IllegalArgumentException {
+    public static <T> T convertToBean(final Map<String, String[]> parameters, final Class<? extends T> targetType)
+            throws IllegalArgumentException, RuntimeException {
         N.checkArgNotNull(targetType, cs.targetType);
 
         final BeanInfo beanInfo = ParserUtil.getBeanInfo(targetType);
@@ -1818,7 +1862,10 @@ public final class URLEncodedUtil {
         return beanInfo.finishBeanResult(result);
     }
 
-    private static String decodeFormFields(final String content, final Charset charset, final boolean strict) {
+    /**
+     * @throws IllegalArgumentException if {@code strict} is {@code true} and a percent escape or its encoded byte sequence is malformed
+     */
+    private static String decodeFormFields(final String content, final Charset charset, final boolean strict) throws IllegalArgumentException {
         if (content == null) {
             return null;
         }
@@ -1848,11 +1895,18 @@ public final class URLEncodedUtil {
             return null;
         }
 
+        // Nothing to decode: the loop below would copy every character unchanged.
+        if (content.indexOf('%') < 0 && (!plusAsBlank || content.indexOf('+') < 0)) {
+            return content;
+        }
+
         // Decode each contiguous escape run as bytes. Literal characters must not be round-tripped
         // through the selected charset: URLDecoder semantics retain them as-is, and doing otherwise
         // both corrupts unrepresentable Unicode and requires unsafe fixed-size byte estimates for
         // stateful encoders such as ISO-2022-JP.
         final StringBuilder result = new StringBuilder(content.length());
+        byte[] escapedBytes = null;
+        CharsetDecoder decoder = null;
 
         for (int i = 0, len = content.length(); i < len;) {
             final char c = content.charAt(i);
@@ -1873,7 +1927,12 @@ public final class URLEncodedUtil {
                     continue;
                 }
 
-                final java.io.ByteArrayOutputStream escapedBytes = new java.io.ByteArrayOutputStream();
+                // Every escape takes three characters, so one buffer of len / 3 bytes holds any run of this call.
+                if (escapedBytes == null) {
+                    escapedBytes = new byte[len / 3];
+                }
+
+                int byteCount = 0;
 
                 while (i + 2 < len && content.charAt(i) == '%') {
                     final int nextUpperDigit = asciiHexDigit(content.charAt(i + 1));
@@ -1883,24 +1942,24 @@ public final class URLEncodedUtil {
                         break;
                     }
 
-                    escapedBytes.write((nextUpperDigit << 4) + nextLowerDigit);
+                    escapedBytes[byteCount++] = (byte) ((nextUpperDigit << 4) + nextLowerDigit);
                     i += 3;
                 }
 
-                final byte[] bytes = escapedBytes.toByteArray();
-
                 if (strict) {
+                    // CharsetDecoder.decode(ByteBuffer) resets the decoder before each run, so one instance serves all runs.
+                    if (decoder == null) {
+                        decoder = charset.newDecoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
+                    }
+
                     try {
-                        result.append(charset.newDecoder()
-                                .onMalformedInput(CodingErrorAction.REPORT)
-                                .onUnmappableCharacter(CodingErrorAction.REPORT)
-                                .decode(ByteBuffer.wrap(bytes)));
+                        result.append(decoder.decode(ByteBuffer.wrap(escapedBytes, 0, byteCount)));
                     } catch (final CharacterCodingException e) {
                         throw new IllegalArgumentException("Invalid percent-encoded byte sequence at index " + escapeStart + " for charset " + charset.name(),
                                 e);
                     }
                 } else {
-                    result.append(new String(bytes, charset));
+                    result.append(new String(escapedBytes, 0, byteCount, charset));
                 }
             } else if (plusAsBlank && c == '+') {
                 result.append(' ');

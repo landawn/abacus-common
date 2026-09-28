@@ -201,7 +201,7 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      *
      * @param cbuf the character array containing the date-time string
      * @param offset the offset in the array where the date-time string starts
-     * @param len the length of the date-time string
+     * @param length the length of the date-time string
      * @return the parsed OffsetDateTime, or {@code null} if the input is {@code null} or empty
      * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns {@code null} without reading.
      * @throws DateTimeParseException if the text is neither a millisecond number nor a valid ISO-8601 representation
@@ -209,23 +209,23 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      */
     @MayReturnNull
     @Override
-    public OffsetDateTime valueOf(final char[] cbuf, final int offset, final int len) throws IndexOutOfBoundsException, DateTimeParseException {
-        if ((cbuf == null) || (len == 0)) {
+    public OffsetDateTime valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException, DateTimeParseException {
+        if ((cbuf == null) || (length == 0)) {
             return null; // NOSONAR
         }
 
         // Check the entire token for decimal digits and an optional leading sign: parseLong(char[]) also
         // accepts suffixes and some hexadecimal forms. Rejected syntax and numeric overflow fall through
         // to valueOf(String), preserving the String overload's parsing and exception behavior.
-        if (isPossibleMillis(cbuf, offset, len)) {
+        if (isPossibleMillis(cbuf, offset, length)) {
             try {
-                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, len)), DEFAULT_ZONE_ID);
+                return OffsetDateTime.ofInstant(Instant.ofEpochMilli(parseLong(cbuf, offset, length)), DEFAULT_ZONE_ID);
             } catch (final NumberFormatException | ArithmeticException e) {
                 // ignore;
             }
         }
 
-        return valueOf(String.valueOf(cbuf, offset, len));
+        return valueOf(String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -266,34 +266,34 @@ public class OffsetDateTimeType extends AbstractTemporalType<OffsetDateTime> {
      * Sets a parameter in a PreparedStatement to an {@link OffsetDateTime} value.
      * The OffsetDateTime is converted to a Timestamp for database storage.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based) to set
      * @param x the OffsetDateTime value to set, or {@code null} to set SQL NULL
      * @throws IllegalArgumentException if a non-null value cannot be converted to a {@code Timestamp} because its epoch-millisecond value overflows
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the columnIndex is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final OffsetDateTime x)
+    public void set(final PreparedStatement statement, final int columnIndex, final OffsetDateTime x)
             throws IllegalArgumentException, NullPointerException, SQLException {
-        stmt.setTimestamp(columnIndex, x == null ? null : Timestamp.from(x.toInstant()));
+        statement.setTimestamp(columnIndex, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
     /**
      * Sets a named parameter in a CallableStatement to an {@link OffsetDateTime} value.
      * The OffsetDateTime is converted to a Timestamp for database storage.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the OffsetDateTime value to set, or {@code null} to set SQL NULL
      * @throws IllegalArgumentException if a non-null value cannot be converted to a {@code Timestamp} because its epoch-millisecond value overflows
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameterName is invalid
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final OffsetDateTime x)
+    public void set(final CallableStatement statement, final String parameterName, final OffsetDateTime x)
             throws IllegalArgumentException, NullPointerException, SQLException {
-        stmt.setTimestamp(parameterName, x == null ? null : Timestamp.from(x.toInstant()));
+        statement.setTimestamp(parameterName, x == null ? null : Timestamp.from(x.toInstant()));
     }
 
     /**

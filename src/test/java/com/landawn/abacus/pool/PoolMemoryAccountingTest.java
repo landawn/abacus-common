@@ -333,4 +333,52 @@ public class PoolMemoryAccountingTest extends TestBase {
             }
         }
     }
+
+    // ---- perf review 2026-09-26 G011 begin ----
+    // G011-01: the per-instance charge deque starts sized for one charge; pins growth past it, charge order and serialization.
+    @Test
+    public void testRecordMemoryCharge_threeDuplicateAdmissionsKeepChargeOrder() throws Exception {
+        try (GenericObjectPool<Value> pool = objects(EvictionPolicy.FIFO, 100)) {
+            final Value value = new Value("same", 10);
+            assertTrue(pool.add(value));
+            value.bytes = 20;
+            assertTrue(pool.add(value));
+            value.bytes = 30;
+            assertTrue(pool.add(value));
+            assertEquals(60, pool.stats().dataSize());
+            assertEquals(3, pool.size());
+
+            try (GenericObjectPool<Value> copy = copy(pool)) {
+                assertEquals(60, copy.stats().dataSize());
+                copy.evict();
+                assertEquals(50, copy.stats().dataSize(), "FIFO eviction removes the oldest charge of the copy");
+                assertNotNull(copy.poll());
+                assertEquals(20, copy.stats().dataSize(), "poll removes the newest charge of the copy");
+            }
+
+            pool.evict();
+            assertEquals(50, pool.stats().dataSize(), "FIFO eviction removes the oldest charge");
+            assertSame(value, pool.poll());
+            assertEquals(20, pool.stats().dataSize(), "poll removes the newest charge");
+            assertSame(value, pool.poll());
+            assertEquals(0, pool.stats().dataSize());
+            assertNull(pool.poll());
+
+            value.bytes = 1;
+            assertTrue(pool.add(value));
+            value.bytes = 2;
+            assertTrue(pool.add(value));
+            value.bytes = 4;
+            assertTrue(pool.add(value));
+            assertEquals(7, pool.stats().dataSize());
+            assertSame(value, pool.poll());
+            assertEquals(3, pool.stats().dataSize());
+            assertSame(value, pool.poll());
+            assertEquals(1, pool.stats().dataSize());
+            assertSame(value, pool.poll());
+            assertEquals(0, pool.stats().dataSize());
+            assertTrue(pool.isEmpty());
+        }
+    }
+    // ---- perf review 2026-09-26 G011 end ----
 }

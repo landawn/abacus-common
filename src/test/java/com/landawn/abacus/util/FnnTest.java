@@ -1502,4 +1502,58 @@ public class FnnTest extends TestBase {
         assertEquals(2, attempts.get());
     }
 
+    // ---- perf review 2026-09-26 G041 begin ----
+    // G041-01: exactly `count` trues across concurrent callers, then false forever (pins the exhausted fast path).
+    @Test
+    public void testAtMost_concurrentCallersGetExactlyCountTrues() throws Exception {
+        final int count = 1000;
+        final int threadCount = 4;
+        final int callsPerThread = 5000;
+        final Throwables.Predicate<Object, RuntimeException> predicate = Fnn.atMost(count);
+        final java.util.concurrent.atomic.AtomicInteger trues = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+        final Thread[] threads = new Thread[threadCount];
+
+        for (int k = 0; k < threadCount; k++) {
+            threads[k] = new Thread(() -> {
+                try {
+                    start.await();
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+                for (int i = 0; i < callsPerThread; i++) {
+                    if (predicate.test(null)) {
+                        trues.incrementAndGet();
+                    }
+                }
+            });
+            threads[k].start();
+        }
+
+        start.countDown();
+
+        for (final Thread thread : threads) {
+            thread.join(60_000);
+        }
+
+        assertEquals(count, trues.get());
+        assertFalse(predicate.test(null));
+    }
+
+    // G041-01: a single-permit predicate and Integer.MAX_VALUE permits keep their boundary answers.
+    @Test
+    public void testAtMost_boundaryCounts() throws Exception {
+        final Throwables.Predicate<Object, RuntimeException> one = Fnn.atMost(1);
+        assertTrue(one.test(null));
+        assertFalse(one.test(null));
+        assertFalse(one.test(null));
+
+        final Throwables.Predicate<Object, RuntimeException> max = Fnn.atMost(Integer.MAX_VALUE);
+        for (int i = 0; i < 1000; i++) {
+            assertTrue(max.test(null));
+        }
+    }
+    // ---- perf review 2026-09-26 G041 end ----
+
 }

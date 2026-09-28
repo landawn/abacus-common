@@ -1326,4 +1326,71 @@ public class ArrayCharStreamTest extends TestBase {
     public void testIterateBooleanSupplierCharSupplierNull() {
         assertThrows(IllegalArgumentException.class, () -> CharStream.iterate(null, () -> 'a').count());
     }
+
+    // ---- perf review 2026-09-26 G087 begin ----
+    // G087-02: unsorted ArrayCharStream.distinct() keeps first occurrences in encounter order over the full char domain
+    @Test
+    public void testDistinct_unsortedArrayFullDomainMatchesFirstOccurrenceOrder() {
+        final char[] edge = { 'b', '\uffff', '\u0000', 'b', '?', '@', '\u007f', '\u0080', '\uffff', '\u0000', '\u00ff', '\u0100', '@',
+                '\u8000', '\u7fff', '\u8000' };
+        assertTrue(Arrays.equals(new char[] { 'b', '\uffff', '\u0000', '?', '@', '\u007f', '\u0080', '\u00ff', '\u0100', '\u8000', '\u7fff' },
+                CharStream.of(edge).distinct().toArray()));
+        assertTrue(Arrays.equals(new char[] { '\u0000', 'b', '?', '@', '\u007f', '\u0080', '\uffff' },
+                CharStream.of(edge, 2, 10).distinct().toArray()));
+        assertEquals(0, CharStream.of(new char[0]).distinct().count());
+        assertTrue(Arrays.equals(new char[] { '\u0080' }, CharStream.of(new char[] { '\u0080', '\u0080' }).distinct().toArray()));
+        // growth from a small table straight to the top word, then back to low values
+        assertTrue(Arrays.equals(new char[] { 'a', '\uffff', 'A', '\u1234' },
+                CharStream.of(new char[] { 'a', '\uffff', 'a', 'A', '\u1234', '\uffff', '\u1234' }).distinct().toArray()));
+
+        final java.util.Random random = new java.util.Random(20260926L);
+
+        for (int round = 0; round < 20; round++) {
+            final char[] data = new char[random.nextInt(3000)];
+            final int bound = round % 2 == 0 ? 128 : 65536;
+
+            for (int i = 0; i < data.length; i++) {
+                data[i] = (char) random.nextInt(bound);
+            }
+
+            final java.util.LinkedHashSet<Character> expected = new java.util.LinkedHashSet<>();
+
+            for (final char c : data) {
+                expected.add(c);
+            }
+
+            final char[] expectedArray = new char[expected.size()];
+            int idx = 0;
+
+            for (final Character c : expected) {
+                expectedArray[idx++] = c;
+            }
+
+            assertTrue(Arrays.equals(expectedArray, CharStream.of(data).distinct().toArray()));
+            assertEquals(expected.size(), CharStream.of(data).distinct().count());
+
+            final char[] parallelResult = CharStream.of(data).parallel(4).distinct().toArray();
+            Arrays.sort(parallelResult);
+            final char[] sortedExpected = expectedArray.clone();
+            Arrays.sort(sortedExpected);
+            assertTrue(Arrays.equals(sortedExpected, parallelResult));
+        }
+    }
+
+    // G087-02: the distinct filter is lazy and each distinct() call has its own seen-table
+    @Test
+    public void testDistinct_unsortedArrayLazyAndIndependentPerCall() {
+        final char[] data = { 'z', '\u4e00', 'z', 'a', '\u4e00', 'q' };
+        final CharIterator iter = CharStream.of(data).distinct().iterator();
+        assertTrue(iter.hasNext());
+        assertEquals('z', iter.nextChar());
+        assertEquals('\u4e00', iter.nextChar());
+        assertEquals('a', iter.nextChar());
+        assertEquals('q', iter.nextChar());
+        assertFalse(iter.hasNext());
+
+        assertTrue(Arrays.equals(new char[] { 'z', '\u4e00', 'a', 'q' }, CharStream.of(data).distinct().toArray()));
+        assertTrue(Arrays.equals(new char[] { 'z', '\u4e00', 'a', 'q' }, CharStream.of(data).distinct().toArray()));
+    }
+    // ---- perf review 2026-09-26 G087 end ----
 }

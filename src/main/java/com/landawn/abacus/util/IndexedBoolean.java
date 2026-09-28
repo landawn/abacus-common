@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedBoolean indexedBool = IndexedBoolean.of(true, 5);
- * boolean value = indexedBool.value();   // returns true
- * int index = indexedBool.index();       // returns 5
+ * boolean value = indexedBool.value();  // returns true
+ * int index = indexedBool.index();      // returns 5
  * }</pre>
  *
  * @see Indexed
@@ -142,8 +142,8 @@ public final class IndexedBoolean extends AbstractIndexed {
      * IndexedBoolean indexed2 = IndexedBoolean.of(true, 5);
      * IndexedBoolean indexed3 = IndexedBoolean.of(false, 5);
      *
-     * indexed1.equals(indexed2);   // returns true
-     * indexed1.equals(indexed3);   // returns false
+     * indexed1.equals(indexed2);  // returns true
+     * indexed1.equals(indexed3);  // returns false
      * }</pre>
      *
      * @param obj the object to compare with this IndexedBoolean instance for equality

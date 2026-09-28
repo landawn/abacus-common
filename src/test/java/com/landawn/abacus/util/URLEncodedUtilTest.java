@@ -618,7 +618,7 @@ public class URLEncodedUtilTest extends AbstractTest {
     @Test
     public void testDecodeMapSupplierValidationIsEager() {
         assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, (Supplier<Map<String, String>>) null));
-        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, () -> null));
+        assertThrows(NullPointerException.class, () -> URLEncodedUtil.decode(null, StandardCharsets.UTF_8, () -> null));
     }
 
     @Test
@@ -1206,4 +1206,138 @@ public class URLEncodedUtilTest extends AbstractTest {
         typed.put("age", new String[] { null });
         assertEquals(0, URLEncodedUtil.convertToBean(typed, User.class).getAge());
     }
+
+    // ---- perf review 2026-09-26 G079 begin ----
+    // G079-01: pins urlEncode output (ASCII-run fast path + reused encoder) against java.net.URLEncoder, which shares the form-encoding safe set and run splitting
+    @Test
+    public void testEncode_differentialAgainstUrlEncoder_perfReview() throws Exception {
+        final String asciiAlphabet = "aZ09 -_.*~!'()/?:@&=+$,;#%[]\"<>{}|^`\t\n\u0000\u007f";
+        final String latin1Alphabet = asciiAlphabet + "\u00e9\u00ff\u0080\u00a0";
+        final String unicodeAlphabet = latin1Alphabet + "\u4e2d\u6587\u20ac\ud83d\ude00";
+        final Object[][] cases = { { StandardCharsets.UTF_8, unicodeAlphabet }, { StandardCharsets.ISO_8859_1, latin1Alphabet },
+                { StandardCharsets.US_ASCII, asciiAlphabet }, { StandardCharsets.UTF_16, unicodeAlphabet }, { StandardCharsets.UTF_16LE, latin1Alphabet } };
+        final java.util.Random random = new java.util.Random(79);
+
+        for (final Object[] testCase : cases) {
+            final Charset charset = (Charset) testCase[0];
+            final String alphabet = (String) testCase[1];
+
+            for (int round = 0; round < 1500; round++) {
+                final StringBuilder sb = new StringBuilder();
+                final int length = random.nextInt(24);
+
+                while (sb.length() < length) {
+                    final char ch = alphabet.charAt(random.nextInt(alphabet.length()));
+
+                    if (Character.isHighSurrogate(ch)) {
+                        sb.append("\ud83d\ude00");
+                    } else if (!Character.isLowSurrogate(ch)) {
+                        sb.append(ch);
+                    }
+                }
+
+                final String value = sb.toString();
+                final String expected = "k=" + java.net.URLEncoder.encode(value, charset);
+
+                assertEquals(expected, URLEncodedUtil.encode(new Object[] { "k", value }, charset), charset + " / " + value);
+                assertEquals(value, URLEncodedUtil.decode(expected, charset).get("k"), charset + " / " + value);
+            }
+        }
+    }
+
+    // G079-01: non-form encoders keep spaces inside the escaped run; ASCII and mixed runs; hex digits are upper-case
+    @Test
+    public void testEncodeComponents_asciiAndMixedRuns_perfReview() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        URLEncodedUtil.encPath("a b/c d%\u00e9 x", StandardCharsets.UTF_8, sb);
+        assertEquals("a%20b/c%20d%25%C3%A9%20x", sb.toString());
+
+        sb = new StringBuilder();
+        URLEncodedUtil.encUserInfo("u s\u00e9r:p\"w", StandardCharsets.ISO_8859_1, sb);
+        assertEquals("u%20s%E9r:p%22w", sb.toString());
+
+        sb = new StringBuilder();
+        URLEncodedUtil.encUric("\u0000\u001f\u007f{|}", StandardCharsets.US_ASCII, sb);
+        assertEquals("%00%1F%7F%7B%7C%7D", sb.toString());
+
+        sb = new StringBuilder();
+        URLEncodedUtil.encUric("a b", StandardCharsets.UTF_16BE, sb);
+        assertEquals("a%00%20b", sb.toString());
+
+        assertEquals("k=%2F%3A%E4%B8%AD%3F+%26", URLEncodedUtil.encode(new Object[] { "k", "/:\u4e2d? &" }, StandardCharsets.UTF_8));
+        assertEquals("k=%FE%FF%00%2F+%FE%FF%00%3A", URLEncodedUtil.encode(new Object[] { "k", "/ :" }, StandardCharsets.UTF_16));
+    }
+
+    // G079-01: a run mixing ASCII punctuation with a lone surrogate still reports the start index of the whole run
+    @Test
+    public void testEncode_malformedMixedRunReportsRunStart_perfReview() {
+        final IllegalArgumentException malformed = assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode(new Object[] { "k", "ab/:\ud800c" }, StandardCharsets.UTF_8));
+        assertTrue(malformed.getMessage().contains("in the run beginning at index 2"), malformed.getMessage());
+
+        final IllegalArgumentException unmappable = assertThrows(IllegalArgumentException.class,
+                () -> URLEncodedUtil.encode(new Object[] { "k", "a/?\u00e9" }, StandardCharsets.US_ASCII));
+        assertTrue(unmappable.getMessage().contains("US-ASCII in the run beginning at index 1"), unmappable.getMessage());
+
+        final StringBuilder sb = new StringBuilder();
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.encode(new Object[] { "a/b", "x", "k", "\udc00" }, StandardCharsets.UTF_8, sb));
+        assertEquals("a%2Fb=x&k=", sb.toString());
+    }
+
+    // G079-02: urlDecode returns tokens without '%' or '+' unchanged; tokens with them are still decoded
+    @Test
+    public void testDecode_tokensWithoutEscapes_perfReview() {
+        final String query = "plain=value&empty=&flag&sp=a+b&pct=%41b&both=x+%2B+y&=v&u=\u4e2d\u00e9;k.1=*-_~";
+        final Map<String, String> decoded = URLEncodedUtil.decode(query);
+        final Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("plain", "value");
+        expected.put("empty", "");
+        expected.put("flag", null);
+        expected.put("sp", "a b");
+        expected.put("pct", "Ab");
+        expected.put("both", "x + y");
+        expected.put("", "v");
+        expected.put("u", "\u4e2d\u00e9");
+        expected.put("k.1", "*-_~");
+        assertEquals(expected, decoded);
+        assertEquals(new java.util.ArrayList<>(expected.keySet()), new java.util.ArrayList<>(decoded.keySet()));
+
+        assertEquals(expected, URLEncodedUtil.decodeLenient(query));
+        assertEquals("%zz a", URLEncodedUtil.decodeLenient("k=%zz+a").get("k"));
+        assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("k=%zz+a"));
+        assertEquals(Arrays.asList("1", "2 3", "4"), URLEncodedUtil.decodeToMultimap("a=1&a=2+3&a=4").get("a"));
+
+        final java.util.Random random = new java.util.Random(792);
+        final String alphabet = "abcXYZ019 +-_.*~!'()/?:@$,[]\u00e9\u4e2d";
+
+        for (int round = 0; round < 3000; round++) {
+            final StringBuilder sb = new StringBuilder();
+            final int length = random.nextInt(16);
+
+            for (int i = 0; i < length; i++) {
+                sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
+            }
+
+            final String raw = sb.toString();
+            assertEquals(java.net.URLDecoder.decode(raw, StandardCharsets.UTF_8), URLEncodedUtil.decode("k=" + raw).get("k"), raw);
+        }
+    }
+
+    // G079-03: several escape runs per token share one byte buffer (sized len / 3) and one strict decoder; results and error indexes unchanged
+    @Test
+    public void testDecode_multipleEscapeRunsPerToken_perfReview() {
+        assertEquals("ABC", URLEncodedUtil.decode("k=%41%42%43").get("k"));
+        assertEquals("A", URLEncodedUtil.decode("k=%41").get("k"));
+        assertEquals("aAb\u4e2dc d/e", URLEncodedUtil.decode("k=a%41b%E4%B8%ADc+d%2fe").get("k"));
+        assertEquals("%41%42", URLEncodedUtil.decode("%2541%2542").keySet().iterator().next());
+        assertEquals("\u4e2d\u6587", URLEncodedUtil.decode("k=%4E%2D%65%87", StandardCharsets.UTF_16BE).get("k"));
+        assertEquals("x\u00e9y\u00ff", URLEncodedUtil.decode("k=x%E9y%FF", StandardCharsets.ISO_8859_1).get("k"));
+
+        final IllegalArgumentException invalid = assertThrows(IllegalArgumentException.class, () -> URLEncodedUtil.decode("k=a%41b%FFc%42"));
+        assertTrue(invalid.getMessage().startsWith("Invalid percent-encoded byte sequence at index 5 for charset UTF-8"), invalid.getMessage());
+        assertEquals("aAb\ufffdcB", URLEncodedUtil.decodeLenient("k=a%41b%FFc%42").get("k"));
+        assertEquals("\ufffd%4x%", URLEncodedUtil.decodeLenient("k=%C3%4x%").get("k"));
+        assertEquals("\u4e2d\ufffd", URLEncodedUtil.decodeLenient("k=%E4%B8%AD%E4%B8").get("k"));
+    }
+    // ---- perf review 2026-09-26 G079 end ----
 }

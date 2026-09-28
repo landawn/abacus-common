@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.PatternSyntaxException;
 
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
@@ -215,8 +216,10 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param typeName the type name to parse
      * @return array of type parameter names
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or is not a well-formed type declaration
+     *         (see {@link TypeAttrParser#parse(String)})
      */
-    protected static String[] getTypeParameters(final String typeName) {
+    protected static String[] getTypeParameters(final String typeName) throws IllegalArgumentException {
         return TypeAttrParser.parse(typeName).getTypeParameters();
     }
 
@@ -244,8 +247,10 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param typeName the type name to parse
      * @return array of constructor parameter strings
+     * @throws IllegalArgumentException if {@code typeName} is {@code null} or is not a well-formed type declaration
+     *         (see {@link TypeAttrParser#parse(String)})
      */
-    protected static String[] getParameters(final String typeName) {
+    protected static String[] getParameters(final String typeName) throws IllegalArgumentException {
         return TypeAttrParser.parse(typeName).getParameters();
     }
 
@@ -789,12 +794,14 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param cbuf the character array, may be {@code null}
      * @param offset the starting position within {@code cbuf}
-     * @param len the number of characters to read
+     * @param length the number of characters to read
      * @return the converted value
+     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null and {@code offset} or {@code length} is negative or
+     *         {@code offset + len > cbuf.length}
      */
     @Override
-    public T valueOf(final char[] cbuf, final int offset, final int len) {
-        return valueOf(cbuf == null ? null : String.valueOf(cbuf, offset, len));
+    public T valueOf(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException {
+        return valueOf(cbuf == null ? null : String.valueOf(cbuf, offset, length));
     }
 
     /**
@@ -847,17 +854,17 @@ public abstract class AbstractType<T> implements Type<T> {
      * (numbers, dates, blobs, etc.) should override this method.
      * </p>
      *
-     * @param stmt the {@code PreparedStatement}
+     * @param statement the {@code PreparedStatement}
      * @param columnIndex the parameter index (1-based); named {@code columnIndex} for historical API
      *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
      *                    {@link ResultSet} column index
      * @param x the value to set, may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws NullPointerException if {@code statement} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final T x) throws NullPointerException, SQLException {
-        stmt.setString(columnIndex, stringOf(x));
+    public void set(final PreparedStatement statement, final int columnIndex, final T x) throws NullPointerException, SQLException {
+        statement.setString(columnIndex, stringOf(x));
     }
 
     /**
@@ -870,15 +877,15 @@ public abstract class AbstractType<T> implements Type<T> {
      * should override this method.
      * </p>
      *
-     * @param stmt the {@code CallableStatement}
+     * @param statement the {@code CallableStatement}
      * @param parameterName the parameter name
      * @param x the value to set, may be {@code null}
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws NullPointerException if {@code statement} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final T x) throws NullPointerException, SQLException {
-        stmt.setString(parameterName, stringOf(x));
+    public void set(final CallableStatement statement, final String parameterName, final T x) throws NullPointerException, SQLException {
+        statement.setString(parameterName, stringOf(x));
     }
 
     /**
@@ -889,18 +896,18 @@ public abstract class AbstractType<T> implements Type<T> {
      * or column size (e.g., {@code Clob}, {@code Blob}, large strings) should override.
      * </p>
      *
-     * @param stmt the {@code PreparedStatement}
+     * @param statement the {@code PreparedStatement}
      * @param columnIndex the parameter index (1-based); named {@code columnIndex} for historical API
      *                    compatibility, but this is a {@link PreparedStatement} parameter index, not a
      *                    {@link ResultSet} column index
      * @param x the value to set, may be {@code null}
      * @param sqlTypeOrLength the {@code java.sql.Types} code or column length (ignored by default)
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws NullPointerException if {@code statement} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final T x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
-        this.set(stmt, columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final T x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
+        this.set(statement, columnIndex, x);
     }
 
     /**
@@ -911,16 +918,17 @@ public abstract class AbstractType<T> implements Type<T> {
      * or column size should override.
      * </p>
      *
-     * @param stmt the {@code CallableStatement}
+     * @param statement the {@code CallableStatement}
      * @param parameterName the parameter name
      * @param x the value to set, may be {@code null}
      * @param sqlTypeOrLength the {@code java.sql.Types} code or column length (ignored by default)
-     * @throws NullPointerException if {@code stmt} is {@code null}
+     * @throws NullPointerException if {@code statement} is {@code null}
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final T x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
-        this.set(stmt, parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final T x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
+        this.set(statement, parameterName, x);
     }
 
     /**
@@ -1179,8 +1187,10 @@ public abstract class AbstractType<T> implements Type<T> {
      *        metacharacter is interpreted literally, while a multi-character value is
      *        treated as a regular expression for backward compatibility
      * @return array of split strings
+     * @throws NullPointerException if {@code string} or {@code separator} is {@code null}
+     * @throws PatternSyntaxException if {@code separator} is a multi-character value that is not a valid regular expression
      */
-    protected static String[] split(final String string, final String separator) {
+    protected static String[] split(final String string, final String separator) throws NullPointerException, PatternSyntaxException {
         final String newValue = separatorConverter.get(separator);
 
         return (newValue == null) ? string.split(separator) : string.split(newValue);
@@ -1280,15 +1290,17 @@ public abstract class AbstractType<T> implements Type<T> {
      *
      * @param cbuf the character array to inspect
      * @param offset the starting position within the array
-     * @param len the number of characters in the region to inspect
+     * @param length the number of characters in the region to inspect
      * @return {@code true} if the character region could represent a millisecond timestamp
+     * @throws IndexOutOfBoundsException if {@code length > 4} and the region {@code [offset, offset + len)} extends
+     *         outside {@code cbuf}
      */
-    protected static boolean isPossibleMillis(final char[] cbuf, final int offset, final int len) {
-        if (len <= 4) {
+    protected static boolean isPossibleMillis(final char[] cbuf, final int offset, final int length) throws IndexOutOfBoundsException {
+        if (length <= 4) {
             return false;
         }
 
-        for (int i = cbuf[offset] == '-' || cbuf[offset] == '+' ? 1 : 0; i < len; i++) {
+        for (int i = cbuf[offset] == '-' || cbuf[offset] == '+' ? 1 : 0; i < length; i++) {
             if (!isDigit(cbuf[offset + i])) {
                 return false;
             }
@@ -1318,15 +1330,15 @@ public abstract class AbstractType<T> implements Type<T> {
      * fall back to {@link Numbers#toInt(String)}. A trailing type suffix
      * ({@code l}, {@code L}, {@code f}, {@code F}, {@code d}, {@code D}) is accepted and
      * ignored. Supports an optional leading sign ({@code '+'} or {@code '-'}).
-     * Returns {@code 0} when {@code cbuf} is {@code null} or {@code len == 0}.
+     * Returns {@code 0} when {@code cbuf} is {@code null} or {@code length == 0}.
      * </p>
      *
      * @param cbuf the character array; may be {@code null}
      * @param offset the starting position within {@code cbuf}
-     * @param len the number of characters to parse
+     * @param length the number of characters to parse
      * @return the parsed integer value
-     * @throws IllegalArgumentException if {@code offset} or {@code len} is negative.
-     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code len > 0}, and the selected region
+     * @throws IllegalArgumentException if {@code offset} or {@code length} is negative.
+     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code length > 0}, and the selected region
      *         extends beyond the array
      * @throws NumberFormatException if the characters cannot be parsed as an integer
      * @throws ArithmeticException if the digits form a well-formed number outside the {@code int} range
@@ -1335,27 +1347,28 @@ public abstract class AbstractType<T> implements Type<T> {
      * @see Integer#parseInt(String)
      * @see Numbers#toInt(String)
      */
-    protected static int parseInt(final char[] cbuf, final int offset, int len)
+    protected static int parseInt(final char[] cbuf, final int offset, int length)
             throws IllegalArgumentException, IndexOutOfBoundsException, NumberFormatException, ArithmeticException {
-        if (offset < 0 || len < 0) {
+        if (offset < 0 || length < 0) {
             throw new IllegalArgumentException("'offset' and 'len' cannot be negative");
         }
 
-        if (cbuf == null || len == 0) {
+        if (cbuf == null || length == 0) {
             return 0;
         }
 
-        char ch = cbuf[offset + len - 1];
+        char ch = cbuf[offset + length - 1];
+        final int tokenLength = length; // error messages name the whole token, a stripped suffix included
 
         if (isNumericTypeSuffix(ch)) {
-            len = len - 1; // ignore the suffix
+            length = length - 1; // ignore the suffix
 
-            if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {
-                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
+            if (length == 0 || (cbuf[offset + length - 1] < '0' || cbuf[offset + length - 1] > '9')) {
+                throw new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, tokenLength) + "\"");
             }
         }
 
-        switch (len) {
+        switch (length) {
             case 1: {
                 ch = cbuf[offset];
                 if (ch < '0' || ch > '9') {
@@ -1370,11 +1383,11 @@ public abstract class AbstractType<T> implements Type<T> {
 
                 int result = 0;
 
-                for (int i = (cbuf[offset] == '-' || cbuf[offset] == '+') ? offset + 1 : offset, to = offset + len; i < to; i++) {
+                for (int i = (cbuf[offset] == '-' || cbuf[offset] == '+') ? offset + 1 : offset, to = offset + length; i < to; i++) {
                     ch = cbuf[i];
 
                     if (ch < '0' || ch > '9') {
-                        throw new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, len) + "\"");
+                        throw new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, tokenLength) + "\"");
                     }
 
                     result = result * 10 + (ch - '0');
@@ -1384,7 +1397,17 @@ public abstract class AbstractType<T> implements Type<T> {
             }
 
             default:
-                return Numbers.toInt(new String(cbuf, offset, len));
+                try {
+                    return Numbers.toInt(new String(cbuf, offset, length));
+                } catch (final NumberFormatException e) {
+                    if (length == tokenLength) {
+                        throw e;
+                    }
+
+                    // Numbers.toInt saw the token without its stripped suffix: name the whole token, as the messages above do.
+                    throw (NumberFormatException) new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, tokenLength) + "\"")
+                            .initCause(e);
+                }
         }
     }
 
@@ -1395,15 +1418,15 @@ public abstract class AbstractType<T> implements Type<T> {
      * fall back to {@link Numbers#toLong(String)}. A trailing type suffix
      * ({@code l}, {@code L}, {@code f}, {@code F}, {@code d}, {@code D}) is accepted and
      * ignored. Supports an optional leading sign ({@code '+'} or {@code '-'}).
-     * Returns {@code 0L} when {@code cbuf} is {@code null} or {@code len == 0}.
+     * Returns {@code 0L} when {@code cbuf} is {@code null} or {@code length == 0}.
      * </p>
      *
      * @param cbuf the character array; may be {@code null}
      * @param offset the starting position within {@code cbuf}
-     * @param len the number of characters to parse
+     * @param length the number of characters to parse
      * @return the parsed long value
-     * @throws IllegalArgumentException if {@code offset} or {@code len} is negative.
-     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code len > 0}, and the selected region
+     * @throws IllegalArgumentException if {@code offset} or {@code length} is negative.
+     * @throws IndexOutOfBoundsException if {@code cbuf} is non-null, {@code length > 0}, and the selected region
      *         extends beyond the array
      * @throws NumberFormatException if the characters cannot be parsed as a long
      * @throws ArithmeticException if the digits form a well-formed number outside the {@code long} range
@@ -1412,27 +1435,28 @@ public abstract class AbstractType<T> implements Type<T> {
      * @see Long#parseLong(String)
      * @see Numbers#toLong(String)
      */
-    protected static long parseLong(final char[] cbuf, final int offset, int len)
+    protected static long parseLong(final char[] cbuf, final int offset, int length)
             throws IllegalArgumentException, IndexOutOfBoundsException, NumberFormatException, ArithmeticException {
-        if (offset < 0 || len < 0) {
+        if (offset < 0 || length < 0) {
             throw new IllegalArgumentException("'offset' and 'len' cannot be negative");
         }
 
-        if (cbuf == null || len == 0) {
+        if (cbuf == null || length == 0) {
             return 0;
         }
 
-        char ch = cbuf[offset + len - 1];
+        char ch = cbuf[offset + length - 1];
+        final int tokenLength = length; // error messages name the whole token, a stripped suffix included
 
         if (isNumericTypeSuffix(ch)) {
-            len = len - 1; // ignore the suffix
+            length = length - 1; // ignore the suffix
 
-            if (len == 0 || (cbuf[offset + len - 1] < '0' || cbuf[offset + len - 1] > '9')) {
-                throw new NumberFormatException("Invalid numeric String: \"" + ch + "\""); //NOSONAR
+            if (length == 0 || (cbuf[offset + length - 1] < '0' || cbuf[offset + length - 1] > '9')) {
+                throw new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, tokenLength) + "\"");
             }
         }
 
-        switch (len) {
+        switch (length) {
             case 1: {
                 ch = cbuf[offset];
 
@@ -1448,11 +1472,11 @@ public abstract class AbstractType<T> implements Type<T> {
 
                 long result = 0;
 
-                for (int i = (cbuf[offset] == '-' || cbuf[offset] == '+') ? offset + 1 : offset, to = offset + len; i < to; i++) {
+                for (int i = (cbuf[offset] == '-' || cbuf[offset] == '+') ? offset + 1 : offset, to = offset + length; i < to; i++) {
                     ch = cbuf[i];
 
                     if (ch < '0' || ch > '9') {
-                        throw new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, len) + "\"");
+                        throw new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, tokenLength) + "\"");
                     }
 
                     result = result * 10 + (ch - '0');
@@ -1462,7 +1486,17 @@ public abstract class AbstractType<T> implements Type<T> {
             }
 
             default:
-                return Numbers.toLong(new String(cbuf, offset, len));
+                try {
+                    return Numbers.toLong(new String(cbuf, offset, length));
+                } catch (final NumberFormatException e) {
+                    if (length == tokenLength) {
+                        throw e;
+                    }
+
+                    // Numbers.toLong saw the token without its stripped suffix: name the whole token, as the messages above do.
+                    throw (NumberFormatException) new NumberFormatException("Invalid numeric String: \"" + new String(cbuf, offset, tokenLength) + "\"")
+                            .initCause(e);
+                }
         }
     }
 
@@ -1597,9 +1631,12 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param columnIndex the column index (1-based)
      * @param targetClass the target class
      * @return the column value converted to the target type
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
+     * @throws NullPointerException if {@code rs} is {@code null}
      * @throws SQLException if a database access error occurs
      */
-    protected static <T> T getColumnValue(final ResultSet rs, final int columnIndex, final Class<? extends T> targetClass) throws SQLException {
+    protected static <T> T getColumnValue(final ResultSet rs, final int columnIndex, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         return Type.of(targetClass).get(rs, columnIndex);
     }
 
@@ -1624,16 +1661,19 @@ public abstract class AbstractType<T> implements Type<T> {
      * @param columnName the column label
      * @param targetClass the target class
      * @return the column value converted to the target type
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
+     * @throws NullPointerException if {@code rs} is {@code null}
      * @throws SQLException if a database access error occurs
      */
-    protected static <T> T getColumnValue(final ResultSet rs, final String columnName, final Class<? extends T> targetClass) throws SQLException {
+    protected static <T> T getColumnValue(final ResultSet rs, final String columnName, final Class<? extends T> targetClass)
+            throws IllegalArgumentException, NullPointerException, SQLException {
         return Type.of(targetClass).get(rs, columnName);
     }
 
     /**
      * Calculates a buffer size for string operations, capped at {@link Integer#MAX_VALUE}.
      * <p>
-     * Prevents integer overflow by clamping the result when {@code len * elementPlusDelimiterLen}
+     * Prevents integer overflow by clamping the result when {@code length * elementPlusDelimiterLen}
      * would exceed {@link Integer#MAX_VALUE}. Returns {@code 0} when
      * {@code elementPlusDelimiterLen} is {@code 0}.
      * </p>
@@ -1653,16 +1693,16 @@ public abstract class AbstractType<T> implements Type<T> {
      * // bufferSize3: 50
      * }</pre>
      *
-     * @param len the number of elements
+     * @param length the number of elements
      * @param elementPlusDelimiterLen the length of each element plus delimiter
      * @return the calculated buffer size, capped at {@link Integer#MAX_VALUE}, or {@code 0} if
      *         {@code elementPlusDelimiterLen} is {@code 0}
      */
-    protected static int calculateBufferSize(final int len, final int elementPlusDelimiterLen) {
+    protected static int calculateBufferSize(final int length, final int elementPlusDelimiterLen) {
         if (elementPlusDelimiterLen == 0) {
             return 0;
         }
 
-        return len > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : len * elementPlusDelimiterLen;
+        return length > Integer.MAX_VALUE / elementPlusDelimiterLen ? Integer.MAX_VALUE : length * elementPlusDelimiterLen;
     }
 }

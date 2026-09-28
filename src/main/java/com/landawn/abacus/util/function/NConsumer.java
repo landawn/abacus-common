@@ -66,10 +66,10 @@ public interface NConsumer<T> {
      * The varargs parameter may contain any number of arguments of type {@code T},
      * including zero (empty array).
      *
-     * @param args the input arguments as a varargs array
+     * @param arguments the input arguments as a varargs array
      */
     @SuppressWarnings("unchecked")
-    void accept(T... args);
+    void accept(T... arguments);
 
     /**
      * Returns a composed {@code NConsumer} that performs, in sequence, this

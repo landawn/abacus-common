@@ -304,4 +304,25 @@ public class ByteArrayTypeTest extends TestBase {
         assertThrows(NumberFormatException.class, () -> type.valueOf("[x]"));
         assertThrows(NumberFormatException.class, () -> type.valueOf("[NULL]"));
     }
+
+    @Test
+    public void testSetWritesNullElementAsZeroByte() throws Exception {
+        final Type<Byte[]> byteArrayType = TypeFactory.getType(Byte[].class);
+        final Byte[] withNull = { (byte) 1, null, (byte) 3 };
+
+        final java.sql.PreparedStatement stmt = org.mockito.Mockito.mock(java.sql.PreparedStatement.class);
+        byteArrayType.set(stmt, 1, withNull);
+        org.mockito.Mockito.verify(stmt).setBytes(org.mockito.ArgumentMatchers.eq(1),
+                org.mockito.AdditionalMatchers.aryEq(new byte[] { 1, 0, 3 }));
+
+        final java.sql.CallableStatement cstmt = org.mockito.Mockito.mock(java.sql.CallableStatement.class);
+        byteArrayType.set(cstmt, "p", withNull, 3);
+        org.mockito.Mockito.verify(cstmt).setBytes(org.mockito.ArgumentMatchers.eq("p"),
+                org.mockito.AdditionalMatchers.aryEq(new byte[] { 1, 0, 3 }));
+
+        // a null array is still bound as SQL NULL
+        final java.sql.PreparedStatement nullStmt = org.mockito.Mockito.mock(java.sql.PreparedStatement.class);
+        byteArrayType.set(nullStmt, 2, (Byte[]) null);
+        org.mockito.Mockito.verify(nullStmt).setBytes(2, null);
+    }
 }

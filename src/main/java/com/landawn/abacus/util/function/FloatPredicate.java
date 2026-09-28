@@ -48,8 +48,8 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = FloatPredicate.ALWAYS_TRUE.test(3.14f);    // Always returns true
-     * boolean result2 = FloatPredicate.ALWAYS_TRUE.test(-0.0f);   // Always returns true
+     * boolean result = FloatPredicate.ALWAYS_TRUE.test(3.14f);   // Always returns true
+     * boolean result2 = FloatPredicate.ALWAYS_TRUE.test(-0.0f);  // Always returns true
      * }</pre>
      *
      */
@@ -59,8 +59,8 @@ public interface FloatPredicate extends Throwables.FloatPredicate<RuntimeExcepti
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * boolean result = FloatPredicate.ALWAYS_FALSE.test(3.14f);    // Always returns false
-     * boolean result2 = FloatPredicate.ALWAYS_FALSE.test(-0.0f);   // Always returns false
+     * boolean result = FloatPredicate.ALWAYS_FALSE.test(3.14f);   // Always returns false
+     * boolean result2 = FloatPredicate.ALWAYS_FALSE.test(-0.0f);  // Always returns false
      * }</pre>
      *
      */

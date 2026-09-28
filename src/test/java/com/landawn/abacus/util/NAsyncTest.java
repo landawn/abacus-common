@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 public class NAsyncTest extends NTestSupport {
 
@@ -261,5 +263,131 @@ public class NAsyncTest extends NTestSupport {
 
             assertEquals(Arrays.asList("only"), seen);
         });
+    }
+
+
+    @Test
+    public void testAsyncExecuteWithRetry_invalidRetryArgumentsRejectedOnCallingThread() {
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> {
+        }, -1, 0, e -> false));
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> {
+        }, 1, -1, e -> false));
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> "x", -1, 0, (r, e) -> false));
+        assertThrows(IllegalArgumentException.class, () -> N.asyncExecute(() -> "x", 1, -1, (r, e) -> false));
+    }
+
+    @Test
+    public void testRunAsyncCallAsync_workerInterruptedExceptionDoesNotInterruptConsumer() throws Exception {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        try {
+            final List<Throwables.Runnable<Exception>> commands = new ArrayList<>();
+            commands.add(() -> {
+                throw new InterruptedException("worker");
+            });
+
+            Thread.interrupted();
+            final ObjIterator<Void> runIter = N.runAsync(commands, executor);
+            assertThrows(RuntimeException.class, () -> {
+                while (runIter.hasNext()) {
+                    runIter.next();
+                }
+            });
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            final List<Callable<String>> calls = new ArrayList<>();
+            calls.add(() -> {
+                throw new InterruptedException("worker");
+            });
+
+            final ObjIterator<String> callIter = N.callAsync(calls, executor);
+            assertThrows(RuntimeException.class, () -> {
+                while (callIter.hasNext()) {
+                    callIter.next();
+                }
+            });
+            assertFalse(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    public void testRunAsyncCallAsync_directExecutorInterruptedExceptionRestoresInterrupt() {
+        final Executor direct = Runnable::run;
+
+        try {
+            final List<Throwables.Runnable<Exception>> commands = new ArrayList<>();
+            commands.add(() -> {
+                throw new InterruptedException("caller");
+            });
+
+            final ObjIterator<Void> runIter = N.runAsync(commands, direct);
+            assertThrows(RuntimeException.class, () -> {
+                while (runIter.hasNext()) {
+                    runIter.next();
+                }
+            });
+            assertTrue(Thread.interrupted());
+
+            final List<Callable<String>> calls = new ArrayList<>();
+            calls.add(() -> {
+                throw new InterruptedException("caller");
+            });
+
+            final ObjIterator<String> callIter = N.callAsync(calls, direct);
+            assertThrows(RuntimeException.class, () -> {
+                while (callIter.hasNext()) {
+                    callIter.next();
+                }
+            });
+            assertTrue(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
+        }
+    }
+
+    @Test
+    public void testForEachInParallel_workerInterruptedExceptionDoesNotInterruptCaller() throws Exception {
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        try {
+            Thread.interrupted();
+            assertThrows(RuntimeException.class, () -> N.forEachInParallel(Arrays.asList(1, 2, 3), v -> {
+                throw new InterruptedException("worker");
+            }, 2, executor));
+            assertFalse(Thread.currentThread().isInterrupted());
+
+            assertThrows(RuntimeException.class, () -> N.forEachIndexedInParallel(Arrays.asList(1, 2, 3), (idx, v) -> {
+                throw new InterruptedException("worker");
+            }, 2, executor));
+            assertFalse(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+            executor.shutdown();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    public void testForEachInParallel_directExecutorInterruptedExceptionRestoresInterrupt() {
+        final Executor direct = Runnable::run;
+
+        try {
+            final RuntimeException e1 = assertThrows(RuntimeException.class, () -> N.forEachInParallel(Arrays.asList(1, 2, 3), v -> {
+                throw new InterruptedException("caller");
+            }, 2, direct));
+            assertEquals("caller", e1.getCause().getMessage());
+            assertTrue(Thread.interrupted());
+
+            assertThrows(RuntimeException.class, () -> N.forEachIndexedInParallel(Arrays.asList(1, 2, 3), (idx, v) -> {
+                throw new InterruptedException("caller");
+            }, 2, direct));
+            assertTrue(Thread.interrupted());
+        } finally {
+            Thread.interrupted();
+        }
     }
 }

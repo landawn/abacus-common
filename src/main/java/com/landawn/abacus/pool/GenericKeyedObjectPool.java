@@ -306,6 +306,10 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      *   <li>The memory measure returns a negative size or throws an exception</li>
      * </ul>
      *
+     * <p>A value that the memory rule must reject whatever balancing frees (its measure is negative or
+     * failed, or it is larger than {@code maxMemorySize} on its own) is rejected without auto-balancing
+     * other entries; a previous mapping for {@code key} is still detached as described above.</p>
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DBConnection conn = new DBConnection("server1");
@@ -368,6 +372,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
             if (pool.size() >= capacity) {
                 if (autoBalance) {
+                    if (isNeverAdmissible(admissionMemorySize)) {
+                        // The memory rule below rejects this candidate anyway; do not destroy live entries for it.
+                        return false;
+                    }
+
                     pendingDestroys = appendAutoBalanceVictimsUnderLock(pendingDestroys);
 
                     if (pool.size() >= capacity) {
@@ -388,6 +397,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                 if (keyValueMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
                     if (autoBalance) {
+                        if (isNeverAdmissible(keyValueMemorySize)) {
+                            // Larger than the whole memory limit: no amount of balancing can admit it.
+                            return false;
+                        }
+
                         pendingDestroys = appendAutoBalanceVictimsUnderLock(pendingDestroys);
 
                         if (keyValueMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
@@ -508,7 +522,9 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
      * {@link Caller#VACATE} - and the value is inserted without waiting. Waiting for a slot occurs
      * only when auto-balancing is disabled (or the capacity is {@code 0}).
      * Auto-balance and replacement victims are detached and accounted while locked; their
-     * destruction callbacks run after this invocation releases the pool lock.</p>
+     * destruction callbacks run after this invocation releases the pool lock. A value that the memory
+     * rule must reject whatever balancing frees is rejected without balancing, as in
+     * {@link #put(Object, Poolable)}.</p>
      *
      * <p>As with {@link #put(Object, Poolable)}, a value that is already expired on entry is rejected
      * before any existing mapping for {@code key} is touched, while a value that expires later
@@ -589,6 +605,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
                 }
 
                 if ((pool.size() >= capacity) && autoBalance) {
+                    if (!pool.isEmpty() && isNeverAdmissible(admissionMemorySize)) {
+                        // The memory rule below rejects this candidate anyway; do not destroy live entries for it.
+                        return false;
+                    }
+
                     pendingDestroys = appendAutoBalanceVictimsUnderLock(pendingDestroys);
                 }
 
@@ -608,6 +629,11 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
 
                         if (keyValueMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
                             if (autoBalance) {
+                                if (isNeverAdmissible(keyValueMemorySize)) {
+                                    // Larger than the whole memory limit: no amount of balancing can admit it.
+                                    return false;
+                                }
+
                                 pendingDestroys = appendAutoBalanceVictimsUnderLock(pendingDestroys);
 
                                 if (keyValueMemorySize > (maxMemorySize > 0 ? maxMemorySize : Long.MAX_VALUE) - totalDataSize.get()) {
@@ -1498,6 +1524,15 @@ public class GenericKeyedObjectPool<K, E extends Poolable> extends AbstractPool 
             logger.warn("Error measuring memory size of entry", e);
             return -1;
         }
+    }
+
+    /**
+     * Tells whether the memory admission rule is certain to reject a candidate with this measured size,
+     * whatever balancing frees: a negative size (including a measure that threw) or a size above the
+     * whole memory limit.
+     */
+    private boolean isNeverAdmissible(final long admissionMemorySize) {
+        return memoryMeasure != null && (admissionMemorySize < 0 || (maxMemorySize > 0 && admissionMemorySize > maxMemorySize));
     }
 
     private void recordMemoryCharge(final K key, final long charge) {

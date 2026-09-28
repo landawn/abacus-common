@@ -54,8 +54,9 @@ public class ClazzType extends AbstractType<Class> {
      *
      * @param typeName the fully qualified (or canonical) name of the type parameter class,
      *                 e.g., {@code "java.lang.Integer"} or {@code "int"}
-     * @throws IllegalArgumentException if {@code typeName} names no loadable class (the unbounded wildcards
-     *         {@code "?"} and {@code "? super X"}, which denote {@link Object}, are accepted).
+     * @throws IllegalArgumentException if {@code typeName} is {@code null}, empty or blank, is a structurally invalid type name,
+     *         or names no loadable class (the unbounded wildcards {@code "?"} and {@code "? super X"}, which denote
+     *         {@link Object}, are accepted).
      */
     protected ClazzType(final String typeName) throws IllegalArgumentException {
         super("Clazz<" + typeName + ">");

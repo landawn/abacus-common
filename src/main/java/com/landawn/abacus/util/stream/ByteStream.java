@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -90,6 +89,11 @@ import com.landawn.abacus.util.function.TriFunction;
  * aggregate operations. It provides a more efficient alternative to generic {@link Stream} when working
  * specifically with byte values, avoiding boxing/unboxing overhead and offering byte-specific utility methods.
  *
+ * <p><b>Parallel streams and order:</b> parallel stages such as {@code map}/{@code filter}/{@code flatMap}/{@code onEach}
+ * emit results in completion order, so encounter order is <b>not</b> guaranteed after them. Parallel {@code collect} and
+ * {@code reduce} need commutative functions, and the {@code mergeFunction} of {@code toMap} and the downstream collector of
+ * {@code groupTo} receive the values of a key in an unspecified order. Sort the result or stay sequential when order matters.
+ *
  * <p><b>Key Features:</b>
  * <ul>
  *   <li><b>Type Safety:</b> Strongly typed for byte operations, preventing ClassCastException</li>
@@ -121,33 +125,33 @@ import com.landawn.abacus.util.function.TriFunction;
  * <pre>{@code
  * // Basic byte stream operations
  * ByteStream.of((byte)1, (byte)2, (byte)3, (byte)4, (byte)5)
- *     .filter(b -> b > 2)        // keeps bytes > 2
- *     .map(b -> (byte)(b * 2))   // transforms each byte by doubling
- *     .sum();                    // returns 24
+ *     .filter(b -> b > 2)       // keeps bytes > 2
+ *     .map(b -> (byte)(b * 2))  // transforms each byte by doubling
+ *     .sum();                   // returns 24
  *
  * // File I/O operations
  * try (ByteStream bytes = ByteStream.of(new File("data.bin"))) {
- *     bytes.takeWhile(b -> b != 0) // keeps bytes until null terminator
- *          .toArray();             // returns byte array
- * }                                // closes the stream automatically
+ *     bytes.takeWhile(b -> b != 0)  // keeps bytes until null terminator
+ *          .toArray();              // returns byte array
+ * }                                 // closes the stream automatically
  *
  * // Statistical operations
  * ByteSummaryStatistics stats = ByteStream.of(byteArray)
- *     .filter(b -> b >= 0)    // keeps only non-negative bytes
- *     .summaryStatistics();   // gets min, max, avg, count
+ *     .filter(b -> b >= 0)   // keeps only non-negative bytes
+ *     .summaryStatistics();  // gets min, max, avg, count
  *
  * // Parallel processing for large datasets
  * ByteStream.of(largeByteArray)
- *     .parallel()                  // switches to parallel processing
- *     .filter(this::isValidByte)   // filters in parallel
- *     .sequential()                // switches back to sequential
- *     .toByteList();               // collects results
+ *     .parallel()                 // switches to parallel processing
+ *     .filter(this::isValidByte)  // filters in parallel
+ *     .sequential()               // switches back to sequential
+ *     .toByteList();              // collects results
  *
  * // Integration with other streams
  * Stream<String> strings = Stream.of("Hello", "World");
  * IntStream bytes = strings
- *     .flatMapToInt(s -> ByteStream.of(s.getBytes()).asIntStream()) // maps each string to its bytes
- *     .map(b -> b & 0xFF);                                          // transforms to unsigned int
+ *     .flatMapToInt(s -> ByteStream.of(s.getBytes()).asIntStream())  // maps each string to its bytes
+ *     .map(b -> b & 0xFF);                                           // transforms to unsigned int
  * }</pre>
  *
  * <p><b>Performance Considerations:</b>
@@ -157,6 +161,10 @@ import com.landawn.abacus.util.function.TriFunction;
  *   <li>Sequential processing is more efficient for small datasets and simple operations</li>
  *   <li>Most intermediate operations defer processing until traversal; consult each operation for eager evaluation or buffering</li>
  * </ul>
+ *
+ * <p><b>Set operations:</b> {@code intersection(Collection)} and {@code difference(Collection)} accept any
+ * {@code Collection<?>} and compare each element as a boxed {@code Byte} using {@code equals}, so a collection of
+ * another box type silently matches nothing: {@code ByteStream.of((byte) 1, (byte) 2).intersection(List.of(1, 2))} (a {@code List<Integer>}) is empty; use {@code List.of((byte) 1, (byte) 2)}.
  *
  * @see StreamBase
  * @see IntStream
@@ -174,7 +182,9 @@ import com.landawn.abacus.util.function.TriFunction;
 @LazyEvaluation
 public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate, ByteConsumer, OptionalByte, IndexedByte, ByteIterator, ByteStream> {
 
-    static final Random RAND = new SecureRandom();
+    // Unboxes the result of an N-ary zip function; a null result is a bug in the function, not a 0 value,
+    // so it is rejected (house rule: a function returning null -> NullPointerException).
+    private static final ToByteFunction<Byte> UNBOX_ZIP_RESULT = r -> N.requireNonNull(r, "zipFunction returned null");
 
     ByteStream(final boolean sorted, final Collection<LocalRunnable> closeHandlers) {
         super(sorted, null, closeHandlers);
@@ -380,7 +390,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Returns a stream consisting of the results of replacing each element of this stream with the contents
      * of a mapped stream produced by applying the provided mapping function to each element.
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * <p>This operation is stateless and can be parallelized if the stream supports parallel processing.
@@ -499,7 +509,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Returns an IntStream consisting of the results of replacing each element of this stream with the contents
      * of a mapped stream produced by applying the provided mapping function to each element.
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * <p>This operation is stateless and can be parallelized if the stream supports parallel processing.
@@ -530,7 +540,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Returns an object-valued Stream consisting of the results of replacing each element of this stream
      * with the contents of a mapped stream produced by applying the provided mapping function to each element.
-     * Each non-null mapped stream is closed after its contents are consumed or when the resulting
+     * <p>Each non-null mapped stream is closed after its contents are consumed or when the resulting
      * stream is closed. A null mapped stream is treated as empty.
      *
      * <p>This operation is stateless and can be parallelized if the stream supports parallel processing.
@@ -646,6 +656,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }</pre>
      *
      * <p>Note: copied from StreamEx: <a href="https://github.com/amaembo/streamex">StreamEx</a> under Apache License 2.0 and may be modified.
+     *
+     * <p>The mapper must return an empty optional - never {@code null} - for an element that has no result; a {@code null}
+     * return fails with a {@link NullPointerException} when the element is reached.
      *
      * <p><b>Operation characteristics:</b> {@link IntermediateOp Intermediate} operation, evaluated lazily; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
      *
@@ -1123,6 +1136,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return a Map whose keys and values are the result of applying the provided mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed, or if duplicate keys are encountered
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1131,7 +1145,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.ByteFunction<? extends K, E> keyMapper,
             Throwables.ByteFunction<? extends V, E2> valueMapper, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2;
 
     /**
      * Returns a Map containing the results of applying the given functions to the elements of this stream.
@@ -1146,7 +1160,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *     .toMap(b -> b < 10 ? "small" : "large",
      *            b -> (int) b,
      *            Integer::sum);
-     * // Result: {small=3, large=23}
+     * // Result: {small=3, large=23} (HashMap iteration order is unspecified)
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; retains the accumulated result map; memory use depends on its keys and mapped values.
@@ -1202,6 +1216,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return a Map whose keys and values are the result of applying the provided mapping functions to the input elements
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code keyMapper}, {@code valueMapper}, {@code mergeFunction}, {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}
      * @throws E if the key mapper throws an exception
      * @throws E2 if the value mapper throws an exception
      * @see Collectors#toMap(Function, Function, BinaryOperator, Supplier)
@@ -1210,7 +1225,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @TerminalOp
     public abstract <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(Throwables.ByteFunction<? extends K, E> keyMapper,
             Throwables.ByteFunction<? extends V, E2> valueMapper, BinaryOperator<V> mergeFunction, Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2;
 
     /**
      * Groups the elements of this stream according to a classification function,
@@ -1237,13 +1252,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper} or {@code downstream} is {@code null}
+     * @throws NullPointerException if {@code keyMapper} returns a {@code null} key
      * @throws E if the classifier function throws an exception
      * @see Collectors#groupingBy(Function, Collector)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, E extends Exception> Map<K, D> groupTo(Throwables.ByteFunction<? extends K, E> keyMapper,
-            final Collector<? super Byte, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E;
+            final Collector<? super Byte, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, NullPointerException, E;
 
     /**
      * Groups the elements of this stream according to a classification function,
@@ -1274,13 +1290,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return a Map containing the results of the group-by operation
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code keyMapper}, {@code downstream}, or {@code mapFactory} is {@code null}
+     * @throws NullPointerException if {@code mapFactory} returns {@code null}, or if {@code keyMapper} returns a {@code null} key
      * @throws E if the classifier function throws an exception
      * @see Collectors#groupingBy(Function, Collector, Supplier)
      */
     @ParallelSupported
     @TerminalOp
     public abstract <K, D, M extends Map<K, D>, E extends Exception> M groupTo(Throwables.ByteFunction<? extends K, E> keyMapper,
-            final Collector<? super Byte, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E;
+            final Collector<? super Byte, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E;
 
     /**
      * Performs a reduction on the elements of this stream, using the provided accumulator function, and returns the reduced value.
@@ -1353,6 +1371,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, {@code combiner} is {@code null}
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
      * @see BiConsumers#ofAddAll()
      * @see BiConsumers#ofPutAll()
@@ -1360,7 +1380,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, ObjByteConsumer<? super R> accumulator, BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException;
 
     /**
      * Performs a mutable reduction operation on the elements of this stream using only
@@ -1388,9 +1408,17 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return the result of the reduction
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator} is {@code null}
-     * @throws RuntimeException if this stream is parallel and the result type {@code R} is not one of:
-     *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}
-     *         (the default combiner cannot merge the per-thread containers); sequential streams perform no such check.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked for every container it creates,
+     *         also on an empty stream; the stream is closed)
+     * @throws IllegalArgumentException if this stream is parallel and the container type cannot be combined by default
+     *         (the result type {@code R} is not one of
+     *         {@code Collection/Map/StringBuilder/Multiset/Multimap/BooleanList/IntList/.../DoubleList}; message
+     *         "... cannot be combined by default ..."), and two per-thread containers actually have to be combined.
+     *         The check is made by the default combiner, so it fails only <i>after</i> the workers have accumulated their
+     *         elements, and whether containers have to be combined depends on the source and the number of workers:
+     *         a very small parallel stream can succeed while a larger one fails.
+     *         Sequential streams never combine and perform no such check. For any other result type, call
+     *         {@link #collect(Supplier, ObjByteConsumer, BiConsumer)} with an explicit combiner.
      * @see #collect(Supplier, ObjByteConsumer, BiConsumer)
      * @see Stream#collect(Supplier, BiConsumer)
      * @see Stream#collect(Supplier, BiConsumer, BiConsumer)
@@ -1398,7 +1426,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     @ParallelSupported
     @TerminalOp
     public abstract <R> R collect(Supplier<R> supplier, ObjByteConsumer<? super R> accumulator)
-            throws IllegalStateException, IllegalArgumentException, RuntimeException;
+            throws IllegalStateException, IllegalArgumentException, NullPointerException;
 
     /**
      * Performs an action for each element of this stream.
@@ -1556,8 +1584,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalByte first = ByteStream.of((byte) 1, (byte) 2, (byte) 3).findFirst();   // returns OptionalByte.of((byte) 1)
-     * OptionalByte none = ByteStream.empty().findFirst();   // returns OptionalByte.empty()
+     * OptionalByte first = ByteStream.of((byte) 1, (byte) 2, (byte) 3).findFirst();  // returns OptionalByte.of((byte) 1)
+     * OptionalByte none = ByteStream.empty().findFirst();                            // returns OptionalByte.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1589,8 +1617,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * OptionalByte any = ByteStream.of((byte) 1, (byte) 2, (byte) 3).findAny();   // returns OptionalByte.of((byte) 1)
-     * OptionalByte none = ByteStream.empty().findAny();   // returns OptionalByte.empty()
+     * OptionalByte any = ByteStream.of((byte) 1, (byte) 2, (byte) 3).findAny();  // returns OptionalByte.of((byte) 1)
+     * OptionalByte none = ByteStream.empty().findAny();                          // returns OptionalByte.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1624,8 +1652,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalByte firstEven = ByteStream.of((byte) 1, (byte) 3, (byte) 4, (byte) 6)
-     *     .findFirst(x -> x % 2 == 0);   // returns OptionalByte.of((byte) 4)
-     * OptionalByte none = ByteStream.of((byte) 1, (byte) 3, (byte) 5).findFirst(x -> x % 2 == 0);   // returns OptionalByte.empty()
+     *     .findFirst(x -> x % 2 == 0);                                                             // returns OptionalByte.of((byte) 4)
+     * OptionalByte none = ByteStream.of((byte) 1, (byte) 3, (byte) 5).findFirst(x -> x % 2 == 0);  // returns OptionalByte.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1659,8 +1687,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalByte anyEven = ByteStream.of((byte) 1, (byte) 3, (byte) 4, (byte) 6)
-     *     .findAny(x -> x % 2 == 0);   // returns a matching element, e.g. OptionalByte.of((byte) 4)
-     * OptionalByte none = ByteStream.of((byte) 1, (byte) 3, (byte) 5).findAny(x -> x % 2 == 0);   // returns OptionalByte.empty()
+     *     .findAny(x -> x % 2 == 0);                                                             // returns a matching element, e.g. OptionalByte.of((byte) 4)
+     * OptionalByte none = ByteStream.of((byte) 1, (byte) 3, (byte) 5).findAny(x -> x % 2 == 0);  // returns OptionalByte.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1693,8 +1721,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * OptionalByte lastEven = ByteStream.of((byte) 1, (byte) 3, (byte) 4, (byte) 6)
-     *     .findLast(x -> x % 2 == 0);   // returns OptionalByte.of((byte) 6)
-     * OptionalByte none = ByteStream.of((byte) 1, (byte) 3, (byte) 5).findLast(x -> x % 2 == 0);   // returns OptionalByte.empty()
+     *     .findLast(x -> x % 2 == 0);                                                             // returns OptionalByte.of((byte) 6)
+     * OptionalByte none = ByteStream.of((byte) 1, (byte) 3, (byte) 5).findLast(x -> x % 2 == 0);  // returns OptionalByte.empty()
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link ParallelSupported parallel-supported}; does not buffer elements in memory.
@@ -1798,7 +1826,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return an {@code OptionalByte} containing the k-th largest element, or an empty {@code OptionalByte}
      *         if the stream is empty or the count of elements is less than k
      * @throws IllegalStateException if the stream is already closed
-     * @throws IllegalArgumentException if k is less than 1.
+     * @throws IllegalArgumentException if {@code k} is less than 1.
      */
     @SequentialOnly
     @TerminalOp
@@ -1810,7 +1838,10 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p>The sum is accumulated in a {@code long} and then converted to {@code int}. For empty streams, returns 0.
      *
      * <p><b>Note:</b> if the accumulated long sum is outside the {@code int} range, an
-     * {@link ArithmeticException} is thrown during conversion.
+     * {@link ArithmeticException} is thrown during conversion. That takes only about 17 million bytes: 16,909,321
+     * elements of {@code 127}, or 16,777,217 elements of {@code -128}, which is an ordinary file size for
+     * {@link #of(java.io.InputStream)}. {@code summaryStatistics().getSum()} returns the same total as a {@code long}
+     * and cannot overflow in practice.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -1826,6 +1857,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @return the sum of elements in this stream as an int. Returns 0 if the stream is empty.
      * @throws IllegalStateException if the stream is already closed
      * @throws ArithmeticException if the sum overflows an {@code int}
+     * @see #summaryStatistics()
      * @see #average()
      * @see #reduce(byte, ByteBinaryOperator)
      */
@@ -1870,11 +1902,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteSummaryStatistics stats = ByteStream.of((byte) 1, (byte) 2, (byte) 3, (byte) 4, (byte) 5).summaryStatistics();
-     * System.out.println("Count: " + stats.getCount());       // count is 5
-     * System.out.println("Sum: " + stats.getSum());           // sum is 15
-     * System.out.println("Min: " + stats.getMin());           // min is 1
-     * System.out.println("Max: " + stats.getMax());           // max is 5
-     * System.out.println("Average: " + stats.getAverage());   // average is 3.0
+     * System.out.println("Count: " + stats.getCount());      // count is 5
+     * System.out.println("Sum: " + stats.getSum());          // sum is 15
+     * System.out.println("Min: " + stats.getMin());          // min is 1
+     * System.out.println("Max: " + stats.getMax());          // max is 5
+     * System.out.println("Average: " + stats.getAverage());  // average is 3.0
      * }</pre>
      *
      * <p><b>Operation characteristics:</b> {@link TerminalOp Terminal} operation; {@link SequentialOnly always sequential}; does not buffer elements in memory.
@@ -1930,7 +1962,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param nextSelector a function to determine which element should be selected as the next element.
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return the merged stream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}
      */
     @SequentialOnly
@@ -1959,7 +1991,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param b the ByteStream to be combined with the current ByteStream. Must be {@code non-null}. Will be closed along with this ByteStream.
      * @param zipFunction a ByteBinaryOperator that determines the combination of elements in the combined ByteStream.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      * @see #zipWith(ByteStream, byte, byte, ByteBinaryOperator)
      */
@@ -1988,7 +2020,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param c the third ByteStream to be combined with the current ByteStream. Will be closed along with this ByteStream.
      * @param zipFunction a ByteTernaryOperator that determines the combination of elements in the combined ByteStream.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStreams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      * @see #zipWith(ByteStream, ByteStream, byte, byte, byte, ByteTernaryOperator)
      */
@@ -2017,7 +2049,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param valueForNoneB the default value to use for the given ByteStream when it runs out of elements
      * @param zipFunction a ByteBinaryOperator that determines the combination of elements in the combined ByteStream.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStream
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream or {@code b} is already closed
      * @throws IllegalArgumentException if {@code b} or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
@@ -2050,7 +2082,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param valueForNoneC the default value to use for the third ByteStream when it runs out of elements
      * @param zipFunction a ByteTernaryOperator that determines the combination of elements in the combined ByteStream.
      * @return a new ByteStream that is the result of combining the current ByteStream with the given ByteStreams
-     * @throws IllegalStateException if the stream is already closed
+     * @throws IllegalStateException if this stream, {@code b}, or {@code c} is already closed
      * @throws IllegalArgumentException if {@code b}, {@code c}, or {@code zipFunction} is {@code null}
      */
     @ParallelSupported
@@ -2124,7 +2156,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }
      * }</pre>
      *
-     * @return an empty ByteStream
+     * @return a new, empty ByteStream (each call returns a fresh instance)
      * @see #ofNullable(Byte)
      */
     public static ByteStream empty() {
@@ -2205,8 +2237,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.of((byte)1, (byte)2, (byte)3).toArray();   // [1, 2, 3]
      * }</pre>
      *
-     * @param a the elements of the new stream
-     * @return a new ByteStream consisting of the specified elements
+     * @param a the elements of the new stream; may be {@code null}
+     * @return a new ByteStream consisting of the specified elements, or an empty stream if {@code a} is {@code null} or empty
      */
     public static ByteStream of(final byte... a) {
         return N.isEmpty(a) ? empty() : new ArrayByteStream(a);
@@ -2222,7 +2254,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.of(arr, 1, 4).toArray();   // [2, 3, 4]
      * }</pre>
      *
-     * @param a the array containing the elements
+     * @param a the array containing the elements; a {@code null} array is treated as empty, so only the range {@code [0, 0)} is valid
      * @param fromIndex the starting index, inclusive
      * @param toIndex the ending index, exclusive
      * @return a ByteStream containing the specified range of elements
@@ -2242,8 +2274,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.of(bytes).toArray();   // [1, 2, 3]
      * }</pre>
      *
-     * @param a the array of Byte objects
-     * @return a new ByteStream containing the unboxed values from the array
+     * @param a the array of Byte objects ({@code null} elements are unboxed to {@code (byte) 0})
+     * @return a new ByteStream containing the unboxed values from the array, or an empty stream if the array is {@code null} or empty
      */
     public static ByteStream of(final Byte[] a) {
         return Stream.of(a).mapToByte(FB.unbox());
@@ -2259,7 +2291,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.of(bytes, 1, 3).toArray();   // [2, 3]
      * }</pre>
      *
-     * @param a the array of Byte objects
+     * @param a the array of Byte objects ({@code null} elements are unboxed to {@code (byte) 0})
      * @param fromIndex the starting index, inclusive
      * @param toIndex the ending index, exclusive
      * @return a new ByteStream containing the unboxed values from the specified array range
@@ -2279,8 +2311,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.of(list).toArray();   // [1, 2, 3]
      * }</pre>
      *
-     * @param c the collection of Byte objects
-     * @return a new ByteStream containing the unboxed values from the collection
+     * @param c the collection of Byte objects ({@code null} elements are unboxed to {@code (byte) 0})
+     * @return a new ByteStream containing the unboxed values from the collection, or an empty stream if the collection is {@code null} or empty
      */
     public static ByteStream of(final Collection<Byte> c) {
         return Stream.of(c).mapToByte(FB.unbox());
@@ -2309,9 +2341,13 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * {@link ByteBuffer#limit() limit} (exclusive). Returns an empty stream if {@code buf}
      * is {@code null}.
      *
-     * <p>The buffer's position is <b>not</b> advanced by stream consumption — the stream
-     * reads bytes via absolute indexed {@code get(int)} access, so the buffer remains
-     * usable afterwards.
+     * <p>The window {@code [position, limit)} is fixed when this method is called. The elements are read from the
+     * buffer when the stream is traversed (directly from its backing array when {@link ByteBuffer#hasArray()} is
+     * {@code true}, otherwise by absolute {@code get(int)} on a {@link ByteBuffer#duplicate() duplicate} taken when this
+     * method is called), so the stream is a live view of that window: a write to the buffer is seen by elements not
+     * yet read. This method never changes the buffer's position or limit, and changing them afterwards (for example
+     * with {@code limit(n)}, {@code flip()} or {@code clear()}) does not affect the stream, so the buffer remains
+     * usable right away.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -2329,8 +2365,20 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             return empty();
         }
 
+        if (buf.hasArray()) {
+            // Same live view of the same backing array, but array-backed: O(1) count/skip and the array fast paths.
+            final int offset = buf.arrayOffset();
+
+            return of(buf.array(), offset + buf.position(), offset + buf.limit());
+        }
+
+        // Read through a duplicate taken now: it shares the content (so the stream stays a live view) but has its own
+        // position and limit, so a later limit(n)/flip()/clear() on the caller's buffer cannot shrink the window under
+        // the stream - get(int) checks the CURRENT limit and would throw mid-traversal. The array path above is immune.
+        final ByteBuffer view = buf.duplicate();
+
         //noinspection resource
-        return IntStream.range(buf.position(), buf.limit()).mapToByte(buf::get);
+        return IntStream.range(view.position(), view.limit()).mapToByte(view::get);
     }
 
     /**
@@ -2375,7 +2423,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * byte[] bytes = stream.toArray();   // [1, 2, 3]
      * }</pre>
      *
-     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the input beyond the bytes it emits; closing the stream discards unread buffered bytes. Consumption throws {@link UncheckedIOException} if reading from {@code is} fails.</p>
+     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the input beyond the bytes it emits; closing the stream discards unread buffered bytes. Consumption throws {@link UncheckedIOException} if reading from {@code is} fails.
+     * A {@code read} call that returns {@code 0} (which only a non-conforming or non-blocking {@code InputStream} does) is treated as the
+     * end of the input, like {@code -1}.</p>
      *
      * @param is the input stream to read from (may be {@code null})
      * @return a new ByteStream over the bytes read from {@code is}, or an empty
@@ -2406,7 +2456,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * // sharedStream is still open for other operations
      * }</pre>
      *
-     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the input beyond the bytes it emits; closing the stream discards unread buffered bytes. Consumption throws {@link UncheckedIOException} if reading from {@code is} fails.</p>
+     * <p>Reading is deferred until the returned stream is consumed. Reads are buffered, so a short-circuiting operation can advance the input beyond the bytes it emits; closing the stream discards unread buffered bytes. Consumption throws {@link UncheckedIOException} if reading from {@code is} fails.
+     * A {@code read} call that returns {@code 0} (which only a non-conforming or non-blocking {@code InputStream} does) is treated as the
+     * end of the input, like {@code -1}.</p>
      *
      * @param is the input stream to read from (may be {@code null})
      * @param closeInputStreamWhenStreamIsClosed if {@code true}, the input stream will be closed when the ByteStream is closed;
@@ -2420,7 +2472,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             return empty();
         }
 
-        final ByteIterator iter = new ByteIterator() {
+        final ByteIterator iter = new ByteIteratorEx() {
             private final byte[] buf = new byte[8192];
             private boolean isEnd = false;
             private int count = 0;
@@ -2444,13 +2496,64 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
                 return count > idx;
             }
 
+            /**
+             * @throws UncheckedIOException if reading from the source fails.
+             * @throws NoSuchElementException if there are no more elements to read.
+             */
             @Override
-            public byte nextByte() throws NoSuchElementException {
+            public byte nextByte() throws UncheckedIOException, NoSuchElementException {
                 if (!hasNext()) {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
                 return buf[idx++];
+            }
+
+            /*
+             * The bulk operations below consume the buffer a chunk at a time instead of element by element. They go
+             * through hasNext(), so they issue exactly the same read(buf) calls, in the same order, as iteration does.
+             */
+
+            /**
+             * @throws UncheckedIOException if reading from the source fails.
+             */
+            @Override
+            public long count() throws UncheckedIOException {
+                long result = 0;
+
+                while (hasNext()) {
+                    result += count - idx;
+                    idx = count;
+                }
+
+                return result;
+            }
+
+            /**
+             * @throws UncheckedIOException if reading from the source fails.
+             */
+            @Override
+            public byte[] toArray() throws UncheckedIOException {
+                if (!hasNext()) {
+                    return N.EMPTY_BYTE_ARRAY;
+                }
+
+                final java.io.ByteArrayOutputStream os = new java.io.ByteArrayOutputStream(count - idx);
+
+                do {
+                    os.write(buf, idx, count - idx);
+                    idx = count;
+                } while (hasNext());
+
+                return os.toByteArray();
+            }
+
+            /**
+             * @throws UncheckedIOException if reading from the source fails.
+             */
+            @Override
+            public ByteList toList() throws UncheckedIOException {
+                return ByteList.of(toArray());
             }
         };
 
@@ -2475,8 +2578,9 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.flatten(array).toArray();   // [1, 2, 3, 4, 5]
      * }</pre>
      *
-     * @param a the two-dimensional array to flatten
-     * @return a new ByteStream containing all elements from the two-dimensional array
+     * @param a the two-dimensional array to flatten; may be {@code null} or empty, and {@code null} rows are skipped
+     * @return a new ByteStream containing all elements from the two-dimensional array,
+     *         or an empty stream if the array is {@code null} or empty
      */
     public static ByteStream flatten(final byte[][] a) {
         return N.isEmpty(a) ? empty() : Stream.of(a).flatMapToByte(flatMapper);
@@ -2489,13 +2593,14 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[][] array = {{1, 2}, {3, 4}};
-     * ByteStream.flatten(array, false).toArray();   // [1, 2, 3, 4] (row by row)
-     * ByteStream.flatten(array, true).toArray();    // [1, 3, 2, 4] (column by column)
+     * ByteStream.flatten(array, false).toArray();  // [1, 2, 3, 4] (row by row)
+     * ByteStream.flatten(array, true).toArray();   // [1, 3, 2, 4] (column by column)
      * }</pre>
      *
-     * @param a the two-dimensional array to flatten
+     * @param a the two-dimensional array to flatten; may be {@code null} or empty, and {@code null} rows are treated as empty
      * @param vertically if {@code true}, elements are read column by column; if {@code false}, row by row
-     * @return a new ByteStream containing all elements from the two-dimensional array
+     * @return a new ByteStream containing all elements from the two-dimensional array,
+     *         or an empty stream if the array is {@code null} or empty
      */
     public static ByteStream flatten(final byte[][] a, final boolean vertically) {
         if (N.isEmpty(a)) {
@@ -2507,9 +2612,15 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
         }
 
         long n = 0;
+        int maxLen = 0;
 
         for (final byte[] e : a) {
-            n += N.len(e);
+            final int len = N.len(e);
+            n += len;
+
+            if (len > maxLen) {
+                maxLen = len;
+            }
         }
 
         if (n == 0) {
@@ -2518,6 +2629,13 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
         final int rows = N.len(a);
         final long count = n;
+
+        // The walk below checks about rows * maxLen positions, rescanning null or too short rows in every later column.
+        // It is the fastest per element, so it is kept unless most of those positions are empty (jagged input such as
+        // one long row among many short ones), where it would be up to 'rows' times slower than the elements it returns.
+        if ((long) rows * maxLen > 4 * n) {
+            return of(flattenJaggedVertically(a, count));
+        }
 
         final ByteIterator iter = new ByteIteratorEx() {
             private int rowNum = 0;
@@ -2557,6 +2675,67 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     }
 
     /**
+     * Column-major iterator over a jagged {@code byte[][]} (rows of different lengths, or {@code null} rows) holding
+     * {@code count > 0} elements in total. It keeps the indices (in row order) of the rows that have an element in the
+     * current column. A row that is too short for one column is too short for every later one, so it is dropped once
+     * instead of being rescanned for every column: O(count + rows) in total instead of O(rows * longest row).
+     */
+    private static ByteIterator flattenJaggedVertically(final byte[][] a, final long count) {
+        return new ByteIteratorEx() {
+            private int[] activeRows = null;
+            private int activeCount = 0;
+            private int activeIndex = 0;
+            private int colNum = 0;
+            private long cnt = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cnt < count;
+            }
+
+            @Override
+            public byte nextByte() throws NoSuchElementException {
+                if (cnt++ >= count) {
+                    throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                if (activeIndex == activeCount) {
+                    nextColumn();
+                }
+
+                return a[activeRows[activeIndex++]][colNum];
+            }
+
+            // Moves to the next column (the first one on the first call), keeping only the rows that have an element in it.
+            private void nextColumn() {
+                if (activeRows == null) {
+                    activeRows = new int[a.length];
+
+                    for (int rowNum = 0; rowNum < a.length; rowNum++) {
+                        if (a[rowNum] != null && a[rowNum].length > 0) {
+                            activeRows[activeCount++] = rowNum;
+                        }
+                    }
+                } else {
+                    colNum++;
+
+                    int kept = 0;
+
+                    for (int i = 0; i < activeCount; i++) {
+                        if (colNum < a[activeRows[i]].length) {
+                            activeRows[kept++] = activeRows[i];
+                        }
+                    }
+
+                    activeCount = kept;
+                }
+
+                activeIndex = 0;
+            }
+        };
+    }
+
+    /**
      * Returns a ByteStream whose elements are all the elements from the input two-dimensional array, flattened either
      * in row-major order (vertically = false) or column-major order (vertically = true).
      * If rows have different lengths, the valueForAlignment is used to pad shorter rows.
@@ -2564,8 +2743,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * byte[][] array = {{1, 2}, {3}};
-     * ByteStream.flatten(array, (byte)0, false).toArray();   // [1, 2, 3, 0] (row by row with padding)
-     * ByteStream.flatten(array, (byte)0, true).toArray();    // [1, 3, 2, 0] (column by column with padding)
+     * ByteStream.flatten(array, (byte)0, false).toArray();  // [1, 2, 3, 0] (row by row with padding)
+     * ByteStream.flatten(array, (byte)0, true).toArray();   // [1, 3, 2, 0] (column by column with padding)
      * }</pre>
      *
      * @param a the two-dimensional array to flatten
@@ -2690,6 +2869,10 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.range((byte)1, (byte)5).toArray();   // [1, 2, 3, 4]
      * }</pre>
      *
+     * <p>The returned stream is known to be sorted, so {@code sorted()} returns it as is and {@code distinct()},
+     * {@code min()}, {@code max()} and {@code kthLargest(k)} use their streaming sorted paths (as for
+     * {@link IntStream#range(int, int)}).
+     *
      * @param startInclusive the (inclusive) initial value
      * @param endExclusive the exclusive upper bound
      * @return a new ByteStream consisting of values from startInclusive (inclusive) to endExclusive (exclusive)
@@ -2699,6 +2882,8 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             return empty();
         }
 
+        // Flagged sorted (strictly ascending, distinct), like IntStream.range: sorted()/distinct()/min()/max()/kthLargest()
+        // take their sorted fast paths.
         return new IteratorByteStream(new ByteIteratorEx() {
             private byte next = startInclusive;
             private int cnt = endExclusive - startInclusive;
@@ -2752,7 +2937,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return result;
             }
-        });
+        }, true, null);
     }
 
     /**
@@ -2764,13 +2949,16 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteStream.range((byte)0, (byte)10, (byte)2).toArray();    // [0, 2, 4, 6, 8]
-     * ByteStream.range((byte)10, (byte)0, (byte)-2).toArray();   // [10, 8, 6, 4, 2]
+     * ByteStream.range((byte)0, (byte)10, (byte)2).toArray();   // [0, 2, 4, 6, 8]
+     * ByteStream.range((byte)10, (byte)0, (byte)-2).toArray();  // [10, 8, 6, 4, 2]
      * }</pre>
+     *
+     * <p>An ascending range ({@code by > 0}) is known to be sorted, so {@code sorted()} returns it as is;
+     * see {@link #range(byte, byte)}.
      *
      * @param startInclusive the (inclusive) initial value
      * @param endExclusive the exclusive upper bound
-     * @param by the incremental step
+     * @param by the incremental step; must not be zero; can be negative for descending sequences
      * @return a new ByteStream consisting of values from startInclusive (inclusive) to endExclusive (exclusive) by the specified step
      * @throws IllegalArgumentException if {@code by} is zero.
      */
@@ -2783,6 +2971,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             return empty();
         }
 
+        // An ascending range (by > 0) is flagged sorted so the sorted fast paths apply; a descending one is not.
         return new IteratorByteStream(new ByteIteratorEx() {
             private byte next = startInclusive;
             private int cnt = (endExclusive - startInclusive) / by + ((endExclusive - startInclusive) % by == 0 ? 0 : 1);
@@ -2843,7 +3032,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return result;
             }
-        });
+        }, by > 0, null);
     }
 
     /**
@@ -2857,6 +3046,10 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * ByteStream.rangeClosed((byte)1, (byte)5).toArray();   // [1, 2, 3, 4, 5]
      * }</pre>
      *
+     * <p>The returned stream is known to be sorted, so {@code sorted()} returns it as is and {@code distinct()},
+     * {@code min()}, {@code max()} and {@code kthLargest(k)} use their streaming sorted paths (as for
+     * {@link IntStream#range(int, int)}).
+     *
      * @param startInclusive the (inclusive) initial value
      * @param endInclusive the inclusive upper bound
      * @return a new ByteStream consisting of values from startInclusive (inclusive) to endInclusive (inclusive)
@@ -2865,9 +3058,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
         if (startInclusive > endInclusive) {
             return empty();
         } else if (startInclusive == endInclusive) {
-            return of(startInclusive);
+            return new ArrayByteStream(new byte[] { startInclusive }, true, null); // one element: trivially sorted
         }
 
+        // Flagged sorted (strictly ascending, distinct), like IntStream.range: sorted()/distinct()/min()/max()/kthLargest()
+        // take their sorted fast paths.
         return new IteratorByteStream(new ByteIteratorEx() {
             private byte next = startInclusive;
             private int cnt = endInclusive - startInclusive + 1;
@@ -2921,7 +3116,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return result;
             }
-        });
+        }, true, null);
     }
 
     /**
@@ -2932,9 +3127,12 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * ByteStream.rangeClosed((byte)0, (byte)10, (byte)2).toArray();    // [0, 2, 4, 6, 8, 10]
-     * ByteStream.rangeClosed((byte)10, (byte)0, (byte)-2).toArray();   // [10, 8, 6, 4, 2, 0]
+     * ByteStream.rangeClosed((byte)0, (byte)10, (byte)2).toArray();   // [0, 2, 4, 6, 8, 10]
+     * ByteStream.rangeClosed((byte)10, (byte)0, (byte)-2).toArray();  // [10, 8, 6, 4, 2, 0]
      * }</pre>
+     *
+     * <p>An ascending range ({@code by > 0}) is known to be sorted, so {@code sorted()} returns it as is;
+     * see {@link #range(byte, byte)}.
      *
      * @param startInclusive the (inclusive) initial value
      * @param endInclusive the inclusive upper bound
@@ -2948,11 +3146,12 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
         }
 
         if (endInclusive == startInclusive) {
-            return of(startInclusive);
+            return new ArrayByteStream(new byte[] { startInclusive }, true, null); // one element: trivially sorted
         } else if (endInclusive > startInclusive != by > 0) {
             return empty();
         }
 
+        // An ascending range (by > 0) is flagged sorted so the sorted fast paths apply; a descending one is not.
         return new IteratorByteStream(new ByteIteratorEx() {
             private byte next = startInclusive;
             private int cnt = (endInclusive - startInclusive) / by + 1;
@@ -3013,7 +3212,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return result;
             }
-        });
+        }, by > 0, null);
     }
 
     /**
@@ -3027,7 +3226,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param element the element to repeat
      * @param n the number of times to repeat the element
      * @return a new ByteStream consisting of the element repeated n times
-     * @throws IllegalArgumentException if n is negative.
+     * @throws IllegalArgumentException if {@code n} is negative.
      */
     public static ByteStream repeat(final byte element, final long n) throws IllegalArgumentException {
         N.checkArgNotNegative(n, cs.n);
@@ -3102,6 +3301,12 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * generated {@code byte}. The random values are uniformly distributed over the full signed
      * byte range: {@code Byte.MIN_VALUE} (-128) to {@code Byte.MAX_VALUE} (127), inclusive.
      *
+     * <p><b>Source of randomness:</b> each value is drawn from
+     * {@link java.util.concurrent.ThreadLocalRandom#current()} of the thread that pulls it, so the stream is fast
+     * and does not contend across threads. The values are <b>not</b> cryptographically secure and cannot be
+     * seeded; callers that need unpredictable values should use {@link java.security.SecureRandom} directly, and
+     * callers that need a reproducible sequence can pass their own generator to {@link #generate(ByteSupplier)}.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteStream.random().limit(5).forEach(System.out::println);   // prints 5 random bytes
@@ -3117,7 +3322,7 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     public static ByteStream random() {
         final int bound = Byte.MAX_VALUE - Byte.MIN_VALUE + 1;
 
-        return generate(() -> (byte) (RAND.nextInt(bound) + Byte.MIN_VALUE));
+        return generate(() -> (byte) (ThreadLocalRandom.current().nextInt(bound) + Byte.MIN_VALUE));
     }
 
     /**
@@ -3425,6 +3630,12 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Concatenates multiple ByteStreams into a single ByteStream.
      *
+     * <p>The resulting stream will automatically close all input streams when it is closed.
+     * As each input stream is exhausted during iteration, it is immediately closed before moving to the next stream
+     * (the last one is closed when the resulting stream is closed). A failure thrown while closing an exhausted input
+     * therefore ends the traversal: it is thrown by the resulting stream's iteration, and the elements of the remaining
+     * inputs are not delivered.
+     *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteStream s1 = ByteStream.of((byte)1, (byte)2);
@@ -3487,6 +3698,44 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
 
                 return cur[cursor++];
             }
+
+            /*
+             * The bulk operations below consume the remaining arrays a whole array at a time instead of element by
+             * element. They go through hasNext(), so the list iterator is advanced exactly as iteration advances it.
+             */
+
+            @Override
+            public long count() {
+                long result = 0;
+
+                while (hasNext()) {
+                    result += cur.length - cursor;
+                    cursor = cur.length;
+                }
+
+                return result;
+            }
+
+            @Override
+            public byte[] toArray() {
+                if (!hasNext()) {
+                    return N.EMPTY_BYTE_ARRAY;
+                }
+
+                final java.io.ByteArrayOutputStream os = new java.io.ByteArrayOutputStream(cur.length - cursor);
+
+                do {
+                    os.write(cur, cursor, cur.length - cursor);
+                    cursor = cur.length;
+                } while (hasNext());
+
+                return os.toByteArray();
+            }
+
+            @Override
+            public ByteList toList() {
+                return ByteList.of(toArray());
+            }
         });
     }
 
@@ -3494,6 +3743,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * Concatenates a collection of ByteStream into a single ByteStream.
      * The collection's membership and encounter order are snapshotted when this method is called.
      * Closing the returned stream closes every snapshotted input stream.
+     *
+     * <p>As each input stream is exhausted during iteration, it is immediately closed before moving to the next stream
+     * (the last one is closed when the resulting stream is closed). A failure thrown while closing an exhausted input
+     * therefore ends the traversal: it is thrown by the resulting stream's iteration, and the elements of the remaining
+     * inputs are not delivered.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -3804,9 +4058,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#zip(Stream, Stream, BiFunction)
      */
-    public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteBinaryOperator zipFunction) throws IllegalArgumentException {
+    public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteBinaryOperator zipFunction)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> zip(ia, ib, zipFunction).onClose(newCloseHandler(a, b)));
@@ -3835,10 +4091,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see Stream#zip(Stream, Stream, Stream, TriFunction)
      */
     public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteStream c, final ByteTernaryOperator zipFunction)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
@@ -3865,16 +4122,19 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * }</pre>
      *
      * @param streams the collection of ByteStream instances to zip; its contents are snapshotted, and {@code null} streams are treated as empty
-     * @param zipFunction the function to combine elements from all streams.
+     * @param zipFunction the function to combine elements from all streams; it must not return {@code null}
      * @return a stream of combined values. Empty if the collection is {@code null} or empty
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws NullPointerException if {@code zipFunction} returns {@code null} (thrown lazily, when that element is reached).
+     * @throws IllegalStateException if any stream in {@code streams} is already closed
      * @see Stream#zip(Collection, Function)
      */
-    public static ByteStream zip(final Collection<? extends ByteStream> streams, final ByteNFunction<Byte> zipFunction) throws IllegalArgumentException {
+    public static ByteStream zip(final Collection<? extends ByteStream> streams, final ByteNFunction<Byte> zipFunction)
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         //noinspection resource
-        return Stream.zip(streams, zipFunction).mapToByte(ToByteFunction.UNBOX);
+        return Stream.zip(streams, zipFunction).mapToByte(UNBOX_ZIP_RESULT);
     }
 
     /**
@@ -4121,10 +4381,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param zipFunction the function to combine elements from both streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#zip(Stream, Stream, Object, Object, BiFunction)
      */
     public static ByteStream zip(final ByteStream a, final ByteStream b, final byte valueForNoneA, final byte valueForNoneB,
-            final ByteBinaryOperator zipFunction) throws IllegalArgumentException {
+            final ByteBinaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b),
@@ -4157,10 +4418,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      * @param zipFunction the function to combine elements from all three streams.
      * @return a stream of combined values
      * @throws IllegalArgumentException if {@code zipFunction} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see Stream#zip(Stream, Stream, Stream, Object, Object, Object, TriFunction)
      */
     public static ByteStream zip(final ByteStream a, final ByteStream b, final ByteStream c, final byte valueForNoneA, final byte valueForNoneB,
-            final byte valueForNoneC, final ByteTernaryOperator zipFunction) throws IllegalArgumentException {
+            final byte valueForNoneC, final ByteTernaryOperator zipFunction) throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(zipFunction, cs.zipFunction);
 
         return closingOpenedSources(a, b, c, () -> iterate(a), () -> iterate(b), () -> iterate(c),
@@ -4189,18 +4451,18 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *
      * @param streams the collection of ByteStream instances to zip; its contents are snapshotted, and {@code null} streams are treated as empty
      * @param valuesForNone the default values to use for exhausted streams, must have the same size as the streams collection
-     * @param zipFunction the function to combine elements from all streams.
+     * @param zipFunction the function to combine elements from all streams; it must not return {@code null}
      * @return a stream of combined values. Empty if the collection is {@code null} or empty
      * @throws IllegalArgumentException if the size of {@code valuesForNone} doesn't match the size of the streams
      *         collection, or if {@code zipFunction} is {@code null}.
+     * @throws NullPointerException if {@code zipFunction} returns {@code null} (thrown lazily, when that element is reached).
+     * @throws IllegalStateException if any stream in {@code streams} is already closed
      * @see Stream#zip(Collection, List, Function)
      */
     public static ByteStream zip(final Collection<? extends ByteStream> streams, final byte[] valuesForNone, final ByteNFunction<Byte> zipFunction)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(zipFunction, cs.zipFunction);
-
+            throws IllegalArgumentException, NullPointerException, IllegalStateException {
         //noinspection resource
-        return Stream.zip(streams, valuesForNone, zipFunction).mapToByte(ToByteFunction.UNBOX);
+        return Stream.zip(streams, valuesForNone, zipFunction).mapToByte(UNBOX_ZIP_RESULT);
     }
 
     /**
@@ -4406,9 +4668,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the two input streams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code a} or {@code b} is already closed
      * @see Stream#merge(Stream, Stream, BiFunction)
      */
-    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteBiFunction<MergeResult> nextSelector) throws IllegalArgumentException {
+    public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteBiFunction<MergeResult> nextSelector)
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return closingOpenedSources(a, b, () -> iterate(a), () -> iterate(b), (ia, ib) -> merge(ia, ib, nextSelector).onClose(newCloseHandler(a, b)));
@@ -4434,10 +4698,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the three input streams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code a}, {@code b}, or {@code c} is already closed
      * @see Stream#merge(Stream, Stream, Stream, BiFunction)
      */
     public static ByteStream merge(final ByteStream a, final ByteStream b, final ByteStream c, final ByteBiFunction<MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         return merge(merge(a, b, nextSelector), c, nextSelector);
@@ -4446,6 +4711,16 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
     /**
      * Merges a collection of ByteStream into a single ByteStream based on the provided nextSelector function.
      * The nextSelector function determines which element to take next from the multiple streams.
+     *
+     * <p>The streams are merged lazily as a balanced tree of pairwise merges of <i>adjacent</i> streams, so each
+     * element passes through about {@code log2(k)} selector calls for {@code k} streams (the tree is built, and every
+     * stream is opened, when this method is called). All streams should provide elements in pre-sorted order
+     * according to the same ordering that the nextSelector function expects; for a {@code nextSelector} that returns
+     * {@code TAKE_FIRST} on ties, elements it treats as equal keep their source order, and the result is the same as
+     * merging the streams one after another from left to right.
+     * The returned stream will automatically close all input streams when it is closed. If an input stream is found
+     * to be already closed, the streams that precede it in the collection are closed, the ones after it are left
+     * untouched, and the exception is rethrown.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -4463,10 +4738,11 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
      *                     The first parameter is selected if {@code MergeResult.TAKE_FIRST} is returned, otherwise the second parameter is selected.
      * @return a ByteStream containing the merged elements from the input ByteStreams
      * @throws IllegalArgumentException if {@code nextSelector} is {@code null}.
+     * @throws IllegalStateException if {@code streams} contains more than one stream and any of them is already closed
      * @see Stream#merge(Collection, BiFunction)
      */
     public static ByteStream merge(final Collection<? extends ByteStream> streams, final ByteBiFunction<MergeResult> nextSelector)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException {
         N.checkArgNotNull(nextSelector, cs.nextSelector);
 
         if (N.isEmpty(streams)) {
@@ -4479,14 +4755,43 @@ public abstract class ByteStream extends StreamBase<Byte, byte[], BytePredicate,
             return merge(iter.next(), iter.next(), nextSelector);
         }
 
-        final Iterator<? extends ByteStream> iter = streams.iterator();
-        ByteStream result = merge(iter.next(), iter.next(), nextSelector);
+        // Merge adjacent pairs level by level - a balanced tree, as Stream.merge(Collection) does (C-104) - instead of
+        // folding left. The left fold merge(merge(merge(s1, s2), s3), ...) is k - 1 merges deep: an element of an early
+        // source passed through up to k - 1 selector calls (O(n * k) in total), and every hasNext()/next()/close()
+        // recursed through all levels (StackOverflowError, with sources left open, at about 2,000 sources). The tree is
+        // ceil(log2(k)) deep. Merging adjacent runs keeps elements that a TAKE_FIRST-on-ties selector treats as equal in
+        // source order, so for such a selector the result is exactly the left fold's.
+        List<ByteStream> level = new ArrayList<>(streams);
+        final List<ByteStream> created = new ArrayList<>(level.size() - 1);
 
-        while (iter.hasNext()) {
-            result = merge(result, iter.next(), nextSelector);
+        try {
+            while (level.size() > 1) {
+                final int size = level.size();
+                final List<ByteStream> nextLevel = new ArrayList<>((size + 1) / 2);
+
+                for (int i = 0; i + 1 < size; i += 2) {
+                    final ByteStream merged = merge(level.get(i), level.get(i + 1), nextSelector);
+                    created.add(merged);
+                    nextLevel.add(merged);
+                }
+
+                if (size % 2 == 1) {
+                    nextLevel.add(level.get(size - 1));
+                }
+
+                level = nextLevel;
+            }
+        } catch (final RuntimeException | Error e) {
+            // As in each pairwise merge, close only what has been opened: every merge created so far (which closes
+            // the sources it consumed; closing twice is a no-op). Sources not reached yet are left untouched.
+            for (int i = created.size() - 1; i >= 0; i--) {
+                closeOpenedSource(created.get(i), e);
+            }
+
+            throw e;
         }
 
-        return result;
+        return level.get(0);
     }
 
     /**

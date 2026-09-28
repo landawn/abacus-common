@@ -319,4 +319,19 @@ public class CalendarTypeTest extends TestBase {
         assertEquals(2023, result.get(Calendar.YEAR));
     }
 
+    @Test
+    public void testValueOfShortNumericTextIsNotEpochMillis() {
+        final Type<Object> dateType = TypeFactory.getType("Calendar");
+
+        // more than four characters of an optional sign and ASCII digits: epoch milliseconds
+        Assertions.assertEquals(12345L, ((java.util.Calendar) dateType.valueOf("12345")).getTimeInMillis());
+        Assertions.assertEquals(-12345L, ((java.util.Calendar) dateType.valueOf("-12345")).getTimeInMillis());
+        Assertions.assertEquals(12345L, ((java.util.Calendar) dateType.valueOf("12345".toCharArray(), 0, 5)).getTimeInMillis());
+
+        // shorter numeric text is not epoch millis: the formatted parser rejects it as ambiguous
+        for (final String text : new String[] { "0", "-1", "99", "2024" }) {
+            Assertions.assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(text), text);
+            Assertions.assertThrows(IllegalArgumentException.class, () -> dateType.valueOf(text.toCharArray(), 0, text.length()), text);
+        }
+    }
 }

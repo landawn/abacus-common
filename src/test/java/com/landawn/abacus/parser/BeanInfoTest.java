@@ -739,4 +739,182 @@ public class BeanInfoTest extends TestBase {
         Assertions.assertEquals("firstName", self.getPropInfo("first_name").name);
         Assertions.assertEquals("firstName", self.getPropInfo("FIRST_NAME").name);
     }
+
+    // ---- perf review 2026-09-26 G009 begin ----
+
+    public static class SameLengthNames {
+        private String email;
+        private String phone;
+        private String alpha;
+        private int id;
+        private String address;
+        private String userName;
+        @JsonXmlField(name = "Aa")
+        private String x1;
+        @JsonXmlField(name = "BB")
+        private String x2;
+        @Column("ADDR_LINE")
+        private String line;
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public void setPhone(String phone) {
+            this.phone = phone;
+        }
+
+        public String getAlpha() {
+            return alpha;
+        }
+
+        public void setAlpha(String alpha) {
+            this.alpha = alpha;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
+        }
+
+        public String getX1() {
+            return x1;
+        }
+
+        public void setX1(String x1) {
+            this.x1 = x1;
+        }
+
+        public String getX2() {
+            return x2;
+        }
+
+        public void setX2(String x2) {
+            this.x2 = x2;
+        }
+
+        public String getLine() {
+            return line;
+        }
+
+        public void setLine(String line) {
+            this.line = line;
+        }
+    }
+
+    // G009-01: readPropInfo finds same-length names ("email"/"phone"/"alpha", and "Aa"/"BB", whose hash codes collide)
+    // without the boxed hash map; every key, known or not, must resolve exactly as before.
+    @Test
+    public void testReadPropInfo_sameLengthNamesAndHashCollisions() {
+        ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(SameLengthNames.class);
+        Assertions.assertEquals("Aa".hashCode(), "BB".hashCode());
+
+        String[][] expected = { { "email", "email" }, { "phone", "phone" }, { "alpha", "alpha" }, { "id", "id" }, { "address", "address" },
+                { "userName", "userName" }, { "user_name", "userName" }, { "USER_NAME", "userName" }, { "Email", "email" }, { "EMAIL", "email" },
+                { "Aa", "x1" }, { "BB", "x2" }, { "x1", "x1" }, { "x2", "x2" }, { "line", "line" }, { "ADDR_LINE", "line" }, { "addr_line", "line" },
+                { "emaiL", null }, { "zz", null }, { "AB", null }, { "C#", null }, { "a", null }, { "averyveryverylongunknownkey", null },
+                { "phonE", null }, { "address1", null } };
+
+        for (String[] pair : expected) {
+            String key = pair[0];
+            ParserUtil.PropInfo direct = info.readPropInfo(key.toCharArray(), 0, key.length());
+            char[] padded = ("#" + key + "##").toCharArray();
+            ParserUtil.PropInfo offset = info.readPropInfo(padded, 1, 1 + key.length());
+
+            if (pair[1] == null) {
+                Assertions.assertNull(direct, key);
+                Assertions.assertNull(offset, key);
+            } else {
+                Assertions.assertEquals(pair[1], direct.name, key);
+                Assertions.assertSame(direct, offset, key);
+                Assertions.assertSame(info.getPropInfo(pair[1]), direct, key);
+            }
+        }
+
+        // Once getPropInfo has memoized its (tolerant) answers, readPropInfo returns exactly those for the same text.
+        for (String[] pair : expected) {
+            String key = pair[0];
+            ParserUtil.PropInfo resolved = info.getPropInfo(key);
+            Assertions.assertSame(resolved, info.readPropInfo(key.toCharArray(), 0, key.length()), key);
+            Assertions.assertSame(resolved, info.readPropInfo(("##" + key + "#").toCharArray(), 2, 2 + key.length()), key);
+        }
+
+        Assertions.assertEquals("email", info.readPropInfo("emaiL".toCharArray(), 0, 5).name);
+        Assertions.assertNull(info.readPropInfo("zz".toCharArray(), 0, 2));
+
+        Assertions.assertNull(info.readPropInfo("email".toCharArray(), 2, 2));
+
+        SameLengthNames bean = N.fromJson("{\"Aa\": \"1\", \"BB\": \"2\", \"email\": \"e\", \"phone\": \"p\", \"alpha\": \"a\", \"ADDR_LINE\": \"l\", \"id\": 7}",
+                SameLengthNames.class);
+        Assertions.assertEquals("1", bean.getX1());
+        Assertions.assertEquals("2", bean.getX2());
+        Assertions.assertEquals("e", bean.getEmail());
+        Assertions.assertEquals("p", bean.getPhone());
+        Assertions.assertEquals("a", bean.getAlpha());
+        Assertions.assertEquals("l", bean.getLine());
+        Assertions.assertEquals(7, bean.getId());
+    }
+
+    // ---- perf review 2026-09-26 G009 end ----
+
+    public static class WideBean {
+        public int field000, field001, field002, field003, field004, field005, field006, field007, field008, field009, field010, field011, field012, field013, field014, field015;
+        public int field016, field017, field018, field019, field020, field021, field022, field023, field024, field025, field026, field027, field028, field029, field030, field031;
+        public int field032, field033, field034, field035, field036, field037, field038, field039, field040, field041, field042, field043, field044, field045, field046, field047;
+        public int field048, field049, field050, field051, field052, field053, field054, field055, field056, field057, field058, field059, field060, field061, field062, field063;
+        public int field064, field065, field066, field067, field068, field069, field070, field071, field072, field073, field074, field075, field076, field077, field078, field079;
+        public int field080, field081, field082, field083, field084, field085, field086, field087, field088, field089, field090, field091, field092, field093, field094, field095;
+        public int field096, field097, field098, field099, field100, field101, field102, field103, field104, field105, field106, field107, field108, field109, field110, field111;
+        public int field112, field113, field114, field115, field116, field117, field118, field119, field120, field121, field122, field123, field124, field125, field126, field127;
+    }
+
+    @Test
+    public void testReadPropInfo_manyEqualLengthNames() throws Exception {
+        final ParserUtil.BeanInfo info = ParserUtil.getBeanInfo(WideBean.class);
+        Assertions.assertEquals(128, info.propInfoList.size());
+        final StringBuilder json = new StringBuilder("{");
+        for (int i = 127; i >= 0; i--) {
+            final String name = String.format(java.util.Locale.ROOT, "field%03d", i);
+            final char[] key = ("##" + name + "##").toCharArray();
+            Assertions.assertSame(info.getPropInfo(name), info.readPropInfo(key, 2, key.length - 2));
+            if (i < 127) {
+                json.append(',');
+            }
+            json.append('"').append(name).append("\":").append(i);
+        }
+        json.append('}');
+        final WideBean bean = N.fromJson(json.toString(), WideBean.class);
+        for (int i = 0; i < 128; i++) {
+            Assertions.assertEquals(i, WideBean.class.getField(String.format(java.util.Locale.ROOT, "field%03d", i)).getInt(bean));
+        }
+        Assertions.assertNull(info.readPropInfo("field128".toCharArray(), 0, 8));
+        Assertions.assertNull(info.readPropInfo("field".toCharArray(), 0, 5));
+    }
 }

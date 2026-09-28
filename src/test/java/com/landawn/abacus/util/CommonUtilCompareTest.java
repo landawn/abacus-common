@@ -289,4 +289,27 @@ public class CommonUtilCompareTest extends CommonUtilTestSupport {
         assertEquals(0, CommonUtil.compareIgnoreCase("HELLO", "hello"));
     }
 
+
+    @Test
+    public void testCompare_nullIterableTreatedAsEmpty() {
+        List<String> list = Arrays.asList("a");
+        Comparator<String> natural = Comparator.naturalOrder();
+        assertEquals(0, CommonUtil.compare((Iterable<String>) null, (Iterable<String>) null));
+        assertEquals(0, CommonUtil.compare((Iterable<String>) null, Collections.<String> emptyList()));
+        assertEquals(0, CommonUtil.compare(Collections.<String> emptyList(), (Iterable<String>) null));
+        assertTrue(CommonUtil.compare((Iterable<String>) null, list) < 0);
+        assertTrue(CommonUtil.compare(list, (Iterable<String>) null) > 0);
+        assertEquals(0, CommonUtil.compare((Iterable<String>) null, Collections.<String> emptyList(), natural));
+        assertTrue(CommonUtil.compare((Iterable<String>) null, list, natural) < 0);
+        assertTrue(CommonUtil.compare(list, (Iterable<String>) null, natural) > 0);
+    }
+
+    @Test
+    public void testCompare_nullIteratorTreatedAsEmpty() {
+        Comparator<String> natural = Comparator.naturalOrder();
+        assertEquals(0, CommonUtil.compare((Iterator<String>) null, Collections.<String> emptyIterator()));
+        assertEquals(0, CommonUtil.compare(Collections.<String> emptyIterator(), (Iterator<String>) null, natural));
+        assertTrue(CommonUtil.compare((Iterator<String>) null, Arrays.asList("a").iterator(), natural) < 0);
+        assertTrue(CommonUtil.compare(Arrays.asList("a").iterator(), (Iterator<String>) null, natural) > 0);
+    }
 }

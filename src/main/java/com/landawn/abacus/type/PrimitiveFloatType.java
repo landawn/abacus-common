@@ -30,8 +30,8 @@ package com.landawn.abacus.type;
  * Type<Float> type = TypeFactory.getType(float.class);
  *
  * // Convert string to float
- * Float value = type.valueOf("3.14");    // Returns 3.14f
- * Float value2 = type.valueOf("-0.5");   // Returns -0.5f
+ * Float value = type.valueOf("3.14");   // Returns 3.14f
+ * Float value2 = type.valueOf("-0.5");  // Returns -0.5f
  *
  * // Get default value
  * Float defaultVal = type.defaultValue();   // Returns 0.0f

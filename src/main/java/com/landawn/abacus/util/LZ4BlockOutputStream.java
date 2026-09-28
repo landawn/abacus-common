@@ -157,25 +157,26 @@ public final class LZ4BlockOutputStream extends OutputStream {
      *
      * @param b the byte array containing the data to write
      * @param off the start offset in the data
-     * @param len the number of bytes to write
+     * @param length the number of bytes to write
      *
      * @throws NullPointerException if {@code b} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
-     *         or {@code len} is greater than {@code b.length - off}
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is negative,
+     *         or {@code length} is greater than {@code b.length - off}
      * @throws IllegalStateException if this stream has already been finished or closed
      * @throws IOException if writing a compressed block to the underlying output stream fails
      */
     @Override
-    public void write(final byte[] b, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException, IllegalStateException, IOException {
+    public void write(final byte[] b, final int off, final int length)
+            throws NullPointerException, IndexOutOfBoundsException, IllegalStateException, IOException {
         // Enforce OutputStream.write(byte[], int, int) contract: net.jpountz.lz4.LZ4BlockOutputStream reports a
         // negative length as IllegalArgumentException and skips the range check entirely when len == 0, so we
         // validate here. Subtraction, not off + len, so a length near Integer.MAX_VALUE cannot overflow into a
         // passing check.
-        if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException("off: " + off + ", len: " + len + ", length: " + b.length);
+        if (off < 0 || length < 0 || length > b.length - off) {
+            throw new IndexOutOfBoundsException("off: " + off + ", len: " + length + ", length: " + b.length);
         }
 
-        out.write(b, off, len);
+        out.write(b, off, length);
     }
 
     /**

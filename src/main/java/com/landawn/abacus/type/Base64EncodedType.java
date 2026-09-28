@@ -25,6 +25,11 @@ import com.landawn.abacus.util.Strings;
  * encoding, this type is registered under the name {@code "Base64Encoded"} and treats a
  * {@code null} input to {@link #stringOf(byte[])} as an empty string rather than {@code null}.</p>
  *
+ * <p>The JDBC methods are inherited from {@link AbstractType}, which binds {@code stringOf(x)} as a
+ * {@code VARCHAR} and reads the column back through {@link #valueOf(String)}. Consequently a {@code null}
+ * array is bound as an empty string, <em>not</em> as SQL {@code NULL}, and a SQL {@code NULL} column is read
+ * back as an empty array, not {@code null}.</p>
+ *
  * @see BytesType
  */
 public class Base64EncodedType extends AbstractType<byte[]> {

@@ -81,8 +81,12 @@ final class Utils {
     /**
      * Parses each tuple slot directly from its original JSON token with the declared type.
      * An Object[] first pass would already have rounded decimal tokens before their types were known.
+     *
+     * @throws IllegalArgumentException if {@code source} is blank, is not enclosed in {@code '['} and {@code ']'}, has
+     *         unbalanced brackets or an unterminated quoted value, does not hold exactly {@code types.size()} elements,
+     *         or has an empty element.
      */
-    static Object[] parseTupleElements(final String source, final String typeName, final List<Type<?>> types) {
+    static Object[] parseTupleElements(final String source, final String typeName, final List<Type<?>> types) throws IllegalArgumentException {
         int from = 0;
         int end = source.length();
 

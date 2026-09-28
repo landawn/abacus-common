@@ -98,9 +98,9 @@ public final class Predicates {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> p = Predicates.distinct();
-     * p.test("a");   // returns true (new)
-     * p.test("a");   // returns false (seen)
-     * p.test("b");   // returns true (new)
+     * p.test("a");  // returns true (new)
+     * p.test("a");  // returns false (seen)
+     * p.test("b");  // returns true (new)
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -128,8 +128,8 @@ public final class Predicates {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<Person> p = Predicates.distinctBy(Person::getName);
-     * p.test(new Person("Alice"));   // returns true
-     * p.test(new Person("Alice"));   // returns false
+     * p.test(new Person("Alice"));  // returns true
+     * p.test(new Person("Alice"));  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -161,8 +161,8 @@ public final class Predicates {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> p = Predicates.concurrentDistinct();
-     * p.test("a");   // returns true (thread-safe)
-     * p.test("a");   // returns false
+     * p.test("a");  // returns true (thread-safe)
+     * p.test("a");  // returns false
      * }</pre>
      *
      * @param <T> the type of the input to the predicate
@@ -221,9 +221,9 @@ public final class Predicates {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Predicate<String> p = Predicates.skipRepeats();
-     * p.test("a");   // returns true
-     * p.test("a");   // returns false (repeated)
-     * p.test("b");   // returns true (different)
+     * p.test("a");  // returns true
+     * p.test("a");  // returns false (repeated)
+     * p.test("b");  // returns true (different)
      * }</pre>
      *
      * @param <T> the type of the input to the predicate

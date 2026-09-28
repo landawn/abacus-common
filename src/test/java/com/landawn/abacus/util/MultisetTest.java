@@ -1968,7 +1968,7 @@ public class MultisetTest extends MultisetTestSupport {
 
     @Test
     public void testConstructorWithMapSupplierReturningNull() {
-        assertThrows(IllegalArgumentException.class, () -> new Multiset<String>((Supplier<Map<String, ?>>) () -> null));
+        assertThrows(NullPointerException.class, () -> new Multiset<String>((Supplier<Map<String, ?>>) () -> null));
     }
 
     @Test

@@ -13,6 +13,8 @@
  */
 package com.landawn.abacus.util.function;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.landawn.abacus.annotation.SuppressFBWarnings;
 import com.landawn.abacus.util.Throwables;
 
@@ -43,8 +45,11 @@ public interface BooleanSupplier extends Throwables.BooleanSupplier<RuntimeExcep
     /**
      * A supplier that returns a random {@code boolean} value.
      * Each invocation has approximately equal probability of returning {@code true} or {@code false}.
+     * Values come from the calling thread's {@link ThreadLocalRandom#current()} and are <b>not</b>
+     * cryptographically secure; use {@link java.security.SecureRandom} directly when unpredictable values are
+     * required.
      */
-    BooleanSupplier RANDOM = Util.RAND_BOOLEAN::nextBoolean;
+    BooleanSupplier RANDOM = () -> ThreadLocalRandom.current().nextBoolean();
 
     /**
      * Gets a boolean result.

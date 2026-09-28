@@ -4471,4 +4471,316 @@ public class LongStreamTest extends TestBase {
         assertThrows(NoSuchElementException.class, iter::nextLong);
         assertEquals(1, conditionCalls.get());
     }
+
+    // ---- perf review 2026-09-26 G100 begin ----
+    // G100-01: pins the column-major order of flatten(long[][], true) for jagged input with null/empty/short rows
+    @Test
+    public void testFlattenVertically_jaggedNullEmptyRowsMatchesColumnMajorReference() {
+        final Random random = new Random(20260926L);
+
+        for (int round = 0; round < 300; round++) {
+            final int rows = 2 + random.nextInt(8);
+            final long[][] a = new long[rows][];
+
+            for (int r = 0; r < rows; r++) {
+                final int kind = random.nextInt(6);
+                a[r] = kind == 0 ? null : new long[kind == 1 ? 0 : random.nextInt(7)];
+
+                if (a[r] != null) {
+                    for (int c = 0; c < a[r].length; c++) {
+                        a[r][c] = random.nextLong();
+                    }
+                }
+            }
+
+            int maxLen = 0;
+
+            for (final long[] row : a) {
+                maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+            }
+
+            final LongList expected = new LongList();
+
+            for (int c = 0; c < maxLen; c++) {
+                for (final long[] row : a) {
+                    if (row != null && c < row.length) {
+                        expected.add(row[c]);
+                    }
+                }
+            }
+
+            assertArrayEquals(expected.toArray(), LongStream.flatten(a, true).toArray());
+            assertEquals(expected.size(), LongStream.flatten(a, true).count());
+
+            if (expected.size() > 1) {
+                assertArrayEquals(expected.copy(1, expected.size()).toArray(), LongStream.flatten(a, true).skip(1).toArray());
+            }
+        }
+    }
+
+    // G100-01: iterator exhaustion and a strongly jagged input (one long row, many single-element and null rows)
+    @Test
+    public void testFlattenVertically_iteratorExhaustionAndLongRow() {
+        final long[][] a = { null, { 1L }, {}, { 2L, 3L, 4L }, null, { 5L, 6L } };
+        final LongIterator iter = LongStream.flatten(a, true).iterator();
+        final LongList actual = new LongList();
+
+        while (iter.hasNext()) {
+            actual.add(iter.nextLong());
+        }
+
+        assertArrayEquals(new long[] { 1L, 2L, 5L, 3L, 6L, 4L }, actual.toArray());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextLong);
+        assertFalse(iter.hasNext());
+
+        final long[][] jagged = new long[201][];
+
+        for (int i = 0; i < 200; i++) {
+            jagged[i] = i % 3 == 0 ? null : new long[] { 1000L + i };
+        }
+
+        jagged[200] = new long[5000];
+
+        for (int i = 0; i < 5000; i++) {
+            jagged[200][i] = -i;
+        }
+
+        final long[] result = LongStream.flatten(jagged, true).toArray();
+        final LongList expected = new LongList();
+
+        for (int i = 0; i < 200; i++) {
+            if (jagged[i] != null) {
+                expected.add(jagged[i][0]);
+            }
+        }
+
+        for (int i = 0; i < 5000; i++) {
+            expected.add(jagged[200][i]);
+        }
+
+        assertArrayEquals(expected.toArray(), result);
+        assertArrayEquals(new long[0], LongStream.flatten(new long[][] { null, {}, null }, true).toArray());
+    }
+    // G100-06: concat(List<long[]>) bulk toArray/count/toLongList must equal the element-wise results
+    @Test
+    public void testConcatListOfArrays_toArrayCountToList_edgeCases() {
+        final long[] a = { 1L, Long.MIN_VALUE, -1L };
+        final long[] b = {};
+        final long[] c = { Long.MAX_VALUE, 5L };
+        final List<long[]> list = Arrays.asList(null, a, b, null, c, b);
+        final long[] expected = { 1L, Long.MIN_VALUE, -1L, Long.MAX_VALUE, 5L };
+
+        assertArrayEquals(expected, LongStream.concat(list).toArray());
+        assertEquals(5, LongStream.concat(list).count());
+        assertArrayEquals(expected, LongStream.concat(list).toLongList().toArray());
+
+        final long[] arr = LongStream.concat(list).toArray();
+        arr[0] = 42L;
+        assertEquals(1L, a[0]);
+        final LongList ll = LongStream.concat(list).toLongList();
+        ll.add(7L);
+        assertEquals(6, ll.size());
+        assertEquals(1L, a[0]);
+
+        final List<long[]> empties = Arrays.asList(b, null, new long[0]);
+        assertEquals(0, LongStream.concat(empties).toArray().length);
+        assertEquals(0, LongStream.concat(empties).count());
+        final LongList emptyList = LongStream.concat(empties).toLongList();
+        assertEquals(0, emptyList.size());
+        emptyList.add(1L);
+        assertEquals(1, emptyList.size());
+
+        assertArrayEquals(new long[] { 3L, 4L }, LongStream.concat(Arrays.asList(new long[][] { { 3L, 4L } })).toArray());
+    }
+
+    // G100-06: bulk paths after partial consumption (skip inside a segment, at a segment end, beyond the end)
+    @Test
+    public void testConcatListOfArrays_bulkOpsAfterSkip() {
+        final List<long[]> list = Arrays.asList(new long[] { 1, 2 }, null, new long[] { 3 }, new long[0], new long[] { 4, 5, 6 });
+
+        for (int n = 0; n <= 8; n++) {
+            final long[] expected = new long[Math.max(0, 6 - n)];
+            for (int i = 0; i < expected.length; i++) {
+                expected[i] = n + i + 1;
+            }
+
+            assertArrayEquals(expected, LongStream.concat(list).skip(n).toArray(), "skip " + n);
+            assertEquals(expected.length, LongStream.concat(list).skip(n).count(), "skip " + n);
+            assertArrayEquals(expected, LongStream.concat(list).skip(n).toLongList().toArray(), "skip " + n);
+        }
+
+        final LongIterator iter = LongStream.concat(list).iterator();
+        assertEquals(1L, iter.nextLong());
+        assertArrayEquals(new long[] { 2, 3, 4, 5, 6 }, iter.toArray());
+        assertFalse(iter.hasNext());
+    }
+
+    // G100-06: the list is still read lazily (at terminal-operation time), and close handlers still run
+    @Test
+    public void testConcatListOfArrays_lazyReadAndCloseHandler() {
+        final List<long[]> list = Arrays.asList(new long[] { 1 }, new long[] { 2 });
+        final LongStream stream = LongStream.concat(list);
+        list.set(1, new long[] { 8, 9 });
+        final AtomicInteger closed = new AtomicInteger();
+        assertArrayEquals(new long[] { 1, 8, 9 }, stream.onClose(closed::incrementAndGet).toArray());
+        assertEquals(1, closed.get());
+
+        final AtomicInteger closed2 = new AtomicInteger();
+        assertEquals(3, LongStream.concat(list).onClose(closed2::incrementAndGet).count());
+        assertEquals(1, closed2.get());
+
+        assertEquals(18L, LongStream.concat(list).sum());
+        assertArrayEquals(new long[] { 1, 8, 9 }, LongStream.concat(list).sorted().toArray());
+    }
+
+    // G100-06: long segments take the bulk-copy path (whole segments and a partially consumed head segment)
+    @Test
+    public void testConcatListOfArrays_longSegmentsBulkPath() {
+        final long[] a = new long[20];
+        final long[] b = new long[40];
+        final long[] c = { -1L, -2L, -3L };
+        for (int i = 0; i < a.length; i++) {
+            a[i] = i;
+        }
+        for (int i = 0; i < b.length; i++) {
+            b[i] = 100 + i;
+        }
+        final List<long[]> list = Arrays.asList(a, null, new long[0], c, b, c);
+        final long[] all = new long[66];
+        System.arraycopy(a, 0, all, 0, 20);
+        System.arraycopy(c, 0, all, 20, 3);
+        System.arraycopy(b, 0, all, 23, 40);
+        System.arraycopy(c, 0, all, 63, 3);
+
+        for (final int n : new int[] { 0, 1, 4, 5, 19, 20, 21, 23, 24, 27, 30, 62, 63, 64, 66, 70 }) {
+            final long[] expected = Arrays.copyOfRange(all, Math.min(n, all.length), all.length);
+            assertArrayEquals(expected, LongStream.concat(list).skip(n).toArray(), "skip " + n);
+            assertEquals(expected.length, LongStream.concat(list).skip(n).count(), "skip " + n);
+            final LongList ll = LongStream.concat(list).skip(n).toLongList();
+            assertArrayEquals(expected, ll.toArray(), "skip " + n);
+            ll.add(1L);
+            assertEquals(expected.length + 1, ll.size());
+        }
+
+        final long[] result = LongStream.concat(list).toArray();
+        assertArrayEquals(all, result);
+        result[0] = 99;
+        assertEquals(0L, a[0]);
+        final long[] result2 = LongStream.concat(Arrays.asList(b)).toArray();
+        assertArrayEquals(b, result2);
+        assertFalse(result2 == b);
+        assertEquals(100L, LongStream.concat(b, a).toArray()[0]);
+    }
+    // ---- perf review 2026-09-26 G100 end ----
+    // ---- perf review 2026-09-26 G114 begin ----
+    private static long[] flattenVerticallyReferenceG114(final long[][] a) {
+        final LongList ret = new LongList();
+        int maxLen = 0;
+
+        for (final long[] row : a) {
+            maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+        }
+
+        for (int col = 0; col < maxLen; col++) {
+            for (final long[] row : a) {
+                if (row != null && col < row.length) {
+                    ret.add(row[col]);
+                }
+            }
+        }
+
+        return ret.toArray();
+    }
+
+    private static void assertFlattenVerticallyMatchesReferenceG114(final long[][] a, final int skip) {
+        final long[] expected = flattenVerticallyReferenceG114(a);
+        final String message = Arrays.deepToString(a);
+        assertArrayEquals(expected, LongStream.flatten(a, true).toArray(), message);
+        assertEquals(expected.length, LongStream.flatten(a, true).count(), message);
+        assertArrayEquals(Arrays.copyOfRange(expected, Math.min(skip, expected.length), expected.length), LongStream.flatten(a, true).skip(skip).toArray(),
+                message);
+
+        final LongIterator iter = LongStream.flatten(a, true).iterator();
+
+        for (final long element : expected) {
+            assertTrue(iter.hasNext());
+            assertEquals(element, iter.nextLong());
+        }
+
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextLong);
+        assertFalse(iter.hasNext());
+    }
+
+    // G114-01: flatten(long[][], true) keeps the original walk for dense input and uses a compacted row walk when
+    // rows * longest row > 4 * elements; pins order, count, skip and the iterator (incl. NoSuchElementException) on both walks.
+    @Test
+    public void testFlattenVertically_denseAndSparseWalksMatchColumnMajorReference() {
+        final Random random = new Random(114);
+
+        for (int round = 0; round < 400; round++) {
+            // kind 0: dense jagged, 1: mostly null/empty rows plus a few long ones, 2: rectangular, 3: one long row among empty/null rows
+            final int kind = round % 4;
+            final int rows = 2 + random.nextInt(kind == 1 || kind == 3 ? 40 : 8);
+            final int width = 1 + random.nextInt(6);
+            final int longRow = random.nextInt(rows);
+            final long[][] a = new long[rows][];
+
+            for (int i = 0; i < rows; i++) {
+                final int len;
+
+                if (kind == 0) {
+                    len = random.nextInt(7) - 1;
+                } else if (kind == 1) {
+                    len = random.nextInt(6) == 0 ? random.nextInt(40) : random.nextInt(3) - 1;
+                } else if (kind == 2) {
+                    len = width;
+                } else {
+                    len = i == longRow ? 1 + random.nextInt(60) : random.nextInt(2) - 1;
+                }
+
+                if (len >= 0) {
+                    a[i] = new long[len];
+
+                    for (int j = 0; j < len; j++) {
+                        a[i][j] = (long) (i * 100 + j);
+                    }
+                }
+            }
+
+            assertFlattenVerticallyMatchesReferenceG114(a, random.nextInt(rows * 3 + 2));
+        }
+
+        // rows * longest row == 4 * elements keeps the original walk; one more empty row switches to the compacted walk
+        final long[][] boundary = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {} };
+        final long[][] boundaryPlusOne = { { 1, 2, 3, 4 }, null, {}, { 5, 6, 7, 8 }, null, {}, {}, {}, {} };
+        assertArrayEquals(new long[] { 1, 5, 2, 6, 3, 7, 4, 8 }, LongStream.flatten(boundary, true).toArray());
+        assertArrayEquals(new long[] { 1, 5, 2, 6, 3, 7, 4, 8 }, LongStream.flatten(boundaryPlusOne, true).toArray());
+
+        for (int skip = 0; skip <= 9; skip++) {
+            assertFlattenVerticallyMatchesReferenceG114(boundary, skip);
+            assertFlattenVerticallyMatchesReferenceG114(boundaryPlusOne, skip);
+        }
+
+        // sparse: rows drop out of the compacted walk at different columns
+        final long[][] sparse = { null, {}, { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, {}, {}, { 10, 11 }, {}, null, {}, {}, { 12, 13, 14, 15 }, {} };
+        assertArrayEquals(new long[] { 1, 10, 12, 2, 11, 13, 3, 14, 4, 15, 5, 6, 7, 8, 9 }, LongStream.flatten(sparse, true).toArray());
+        assertFlattenVerticallyMatchesReferenceG114(sparse, 4);
+
+        // one long row among 999 null rows (first and last position)
+        final long[][] oneLongRow = new long[1000][];
+        oneLongRow[999] = new long[5000];
+
+        for (int j = 0; j < 5000; j++) {
+            oneLongRow[999][j] = (long) j;
+        }
+
+        assertArrayEquals(oneLongRow[999], LongStream.flatten(oneLongRow, true).toArray());
+        oneLongRow[0] = oneLongRow[999];
+        oneLongRow[999] = null;
+        assertFlattenVerticallyMatchesReferenceG114(oneLongRow, 4999);
+        assertEquals(0, LongStream.flatten(new long[][] { null, {}, null, {} }, true).count());
+    }
+    // ---- perf review 2026-09-26 G114 end ----
 }

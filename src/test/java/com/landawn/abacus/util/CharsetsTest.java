@@ -276,4 +276,14 @@ public class CharsetsTest extends AbstractTest {
         Assertions.assertEquals("UTF-16LE", Charsets.UTF_16LE.name());
     }
 
+    @Test
+    public void testGetCaseVariantsOfNonPrepopulatedNameReturnSameInstance() {
+        final Charset lower = Charsets.get("iso-8859-15");
+        final Charset upper = Charsets.get("ISO-8859-15");
+        final Charset mixed = Charsets.get("Iso-8859-15");
+
+        Assertions.assertSame(lower, upper);
+        Assertions.assertSame(lower, mixed);
+        Assertions.assertSame(lower, Charsets.get("iso-8859-15"));
+    }
 }

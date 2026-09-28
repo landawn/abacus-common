@@ -543,34 +543,42 @@ public final class XmlUtil {
      * }</pre>
      *
      * @param <T> The type of the object to be returned
-     * @param cls The class of the object to be returned (must be JAXB-annotated)
+     * @param targetClass The class of the object to be returned (must be JAXB-annotated)
      * @param xml The XML string to be unmarshalled (must not be {@code null})
      * @return The unmarshalled object of the specified class
-     * @throws IllegalArgumentException if {@code cls} or {@code xml} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} or {@code xml} is {@code null}
      * @throws RuntimeException if secure XML parsing or JAXB unmarshalling fails
-     * @throws ClassCastException if the XML root resolves to a JAXB object that is not an instance of {@code cls}
+     * @throws ClassCastException if the XML root resolves to a JAXB object that is not an instance of {@code targetClass}
      * @see JAXBContext#newInstance(Class...)
      * @see Unmarshaller#unmarshal(XMLStreamReader)
      */
-    public static <T> T unmarshal(final Class<? extends T> cls, final String xml) throws IllegalArgumentException, RuntimeException, ClassCastException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static <T> T unmarshal(final Class<? extends T> targetClass, final String xml)
+            throws IllegalArgumentException, RuntimeException, ClassCastException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
         N.checkArgNotNull(xml, cs.xml);
 
         // Parse through the hardened StAX factory (DTD and external entities disabled) instead of
         // handing a raw Reader to JAXB, whose default unmarshaller would otherwise create its own
         // XXE-vulnerable parser and bypass the hardening every other parse path in this class uses.
-        return unmarshalAndClose(cls, createXMLStreamReader(new StringReader(xml)));
+        return unmarshalAndClose(targetClass, createXMLStreamReader(new StringReader(xml)));
     }
 
-    /** Unmarshals from and always closes the supplied reader. Package-private for lifecycle testing. */
-    static <T> T unmarshalAndClose(final Class<? extends T> cls, final XMLStreamReader xmlStreamReader) {
+    /**
+     * Unmarshals from and always closes the supplied reader. Package-private for lifecycle testing.
+     *
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
+     * @throws RuntimeException if a JAXB context or unmarshaller cannot be created for {@code targetClass}, or unmarshalling fails
+     * @throws ClassCastException if the XML root resolves to a JAXB object that is not an instance of {@code targetClass}
+     */
+    static <T> T unmarshalAndClose(final Class<? extends T> targetClass, final XMLStreamReader xmlStreamReader)
+            throws IllegalArgumentException, RuntimeException, ClassCastException {
         try {
-            final JAXBContext jc = jaxbContext(cls);
+            final JAXBContext jc = jaxbContext(targetClass);
 
             final Unmarshaller unmarshaller = jc.createUnmarshaller();
 
             // A JAXB context also knows related roots; creating it for cls does not enforce the result type.
-            return cls.cast(unmarshaller.unmarshal(xmlStreamReader));
+            return targetClass.cast(unmarshaller.unmarshal(xmlStreamReader));
         } catch (final JAXBException e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         } finally {
@@ -626,16 +634,16 @@ public final class XmlUtil {
      * marshaller.marshal(person, new File("person.xml"));
      * }</pre>
      *
-     * @param cls The class for which to create the Marshaller (must be JAXB-annotated)
+     * @param targetClass The class for which to create the Marshaller (must be JAXB-annotated)
      * @return The created Marshaller
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      * @throws RuntimeException if the Marshaller cannot be created
      * @see JAXBContext#newInstance(Class...)
      * @see JAXBContext#createMarshaller()
      */
-    public static Marshaller createMarshaller(final Class<?> cls) throws IllegalArgumentException, RuntimeException {
+    public static Marshaller createMarshaller(final Class<?> targetClass) throws IllegalArgumentException, RuntimeException {
         try {
-            final JAXBContext jc = jaxbContext(cls);
+            final JAXBContext jc = jaxbContext(targetClass);
 
             return jc.createMarshaller();
         } catch (final JAXBException e) {
@@ -700,16 +708,16 @@ public final class XmlUtil {
      * }
      * }</pre>
      *
-     * @param cls The class for which to create the Unmarshaller (must be JAXB-annotated)
+     * @param targetClass The class for which to create the Unmarshaller (must be JAXB-annotated)
      * @return The created Unmarshaller
-     * @throws IllegalArgumentException if {@code cls} is {@code null}
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}
      * @throws RuntimeException if the Unmarshaller cannot be created
      * @see JAXBContext#newInstance(Class...)
      * @see JAXBContext#createUnmarshaller()
      */
-    public static Unmarshaller createUnmarshaller(final Class<?> cls) throws IllegalArgumentException, RuntimeException {
+    public static Unmarshaller createUnmarshaller(final Class<?> targetClass) throws IllegalArgumentException, RuntimeException {
         try {
-            final JAXBContext jc = jaxbContext(cls);
+            final JAXBContext jc = jaxbContext(targetClass);
 
             return jc.createUnmarshaller();
         } catch (final JAXBException e) {
@@ -1855,8 +1863,8 @@ public final class XmlUtil {
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello World  ");
      *
-     * String content = XmlUtil.getTextContent(elem);   // returns "  Hello World  "
-     * String missing = XmlUtil.getTextContent(null);   // returns null
+     * String content = XmlUtil.getTextContent(elem);  // returns "  Hello World  "
+     * String missing = XmlUtil.getTextContent(null);  // returns null
      * }</pre>
      *
      * @param node the XML node to read text from
@@ -1885,9 +1893,9 @@ public final class XmlUtil {
      * Element elem = doc.createElement("message");
      * elem.setTextContent("  Hello\n\tWorld  ");
      *
-     * String normalized = XmlUtil.getTextContent(elem, true);   // returns "Hello World"
-     * String raw = XmlUtil.getTextContent(elem, false);         // returns "  Hello\n\tWorld  "
-     * String missing = XmlUtil.getTextContent(null, true);      // returns null
+     * String normalized = XmlUtil.getTextContent(elem, true);  // returns "Hello World"
+     * String raw = XmlUtil.getTextContent(elem, false);        // returns "  Hello\n\tWorld  "
+     * String missing = XmlUtil.getTextContent(null, true);     // returns null
      * }</pre>
      *
      * @param node the XML node to read text from
@@ -2005,20 +2013,21 @@ public final class XmlUtil {
      *
      * @param cbuf The character array containing the characters to be written
      * @param off The start offset in the character array
-     * @param len The number of characters to write
+     * @param length The number of characters to write
      * @param output The StringBuilder to which the escaped characters will be written
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or the requested range exceeds {@code cbuf.length}
      * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws UncheckedIOException if writing the escaped characters fails
      */
-    public static void writeCharacters(final char[] cbuf, final int off, final int len, final StringBuilder output)
+    public static void writeCharacters(final char[] cbuf, final int off, final int length, final StringBuilder output)
             throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException {
-        Objects.checkFromIndexSize(off, len, cbuf.length);
+        Objects.checkFromIndexSize(off, length, cbuf.length);
+        N.checkArgNotNull(output, cs.output);
 
         // A StringBuilder-backed writer cannot fail; the checked exception is unreachable here.
         try {
-            writeCharacters(cbuf, off, len, IOUtil.newStringWriter(output));
+            writeCharacters(cbuf, off, length, IOUtil.newStringWriter(output));
         } catch (final IOException e) {
             throw new UncheckedIOException(e); //NOSONAR
         }
@@ -2061,20 +2070,21 @@ public final class XmlUtil {
      *
      * @param str The string containing the characters to be written
      * @param off The start offset in the string
-     * @param len The number of characters to write
+     * @param length The number of characters to write
      * @param output The StringBuilder to which the escaped characters will be written
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or the requested range exceeds the length of
      *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
      * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws UncheckedIOException if writing the escaped characters fails
      */
-    public static void writeCharacters(final String str, final int off, final int len, final StringBuilder output)
+    public static void writeCharacters(final String str, final int off, final int length, final StringBuilder output)
             throws IndexOutOfBoundsException, IllegalArgumentException, UncheckedIOException {
-        Objects.checkFromIndexSize(off, len, str == null ? Strings.NULL.length() : str.length());
+        Objects.checkFromIndexSize(off, length, str == null ? Strings.NULL.length() : str.length());
+        N.checkArgNotNull(output, cs.output);
 
         // A StringBuilder-backed writer cannot fail; the checked exception is unreachable here.
         try {
-            writeCharacters(str, off, len, IOUtil.newStringWriter(output));
+            writeCharacters(str, off, length, IOUtil.newStringWriter(output));
         } catch (final IOException e) {
             throw new UncheckedIOException(e); //NOSONAR
         }
@@ -2121,20 +2131,21 @@ public final class XmlUtil {
      *
      * @param cbuf The character array containing the characters to be written
      * @param off The start offset in the character array
-     * @param len The number of characters to write
+     * @param length The number of characters to write
      * @param output The OutputStream to receive UTF-8 encoded escaped characters; flushed but not closed
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or the requested range exceeds {@code cbuf.length}
      * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if writing the escaped characters to {@code output} or flushing {@code output} fails
      */
-    public static void writeCharacters(final char[] cbuf, final int off, final int len, final OutputStream output)
+    public static void writeCharacters(final char[] cbuf, final int off, final int length, final OutputStream output)
             throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, IOException {
-        Objects.checkFromIndexSize(off, len, cbuf.length);
+        Objects.checkFromIndexSize(off, length, cbuf.length);
+        N.checkArgNotNull(output, cs.output);
 
         final BufferedXmlWriter bufWriter = Objectory.createBufferedXmlWriter(output); //NOSONAR
 
-        bufWriter.writeCharacter(cbuf, off, len);
+        bufWriter.writeCharacter(cbuf, off, length);
         bufWriter.flush();
         // Recycling flushes pending output. After a failure, discard this wrapper instead of
         // retrying a possibly partial write and replacing the original exception.
@@ -2185,20 +2196,21 @@ public final class XmlUtil {
      *
      * @param str The string containing the characters to be written
      * @param off The start offset in the string
-     * @param len The number of characters to write
+     * @param length The number of characters to write
      * @param output The OutputStream to receive UTF-8 encoded escaped characters; flushed but not closed
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or the requested range exceeds the length of
      *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
      * @throws IllegalArgumentException if {@code output} is {@code null}
      * @throws IOException if writing the escaped characters to {@code output} or flushing {@code output} fails
      */
-    public static void writeCharacters(final String str, final int off, final int len, final OutputStream output)
+    public static void writeCharacters(final String str, final int off, final int length, final OutputStream output)
             throws IndexOutOfBoundsException, IllegalArgumentException, IOException {
-        Objects.checkFromIndexSize(off, len, str == null ? Strings.NULL.length() : str.length());
+        Objects.checkFromIndexSize(off, length, str == null ? Strings.NULL.length() : str.length());
+        N.checkArgNotNull(output, cs.output);
 
         final BufferedXmlWriter bufWriter = Objectory.createBufferedXmlWriter(output); //NOSONAR
 
-        bufWriter.writeCharacter(str, off, len);
+        bufWriter.writeCharacter(str, off, length);
         bufWriter.flush();
         // Recycling can flush again, so only return a wrapper whose write and flush succeeded.
         Objectory.recycle(bufWriter);
@@ -2249,25 +2261,26 @@ public final class XmlUtil {
      *
      * @param cbuf The character array containing the characters to be written
      * @param off The start offset in the character array
-     * @param len The number of characters to write
+     * @param length The number of characters to write
      * @param output The Writer to receive escaped characters; flushed but not closed
      * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds {@code cbuf.length}
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or the requested range exceeds {@code cbuf.length}
      * @throws IllegalArgumentException if {@code output} is {@code null}
      */
-    public static void writeCharacters(final char[] cbuf, final int off, final int len, final Writer output)
+    public static void writeCharacters(final char[] cbuf, final int off, final int length, final Writer output)
             throws IOException, NullPointerException, IndexOutOfBoundsException, IllegalArgumentException {
         if (output instanceof BufferedXmlWriter) {
             ((BufferedXmlWriter) output).ensureOpen();
         }
 
-        Objects.checkFromIndexSize(off, len, cbuf.length);
+        Objects.checkFromIndexSize(off, length, cbuf.length);
+        N.checkArgNotNull(output, cs.output);
 
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output); //NOSONAR
 
-        bw.writeCharacter(cbuf, off, len);
+        bw.writeCharacter(cbuf, off, length);
         bw.flush();
         // Do not retry failed output through the recycling flush, or recycle a caller-owned writer.
         if (!isBufferedWriter) {
@@ -2321,25 +2334,26 @@ public final class XmlUtil {
      *
      * @param str The string containing the characters to be written
      * @param off The start offset in the string
-     * @param len The number of characters to write
+     * @param length The number of characters to write
      * @param output The Writer to receive escaped characters; flushed but not closed
      * @throws IOException if {@code output} is a closed {@code BufferedXmlWriter}, or writing or flushing {@code output} fails
-     * @throws IndexOutOfBoundsException if {@code off} or {@code len} is negative, or the requested range exceeds the length of
+     * @throws IndexOutOfBoundsException if {@code off} or {@code length} is negative, or the requested range exceeds the length of
      *         {@code str} (or the literal {@code "null"} when {@code str} is {@code null})
      * @throws IllegalArgumentException if {@code output} is {@code null}
      */
-    public static void writeCharacters(final String str, final int off, final int len, final Writer output)
+    public static void writeCharacters(final String str, final int off, final int length, final Writer output)
             throws IOException, IndexOutOfBoundsException, IllegalArgumentException {
         if (output instanceof BufferedXmlWriter) {
             ((BufferedXmlWriter) output).ensureOpen();
         }
 
-        Objects.checkFromIndexSize(off, len, str == null ? Strings.NULL.length() : str.length());
+        Objects.checkFromIndexSize(off, length, str == null ? Strings.NULL.length() : str.length());
+        N.checkArgNotNull(output, cs.output);
 
         final boolean isBufferedWriter = output instanceof BufferedXmlWriter;
         final BufferedXmlWriter bw = isBufferedWriter ? (BufferedXmlWriter) output : Objectory.createBufferedXmlWriter(output); //NOSONAR
 
-        bw.writeCharacter(str, off, len);
+        bw.writeCharacter(str, off, length);
         bw.flush();
         // Do not retry failed output through the recycling flush, or recycle a caller-owned writer.
         if (!isBufferedWriter) {
@@ -2464,7 +2478,8 @@ public final class XmlUtil {
      * Resolves the complete type expression declared by a node after applying the XML type allowlist.
      * Unlike {@link #getAttributeTypeClass(Node)}, this retains generic component information.
      *
-     * @throws IllegalArgumentException if {@code node} is {@code null}
+     * @throws IllegalArgumentException if {@code node} is {@code null}, or the {@code type} attribute is accepted by the type policy
+     *         but is structurally invalid for {@link Type#of(String)}
      */
     static Type<?> getAttributeType(final Node node) throws IllegalArgumentException {
         final String typeAttr = XmlUtil.getAttribute(node, TYPE);
@@ -2528,8 +2543,11 @@ public final class XmlUtil {
      * @param node the XML node that may carry a {@code type} attribute; may be {@code null}
      * @return the resolved concrete class, or {@code targetClass} if {@code node} is {@code null}
      *         or carries no usable type information
+     * @throws IllegalArgumentException if the {@code type} attribute of {@code node} is accepted by the type policy but is structurally
+     *         invalid for {@link Type#of(String)}
+     * @throws RuntimeException if an accepted type expression cannot be resolved by the type registry
      */
-    static Class<?> getConcreteClass(final Class<?> targetClass, final Node node) {
+    static Class<?> getConcreteClass(final Class<?> targetClass, final Node node) throws IllegalArgumentException, RuntimeException {
         if (node == null) {
             return targetClass;
         }
@@ -2587,7 +2605,7 @@ public final class XmlUtil {
      * @throws JAXBException if a JAXB provider cannot create a context for {@code type}
      */
     private static JAXBContext jaxbContext(final Class<?> type) throws IllegalArgumentException, JAXBException {
-        N.checkArgNotNull(type, cs.cls);
+        N.checkArgNotNull(type, cs.type);
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         return classJaxbContextPool.get(type).get(loader, Boolean.TRUE, () -> JAXBContext.newInstance(type));
     }

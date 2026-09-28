@@ -170,9 +170,9 @@ public final class Charsets {
      * {@code UTF-16}, {@code UTF-16BE}, {@code UTF-16LE}) and previously resolved names are reused.
      * Unresolved names are looked up via {@link Charset#forName(String)} and then retained for later
      * calls. Lookup is case-insensitive, matching {@link Charset#forName(String)}, so names differing
-     * only in case share one cache entry. Concurrent callers may race to resolve the same uncached
-     * name more than once; the returned charset for a given name is still a usable equivalent
-     * instance.</p>
+     * only in case share one cache entry. Resolving an uncached name is atomic per case-folded name
+     * (the cache delegates to {@link java.util.concurrent.ConcurrentHashMap#computeIfAbsent}), so
+     * concurrent callers resolve it at most once and all receive the same cached instance.</p>
      *
      * <p>The cache never evicts. Because entries are keyed case-insensitively it is bounded by the set
      * of charset names and aliases the platform actually supports, whatever spellings callers use.</p>

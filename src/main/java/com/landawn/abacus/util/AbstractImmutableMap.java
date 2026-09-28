@@ -118,9 +118,9 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map.getOrDefault("a", 0));    // 1
-     * System.out.println(map.getOrDefault("c", 0));    // 0
-     * System.out.println(map.getOrDefault("c", 99));   // 99
+     * System.out.println(map.getOrDefault("a", 0));   // 1
+     * System.out.println(map.getOrDefault("c", 0));   // 0
+     * System.out.println(map.getOrDefault("c", 99));  // 99
      * }</pre>
      *
      * @param key the key whose associated value is to be returned
@@ -350,8 +350,8 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * <pre>{@code
      * ImmutableMap<String, Integer> empty = ImmutableMap.empty();
      * ImmutableMap<String, Integer> nonEmpty = ImmutableMap.of("a", 1);
-     * System.out.println(empty.isEmpty());      // true
-     * System.out.println(nonEmpty.isEmpty());   // false
+     * System.out.println(empty.isEmpty());     // true
+     * System.out.println(nonEmpty.isEmpty());  // false
      * }</pre>
      *
      * @return {@code true} if this map contains no key-value mappings, {@code false} otherwise.
@@ -370,9 +370,9 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map.containsKey("a"));    // true
-     * System.out.println(map.containsKey("c"));    // false
-     * System.out.println(map.containsKey(null));   // false (unless null key was added)
+     * System.out.println(map.containsKey("a"));   // true
+     * System.out.println(map.containsKey("c"));   // false
+     * System.out.println(map.containsKey(null));  // false (unless null key was added)
      * }</pre>
      *
      * @param key the key whose presence in this map is to be tested.
@@ -395,8 +395,8 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2, "c", 1);
-     * System.out.println(map.containsValue(1));   // true
-     * System.out.println(map.containsValue(3));   // false
+     * System.out.println(map.containsValue(1));  // true
+     * System.out.println(map.containsValue(3));  // false
      * }</pre>
      *
      * @param value the value whose presence in this map is to be tested.
@@ -420,8 +420,8 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableMap<String, Integer> map = ImmutableMap.of("a", 1, "b", 2);
-     * System.out.println(map.get("a"));   // 1
-     * System.out.println(map.get("c"));   // null
+     * System.out.println(map.get("a"));  // 1
+     * System.out.println(map.get("c"));  // null
      * }</pre>
      *
      * @param key the key whose associated value is to be returned.
@@ -554,8 +554,8 @@ abstract class AbstractImmutableMap<K, V> extends AbstractMap<K, V> implements I
      * ImmutableMap<String, Integer> map1 = ImmutableMap.of("a", 1, "b", 2);
      * ImmutableMap<String, Integer> map2 = ImmutableMap.of("a", 1, "b", 2);
      * ImmutableMap<String, Integer> map3 = ImmutableMap.of("a", 1, "c", 3);
-     * System.out.println(map1.equals(map2));   // true
-     * System.out.println(map1.equals(map3));   // false
+     * System.out.println(map1.equals(map2));  // true
+     * System.out.println(map1.equals(map3));  // false
      * }</pre>
      *
      * @param obj the object to be compared for equality with this map.

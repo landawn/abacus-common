@@ -35,8 +35,8 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Double boxed = 3.14;
-     * double primitive = ToDoubleFunction.UNBOX.applyAsDouble(boxed);     // returns 3.14
-     * double defaultValue = ToDoubleFunction.UNBOX.applyAsDouble(null);   // returns 0.0
+     * double primitive = ToDoubleFunction.UNBOX.applyAsDouble(boxed);    // returns 3.14
+     * double defaultValue = ToDoubleFunction.UNBOX.applyAsDouble(null);  // returns 0.0
      * }</pre>
      *
      */
@@ -44,6 +44,10 @@ public interface ToDoubleFunction<T> extends Throwables.ToDoubleFunction<T, Runt
     /**
      * A predefined {@code ToDoubleFunction} that converts any {@link Number} to a primitive {@code double}.
      * Returns {@code 0.0} if the input is {@code null}; otherwise converts via {@link Numbers#toDouble(Object)}.
+     *
+     * <p>Note: unlike {@link Number#doubleValue()}, a {@code Float} is widened through its canonical decimal
+     * spelling, so {@code 1.1f} becomes {@code 1.1}, not {@code 1.100000023841858}; every other {@code Number}
+     * is converted with {@link Number#doubleValue()}.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code

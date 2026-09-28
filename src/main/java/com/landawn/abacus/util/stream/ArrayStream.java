@@ -14,6 +14,7 @@
 
 package com.landawn.abacus.util.stream;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.RandomAccess;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -1969,7 +1971,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final C result = collectionSupplier.apply(Math.min(toIndex - cursor, chunkSize));
+                final C result = N.requireNonNull(collectionSupplier.apply(Math.min(toIndex - cursor, chunkSize)), "collectionSupplier returned null");
 
                 for (final int to = (cursor < toIndex - chunkSize ? cursor + chunkSize : toIndex); cursor < to; cursor++) {
                     result.add(elements[cursor]); //NOSONAR
@@ -2064,6 +2066,9 @@ class ArrayStream<T> extends AbstractStream<T> {
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
             private boolean preCondition = false;
+            // The element that ended the previous group has already been tested (its result is the flipped
+            // preCondition), so the predicate is evaluated exactly once per element, as in Seq.split(Predicate).
+            private boolean nextTested = false;
 
             @Override
             public boolean hasNext() {
@@ -2080,8 +2085,14 @@ class ArrayStream<T> extends AbstractStream<T> {
 
                 while (cursor < toIndex) {
                     if (from == cursor) {
-                        preCondition = predicate.test(elements[cursor]);
+                        if (nextTested) {
+                            nextTested = false;
+                        } else {
+                            preCondition = predicate.test(elements[cursor]);
+                        }
                     } else if (predicate.test(elements[cursor]) != preCondition) {
+                        preCondition = !preCondition;
+                        nextTested = true;
                         break;
                     }
 
@@ -2107,6 +2118,9 @@ class ArrayStream<T> extends AbstractStream<T> {
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
             private boolean preCondition = false;
+            // The element that ended the previous group has already been tested (its result is the flipped
+            // preCondition), so the predicate is evaluated exactly once per element, as in Seq.split(Predicate).
+            private boolean nextTested = false;
 
             @Override
             public boolean hasNext() {
@@ -2119,12 +2133,17 @@ class ArrayStream<T> extends AbstractStream<T> {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final C result = collectionSupplier.get();
+                final C result = N.requireNonNull(collectionSupplier.get(), "collectionSupplier returned null");
                 boolean isFirst = true;
 
                 while (cursor < toIndex) {
                     if (isFirst) {
-                        preCondition = predicate.test(elements[cursor]);
+                        if (nextTested) {
+                            nextTested = false;
+                        } else {
+                            preCondition = predicate.test(elements[cursor]);
+                        }
+
                         result.add(elements[cursor]);
                         cursor++;
                         isFirst = false;
@@ -2132,7 +2151,8 @@ class ArrayStream<T> extends AbstractStream<T> {
                         result.add(elements[cursor]);
                         cursor++;
                     } else {
-
+                        preCondition = !preCondition;
+                        nextTested = true;
                         break;
                     }
                 }
@@ -2157,6 +2177,9 @@ class ArrayStream<T> extends AbstractStream<T> {
         return newStream(new ObjIteratorEx<>() { //NOSONAR
             private int cursor = fromIndex;
             private boolean preCondition = false;
+            // The element that ended the previous group has already been tested (its result is the flipped
+            // preCondition), so the predicate is evaluated exactly once per element, as in Seq.split(Predicate).
+            private boolean nextTested = false;
 
             @Override
             public boolean hasNext() {
@@ -2174,7 +2197,12 @@ class ArrayStream<T> extends AbstractStream<T> {
 
                 while (cursor < toIndex) {
                     if (isFirst) {
-                        preCondition = predicate.test(elements[cursor]);
+                        if (nextTested) {
+                            nextTested = false;
+                        } else {
+                            preCondition = predicate.test(elements[cursor]);
+                        }
+
                         accumulator.accept(container, elements[cursor]);
                         cursor++;
                         isFirst = false;
@@ -2182,7 +2210,8 @@ class ArrayStream<T> extends AbstractStream<T> {
                         accumulator.accept(container, elements[cursor]);
                         cursor++;
                     } else {
-
+                        preCondition = !preCondition;
+                        nextTested = true;
                         break;
                     }
                 }
@@ -2297,7 +2326,7 @@ class ArrayStream<T> extends AbstractStream<T> {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                final C result = collectionSupplier.apply(Math.min(windowSize, toIndex - cursor));
+                final C result = N.requireNonNull(collectionSupplier.apply(Math.min(windowSize, toIndex - cursor)), "collectionSupplier returned null");
 
                 for (int i = cursor, to = windowSize < toIndex - cursor ? cursor + windowSize : toIndex; i < to; i++) {
                     result.add(elements[i]); //NOSONAR
@@ -2408,7 +2437,9 @@ class ArrayStream<T> extends AbstractStream<T> {
      * Returns a stream consisting of the distinct elements of this stream, preserving encounter order.
      * Equality and hashing, rather than ordering equivalence, determine whether elements are duplicates.
      * This remains true for naturally sorted streams because a type's natural ordering is not required
-     * to be consistent with {@link Object#equals(Object)}.
+     * to be consistent with {@link Object#equals(Object)}. Array elements are an exception to plain
+     * {@code equals}: two arrays are duplicates when their contents are equal (as by
+     * {@link N#deepEquals(Object, Object)}), not only when they are the same instance.
      *
      * <p>This is a stateful intermediate operation that maintains a set of previously seen elements.
      *
@@ -2649,6 +2680,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             onComplete.run();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2674,6 +2708,9 @@ class ArrayStream<T> extends AbstractStream<T> {
                     }
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2709,6 +2746,9 @@ class ArrayStream<T> extends AbstractStream<T> {
                     }
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2732,6 +2772,9 @@ class ArrayStream<T> extends AbstractStream<T> {
 
                 cursor = increment < toIndex - cursor && windowSize < toIndex - cursor ? cursor + increment : toIndex;
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2755,6 +2798,9 @@ class ArrayStream<T> extends AbstractStream<T> {
 
                 cursor = increment < toIndex - cursor && windowSize < toIndex - cursor ? cursor + increment : toIndex;
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2766,6 +2812,12 @@ class ArrayStream<T> extends AbstractStream<T> {
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -2803,6 +2855,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             N.copy(elements, fromIndex, a, 0, toIndex - fromIndex);
 
             return a;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2814,21 +2869,31 @@ class ArrayStream<T> extends AbstractStream<T> {
      *
      * <p>This is a terminal operation. The stream is closed after this call.
      *
+     * <p>Unlike the JDK, a generator that ignores its length argument is tolerated (test-pinned): a shorter
+     * array is replaced by one of the exact length with the same component type, and a longer one is filled
+     * from index 0 and returned with its tail untouched.
+     *
      * @param <A> the component type of the array
      * @param generator a function that produces a new array of the desired type and the
      *                  provided length
      * @return an array containing all elements of this stream
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code generator} is {@code null}.
+     * @throws NullPointerException if {@code generator} returns {@code null} (also for an empty stream; the stream is
+     *         closed).
+     * @throws ArrayStoreException if an element of this stream cannot be stored in the array returned by {@code generator}
      */
     @Override
-    public <A> A[] toArray(final IntFunction<A[]> generator) throws IllegalStateException, IllegalArgumentException {
+    public <A> A[] toArray(final IntFunction<A[]> generator) throws IllegalStateException, IllegalArgumentException, NullPointerException, ArrayStoreException {
         assertNotClosed();
 
         checkArgNotNull(generator, cs.generator);
 
         try {
-            return toArray(generator.apply(toIndex - fromIndex));
+            return toArray(N.requireNonNull(generator.apply(toIndex - fromIndex), "generator returned null"));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2848,6 +2913,9 @@ class ArrayStream<T> extends AbstractStream<T> {
 
         try {
             return N.toList(elements, fromIndex, toIndex);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2869,6 +2937,9 @@ class ArrayStream<T> extends AbstractStream<T> {
 
         try {
             return N.toSet(elements, fromIndex, toIndex);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2881,12 +2952,14 @@ class ArrayStream<T> extends AbstractStream<T> {
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             if (toIndex - fromIndex == elements.length) {
                 result.addAll(Arrays.asList(elements));
             } else if (toIndex - fromIndex > 9 && result instanceof List) {
-                result.addAll(Arrays.asList(N.copyOfRange(elements, fromIndex, toIndex)));
+                // A read-only range view whose toArray() makes the only intermediate copy (List.addAll implementations
+                // take c.toArray()), instead of copying the range and then letting Arrays.asList(..).toArray() copy it again.
+                result.addAll(new ArrayRangeList<>(elements, fromIndex, toIndex));
             } else {
                 //noinspection ManualArrayToCollectionCopy
                 for (int i = fromIndex; i < toIndex; i++) {
@@ -2895,6 +2968,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2913,6 +2989,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2925,7 +3004,7 @@ class ArrayStream<T> extends AbstractStream<T> {
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<T> result = supplier.get();
+            final Multiset<T> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             //noinspection ManualArrayToCollectionCopy
             for (int i = fromIndex; i < toIndex; i++) {
@@ -2933,6 +3012,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2950,13 +3032,16 @@ class ArrayStream<T> extends AbstractStream<T> {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 Collectors.merge(result, keyMapper.apply(elements[i]), valueMapper.apply(elements[i]), mergeFunction);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2973,13 +3058,16 @@ class ArrayStream<T> extends AbstractStream<T> {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.put(keyMapper.apply(elements[i]), valueMapper.apply(elements[i]));
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -2992,15 +3080,18 @@ class ArrayStream<T> extends AbstractStream<T> {
      * <p>This is a terminal short-circuit operation. The stream is closed after this call.
      *
      * @return an Optional containing the first element, or empty if the stream is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
+     * @throws NullPointerException if the first element is {@code null}
      */
     @Override
-    public Optional<T> first() throws IllegalStateException {
+    public Optional<T> first() throws IllegalStateException, NullPointerException {
         assertNotClosed();
 
         try {
             return fromIndex < toIndex ? Optional.of(elements[fromIndex]) : Optional.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3013,22 +3104,25 @@ class ArrayStream<T> extends AbstractStream<T> {
      * <p>This is a terminal operation. The stream is closed after this call.
      *
      * @return an Optional containing the last element, or empty if the stream is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
+     * @throws NullPointerException if the last element is {@code null}
      */
     @Override
-    public Optional<T> last() throws IllegalStateException {
+    public Optional<T> last() throws IllegalStateException, NullPointerException {
         assertNotClosed();
 
         try {
             return fromIndex < toIndex ? Optional.of(elements[toIndex - 1]) : Optional.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
     @Override
-    public Optional<T> elementAt(final long position) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> elementAt(final long position) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
         checkArgNotNegative(position, cs.position);
 
@@ -3038,6 +3132,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             } else {
                 return Optional.empty();
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3045,7 +3142,7 @@ class ArrayStream<T> extends AbstractStream<T> {
 
     @SuppressWarnings("DuplicateThrows")
     @Override
-    public Optional<T> onlyOne() throws IllegalStateException, TooManyElementsException {
+    public Optional<T> onlyOne() throws IllegalStateException, TooManyElementsException, NullPointerException {
         assertNotClosed();
 
         try {
@@ -3059,6 +3156,9 @@ class ArrayStream<T> extends AbstractStream<T> {
                 throw new TooManyElementsException(
                         "There are at least two elements: " + Strings.concat(N.toString(elements[fromIndex]), ", ", N.toString(elements[fromIndex + 1])));
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3073,12 +3173,12 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param accumulator a function that combines the running result with the next element
      * @return an Optional containing the result of folding all elements left-to-right,
      *         or an empty Optional if the stream is empty
-     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the result of the reduction is {@code null}
      */
     @Override
-    public Optional<T> foldLeft(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> foldLeft(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -3095,6 +3195,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return Optional.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3127,6 +3230,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3142,12 +3248,12 @@ class ArrayStream<T> extends AbstractStream<T> {
      *                    (applied right-to-left)
      * @return an Optional containing the result of folding all elements right-to-left,
      *         or an empty Optional if the stream is empty
-     * @throws NullPointerException if the final reduction result is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the final reduction result is {@code null}
      */
     @Override
-    public Optional<T> foldRight(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> foldRight(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -3166,6 +3272,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return Optional.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3199,6 +3308,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3214,12 +3326,12 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param accumulator the associative function used to reduce elements
      * @return an Optional describing the reduction result, or an empty Optional if the stream
      *         is empty
-     * @throws NullPointerException if the result of the reduction is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code accumulator} is {@code null}.
+     * @throws NullPointerException if the result of the reduction is {@code null}
      */
     @Override
-    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> reduce(final BinaryOperator<T> accumulator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(accumulator, cs.accumulator);
@@ -3268,10 +3380,12 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if any of {@code supplier}, {@code accumulator}, or {@code combiner} is
      *         {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null} (checked once per container, also for an
+     *         empty stream; the stream is closed).
      */
     @Override
     public <R> R collect(final Supplier<R> supplier, final BiConsumer<? super R, ? super T> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -3279,13 +3393,16 @@ class ArrayStream<T> extends AbstractStream<T> {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 accumulator.accept(result, elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3319,6 +3436,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return finisher.apply(container);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3383,12 +3503,12 @@ class ArrayStream<T> extends AbstractStream<T> {
      *
      * @param comparator the comparator used to compare elements
      * @return an Optional containing the minimum element, or empty if the stream is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
-    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> min(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3401,6 +3521,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return Optional.of(N.min(elements, fromIndex, toIndex, comparator));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3410,17 +3533,19 @@ class ArrayStream<T> extends AbstractStream<T> {
      * Returns an Optional containing the maximum element of this stream according to the given
      * comparator, or an empty Optional if the stream is empty.
      *
-     * <p>This is a terminal operation. The stream is closed after this call. When the stream is sorted according to
-     * the given comparator, the last element is returned directly in O(1) time.
+     * <p>This is a terminal operation. The stream is closed after this call. Ties resolve to the first maximal
+     * element. When the stream is sorted according to the given comparator, the result is found from the end: the
+     * trailing run of elements equivalent to the last one is stepped back over (usually a single comparison), and
+     * the first element of that run is returned.
      *
      * @param comparator the comparator used to compare elements
      * @return an Optional containing the maximum element, or empty if the stream is empty
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code comparator} is {@code null}.
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
-    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> max(Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(comparator, cs.comparator);
@@ -3429,10 +3554,21 @@ class ArrayStream<T> extends AbstractStream<T> {
             if (fromIndex == toIndex) {
                 return Optional.empty();
             } else if (isSorted() && isSameComparator(comparator(), comparator)) {
-                return Optional.of(elements[toIndex - 1]);
+                // Ties resolve to the FIRST maximal element (JDK max, Collections.max, Collectors.max, maxBy), so step
+                // back over the trailing run of elements equivalent to the last one - usually a single comparison.
+                int idx = toIndex - 1;
+
+                while (idx > fromIndex && comparator.compare(elements[idx - 1], elements[toIndex - 1]) == 0) {
+                    idx--;
+                }
+
+                return Optional.of(elements[idx]);
             }
 
             return Optional.of(N.max(elements, fromIndex, toIndex, comparator));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3448,7 +3584,7 @@ class ArrayStream<T> extends AbstractStream<T> {
             return collect(Collectors.maxAll(comparator));
         } else {
             try {
-                final List<T> result = new ArrayList<>();
+                List<T> result = new ArrayList<>();
 
                 if (fromIndex == toIndex) {
                     return result;
@@ -3478,7 +3614,12 @@ class ArrayStream<T> extends AbstractStream<T> {
                         if (cp == 0) {
                             result.add(elements[i]);
                         } else if (cp > 0) {
-                            result.clear();
+                            if (result.size() > 16) {
+                                // A long run of earlier ties may have grown the list: start a new one rather than keep that capacity.
+                                result = new ArrayList<>();
+                            } else {
+                                result.clear();
+                            }
                             result.add(elements[i]);
                             candidate = elements[i];
                         }
@@ -3486,6 +3627,9 @@ class ArrayStream<T> extends AbstractStream<T> {
                 }
 
                 return result;
+            } catch (final Throwable e) {
+                closeAfterFailure(e);
+                throw e;
             } finally {
                 close();
             }
@@ -3493,7 +3637,8 @@ class ArrayStream<T> extends AbstractStream<T> {
     }
 
     @Override
-    public Optional<T> kthLargest(final int k, final Comparator<? super T> comparator) throws IllegalStateException, IllegalArgumentException {
+    public Optional<T> kthLargest(final int k, final Comparator<? super T> comparator)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgPositive(k, cs.k);
@@ -3507,6 +3652,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return Optional.of(N.kthLargest(elements, fromIndex, toIndex, k, comparator));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3528,6 +3676,9 @@ class ArrayStream<T> extends AbstractStream<T> {
 
         try {
             return toIndex - fromIndex; //NOSONAR
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3561,6 +3712,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return false;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3595,6 +3749,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return true;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3629,6 +3786,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return true;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3652,6 +3812,9 @@ class ArrayStream<T> extends AbstractStream<T> {
                     return false;
                 }
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3668,14 +3831,14 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against
      * @return an Optional containing the first matching element, or empty if none match
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws a checked exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findFirst(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3688,6 +3851,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return Optional.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -3703,14 +3869,14 @@ class ArrayStream<T> extends AbstractStream<T> {
      * @param <E> the type of exception that the predicate may throw
      * @param predicate the predicate to test elements against
      * @return an Optional containing the last matching element, or empty if none match
-     * @throws NullPointerException if the selected element is {@code null}
      * @throws IllegalStateException if the stream is already closed
      * @throws IllegalArgumentException if {@code predicate} is {@code null}.
      * @throws E if the predicate throws a checked exception
+     * @throws NullPointerException if the selected element is {@code null}
      */
     @Override
     public <E extends Exception> Optional<T> findLast(final Throwables.Predicate<? super T, E> predicate)
-            throws IllegalStateException, IllegalArgumentException, E {
+            throws IllegalStateException, IllegalArgumentException, E, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(predicate, cs.predicate);
@@ -3723,6 +3889,9 @@ class ArrayStream<T> extends AbstractStream<T> {
             }
 
             return Optional.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -4027,5 +4196,41 @@ class ArrayStream<T> extends AbstractStream<T> {
     @Override
     protected boolean isEmpty() {
         return fromIndex >= toIndex;
+    }
+
+    /**
+     * A read-only, fixed-size view of {@code a[fromIndex, toIndex)}, passed to {@code List.addAll} by
+     * {@link #toCollection(Supplier)}. {@link #toArray()} returns a fresh {@code Object[]} copy of the range, exactly as
+     * {@code Arrays.asList(copyOfRange(..)).toArray()} did, but without the preceding copy.
+     *
+     * @param <T> the element type
+     */
+    private static final class ArrayRangeList<T> extends AbstractList<T> implements RandomAccess {
+        private final T[] a;
+        private final int fromIndex;
+        private final int toIndex;
+
+        ArrayRangeList(final T[] a, final int fromIndex, final int toIndex) {
+            this.a = a;
+            this.fromIndex = fromIndex;
+            this.toIndex = toIndex;
+        }
+
+        @Override
+        public T get(final int index) {
+            N.checkElementIndex(index, toIndex - fromIndex);
+
+            return a[fromIndex + index];
+        }
+
+        @Override
+        public int size() {
+            return toIndex - fromIndex;
+        }
+
+        @Override
+        public Object[] toArray() {
+            return Arrays.copyOfRange(a, fromIndex, toIndex, Object[].class);
+        }
     }
 }

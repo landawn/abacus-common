@@ -524,11 +524,11 @@ public enum JavaVersion {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JavaVersion.get("1.8");      // returns JAVA_1_8
-     * JavaVersion.get("8");        // returns JAVA_1_8
-     * JavaVersion.get("11");       // returns JAVA_11
-     * JavaVersion.get("17.0.1");   // returns JAVA_17
-     * JavaVersion.get("50");       // returns JAVA_RECENT (for versions > 39)
+     * JavaVersion.get("1.8");     // returns JAVA_1_8
+     * JavaVersion.get("8");       // returns JAVA_1_8
+     * JavaVersion.get("11");      // returns JAVA_11
+     * JavaVersion.get("17.0.1");  // returns JAVA_17
+     * JavaVersion.get("50");      // returns JAVA_RECENT (for versions > 39)
      * }</pre>
      *
      * @param versionStr the version string to parse (e.g., "1.8", "11", "17.0.1")
@@ -676,10 +676,10 @@ public enum JavaVersion {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * JavaVersion v1 = JavaVersion.of("1.8");      // returns JAVA_1_8
-     * JavaVersion v2 = JavaVersion.of("11");       // returns JAVA_11
-     * JavaVersion v3 = JavaVersion.of("17.0.1");   // returns JAVA_17
-     * JavaVersion v4 = JavaVersion.of("25-ea");    // returns JAVA_25
+     * JavaVersion v1 = JavaVersion.of("1.8");     // returns JAVA_1_8
+     * JavaVersion v2 = JavaVersion.of("11");      // returns JAVA_11
+     * JavaVersion v3 = JavaVersion.of("17.0.1");  // returns JAVA_17
+     * JavaVersion v4 = JavaVersion.of("25-ea");   // returns JAVA_25
      *
      * // Get current Java version
      * JavaVersion current = JavaVersion.of(System.getProperty("java.specification.version"));
@@ -777,8 +777,8 @@ public enum JavaVersion {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * System.out.println(JavaVersion.JAVA_1_8);   // prints 1.8
-     * System.out.println(JavaVersion.JAVA_11);    // prints 11
+     * System.out.println(JavaVersion.JAVA_1_8);  // prints 1.8
+     * System.out.println(JavaVersion.JAVA_11);   // prints 11
      * }</pre>
      *
      * @return the standard version name, never null

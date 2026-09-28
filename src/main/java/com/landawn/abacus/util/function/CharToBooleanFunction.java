@@ -35,8 +35,8 @@ public interface CharToBooleanFunction {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * CharToBooleanFunction defaultConversion = CharToBooleanFunction.DEFAULT;
-     * boolean result1 = defaultConversion.applyAsBoolean('Y');   // Returns true
-     * boolean result2 = defaultConversion.applyAsBoolean('N');   // Returns false
+     * boolean result1 = defaultConversion.applyAsBoolean('Y');  // Returns true
+     * boolean result2 = defaultConversion.applyAsBoolean('N');  // Returns false
      * }</pre>
      *
      */

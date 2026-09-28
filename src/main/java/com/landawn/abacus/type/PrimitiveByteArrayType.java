@@ -183,11 +183,18 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
      * @throws UncheckedIOException if {@code obj} is an {@link InputStream} and reading its remaining bytes fails
      * @throws UncheckedSQLException if a database access error occurs while reading or freeing a Blob
      * @throws UnsupportedOperationException if the input is a {@link Blob} whose length exceeds {@link Integer#MAX_VALUE}
+     * @throws IllegalArgumentException if {@code obj} is of any other type and its string representation contains an
+     *         unquoted element that is empty or whitespace-only (see {@link #valueOf(String)})
+     * @throws NumberFormatException if {@code obj} is of any other type and an element of its string representation is
+     *         not a valid integer literal
+     * @throws ArithmeticException if {@code obj} is of any other type and an element of its string representation is
+     *         outside the {@code byte} range
      */
     @MayReturnNull
     @SuppressFBWarnings
     @Override
-    public byte[] valueOf(final Object obj) throws UncheckedIOException, UncheckedSQLException, UnsupportedOperationException {
+    public byte[] valueOf(final Object obj) throws UncheckedIOException, UncheckedSQLException, UnsupportedOperationException, IllegalArgumentException,
+            NumberFormatException, ArithmeticException {
         if (obj == null) {
             return null; // NOSONAR
         } else if (obj instanceof InputStream is) {
@@ -265,62 +272,63 @@ public final class PrimitiveByteArrayType extends AbstractPrimitiveArrayType<byt
     /**
      * Sets a byte array value in a PreparedStatement at the specified parameter index.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the byte array to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x) throws NullPointerException, SQLException {
-        stmt.setBytes(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final byte[] x) throws NullPointerException, SQLException {
+        statement.setBytes(columnIndex, x);
     }
 
     /**
      * Sets a byte array value in a CallableStatement using the specified parameter name.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the byte array to set
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final byte[] x) throws NullPointerException, SQLException {
-        stmt.setBytes(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final byte[] x) throws NullPointerException, SQLException {
+        statement.setBytes(parameterName, x);
     }
 
     /**
      * Sets a byte array value in a PreparedStatement with SQL type information.
      * The sqlTypeOrLength parameter is ignored as byte arrays have their own specific SQL type.
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the byte array to set
      * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final byte[] x, final int sqlTypeOrLength) throws NullPointerException, SQLException {
-        stmt.setBytes(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final byte[] x, final int sqlTypeOrLength)
+            throws NullPointerException, SQLException {
+        statement.setBytes(columnIndex, x);
     }
 
     /**
      * Sets a byte array value in a CallableStatement with SQL type information.
      * The sqlTypeOrLength parameter is ignored as byte arrays have their own specific SQL type.
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter
      * @param x the byte array to set
      * @param sqlTypeOrLength the SQL type or length (ignored for byte arrays)
-     * @throws NullPointerException if {@code stmt} is {@code null}.
+     * @throws NullPointerException if {@code statement} is {@code null}.
      * @throws SQLException if the statement is closed, the parameter is invalid, or the JDBC bind fails.
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final byte[] x, final int sqlTypeOrLength)
+    public void set(final CallableStatement statement, final String parameterName, final byte[] x, final int sqlTypeOrLength)
             throws NullPointerException, SQLException {
-        stmt.setBytes(parameterName, x);
+        statement.setBytes(parameterName, x);
     }
 
     /**

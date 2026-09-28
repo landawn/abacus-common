@@ -218,6 +218,9 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
     public static BooleanIterator defer(final Supplier<? extends BooleanIterator> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends BooleanIterator>> supplierHolder = Holder.of(iteratorSupplier);
+
         return new BooleanIterator() {
             private BooleanIterator iter = null;
             private volatile boolean isInitialized = false;
@@ -256,7 +259,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                             isInitializing = true;
 
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == this) {
                                     throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
@@ -270,6 +273,7 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;
                             }
@@ -384,8 +388,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
-     * Boolean boxed = iter.next();              // returns true (boxed) — avoid this
-     * boolean primitive = iter.nextBoolean();   // returns false — prefer this
+     * Boolean boxed = iter.next();             // returns true (boxed) — avoid this
+     * boolean primitive = iter.nextBoolean();  // returns false — prefer this
      * }</pre>
      *
      * @return the next boolean value as a boxed {@link Boolean} object
@@ -404,8 +408,8 @@ public abstract class BooleanIterator extends ImmutableIterator<Boolean> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * BooleanIterator iter = BooleanIterator.of(true, false);
-     * boolean first = iter.nextBoolean();    // returns true
-     * boolean second = iter.nextBoolean();   // returns false
+     * boolean first = iter.nextBoolean();   // returns true
+     * boolean second = iter.nextBoolean();  // returns false
      * }</pre>
      *
      * @return the next boolean value

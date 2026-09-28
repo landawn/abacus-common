@@ -377,4 +377,29 @@ public class NumbersIsTest extends NumbersTestSupport {
         assertFalse(Numbers.isNormal(Double.POSITIVE_INFINITY));
         assertFalse(Numbers.isNormal(Double.NaN));
     }
+    // ---- perf review 2026-09-26 G061 begin ----
+    // G061-01: the mod-16 residue pre-filter must agree with the exact root-and-square test at every magnitude,
+    // including multi-word values whose low 32 bits are what the filter reads.
+    @Test
+    public void testIsPerfectSquare_BigInteger_residueFilterMatchesExactCheck() {
+        final java.util.Random random = new java.util.Random(20260926L);
+        for (final int bits : new int[] { 1, 31, 32, 33, 63, 64, 65, 127, 200, 1000 }) {
+            for (int trial = 0; trial < 20; trial++) {
+                final BigInteger root = new BigInteger(bits, random);
+                final BigInteger square = root.multiply(root);
+                for (int delta = -40; delta <= 40; delta++) {
+                    final BigInteger n = square.add(BigInteger.valueOf(delta));
+                    final boolean expected = n.signum() >= 0 && n.sqrt().pow(2).equals(n);
+                    assertEquals(expected, Numbers.isPerfectSquare(n), n.toString());
+                }
+            }
+        }
+        // Low 32 bits all zero / all ones above a large high part.
+        assertTrue(Numbers.isPerfectSquare(BigInteger.ONE.shiftLeft(64)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.ONE.shiftLeft(65)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.ONE.shiftLeft(96).subtract(BigInteger.ONE)));
+        assertTrue(Numbers.isPerfectSquare(BigInteger.ONE.shiftLeft(48).subtract(BigInteger.ONE).pow(2)));
+        assertFalse(Numbers.isPerfectSquare(BigInteger.valueOf(Long.MAX_VALUE).pow(2).negate()));
+    }
+    // ---- perf review 2026-09-26 G061 end ----
 }

@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import com.landawn.abacus.annotation.MayReturnNull;
 
@@ -250,10 +250,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String line = EscapeUtil.escapeJava("Hello\nWorld");      // returns "Hello\\nWorld"
-     * String quote = EscapeUtil.escapeJava("He said \"Hi\"");   // returns "He said \\\"Hi\\\""
-     * String path = EscapeUtil.escapeJava("C:\\temp\\file");    // returns "C:\\\\temp\\\\file"
-     * String absent = EscapeUtil.escapeJava(null);              // returns null
+     * String line = EscapeUtil.escapeJava("Hello\nWorld");     // returns "Hello\\nWorld"
+     * String quote = EscapeUtil.escapeJava("He said \"Hi\"");  // returns "He said \\\"Hi\\\""
+     * String path = EscapeUtil.escapeJava("C:\\temp\\file");   // returns "C:\\\\temp\\\\file"
+     * String absent = EscapeUtil.escapeJava(null);             // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -279,10 +279,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String apostrophe = EscapeUtil.escapeEcmaScript("Don't stop");     // returns "Don\\'t stop"
-     * String scriptEnd = EscapeUtil.escapeEcmaScript("</script>");       // returns "<\\/script>"
-     * String quote = EscapeUtil.escapeEcmaScript("He said \"Hi\"");      // returns "He said \\\"Hi\\\""
-     * String absent = EscapeUtil.escapeEcmaScript(null);                 // returns null
+     * String apostrophe = EscapeUtil.escapeEcmaScript("Don't stop");  // returns "Don\\'t stop"
+     * String scriptEnd = EscapeUtil.escapeEcmaScript("</script>");    // returns "<\\/script>"
+     * String quote = EscapeUtil.escapeEcmaScript("He said \"Hi\"");   // returns "He said \\\"Hi\\\""
+     * String absent = EscapeUtil.escapeEcmaScript(null);              // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -300,17 +300,17 @@ public final class EscapeUtil {
      *
      * <p>This method escapes double quotes, backslashes, forward slashes, and control characters.
      * Control characters (tab, newline, carriage return, etc.) are converted to their escape sequences
-     * (e.g., {@code \t}, {@code \n}, {@code \r}). Characters outside the printable ASCII range are
-     * converted to Unicode escape sequences.</p>
+     * (e.g., {@code \t}, {@code \n}, {@code \r}). Characters outside the range U+0020 through U+007F are
+     * converted to Unicode escape sequences; the DEL character U+007F itself is left as-is, which JSON permits.</p>
      *
      * <p>The resulting string can be safely embedded as a JSON string value.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String line = EscapeUtil.escapeJson("Hello\nWorld");       // returns "Hello\\nWorld"
-     * String path = EscapeUtil.escapeJson("path/to/file");       // returns "path\\/to\\/file"
-     * String quote = EscapeUtil.escapeJson("Say \"Hello\"");     // returns "Say \\\"Hello\\\""
-     * String absent = EscapeUtil.escapeJson(null);               // returns null
+     * String line = EscapeUtil.escapeJson("Hello\nWorld");    // returns "Hello\\nWorld"
+     * String path = EscapeUtil.escapeJson("path/to/file");    // returns "path\\/to\\/file"
+     * String quote = EscapeUtil.escapeJson("Say \"Hello\"");  // returns "Say \\\"Hello\\\""
+     * String absent = EscapeUtil.escapeJson(null);            // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -333,10 +333,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String line = EscapeUtil.unescapeJava("Hello\\nWorld");                          // contains a newline
-     * String quote = EscapeUtil.unescapeJava("He said \\\"Hi\\\"");                    // returns "He said \"Hi\""
-     * String hello = EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F");   // returns "Hello"
-     * String absent = EscapeUtil.unescapeJava(null);                                   // returns null
+     * String line = EscapeUtil.unescapeJava("Hello\\nWorld");                         // contains a newline
+     * String quote = EscapeUtil.unescapeJava("He said \\\"Hi\\\"");                   // returns "He said \"Hi\""
+     * String hello = EscapeUtil.unescapeJava("\\u0048\\u0065\\u006C\\u006C\\u006F");  // returns "Hello"
+     * String absent = EscapeUtil.unescapeJava(null);                                  // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -359,9 +359,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String apostrophe = EscapeUtil.unescapeEcmaScript("Don\\'t stop");   // returns "Don't stop"
-     * String scriptEnd = EscapeUtil.unescapeEcmaScript("<\\/script>");     // returns "</script>"
-     * String absent = EscapeUtil.unescapeEcmaScript(null);                 // returns null
+     * String apostrophe = EscapeUtil.unescapeEcmaScript("Don\\'t stop");  // returns "Don't stop"
+     * String scriptEnd = EscapeUtil.unescapeEcmaScript("<\\/script>");    // returns "</script>"
+     * String absent = EscapeUtil.unescapeEcmaScript(null);                // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -387,10 +387,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String line = EscapeUtil.unescapeJson("Hello\\nWorld");        // contains a newline
-     * String path = EscapeUtil.unescapeJson("path\\/to\\/file");     // returns "path/to/file"
-     * String quote = EscapeUtil.unescapeJson("Say \\\"Hello\\\"");   // returns "Say \"Hello\""
-     * String absent = EscapeUtil.unescapeJson(null);                 // returns null
+     * String line = EscapeUtil.unescapeJson("Hello\\nWorld");       // contains a newline
+     * String path = EscapeUtil.unescapeJson("path\\/to\\/file");    // returns "path/to/file"
+     * String quote = EscapeUtil.unescapeJson("Say \\\"Hello\\\"");  // returns "Say \"Hello\""
+     * String absent = EscapeUtil.unescapeJson(null);                // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -427,10 +427,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String element = EscapeUtil.escapeHtml4("<p>Hello</p>");       // returns "&lt;p&gt;Hello&lt;/p&gt;"
-     * String ampersand = EscapeUtil.escapeHtml4("bread & butter");   // returns "bread &amp; butter"
-     * String quote = EscapeUtil.escapeHtml4("\"quoted\"");           // returns "&quot;quoted&quot;"
-     * String absent = EscapeUtil.escapeHtml4(null);                  // returns null
+     * String element = EscapeUtil.escapeHtml4("<p>Hello</p>");      // returns "&lt;p&gt;Hello&lt;/p&gt;"
+     * String ampersand = EscapeUtil.escapeHtml4("bread & butter");  // returns "bread &amp; butter"
+     * String quote = EscapeUtil.escapeHtml4("\"quoted\"");          // returns "&quot;quoted&quot;"
+     * String absent = EscapeUtil.escapeHtml4(null);                 // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -453,9 +453,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String element = EscapeUtil.escapeHtml3("<div>");     // returns "&lt;div&gt;"
-     * String ampersand = EscapeUtil.escapeHtml3("A & B");   // returns "A &amp; B"
-     * String absent = EscapeUtil.escapeHtml3(null);         // returns null
+     * String element = EscapeUtil.escapeHtml3("<div>");    // returns "&lt;div&gt;"
+     * String ampersand = EscapeUtil.escapeHtml3("A & B");  // returns "A &amp; B"
+     * String absent = EscapeUtil.escapeHtml3(null);        // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -487,11 +487,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String element = EscapeUtil.unescapeHtml4("<p>Hello</p>");           // unchanged
-     * String ampersand = EscapeUtil.unescapeHtml4("bread &amp; butter");   // returns "bread & butter"
-     * String copyright = EscapeUtil.unescapeHtml4("&copy; 2024");          // returns the copyright sign followed by 2024
-     * String letter = EscapeUtil.unescapeHtml4("&#65;");                   // returns "A"
-     * String absent = EscapeUtil.unescapeHtml4(null);                      // returns null
+     * String element = EscapeUtil.unescapeHtml4("<p>Hello</p>");          // unchanged
+     * String ampersand = EscapeUtil.unescapeHtml4("bread &amp; butter");  // returns "bread & butter"
+     * String copyright = EscapeUtil.unescapeHtml4("&copy; 2024");         // returns the copyright sign followed by 2024
+     * String letter = EscapeUtil.unescapeHtml4("&#65;");                  // returns "A"
+     * String absent = EscapeUtil.unescapeHtml4(null);                     // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -520,9 +520,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String element = EscapeUtil.unescapeHtml3("<div>");         // unchanged
-     * String ampersand = EscapeUtil.unescapeHtml3("A &amp; B");   // returns "A & B"
-     * String absent = EscapeUtil.unescapeHtml3(null);             // returns null
+     * String element = EscapeUtil.unescapeHtml3("<div>");        // unchanged
+     * String ampersand = EscapeUtil.unescapeHtml3("A &amp; B");  // returns "A & B"
+     * String absent = EscapeUtil.unescapeHtml3(null);            // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -556,10 +556,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String element = EscapeUtil.escapeXml10("<root>data</root>");   // returns "&lt;root&gt;data&lt;/root&gt;"
-     * String ampersand = EscapeUtil.escapeXml10("A & B");             // returns "A &amp; B"
-     * String quotes = EscapeUtil.escapeXml10("It's \"cool\"");        // returns "It&apos;s &quot;cool&quot;"
-     * String absent = EscapeUtil.escapeXml10(null);                   // returns null
+     * String element = EscapeUtil.escapeXml10("<root>data</root>");  // returns "&lt;root&gt;data&lt;/root&gt;"
+     * String ampersand = EscapeUtil.escapeXml10("A & B");            // returns "A &amp; B"
+     * String quotes = EscapeUtil.escapeXml10("It's \"cool\"");       // returns "It&apos;s &quot;cool&quot;"
+     * String absent = EscapeUtil.escapeXml10(null);                  // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -591,9 +591,9 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String element = EscapeUtil.escapeXml11("<tag>value</tag>");   // returns "&lt;tag&gt;value&lt;/tag&gt;"
-     * String ampersand = EscapeUtil.escapeXml11("A & B");            // returns "A &amp; B"
-     * String absent = EscapeUtil.escapeXml11(null);                  // returns null
+     * String element = EscapeUtil.escapeXml11("<tag>value</tag>");  // returns "&lt;tag&gt;value&lt;/tag&gt;"
+     * String ampersand = EscapeUtil.escapeXml11("A & B");           // returns "A &amp; B"
+     * String absent = EscapeUtil.escapeXml11(null);                 // returns null
      * }</pre>
      *
      * @param input the string to escape, which may be null
@@ -628,11 +628,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String element = EscapeUtil.unescapeXml("<root>");                 // unchanged
-     * String ampersand = EscapeUtil.unescapeXml("A &amp; B");            // returns "A & B"
-     * String quoted = EscapeUtil.unescapeXml("&apos;quoted&apos;");      // returns "'quoted'"
-     * String letter = EscapeUtil.unescapeXml("&#65;");                   // returns "A"
-     * String absent = EscapeUtil.unescapeXml(null);                      // returns null
+     * String element = EscapeUtil.unescapeXml("<root>");             // unchanged
+     * String ampersand = EscapeUtil.unescapeXml("A &amp; B");        // returns "A & B"
+     * String quoted = EscapeUtil.unescapeXml("&apos;quoted&apos;");  // returns "'quoted'"
+     * String letter = EscapeUtil.unescapeXml("&#65;");               // returns "A"
+     * String absent = EscapeUtil.unescapeXml(null);                  // returns null
      * }</pre>
      *
      * @param input the string to unescape, which may be null
@@ -663,10 +663,10 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String simple = EscapeUtil.escapeCsv("simple");          // returns "simple"
-     * String comma = EscapeUtil.escapeCsv("hello,world");      // returns "\"hello,world\""
-     * String quote = EscapeUtil.escapeCsv("say \"hi\"");       // returns "\"say \"\"hi\"\"\""
-     * String absent = EscapeUtil.escapeCsv(null);              // returns null
+     * String simple = EscapeUtil.escapeCsv("simple");      // returns "simple"
+     * String comma = EscapeUtil.escapeCsv("hello,world");  // returns "\"hello,world\""
+     * String quote = EscapeUtil.escapeCsv("say \"hi\"");   // returns "\"say \"\"hi\"\"\""
+     * String absent = EscapeUtil.escapeCsv(null);          // returns null
      * }</pre>
      *
      * @param input the input CSV column String, which may be null
@@ -692,11 +692,11 @@ public final class EscapeUtil {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * String simple = EscapeUtil.unescapeCsv("simple");                  // returns "simple"
-     * String quotedSimple = EscapeUtil.unescapeCsv("\"simple\"");        // returns "simple"
-     * String comma = EscapeUtil.unescapeCsv("\"hello,world\"");          // returns "hello,world"
-     * String quote = EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"");       // returns "say \"hi\""
-     * String absent = EscapeUtil.unescapeCsv(null);                      // returns null
+     * String simple = EscapeUtil.unescapeCsv("simple");             // returns "simple"
+     * String quotedSimple = EscapeUtil.unescapeCsv("\"simple\"");   // returns "simple"
+     * String comma = EscapeUtil.unescapeCsv("\"hello,world\"");     // returns "hello,world"
+     * String quote = EscapeUtil.unescapeCsv("\"say \"\"hi\"\"\"");  // returns "say \"hi\""
+     * String absent = EscapeUtil.unescapeCsv(null);                 // returns null
      * }</pre>
      *
      * @param input the input CSV column String, which may be null
@@ -743,13 +743,13 @@ public final class EscapeUtil {
          * java.io.StringWriter out = new java.io.StringWriter();
          *
          * // A character that this translator handles: ESCAPE_JAVA escapes a double quote
-         * int consumed = EscapeUtil.ESCAPE_JAVA.translate("\"abc", 0, out);   // returns 1 (one codepoint consumed)
-         * out.toString();                                                     // returns "\\\"" (a backslash followed by a quote)
+         * int consumed = EscapeUtil.ESCAPE_JAVA.translate("\"abc", 0, out);  // returns 1 (one codepoint consumed)
+         * out.toString();                                                    // returns "\\\"" (a backslash followed by a quote)
          *
          * // A character it does not handle: nothing is consumed or written
          * java.io.StringWriter out2 = new java.io.StringWriter();
-         * int consumed2 = EscapeUtil.ESCAPE_JAVA.translate("abc", 0, out2);   // returns 0 (not handled here)
-         * out2.toString();                                                    // returns "" (empty; caller passes the char through)
+         * int consumed2 = EscapeUtil.ESCAPE_JAVA.translate("abc", 0, out2);  // returns 0 (not handled here)
+         * out2.toString();                                                   // returns "" (empty; caller passes the char through)
          * }</pre>
          *
          * @param input CharSequence that is being translated
@@ -769,10 +769,10 @@ public final class EscapeUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * String line = EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld");   // returns "Hello\\nWorld"
-         * String element = EscapeUtil.UNESCAPE_HTML4.translate("<p>");      // unchanged
-         * String field = EscapeUtil.ESCAPE_CSV.translate("hello,world");    // returns "\"hello,world\""
-         * String absent = EscapeUtil.ESCAPE_JAVA.translate(null);           // returns null
+         * String line = EscapeUtil.ESCAPE_JAVA.translate("Hello\nWorld");  // returns "Hello\\nWorld"
+         * String element = EscapeUtil.UNESCAPE_HTML4.translate("<p>");     // unchanged
+         * String field = EscapeUtil.ESCAPE_CSV.translate("hello,world");   // returns "\"hello,world\""
+         * String absent = EscapeUtil.ESCAPE_JAVA.translate(null);          // returns null
          * }</pre>
          *
          * @param input CharSequence to be translated, may be null
@@ -812,7 +812,9 @@ public final class EscapeUtil {
          *
          * @param input the CharSequence to be translated; may be {@code null}, in which case nothing is written
          * @param out the Writer to translate the text to; must not be {@code null}
-         * @throws IllegalArgumentException if {@code out} is {@code null}.
+         * @throws IllegalArgumentException if {@code out} is {@code null}, or if this translator rejects malformed
+         *         {@code input} (for example an incomplete <code>&#92;u</code> escape, or a numeric character reference
+         *         above Unicode's maximum code point).
          * @throws IOException if a translator or the output writer raises an I/O exception
          */
         public final void translate(final CharSequence input, final Writer out) throws IllegalArgumentException, IOException {
@@ -883,9 +885,9 @@ public final class EscapeUtil {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * String zero = EscapeUtil.CharSequenceTranslator.hex(0);      // "0"
-         * String fifteen = EscapeUtil.CharSequenceTranslator.hex(15);  // "F"
-         * String byteMax = EscapeUtil.CharSequenceTranslator.hex(255); // "FF"
+         * String zero = EscapeUtil.CharSequenceTranslator.hex(0);       // "0"
+         * String fifteen = EscapeUtil.CharSequenceTranslator.hex(15);   // "F"
+         * String byteMax = EscapeUtil.CharSequenceTranslator.hex(255);  // "FF"
          * }</pre>
          *
          * @param codepoint The codepoint to convert.
@@ -942,11 +944,16 @@ public final class EscapeUtil {
          * @param index the current index in the input sequence
          * @param out the destination writer for translated output
          * @return the number of code points consumed by the winning translator, or {@code 0} if none match
-         * @throws NullPointerException if the translator array or a reached translator is null
+         * @throws NullPointerException if the translator array or a reached translator is null, or if a reached
+         *         translator dereferences a {@code null} {@code input} or {@code out}
+         * @throws IndexOutOfBoundsException if a translator is reached and {@code index} is outside the input character range
+         * @throws IllegalArgumentException if a reached translator rejects the input at {@code index} (for example an
+         *         incomplete <code>&#92;u</code> escape, or a numeric character reference above Unicode's maximum code point)
          * @throws IOException if writing translated output fails
          */
         @Override
-        public int translate(final CharSequence input, final int index, final Writer out) throws NullPointerException, IOException {
+        public int translate(final CharSequence input, final int index, final Writer out)
+                throws NullPointerException, IndexOutOfBoundsException, IllegalArgumentException, IOException {
             for (final CharSequenceTranslator translator : translators) {
                 final int consumed = translator.translate(input, index, out);
                 if (consumed != 0) {
@@ -1607,8 +1614,11 @@ public final class EscapeUtil {
         /** Map from source sequence string to its replacement string. */
         private final Map<String, String> lookupMap;
 
-        /** Set of first characters of all registered source sequences, used for fast pre-filtering. */
-        private final Set<Character> prefixSet;
+        /** First characters of all registered source sequences (bit {@code c} is set for char {@code c}), used for fast pre-filtering without boxing. */
+        private final BitSet prefixSet;
+
+        /** Last characters of all registered source sequences, used to skip candidate lengths that cannot match without allocating a substring. */
+        private final BitSet suffixSet;
 
         /** Length of the shortest source sequence in the lookup table. */
         private final int shortest;
@@ -1635,14 +1645,16 @@ public final class EscapeUtil {
         @SafeVarargs
         public LookupTranslator(final CharSequence[]... lookup) throws NullPointerException, IndexOutOfBoundsException {
             lookupMap = new HashMap<>();
-            prefixSet = N.newHashSet();
+            prefixSet = new BitSet();
+            final BitSet suffixes = new BitSet();
             int _shortest = Integer.MAX_VALUE; // NOSONAR
             int _longest = 0; // NOSONAR
             if (lookup != null) {
                 for (final CharSequence[] seq : lookup) {
                     lookupMap.put(seq[0].toString(), seq[1].toString());
-                    prefixSet.add(seq[0].charAt(0));
+                    prefixSet.set(seq[0].charAt(0));
                     final int sz = seq[0].length();
+                    suffixes.set(seq[0].charAt(sz - 1));
                     if (sz < _shortest) {
                         _shortest = sz;
                     }
@@ -1651,6 +1663,8 @@ public final class EscapeUtil {
                     }
                 }
             }
+            // Single-char tables have identical prefix and suffix sets: share one BitSet instead of keeping two equal copies.
+            suffixSet = suffixes.equals(prefixSet) ? prefixSet : suffixes;
             shortest = _shortest;
             longest = _longest;
         }
@@ -1669,10 +1683,14 @@ public final class EscapeUtil {
         @Override
         public int translate(final CharSequence input, final int index, final Writer out) throws NullPointerException, IndexOutOfBoundsException, IOException {
             // check if translation exists for the input at position index
-            if (prefixSet.contains(input.charAt(index))) {
+            if (prefixSet.get(input.charAt(index))) {
                 final int max = Math.min(longest, input.length() - index);
                 // implement greedy algorithm by trying maximum match first
                 for (int i = max; i >= shortest; i--) {
+                    if (!suffixSet.get(input.charAt(index + i - 1))) {
+                        continue; // no key ends with this char, so no key of length i can match here
+                    }
+
                     final CharSequence subSeq = input.subSequence(index, index + i);
                     final String result = lookupMap.get(subSeq.toString());
 

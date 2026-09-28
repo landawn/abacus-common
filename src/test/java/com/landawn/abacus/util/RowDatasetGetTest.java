@@ -395,7 +395,7 @@ public class RowDatasetGetTest extends RowDatasetTestSupport {
 
     @Test
     public void testGetRow_RowSupplierReturningNull() {
-        assertThrows(IllegalArgumentException.class, () -> dataset.getRow(0, size -> null));
+        assertThrows(NullPointerException.class, () -> dataset.getRow(0, size -> null));
     }
 
     @Test

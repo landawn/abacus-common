@@ -6845,4 +6845,257 @@ public class IntStreamTest extends TestBase {
         assertThrows(IllegalStateException.class, () -> IntStream.merge(a, b, (x, y) -> x <= y ? MergeResult.TAKE_FIRST : MergeResult.TAKE_SECOND).toArray());
         assertEquals(1, closed.get());
     }
+
+    @Test
+    public void testSummaryStatisticsAndPercentilesOneToTenQuartiles() {
+        final Pair<IntSummaryStatistics, Optional<Map<Percentage, Integer>>> result = IntStream.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .summaryStatisticsAndPercentiles();
+
+        assertEquals(10, result.left().getCount());
+        assertEquals(55, result.left().getSum());
+        assertTrue(result.right().isPresent());
+
+        final Map<Percentage, Integer> percentiles = result.right().get();
+        assertEquals(Percentage.values().length, percentiles.size());
+        assertEquals(3, percentiles.get(Percentage._25));
+        assertEquals(6, percentiles.get(Percentage._50));
+        assertEquals(8, percentiles.get(Percentage._75));
+    }
+
+    // ---- perf review 2026-09-26 G097 begin ----
+    // G097-03: flatten(int[][], true) uses a compacted row walk for sparse jagged input; pins column-major order on both walks.
+    @Test
+    public void testFlattenVertically_jaggedRowsPinned() {
+        final int[][][] cases = { { { 1, 2, 3 }, {}, null, { 4 }, { 5, 6 } }, { {}, { 1, 2, 3, 4, 5 }, {}, null }, { null, {}, { 7 } },
+                { { 1 }, { 2, 3, 4 }, null, { 5, 6 }, {}, { 8, 9, 10, 11 } }, { { 1, 2 }, { 3, 4 }, { 5, 6 } }, { { 1, 2, 3 }, { 4 } },
+                { { 1 }, { 2, 3 } }, { null, null }, { {}, {} } };
+
+        for (final int[][] a : cases) {
+            final IntList expected = new IntList();
+            int maxLen = 0;
+            for (final int[] row : a) {
+                maxLen = Math.max(maxLen, row == null ? 0 : row.length);
+            }
+            for (int col = 0; col < maxLen; col++) {
+                for (final int[] row : a) {
+                    if (row != null && col < row.length) {
+                        expected.add(row[col]);
+                    }
+                }
+            }
+
+            assertArrayEquals(expected.toArray(), IntStream.flatten(a, true).toArray(), Arrays.deepToString(a));
+            assertEquals(expected.size(), IntStream.flatten(a, true).count());
+            if (expected.size() > 1) {
+                assertArrayEquals(Arrays.copyOfRange(expected.toArray(), 1, expected.size()), IntStream.flatten(a, true).skip(1).toArray());
+            }
+        }
+
+        final Random random = new Random(3);
+        for (int round = 0; round < 200; round++) {
+            // odd rounds: mostly null/empty rows plus a few long ones (the sparse walk); even rounds: dense jagged rows
+            final boolean sparse = round % 2 == 1;
+            final int[][] a = new int[2 + random.nextInt(sparse ? 30 : 8)][];
+            int maxLen = 0;
+            for (int i = 0; i < a.length; i++) {
+                final int len = sparse ? (random.nextInt(6) == 0 ? random.nextInt(40) : random.nextInt(3) - 1) : random.nextInt(6) - 1;
+                a[i] = len < 0 ? null : Array.range(i * 100, i * 100 + len);
+                maxLen = Math.max(maxLen, Math.max(len, 0));
+            }
+            final IntList expected = new IntList();
+            for (int col = 0; col < maxLen; col++) {
+                for (final int[] row : a) {
+                    if (row != null && col < row.length) {
+                        expected.add(row[col]);
+                    }
+                }
+            }
+            assertArrayEquals(expected.toArray(), IntStream.flatten(a, true).toArray(), Arrays.deepToString(a));
+            assertEquals(expected.size(), IntStream.flatten(a, true).count(), Arrays.deepToString(a));
+            if (expected.size() > 2) {
+                final IntIterator it = IntStream.flatten(a, true).skip(2).iterator();
+                for (int i = 2; i < expected.size(); i++) {
+                    assertTrue(it.hasNext());
+                    assertEquals(expected.get(i), it.nextInt());
+                }
+                assertFalse(it.hasNext());
+            }
+        }
+
+        // sparse: rows * longest row far exceeds the element count
+        final int[][] sparse = { null, {}, { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, {}, {}, { 10, 11 }, {}, null, {}, {}, { 12, 13, 14, 15 }, {} };
+        assertArrayEquals(new int[] { 1, 10, 12, 2, 11, 13, 3, 14, 4, 15, 5, 6, 7, 8, 9 }, IntStream.flatten(sparse, true).toArray());
+        final int[][] oneLongRow = new int[1000][];
+        oneLongRow[999] = Array.range(0, 5000);
+        assertArrayEquals(Array.range(0, 5000), IntStream.flatten(oneLongRow, true).toArray());
+        final IntIterator sparseIter = IntStream.flatten(new int[][] { {}, { 1, 2 }, null, {}, {}, {}, { 3 }, {}, {} }, true).iterator();
+        assertEquals(1, sparseIter.nextInt());
+        assertEquals(3, sparseIter.nextInt());
+        assertEquals(2, sparseIter.nextInt());
+        assertFalse(sparseIter.hasNext());
+        assertThrows(NoSuchElementException.class, sparseIter::nextInt);
+
+        final IntIterator iter = IntStream.flatten(new int[][] { { 1 }, {}, { 2, 3 } }, true).iterator();
+        assertTrue(iter.hasNext());
+        assertEquals(1, iter.nextInt());
+        assertEquals(2, iter.nextInt());
+        assertEquals(3, iter.nextInt());
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::nextInt);
+        assertThrows(NoSuchElementException.class, iter::nextInt);
+    }
+
+    // G097-05: concat(List<int[]>) bulk toArray()/toIntList()/count(); pins null/empty segments and fresh results.
+    @Test
+    public void testConcatListOfArrays_toArrayCountToList_edgeCases() {
+        final int[] a = { 1, Integer.MIN_VALUE, Integer.MAX_VALUE };
+        final int[] b = {};
+        final int[] c = { -7, 5 };
+        final List<int[]> list = Arrays.asList(null, a, b, null, c, b);
+        final int[] expected = { 1, Integer.MIN_VALUE, Integer.MAX_VALUE, -7, 5 };
+
+        assertArrayEquals(expected, IntStream.concat(list).toArray());
+        assertEquals(5, IntStream.concat(list).count());
+        assertArrayEquals(expected, IntStream.concat(list).toIntList().toArray());
+
+        final int[] arr = IntStream.concat(list).toArray();
+        arr[0] = 42;
+        assertEquals(1, a[0]);
+        final IntList il = IntStream.concat(list).toIntList();
+        il.add(7);
+        assertEquals(6, il.size());
+        assertEquals(1, a[0]);
+
+        final List<int[]> empties = Arrays.asList(b, null, new int[0]);
+        assertEquals(0, IntStream.concat(empties).toArray().length);
+        assertEquals(0, IntStream.concat(empties).count());
+        final IntList emptyList = IntStream.concat(empties).toIntList();
+        assertEquals(0, emptyList.size());
+        emptyList.add(1);
+        assertEquals(1, emptyList.size());
+
+        assertArrayEquals(new int[] { 3, 4 }, IntStream.concat(Arrays.asList(new int[][] { { 3, 4 } })).toArray());
+        assertArrayEquals(new int[] { 3, 4, 5 }, IntStream.concat(new int[] { 3 }, null, new int[] { 4, 5 }).toArray());
+    }
+
+    // G097-05: bulk paths after partial consumption (skip inside a segment, at a segment end, beyond the end)
+    @Test
+    public void testConcatListOfArrays_bulkOpsAfterSkip() {
+        final List<int[]> list = Arrays.asList(new int[] { 1, 2 }, null, new int[] { 3 }, new int[0], new int[] { 4, 5, 6 });
+
+        for (int n = 0; n <= 8; n++) {
+            final int[] expected = new int[Math.max(0, 6 - n)];
+            for (int i = 0; i < expected.length; i++) {
+                expected[i] = n + i + 1;
+            }
+
+            assertArrayEquals(expected, IntStream.concat(list).skip(n).toArray(), "skip " + n);
+            assertEquals(expected.length, IntStream.concat(list).skip(n).count(), "skip " + n);
+            assertArrayEquals(expected, IntStream.concat(list).skip(n).toIntList().toArray(), "skip " + n);
+        }
+
+        final IntIterator iter = IntStream.concat(list).iterator();
+        assertEquals(1, iter.nextInt());
+        assertArrayEquals(new int[] { 2, 3, 4, 5, 6 }, iter.toArray());
+        assertFalse(iter.hasNext());
+    }
+
+    // G097-05: the list is still read at terminal-operation time; close handlers run once
+    @Test
+    public void testConcatListOfArrays_lazyReadAndCloseHandler() {
+        final List<int[]> list = Arrays.asList(new int[] { 1 }, new int[] { 2 });
+        final IntStream stream = IntStream.concat(list);
+        list.set(1, new int[] { 8, 9 });
+        final AtomicInteger closed = new AtomicInteger();
+        assertArrayEquals(new int[] { 1, 8, 9 }, stream.onClose(closed::incrementAndGet).toArray());
+        assertEquals(1, closed.get());
+
+        final AtomicInteger closed2 = new AtomicInteger();
+        assertEquals(3, IntStream.concat(list).onClose(closed2::incrementAndGet).count());
+        assertEquals(1, closed2.get());
+
+        assertEquals(18, IntStream.concat(list).sum());
+        assertArrayEquals(new int[] { 1, 8, 9 }, IntStream.concat(list).sorted().toArray());
+    }
+
+    // G097-05: long segments take the bulk-copy path (whole segments and a partially consumed head segment)
+    @Test
+    public void testConcatListOfArrays_longSegmentsBulkPath() {
+        final int[] a = Array.range(0, 20);
+        final int[] b = Array.range(100, 140);
+        final int[] c = { -1, -2, -3 };
+        final List<int[]> list = Arrays.asList(a, null, new int[0], c, b, c);
+        final int[] all = new int[66];
+        System.arraycopy(a, 0, all, 0, 20);
+        System.arraycopy(c, 0, all, 20, 3);
+        System.arraycopy(b, 0, all, 23, 40);
+        System.arraycopy(c, 0, all, 63, 3);
+
+        for (final int n : new int[] { 0, 1, 4, 5, 19, 20, 21, 23, 24, 27, 30, 62, 63, 64, 66, 70 }) {
+            final int[] expected = Arrays.copyOfRange(all, Math.min(n, all.length), all.length);
+            assertArrayEquals(expected, IntStream.concat(list).skip(n).toArray(), "skip " + n);
+            assertEquals(expected.length, IntStream.concat(list).skip(n).count(), "skip " + n);
+            final IntList il = IntStream.concat(list).skip(n).toIntList();
+            assertArrayEquals(expected, il.toArray(), "skip " + n);
+            il.add(1);
+            assertEquals(expected.length + 1, il.size());
+        }
+
+        final int[] result = IntStream.concat(list).toArray();
+        assertArrayEquals(all, result);
+        result[0] = 99;
+        assertEquals(0, a[0]);
+        final int[] result2 = IntStream.concat(Arrays.asList(b)).toArray();
+        assertArrayEquals(b, result2);
+        assertFalse(result2 == b);
+        assertEquals(100, IntStream.concat(b, a).toArray()[0]);
+    }
+    // ---- perf review 2026-09-26 G097 end ----
+    // ---- perf review 2026-09-26 G115 begin ----
+    // G115-01: random() streams are lazy and look up ThreadLocalRandom.current() per draw, so a stream created on one
+    // thread can be consumed on another (and several such streams concurrently).
+    @Test
+    public void testRandom_primitiveStreamsConsumedOnOtherThreads() throws Exception {
+        final IntStream created = IntStream.random(-3, 3).limit(500);
+        final ExecutorService executor = Executors.newFixedThreadPool(4);
+
+        try {
+            final java.util.concurrent.Future<int[]> handedOver = executor.submit(() -> created.toArray());
+            final int[] fromOtherThread = handedOver.get();
+            assertEquals(500, fromOtherThread.length);
+            for (final int value : fromOtherThread) {
+                assertTrue(value >= -3 && value < 3);
+            }
+
+            final List<java.util.concurrent.Future<Boolean>> futures = new ArrayList<>();
+
+            for (int t = 0; t < 4; t++) {
+                futures.add(executor.submit(() -> {
+                    final int[] ints = IntStream.random().limit(1000).toArray();
+                    assertTrue(IntList.of(ints).min().orElseThrow() < 0 && IntList.of(ints).max().orElseThrow() > 0);
+                    assertEquals(1000L, LongStream.random().limit(1000).distinct().count());
+                    assertTrue(DoubleStream.random().limit(1000).allMatch(d -> d >= 0d && d < 1d));
+                    assertTrue(FloatStream.random().limit(1000).allMatch(f -> f >= 0f && f < 1f));
+                    assertTrue(ByteStream.random().limit(1000).distinct().count() > 100);
+                    assertTrue(ShortStream.random().limit(1000).distinct().count() > 500);
+                    assertTrue(CharStream.random().limit(1000).distinct().count() > 500);
+                    assertTrue(CharStream.random('a', 'c').limit(1000).allMatch(c -> c == 'a' || c == 'b'));
+                    assertEquals(2, CharStream.random(new char[] { 'x', 'y' }).limit(1000).distinct().count());
+                    return true;
+                }));
+            }
+
+            for (final java.util.concurrent.Future<Boolean> future : futures) {
+                assertTrue(future.get());
+            }
+        } finally {
+            executor.shutdown();
+        }
+
+        // Validation is unchanged: still eager, before any value is drawn.
+        assertThrows(IllegalArgumentException.class, () -> IntStream.random(5, 5));
+        assertThrows(IllegalArgumentException.class, () -> CharStream.random('z', 'a'));
+        assertEquals(0, CharStream.random(new char[0]).count());
+    }
+    // ---- perf review 2026-09-26 G115 end ----
 }

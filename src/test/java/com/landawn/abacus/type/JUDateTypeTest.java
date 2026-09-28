@@ -236,4 +236,17 @@ public class JUDateTypeTest extends TestBase {
         assertNull(dateType.valueOf((char[]) null, 0, 0));
         assertNull(dateType.valueOf(new char[0], 0, 0));
     }
+
+    @Test
+    public void testValueOfStringEpochMillisNeedsMoreThanFourDigits() {
+        final Type<Date> type = TypeFactory.getType("JUDate");
+
+        assertEquals(12345L, type.valueOf("12345").getTime());
+        assertEquals(-12345L, type.valueOf("-12345").getTime());
+        assertEquals(12345L, type.valueOf("+12345").getTime());
+
+        // shorter or out-of-range numeric text is not read as epoch milliseconds; the date parser rejects it
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("1234"));
+        assertThrows(IllegalArgumentException.class, () -> type.valueOf("99999999999999999999"));
+    }
 }

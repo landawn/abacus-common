@@ -119,8 +119,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.getCharQuotation();                          // returns '"' (default)
-     * config.setCharQuotation('\'').getCharQuotation();   // returns '\''
+     * config.getCharQuotation();                         // returns '"' (default)
+     * config.setCharQuotation('\'').getCharQuotation();  // returns '\''
      * }</pre>
      *
      * @return the char quotation character
@@ -135,9 +135,9 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setCharQuotation('\'');      // uses single quotes
-     * config.setCharQuotation('"');       // uses double quotes
-     * config.setCharQuotation((char)0);   // uses no quotes
+     * config.setCharQuotation('\'');     // uses single quotes
+     * config.setCharQuotation('"');      // uses double quotes
+     * config.setCharQuotation((char)0);  // uses no quotes
      * }</pre>
      *
      * @param charQuotation the character to use ({@code '}, {@code "}, or {@code 0})
@@ -160,8 +160,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.getStringQuotation();                            // returns '"' (default)
-     * config.setStringQuotation('\'').getStringQuotation();   // returns '\''
+     * config.getStringQuotation();                           // returns '"' (default)
+     * config.setStringQuotation('\'').getStringQuotation();  // returns '\''
      * }</pre>
      *
      * @return the string quotation character
@@ -177,9 +177,9 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setStringQuotation('"');       // uses double quotes (standard JSON)
-     * config.setStringQuotation('\'');      // uses single quotes (non-standard)
-     * config.setStringQuotation((char)0);   // uses no quotes (non-standard)
+     * config.setStringQuotation('"');      // uses double quotes (standard JSON)
+     * config.setStringQuotation('\'');     // uses single quotes (non-standard)
+     * config.setStringQuotation((char)0);  // uses no quotes (non-standard)
      * }</pre>
      *
      * @param stringQuotation the character to use ({@code '}, {@code "}, or {@code 0})
@@ -260,9 +260,9 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.getDateTimeFormat();                                                        // returns DateTimeFormat.LONG (default)
-     * config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME).getDateTimeFormat();   // returns ISO_8601_DATE_TIME
-     * config.setDateTimeFormat(null).getDateTimeFormat();                                // returns null (type-specific text)
+     * config.getDateTimeFormat();                                                       // returns DateTimeFormat.LONG (default)
+     * config.setDateTimeFormat(DateTimeFormat.ISO_8601_DATE_TIME).getDateTimeFormat();  // returns ISO_8601_DATE_TIME
+     * config.setDateTimeFormat(null).getDateTimeFormat();                               // returns null (type-specific text)
      * }</pre>
      *
      * @return the current date time format, or {@code null} if each temporal type uses its own default text
@@ -286,7 +286,7 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * // Dates will be serialized as "2023-12-25T10:30:00Z"
      *
      * config.setDateTimeFormat(DateTimeFormat.LONG);
-     * // Dates will be serialized as milliseconds: 1703502600000
+     * // Dates will be serialized as milliseconds: 1703500200000
      *
      * config.setDateTimeFormat(null);
      * // Dates will be serialized in the type's own default text: "2023-12-25T10:30:00Z" (not as milliseconds)
@@ -308,8 +308,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isPrettyFormat();                         // returns false (default)
-     * config.setPrettyFormat(true).isPrettyFormat();   // returns true
+     * config.isPrettyFormat();                        // returns false (default)
+     * config.setPrettyFormat(true).isPrettyFormat();  // returns true
      * }</pre>
      *
      * @return {@code true} if pretty format is enabled, {@code false} otherwise
@@ -344,8 +344,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.getIndentation();                        // returns "    " (four spaces, default)
-     * config.setIndentation("\t").getIndentation();   // returns "\t"
+     * config.getIndentation();                       // returns "    " (four spaces, default)
+     * config.setIndentation("\t").getIndentation();  // returns "\t"
      * }</pre>
      *
      * @return the indentation string
@@ -367,10 +367,10 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * config.setPrettyFormat(true).setIndentation("\t");     // uses tabs
-     * config.setPrettyFormat(true).setIndentation("  ");     // uses 2 spaces
-     * config.setPrettyFormat(true).setIndentation("    ");   // uses 4 spaces (default)
-     * config.setPrettyFormat(true).setIndentation("");       // no indentation, line breaks only
+     * config.setPrettyFormat(true).setIndentation("\t");    // uses tabs
+     * config.setPrettyFormat(true).setIndentation("  ");    // uses 2 spaces
+     * config.setPrettyFormat(true).setIndentation("    ");  // uses 4 spaces (default)
+     * config.setPrettyFormat(true).setIndentation("");      // no indentation, line breaks only
      * }</pre>
      *
      * @param indentation the indentation string to use; only space, tab, CR and LF characters are allowed
@@ -408,8 +408,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.getPropNamingPolicy();                                                // returns null (default: the bean's @JsonXmlConfig policy, else CAMEL_CASE)
-     * config.setPropNamingPolicy(NamingPolicy.SNAKE_CASE).getPropNamingPolicy();   // returns SNAKE_CASE
+     * config.getPropNamingPolicy();                                               // returns null (default: the bean's @JsonXmlConfig policy, else CAMEL_CASE)
+     * config.setPropNamingPolicy(NamingPolicy.SNAKE_CASE).getPropNamingPolicy();  // returns SNAKE_CASE
      * }</pre>
      *
      * @return the property naming policy, or {@code null} (default) if the bean's own {@code @JsonXmlConfig(namingPolicy)} applies, falling back to {@link NamingPolicy#CAMEL_CASE}
@@ -459,8 +459,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isWriteLongAsString();                              // returns false (default)
-     * config.setWriteLongAsString(true).isWriteLongAsString();   // returns true
+     * config.isWriteLongAsString();                             // returns false (default)
+     * config.setWriteLongAsString(true).isWriteLongAsString();  // returns true
      * }</pre>
      *
      * @return {@code true} if longs are written as strings, {@code false} otherwise
@@ -476,8 +476,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.setWriteLongAsString(true).isWriteLongAsString();    // returns true
-     * config.setWriteLongAsString(false).isWriteLongAsString();   // returns false
+     * config.setWriteLongAsString(true).isWriteLongAsString();   // returns true
+     * config.setWriteLongAsString(false).isWriteLongAsString();  // returns false
      * }</pre>
      *
      * @param writeLongAsString {@code true} to write longs as strings, {@code false} otherwise
@@ -499,8 +499,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isWriteNullStringAsEmpty();                                   // returns false (default)
-     * config.setWriteNullStringAsEmpty(true).isWriteNullStringAsEmpty();   // returns true
+     * config.isWriteNullStringAsEmpty();                                  // returns false (default)
+     * config.setWriteNullStringAsEmpty(true).isWriteNullStringAsEmpty();  // returns true
      * }</pre>
      *
      * @return {@code true} if {@code null} string bean properties and typed string elements are written as {@code ""} in JSON, {@code false} otherwise
@@ -534,8 +534,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.setWriteNullStringAsEmpty(true).isWriteNullStringAsEmpty();    // returns true
-     * config.setWriteNullStringAsEmpty(false).isWriteNullStringAsEmpty();   // returns false
+     * config.setWriteNullStringAsEmpty(true).isWriteNullStringAsEmpty();   // returns true
+     * config.setWriteNullStringAsEmpty(false).isWriteNullStringAsEmpty();  // returns false
      *
      * // JSON output of a bean with String name = null, Integer age = null, List<String> tags = ["a", null]:
      * jsonParser.serialize(bean, new JsonSerConfig().setWriteNullStringAsEmpty(true));
@@ -563,8 +563,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isWriteNullNumberAsZero();                                  // returns false (default)
-     * config.setWriteNullNumberAsZero(true).isWriteNullNumberAsZero();   // returns true
+     * config.isWriteNullNumberAsZero();                                 // returns false (default)
+     * config.setWriteNullNumberAsZero(true).isWriteNullNumberAsZero();  // returns true
      * }</pre>
      *
      * @return {@code true} if {@code null} numeric bean properties and typed numeric elements are written as zero in JSON, {@code false} otherwise
@@ -599,8 +599,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.setWriteNullNumberAsZero(true).isWriteNullNumberAsZero();    // returns true
-     * config.setWriteNullNumberAsZero(false).isWriteNullNumberAsZero();   // returns false
+     * config.setWriteNullNumberAsZero(true).isWriteNullNumberAsZero();   // returns true
+     * config.setWriteNullNumberAsZero(false).isWriteNullNumberAsZero();  // returns false
      *
      * // JSON output of a bean with Integer age = null, String name = null, List<Integer> nums = [1, null]:
      * jsonParser.serialize(bean, new JsonSerConfig().setWriteNullNumberAsZero(true));
@@ -628,8 +628,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isWriteNullBooleanAsFalse();                                    // returns false (default)
-     * config.setWriteNullBooleanAsFalse(true).isWriteNullBooleanAsFalse();   // returns true
+     * config.isWriteNullBooleanAsFalse();                                   // returns false (default)
+     * config.setWriteNullBooleanAsFalse(true).isWriteNullBooleanAsFalse();  // returns true
      * }</pre>
      *
      * @return {@code true} if {@code null} boolean bean properties and typed boolean elements are written as {@code false} in JSON, {@code false} otherwise
@@ -663,8 +663,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.setWriteNullBooleanAsFalse(true).isWriteNullBooleanAsFalse();    // returns true
-     * config.setWriteNullBooleanAsFalse(false).isWriteNullBooleanAsFalse();   // returns false
+     * config.setWriteNullBooleanAsFalse(true).isWriteNullBooleanAsFalse();   // returns true
+     * config.setWriteNullBooleanAsFalse(false).isWriteNullBooleanAsFalse();  // returns false
      *
      * // JSON output of a bean with Boolean active = null, String name = null, List<Boolean> flags = [true, null]:
      * jsonParser.serialize(bean, new JsonSerConfig().setWriteNullBooleanAsFalse(true));
@@ -688,8 +688,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isWriteBigDecimalAsPlain();                                   // returns false (default)
-     * config.setWriteBigDecimalAsPlain(true).isWriteBigDecimalAsPlain();   // returns true
+     * config.isWriteBigDecimalAsPlain();                                  // returns false (default)
+     * config.setWriteBigDecimalAsPlain(true).isWriteBigDecimalAsPlain();  // returns true
      * }</pre>
      *
      * @return {@code true} if {@code BigDecimal}s are written in plain notation without an exponent, {@code false} otherwise
@@ -704,8 +704,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.setWriteBigDecimalAsPlain(true).isWriteBigDecimalAsPlain();    // returns true
-     * config.setWriteBigDecimalAsPlain(false).isWriteBigDecimalAsPlain();   // returns false
+     * config.setWriteBigDecimalAsPlain(true).isWriteBigDecimalAsPlain();   // returns true
+     * config.setWriteBigDecimalAsPlain(false).isWriteBigDecimalAsPlain();  // returns false
      * }</pre>
      *
      * @param writeBigDecimalAsPlain {@code true} to write in plain format, {@code false} otherwise
@@ -723,8 +723,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isFailOnEmptyBean();                             // returns true (default)
-     * config.setFailOnEmptyBean(false).isFailOnEmptyBean();   // returns false
+     * config.isFailOnEmptyBean();                            // returns true (default)
+     * config.setFailOnEmptyBean(false).isFailOnEmptyBean();  // returns false
      * }</pre>
      *
      * @return {@code true} if should fail on empty beans, {@code false} otherwise
@@ -739,8 +739,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.setFailOnEmptyBean(false).isFailOnEmptyBean();   // returns false
-     * config.setFailOnEmptyBean(true).isFailOnEmptyBean();    // returns true
+     * config.setFailOnEmptyBean(false).isFailOnEmptyBean();  // returns false
+     * config.setFailOnEmptyBean(true).isFailOnEmptyBean();   // returns true
      * }</pre>
      *
      * @param failOnEmptyBean {@code true} to fail on empty beans, {@code false} to allow
@@ -758,8 +758,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.isCircularReferenceSupported();                                       // returns false (default)
-     * config.setCircularReferenceSupported(true).isCircularReferenceSupported();   // returns true
+     * config.isCircularReferenceSupported();                                      // returns false (default)
+     * config.setCircularReferenceSupported(true).isCircularReferenceSupported();  // returns true
      * }</pre>
      *
      * @return {@code true} if circular references are supported, {@code false} otherwise
@@ -778,8 +778,8 @@ public abstract class JsonXmlSerConfig<C extends JsonXmlSerConfig<C>> extends Se
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * JsonSerConfig config = new JsonSerConfig();
-     * config.setCircularReferenceSupported(true).isCircularReferenceSupported();    // returns true
-     * config.setCircularReferenceSupported(false).isCircularReferenceSupported();   // returns false
+     * config.setCircularReferenceSupported(true).isCircularReferenceSupported();   // returns true
+     * config.setCircularReferenceSupported(false).isCircularReferenceSupported();  // returns false
      * }</pre>
      *
      * @param circularReferenceSupported {@code true} to support circular references, {@code false} otherwise

@@ -208,18 +208,18 @@ public final class Utf8 {
      *
      * @param bytes the input buffer containing the bytes to validate
      * @param off the offset in the buffer of the first byte to validate
-     * @param len the number of bytes to validate from the buffer
+     * @param length the number of bytes to validate from the buffer
      * @return {@code true} if the specified byte range forms a valid UTF-8 sequence
-     * @throws IllegalArgumentException if {@code bytes} is {@code null} or {@code len} is negative
+     * @throws IllegalArgumentException if {@code bytes} is {@code null} or {@code length} is negative
      * @throws IndexOutOfBoundsException if {@code off} is negative, or
      *         {@code off + len} is greater than {@code bytes.length}
      */
-    public static boolean isWellFormed(final byte[] bytes, final int off, final int len) throws IllegalArgumentException, IndexOutOfBoundsException {
+    public static boolean isWellFormed(final byte[] bytes, final int off, final int length) throws IllegalArgumentException, IndexOutOfBoundsException {
         N.checkArgNotNull(bytes, cs.bytes);
 
-        N.checkFromIndexSize(off, len, bytes.length);
+        N.checkFromIndexSize(off, length, bytes.length);
 
-        final int end = off + len;
+        final int end = off + length;
         // Look for the first non-ASCII character.
         for (int i = off; i < end; i++) {
             if (bytes[i] < 0) {

@@ -45,11 +45,11 @@ public interface ByteNFunction<R> extends Throwables.ByteNFunction<R, RuntimeExc
      * Integer result = summer.apply((byte) 1, (byte) 2, (byte) 3);   // Returns 6
      * }</pre>
      *
-     * @param args the byte array input arguments. Can be empty but not {@code null}.
+     * @param arguments the byte array input arguments. Can be empty but not {@code null}.
      * @return the function result of type R
      */
     @Override
-    R apply(byte... args);
+    R apply(byte... arguments);
 
     /**
      * Returns a composed function that first applies this function to its input,

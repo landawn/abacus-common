@@ -49,7 +49,8 @@ import com.landawn.abacus.util.stream.Stream;
  *   <li><b>B5</b> - {@code forEachUntil} consumes exactly the elements it delivers.</li>
  *   <li><b>B6</b> - {@code step} skips its gap lazily.</li>
  *   <li><b>B7</b> - {@code forEachIndexed} refuses a wrapped-around {@code int} index.</li>
- *   <li><b>B9</b> - {@code max} gained {@code min}'s already-sorted shortcut.</li>
+ *   <li><b>B9</b> - {@code max} on an already-sorted sequence keeps the first of tied maxima (its sorted shortcut was
+ *       removed on 2026-09-24, C-017); {@code min} keeps its shortcut.</li>
  *   <li><b>B10</b> - a {@code Collector} whose accessors throw no longer leaks the sequence.</li>
  *   <li><b>B11</b> - the {@code buffered(..)} rejection message no longer blames a "parallel Stream".</li>
  *   <li><b>D1</b> - {@code top(0, comparator)} matches {@code top(0)} instead of throwing.</li>
@@ -457,11 +458,12 @@ public class SeqRegressionTest extends TestBase {
     }
 
     // ------------------------------------------------------------------------------------------------------
-    // B9 - max gained min's already-sorted shortcut
+    // B9 - max/min on an already-sorted sequence. max(..) no longer takes the sorted shortcut (C-017, 2026-09-24):
+    // the last element of a sorted sequence is the LAST of several equal maxima, while max(..) keeps the FIRST.
     // ------------------------------------------------------------------------------------------------------
 
     @Test
-    public void testB9_maxUsesTheSortedShortcut() {
+    public void testB9_maxOnSortedSequenceKeepsTheFirstOfTiedMaxima() {
         final AtomicInteger comparisons = new AtomicInteger();
         final Comparator<Integer> counting = (a, b) -> {
             comparisons.incrementAndGet();
@@ -469,16 +471,22 @@ public class SeqRegressionTest extends TestBase {
         };
 
         assertEquals(u.Nullable.of(3), assertDoesNotThrowChecked(() -> Seq.of(1, 2, 3).sorted(counting).max(counting)));
-        // The sort itself compares; max(..) must add nothing on top of it.
-        final int afterSortedMax = comparisons.get();
 
         comparisons.set(0);
         assertEquals(u.Nullable.of(3), assertDoesNotThrowChecked(() -> Seq.of(3, 1, 2).max(counting)));
         assertTrue(comparisons.get() > 0, "an unsorted sequence must still compare");
 
+        // min keeps its shortcut: the first element of a sorted sequence is also the first of tied minima.
         comparisons.set(0);
         assertEquals(u.Nullable.of(1), assertDoesNotThrowChecked(() -> Seq.of(1, 2, 3).sorted(counting).min(counting)));
-        assertTrue(afterSortedMax >= 0);
+        final int sortComparisons = comparisons.get();
+        comparisons.set(0);
+        assertDoesNotThrowChecked(() -> Seq.of(1, 2, 3).sorted(counting).toList());
+        assertEquals(sortComparisons, comparisons.get(), "min(..) on a sequence sorted by the same comparator must not compare");
+
+        final Comparator<String> byLen = Comparator.comparingInt(String::length);
+        assertEquals(u.Nullable.of("bb"), assertDoesNotThrowChecked(() -> Seq.of("bb", "a", "cc").sorted(byLen).max(byLen)));
+        assertEquals(u.Nullable.of("bb"), assertDoesNotThrowChecked(() -> Seq.of("a", "bb", "cc").max(byLen)));
     }
 
     @Test
@@ -1079,7 +1087,8 @@ public class SeqRegressionTest extends TestBase {
     }
 
     // --- G13-001: takeLast(..)/last(..) flag their lazy init() before draining, so a hasNext() retried after a failed
-    // --- drain must degrade to an empty iterator (what top/reversed/rotated/sorted do) instead of throwing NPE.
+    // --- drain must degrade to an empty iterator (what top does) instead of throwing NPE. (reversed/rotated/sorted*/
+    // --- shuffled now fail again on such a retry - SeqReview20260924cTest, H2-04.)
     @SuppressWarnings("deprecation")
     @Test
     public void testTakeLast_retriedHasNextAfterAFailedDrainDegradesToEmpty() throws Exception {

@@ -82,7 +82,7 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
 
     /**
      * Converts a CharList to its string representation.
-     * The list is first converted to a char array, then serialized using the array type handler.
+     * The logical elements use the built-in array format or a registered array type handler.
      * Returns {@code null} if the input list is {@code null}.
      *
      * <p>The returned string is a serializable representation designed to be parsed back into an equivalent value
@@ -96,9 +96,10 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public String stringOf(final CharList x) {
-        return x == null ? null : arrayType.stringOf(x.toArray());
+        return x == null ? null : arrayType instanceof PrimitiveCharArrayType ? stringOf(x.internalArray(), x.size()) : arrayType.stringOf(x.toArray());
     }
 
     /**
@@ -112,7 +113,8 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      *
      * @param str the string to parse
      * @return a CharList created from the parsed values, or {@code null} if input is {@code null}, empty or blank
-     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only, or a numeric character code is outside the char range.
+     * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only, or a numeric character code is outside the char range; or
+     *         a quoted element contains a malformed Unicode escape.
      * @throws NumberFormatException if an element has multiple characters after removing quotes and escapes and is not an integer character code.
      * @see #valueOf(Object)
      * @see #stringOf(CharList)
@@ -130,7 +132,7 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
 
     /**
      * Appends the string representation of a CharList to an Appendable.
-     * Delegates to the array type handler after converting the list to an array.
+     * Writes the array-type representation, preserving a snapshot for application-controlled callbacks.
      * Appends "null" if the list is {@code null}.
      * <p>
      * <b>appendTo vs. serializeTo:</b> {@code appendTo} produces a plain, {@code toString()}-style rendering with no
@@ -152,18 +154,23 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void appendTo(final Appendable appendable, final CharList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            arrayType.appendTo(appendable, x.toArray());
+            if (arrayType instanceof PrimitiveCharArrayType && canWriteDirectly(appendable)) {
+                appendTo(appendable, x.internalArray(), x.size());
+            } else {
+                arrayType.appendTo(appendable, x.toArray());
+            }
         }
     }
 
     /**
      * Writes the character representation of a CharList to a CharacterWriter.
-     * Delegates to the array type handler after converting the list to an array.
+     * Writes the array-type representation, preserving a snapshot for application-controlled callbacks.
      * Writes "null" if the list is {@code null}.
      * <p>
      * This method is specifically designed for JSON/XML serialization: it writes the serialized form of {@code x} to the
@@ -181,12 +188,17 @@ public final class PrimitiveCharListType extends AbstractPrimitiveListType<CharL
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void serializeTo(final CharacterWriter writer, final CharList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            arrayType.serializeTo(writer, x.toArray(), config);
+            if (arrayType instanceof PrimitiveCharArrayType && canWriteDirectly(writer, config)) {
+                serializeTo(writer, x.internalArray(), x.size(), config);
+            } else {
+                arrayType.serializeTo(writer, x.toArray(), config);
+            }
         }
     }
 }

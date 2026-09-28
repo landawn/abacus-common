@@ -1985,4 +1985,100 @@ public class ArrayStreamTest extends TestBase {
         assertEquals(Arrays.asList(1, 2), firstPartOnly.get(0).toList());
     }
 
+    @Test
+    public void testDistinctTreatsArraysWithEqualContentsAsDuplicates() {
+        final int[] first = { 1, 2 };
+        final int[] sameContents = { 1, 2 };
+        final int[] other = { 3 };
+
+        final List<int[]> result = Stream.of(new int[][] { first, sameContents, other, first }).distinct().toList();
+
+        assertEquals(2, result.size());
+        assertSame(first, result.get(0));
+        assertSame(other, result.get(1));
+
+        final Object[] nestedA = { new String[] { "x" }, 1 };
+        final Object[] nestedB = { new String[] { "x" }, 1 };
+        assertEquals(1, Stream.of(new Object[][] { nestedA, nestedB }).distinct().count());
+    }
+    // ---- perf review 2026-09-26 G112 begin ----
+    // A List whose addAll(Collection) is the inherited AbstractList one: it iterates the argument instead of calling toArray().
+    private static final class G112IteratingList<T> extends java.util.AbstractList<T> {
+        private final List<T> delegate = new ArrayList<>();
+
+        @Override
+        public T get(final int index) {
+            return delegate.get(index);
+        }
+
+        @Override
+        public int size() {
+            return delegate.size();
+        }
+
+        @Override
+        public void add(final int index, final T element) {
+            delegate.add(index, element);
+        }
+    }
+
+    // G112-05: toCollection(..) of a sub-range longer than 9 elements into a List - pins contents, collection type, independence
+    // from the source array, and Lists that take the argument's toArray() or iterate it
+    @Test
+    public void testToCollection_subRangeIntoList_G112() {
+        final String[] source = new String[30];
+
+        for (int i = 0; i < source.length; i++) {
+            source[i] = i % 4 == 0 ? null : "s" + i;
+        }
+
+        for (final int from : new int[] { 0, 1, 5 }) {
+            for (final int length : new int[] { 0, 1, 9, 10, 11, 20, 25 }) {
+                if (from + length > source.length) {
+                    continue;
+                }
+
+                final List<String> expected = new ArrayList<>(Arrays.asList(source).subList(from, from + length));
+                final String msg = "from=" + from + ", length=" + length;
+
+                final ArrayList<String> arrayList = Stream.of(source).skip(from).limit(length).toCollection(ArrayList::new);
+                assertEquals(expected, arrayList, msg);
+                arrayList.add("x");
+                assertEquals(length + 1, arrayList.size(), msg);
+
+                final LinkedList<String> linkedList = Stream.of(source).skip(from).limit(length).toCollection(LinkedList::new);
+                assertEquals(expected, linkedList, msg);
+
+                final java.util.concurrent.CopyOnWriteArrayList<String> cowList = Stream.of(source)
+                        .skip(from)
+                        .limit(length)
+                        .toCollection(java.util.concurrent.CopyOnWriteArrayList::new);
+                assertEquals(expected, cowList, msg);
+
+                final G112IteratingList<String> iteratingList = Stream.of(source).skip(from).limit(length).toCollection(G112IteratingList::new);
+                assertEquals(expected, iteratingList, msg);
+
+                // elements already in the target are kept, new ones are appended
+                final List<String> prefilled = Stream.of(source).skip(from).limit(length).toCollection(() -> new ArrayList<>(Arrays.asList("p", null)));
+                final List<String> expectedPrefilled = new ArrayList<>(Arrays.asList("p", null));
+                expectedPrefilled.addAll(expected);
+                assertEquals(expectedPrefilled, prefilled, msg);
+
+                assertEquals(new HashSet<>(expected), Stream.of(source).skip(from).limit(length).toCollection(HashSet::new), msg);
+            }
+        }
+
+        // the collected list does not share the source array
+        final String[] src = new String[20];
+        Arrays.fill(src, "v");
+        final List<String> list = Stream.of(src).skip(2).limit(15).toCollection(ArrayList::new);
+        src[5] = "changed";
+        assertEquals(15, list.size());
+        assertTrue(list.stream().allMatch("v"::equals));
+
+        // the full range, and a fixed-size List target
+        assertEquals(Arrays.asList(src), Stream.of(src).toCollection(ArrayList::new));
+        assertThrows(UnsupportedOperationException.class, () -> Stream.of(src).skip(1).limit(12).toCollection(() -> Arrays.asList(new String[0])));
+    }
+    // ---- perf review 2026-09-26 G112 end ----
 }

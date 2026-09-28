@@ -391,4 +391,41 @@ public class StringsJoinTest extends StringsTestSupport {
         map.put("c", 3);
         return map;
     }
+
+    // ---- perf review 2026-09-26 G074 begin ----
+    // G074-01: pins join(char[], ..., empty/null delimiter, ...) after the bulk-append change
+    @Test
+    public void testJoinCharArray_emptyOrNullDelimiterRanges() {
+        final char[] chars = { 'a', 'b', '\u00e9', '\u4e2d', 'c', '\ud83d', '\ude00', 'd' };
+        assertEquals("ab\u00e9\u4e2dc\ud83d\ude00d", join(chars, ""));
+        assertEquals("ab\u00e9\u4e2dc\ud83d\ude00d", join(chars, (String) null));
+        assertEquals("b\u00e9\u4e2d", join(chars, 1, 4, ""));
+        assertEquals("b\u00e9\u4e2d", join(chars, 1, 4, null));
+        assertEquals("\ud83d\ude00d", join(chars, 5, 8, ""));
+        assertEquals("d", join(chars, 7, 8, ""));
+        assertEquals("", join(chars, 3, 3, ""));
+        assertEquals("<c\ud83d>", join(chars, 4, 6, "", "<", ">"));
+        assertEquals("<c\ud83d", join(chars, 4, 6, null, "<", null));
+        assertEquals("c\ud83d>", join(chars, 4, 6, "", "", ">"));
+        assertEquals("[ab]", join(new char[] { 'a', 'b' }, "", "[", "]"));
+        assertEquals("[a]", join(new char[] { 'a' }, 0, 1, "", "[", "]"));
+        assertEquals("a", join(new char[] { 'a' }, 0, 1, ""));
+        assertThrows(IndexOutOfBoundsException.class, () -> join(chars, 2, 9, ""));
+        assertThrows(IndexOutOfBoundsException.class, () -> join(chars, -1, 2, ""));
+
+        final char[] big = new char[5000];
+        final StringBuilder expected = new StringBuilder();
+
+        for (int i = 0; i < big.length; i++) {
+            big[i] = (char) (i % 3 == 0 ? 'x' : 0x100 + i);
+
+            if (i >= 7 && i < 4993) {
+                expected.append(big[i]);
+            }
+        }
+
+        assertEquals(expected.toString(), join(big, 7, 4993, ""));
+        assertEquals("(" + expected + ")", join(big, 7, 4993, "", "(", ")"));
+    }
+    // ---- perf review 2026-09-26 G074 end ----
 }

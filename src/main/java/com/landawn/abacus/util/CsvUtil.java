@@ -67,9 +67,17 @@ import com.landawn.abacus.util.stream.Stream;
  *
  * <p><b>Resource ownership:</b> overloads accepting a {@link Reader} or {@link Writer} do not close
  * that caller-owned object. Reader-backed stream overloads expose an explicit close flag; file-backed
- * streams own their reader and close it when the stream is closed.</p>
+ * streams own their reader and close it when the stream is closed. Input is read in blocks, so an operation
+ * that stops before the end of the input (an {@code offset}/{@code count} limit, an exception, or a stream
+ * that is not fully consumed) may have read the caller's reader past the last record it returned.</p>
  *
  * <p><b>Column-selection convention:</b> a {@code null} {@code selectColumnNames}/{@code selectCsvHeaders} means &quot;not specified&quot; and selects ALL columns; an empty collection is an explicit selection of NO columns (a zero-column result). See the library null/empty selection convention.</p>
+ *
+ * <p><b>Row filters see the whole raw row:</b> the {@code String[]} passed to a {@code rowFilter} holds every
+ * header column, in header order, as unconverted text - column selection and type conversion are applied only
+ * to the rows the filter accepts. With the header {@code id,name,age} and the selection {@code ["name", "age"]},
+ * {@code row[2]} is {@code age} and {@code row[0]} is the unselected {@code id}. {@code offset} is applied before
+ * the filter and {@code count} limits the rows it accepts.</p>
  *
  * <p><b>Byte-order mark:</b> a UTF-8 BOM at the start of the input is stripped from the header line before it is
  * parsed, so the first column is named {@code "id"} rather than {@code "<U+FEFF>id"}. A UTF-8 CSV file
@@ -138,6 +146,9 @@ public final class CsvUtil {
     /**
      * Default CSV line parser that parses a line into an existing array.
      * This parser handles quoted fields and escape characters according to CSV standards.
+     * A row with more fields than the array has slots throws {@link ArrayIndexOutOfBoundsException} (the loaders
+     * in this class report it as {@link ParsingException}); slots beyond the field count keep whatever the array
+     * already held, so clear a reused array first (the loaders in this class do so before every record).
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -424,7 +435,9 @@ public final class CsvUtil {
      *
      * @param selectColumnNames the requested columns; {@code null} means "not specified", i.e. every column
      * @param titles the parsed CSV header
-     * @return {@code true} if every column is selected and no selected name needs to be validated
+     * @return {@code true} if every column is selected and no selected name needs to be validated against the header
+     *         (a caller that also validates names against something else, such as a bean's properties, must still
+     *         tell an explicit whole-header selection from a {@code null} one)
      */
     private static boolean selectsWholeHeader(final Collection<String> selectColumnNames, final String[] titles) {
         return selectColumnNames == null
@@ -456,113 +469,6 @@ public final class CsvUtil {
      */
     private static String stripByteOrderMark(final String headerLine) {
         return Strings.isNotEmpty(headerLine) && headerLine.charAt(0) == '\uFEFF' ? headerLine.substring(1) : headerLine;
-    }
-
-    /** Per-operation framing state; works with pooled and caller-supplied readers, including those without mark/reset. */
-    private static final class CsvRecordReader {
-        private final BufferedReader reader;
-        private boolean skipLF;
-
-        private CsvRecordReader(final BufferedReader reader) {
-            this.reader = reader;
-        }
-
-        /**
-         * @throws IOException if reading the next character, including a skipped line-feed, fails.
-         */
-        private int read() throws IOException {
-            int value = reader.read();
-            if (skipLF) {
-                skipLF = false;
-                if (value == '\n') {
-                    value = reader.read();
-                }
-            }
-            return value;
-        }
-    }
-
-    /**
-     * @throws IOException if reading characters from the input reader fails.
-     * @throws ParsingException if {@code logicalCsv} is true and the input ends inside a quoted field.
-     */
-    private static String readRecord(final CsvRecordReader reader, final boolean logicalCsv, final boolean header) throws IOException, ParsingException {
-        final StringBuilder record = new StringBuilder();
-        boolean inQuotes = false;
-        boolean afterQuote = false;
-        boolean fieldHasContent = false;
-        boolean leadingWhitespace = true;
-        int value;
-
-        while ((value = reader.read()) != -1) {
-            final char ch = (char) value;
-            if ((!logicalCsv || !inQuotes) && (ch == '\r' || ch == '\n')) {
-                if (ch == '\r') {
-                    // Consume an optional LF on the next read, without mark/reset or reading ahead.
-                    reader.skipLF = true;
-                }
-                return record.toString();
-            }
-
-            record.append(ch);
-            if (!logicalCsv) {
-                continue;
-            }
-            if (header && record.length() == 1 && ch == '\uFEFF') {
-                continue; // The header parser strips this prefix before deciding whether its first field is quoted.
-            }
-
-            // Mirror the default parser's quoted-region rules, including quotes embedded in unquoted text.
-            // Defer recognition of a doubled quote until the next character; pooled readers cannot mark/reset.
-            if (ch == '"') {
-                leadingWhitespace = false;
-                if (afterQuote) {
-                    inQuotes = true;
-                    fieldHasContent = true;
-                    afterQuote = false;
-                } else if (inQuotes) {
-                    inQuotes = false;
-                    afterQuote = true;
-                } else if (!fieldHasContent) {
-                    inQuotes = true;
-                }
-            } else if (!inQuotes && ch == ',') {
-                fieldHasContent = false;
-                leadingWhitespace = true;
-            } else if (inQuotes || !leadingWhitespace || !Character.isWhitespace(ch)) {
-                fieldHasContent = true;
-                leadingWhitespace = false;
-            }
-            if (ch != '"') {
-                afterQuote = false;
-            }
-        }
-
-        if (inQuotes) {
-            // An unclosed quote absorbs the rest of the stream, so `record` can be the entire source. Echo only a
-            // bounded prefix of it: concatenating a multi-hundred-MB record would need another full copy of the
-            // file in the heap before the exception could even be constructed.
-            final int maxEchoedLength = 256;
-            final String echoed = record.length() > maxEchoedLength ? record.substring(0, maxEchoedLength) + "..." : record.toString();
-
-            throw new ParsingException("Un-terminated quoted field at end of CSV input: " + echoed);
-        }
-        return record.isEmpty() ? null : record.toString();
-    }
-
-    /**
-     *
-     * <p> Reading is deferred until stream consumption; reader failures then raise {@link UncheckedIOException}, and unterminated quoted fields raise
-     *         {@link ParsingException}.</p>
-     */
-    private static Stream<String> recordStream(final CsvRecordReader reader, final boolean logicalCsv) {
-        return Stream.generate(() -> {
-            try {
-                return readRecord(reader, logicalCsv, false);
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }).takeWhile(it -> it != null);
     }
 
     /**
@@ -738,6 +644,584 @@ public final class CsvUtil {
                 IOUtil.deleteQuietly(tempFile);
             }
         }
+    }
+
+    /**
+     * Incrementally reads and parses CSV records from a caller-owned {@link Reader}.
+     * This class is not thread-safe. Neither this reader nor streams returned by it close the source;
+     * the caller is responsible for closing it. Do not interleave stream consumption with other reads
+     * from this instance or read directly from the underlying source.
+     * After an I/O failure, the source position is unspecified; discard this instance rather than retrying the read.
+     *
+     * <p>Characters are read from the source in blocks of up to 8192 characters, so the
+     * source is read ahead of the records returned so far: after an early stop ({@code offset}/{@code count}, a
+     * filter, an exception, or a stream that is not fully consumed) the source may have been read up to one buffer
+     * beyond the last record, and a caller-supplied reader is not left positioned just after that record.</p>
+     *
+     * <pre>{@code
+     * try (Reader source = new StringReader("a,b\nc,d")) {
+     *     CsvUtil.CsvRecordReader records = new CsvUtil.CsvRecordReader(source);
+     *     String[] header = records.readHeader(CsvUtil.CSV_HEADER_PARSER);   // ["a", "b"], or null for empty input
+     *     String[] row = new String[header == null ? 0 : header.length];
+     *     while (records.nextRecord(CsvUtil.CSV_LINE_PARSER)) {
+     *         records.parseRecordInto(row);   // ["c", "d"]
+     *         // Consume row here, or clone it before retaining it.
+     *     }
+     * }
+     * }</pre>
+     */
+    public static final class CsvRecordReader {
+        /** The most characters read from {@link #reader} per call. */
+        private static final int BUFFER_SIZE = 8192;
+
+        /**
+         * The first buffer's size. The buffer doubles on each refill that filled it, up to {@link #BUFFER_SIZE}, so
+         * a small input does not pay for zeroing a full-size buffer.
+         */
+        private static final int INITIAL_BUFFER_SIZE = 256;
+
+        /**
+         * The largest {@link #recordBuilder} or {@link #fieldBuilder} capacity, or {@link #spannedRecord} length, kept for reuse. A larger
+         * one is dropped once its content is no longer needed, so one huge record or field does not keep its
+         * buffers alive for the rest of the operation (for a stream, for as long as it stays open).
+         */
+        private static final int MAX_RETAINED_RECORD_CAPACITY = 64 * 1024;
+
+        private final Reader reader;
+        private char[] buffer = new char[INITIAL_BUFFER_SIZE];
+        private int position;
+        private int limit;
+
+        /** A record ended with {@code '\r'}: a {@code '\n'} read next belongs to the same terminator and is skipped. */
+        private boolean skipLF;
+
+        /** Reused across records; only needed when a record spans a buffer refill. */
+        private StringBuilder recordBuilder;
+
+        /** Whether the latest read successfully framed a record. */
+        private boolean hasCurrentRecord;
+
+        /** The record framed last is {@code recordChars[recordFrom, recordTo)}: a range of {@link #buffer} or of {@link #spannedRecord}. */
+        private char[] recordChars;
+        private int recordFrom;
+        private int recordTo;
+
+        /** Holds a record that spans buffer refills, so it can be parsed like one inside the buffer. */
+        private char[] spannedRecord;
+
+        /** Builds a quoted field that has doubled quotes or text after its closing quote. */
+        private StringBuilder fieldBuilder;
+
+        /**
+         * Creates a record reader over a caller-owned source.
+         *
+         * @param reader the source reader
+         * @throws IllegalArgumentException if the source is null
+         */
+        public CsvRecordReader(final Reader reader) {
+            N.checkArgNotNull(reader, cs.reader);
+            this.reader = reader;
+        }
+
+        private void setRecord(final char[] chars, final int from, final int to) {
+            hasCurrentRecord = true;
+            recordChars = chars;
+            recordFrom = from;
+            recordTo = to;
+        }
+
+        /** Makes the record accumulated in {@code chars} current, copying it into the reusable {@link #spannedRecord} array. */
+        private void setRecordFromBuilder(final StringBuilder chars) {
+            final int length = chars.length();
+
+            if (spannedRecord == null || spannedRecord.length < length) {
+                spannedRecord = new char[length];
+            }
+
+            chars.getChars(0, length, spannedRecord, 0);
+            setRecord(spannedRecord, 0, length);
+
+            if (chars == recordBuilder && recordBuilder.capacity() > MAX_RETAINED_RECORD_CAPACITY) {
+                recordBuilder = null; // copied; do not hold a second copy of a large record until the next refill
+            }
+        }
+
+        /**
+         * Drops the oversized buffers the previous record left behind. That record is no longer needed once the next
+         * one is being framed.
+         */
+        private void releaseOversizedBuffers() {
+            if (spannedRecord != null && spannedRecord.length > MAX_RETAINED_RECORD_CAPACITY) {
+                if (recordChars == spannedRecord) {
+                    recordChars = null;
+                }
+
+                spannedRecord = null;
+            }
+
+            if (recordBuilder != null && recordBuilder.capacity() > MAX_RETAINED_RECORD_CAPACITY) {
+                recordBuilder = null;
+            }
+
+            releaseOversizedField();
+        }
+
+        /** Drops the quoted-field builder once a field made it oversized; call after taking the field's value. */
+        private void releaseOversizedField() {
+            if (fieldBuilder != null && fieldBuilder.capacity() > MAX_RETAINED_RECORD_CAPACITY) {
+                fieldBuilder = null;
+            }
+        }
+
+        /** The record framed last, as the line text a line parser receives. */
+        private String currentRecordText() {
+            return new String(recordChars, recordFrom, recordTo - recordFrom);
+        }
+
+        /** Returns the reusable quoted-field builder, cleared. */
+        private StringBuilder clearedFieldBuilder() {
+            if (fieldBuilder == null) {
+                fieldBuilder = new StringBuilder();
+            } else {
+                fieldBuilder.setLength(0);
+            }
+
+            return fieldBuilder;
+        }
+
+        /**
+         * Refills {@link #buffer} once it is fully consumed.
+         *
+         * @return {@code false} at end of input
+         * @throws IOException if reading from the source fails.
+         */
+        private boolean refillBuffer() throws IOException {
+            if (limit == buffer.length && buffer.length < BUFFER_SIZE) {
+                buffer = new char[Math.min(buffer.length * 2, BUFFER_SIZE)];
+            }
+
+            int n;
+
+            do {
+                n = reader.read(buffer, 0, buffer.length);
+            } while (n == 0);
+
+            position = 0;
+            limit = Math.max(n, 0);
+
+            return n > 0;
+        }
+
+        /** Returns the reusable record builder, cleared. */
+        private StringBuilder clearedRecordBuilder() {
+            if (recordBuilder == null) {
+                recordBuilder = new StringBuilder();
+            } else {
+                recordBuilder.setLength(0);
+            }
+
+            return recordBuilder;
+        }
+
+        /**
+         * Reads the next record as the header and parses it with {@code headerParser}. The record is framed as a
+         * logical CSV record (line breaks inside quoted fields kept) when {@code headerParser} is
+         * {@link #CSV_HEADER_PARSER}, compared by identity, and as one physical line for any other parser, as the
+         * loaders in {@code CsvUtil} do. A UTF-8 byte-order mark at the start of the record is removed before
+         * parsing, and is not treated as content when deciding whether the first field is quoted.
+         *
+         * <p>The header record becomes the current record with its original text, including any leading BOM.
+         * BOM removal applies only to the text passed to {@code headerParser}.
+         * {@link #parseRecordInto(BiConsumer, String[])} parses the original text without removing the BOM, so
+         * reparsing may produce different values or fail: a BOM before an opening quote prevents the default
+         * data parser from recognizing the quoted field, and commas inside it become separators. Use the array
+         * returned by this method for the parsed header. EOF or a read failure invalidates the current record.</p>
+         *
+         * @param headerParser the non-null parser that splits the header text into column names
+         * @return the parsed header, or {@code null} at end of input (never {@code null} for a header that was read)
+         * @throws IllegalArgumentException if {@code headerParser} is null
+         * @throws NullPointerException if {@code headerParser} returns {@code null}
+         * @throws IOException if reading characters from the input reader fails.
+         * @throws ParsingException if the header is a logical CSV record and the input ends inside a quoted field.
+         * @throws RuntimeException if {@code headerParser} fails, as thrown by it
+         */
+        public String[] readHeader(final Function<String, String[]> headerParser)
+                throws IllegalArgumentException, NullPointerException, IOException, ParsingException, RuntimeException {
+            N.checkArgNotNull(headerParser, cs.headerParser);
+
+            if (!frameNextRecord(headerParser == CSV_HEADER_PARSER, true)) {
+                return null;
+            }
+
+            // A null result must not be mistaken for end of input (the loaders would return an empty result for a
+            // non-empty source); before readHeader existed they failed with a NullPointerException on titles.length.
+            return N.requireNonNull(headerParser.apply(stripByteOrderMark(currentRecordText())), "headerParser returned null");
+        }
+
+        /**
+         * Advances to the next record, framed for {@code lineParser} as {@link #nextRecord(BiConsumer)} frames it, and
+         * returns its text without the terminating CR, LF or CRLF. A logical CSV record keeps the line breaks inside
+         * its quoted fields. The record also becomes the current record for {@link #parseRecordInto(BiConsumer, String[])}.
+         *
+         * @param lineParser the non-null parser determining the framing mode
+         * @return the record text, {@code ""} for an empty line, or {@code null} at end of input
+         * @throws IllegalArgumentException if {@code lineParser} is null
+         * @throws IOException if reading characters from the input reader fails.
+         * @throws ParsingException if the input ends inside a quoted field of a logical CSV record.
+         */
+        public String nextRecordText(final BiConsumer<String, String[]> lineParser) throws IOException, ParsingException {
+            return nextRecord(lineParser) ? currentRecordText() : null;
+        }
+
+        /**
+         * Frames the next record: the characters up to the next {@code '\r'}, {@code '\n'} or {@code "\r\n"} (not
+         * included), or, when {@code logicalCsv} is true, up to the next such terminator outside a quoted field. The
+         * record is left in this instance as a character range, valid until the next read attempt.
+         *
+         * @return {@code false} at end of input
+         * @throws IOException if reading characters from the input reader fails.
+         * @throws ParsingException if {@code logicalCsv} is true and the input ends inside a quoted field.
+         */
+        private boolean frameNextRecord(final boolean logicalCsv, final boolean header) throws IOException, ParsingException {
+            // Invalidate before refilling: EOF or an exception must not leave the previous record available for parsing.
+            hasCurrentRecord = false;
+            this.releaseOversizedBuffers();
+
+            StringBuilder record = null; // characters of this record from earlier buffer fills, if any
+            boolean inQuotes = false;
+            boolean afterQuote = false;
+            boolean fieldHasContent = false;
+            boolean leadingWhitespace = true;
+
+            while (true) {
+                if (this.position >= this.limit && !this.refillBuffer()) {
+                    this.skipLF = false;
+                    break;
+                }
+
+                final char[] buffer = this.buffer; // refillBuffer() may have replaced it
+                int pos = this.position;
+                final int limit = this.limit;
+
+                if (this.skipLF) {
+                    this.skipLF = false;
+
+                    if (buffer[pos] == '\n') {
+                        this.position = pos + 1;
+                        continue;
+                    }
+                }
+
+                final int start = pos;
+
+                for (; pos < limit; pos++) {
+                    final char ch = buffer[pos];
+
+                    if ((!logicalCsv || !inQuotes) && (ch == '\r' || ch == '\n')) {
+                        // Consume an optional LF with the next character read.
+                        this.skipLF = ch == '\r';
+                        this.position = pos + 1;
+
+                        if (record == null) {
+                            this.setRecord(buffer, start, pos);
+                        } else {
+                            this.setRecordFromBuilder(record.append(buffer, start, pos - start));
+                        }
+
+                        return true;
+                    }
+
+                    if (!logicalCsv) {
+                        continue;
+                    }
+
+                    if (header && ch == '\uFEFF' && pos == start && (record == null || record.isEmpty())) {
+                        continue; // The header parser strips this prefix before deciding whether its first field is quoted.
+                    }
+
+                    // Mirror the default parser's quoted-region rules, including quotes embedded in unquoted text.
+                    // A doubled quote is recognized on the character after it, which may be in the next buffer fill.
+                    if (ch == '"') {
+                        leadingWhitespace = false;
+                        if (afterQuote) {
+                            inQuotes = true;
+                            fieldHasContent = true;
+                            afterQuote = false;
+                        } else if (inQuotes) {
+                            inQuotes = false;
+                            afterQuote = true;
+                        } else if (!fieldHasContent) {
+                            inQuotes = true;
+                        }
+                    } else if (!inQuotes && ch == ',') {
+                        fieldHasContent = false;
+                        leadingWhitespace = true;
+                    } else if (inQuotes || !leadingWhitespace || !Character.isWhitespace(ch)) {
+                        fieldHasContent = true;
+                        leadingWhitespace = false;
+                    }
+                    if (ch != '"') {
+                        afterQuote = false;
+                    }
+                }
+
+                // The record continues past this buffer fill.
+                if (record == null) {
+                    record = this.clearedRecordBuilder();
+                }
+
+                record.append(buffer, start, limit - start);
+                this.position = limit;
+            }
+
+            if (inQuotes) {
+                // An unclosed quote absorbs the rest of the stream, so `record` can be the entire source. Echo only a
+                // bounded prefix of it: concatenating a multi-hundred-MB record would need another full copy of the
+                // file in the heap before the exception could even be constructed.
+                final int maxEchoedLength = 256;
+                final String echoed = record.length() > maxEchoedLength ? record.substring(0, maxEchoedLength) + "..." : record.toString();
+
+                throw new ParsingException("Un-terminated quoted field at end of CSV input: " + echoed);
+            }
+
+            if (record == null || record.isEmpty()) {
+                return false;
+            }
+
+            this.setRecordFromBuilder(record);
+            return true;
+        }
+
+        /**
+         * Frames the next data record for {@code lineParser}: a logical CSV record for {@link #CSV_LINE_PARSER}, one
+         * physical line for any other parser.
+         *
+         * <p>The parser is compared by identity: even a wrapper around {@code CSV_LINE_PARSER} uses physical lines.
+         * This method advances without parsing; parse the record with {@link #parseRecordInto(BiConsumer, String[])},
+         * normally with the same parser. EOF or a read failure invalidates the current record.</p>
+         *
+         * @param lineParser the non-null parser determining the framing mode
+         * @return {@code false} at end of input
+         * @throws IllegalArgumentException if the parser is null
+         * @throws IOException if reading characters from the input reader fails.
+         * @throws ParsingException if the input ends inside a quoted field of a logical CSV record.
+         */
+        public boolean nextRecord(final BiConsumer<String, String[]> lineParser) throws IOException, ParsingException {
+            N.checkArgNotNull(lineParser, cs.lineParser);
+            return frameNextRecord(lineParser == CSV_LINE_PARSER, false);
+        }
+
+        /**
+         * Clears {@code output} and parses the current record into it: the record the latest
+         * {@link #nextRecord(BiConsumer)}, {@link #nextRecordText(BiConsumer)} or {@link #readHeader(Function)} framed.
+         * {@link #CSV_LINE_PARSER} is applied directly to the framed characters; any other parser receives the record text.
+         * A leading BOM retained by {@code readHeader} is included; its header-only BOM removal is not repeated here.
+         *
+         * <p>The record's extent was fixed when it was read: a logical CSV record if that read used
+         * {@code CSV_LINE_PARSER} ({@code CSV_HEADER_PARSER} for {@code readHeader}), otherwise one physical line.
+         * Parsing does not re-frame it, so a parser of the other kind sees the record as it was read.</p>
+         *
+         * <p>Does not advance the reader. The current record may be parsed repeatedly, including after a parsing
+         * failure with a larger destination or a different parser. A parsing failure may leave the destination
+         * partially populated. Custom-parser exceptions propagate unchanged, except that an
+         * {@link IndexOutOfBoundsException} is wrapped in {@link ParsingException}.</p>
+         *
+         * @param lineParser the non-null parser to apply
+         * @param output the non-null destination; unused slots are set to null
+         * @throws IllegalStateException if no record has been read successfully, or the latest read reached EOF or failed
+         * @throws IllegalArgumentException if the parser or destination is null
+         * @throws ParsingException if the record is malformed, or has more fields than {@code output} has slots.
+         */
+        public void parseRecordInto(final BiConsumer<String, String[]> lineParser, final String[] output) throws ParsingException, RuntimeException {
+            N.checkArgNotNull(lineParser, cs.lineParser);
+            N.checkArgNotNull(output, cs.output);
+
+            if (!hasCurrentRecord) {
+                throw new IllegalStateException("No current CSV record");
+            }
+
+            N.fill(output, null);
+
+            if (lineParser == CSV_LINE_PARSER) {
+                parseDefaultCsvRecord(output);
+            } else {
+                parseRow(lineParser, this.currentRecordText(), output);
+            }
+        }
+
+        /**
+         * Clears the destination and parses the current record with {@link #CSV_LINE_PARSER}, without advancing.
+         * Unquoted fields are stripped of surrounding whitespace; quoted fields preserve their contents and
+         * decode doubled quotes. See {@link #parseRecordInto(BiConsumer, String[])} for record-state and failure behavior.
+         *
+         * @param output the non-null destination; unused slots are set to null
+         * @throws IllegalStateException if no current record is available
+         * @throws IllegalArgumentException if the destination is null
+         * @throws ParsingException if the record is malformed or has more fields than the destination has slots
+         */
+        public void parseRecordInto(final String[] output) throws ParsingException {
+            parseRecordInto(CSV_LINE_PARSER, output);
+        }
+
+        /**
+         * Splits the framed record into {@code row} exactly as {@link #CSV_LINE_PARSER} (a default {@link CsvParser}:
+         * {@code ','} separator, {@code '"'} quote, no escape character, not strict, leading whitespace ignored) splits
+         * the same text, and fails the same way, but reads the characters in place instead of from a line {@code String}.
+         * An unquoted field is its text with surrounding whitespace removed. A quoted field is its content with each
+         * doubled quote reduced to one, followed by any text between the closing quote and the next separator,
+         * unless that text is only whitespace. A quote inside an unquoted field, or after a closing quote, is text.
+         *
+         * @throws ParsingException if a quoted field is not closed, or the record has more fields than {@code row} has slots.
+         */
+        private void parseDefaultCsvRecord(final String[] row) throws ParsingException {
+            final char[] chars = this.recordChars;
+            final int to = this.recordTo;
+            int i = this.recordFrom;
+            int index = 0;
+
+            while (true) {
+                // Leading whitespace of a field is skipped (a separator or quote is never whitespace).
+                while (i < to && Character.isWhitespace(chars[i])) {
+                    i++;
+                }
+
+                final String value;
+
+                if (i < to && chars[i] == '"') {
+                    StringBuilder builder = null;
+                    int runStart = ++i;
+
+                    while (true) {
+                        if (i >= to) {
+                            throw new ParsingException("Un-terminated quoted field at end of CSV line: " + this.currentRecordText());
+                        }
+
+                        if (chars[i] == '"') {
+                            if (i + 1 < to && chars[i + 1] == '"') {
+                                // A doubled quote is one quote of content.
+                                builder = (builder == null ? this.clearedFieldBuilder() : builder).append(chars, runStart, i + 1 - runStart);
+                                i += 2;
+                                runStart = i;
+                                continue;
+                            }
+
+                            break;
+                        }
+
+                        i++;
+                    }
+
+                    final int closingQuote = i;
+                    int j = closingQuote + 1;
+
+                    while (j < to && chars[j] != '"' && Character.isWhitespace(chars[j])) {
+                        j++;
+                    }
+
+                    final int suffixStart = closingQuote + 1;
+
+                    if (j >= to || chars[j] == ',') {
+                        // Only whitespace between the closing quote and the separator or the end: dropped.
+                        i = j;
+                    } else {
+                        // Other text after the closing quote belongs to the field, verbatim.
+                        i = suffixStart;
+
+                        while (i < to && chars[i] != ',') {
+                            i++;
+                        }
+
+                        builder = (builder == null ? this.clearedFieldBuilder() : builder).append(chars, runStart, closingQuote - runStart);
+                        builder.append(chars, suffixStart, i - suffixStart);
+                        runStart = closingQuote; // content already appended
+                    }
+
+                    if (builder == null) {
+                        value = new String(chars, runStart, closingQuote - runStart);
+                    } else {
+                        if (runStart < closingQuote) {
+                            builder.append(chars, runStart, closingQuote - runStart);
+                        }
+
+                        value = builder.toString();
+                        this.releaseOversizedField();
+                    }
+                } else {
+                    final int fieldStart = i;
+
+                    while (i < to && chars[i] != ',') {
+                        i++;
+                    }
+
+                    int fieldEnd = i;
+
+                    while (fieldEnd > fieldStart && Character.isWhitespace(chars[fieldEnd - 1])) {
+                        fieldEnd--;
+                    }
+
+                    value = new String(chars, fieldStart, fieldEnd - fieldStart);
+                }
+
+                if (index >= row.length) {
+                    // The message and cause parseRow gives the same failure of CSV_LINE_PARSER. The cause is built here
+                    // rather than caught, so its message does not depend on the JIT (a hot implicit exception loses it).
+                    throw new ParsingException("CSV data row has more fields than the expected " + row.length + " column(s): " + this.currentRecordText(),
+                            new ArrayIndexOutOfBoundsException("Index " + index + " out of bounds for length " + row.length));
+                }
+
+                row[index++] = value;
+
+                if (i >= to) {
+                    return;
+                }
+
+                i++; // the separator
+            }
+        }
+
+        /**
+         * Streams the data records after skipping {@code offset} of them, each parsed into {@code output} (cleared
+         * first); every element is that same array. A skipped record is framed but not parsed.
+         *
+         * <p> Reading is deferred until stream consumption; reader failures then raise {@link UncheckedIOException}, and unterminated quoted fields raise
+         *         {@link ParsingException}.</p>
+         * <p>Starts with the next unread record, excluding any current record. Closing the stream does not close
+         * the source. Copy each array before retaining it, for example with {@code map(it -> it.clone())}.
+         * Consume this stream sequentially: its elements share a mutable array. Do not interleave consumption
+         * with other operations on this reader.</p>
+         *
+         * @param lineParser the non-null parser; only {@link #CSV_LINE_PARSER} by identity uses logical CSV framing
+         * @param offset the non-negative number of unread records to skip
+         * @param output the non-null destination reused for every element
+         * @return a lazy stream sharing this reader's position and the supplied array
+         * @throws IllegalArgumentException if the parser or destination is null, or the offset is negative
+         */
+        public Stream<String[]> stream(final BiConsumer<String, String[]> lineParser, final long offset, final String[] output) {
+            N.checkArgNotNull(lineParser, cs.lineParser);
+            N.checkArgNotNull(output, cs.output);
+            N.checkArgNotNegative(offset, cs.offset);
+            final long[] recordsToSkip = { offset };
+
+            return Stream.generate(() -> {
+                try {
+                    for (; recordsToSkip[0] > 0; recordsToSkip[0]--) {
+                        if (!nextRecord(lineParser)) {
+                            return null;
+                        }
+                    }
+
+                    if (!nextRecord(lineParser)) {
+                        return null;
+                    }
+
+                    parseRecordInto(lineParser, output);
+                    return output;
+                } catch (final IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }).takeWhile(it -> it != null);
+        }
+
     }
 
     /**
@@ -1032,13 +1516,12 @@ public final class CsvUtil {
         final CsvRecordReader records = new CsvRecordReader(br);
 
         try {
-            String line = readRecord(records, headerParser == CSV_HEADER_PARSER, true);
+            final String[] titles = records.readHeader(headerParser);
 
-            if (line == null) {
+            if (titles == null) {
                 return N.newEmptyDataset();
             }
 
-            final String[] titles = headerParser.apply(stripByteOrderMark(line));
             final int columnCount = titles.length;
             final boolean noSelectColumnNamesSpecified = selectsWholeHeader(selectColumnNames, titles);
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
@@ -1061,7 +1544,7 @@ public final class CsvUtil {
                 }
             }
 
-            while (offset-- > 0 && readRecord(records, lineParser == CSV_LINE_PARSER, false) != null) { // NOSONAR
+            while (offset-- > 0 && records.nextRecord(lineParser)) { // NOSONAR
                 // continue
             }
 
@@ -1075,9 +1558,8 @@ public final class CsvUtil {
                 long resultCount = 0;
                 final String[] row = new String[columnCount];
 
-                while ((line = readRecord(records, lineParser == CSV_LINE_PARSER, false)) != null) {
-                    N.fill(row, null);
-                    parseRow(lineParser, line, row);
+                while (records.nextRecord(lineParser)) {
+                    records.parseRecordInto(lineParser, row);
 
                     if (!rowFilter.test(row)) {
                         continue;
@@ -1101,7 +1583,8 @@ public final class CsvUtil {
                 }
             }
 
-            return new RowDataset(columnNameList, columnList);
+            // Columns are private; keep a separate header snapshot from any callback-visible header view.
+            return new RowDataset(new ArrayList<>(columnNameList), columnList, null, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1468,13 +1951,12 @@ public final class CsvUtil {
         final CsvRecordReader records = new CsvRecordReader(br);
 
         try {
-            String line = readRecord(records, headerParser == CSV_HEADER_PARSER, true);
+            final String[] titles = records.readHeader(headerParser);
 
-            if (line == null) {
+            if (titles == null) {
                 return N.newEmptyDataset();
             }
 
-            final String[] titles = headerParser.apply(stripByteOrderMark(line));
             final int columnCount = titles.length;
             final boolean noSelectColumnNamesSpecified = selectsWholeHeader(selectColumnNames, titles);
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
@@ -1503,7 +1985,7 @@ public final class CsvUtil {
                 }
             }
 
-            while (offset-- > 0 && readRecord(records, lineParser == CSV_LINE_PARSER, false) != null) { // NOSONAR
+            while (offset-- > 0 && records.nextRecord(lineParser)) { // NOSONAR
                 // continue
             }
 
@@ -1517,9 +1999,8 @@ public final class CsvUtil {
                 long resultCount = 0;
                 final String[] row = new String[columnCount];
 
-                while ((line = readRecord(records, lineParser == CSV_LINE_PARSER, false)) != null) {
-                    N.fill(row, null);
-                    parseRow(lineParser, line, row);
+                while (records.nextRecord(lineParser)) {
+                    records.parseRecordInto(lineParser, row);
 
                     if (!rowFilter.test(row)) {
                         continue;
@@ -1551,7 +2032,8 @@ public final class CsvUtil {
                 }
             }
 
-            return new RowDataset(columnNameList, columnList);
+            // Columns are private; keep a separate header snapshot from any callback-visible header view.
+            return new RowDataset(new ArrayList<>(columnNameList), columnList, null, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1831,13 +2313,12 @@ public final class CsvUtil {
         final CsvRecordReader records = new CsvRecordReader(br);
 
         try {
-            String line = readRecord(records, headerParser == CSV_HEADER_PARSER, true);
+            final String[] titles = records.readHeader(headerParser);
 
-            if (line == null) {
+            if (titles == null) {
                 return N.newEmptyDataset();
             }
 
-            final String[] titles = headerParser.apply(stripByteOrderMark(line));
             final int columnCount = titles.length;
 
             final boolean noSelectColumnNamesSpecified = selectsWholeHeader(selectColumnNames, titles);
@@ -1874,7 +2355,7 @@ public final class CsvUtil {
                 }
             }
 
-            while (offset-- > 0 && readRecord(records, lineParser == CSV_LINE_PARSER, false) != null) { // NOSONAR
+            while (offset-- > 0 && records.nextRecord(lineParser)) { // NOSONAR
                 // continue
             }
 
@@ -1882,9 +2363,8 @@ public final class CsvUtil {
                 long resultCount = 0;
                 final String[] row = new String[columnCount];
 
-                while ((line = readRecord(records, lineParser == CSV_LINE_PARSER, false)) != null) {
-                    N.fill(row, null);
-                    parseRow(lineParser, line, row);
+                while (records.nextRecord(lineParser)) {
+                    records.parseRecordInto(lineParser, row);
 
                     if (!rowFilter.test(row)) {
                         continue;
@@ -1902,7 +2382,8 @@ public final class CsvUtil {
                 }
             }
 
-            return new RowDataset(columnNameList, columnList);
+            // Columns are private; keep a separate header snapshot from any callback-visible header view.
+            return new RowDataset(new ArrayList<>(columnNameList), columnList, null, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -1920,9 +2401,9 @@ public final class CsvUtil {
      * <pre>{@code
      * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
      *     (columns, row, output) -> {
-     *         output[0] = row.get(0);                     // name as String
-     *         output[1] = Integer.parseInt(row.get(1));   // age as int
-     *         output[2] = LocalDate.parse(row.get(2));    // date as LocalDate
+     *         output[0] = row.get(0);                    // name as String
+     *         output[1] = Integer.parseInt(row.get(1));  // age as int
+     *         output[2] = LocalDate.parse(row.get(2));   // date as LocalDate
      *     };
      *
      * Dataset ds = CsvUtil.load(new File("data.csv"), extractor);
@@ -1944,8 +2425,6 @@ public final class CsvUtil {
     public static Dataset load(final File source,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
-        N.checkArgNotNull(rowExtractor, cs.rowExtractor);
-
         return load(source, null, rowExtractor);
     }
 
@@ -1986,8 +2465,6 @@ public final class CsvUtil {
     public static Dataset load(final File source, final Collection<String> selectColumnNames,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
-        N.checkArgNotNull(rowExtractor, cs.rowExtractor);
-
         return load(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), rowExtractor);
     }
 
@@ -2026,8 +2503,6 @@ public final class CsvUtil {
     public static Dataset load(final File source, final long offset, final long count,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
-        N.checkArgNotNull(rowExtractor, cs.rowExtractor);
-
         return load(source, null, offset, count, Fn.alwaysTrue(), rowExtractor);
     }
 
@@ -2039,8 +2514,8 @@ public final class CsvUtil {
      * <pre>{@code
      * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
      *     (columns, row, output) -> {
-     *         output[0] = row.get(0);                     // name
-     *         output[1] = Integer.parseInt(row.get(1));   // age
+     *         output[0] = row.get(0);                    // name
+     *         output[1] = Integer.parseInt(row.get(1));  // age
      *     };
      *
      * // Load all rows matching the filter with custom extraction
@@ -2129,8 +2604,6 @@ public final class CsvUtil {
     public static Dataset load(final Reader source,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
-        N.checkArgNotNull(rowExtractor, cs.rowExtractor);
-
         return load(source, null, rowExtractor);
     }
 
@@ -2146,9 +2619,9 @@ public final class CsvUtil {
      * try (Reader reader = new FileReader("employees.csv")) {
      *     List<String> columns = Arrays.asList("name", "department", "salary");
      *     Dataset result = CsvUtil.load(reader, columns, (columnNames, rowData, output) -> {
-     *         output[0] = rowData.get(0);                       // name
-     *         output[1] = rowData.get(1);                       // department
-     *         output[2] = Double.parseDouble(rowData.get(2));   // salary as double
+     *         output[0] = rowData.get(0);                      // name
+     *         output[1] = rowData.get(1);                      // department
+     *         output[2] = Double.parseDouble(rowData.get(2));  // salary as double
      *     });
      * }
      * }</pre>
@@ -2175,8 +2648,6 @@ public final class CsvUtil {
     public static Dataset load(final Reader source, final Collection<String> selectColumnNames,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
-        N.checkArgNotNull(rowExtractor, cs.rowExtractor);
-
         return load(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), rowExtractor);
     }
 
@@ -2223,8 +2694,6 @@ public final class CsvUtil {
     public static Dataset load(final Reader source, final long offset, final long count,
             final TriConsumer<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, Object[]> rowExtractor)
             throws IllegalArgumentException, UncheckedIOException, ParsingException, RuntimeException {
-        N.checkArgNotNull(rowExtractor, cs.rowExtractor);
-
         return load(source, null, offset, count, Fn.alwaysTrue(), rowExtractor);
     }
 
@@ -2300,13 +2769,12 @@ public final class CsvUtil {
         final CsvRecordReader records = new CsvRecordReader(br);
 
         try {
-            String line = readRecord(records, headerParser == CSV_HEADER_PARSER, true);
+            final String[] titles = records.readHeader(headerParser);
 
-            if (line == null) {
+            if (titles == null) {
                 return N.newEmptyDataset();
             }
 
-            final String[] titles = headerParser.apply(stripByteOrderMark(line));
             final int columnCount = titles.length;
             final boolean noSelectColumnNamesSpecified = selectsWholeHeader(selectColumnNames, titles);
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
@@ -2329,7 +2797,7 @@ public final class CsvUtil {
                 }
             }
 
-            while (offset-- > 0 && readRecord(records, lineParser == CSV_LINE_PARSER, false) != null) { // NOSONAR
+            while (offset-- > 0 && records.nextRecord(lineParser)) { // NOSONAR
                 // continue
             }
 
@@ -2348,9 +2816,8 @@ public final class CsvUtil {
             if (count > 0) {
                 long resultCount = 0;
 
-                while ((line = readRecord(records, lineParser == CSV_LINE_PARSER, false)) != null) {
-                    N.fill(rowData, null);
-                    parseRow(lineParser, line, rowData);
+                while (records.nextRecord(lineParser)) {
+                    records.parseRecordInto(lineParser, rowData);
 
                     if (!rowFilter.test(rowData)) {
                         continue;
@@ -2378,7 +2845,8 @@ public final class CsvUtil {
                 }
             }
 
-            return new RowDataset(columnNameList, columnList);
+            // Columns are private; keep a separate header snapshot from any callback-visible header view.
+            return new RowDataset(new ArrayList<>(columnNameList), columnList, null, true);
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         } finally {
@@ -2561,15 +3029,15 @@ public final class CsvUtil {
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
-     *         A null source reader is also rejected during consumption. Unsupported target/column combinations, unmatched explicitly selected bean
+     *         Unsupported target/column combinations, unmatched explicitly selected bean
      *         properties, and value-conversion failures are reported during consumption. Closing an owned reader can also raise {@code
      *         UncheckedIOException}.</p>
      * @param <T> the type of the elements in the stream
-     * @param source the Reader source to load CSV data from
+     * @param source the Reader source to load CSV data from, must not be {@code null}
      * @param targetType the Class of the target type
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code targetType} is null.
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null.
      * @see #stream(Reader, Collection, Class, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, Class, boolean)
      * @see #stream(File, Class)
@@ -2604,16 +3072,16 @@ public final class CsvUtil {
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
-     *         A null source reader is also rejected during consumption. Unsupported target/column combinations, unmatched explicitly selected bean
+     *         Unsupported target/column combinations, unmatched explicitly selected bean
      *         properties, and value-conversion failures are reported during consumption. Closing an owned reader can also raise {@code
      *         UncheckedIOException}.</p>
      * @param <T> the type of the elements in the stream
-     * @param source the Reader source to load CSV data from
+     * @param source the Reader source to load CSV data from, must not be {@code null}
      * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param targetType the Class of the target type
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code targetType} is null.
+     * @throws IllegalArgumentException if {@code source} or {@code targetType} is null.
      * @see #stream(Reader, Class, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, Class, boolean)
      * @see #stream(File, Collection, Class)
@@ -2659,7 +3127,7 @@ public final class CsvUtil {
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
-     *         A null source reader is also rejected during consumption. Unsupported target/column combinations, unmatched explicitly selected bean
+     *         Unsupported target/column combinations, unmatched explicitly selected bean
      *         properties, and value-conversion failures are reported during consumption. Closing an owned reader can also raise {@code
      *         UncheckedIOException}.</p>
      * @param <T> the type of the elements in the stream
@@ -2672,7 +3140,8 @@ public final class CsvUtil {
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed,
      *        {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or {@code rowFilter} is null, or {@code targetType} is null.
+     * @throws IllegalArgumentException if {@code source} is null, or {@code offset} or {@code count} is negative, or {@code rowFilter} is null, or
+     *         {@code targetType} is null.
      * @see #stream(Reader, Class, boolean)
      * @see #stream(Reader, Collection, Class, boolean)
      * @see #stream(File, Collection, long, long, Predicate, Class)
@@ -2698,9 +3167,9 @@ public final class CsvUtil {
             boolean noException = false;
 
             try {
-                final String line = readRecord(records, headerParser == CSV_HEADER_PARSER, true);
+                final String[] titles = records.readHeader(headerParser);
 
-                if (line == null) {
+                if (titles == null) {
                     noException = true;
                     return Stream.<T> empty().onClose(() -> {
                         if (br != source) {
@@ -2709,10 +3178,12 @@ public final class CsvUtil {
                     });
                 }
 
-                final boolean isBean = Beans.isBeanClass(targetType);
+                // Decided by the same Type that selects the row mapper below: Beans.isBeanClass is also true for
+                // classes the type system handles as single values (GregorianCalendar, a class with a registered
+                // Type), which then failed the bean-property check instead of being converted as one value.
+                final boolean isBean = Type.of(targetType).isBean();
                 final BeanInfo beanInfo = isBean ? ParserUtil.getBeanInfo(targetType) : null;
 
-                final String[] titles = headerParser.apply(stripByteOrderMark(line));
                 final int columnCount = titles.length;
                 final boolean noSelectColumnNamesSpecified = selectsWholeHeader(selectColumnNames, titles);
                 final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
@@ -2724,6 +3195,14 @@ public final class CsvUtil {
                     if (isBean) {
                         for (int i = 0; i < columnCount; i++) {
                             propInfos[i] = beanInfo.getPropInfo(titles[i]);
+
+                            // An explicit selection that happens to name every header column still names each
+                            // column explicitly, so it gets the same property check as a partial selection;
+                            // only a null (unspecified) selection skips columns the bean has no property for.
+                            if (propInfos[i] == null && selectColumnNames != null) {
+                                throw new IllegalArgumentException("Property '" + titles[i] + "' is not found in " + targetType);
+                            }
+
                             isColumnSelected[i] = propInfos[i] != null;
                         }
                     } else {
@@ -2833,11 +3312,7 @@ public final class CsvUtil {
 
                 final boolean acceptsEveryRow = rowFilter == null || N.equals(rowFilter, Fn.alwaysTrue()) || N.equals(rowFilter, Fnn.alwaysTrue());
 
-                Stream<String[]> parsedRows = recordStream(records, lineParser == CSV_LINE_PARSER).skip(offset).map(it -> {
-                    N.fill(rowData, null);
-                    parseRow(lineParser, it, rowData);
-                    return rowData;
-                });
+                Stream<String[]> parsedRows = records.stream(lineParser, offset, rowData);
 
                 if (!acceptsEveryRow) {
                     parsedRows = parsedRows.filter(Fn.from(rowFilter));
@@ -2915,8 +3390,6 @@ public final class CsvUtil {
     public static <T> Stream<T> stream(final File source,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper)
             throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(rowMapper, cs.rowMapper);
-
         return stream(source, null, rowMapper);
     }
 
@@ -2967,8 +3440,6 @@ public final class CsvUtil {
     public static <T> Stream<T> stream(final File source, final Collection<String> selectColumnNames,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper)
             throws IllegalArgumentException, UncheckedIOException {
-        N.checkArgNotNull(rowMapper, cs.rowMapper);
-
         return stream(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), rowMapper);
     }
 
@@ -3072,15 +3543,15 @@ public final class CsvUtil {
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
-     *         A null source reader is also rejected during consumption. Row-filter and row-mapper exceptions propagate during consumption. Closing an
+     *         Row-filter and row-mapper exceptions propagate during consumption. Closing an
      *         owned reader can also raise {@code UncheckedIOException}.</p>
      * @param <T> the type of the elements in the stream
-     * @param source the Reader source to load CSV data from
+     * @param source the Reader source to load CSV data from, must not be {@code null}
      * @param rowMapper converts the row data to the target type;
      *                  first parameter is the column names, second parameter is the row data
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code rowMapper} is null.
+     * @throws IllegalArgumentException if {@code source} or {@code rowMapper} is null.
      * @see #stream(Reader, Collection, BiFunction, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
      * @see #stream(File, BiFunction)
@@ -3088,8 +3559,6 @@ public final class CsvUtil {
     public static <T> Stream<T> stream(final Reader source,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
             final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
-        N.checkArgNotNull(rowMapper, cs.rowMapper);
-
         return stream(source, null, rowMapper, closeReaderWhenStreamIsClosed);
     }
 
@@ -3121,16 +3590,16 @@ public final class CsvUtil {
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
-     *         A null source reader is also rejected during consumption. Row-filter and row-mapper exceptions propagate during consumption. Closing an
+     *         Row-filter and row-mapper exceptions propagate during consumption. Closing an
      *         owned reader can also raise {@code UncheckedIOException}.</p>
      * @param <T> the type of the elements in the stream
-     * @param source the Reader source to load CSV data from
+     * @param source the Reader source to load CSV data from, must not be {@code null}
      * @param selectColumnNames a Collection of column names to select; {@code null} (unspecified) includes all columns; an empty collection selects no columns (an empty/zero-column result)
      * @param rowMapper converts the row data to the target type;
      *                  first parameter is the column names, second parameter is the row data
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed, {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code rowMapper} is null.
+     * @throws IllegalArgumentException if {@code source} or {@code rowMapper} is null.
      * @see #stream(Reader, BiFunction, boolean)
      * @see #stream(Reader, Collection, long, long, Predicate, BiFunction, boolean)
      * @see #stream(File, Collection, BiFunction)
@@ -3138,8 +3607,6 @@ public final class CsvUtil {
     public static <T> Stream<T> stream(final Reader source, final Collection<String> selectColumnNames,
             final BiFunction<? super List<String>, ? super NoCachingNoUpdating.DisposableArray<String>, ? extends T> rowMapper,
             final boolean closeReaderWhenStreamIsClosed) throws IllegalArgumentException {
-        N.checkArgNotNull(rowMapper, cs.rowMapper);
-
         return stream(source, selectColumnNames, 0, Long.MAX_VALUE, Fn.alwaysTrue(), rowMapper, closeReaderWhenStreamIsClosed);
     }
 
@@ -3185,7 +3652,7 @@ public final class CsvUtil {
      *
      * <p> CSV reading and header/selected-column validation occur when the returned stream is consumed. At that time, malformed CSV raises {@link
      *         ParsingException}, missing selected columns raise {@link IllegalArgumentException}, and reader failures raise {@link UncheckedIOException}.
-     *         A null source reader is also rejected during consumption. Row-filter and row-mapper exceptions propagate during consumption. Closing an
+     *         Row-filter and row-mapper exceptions propagate during consumption. Closing an
      *         owned reader can also raise {@code UncheckedIOException}.</p>
      * @param <T> the type of the elements in the stream
      * @param source the Reader source to load CSV data from, must not be {@code null}
@@ -3198,7 +3665,8 @@ public final class CsvUtil {
      * @param closeReaderWhenStreamIsClosed {@code true} to close the reader when the stream is closed,
      *        {@code false} otherwise
      * @return a Stream of the specified target type containing the loaded CSV data
-     * @throws IllegalArgumentException if {@code offset} or {@code count} is negative, or {@code rowFilter} is null, or {@code rowMapper} is null.
+     * @throws IllegalArgumentException if {@code source} is null, or {@code offset} or {@code count} is negative, or {@code rowFilter} is null, or
+     *         {@code rowMapper} is null.
      * @see #stream(Reader, BiFunction, boolean)
      * @see #stream(Reader, Collection, BiFunction, boolean)
      * @see #stream(File, Collection, long, long, Predicate, BiFunction)
@@ -3222,9 +3690,9 @@ public final class CsvUtil {
             boolean noException = false;
 
             try {
-                final String line = readRecord(records, headerParser == CSV_HEADER_PARSER, true);
+                final String[] titles = records.readHeader(headerParser);
 
-                if (line == null) {
+                if (titles == null) {
                     noException = true;
                     return Stream.<T> empty().onClose(() -> {
                         if (br != source) {
@@ -3233,7 +3701,6 @@ public final class CsvUtil {
                     });
                 }
 
-                final String[] titles = headerParser.apply(stripByteOrderMark(line));
                 final int columnCount = titles.length;
                 final boolean noSelectColumnNamesSpecified = selectsWholeHeader(selectColumnNames, titles);
                 final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
@@ -3274,11 +3741,7 @@ public final class CsvUtil {
 
                 final boolean acceptsEveryRow = rowFilter == null || N.equals(rowFilter, Fn.alwaysTrue()) || N.equals(rowFilter, Fnn.alwaysTrue());
 
-                Stream<String[]> parsedRows = recordStream(records, lineParser == CSV_LINE_PARSER).skip(offset).map(it -> {
-                    N.fill(rowData, null);
-                    parseRow(lineParser, it, rowData);
-                    return rowData;
-                });
+                Stream<String[]> parsedRows = records.stream(lineParser, offset, rowData);
 
                 if (!acceptsEveryRow) {
                     parsedRows = parsedRows.filter(Fn.from(rowFilter));
@@ -3592,9 +4055,9 @@ public final class CsvUtil {
             final Function<String, String[]> headerParser = csvHeaderParser_TL.get();
             final BiConsumer<String, String[]> lineParser = csvLineParser_TL.get();
 
-            String line = readRecord(records, headerParser == CSV_HEADER_PARSER, true);
+            final String[] titles = records.readHeader(headerParser);
 
-            if (line == null) {
+            if (titles == null) {
                 bw.write("[]");
                 bw.flush();
                 return 0;
@@ -3605,7 +4068,6 @@ public final class CsvUtil {
             // columnType array below; the variable is named objStrType to avoid shadowing the field.
             final Type<Object> objStrType = Type.of(String.class);
 
-            final String[] titles = headerParser.apply(stripByteOrderMark(line));
             final int columnCount = titles.length;
             final boolean noSelectColumnNamesSpecified = selectsWholeHeader(selectColumnNames, titles);
             final Set<String> selectPropNameSet = noSelectColumnNamesSpecified ? null : N.newHashSet(selectColumnNames);
@@ -3643,12 +4105,8 @@ public final class CsvUtil {
                 }
             }
 
-            while (offset-- > 0) { // NOSONAR
-                line = readRecord(records, lineParser == CSV_LINE_PARSER, false);
-
-                if (line == null) {
-                    break;
-                }
+            while (offset-- > 0 && records.nextRecord(lineParser)) { // NOSONAR
+                // continue
             }
 
             long cnt = 0;
@@ -3657,15 +4115,14 @@ public final class CsvUtil {
             boolean firstRow = true;
             bw.write("[\n");
 
-            while (count-- > 0 && (line = readRecord(records, lineParser == CSV_LINE_PARSER, false)) != null) {
+            while (count-- > 0 && records.nextRecord(lineParser)) {
                 if (!firstRow) {
                     bw.write(",\n");
                 } else {
                     firstRow = false;
                 }
 
-                N.fill(rowData, null);
-                parseRow(lineParser, line, rowData);
+                records.parseRecordInto(lineParser, rowData);
 
                 bw.write("{");
                 boolean firstColumn = true;
@@ -4189,7 +4646,7 @@ public final class CsvUtil {
          * CsvUtil.converter()
          *     .setEscapeCharToBackSlashForWrite()
          *     .selectColumns(Arrays.asList("name", "age"))
-         *     .source(new File("data.csv"))
+         *     .source(new File("data.json"))
          *     .jsonToCsv(new File("output.csv"));
          *
          * // No direct error case; always succeeds
@@ -4427,7 +4884,7 @@ public final class CsvUtil {
          * // Null class throws IllegalArgumentException
          * // CsvUtil.loader().beanClassForColumnTypeInference(null);
          *
-         * // Cannot be used together with columnTypeMap (CsvLoader) or repeated conflicting type configs
+         * // On a CsvLoader, cannot be used together with columnTypeMap; calling it again replaces the class
          * }</pre>
          *
          * @param beanClassForColumnTypeInference the bean class defining property types
@@ -4740,9 +5197,9 @@ public final class CsvUtil {
          * // Custom row extraction with type conversion
          * TriConsumer<List<String>, DisposableArray<String>, Object[]> extractor =
          *     (columns, row, output) -> {
-         *         output[0] = row.get(0);                       // name as String
-         *         output[1] = Integer.parseInt(row.get(1));     // age as int
-         *         output[2] = Boolean.parseBoolean(row.get(2)); // active as boolean
+         *         output[0] = row.get(0);                        // name as String
+         *         output[1] = Integer.parseInt(row.get(1));      // age as int
+         *         output[2] = Boolean.parseBoolean(row.get(2));  // active as boolean
          *     };
          * Dataset ds = CsvUtil.loader()
          *     .source(new File("data.csv"))

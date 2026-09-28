@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
@@ -91,6 +92,13 @@ import com.landawn.abacus.util.cs;
  * understands (gzip, br, snappy, lz4) is removed lazily on the first read, so a corrupt encoding surfaces
  * from that read rather than from the call that returned the stream. Such streams must still be closed.</p>
  *
+ * <p><b>Client reuse:</b> {@code url(..)} requests share one default client. Requests with a connect
+ * timeout (the timeout-taking {@code url(..)} factories, or {@link #connectTimeout(Duration)} with no other
+ * client-level setting) share one client per distinct timeout, for up to 16
+ * timeouts. Shared clients are never closed, so their connections are reused across requests. Other
+ * client-level configuration, such as {@link #authenticator(Authenticator)}, builds a client that belongs
+ * to the request and is closed after execution.</p>
+ *
  * <p><b>Redirects:</b> the shared default client and every client this class creates itself (the
  * timeout-taking {@code url(..)} factories and fluent client-level configuration such as
  * {@link #connectTimeout(Duration)}) follow redirects with {@link HttpClient.Redirect#NORMAL}, like the
@@ -129,9 +137,24 @@ public final class HttpRequest {
 
     private static final HttpClient DEFAULT_HTTP_CLIENT = newClientBuilder().build();
 
+    /**
+     * The most connect timeouts {@link #TIMEOUT_CLIENTS} holds a shared client for. Once it is full, a request
+     * with any other connect timeout builds its own client and closes it after execution.
+     */
+    static final int MAX_TIMEOUT_CLIENTS = 16;
+
+    /**
+     * Shared clients that differ from {@link #DEFAULT_HTTP_CLIENT} only in their connect timeout, keyed by that
+     * timeout. Like the default client they are never closed, so their connection pools (keep-alive connections,
+     * no repeated TCP/TLS handshakes) serve every request that uses the same timeout. Entries are never evicted:
+     * a pending request may already hold the client, so an evicted client could not be closed, and an unclosed
+     * one keeps its selector thread until it is garbage collected.
+     */
+    private static final Map<Duration, HttpClient> TIMEOUT_CLIENTS = new ConcurrentHashMap<>();
+
     private final String url;
     private final URI uri;
-    private final HttpClient httpClient;
+    private HttpClient httpClient;
     private final java.net.http.HttpRequest.Builder requestBuilder;
 
     private Object query;
@@ -264,7 +287,11 @@ public final class HttpRequest {
 
     /**
      * Creates a new HttpRequest instance with the specified URL and timeout settings.
-     * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     * A connect timeout of {@code 0} uses the shared default client. Any other connect timeout uses a shared
+     * client created for that timeout, so repeated requests reuse its connections. Up to
+     * 16 distinct connect timeouts get a shared client. Once that limit is reached,
+     * a request with a new timeout builds its own client and closes it after execution.
+     * The read timeout applies to this request only.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -280,8 +307,7 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if {@code url} is {@code null} or empty, or either timeout is negative.
      */
     public static HttpRequest url(final String url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
-        return new HttpRequest(url, null, null, withConnectTimeout(newClientBuilder(), connectTimeoutInMillis),
-                withReadTimeout(java.net.http.HttpRequest.newBuilder(), readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+        return withTimeouts(url, null, connectTimeoutInMillis, readTimeoutInMillis);
     }
 
     /**
@@ -310,7 +336,11 @@ public final class HttpRequest {
 
     /**
      * Creates a new HttpRequest instance with the specified URL and timeout settings.
-     * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     * A connect timeout of {@code 0} uses the shared default client. Any other connect timeout uses a shared
+     * client created for that timeout, so repeated requests reuse its connections. Up to
+     * 16 distinct connect timeouts get a shared client. Once that limit is reached,
+     * a request with a new timeout builds its own client and closes it after execution.
+     * The read timeout applies to this request only.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -330,8 +360,7 @@ public final class HttpRequest {
     public static HttpRequest url(final URL url, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
         N.checkArgNotNull(url, cs.url);
 
-        return new HttpRequest(url.toString(), null, null, withConnectTimeout(newClientBuilder(), connectTimeoutInMillis),
-                withReadTimeout(java.net.http.HttpRequest.newBuilder(), readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+        return withTimeouts(url.toString(), null, connectTimeoutInMillis, readTimeoutInMillis);
     }
 
     /**
@@ -358,7 +387,11 @@ public final class HttpRequest {
 
     /**
      * Creates a new HttpRequest instance with the specified URI and timeout settings.
-     * A new HTTP client is created with the specified timeouts and will be closed after execution.
+     * A connect timeout of {@code 0} uses the shared default client. Any other connect timeout uses a shared
+     * client created for that timeout, so repeated requests reuse its connections. Up to
+     * 16 distinct connect timeouts get a shared client. Once that limit is reached,
+     * a request with a new timeout builds its own client and closes it after execution.
+     * The read timeout applies to this request only.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -376,14 +409,14 @@ public final class HttpRequest {
      * @throws IllegalArgumentException if {@code uri} is {@code null}, or either timeout is negative.
      */
     public static HttpRequest url(final URI uri, final long connectTimeoutInMillis, final long readTimeoutInMillis) throws IllegalArgumentException {
-        return new HttpRequest(null, uri, null, withConnectTimeout(newClientBuilder(), connectTimeoutInMillis),
-                withReadTimeout(java.net.http.HttpRequest.newBuilder(), readTimeoutInMillis)).closeHttpClientAfterExecution(true);
+        return withTimeouts(null, uri, connectTimeoutInMillis, readTimeoutInMillis);
     }
 
     /**
      * Records whether the {@link HttpClient} used to run this request is owned by the request and must
-     * therefore be closed once execution finishes. Clients created by the timeout-taking factory
-     * methods and by fluent client-level configuration are owned; a caller-supplied client is not.
+     * therefore be closed once execution finishes. Clients built for fluent client-level configuration
+     * are owned. The shared clients (the default one and the per-connect-timeout ones) are not, and
+     * neither is a caller-supplied client.
      *
      * @param shouldClose {@code true} to close the client after this request completes
      * @return this HttpRequest instance for method chaining
@@ -396,7 +429,9 @@ public final class HttpRequest {
 
     /**
      * Sets the connection timeout for this request.
-     * This creates a new HttpClient builder if one doesn't exist, or copies settings from the existing client.
+     * If the request would otherwise use a shared client, and no other client-level setting has been made,
+     * it switches to the shared client for this timeout (see {@link #url(String, long, long)}). Otherwise it
+     * creates a new HttpClient builder if one doesn't exist, or copies settings from the existing client.
      * The connection timeout is the maximum time to wait when establishing a connection to the server.
      * If the connection cannot be established within this timeout, the request will fail.
      * A {@code null} or zero duration leaves the current setting unchanged; a negative duration is rejected.
@@ -417,6 +452,17 @@ public final class HttpRequest {
             // Validate before initClientBuilder(): otherwise a rejected value would still leave this
             // request owning a replacement client that swaps out the caller's client on execution.
             N.checkArgument(!connectTimeout.isNegative(), "connectTimeout cannot be negative: %s", connectTimeout);
+
+            if (clientBuilder == null && isSharedClient(httpClient)) {
+                // A shared client's configuration is newClientBuilder() plus at most a connect timeout,
+                // so the shared client for the new timeout is an exact replacement.
+                final HttpClient timeoutClient = timeoutClient(connectTimeout);
+
+                if (timeoutClient != null) {
+                    httpClient = timeoutClient;
+                    return this;
+                }
+            }
 
             initClientBuilder();
             clientBuilder.connectTimeout(connectTimeout);
@@ -446,7 +492,7 @@ public final class HttpRequest {
         // Rejected rather than mapped to null: a negative millis value is as meaningless as the negative
         // Duration this overload delegates to, and silently discarding it leaves the request with no
         // timeout at all - for example when the caller passes an already-expired deadline.
-        N.checkArgNotNegative(connectTimeoutInMillis, cs.connectTimeout);
+        N.checkArgNotNegative(connectTimeoutInMillis, cs.connectTimeoutInMillis);
 
         return connectTimeout(connectTimeoutInMillis > 0 ? Duration.ofMillis(connectTimeoutInMillis) : null);
     }
@@ -461,13 +507,50 @@ public final class HttpRequest {
         return HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL);
     }
 
+    /**
+     * Returns the shared client for {@code connectTimeout}, creating it if the pool has room.
+     *
+     * @param connectTimeout a positive connect timeout
+     * @return the shared client, or {@code null} if none exists and {@link #MAX_TIMEOUT_CLIENTS} is reached
+     */
+    private static HttpClient timeoutClient(final Duration connectTimeout) {
+        final HttpClient client = TIMEOUT_CLIENTS.get(connectTimeout);
+
+        if (client != null) {
+            return client;
+        }
+
+        // Locked so that concurrent misses cannot push the pool past its bound.
+        synchronized (TIMEOUT_CLIENTS) {
+            if (TIMEOUT_CLIENTS.size() < MAX_TIMEOUT_CLIENTS) {
+                return TIMEOUT_CLIENTS.computeIfAbsent(connectTimeout, it -> newClientBuilder().connectTimeout(it).build());
+            }
+
+            return TIMEOUT_CLIENTS.get(connectTimeout);
+        }
+    }
+
+    /**
+     * Tells whether {@code client} is one of the shared clients this class creates. {@code null} counts
+     * too, because it selects {@link #DEFAULT_HTTP_CLIENT} at execution time.
+     */
+    private static boolean isSharedClient(final HttpClient client) {
+        return client == null || client == DEFAULT_HTTP_CLIENT || TIMEOUT_CLIENTS.containsValue(client);
+    }
+
     private void initClientBuilder() {
         if (clientBuilder == null) {
             // A caller-supplied client's own policy is copied over this default below.
             clientBuilder = newClientBuilder();
         }
 
-        if (httpClient != null && !requireNewClient) {
+        if (httpClient != null && !requireNewClient && isSharedClient(httpClient)) {
+            // A shared client is newClientBuilder() plus at most a connect timeout. Rebuild exactly that
+            // instead of copying its resolved JDK defaults (SSL context/parameters, version) as explicit settings.
+            httpClient.connectTimeout().ifPresent(it -> clientBuilder.connectTimeout(it));
+
+            requireNewClient = true;
+        } else if (httpClient != null && !requireNewClient) {
             httpClient.cookieHandler().ifPresent(it -> clientBuilder.cookieHandler(it));
             httpClient.connectTimeout().ifPresent(it -> clientBuilder.connectTimeout(it));
             httpClient.proxy().ifPresent(it -> clientBuilder.proxy(it));
@@ -542,35 +625,38 @@ public final class HttpRequest {
      */
     public HttpRequest readTimeout(final long readTimeoutInMillis) throws IllegalArgumentException {
         // See connectTimeout(long): a negative value is rejected instead of being silently discarded.
-        N.checkArgNotNegative(readTimeoutInMillis, cs.readTimeout);
+        N.checkArgNotNegative(readTimeoutInMillis, cs.readTimeoutInMillis);
 
         return readTimeout(readTimeoutInMillis > 0 ? Duration.ofMillis(readTimeoutInMillis) : null);
     }
 
     /**
-     * Applies the connect timeout of the {@code url(.., long, long)} factories. {@code 0} means "no connect
-     * timeout" (the JDK default); a negative value is rejected rather than discarded, matching
-     * {@link #connectTimeout(long)} and the sibling {@code com.landawn.abacus.http.HttpClient}, whose
-     * constructor refuses a negative {@code connectTimeoutInMillis}.
+     * Creates the request of the {@code url(.., long, long)} factories. A connect timeout of {@code 0} means
+     * "no connect timeout" (the JDK default) and keeps the shared default client. A positive value is applied
+     * through {@link #connectTimeout(Duration)}, which selects the shared client for it. A negative value is
+     * rejected rather than discarded, matching {@link #connectTimeout(long)} and the sibling
+     * {@code com.landawn.abacus.http.HttpClient}, whose constructor refuses a negative
+     * {@code connectTimeoutInMillis}.
      *
-     * @param builder the client builder to configure
+     * @param url the URL text, or {@code null} when {@code uri} is given
+     * @param uri the target URI, or {@code null} when {@code url} is given
      * @param connectTimeoutInMillis the connection timeout in milliseconds; {@code 0} for none
-     * @return {@code builder}
-     * @throws IllegalArgumentException if {@code connectTimeoutInMillis} is negative.
+     * @param readTimeoutInMillis the maximum duration allowed for the response, in milliseconds; {@code 0} for none
+     * @return a new HttpRequest instance
+     * @throws IllegalArgumentException if either timeout is negative, or the target is missing.
      */
-    private static HttpClient.Builder withConnectTimeout(final HttpClient.Builder builder, final long connectTimeoutInMillis) throws IllegalArgumentException {
-        N.checkArgNotNegative(connectTimeoutInMillis, cs.connectTimeout);
+    private static HttpRequest withTimeouts(final String url, final URI uri, final long connectTimeoutInMillis, final long readTimeoutInMillis)
+            throws IllegalArgumentException {
+        // Checked first, so a negative connect timeout is still reported before the other argument errors.
+        N.checkArgNotNegative(connectTimeoutInMillis, cs.connectTimeoutInMillis);
 
-        if (connectTimeoutInMillis > 0) {
-            builder.connectTimeout(Duration.ofMillis(connectTimeoutInMillis));
-        }
-
-        return builder;
+        return new HttpRequest(url, uri, DEFAULT_HTTP_CLIENT, null, withReadTimeout(java.net.http.HttpRequest.newBuilder(), readTimeoutInMillis))
+                .connectTimeout(connectTimeoutInMillis > 0 ? Duration.ofMillis(connectTimeoutInMillis) : null);
     }
 
     /**
      * Applies the response timeout of the {@code url(.., long, long)} factories. See
-     * {@link #withConnectTimeout(HttpClient.Builder, long)} for the {@code 0}/negative contract.
+     * {@link #withTimeouts(String, URI, long, long)} for the {@code 0}/negative contract.
      *
      * @param builder the request builder to configure
      * @param readTimeoutInMillis the maximum duration allowed for the response, in milliseconds; {@code 0} for none
@@ -579,7 +665,7 @@ public final class HttpRequest {
      */
     private static java.net.http.HttpRequest.Builder withReadTimeout(final java.net.http.HttpRequest.Builder builder, final long readTimeoutInMillis)
             throws IllegalArgumentException {
-        N.checkArgNotNegative(readTimeoutInMillis, cs.readTimeout);
+        N.checkArgNotNegative(readTimeoutInMillis, cs.readTimeoutInMillis);
 
         if (readTimeoutInMillis > 0) {
             builder.timeout(Duration.ofMillis(readTimeoutInMillis));
@@ -734,7 +820,7 @@ public final class HttpRequest {
      * @param name2 the second header name
      * @param value2 the second header value (will be converted to string)
      * @return this HttpRequest instance for method chaining
-     * @throws IllegalArgumentException if a name is restricted or a name/value contains illegal characters;
+     * @throws IllegalArgumentException if a name is {@code null} or restricted, or a name/value contains illegal characters;
      *         see {@link #header(String, Object)}
      * @see HttpHeaders
      * @see HttpHeaders.Names
@@ -765,7 +851,7 @@ public final class HttpRequest {
      * @param name3 the third header name
      * @param value3 the third header value (will be converted to string)
      * @return this HttpRequest instance for method chaining
-     * @throws IllegalArgumentException if a name is restricted or a name/value contains illegal characters;
+     * @throws IllegalArgumentException if a name is {@code null} or restricted, or a name/value contains illegal characters;
      *         see {@link #header(String, Object)}
      * @see HttpHeaders
      * @see HttpHeaders.Names
@@ -796,7 +882,7 @@ public final class HttpRequest {
      *
      * @param headers a map containing header names and values
      * @return this HttpRequest instance for method chaining
-     * @throws IllegalArgumentException if a name is restricted or a name/value contains illegal characters;
+     * @throws IllegalArgumentException if a name is {@code null} or restricted, or a name/value contains illegal characters;
      *         see {@link #header(String, Object)}. Entries before the offending one have already been applied.
      * @see HttpHeaders
      * @see HttpHeaders.Names
@@ -874,9 +960,13 @@ public final class HttpRequest {
      * @see #jsonBody(Object)
      */
     public HttpRequest jsonBody(final String json) {
+        // Build the body first: a serialization/encoding failure must not leave the Content-Type
+        // switched while the previously configured body stays in place.
+        final BodyPublisher publisher = BodyPublishers.ofString(json);
+
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        bodyPublisher = BodyPublishers.ofString(json);
+        bodyPublisher = publisher;
 
         return this;
     }
@@ -898,9 +988,13 @@ public final class HttpRequest {
      * @see #jsonBody(String)
      */
     public HttpRequest jsonBody(final Object obj) {
+        // Build the body first: a serialization/encoding failure must not leave the Content-Type
+        // switched while the previously configured body stays in place.
+        final BodyPublisher publisher = BodyPublishers.ofString(N.toJson(obj));
+
         setContentType(HttpHeaders.Values.APPLICATION_JSON);
 
-        bodyPublisher = BodyPublishers.ofString(N.toJson(obj));
+        bodyPublisher = publisher;
 
         return this;
     }
@@ -922,9 +1016,13 @@ public final class HttpRequest {
      * @see #xmlBody(Object)
      */
     public HttpRequest xmlBody(final String xml) {
+        // Build the body first: a serialization/encoding failure must not leave the Content-Type
+        // switched while the previously configured body stays in place.
+        final BodyPublisher publisher = BodyPublishers.ofString(xml);
+
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        bodyPublisher = BodyPublishers.ofString(xml);
+        bodyPublisher = publisher;
 
         return this;
     }
@@ -947,9 +1045,13 @@ public final class HttpRequest {
      * @see #xmlBody(String)
      */
     public HttpRequest xmlBody(final Object obj) {
+        // Build the body first: a serialization/encoding failure must not leave the Content-Type
+        // switched while the previously configured body stays in place.
+        final BodyPublisher publisher = BodyPublishers.ofString(N.toXml(obj));
+
         setContentType(HttpHeaders.Values.APPLICATION_XML);
 
-        bodyPublisher = BodyPublishers.ofString(N.toXml(obj));
+        bodyPublisher = publisher;
 
         return this;
     }
@@ -971,12 +1073,20 @@ public final class HttpRequest {
      *
      * @param formBodyByMap a map containing form field names and values
      * @return this HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if a key of {@code formBodyByMap} is {@code null}, a key is empty and its value is {@code null}, or
+     *         text to encode contains malformed UTF-16; the map is encoded eagerly by {@link URLEncodedUtil#encode(Object)},
+     *         and on failure neither the body nor the {@code Content-Type} of this request is changed
+     * @throws ClassCastException if a non-null key of {@code formBodyByMap} is not a {@code String}
      * @see #formBody(Object)
      */
-    public HttpRequest formBody(final Map<?, ?> formBodyByMap) {
+    public HttpRequest formBody(final Map<?, ?> formBodyByMap) throws IllegalArgumentException, ClassCastException {
+        // Build the body first: a serialization/encoding failure must not leave the Content-Type
+        // switched while the previously configured body stays in place.
+        final BodyPublisher publisher = BodyPublishers.ofString(URLEncodedUtil.encode(formBodyByMap));
+
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
 
-        bodyPublisher = BodyPublishers.ofString(URLEncodedUtil.encode(formBodyByMap));
+        bodyPublisher = publisher;
 
         return this;
     }
@@ -998,12 +1108,22 @@ public final class HttpRequest {
      *
      * @param formBodyByBean a bean object whose properties will be used as form fields
      * @return this HttpRequest instance for method chaining
+     * @throws IllegalArgumentException if {@code formBodyByBean} is a {@code Map} with a {@code null} key or an {@code Object[]} with a
+     *         {@code null} name element or odd length, an effective field name is empty and its value is {@code null}, or text to encode
+     *         contains malformed UTF-16; the value is encoded eagerly by {@link URLEncodedUtil#encode(Object)},
+     *         and on failure neither the body nor the {@code Content-Type} of this request is changed
+     * @throws ClassCastException if {@code formBodyByBean} is a {@code Map} with a non-null key, or an {@code Object[]} with a non-null
+     *         name element, that is not a {@code String}
      * @see #formBody(Map)
      */
-    public HttpRequest formBody(final Object formBodyByBean) {
+    public HttpRequest formBody(final Object formBodyByBean) throws IllegalArgumentException, ClassCastException {
+        // Build the body first: a serialization/encoding failure must not leave the Content-Type
+        // switched while the previously configured body stays in place.
+        final BodyPublisher publisher = BodyPublishers.ofString(URLEncodedUtil.encode(formBodyByBean));
+
         setContentType(HttpHeaders.Values.APPLICATION_URL_ENCODED);
 
-        bodyPublisher = BodyPublishers.ofString(URLEncodedUtil.encode(formBodyByBean));
+        bodyPublisher = publisher;
 
         return this;
     }
@@ -1051,9 +1171,12 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return the HTTP response with String body
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the body of a non-2xx response cannot be decoded
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      */
-    public HttpResponse<String> get() throws UncheckedIOException {
+    public HttpResponse<String> get() throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         return get(createStringResponseBodyHandler(HttpMethod.GET));
     }
 
@@ -1072,11 +1195,14 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> get(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+    public <T> HttpResponse<T> get(final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
 
         return execute(HttpMethod.GET, responseBodyHandler);
@@ -1098,9 +1224,13 @@ public final class HttpRequest {
      * @param <T> the type of the result
      * @param resultClass the class of the result type to deserialize the response body into
      * @return the deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the response status is not 2xx
+     * @throws RuntimeException if the request is interrupted (the current thread's interrupt status is restored), or the response body cannot be
+     *         converted to {@code resultClass}
      */
-    public <T> T get(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T get(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return getBody(get(responseBodyHandler), resultClass);
@@ -1118,9 +1248,12 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return the HTTP response with String body
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the body of a non-2xx response cannot be decoded
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      */
-    public HttpResponse<String> post() throws UncheckedIOException {
+    public HttpResponse<String> post() throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         return post(createStringResponseBodyHandler(HttpMethod.POST));
     }
 
@@ -1143,11 +1276,14 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> post(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+    public <T> HttpResponse<T> post(final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
 
         return execute(HttpMethod.POST, responseBodyHandler);
@@ -1169,9 +1305,13 @@ public final class HttpRequest {
      * @param <T> the type of the result
      * @param resultClass the class of the result type to deserialize the response body into
      * @return the deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the response status is not 2xx
+     * @throws RuntimeException if the request is interrupted (the current thread's interrupt status is restored), or the response body cannot be
+     *         converted to {@code resultClass}
      */
-    public <T> T post(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T post(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return getBody(post(responseBodyHandler), resultClass);
@@ -1190,9 +1330,12 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return the HTTP response with String body
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the body of a non-2xx response cannot be decoded
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      */
-    public HttpResponse<String> put() throws UncheckedIOException {
+    public HttpResponse<String> put() throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         return put(createStringResponseBodyHandler(HttpMethod.PUT));
     }
 
@@ -1213,11 +1356,14 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> put(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+    public <T> HttpResponse<T> put(final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
 
         return execute(HttpMethod.PUT, responseBodyHandler);
@@ -1239,9 +1385,13 @@ public final class HttpRequest {
      * @param <T> the type of the result
      * @param resultClass the class of the result type to deserialize the response body into
      * @return the deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the response status is not 2xx
+     * @throws RuntimeException if the request is interrupted (the current thread's interrupt status is restored), or the response body cannot be
+     *         converted to {@code resultClass}
      */
-    public <T> T put(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T put(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return getBody(put(responseBodyHandler), resultClass);
@@ -1262,9 +1412,12 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return the HTTP response with String body
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the body of a non-2xx response cannot be decoded
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      */
-    public HttpResponse<String> patch() throws UncheckedIOException {
+    public HttpResponse<String> patch() throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         return patch(createStringResponseBodyHandler(HttpMethod.PATCH));
     }
 
@@ -1286,11 +1439,14 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> patch(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+    public <T> HttpResponse<T> patch(final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
 
         return execute(HttpMethod.PATCH, responseBodyHandler);
@@ -1314,9 +1470,13 @@ public final class HttpRequest {
      * @param <T> the type of the result
      * @param resultClass the class of the result type to deserialize the response body into
      * @return the deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the response status is not 2xx
+     * @throws RuntimeException if the request is interrupted (the current thread's interrupt status is restored), or the response body cannot be
+     *         converted to {@code resultClass}
      */
-    public <T> T patch(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T patch(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return getBody(patch(responseBodyHandler), resultClass);
@@ -1332,9 +1492,12 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return the HTTP response with String body
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the body of a non-2xx response cannot be decoded
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      */
-    public HttpResponse<String> delete() throws UncheckedIOException {
+    public HttpResponse<String> delete() throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         return delete(createStringResponseBodyHandler(HttpMethod.DELETE));
     }
 
@@ -1353,11 +1516,14 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      * @see java.net.http.HttpResponse.BodyHandlers
      */
-    public <T> HttpResponse<T> delete(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException, UncheckedIOException {
+    public <T> HttpResponse<T> delete(final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         N.checkArgNotNull(responseBodyHandler, cs.responseBodyHandler);
 
         return execute(HttpMethod.DELETE, responseBodyHandler);
@@ -1377,9 +1543,13 @@ public final class HttpRequest {
      * @param <T> the type of the result
      * @param resultClass the class of the result type to deserialize the response body into
      * @return the deserialized response body
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the response status is not 2xx
+     * @throws RuntimeException if the request is interrupted (the current thread's interrupt status is restored), or the response body cannot be
+     *         converted to {@code resultClass}
      */
-    public <T> T delete(final Class<T> resultClass) throws UncheckedIOException {
+    public <T> T delete(final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return getBody(delete(responseBodyHandler), resultClass);
@@ -1399,9 +1569,11 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return the HTTP response (with no body, only headers)
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      */
-    public HttpResponse<Void> head() throws UncheckedIOException {
+    public HttpResponse<Void> head() throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         return head(BodyHandlers.discarding());
     }
 
@@ -1411,9 +1583,13 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for the response body
      * @return the HTTP response
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      */
-    private <T> HttpResponse<T> head(final HttpResponse.BodyHandler<T> responseBodyHandler) throws UncheckedIOException {
+    private <T> HttpResponse<T> head(final HttpResponse.BodyHandler<T> responseBodyHandler)
+            throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         return execute(HttpMethod.HEAD, responseBodyHandler);
     }
 
@@ -1429,11 +1605,14 @@ public final class HttpRequest {
      *
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return the HTTP response with String body
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, the request URL (with any configured query) is not a valid {@code http}
+     *         or {@code https} URI, or {@code httpMethod} is {@link HttpMethod#CONNECT}, which the JDK client rejects.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the body of a non-2xx response cannot be decoded
+     * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      */
     @Beta
-    public HttpResponse<String> execute(final HttpMethod httpMethod) throws IllegalArgumentException, UncheckedIOException {
+    public HttpResponse<String> execute(final HttpMethod httpMethod) throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         return execute(httpMethod, createStringResponseBodyHandler(httpMethod));
     }
 
@@ -1452,8 +1631,10 @@ public final class HttpRequest {
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param responseBodyHandler the handler for processing the response body
      * @return the HTTP response with the processed body
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code responseBodyHandler} is {@code null}.
-     * @throws UncheckedIOException if the request could not be executed
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code responseBodyHandler} is {@code null}, the request URL (with any configured
+     *         query) is not a valid {@code http} or {@code https} URI, or {@code httpMethod} is {@link HttpMethod#CONNECT}, which the JDK client
+     *         rejects.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error
      * @throws RuntimeException if the request is interrupted; the current thread's interrupt status is restored
      * @see java.net.http.HttpResponse.BodyHandlers
      */
@@ -1512,11 +1693,15 @@ public final class HttpRequest {
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param resultClass the class of the result type to deserialize the response body into
      * @return the deserialized response body
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
-     * @throws UncheckedIOException if the request could not be executed or the response indicates an error
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, the request URL (with any configured query) is not a valid {@code http}
+     *         or {@code https} URI, or {@code httpMethod} is {@link HttpMethod#CONNECT}, which the JDK client rejects.
+     * @throws UncheckedIOException if sending the request or receiving the response fails with an I/O error, or (as {@link HttpResponseException})
+     *         the response status is not 2xx
+     * @throws RuntimeException if the request is interrupted (the current thread's interrupt status is restored), or the response body cannot be
+     *         converted to {@code resultClass}
      */
     @Beta
-    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException {
+    public <T> T execute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException, UncheckedIOException, RuntimeException {
         final BodyHandler<?> responseBodyHandler = createResponseBodyHandler(resultClass);
 
         return getBody(execute(httpMethod, responseBodyHandler), resultClass);
@@ -1594,7 +1779,8 @@ public final class HttpRequest {
      * @throws Exception if closing an owned HTTP client through {@link AutoCloseable#close()} fails
      */
     private void closeOwnedHttpClient(final HttpClient httpClientUsed) throws Exception {
-        if (closeHttpClientAfterExecution && httpClientUsed != DEFAULT_HTTP_CLIENT && httpClientUsed instanceof AutoCloseable ac) {
+        // A shared client (the default one or a per-connect-timeout one) serves other requests and is never closed.
+        if (closeHttpClientAfterExecution && !isSharedClient(httpClientUsed) && httpClientUsed instanceof AutoCloseable ac) {
             // Java 21+ HttpClient implements AutoCloseable; shut it down to release internal executor threads.
             ac.close();
         }
@@ -1602,7 +1788,7 @@ public final class HttpRequest {
 
     private void shutdownStreamingClient(final HttpClient httpClientUsed, final Object body) {
         try {
-            if (closeHttpClientAfterExecution && httpClientUsed != DEFAULT_HTTP_CLIENT) {
+            if (closeHttpClientAfterExecution && !isSharedClient(httpClientUsed)) {
                 // close() waits for consumption, which cannot start until this response is delivered.
                 // Orderly shutdown preserves the in-flight body while rejecting further requests.
                 httpClientUsed.shutdown();
@@ -1629,8 +1815,9 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public CompletableFuture<HttpResponse<String>> asyncGet() {
+    public CompletableFuture<HttpResponse<String>> asyncGet() throws IllegalArgumentException {
         return asyncGet(createStringResponseBodyHandler(HttpMethod.GET));
     }
 
@@ -1652,7 +1839,8 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.BodyHandlers
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncGet(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
@@ -1679,8 +1867,9 @@ public final class HttpRequest {
      * @return a CompletableFuture that completes with the deserialized response body, or exceptionally with
      *         {@link HttpResponseException} (surfacing as {@code CompletionException}/{@code ExecutionException})
      *         for a non-2xx status
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public <T> CompletableFuture<T> asyncGet(final Class<T> resultClass) {
+    public <T> CompletableFuture<T> asyncGet(final Class<T> resultClass) throws IllegalArgumentException {
         return asyncExecute(HttpMethod.GET, resultClass);
     }
 
@@ -1704,8 +1893,8 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler}
-     *         is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} or {@code pushPromiseHandler} is {@code null}, or the request URL (with any
+     *         configured query) is not a valid {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncGet(final HttpResponse.BodyHandler<T> responseBodyHandler,
@@ -1735,8 +1924,9 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public CompletableFuture<HttpResponse<String>> asyncPost() {
+    public CompletableFuture<HttpResponse<String>> asyncPost() throws IllegalArgumentException {
         return asyncPost(createStringResponseBodyHandler(HttpMethod.POST));
     }
 
@@ -1757,7 +1947,8 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.BodyHandlers
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
@@ -1789,8 +1980,9 @@ public final class HttpRequest {
      * @return a CompletableFuture that completes with the deserialized response body, or exceptionally with
      *         {@link HttpResponseException} (surfacing as {@code CompletionException}/{@code ExecutionException})
      *         for a non-2xx status
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public <T> CompletableFuture<T> asyncPost(final Class<T> resultClass) {
+    public <T> CompletableFuture<T> asyncPost(final Class<T> resultClass) throws IllegalArgumentException {
         return asyncExecute(HttpMethod.POST, resultClass);
     }
 
@@ -1816,8 +2008,8 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler}
-     *         is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} or {@code pushPromiseHandler} is {@code null}, or the request URL (with any
+     *         configured query) is not a valid {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPost(final HttpResponse.BodyHandler<T> responseBodyHandler,
@@ -1843,8 +2035,9 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public CompletableFuture<HttpResponse<String>> asyncPut() {
+    public CompletableFuture<HttpResponse<String>> asyncPut() throws IllegalArgumentException {
         return asyncPut(createStringResponseBodyHandler(HttpMethod.PUT));
     }
 
@@ -1869,7 +2062,8 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.BodyHandlers
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
@@ -1901,8 +2095,9 @@ public final class HttpRequest {
      * @return a CompletableFuture that completes with the deserialized response body, or exceptionally with
      *         {@link HttpResponseException} (surfacing as {@code CompletionException}/{@code ExecutionException})
      *         for a non-2xx status
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public <T> CompletableFuture<T> asyncPut(final Class<T> resultClass) {
+    public <T> CompletableFuture<T> asyncPut(final Class<T> resultClass) throws IllegalArgumentException {
         return asyncExecute(HttpMethod.PUT, resultClass);
     }
 
@@ -1928,8 +2123,8 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler}
-     *         is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} or {@code pushPromiseHandler} is {@code null}, or the request URL (with any
+     *         configured query) is not a valid {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPut(final HttpResponse.BodyHandler<T> responseBodyHandler,
@@ -1961,8 +2156,9 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public CompletableFuture<HttpResponse<String>> asyncPatch() {
+    public CompletableFuture<HttpResponse<String>> asyncPatch() throws IllegalArgumentException {
         return asyncPatch(createStringResponseBodyHandler(HttpMethod.PATCH));
     }
 
@@ -1989,7 +2185,8 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.BodyHandlers
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
@@ -2023,8 +2220,9 @@ public final class HttpRequest {
      * @return a CompletableFuture that completes with the deserialized response body, or exceptionally with
      *         {@link HttpResponseException} (surfacing as {@code CompletionException}/{@code ExecutionException})
      *         for a non-2xx status
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public <T> CompletableFuture<T> asyncPatch(final Class<T> resultClass) {
+    public <T> CompletableFuture<T> asyncPatch(final Class<T> resultClass) throws IllegalArgumentException {
         return asyncExecute(HttpMethod.PATCH, resultClass);
     }
 
@@ -2050,8 +2248,8 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler}
-     *         is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} or {@code pushPromiseHandler} is {@code null}, or the request URL (with any
+     *         configured query) is not a valid {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncPatch(final HttpResponse.BodyHandler<T> responseBodyHandler,
@@ -2079,8 +2277,9 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public CompletableFuture<HttpResponse<String>> asyncDelete() {
+    public CompletableFuture<HttpResponse<String>> asyncDelete() throws IllegalArgumentException {
         return asyncDelete(createStringResponseBodyHandler(HttpMethod.DELETE));
     }
 
@@ -2103,7 +2302,8 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.BodyHandlers
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
@@ -2133,8 +2333,9 @@ public final class HttpRequest {
      * @return a CompletableFuture that completes with the deserialized response body, or exceptionally with
      *         {@link HttpResponseException} (surfacing as {@code CompletionException}/{@code ExecutionException})
      *         for a non-2xx status
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public <T> CompletableFuture<T> asyncDelete(final Class<T> resultClass) {
+    public <T> CompletableFuture<T> asyncDelete(final Class<T> resultClass) throws IllegalArgumentException {
         return asyncExecute(HttpMethod.DELETE, resultClass);
     }
 
@@ -2158,8 +2359,8 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or {@code pushPromiseHandler}
-     *         is {@code null}.
+     * @throws IllegalArgumentException if {@code responseBodyHandler} or {@code pushPromiseHandler} is {@code null}, or the request URL (with any
+     *         configured query) is not a valid {@code http} or {@code https} URI.
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     public <T> CompletableFuture<HttpResponse<T>> asyncDelete(final HttpResponse.BodyHandler<T> responseBodyHandler,
@@ -2190,8 +2391,9 @@ public final class HttpRequest {
      * }</pre>
      *
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if the request URL (with any configured query) is not a valid {@code http} or {@code https} URI.
      */
-    public CompletableFuture<HttpResponse<Void>> asyncHead() {
+    public CompletableFuture<HttpResponse<Void>> asyncHead() throws IllegalArgumentException {
         return asyncHead(BodyHandlers.discarding());
     }
 
@@ -2201,8 +2403,10 @@ public final class HttpRequest {
      * @param <T> the response body type
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
+     * @throws IllegalArgumentException if {@code responseBodyHandler} is {@code null}, or the request URL (with any configured query) is not a valid
+     *         {@code http} or {@code https} URI.
      */
-    <T> CompletableFuture<HttpResponse<T>> asyncHead(final HttpResponse.BodyHandler<T> responseBodyHandler) {
+    <T> CompletableFuture<HttpResponse<T>> asyncHead(final HttpResponse.BodyHandler<T> responseBodyHandler) throws IllegalArgumentException {
         return asyncExecute(HttpMethod.HEAD, responseBodyHandler);
     }
 
@@ -2224,7 +2428,8 @@ public final class HttpRequest {
      *
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, the request URL (with any configured query) is not a valid {@code http}
+     *         or {@code https} URI, or {@code httpMethod} is {@link HttpMethod#CONNECT}, which the JDK client rejects.
      */
     @Beta
     public CompletableFuture<HttpResponse<String>> asyncExecute(final HttpMethod httpMethod) throws IllegalArgumentException {
@@ -2251,7 +2456,9 @@ public final class HttpRequest {
      * @param httpMethod the HTTP method to use (GET, POST, PUT, PATCH, DELETE, HEAD)
      * @param responseBodyHandler the handler for processing the response body
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code httpMethod} or {@code responseBodyHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} or {@code responseBodyHandler} is {@code null}, the request URL (with any configured
+     *         query) is not a valid {@code http} or {@code https} URI, or {@code httpMethod} is {@link HttpMethod#CONNECT}, which the JDK client
+     *         rejects.
      * @see java.net.http.HttpResponse.BodyHandlers
      */
     @Beta
@@ -2297,7 +2504,8 @@ public final class HttpRequest {
      * @return a CompletableFuture that completes with the deserialized response body, or exceptionally with
      *         {@link HttpResponseException} (surfacing as {@code CompletionException}/{@code ExecutionException})
      *         for a non-2xx status
-     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod} is {@code null}, the request URL (with any configured query) is not a valid {@code http}
+     *         or {@code https} URI, or {@code httpMethod} is {@link HttpMethod#CONNECT}, which the JDK client rejects.
      */
     @Beta
     public <T> CompletableFuture<T> asyncExecute(final HttpMethod httpMethod, final Class<T> resultClass) throws IllegalArgumentException {
@@ -2341,8 +2549,9 @@ public final class HttpRequest {
      * @param responseBodyHandler the handler for processing the response body
      * @param pushPromiseHandler the handler for processing HTTP/2 server push promises
      * @return a CompletableFuture that will complete with the HTTP response
-     * @throws IllegalArgumentException if {@code httpMethod}, {@code responseBodyHandler}, or
-     *         {@code pushPromiseHandler} is {@code null}.
+     * @throws IllegalArgumentException if {@code httpMethod}, {@code responseBodyHandler} or {@code pushPromiseHandler} is {@code null}, the request
+     *         URL (with any configured query) is not a valid {@code http} or {@code https} URI, or {@code httpMethod} is {@link HttpMethod#CONNECT},
+     *         which the JDK client rejects.
      * @see java.net.http.HttpResponse.PushPromiseHandler
      */
     @Beta
@@ -2586,8 +2795,8 @@ public final class HttpRequest {
         }
 
         @Override
-        public int read(final byte[] b, final int off, final int len) throws IOException {
-            return inputStream.read(b, off, len);
+        public int read(final byte[] b, final int off, final int length) throws IOException {
+            return inputStream.read(b, off, length);
         }
 
         @Override
@@ -2837,8 +3046,8 @@ public final class HttpRequest {
          * @throws UncheckedIOException if initializing the response decompressor fails, including an empty or malformed compressed header
          */
         @Override
-        public int read(final byte[] b, final int off, final int len) throws IOException, UncheckedIOException {
-            return decoded().read(b, off, len);
+        public int read(final byte[] b, final int off, final int length) throws IOException, UncheckedIOException {
+            return decoded().read(b, off, length);
         }
 
         /**

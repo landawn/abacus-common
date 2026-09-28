@@ -52,9 +52,9 @@ public interface CharNConsumer {
      * collector.accept('a', 'b', 'c');
      * }</pre>
      *
-     * @param args the char array input arguments. Can be empty but not {@code null}.
+     * @param arguments the char array input arguments. Can be empty but not {@code null}.
      */
-    void accept(char... args);
+    void accept(char... arguments);
 
     /**
      * Returns a composed {@code CharNConsumer} that performs, in sequence, this operation

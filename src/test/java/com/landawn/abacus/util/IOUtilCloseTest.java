@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.exception.UncheckedIOException;
+import com.landawn.abacus.exception.UncheckedInterruptedException;
 
 public class IOUtilCloseTest extends IOUtilTestSupport {
     @Test
@@ -349,5 +350,21 @@ public class IOUtilCloseTest extends IOUtilTestSupport {
 
         assertThrows(IOException.class, () -> fis.read());
         assertThrows(IOException.class, () -> br.read());
+    }
+
+    @Test
+    public void testCloseAutoCloseableInterruptRestoresStatus() {
+        final InterruptedException interruption = new InterruptedException("close interrupted");
+
+        try {
+            final UncheckedInterruptedException failure = assertThrows(UncheckedInterruptedException.class, () -> IOUtil.close(() -> {
+                throw interruption;
+            }));
+
+            assertEquals(interruption, failure.getCause());
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
     }
 }

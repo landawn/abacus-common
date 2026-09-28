@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.parser.JsonXmlSerConfig;
 import com.landawn.abacus.util.CharacterWriter;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class JdkOptionalDoubleTypeTest extends TestBase {
 
@@ -286,5 +287,26 @@ public class JdkOptionalDoubleTypeTest extends TestBase {
         assertTrue(optionalDoubleType.valueOf("").isEmpty());
         assertTrue(optionalDoubleType.valueOf((String) null).isEmpty());
         assertEquals(7.0d, optionalDoubleType.valueOf("7").getAsDouble());
+    }
+
+    @Test
+    public void testGetFloatColumnMatchesDoubleTypeDecimalWidening() throws SQLException {
+        final Type<OptionalDouble> type = TypeFactory.getType("JdkOptionalDouble");
+        final ResultSet rs = mock(ResultSet.class);
+        when(rs.getObject(1)).thenReturn(0.1f);
+        when(rs.getObject("col")).thenReturn(0.1f);
+
+        // a REAL column used to be widened in binary (0.10000000149011612) while DoubleType.get answers 0.1
+        assertEquals(0.1d, type.get(rs, 1).getAsDouble());
+        assertEquals(0.1d, type.get(rs, "col").getAsDouble());
+        assertEquals(TypeFactory.getType(Double.class).get(rs, 1), type.get(rs, 1).getAsDouble());
+
+        // unchanged: other numbers and text
+        when(rs.getObject(2)).thenReturn(new java.math.BigDecimal("2.5"));
+        when(rs.getObject(3)).thenReturn("");
+        when(rs.getObject(4)).thenReturn(" ");
+        assertEquals(2.5d, type.get(rs, 2).getAsDouble());
+        assertEquals(0.0d, type.get(rs, 3).getAsDouble());
+        assertThrows(NumberFormatException.class, () -> type.get(rs, 4));
     }
 }

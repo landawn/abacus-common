@@ -65,15 +65,15 @@ public class BlobType extends AbstractType<Blob> {
     /**
      * Package-private constructor for {@code BlobType} with a specific {@link java.sql.Blob} implementation class.
      * Instances are created by {@link TypeFactory}; do not instantiate directly. The handler name is
-     * derived from {@code clazz}, so a driver-specific implementation remains distinguishable from
+     * derived from {@code targetClass}, so a driver-specific implementation remains distinguishable from
      * the standard {@code Blob} interface in type metadata.
      *
-     * @param clazz the specific {@code Blob} implementation class to use as the Java type
-     * @throws IllegalArgumentException if {@code clazz} is {@code null}.
+     * @param targetClass the specific {@code Blob} implementation class to use as the Java type
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    BlobType(final Class<? extends Blob> clazz) throws IllegalArgumentException {
-        super(ClassUtil.getSimpleClassName(clazz));
-        this.clazz = (Class<Blob>) clazz;
+    BlobType(final Class<? extends Blob> targetClass) throws IllegalArgumentException {
+        super(ClassUtil.getSimpleClassName(targetClass));
+        this.clazz = (Class<Blob>) targetClass;
     }
 
     /**
@@ -181,29 +181,29 @@ public class BlobType extends AbstractType<Blob> {
      * Sets a {@link java.sql.Blob} parameter on a {@link java.sql.PreparedStatement} at the specified position.
      * Delegates to {@link java.sql.PreparedStatement#setBlob(int, java.sql.Blob)}.
      *
-     * @param stmt the {@code PreparedStatement} on which to set the parameter
+     * @param statement the {@code PreparedStatement} on which to set the parameter
      * @param columnIndex the 1-based parameter index to set
      * @param x the {@code Blob} value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code columnIndex} is out of range
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Blob x) throws NullPointerException, SQLException {
-        stmt.setBlob(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final Blob x) throws NullPointerException, SQLException {
+        statement.setBlob(columnIndex, x);
     }
 
     /**
      * Sets a named {@link java.sql.Blob} parameter on a {@link java.sql.CallableStatement}.
      * Delegates to {@link java.sql.CallableStatement#setBlob(String, java.sql.Blob)}.
      *
-     * @param stmt the {@code CallableStatement} on which to set the parameter
+     * @param statement the {@code CallableStatement} on which to set the parameter
      * @param parameterName the name of the parameter to set
      * @param x the {@code Blob} value to set; may be {@code null}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or {@code parameterName} is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Blob x) throws NullPointerException, SQLException {
-        stmt.setBlob(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final Blob x) throws NullPointerException, SQLException {
+        statement.setBlob(parameterName, x);
     }
 }

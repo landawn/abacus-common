@@ -195,8 +195,8 @@ public final class StringWriter extends AppendableWriter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * writer.write(65);    // Writes 'A'
-     * writer.write('B');   // Also valid
+     * writer.write(65);   // Writes 'A'
+     * writer.write('B');  // Also valid
      * }</pre>
      *
      * @param c the character to write (as an integer)
@@ -227,7 +227,7 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Writes a portion of a character array to this writer.
      * Characters are written starting at offset {@code off} and
-     * writing {@code len} characters.
+     * writing {@code length} characters.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -237,14 +237,14 @@ public final class StringWriter extends AppendableWriter {
      *
      * @param cbuf the character array containing data to write
      * @param off the index of the first character in {@code cbuf} to write
-     * @param len the number of characters to write
+     * @param length the number of characters to write
      * @throws NullPointerException if {@code cbuf} is {@code null}
-     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is negative,
      *         or {@code off + len} is greater than {@code cbuf.length}
      */
     @Override
-    public void write(final char[] cbuf, final int off, final int len) throws NullPointerException, IndexOutOfBoundsException {
-        buf.append(cbuf, off, len);
+    public void write(final char[] cbuf, final int off, final int length) throws NullPointerException, IndexOutOfBoundsException {
+        buf.append(cbuf, off, length);
     }
 
     /**
@@ -267,7 +267,7 @@ public final class StringWriter extends AppendableWriter {
     /**
      * Writes a portion of a string to this writer.
      * Characters are written starting at offset {@code off} and
-     * writing {@code len} characters. If {@code str} is {@code null}, it is treated as the
+     * writing {@code length} characters. If {@code str} is {@code null}, it is treated as the
      * four-character sequence {@code "null"}, matching {@link StringBuilder#append(CharSequence, int, int)}.
      *
      * <p><b>Usage Examples:</b></p>
@@ -277,14 +277,14 @@ public final class StringWriter extends AppendableWriter {
      *
      * @param str the string containing data to write; may be {@code null}
      * @param off the index of the first character to write
-     * @param len the number of characters to write
-     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code len} is negative,
+     * @param length the number of characters to write
+     * @throws IndexOutOfBoundsException if {@code off} is negative, {@code length} is negative,
      *         or {@code off + len} is greater than the effective sequence length (four when
      *         {@code str} is {@code null})
      */
     @Override
-    public void write(final String str, final int off, final int len) throws IndexOutOfBoundsException {
-        buf.append(str, off, off + len);
+    public void write(final String str, final int off, final int length) throws IndexOutOfBoundsException {
+        buf.append(str, off, off + length);
     }
 
     /**

@@ -758,4 +758,15 @@ public class FilesTest extends TestBase {
             assertNotNull(Files.getFileExtension(name));
         }
     }
+
+    @Test
+    public void testDeleteRecursivelyMissingParentThrowsNoSuchFileExceptionWithoutOption(@TempDir Path dir) {
+        // The parent directory is opened before the SecureDirectoryStream / ALLOW_INSECURE check, so a
+        // missing parent is reported as NoSuchFileException on every file system, with or without the option.
+        Path missingParentChild = dir.resolve("no-such-parent").resolve("child");
+
+        assertThrows(NoSuchFileException.class, () -> Files.deleteRecursively(missingParentChild));
+        assertThrows(NoSuchFileException.class, () -> Files.deleteRecursively(missingParentChild, RecursiveDeleteOption.ALLOW_INSECURE));
+        assertFalse(java.nio.file.Files.exists(dir.resolve("no-such-parent")));
+    }
 }

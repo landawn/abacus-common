@@ -51,15 +51,15 @@ public class JSONType<T> extends AbstractType<T> {
      * type names resolvable by {@link TypeFactory} — fully qualified class names or pool-registered
      * simple names such as {@code "UUID"}.
      *
-     * @param clsName the class name or short alias ({@code "Map"}, {@code "List"}) for which
+     * @param className the class name or short alias ({@code "Map"}, {@code "List"}) for which
      *                to create the JSON type handler
      * @throws IllegalArgumentException if a supplied type name is {@code null}, blank, or structurally invalid.
      */
     @SuppressWarnings({ "unchecked", "cast" })
-    JSONType(final String clsName) throws IllegalArgumentException {
-        super(JSON + SK.LESS_THAN + TypeFactory.getType(clsName).name() + SK.GREATER_THAN);
+    JSONType(final String className) throws IllegalArgumentException {
+        super(JSON + SK.LESS_THAN + TypeFactory.getType(className).name() + SK.GREATER_THAN);
 
-        targetType = (Type<T>) TypeFactory.getType(clsName);
+        targetType = (Type<T>) TypeFactory.getType(className);
         declaringName = JSON + SK.LESS_THAN + targetType.declaringName() + SK.GREATER_THAN;
         // Resolve through TypeFactory (like the name built above): pool-registered simple names
         // such as "UUID" are valid type names that ClassUtil.forName cannot resolve.

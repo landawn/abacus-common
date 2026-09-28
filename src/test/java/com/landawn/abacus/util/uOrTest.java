@@ -371,14 +371,14 @@ public class uOrTest extends uTestSupport {
     }
 
     @Test
-    @DisplayName("or supplier returning null throws IllegalArgumentException")
+    @DisplayName("or supplier returning null throws NullPointerException")
     public void testOr_NullResult() {
-        assertThrows(IllegalArgumentException.class, () -> Optional.empty().or(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> OptionalInt.empty().or(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> OptionalLong.empty().or(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> OptionalFloat.empty().or(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> OptionalDouble.empty().or(() -> null));
-        assertThrows(IllegalArgumentException.class, () -> Nullable.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> Optional.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> OptionalInt.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> OptionalLong.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> OptionalFloat.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> OptionalDouble.empty().or(() -> null));
+        assertThrows(NullPointerException.class, () -> Nullable.empty().or(() -> null));
 
         // A null supplier is rejected eagerly with IllegalArgumentException.
         assertThrows(IllegalArgumentException.class, () -> Optional.empty().or(null));

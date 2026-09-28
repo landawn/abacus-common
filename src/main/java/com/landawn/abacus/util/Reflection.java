@@ -94,11 +94,15 @@ public final class Reflection<T> {
     private static final Logger logger = LoggerFactory.getLogger(Reflection.class);
 
     /**
-     * Names of fields, per reflected class, whose ReflectASM accessor failed to link. The JVM re-raises
-     * that resolution failure on every execution of the generated accessor, and {@link ClassValue} caches
-     * nothing for a {@code computeValue} that threw, so without this memo one unreachable field costs
-     * microseconds on every access for the lifetime of the JVM. Remembering the first failure sends later
-     * accesses straight to the plain {@link Field} path.
+     * Names of fields, per reflected class, for which the ReflectASM fast path cannot be used: either the
+     * generated accessor failed to link, or ReflectASM does not expose the resolved field at all (a private
+     * or static field, or a superclass field hidden by it) and rejects it with an
+     * {@code IllegalArgumentException}. The JVM re-raises a resolution failure on every execution of the
+     * generated accessor, {@link ClassValue} caches nothing for a {@code computeValue} that threw, and a
+     * rejection builds the field's description and a stack trace, so without this memo such a field costs
+     * microseconds on every access for the lifetime of the JVM. Both outcomes depend only on the class and
+     * the field, so remembering the first one sends later accesses straight to the plain {@link Field} path.
+     * The set is bounded by the fields the class actually has.
      */
     static final ClassValue<Set<String>> asmUnreachableFields = new ClassValue<>() {
         @Override
@@ -143,13 +147,13 @@ public final class Reflection<T> {
     /**
      * Creates a wrapper for a target class and, optionally, an existing instance.
      *
-     * @param cls the target class
+     * @param targetClass the target class
      * @param instance the wrapped instance, or {@code null} when operating on the class
      */
-    Reflection(final Class<T> cls, final T instance) {
-        this.cls = cls;
+    Reflection(final Class<T> targetClass, final T instance) {
+        this.cls = targetClass;
         this.instance = instance;
-        reflectASM = isReflectASMAvailable ? new ReflectASM<>(cls, instance) : null;
+        reflectASM = isReflectASMAvailable ? new ReflectASM<>(targetClass, instance) : null;
     }
 
     /**
@@ -163,16 +167,16 @@ public final class Reflection<T> {
      * }</pre>
      *
      * @param <T> the type of the class
-     * @param clsName the fully qualified name of the class; must not be {@code null} or empty
+     * @param className the fully qualified name of the class; must not be {@code null} or empty
      * @return a Reflection instance for the specified class
-     * @throws IllegalArgumentException if {@code clsName} is {@code null} or empty, or if the class with the
+     * @throws IllegalArgumentException if {@code className} is {@code null} or empty, or if the class with the
      *         given name cannot be located.
      * @see ClassUtil#forName(String)
      */
-    public static <T> Reflection<T> on(final String clsName) throws IllegalArgumentException {
-        N.checkArgNotEmpty(clsName, cs.clsName);
+    public static <T> Reflection<T> on(final String className) throws IllegalArgumentException {
+        N.checkArgNotEmpty(className, cs.className);
 
-        return on(ClassUtil.forName(clsName));
+        return on(ClassUtil.forName(className));
     }
 
     /**
@@ -185,14 +189,14 @@ public final class Reflection<T> {
      * }</pre>
      *
      * @param <T> the type of the class
-     * @param cls the class to reflect upon; must not be {@code null}
+     * @param targetClass the class to reflect upon; must not be {@code null}
      * @return a Reflection instance for the specified class
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    public static <T> Reflection<T> on(final Class<T> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static <T> Reflection<T> on(final Class<T> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return new Reflection<>(cls, null);
+        return new Reflection<>(targetClass, null);
     }
 
     /**
@@ -246,19 +250,19 @@ public final class Reflection<T> {
      * Person person = Reflection.on(Person.class).newInstance("John", 30).instance();
      * }</pre>
      *
-     * @param args the arguments to pass to the constructor
+     * @param arguments the arguments to pass to the constructor
      * @return a new Reflection instance wrapping the newly created object
      * @throws RuntimeException if no matching constructor is found or instantiation fails
      */
-    public final Reflection<T> newInstance(final Object... args) throws RuntimeException { //NOSONAR
-        if (N.isEmpty(args)) {
+    public final Reflection<T> newInstance(final Object... arguments) throws RuntimeException { //NOSONAR
+        if (N.isEmpty(arguments)) {
             return newInstance();
         }
 
-        final Constructor<T> constructor = getDeclaredConstructor(cls, getTypes(args));
+        final Constructor<T> constructor = getDeclaredConstructor(cls, getTypes(arguments));
         ClassUtil.setAccessibleQuietly(constructor, true);
 
-        return new Reflection<>(cls, ClassUtil.invokeConstructor(constructor, args));
+        return new Reflection<>(cls, ClassUtil.invokeConstructor(constructor, arguments));
     }
 
     /**
@@ -307,7 +311,10 @@ public final class Reflection<T> {
                     return reflectASM.get(field);
                 } catch (final IllegalArgumentException e) {
                     // Use the resolved field even when ReflectASM only exposes a hidden superclass field.
-                    // Not memoized: ReflectASM rejects the field before any access, which is cheap.
+                    // ReflectASM rejects the field before any access, but building the rejection costs
+                    // microseconds (about 50x a plain reflective read), and it is the same for every later
+                    // access, so it is memoized silently.
+                    asmUnreachableFields.get(cls).add(fieldName);
                 } catch (final LinkageError e) {
                     // The generated accessor failed to link (e.g. IllegalAccessError for a field whose
                     // declaring class is not accessible to it); the read has no side effect, so retrying
@@ -348,7 +355,7 @@ public final class Reflection<T> {
      * @param fieldName the name of the field to set
      * @param value the value to set
      * @return this Reflection instance for method chaining
-     * @throws IllegalArgumentException if {@code fieldName} is {@code null}
+     * @throws IllegalArgumentException if {@code fieldName} is {@code null}, or if {@code value} is {@code null} for a primitive field
      * @throws RuntimeException if the field doesn't exist or cannot be accessed.
      * @throws NullPointerException if the resolved member requires an instance but this reflection object was created from a class without constructing an instance
      */
@@ -358,13 +365,21 @@ public final class Reflection<T> {
         try {
             final Field field = getField(fieldName);
 
-            if (reflectASM != null && !asmUnreachableFields.get(cls).contains(fieldName)) {
+            // A null for a primitive field goes straight to standard reflection, which rejects it with
+            // IllegalArgumentException; the generated accessor would fail its unboxing with a
+            // NullPointerException instead, so the exception type depended on the field's visibility.
+            if (reflectASM != null && !asmUnreachableFields.get(cls).contains(fieldName) && (value != null || !field.getType().isPrimitive())) {
                 try {
                     reflectASM.set(field, value);
                     return this;
-                } catch (final IllegalArgumentException | ClassCastException e) {
-                    // Reflection also supports private fields and unboxing followed by primitive widening.
-                    // Not memoized: ReflectASM rejects the field before any store, which is cheap.
+                } catch (final IllegalArgumentException e) {
+                    // Reflection also supports private fields. ReflectASM rejects such a field before any
+                    // store, but building the rejection costs microseconds, and it is the same for every
+                    // later access, so it is memoized silently.
+                    asmUnreachableFields.get(cls).add(fieldName);
+                } catch (final ClassCastException e) {
+                    // Reflection also supports unboxing followed by primitive widening. Not memoized: this
+                    // failure depends on the value, not on the field.
                 } catch (final LinkageError e) {
                     // The generated accessor failed to link (e.g. IllegalAccessError when assigning a
                     // final field); the JVM rejects the write at resolution time, before any store, so
@@ -434,13 +449,13 @@ public final class Reflection<T> {
      *
      * @param <V> the value type
      * @param methodName the name of the method to invoke
-     * @param args the arguments to pass to the method
+     * @param arguments the arguments to pass to the method
      * @return the result of the method invocation
      * @throws IllegalArgumentException if {@code methodName} is {@code null}
      * @throws RuntimeException if the method doesn't exist or invocation fails.
      * @throws NullPointerException if the resolved member requires an instance but this reflection object was created from a class without constructing an instance
      */
-    public final <V> V invoke(final String methodName, final Object... args) throws IllegalArgumentException, RuntimeException, NullPointerException {
+    public final <V> V invoke(final String methodName, final Object... arguments) throws IllegalArgumentException, RuntimeException, NullPointerException {
         N.checkArgNotNull(methodName, cs.methodName);
 
         // ReflectASM only exposes non-private methods declared in the class or its superclasses
@@ -448,14 +463,14 @@ public final class Reflection<T> {
         // reflection for the members it cannot resolve. The check happens BEFORE the invocation:
         // catching the resolution exception around reflectASM.invoke(...) would be unsafe because
         // the invoked method itself may throw IllegalArgumentException after side effects.
-        if (reflectASM != null && reflectASM.canInvoke(methodName, args)) {
-            return reflectASM.invoke(methodName, args);
+        if (reflectASM != null && reflectASM.canInvoke(methodName, arguments)) {
+            return reflectASM.invoke(methodName, arguments);
         } else {
             try {
-                final Method method = getDeclaredMethod(cls, methodName, getTypes(args));
+                final Method method = getDeclaredMethod(cls, methodName, getTypes(arguments));
                 ClassUtil.setAccessibleQuietly(method, true);
 
-                return (V) method.invoke(instance, args);
+                return (V) method.invoke(instance, arguments);
             } catch (SecurityException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                 throw ExceptionUtil.toRuntimeException(e, true);
             }
@@ -481,20 +496,21 @@ public final class Reflection<T> {
      * }</pre>
      *
      * @param methodName the name of the method to invoke
-     * @param args the arguments to pass to the method
+     * @param arguments the arguments to pass to the method
      * @return this Reflection instance for method chaining
      * @throws IllegalArgumentException if {@code methodName} is {@code null}
      * @throws RuntimeException if the method doesn't exist or invocation fails
      * @throws NullPointerException if the resolved member requires an instance but this reflection object was created from a class without constructing an instance
      */
-    public final Reflection<T> call(final String methodName, final Object... args) throws IllegalArgumentException, RuntimeException, NullPointerException {
+    public final Reflection<T> call(final String methodName, final Object... arguments)
+            throws IllegalArgumentException, RuntimeException, NullPointerException {
         N.checkArgNotNull(methodName, cs.methodName);
 
-        if (reflectASM != null && reflectASM.canInvoke(methodName, args)) {
-            reflectASM.call(methodName, args);
+        if (reflectASM != null && reflectASM.canInvoke(methodName, arguments)) {
+            reflectASM.call(methodName, arguments);
         } else {
             // Falls back to standard reflection for private/inherited members (see invoke(String, Object...)).
-            invoke(methodName, args);
+            invoke(methodName, arguments);
         }
 
         return this;
@@ -539,14 +555,14 @@ public final class Reflection<T> {
     /**
      * Returns the declared constructor matching the specified parameter types.
      * Resolutions are cached per class, except when a lookup is keyed by an argument type from a class loader
-     * that {@code cls} does not already keep alive; such a lookup is resolved again every time so that the
+     * that {@code targetClass} does not already keep alive; such a lookup is resolved again every time so that the
      * cache cannot retain a shorter-lived loader. If no exact match is found,
      * invocation compatibility (including unboxing and primitive widening) is used to locate
      * the most-specific compatible constructor. If multiple unrelated overloads are
      * equally applicable, the invocation is rejected instead of depending on reflection
      * enumeration order.
      *
-     * @param cls the class to search for the constructor
+     * @param targetClass the class to search for the constructor
      * @param argTypes the array of parameter types for the constructor; individual
      *        elements may be {@code null} to match any reference type at that position
      * @return the Constructor object matching the parameter types
@@ -554,8 +570,8 @@ public final class Reflection<T> {
      * @throws RuntimeException if no compatible constructor is found, or if multiple compatible
      *         constructors are equally applicable (ambiguous)
      */
-    private Constructor<T> getDeclaredConstructor(final Class<T> cls, final Class<?>[] argTypes) throws SecurityException, RuntimeException {
-        final Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.get(cls);
+    private Constructor<T> getDeclaredConstructor(final Class<T> targetClass, final Class<?>[] argTypes) throws SecurityException, RuntimeException {
+        final Map<Wrapper<Class<?>[]>, Constructor<?>> constructorPool = clsConstructorPool.get(targetClass);
 
         final Wrapper<Class<?>[]> key = Wrapper.of(argTypes);
         Constructor<?> result = constructorPool.get(key);
@@ -563,7 +579,7 @@ public final class Reflection<T> {
         if (result == null) {
             if (!hasNullArgType(argTypes)) {
                 try {
-                    result = cls.getDeclaredConstructor(argTypes);
+                    result = targetClass.getDeclaredConstructor(argTypes);
                 } catch (final NoSuchMethodException e) {
                     // Fall back to compatible constructor search below.
                 }
@@ -572,7 +588,7 @@ public final class Reflection<T> {
             if (result == null) {
                 final List<Constructor<?>> compatibleConstructors = new ArrayList<>();
 
-                for (final Constructor<?> constructor : cls.getDeclaredConstructors()) {
+                for (final Constructor<?> constructor : targetClass.getDeclaredConstructors()) {
                     final Class<?>[] paramTypes = constructor.getParameterTypes();
 
                     //noinspection ConstantValue
@@ -593,7 +609,7 @@ public final class Reflection<T> {
                 }
 
                 result = selectMostSpecific(compatibleConstructors, argTypes,
-                        "constructor for " + cls.getName() + " with parameter types: " + N.toString(argTypes));
+                        "constructor for " + targetClass.getName() + " with parameter types: " + N.toString(argTypes));
             }
 
             if (result == null) {
@@ -602,7 +618,7 @@ public final class Reflection<T> {
 
             // The key pins its argument types for as long as the target class lives, so cache only a key
             // that cannot outlive it: the declared signature itself, or types that add no new class loader.
-            if (Arrays.equals(argTypes, result.getParameterTypes()) || isCacheableKey(cls, argTypes)) {
+            if (Arrays.equals(argTypes, result.getParameterTypes()) || isCacheableKey(targetClass, argTypes)) {
                 constructorPool.put(key, result);
             }
         }
@@ -615,7 +631,7 @@ public final class Reflection<T> {
      * itself first and then its superclasses (mirroring {@link #getField(String)}), so inherited
      * and private methods are found even when ReflectASM is unavailable or cannot resolve them.
      * Resolutions are cached per class, except when a lookup is keyed by an argument type from a class loader
-     * that {@code cls} does not already keep alive; such a lookup is recomputed every time so that the cache
+     * that {@code targetClass} does not already keep alive; such a lookup is recomputed every time so that the cache
      * cannot retain a shorter-lived loader. At each level of the hierarchy an exact match
      * is tried first; failing that, invocation compatibility (including unboxing and primitive widening) is
      * used to locate a compatible method. As a last resort, {@link Class#getMethod(String, Class...)}
@@ -624,7 +640,7 @@ public final class Reflection<T> {
      * the complete hierarchy and the most-specific one is selected; unrelated equally
      * applicable overloads are reported as ambiguous.
      *
-     * @param cls the class to search for the method
+     * @param targetClass the class to search for the method
      * @param methodName the name of the method to retrieve
      * @param argTypes the array of parameter types for the method; individual
      *        elements may be {@code null} to match any reference type at that position
@@ -633,16 +649,19 @@ public final class Reflection<T> {
      * @throws RuntimeException if no compatible method is found, or if multiple compatible
      *         methods are equally applicable (ambiguous)
      */
-    private Method getDeclaredMethod(final Class<?> cls, final String methodName, final Class<?>[] argTypes) throws SecurityException, RuntimeException {
-        final Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.get(cls);
+    private Method getDeclaredMethod(final Class<?> targetClass, final String methodName, final Class<?>[] argTypes)
+            throws SecurityException, RuntimeException {
+        final Map<String, Map<Wrapper<Class<?>[]>, Method>> methodPool = clsMethodPool.get(targetClass);
 
-        Map<Wrapper<Class<?>[]>, Method> argsMethodPool = methodPool.computeIfAbsent(methodName, k -> new ConcurrentHashMap<>());
+        // The per-name pool is created only once a method of that name has been resolved, so a lookup of a
+        // method name that does not exist leaves no empty entry behind for the class's lifetime.
+        Map<Wrapper<Class<?>[]>, Method> argsMethodPool = methodPool.get(methodName);
 
         final Wrapper<Class<?>[]> key = Wrapper.of(argTypes);
-        Method result = argsMethodPool.get(key);
+        Method result = argsMethodPool == null ? null : argsMethodPool.get(key);
 
         if (result == null) {
-            Class<?> current = cls;
+            Class<?> current = targetClass;
             final List<Method> compatibleMethods = new ArrayList<>();
 
             while (result == null && current != null) {
@@ -683,7 +702,7 @@ public final class Reflection<T> {
                     try {
                         // Public methods inherited from interfaces (default methods) are not declared
                         // in any superclass; Class.getMethod() resolves them.
-                        result = cls.getMethod(methodName, argTypes);
+                        result = targetClass.getMethod(methodName, argTypes);
                     } catch (final NoSuchMethodException e) {
                         // ignore - handled below.
                     }
@@ -694,7 +713,7 @@ public final class Reflection<T> {
                 // Class#getMethods also contributes public interface/default methods, which are
                 // absent from the declared-method walk above. Duplicate overridden signatures are
                 // removed by selectMostSpecific while preserving the subclass declaration.
-                for (final Method method : cls.getMethods()) {
+                for (final Method method : targetClass.getMethods()) {
                     final Class<?>[] paramTypes = method.getParameterTypes();
 
                     if (method.getName().equals(methodName) && paramTypes.length == argTypes.length) {
@@ -714,16 +733,20 @@ public final class Reflection<T> {
                 }
 
                 result = selectMostSpecific(compatibleMethods, argTypes,
-                        "method " + cls.getName() + "." + methodName + " with parameter types: " + N.toString(argTypes));
+                        "method " + targetClass.getName() + "." + methodName + " with parameter types: " + N.toString(argTypes));
             }
 
             if (result == null) {
                 throw new RuntimeException("No method found by name: " + methodName + " with parameter types: " + N.toString(argTypes));
             }
 
+            if (argsMethodPool == null) {
+                argsMethodPool = methodPool.computeIfAbsent(methodName, k -> new ConcurrentHashMap<>());
+            }
+
             // The key pins its argument types for as long as the target class lives, so cache only a key
             // that cannot outlive it: the declared signature itself, or types that add no new class loader.
-            if (Arrays.equals(argTypes, result.getParameterTypes()) || isCacheableKey(cls, argTypes)) {
+            if (Arrays.equals(argTypes, result.getParameterTypes()) || isCacheableKey(targetClass, argTypes)) {
                 argsMethodPool.put(key, result);
             }
         }
@@ -872,19 +895,19 @@ public final class Reflection<T> {
     }
 
     /**
-     * Tests whether a cache entry keyed by {@code argTypes} can be stored under {@code cls} without keeping a
-     * class loader alive longer than {@code cls} itself. The metadata caches are reclaimed with their target
-     * class, so an argument type is safe when it is defined by the bootstrap loader, by {@code cls}'s own
-     * defining loader, or by one of that loader's ancestors: {@code cls} already keeps all of those reachable.
+     * Tests whether a cache entry keyed by {@code argTypes} can be stored under {@code targetClass} without keeping a
+     * class loader alive longer than {@code targetClass} itself. The metadata caches are reclaimed with their target
+     * class, so an argument type is safe when it is defined by the bootstrap loader, by {@code targetClass}'s own
+     * defining loader, or by one of that loader's ancestors: {@code targetClass} already keeps all of those reachable.
      * An argument type from any other loader (a plugin loader or a temporary {@code URLClassLoader}, say) would
-     * be pinned by the entry for the lifetime of {@code cls} and is therefore not cached.
+     * be pinned by the entry for the lifetime of {@code targetClass} and is therefore not cached.
      *
-     * @param cls the class under which the entry would be cached
+     * @param targetClass the class under which the entry would be cached
      * @param argTypes the runtime argument types forming the cache key; individual elements may be {@code null}
-     * @return {@code true} if caching {@code argTypes} under {@code cls} retains nothing that {@code cls} does not
+     * @return {@code true} if caching {@code argTypes} under {@code targetClass} retains nothing that {@code targetClass} does not
      */
-    private boolean isCacheableKey(final Class<?> cls, final Class<?>[] argTypes) {
-        final ClassLoader targetLoader = cls.getClassLoader();
+    private boolean isCacheableKey(final Class<?> targetClass, final Class<?>[] argTypes) {
+        final ClassLoader targetLoader = targetClass.getClassLoader();
 
         for (final Class<?> argType : argTypes) {
             // A null entry (a null argument) and a bootstrap-loaded type retain no loader at all.
@@ -981,10 +1004,10 @@ public final class Reflection<T> {
     /**
      * Wraps a primitive type to its wrapper class if applicable.
      *
-     * @param cls the class to wrap
+     * @param targetClass the class to wrap
      * @return the wrapped class if primitive, otherwise the original class
      */
-    private Class<?> wrap(final Class<?> cls) {
-        return ClassUtil.isPrimitiveType(cls) ? ClassUtil.wrap(cls) : cls;
+    private Class<?> wrap(final Class<?> targetClass) {
+        return ClassUtil.isPrimitiveType(targetClass) ? ClassUtil.wrap(targetClass) : targetClass;
     }
 }

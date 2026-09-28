@@ -78,7 +78,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
      *
      */
     public SpinedBuffer() {
-        this(CHUNK_SIZE);
+        // 0 selects the same default capacity, but defers allocating the first chunk until the first add
+        this(0);
     }
 
     /**
@@ -279,7 +280,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          *
          */
         public OfInt() {
-            this(CHUNK_SIZE);
+            // 0 selects the same default capacity, but defers allocating the first chunk until the first add
+            this(0);
         }
 
         /**
@@ -479,7 +481,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          *
          */
         public OfLong() {
-            this(CHUNK_SIZE);
+            // 0 selects the same default capacity, but defers allocating the first chunk until the first add
+            this(0);
         }
 
         /**
@@ -679,7 +682,8 @@ final class SpinedBuffer<E> extends AbstractCollection<E> implements Consumer<E>
          *
          */
         public OfDouble() {
-            this(CHUNK_SIZE);
+            // 0 selects the same default capacity, but defers allocating the first chunk until the first add
+            this(0);
         }
 
         /**

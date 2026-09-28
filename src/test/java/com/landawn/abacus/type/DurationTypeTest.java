@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import com.landawn.abacus.TestBase;
 import com.landawn.abacus.util.Duration;
+import org.junit.jupiter.api.Assertions;
 
 public class DurationTypeTest extends TestBase {
 
@@ -128,4 +129,31 @@ public class DurationTypeTest extends TestBase {
         assertNull(type.valueOf(""));
     }
 
+    @Test
+    public void testStringOfAppendToSerializeToNeverOverflowForExtremeMillis() throws Exception {
+        final Type<com.landawn.abacus.util.Duration> durationType = TypeFactory.getType("Duration");
+        final com.landawn.abacus.util.Duration max = com.landawn.abacus.util.Duration.ofMillis(Long.MAX_VALUE);
+        final com.landawn.abacus.util.Duration min = com.landawn.abacus.util.Duration.ofMillis(Long.MIN_VALUE);
+
+        // The abacus Duration stores its millisecond count directly, so no long-overflow ArithmeticException can occur
+        Assertions.assertEquals("9223372036854775807", durationType.stringOf(max));
+        Assertions.assertEquals("-9223372036854775808", durationType.stringOf(min));
+
+        final StringBuilder sb = new StringBuilder();
+        durationType.appendTo(sb, min);
+        Assertions.assertEquals("-9223372036854775808", sb.toString());
+
+        final com.landawn.abacus.util.BufferedJsonWriter writer = com.landawn.abacus.util.Objectory.createBufferedJsonWriter();
+
+        try {
+            durationType.serializeTo(writer, max, null);
+            Assertions.assertEquals("9223372036854775807", writer.toString());
+        } finally {
+            com.landawn.abacus.util.Objectory.recycle(writer);
+        }
+
+        final java.sql.PreparedStatement stmt = org.mockito.Mockito.mock(java.sql.PreparedStatement.class);
+        durationType.set(stmt, 1, max);
+        org.mockito.Mockito.verify(stmt).setLong(1, Long.MAX_VALUE);
+    }
 }

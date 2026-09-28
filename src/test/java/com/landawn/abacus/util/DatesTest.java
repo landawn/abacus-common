@@ -960,4 +960,233 @@ public class DatesTest extends TestBase {
 
         assertEquals(TimeUnit.HOURS.toMillis(3), first - second, "each call must honor the zone's current rules, not retained state");
     }
+
+    @Test
+    public void testCalendarPairMethodsNullCal1MessageNamesCal1() {
+        final Calendar cal = Calendar.getInstance();
+        final ZoneId zone = ZoneId.of("UTC");
+        final java.util.List<org.junit.jupiter.api.function.Executable> calls = java.util.Arrays.asList(
+                () -> Dates.truncatedCompareTo((Calendar) null, cal, CalendarField.DAY_OF_MONTH),
+                () -> Dates.truncatedCompareTo((Calendar) null, cal, Calendar.DAY_OF_MONTH), () -> Dates.isSameDay((Calendar) null, cal),
+                () -> Dates.isSameDay((Calendar) null, cal, zone), () -> Dates.isSameMonth((Calendar) null, cal),
+                () -> Dates.isSameMonth((Calendar) null, cal, zone), () -> Dates.isSameYear((Calendar) null, cal),
+                () -> Dates.isSameYear((Calendar) null, cal, zone), () -> Dates.isSameInstant((Calendar) null, cal),
+                () -> Dates.isSameLocalTime((Calendar) null, cal));
+
+        for (final org.junit.jupiter.api.function.Executable call : calls) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
+            assertEquals("'calendar1' cannot be null", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testCalendarPairMethodsNullCal2MessageNamesCal2() {
+        final Calendar cal = Calendar.getInstance();
+        final ZoneId zone = ZoneId.of("UTC");
+        final java.util.List<org.junit.jupiter.api.function.Executable> calls = java.util.Arrays.asList(
+                () -> Dates.truncatedCompareTo(cal, (Calendar) null, CalendarField.DAY_OF_MONTH),
+                () -> Dates.truncatedCompareTo(cal, (Calendar) null, Calendar.DAY_OF_MONTH), () -> Dates.isSameDay(cal, (Calendar) null),
+                () -> Dates.isSameDay(cal, (Calendar) null, zone), () -> Dates.isSameMonth(cal, (Calendar) null),
+                () -> Dates.isSameMonth(cal, (Calendar) null, zone), () -> Dates.isSameYear(cal, (Calendar) null),
+                () -> Dates.isSameYear(cal, (Calendar) null, zone), () -> Dates.isSameInstant(cal, (Calendar) null),
+                () -> Dates.isSameLocalTime(cal, (Calendar) null));
+
+        for (final org.junit.jupiter.api.function.Executable call : calls) {
+            final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, call);
+            assertEquals("'calendar2' cannot be null", e.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testCivilFieldQueriesAcceptFixedOffsetDefaultZoneWithUnrecognizedId() {
+        final TimeZone previous = TimeZone.getDefault();
+        final java.util.Date noon = new java.util.Date(Instant.parse("2025-01-31T12:00:00Z").toEpochMilli());
+        final java.util.Date lateEvening = new java.util.Date(Instant.parse("2025-01-31T22:30:00Z").toEpochMilli());
+
+        try {
+            // A fixed offset (no daylight-saving rules) is accepted even though java.time does not know the ID:
+            // 22:30Z is already 2025-02-01 at +02:00.
+            TimeZone.setDefault(new SimpleTimeZone(2 * 3_600_000, "Custom/FixedPlusTwo"));
+
+            assertTrue(Dates.isLastDayOfMonth(noon));
+            assertFalse(Dates.isLastDayOfMonth(lateEvening));
+            assertFalse(Dates.isLastDayOfYear(noon));
+            assertEquals(31, Dates.lengthOfMonth(noon));
+            assertEquals(28, Dates.lengthOfMonth(lateEvening));
+            assertEquals(365, Dates.lengthOfYear(noon));
+            assertFalse(Dates.isSameDay(noon, lateEvening));
+            assertFalse(Dates.isSameMonth(noon, lateEvening));
+            assertTrue(Dates.isSameYear(noon, lateEvening));
+
+            // An unrecognized ID that carries daylight-saving rules is still rejected.
+            TimeZone.setDefault(new SimpleTimeZone(3_600_000, "Custom/WithDst", Calendar.MARCH, -1, Calendar.SUNDAY, 3_600_000, Calendar.OCTOBER, -1,
+                    Calendar.SUNDAY, 3_600_000));
+
+            assertThrows(IllegalArgumentException.class, () -> Dates.isLastDayOfMonth(noon));
+            assertThrows(IllegalArgumentException.class, () -> Dates.isLastDayOfYear(noon));
+            assertThrows(IllegalArgumentException.class, () -> Dates.lengthOfMonth(noon));
+            assertThrows(IllegalArgumentException.class, () -> Dates.lengthOfYear(noon));
+            assertThrows(IllegalArgumentException.class, () -> Dates.isSameDay(noon, lateEvening));
+            assertThrows(IllegalArgumentException.class, () -> Dates.isSameMonth(noon, lateEvening));
+            assertThrows(IllegalArgumentException.class, () -> Dates.isSameYear(noon, lateEvening));
+        } finally {
+            TimeZone.setDefault(previous);
+        }
+    }
+
+    // ---- perf review 2026-09-26 G035 begin ----
+    // G035-01: a zone-less custom pattern keeps the supplied zone (the java.time zone re-read is skipped).
+    @Test
+    public void testParseToCalendar_zoneLessCustomPatternKeepsSuppliedZone() {
+        final TimeZone newYork = TimeZone.getTimeZone("America/New_York");
+        final long expected = ZonedDateTime.of(2025, 1, 15, 10, 30, 0, 0, ZoneId.of("America/New_York")).toInstant().toEpochMilli();
+
+        final Calendar calendar = Dates.parseToCalendar("2025/01/15 10:30", "yyyy/MM/dd HH:mm", newYork);
+        assertEquals(expected, calendar.getTimeInMillis());
+        assertEquals("America/New_York", calendar.getTimeZone().getID());
+        assertTrue(calendar.getTimeZone() != newYork);
+
+        final GregorianCalendar gregorian = Dates.parseToGregorianCalendar("15.01.2025 10:30", "dd.MM.yyyy HH:mm", newYork);
+        assertEquals(expected, gregorian.getTimeInMillis());
+        assertEquals("America/New_York", gregorian.getTimeZone().getID());
+
+        final Calendar summer = Dates.parseToCalendar("2025/07/15", "yyyy/MM/dd", newYork);
+        assertEquals(ZonedDateTime.of(2025, 7, 15, 0, 0, 0, 0, ZoneId.of("America/New_York")).toInstant().toEpochMilli(), summer.getTimeInMillis());
+        assertEquals("America/New_York", summer.getTimeZone().getID());
+
+        final Calendar explicitConstant = Dates.parseToCalendar("2025-01-15 10:30:00", Dates.LOCAL_DATE_TIME_FORMAT, newYork);
+        assertEquals(expected, explicitConstant.getTimeInMillis());
+        assertEquals("America/New_York", explicitConstant.getTimeZone().getID());
+
+        final XMLGregorianCalendar xml = Dates.parseToXMLGregorianCalendar("2025/01/15 10:30", "yyyy/MM/dd HH:mm", newYork);
+        assertEquals(expected, xml.toGregorianCalendar().getTimeInMillis());
+        assertEquals(-300, xml.getTimezone());
+    }
+
+    // G035-01: zone letters inside quoted literals (and a doubled quote) are not zone fields.
+    @Test
+    public void testParseToCalendar_quotedZoneLettersKeepSuppliedZone() {
+        final TimeZone newYork = TimeZone.getTimeZone("America/New_York");
+        final long expected = ZonedDateTime.of(2025, 1, 15, 10, 30, 0, 0, ZoneId.of("America/New_York")).toInstant().toEpochMilli();
+
+        final Calendar quoted = Dates.parseToCalendar("2025-01-15 at 10:30 Zulu", "yyyy-MM-dd 'at' HH:mm 'Zulu'", newYork);
+        assertEquals(expected, quoted.getTimeInMillis());
+        assertEquals("America/New_York", quoted.getTimeZone().getID());
+
+        final Calendar doubledQuote = Dates.parseToCalendar("2025-01-15'10:30", "yyyy-MM-dd''HH:mm", newYork);
+        assertEquals(expected, doubledQuote.getTimeInMillis());
+        assertEquals("America/New_York", doubledQuote.getTimeZone().getID());
+    }
+
+    // G035-01: patterns that do carry a zone or offset letter still recover the zone from the text.
+    @Test
+    public void testParseToCalendar_zoneBearingCustomPatternRecoversTextZone() {
+        final TimeZone newYork = TimeZone.getTimeZone("America/New_York");
+        final long expected = OffsetDateTime.of(2025, 1, 15, 10, 30, 0, 0, ZoneOffset.ofHours(2)).toInstant().toEpochMilli();
+
+        final Calendar rfc822 = Dates.parseToCalendar("2025-01-15 10:30 +0200", "yyyy-MM-dd HH:mm Z", newYork);
+        assertEquals(expected, rfc822.getTimeInMillis());
+        assertEquals(2 * 60 * 60 * 1000, rfc822.getTimeZone().getOffset(expected));
+
+        final Calendar iso = Dates.parseToCalendar("2025/01/15 10:30+02:00", "yyyy/MM/dd HH:mmXXX", newYork);
+        assertEquals(expected, iso.getTimeInMillis());
+        assertEquals(2 * 60 * 60 * 1000, iso.getTimeZone().getOffset(expected));
+
+        final Calendar named = Dates.parseToCalendar("2025-01-15 10:30 PST", "yyyy-MM-dd HH:mm z", newYork);
+        final long expectedPacific = ZonedDateTime.of(2025, 1, 15, 10, 30, 0, 0, ZoneId.of("America/Los_Angeles")).toInstant().toEpochMilli();
+        assertEquals(expectedPacific, named.getTimeInMillis());
+        assertEquals(-8 * 60 * 60 * 1000, named.getTimeZone().getOffset(expectedPacific));
+    }
+    // G035-02: the default UTC fast path renders every runtime type and boundary exactly.
+    @Test
+    public void testFormat_defaultFastPathShapesAndBoundaries() {
+        assertEquals("2025-01-15T10:30:45Z", Dates.format(new java.util.Date(1736937045123L)));
+        assertEquals("2025-01-15T10:30:45.123Z", Dates.format(new Timestamp(1736937045123L)));
+        assertEquals("2025-01-15T10:30:45.123Z", Dates.format(new java.sql.Date(1736937045123L)));
+        assertEquals("2025-01-15T10:30:45.123Z", Dates.format(new Time(1736937045123L)));
+        assertEquals("1970-01-01T00:00:00Z", Dates.format(new java.util.Date(0L)));
+        assertEquals("1969-12-31T23:59:59.999Z", Dates.format(new Timestamp(-1L)));
+        assertEquals("1969-12-31T23:59:59Z", Dates.format(new java.util.Date(-1L)));
+
+        final long firstMillisOfYear1 = Instant.parse("0001-01-01T00:00:00Z").toEpochMilli();
+        final long lastMillisOfYear9999 = Instant.parse("9999-12-31T23:59:59.999Z").toEpochMilli();
+        assertEquals("0001-01-01T00:00:00.000Z", Dates.format(new Timestamp(firstMillisOfYear1)));
+        assertEquals("9999-12-31T23:59:59.999Z", Dates.format(new Timestamp(lastMillisOfYear9999)));
+        assertEquals("9999-12-31T23:59:59Z", Dates.format(new java.util.Date(lastMillisOfYear9999)));
+
+        final IllegalArgumentException tooLate = assertThrows(IllegalArgumentException.class, () -> Dates.format(new java.util.Date(lastMillisOfYear9999 + 1)));
+        assertEquals("ISO 8601 formatting supports Common Era years from 0001 through 9999; got instant +10000-01-01T00:00:00Z", tooLate.getMessage());
+        assertThrows(IllegalArgumentException.class, () -> Dates.format(new Timestamp(firstMillisOfYear1 - 1)));
+
+        final StringBuilder sb = new StringBuilder("x");
+        Dates.formatTo(new Timestamp(1736937045123L), sb);
+        Dates.formatTo(new java.util.Date(1736937045123L), sb);
+        assertEquals("x2025-01-15T10:30:45.123Z2025-01-15T10:30:45Z", sb.toString());
+
+        final String now = Dates.formatCurrentTimestamp();
+        assertEquals(24, now.length());
+        assertTrue(now.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z"));
+        final String nowSeconds = Dates.formatCurrentDateTime();
+        assertEquals(20, nowSeconds.length());
+        assertTrue(nowSeconds.matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z"));
+    }
+
+    // G035-02: a Writer receives the same write calls, array lengths and stable contents as before.
+    @Test
+    public void testFormatTo_defaultFastPathWriterCalls() {
+        final java.util.List<String> calls = new java.util.ArrayList<>();
+        final java.util.List<char[]> retained = new java.util.ArrayList<>();
+        final java.io.Writer recorder = new java.io.Writer() {
+            @Override
+            public void write(final char[] cbuf) {
+                calls.add("write(char[" + cbuf.length + "])");
+                retained.add(cbuf);
+            }
+
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) {
+                calls.add("write(char[" + cbuf.length + "], " + off + ", " + len + ")");
+                retained.add(cbuf);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        Dates.formatTo(new Timestamp(1736937045123L), recorder);
+        Dates.formatTo(new java.util.Date(1736937045123L), recorder);
+        Dates.formatTo(new Timestamp(0L), recorder);
+        Dates.formatTo(new java.util.Date(0L), recorder);
+
+        assertEquals(java.util.Arrays.asList("write(char[24])", "write(char[20], 0, 20)", "write(char[24])", "write(char[20], 0, 20)"), calls);
+        assertEquals("2025-01-15T10:30:45.123Z", new String(retained.get(0)));
+        assertEquals("2025-01-15T10:30:45Z", new String(retained.get(1)));
+        assertEquals("1970-01-01T00:00:00.000Z", new String(retained.get(2)));
+        assertEquals("1970-01-01T00:00:00Z", new String(retained.get(3)));
+
+        final java.io.Writer failing = new java.io.Writer() {
+            @Override
+            public void write(final char[] cbuf, final int off, final int len) throws java.io.IOException {
+                throw new java.io.IOException("boom");
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> Dates.formatTo(new java.util.Date(0L), failing));
+        assertThrows(com.landawn.abacus.exception.UncheckedIOException.class, () -> Dates.formatTo(new Timestamp(0L), failing));
+    }
+    // ---- perf review 2026-09-26 G035 end ----
 }

@@ -79,9 +79,9 @@ public final class BiPredicates {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiPredicates.alwaysTrue().test("a", "b");          // returns true
-     * BiPredicates.alwaysTrue().test(null, null);        // returns true
-     * BiPredicates.alwaysTrue().test(new Object(), 1);   // returns true
+     * BiPredicates.alwaysTrue().test("a", "b");         // returns true
+     * BiPredicates.alwaysTrue().test(null, null);       // returns true
+     * BiPredicates.alwaysTrue().test(new Object(), 1);  // returns true
      * }</pre>
      *
      * @param <T> the type of the first argument to the predicate
@@ -97,9 +97,9 @@ public final class BiPredicates {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * BiPredicates.alwaysFalse().test("a", "b");          // returns false
-     * BiPredicates.alwaysFalse().test(null, null);        // returns false
-     * BiPredicates.alwaysFalse().test(new Object(), 1);   // returns false
+     * BiPredicates.alwaysFalse().test("a", "b");         // returns false
+     * BiPredicates.alwaysFalse().test(null, null);       // returns false
+     * BiPredicates.alwaysFalse().test(new Object(), 1);  // returns false
      * }</pre>
      *
      * @param <T> the type of the first argument to the predicate

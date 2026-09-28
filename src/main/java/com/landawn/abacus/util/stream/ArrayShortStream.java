@@ -850,11 +850,32 @@ class ArrayShortStream extends AbstractShortStream {
                     return elements[cur++];
                 }
             }, isSorted());
-        } else {
+        } else if (toIndex - fromIndex < 256) {
+            // A small input is cheaper to track in a HashSet than in the fixed 8 KB presence table below.
             final Set<Object> set = N.newHashSet();
 
             // noinspection resource
             return newStream(sequential().filter(set::add).iteratorEx(), isSorted());
+        } else {
+            /*
+             * One presence bit per possible short value (1024 longs = 8 KB): a first occurrence is kept exactly as a
+             * HashSet.add(Short) filter would keep it, without boxing each element or allocating a hash node.
+             */
+            final long[] seen = new long[1024];
+
+            // noinspection resource
+            return newStream(sequential().filter(value -> {
+                final int bit = value & 0xFFFF;
+                final long mask = 1L << bit;
+                final int word = bit >>> 6;
+
+                if ((seen[word] & mask) != 0) {
+                    return false;
+                }
+
+                seen[word] |= mask;
+                return true;
+            }).iteratorEx(), isSorted());
         }
     }
 
@@ -1033,6 +1054,9 @@ class ArrayShortStream extends AbstractShortStream {
             for (int i = fromIndex; i < toIndex; i++) {
                 action.accept(elements[i]);
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1044,6 +1068,12 @@ class ArrayShortStream extends AbstractShortStream {
 
         try {
             return N.copyOfRange(elements, fromIndex, toIndex);
+        } catch (final Throwable e) {
+            if (closeStream) {
+                closeAfterFailure(e);
+            }
+
+            throw e;
         } finally {
             if (closeStream) {
                 close();
@@ -1057,6 +1087,9 @@ class ArrayShortStream extends AbstractShortStream {
 
         try {
             return ShortList.of(N.copyOfRange(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1074,6 +1107,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1084,32 +1120,40 @@ class ArrayShortStream extends AbstractShortStream {
         assertNotClosed();
 
         try {
-            final Set<Short> result = N.newHashSet(toIndex - fromIndex);
+            // Repeated input values cannot exceed the primitive type's finite distinct-value domain.
+            final Set<Short> result = N.newHashSet(Math.min(toIndex - fromIndex, 65536));
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
     @Override
-    public <C extends Collection<Short>> C toCollection(final Supplier<? extends C> supplier) throws IllegalStateException, IllegalArgumentException {
+    public <C extends Collection<Short>> C toCollection(final Supplier<? extends C> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final C result = supplier.get();
+            final C result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1127,25 +1171,32 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
     }
 
     @Override
-    public Multiset<Short> toMultiset(final Supplier<? extends Multiset<Short>> supplier) throws IllegalStateException, IllegalArgumentException {
+    public Multiset<Short> toMultiset(final Supplier<? extends Multiset<Short>> supplier)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
 
         try {
-            final Multiset<Short> result = supplier.get();
+            final Multiset<Short> result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 result.add(elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1154,7 +1205,7 @@ class ArrayShortStream extends AbstractShortStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.ShortFunction<? extends K, E> keyMapper,
             final Throwables.ShortFunction<? extends V, E2> valueMapper, final BinaryOperator<V> mergeFunction, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1163,13 +1214,16 @@ class ArrayShortStream extends AbstractShortStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 Collectors.merge(result, keyMapper.apply(elements[i]), valueMapper.apply(elements[i]), mergeFunction);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1177,7 +1231,8 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public <K, D, M extends Map<K, D>, E extends Exception> M groupTo(final Throwables.ShortFunction<? extends K, E> keyMapper,
-            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Short, ?, D> downstream, final Supplier<? extends M> mapFactory)
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1185,7 +1240,7 @@ class ArrayShortStream extends AbstractShortStream {
         checkArgNotNull(mapFactory, cs.mapFactory);
 
         try {
-            final M result = mapFactory.get();
+            final M result = N.requireNonNull(mapFactory.get(), "mapFactory returned null");
 
             final Supplier<Object> downstreamSupplier = (Supplier<Object>) downstream.supplier();
             final BiConsumer<Object, ? super Short> downstreamAccumulator = (BiConsumer<Object, ? super Short>) downstream.accumulator();
@@ -1196,7 +1251,7 @@ class ArrayShortStream extends AbstractShortStream {
             Object v = null;
 
             for (int i = fromIndex; i < toIndex; i++) {
-                key = checkArgNotNull(keyMapper.apply(elements[i]), "element cannot be mapped to a null key");
+                key = N.requireNonNull(keyMapper.apply(elements[i]), "element cannot be mapped to a null key");
 
                 if ((v = intermediate.get(key)) == null) {
                     v = downstreamSupplier.get();
@@ -1211,6 +1266,9 @@ class ArrayShortStream extends AbstractShortStream {
             Collectors.replaceAll(intermediate, function);
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1222,6 +1280,9 @@ class ArrayShortStream extends AbstractShortStream {
 
         try {
             return fromIndex < toIndex ? OptionalShort.of(elements[fromIndex]) : OptionalShort.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1233,6 +1294,9 @@ class ArrayShortStream extends AbstractShortStream {
 
         try {
             return fromIndex < toIndex ? OptionalShort.of(elements[toIndex - 1]) : OptionalShort.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1249,6 +1313,9 @@ class ArrayShortStream extends AbstractShortStream {
             } else {
                 return OptionalShort.empty();
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1269,6 +1336,9 @@ class ArrayShortStream extends AbstractShortStream {
             } else {
                 throw new TooManyElementsException("There are at least two elements: " + Strings.concat(elements[fromIndex], ", ", elements[fromIndex + 1]));
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1288,6 +1358,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1311,6 +1384,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.of(result);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1318,7 +1394,7 @@ class ArrayShortStream extends AbstractShortStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjShortConsumer<? super R> accumulator, final BiConsumer<R, R> combiner)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);
@@ -1326,13 +1402,16 @@ class ArrayShortStream extends AbstractShortStream {
         checkArgNotNull(combiner, cs.combiner);
 
         try {
-            final R result = supplier.get();
+            final R result = N.requireNonNull(supplier.get(), "supplier returned null");
 
             for (int i = fromIndex; i < toIndex; i++) {
                 accumulator.accept(result, elements[i]);
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1350,6 +1429,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.of(N.min(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1367,6 +1449,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.of(N.max(elements, fromIndex, toIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1385,6 +1470,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.of(N.kthLargest(elements, fromIndex, toIndex, k));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1396,6 +1484,9 @@ class ArrayShortStream extends AbstractShortStream {
 
         try {
             return sum(elements, fromIndex, toIndex);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1420,6 +1511,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return OptionalDouble.of(((double) sum) / (toIndex - fromIndex));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1431,6 +1525,9 @@ class ArrayShortStream extends AbstractShortStream {
 
         try {
             return toIndex - fromIndex; //NOSONAR
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1448,6 +1545,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1467,6 +1567,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return false;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1486,6 +1589,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return true;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1505,6 +1611,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return true;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1525,6 +1634,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1545,6 +1657,9 @@ class ArrayShortStream extends AbstractShortStream {
             }
 
             return OptionalShort.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }

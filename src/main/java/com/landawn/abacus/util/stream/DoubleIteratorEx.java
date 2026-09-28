@@ -219,30 +219,30 @@ public abstract class DoubleIteratorEx extends DoubleIterator implements Iterato
      * DoubleIteratorEx iterEx = DoubleIteratorEx.of(iter);
      * }</pre>
      *
-     * @param iter the DoubleIterator to wrap (can be null)
-     * @return the same instance if {@code iter} is already a DoubleIteratorEx, a DoubleIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
+     * @param iterator the DoubleIterator to wrap (can be null)
+     * @return the same instance if {@code iterator} is already a DoubleIteratorEx, a DoubleIteratorEx wrapping the given iterator, or an empty iterator if {@code iterator} is null
      */
-    public static DoubleIteratorEx of(final DoubleIterator iter) {
-        if (iter == null) {
+    public static DoubleIteratorEx of(final DoubleIterator iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof DoubleIteratorEx) {
-            return ((DoubleIteratorEx) iter);
+        } else if (iterator instanceof DoubleIteratorEx) {
+            return ((DoubleIteratorEx) iterator);
         }
 
         return new DoubleIteratorEx() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public double nextDouble() throws NoSuchElementException {
-                return iter.nextDouble();
+                return iterator.nextDouble();
             }
 
             @Override
             public void closeResource() {
-                ObjIteratorEx.closeResource(iter);
+                ObjIteratorEx.closeResource(iterator);
             }
         };
     }
@@ -260,13 +260,13 @@ public abstract class DoubleIteratorEx extends DoubleIterator implements Iterato
      * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
      * is unboxed by its next method.</p>
      *
-     * @param iter the Iterator of Double objects (can be null)
+     * @param iterator the Iterator of Double objects (can be null)
      * @return a DoubleIteratorEx unwrapping the given iterator, or empty iterator if iter is null
      */
-    public static DoubleIteratorEx from(final Iterator<Double> iter) {
-        if (iter == null) {
+    public static DoubleIteratorEx from(final Iterator<Double> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ObjIteratorEx<Double> iteratorEx) {
+        } else if (iterator instanceof ObjIteratorEx<Double> iteratorEx) {
 
             return new DoubleIteratorEx() {
                 @Override
@@ -313,7 +313,7 @@ public abstract class DoubleIteratorEx extends DoubleIterator implements Iterato
             return new DoubleIteratorEx() {
                 @Override
                 public boolean hasNext() {
-                    return iter.hasNext();
+                    return iterator.hasNext();
                 }
 
                 /**
@@ -324,12 +324,12 @@ public abstract class DoubleIteratorEx extends DoubleIterator implements Iterato
                  */
                 @Override
                 public double nextDouble() throws NoSuchElementException, NullPointerException {
-                    return iter.next();
+                    return iterator.next();
                 }
 
                 @Override
                 public void closeResource() {
-                    ObjIteratorEx.closeResource(iter);
+                    ObjIteratorEx.closeResource(iterator);
                 }
             };
         }
@@ -410,8 +410,8 @@ public abstract class DoubleIteratorEx extends DoubleIterator implements Iterato
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * DoubleIteratorEx iter = DoubleIteratorEx.of(1.0, 2.0);
-     * iter.closeResource();         // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
+     * iter.closeResource();        // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());  // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * DoubleIteratorEx iter2 = DoubleIteratorEx.of(3.0, 4.0);

@@ -700,4 +700,18 @@ public class JsonMappersTest extends TestBase {
         }
         return new File("..", relativePath);
     }
+
+    @Test
+    public void testFromJsonFileNullClassTargetTypeThrowsIaeBeforeOpeningFile() {
+        final File missing = new File("missing-json-mappers-class-target-type-test.json");
+        final Class<Map<String, Object>> missingType = null;
+        final IllegalArgumentException e1 = Assertions.assertThrows(IllegalArgumentException.class, () -> JsonMappers.fromJson(missing, missingType));
+        Assertions.assertEquals("'targetType' cannot be null", e1.getMessage());
+        final IllegalArgumentException e2 = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> JsonMappers.fromJson(missing, missingType, (DeserializationConfig) null));
+        Assertions.assertEquals("'targetType' cannot be null", e2.getMessage());
+        final IllegalArgumentException e3 = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> JsonMappers.wrap(new ObjectMapper()).fromJson(missing, missingType));
+        Assertions.assertEquals("'targetType' cannot be null", e3.getMessage());
+    }
 }

@@ -414,8 +414,24 @@ public final class Splitter {
             }
 
             return new SplitIterator(source, omitEmptyStrings, trim, strip, limit) {
+                // A String cannot change between calls, so its intrinsic indexOf can replace the charAt scan.
+                private final String sourceString = source instanceof String str ? str : null;
+
                 @Override
                 boolean nextSeparator() {
+                    if (sourceString != null) {
+                        final int index = sourceString.indexOf(delimiter, start);
+
+                        if (index >= 0) {
+                            separatorStart = index;
+                            separatorEnd = index + 1;
+
+                            return true;
+                        }
+
+                        return false;
+                    }
+
                     for (int i = start; i < sourceLen; i++) {
                         if (source.charAt(i) == delimiter) {
                             separatorStart = i;
@@ -469,6 +485,7 @@ public final class Splitter {
             // Splitter safe for concurrent read-only use (it is published through the final `strategy` field).
             @SuppressWarnings("deprecation")
             final char[] delimiterChars = InternalUtil.getCharsForReadOnly(delimiterStr);
+            final int[] failure = delimiterChars.length < 16 ? null : delimiterFailureTable(delimiterChars);
 
             return new Splitter((source, omitEmptyStrings, trim, strip, limit) -> {
                 if (source == null) {
@@ -477,9 +494,46 @@ public final class Splitter {
 
                 return new SplitIterator(source, omitEmptyStrings, trim, strip, limit) {
                     private final int delimiterLen = delimiterChars.length;
+                    // A String cannot change between calls, so its intrinsic indexOf can replace the charAt scan below.
+                    // Long delimiters keep the KMP scan, which bounds the worst case at O(n).
+                    private final String sourceString = failure == null && source instanceof String str ? str : null;
 
                     @Override
                     boolean nextSeparator() {
+                        if (delimiterLen > sourceLen - start) {
+                            return false;
+                        }
+
+                        if (sourceString != null) {
+                            final int index = sourceString.indexOf(delimiterStr, start);
+
+                            if (index >= 0) {
+                                separatorStart = index;
+                                separatorEnd = index + delimiterLen;
+
+                                return true;
+                            }
+
+                            return false;
+                        }
+
+                        if (failure != null) {
+                            // Restart at the current token boundary, so source mutations between iterator
+                            // calls are still observed. The immutable delimiter's table is shared.
+                            for (int i = start, matched = 0; i < sourceLen; i++) {
+                                final char ch = source.charAt(i);
+                                while (matched > 0 && ch != delimiterChars[matched]) {
+                                    matched = failure[matched - 1];
+                                }
+                                if (ch == delimiterChars[matched] && ++matched == delimiterLen) {
+                                    separatorStart = i - delimiterLen + 1;
+                                    separatorEnd = i + 1;
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+
                         for (int i = start, last = sourceLen - delimiterLen; i <= last; i++) {
                             if (source.charAt(i) == delimiterChars[0] && match(i)) {
                                 separatorStart = i;
@@ -506,6 +560,19 @@ public final class Splitter {
         }
     }
 
+    private static int[] delimiterFailureTable(final char[] delimiter) {
+        final int[] failure = new int[delimiter.length];
+        for (int i = 1, matched = 0; i < delimiter.length; i++) {
+            while (matched > 0 && delimiter[i] != delimiter[matched]) {
+                matched = failure[matched - 1];
+            }
+            if (delimiter[i] == delimiter[matched]) {
+                failure[i] = ++matched;
+            }
+        }
+        return failure;
+    }
+
     /**
      * Returns a new Splitter instance that uses the specified regular expression pattern as a delimiter.
      * The pattern is applied using Java's regular expression engine. The pattern must not match
@@ -517,8 +584,8 @@ public final class Splitter {
      * which suppresses a zero-length match at index 0 &mdash; this class does not, so a leading empty element
      * appears:</p>
      * <pre>{@code
-     * Splitter.with(Pattern.compile("\\b")).split("ab cd");   // returns ["", "ab", " ", "cd", ""]
-     * Arrays.asList("ab cd".split("\\b", -1));                // returns ["ab", " ", "cd", ""]
+     * Splitter.with(Pattern.compile("\\b")).split("ab cd");  // returns ["", "ab", " ", "cd", ""]
+     * Arrays.asList("ab cd".split("\\b", -1));               // returns ["ab", " ", "cd", ""]
      * }</pre>
      *
      * <p><b>Usage Examples:</b></p>
@@ -606,8 +673,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").omitEmptyStrings(true).split("a,,b,");    // returns ["a", "b"]
-     * Splitter.with(",").omitEmptyStrings(false).split("a,,b,");   // returns ["a", "", "b", ""]
+     * Splitter.with(",").omitEmptyStrings(true).split("a,,b,");   // returns ["a", "b"]
+     * Splitter.with(",").omitEmptyStrings(false).split("a,,b,");  // returns ["a", "", "b", ""]
      * }</pre>
      *
      * <p>{@link #omitEmptyStrings()} can only turn this on, so {@code omitEmptyStrings(false)} is the only way
@@ -653,8 +720,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").trim(true).split("a , b , c");    // returns ["a", "b", "c"]
-     * Splitter.with(",").trim(false).split("a , b , c");   // returns ["a ", " b ", " c"]
+     * Splitter.with(",").trim(true).split("a , b , c");   // returns ["a", "b", "c"]
+     * Splitter.with(",").trim(false).split("a , b , c");  // returns ["a ", " b ", " c"]
      * }</pre>
      *
      * <p><b>This is not {@link String#trim()}.</b> Only the space character {@code U+0020} is removed; tabs,
@@ -663,8 +730,8 @@ public final class Splitter {
      * {@code Splitter.trimResults()} (which removes Unicode whitespace). Use {@link #stripResults()} for
      * whitespace-aware trimming:</p>
      * <pre>{@code
-     * Splitter.with(',').trimResults().split("a	, b");    // returns ["a	", "b"] -- the tab survives
-     * Splitter.with(',').stripResults().split("a	, b");   // returns ["a", "b"]
+     * Splitter.with(',').trimResults().split("a	, b");   // returns ["a	", "b"] -- the tab survives
+     * Splitter.with(',').stripResults().split("a	, b");  // returns ["a", "b"]
      * }</pre>
      *
      * <p>{@link #trimResults()} can only turn trim mode on, so {@code trim(false)} is the only way to turn it
@@ -705,8 +772,8 @@ public final class Splitter {
      * {@code Splitter.trimResults()} (which removes Unicode whitespace). Use {@link #stripResults()} for
      * whitespace-aware trimming:</p>
      * <pre>{@code
-     * Splitter.with(',').trimResults().split("a	, b");    // returns ["a	", "b"] -- the tab survives
-     * Splitter.with(',').stripResults().split("a	, b");   // returns ["a", "b"]
+     * Splitter.with(',').trimResults().split("a	, b");   // returns ["a	", "b"] -- the tab survives
+     * Splitter.with(',').stripResults().split("a	, b");  // returns ["a", "b"]
      * }</pre>
      *
      * <p>Trimming and stripping are mutually exclusive: this method switches the splitter to trim mode,
@@ -732,8 +799,8 @@ public final class Splitter {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Splitter.with(",").strip(true).split("a\t,\nb ,\tc");   // returns ["a", "b", "c"]
-     * Splitter.with(",").strip(false).split("a\t, b ,c");     // returns ["a\t", " b ", "c"]
+     * Splitter.with(",").strip(true).split("a\t,\nb ,\tc");  // returns ["a", "b", "c"]
+     * Splitter.with(",").strip(false).split("a\t, b ,c");    // returns ["a\t", " b ", "c"]
      * }</pre>
      *
      * <p>{@link #stripResults()} can only turn strip mode on, so {@code strip(false)} is the only way to turn
@@ -811,11 +878,11 @@ public final class Splitter {
      * if configured. That differs from {@code String.split(regex, limit)}, which counts every field including
      * the empty ones:</p>
      * <pre>{@code
-     * Splitter.with(",").omitEmptyStrings().limit(2).split(",,a,b,c");   // returns ["a", "b,c"]
-     * Splitter.with(",").omitEmptyStrings().limit(2).split("a,,,b,c");   // returns ["a", "b,c"]
+     * Splitter.with(",").omitEmptyStrings().limit(2).split(",,a,b,c");  // returns ["a", "b,c"]
+     * Splitter.with(",").omitEmptyStrings().limit(2).split("a,,,b,c");  // returns ["a", "b,c"]
      * Splitter.with(",").omitEmptyStrings().limit(2).split("a,b,,c");   // returns ["a", "b,,c"]
-     * Splitter.with(",").omitEmptyStrings().limit(1).split(",");         // returns []
-     * ",,a,b,c".split(",", 2);                                           // returns ["", ",a,b,c"]
+     * Splitter.with(",").omitEmptyStrings().limit(1).split(",");        // returns []
+     * ",,a,b,c".split(",", 2);                                          // returns ["", ",a,b,c"]
      * }</pre>
      *
      * <p>Without {@link #omitEmptyStrings()} empty fields count toward the limit and remain in the final
@@ -858,9 +925,9 @@ public final class Splitter {
      * List<String> parts = Splitter.with(",").split("a,b,c");
      * // Returns ["a", "b", "c"]
      *
-     * Splitter.with(",").split((CharSequence) null);         // returns [] (size 0)
-     * Splitter.with(",").split("");                          // returns [""] (size 1)
-     * Splitter.with(",").omitEmptyStrings().split("");       // returns [] (size 0)
+     * Splitter.with(",").split((CharSequence) null);    // returns [] (size 0)
+     * Splitter.with(",").split("");                     // returns [""] (size 1)
+     * Splitter.with(",").omitEmptyStrings().split("");  // returns [] (size 0)
      * }</pre>
      *
      * @param source the CharSequence to split; may be {@code null}.
@@ -903,9 +970,9 @@ public final class Splitter {
      * itself one empty token (see {@link #split(CharSequence)}), so splitting {@code ""} yields one element, not
      * none. Configure {@link #omitEmptyStrings()} to drop empty tokens instead of converting them:</p>
      * <pre>{@code
-     * Splitter.with(",").split("1,,3", Integer.class);                      // returns [1, null, 3]
-     * Splitter.with(",").split("", Integer.class);                          // returns [null]  (size 1)
-     * Splitter.with(",").omitEmptyStrings().split("1,,3", Integer.class);   // returns [1, 3]
+     * Splitter.with(",").split("1,,3", Integer.class);                     // returns [1, null, 3]
+     * Splitter.with(",").split("", Integer.class);                         // returns [null]  (size 1)
+     * Splitter.with(",").omitEmptyStrings().split("1,,3", Integer.class);  // returns [1, 3]
      * }</pre>
      *
      * @param <T> the target type for conversion.
@@ -950,9 +1017,9 @@ public final class Splitter {
      * itself one empty token (see {@link #split(CharSequence)}), so splitting {@code ""} yields one element, not
      * none. Configure {@link #omitEmptyStrings()} to drop empty tokens instead of converting them:</p>
      * <pre>{@code
-     * Splitter.with(",").split("1,,3", Integer.class);                      // returns [1, null, 3]
-     * Splitter.with(",").split("", Integer.class);                          // returns [null]  (size 1)
-     * Splitter.with(",").omitEmptyStrings().split("1,,3", Integer.class);   // returns [1, 3]
+     * Splitter.with(",").split("1,,3", Integer.class);                     // returns [1, null, 3]
+     * Splitter.with(",").split("", Integer.class);                         // returns [null]  (size 1)
+     * Splitter.with(",").omitEmptyStrings().split("1,,3", Integer.class);  // returns [1, 3]
      * }</pre>
      *
      * @param <T> the target type for conversion.
@@ -1022,17 +1089,18 @@ public final class Splitter {
      * @param source the CharSequence to split; may be {@code null}.
      * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the split results.
-     * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if {@code supplier} is {@code null}.
+     * @throws NullPointerException if {@code supplier} returns {@code null}.
      * @throws UnsupportedOperationException if the supplied Collection rejects insertion and at least one
      *         element is produced.
      * @see #split(CharSequence)
      * @see #splitToCollection(CharSequence, Class, Supplier)
      */
     public <C extends Collection<String>> C splitToCollection(final CharSequence source, final Supplier<? extends C> supplier)
-            throws IllegalArgumentException, UnsupportedOperationException {
+            throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final C result = N.checkArgNotNull(supplier.get(), "The Supplier must not return null");
+        final C result = N.requireNonNull(supplier.get(), "The Supplier must not return null");
 
         splitInto(source, result);
 
@@ -1057,9 +1125,10 @@ public final class Splitter {
      * @param targetType the Class representing the type to convert each substring to.
      * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the converted results.
-     * @throws IllegalArgumentException if targetType is {@code null}, or if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if targetType is {@code null}, or if {@code supplier} is {@code null}.
      * @throws RuntimeException if resolving the requested conversion type or converting a split token fails
-     * @throws NullPointerException if a converted element is {@code null} and the destination rejects it
+     * @throws NullPointerException if {@code supplier} returns {@code null}, or a converted element is {@code null} and
+     *         the destination rejects it
      * @throws ClassCastException if a converted element has a type that the destination cannot accept or compare
      * @throws UnsupportedOperationException if the supplied Collection rejects insertion and at least one
      *         element is produced.
@@ -1070,7 +1139,7 @@ public final class Splitter {
         N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final C result = N.checkArgNotNull(supplier.get(), "The Supplier must not return null");
+        final C result = N.requireNonNull(supplier.get(), "The Supplier must not return null");
 
         splitInto(source, targetType, result);
 
@@ -1098,9 +1167,10 @@ public final class Splitter {
      * @param targetType the Type instance used for converting strings to the target type.
      * @param supplier a Supplier that creates a new Collection instance to hold the results.
      * @return the Collection created by the supplier, populated with the converted results.
-     * @throws IllegalArgumentException if targetType is {@code null}, or if {@code supplier} is {@code null} or returns {@code null}.
+     * @throws IllegalArgumentException if targetType is {@code null}, or if {@code supplier} is {@code null}.
      * @throws RuntimeException if converting a split token fails
-     * @throws NullPointerException if a converted element is {@code null} and the destination rejects it
+     * @throws NullPointerException if {@code supplier} returns {@code null}, or a converted element is {@code null} and
+     *         the destination rejects it
      * @throws ClassCastException if a converted element has a type that the destination cannot accept or compare
      * @throws UnsupportedOperationException if the supplied Collection rejects insertion and at least one
      *         element is produced.
@@ -1110,7 +1180,7 @@ public final class Splitter {
         N.checkArgNotNull(targetType, cs.targetType);
         N.checkArgNotNull(supplier, cs.supplier);
 
-        final C result = N.checkArgNotNull(supplier.get(), "The Supplier must not return null");
+        final C result = N.requireNonNull(supplier.get(), "The Supplier must not return null");
 
         splitInto(source, targetType, result);
 
@@ -1389,8 +1459,8 @@ public final class Splitter {
      * int[] primitives = Splitter.with(";").splitToArray("10;20;30", int[].class);
      * // Returns [10, 20, 30]
      *
-     * Splitter.with(",").splitToArray("1,,3", int[].class);       // returns [1, 0, 3]
-     * Splitter.with(",").splitToArray("1,,3", Integer[].class);   // returns [1, null, 3]
+     * Splitter.with(",").splitToArray("1,,3", int[].class);      // returns [1, 0, 3]
+     * Splitter.with(",").splitToArray("1,,3", Integer[].class);  // returns [1, null, 3]
      * }</pre>
      *
      * @param <T> the array type.
@@ -1697,7 +1767,10 @@ public final class Splitter {
          * @see Splitter#with(CharSequence)
          */
         public static MapSplitter with(final CharSequence entryDelimiter, final CharSequence keyValueDelimiter) throws IllegalArgumentException {
-            return new MapSplitter(Splitter.with(entryDelimiter), Splitter.with(keyValueDelimiter));
+            // Each delimiter is validated inline, in argument order, so the message names the MapSplitter parameter
+            // rather than the delegate's 'delimiter' while every other outcome stays exactly as before.
+            return new MapSplitter(Splitter.with(N.checkArgNotEmpty(entryDelimiter, cs.entryDelimiter)),
+                    Splitter.with(N.checkArgNotEmpty(keyValueDelimiter, cs.keyValueDelimiter)));
         }
 
         /**
@@ -1716,14 +1789,15 @@ public final class Splitter {
          * @param entryDelimiter the Pattern that separates entries (key-value pairs), not {@code null}.
          * @param keyValueDelimiter the Pattern that separates keys from values, not {@code null}.
          * @return a new MapSplitter instance with the specified pattern delimiters.
-         * @throws IllegalArgumentException if either delimiter is {@code null}, or if either pattern can match an
-         *         empty string.
+         * @throws IllegalArgumentException if either delimiter is {@code null}, or if either pattern matches the
+         *         empty input string.
          * @see #with(CharSequence, CharSequence)
          * @see #pattern(CharSequence, CharSequence)
          * @see Splitter#with(Pattern)
          */
         public static MapSplitter with(final Pattern entryDelimiter, final Pattern keyValueDelimiter) throws IllegalArgumentException {
-            return new MapSplitter(Splitter.with(entryDelimiter), Splitter.with(keyValueDelimiter));
+            return new MapSplitter(Splitter.with(N.checkArgNotNull(entryDelimiter, cs.entryDelimiter)),
+                    Splitter.with(N.checkArgNotNull(keyValueDelimiter, cs.keyValueDelimiter)));
         }
 
         /**
@@ -1741,8 +1815,8 @@ public final class Splitter {
          * @param entryDelimiterRegex the regular expression that separates entries, not {@code null} or empty.
          * @param keyValueDelimiterRegex the regular expression that separates keys from values, not {@code null} or empty.
          * @return a new MapSplitter instance with the compiled pattern delimiters.
-         * @throws IllegalArgumentException if either regex is {@code null} or empty, or if the compiled patterns can
-         *         match an empty string.
+         * @throws IllegalArgumentException if either regex is {@code null} or empty, or if either compiled pattern
+         *         matches the empty input string.
          * @throws PatternSyntaxException if either delimiter regex is not a valid regular expression
          * @see #with(Pattern, Pattern)
          * @see #with(CharSequence, CharSequence)
@@ -1750,7 +1824,8 @@ public final class Splitter {
          */
         public static MapSplitter pattern(final CharSequence entryDelimiterRegex, final CharSequence keyValueDelimiterRegex)
                 throws IllegalArgumentException, PatternSyntaxException {
-            return new MapSplitter(Splitter.pattern(entryDelimiterRegex), Splitter.pattern(keyValueDelimiterRegex));
+            return new MapSplitter(Splitter.pattern(N.checkArgNotEmpty(entryDelimiterRegex, cs.entryDelimiterRegex)),
+                    Splitter.pattern(N.checkArgNotEmpty(keyValueDelimiterRegex, cs.keyValueDelimiterRegex)));
         }
 
         /**
@@ -2128,16 +2203,17 @@ public final class Splitter {
          * @param source the CharSequence to split into a map; may be {@code null}
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the parsed key-value pairs
-         * @throws IllegalArgumentException if {@code supplier} is {@code null} or returns {@code null}, or if any
+         * @throws IllegalArgumentException if {@code supplier} is {@code null}, or if any
          *         entry string cannot be properly parsed into a key-value pair.
+         * @throws NullPointerException if {@code supplier} returns {@code null}.
          * @throws UnsupportedOperationException if the supplied Map rejects insertion and at least one entry is
          *         produced.
          */
         public <M extends Map<String, String>> M splitToMap(final CharSequence source, final Supplier<? extends M> supplier)
-                throws IllegalArgumentException, UnsupportedOperationException {
+                throws IllegalArgumentException, NullPointerException, UnsupportedOperationException {
             N.checkArgNotNull(supplier, cs.supplier);
 
-            final M result = N.checkArgNotNull(supplier.get(), "The Supplier must not return null");
+            final M result = N.requireNonNull(supplier.get(), "The Supplier must not return null");
 
             splitInto(source, result);
 
@@ -2166,10 +2242,11 @@ public final class Splitter {
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the converted key-value pairs
          * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}, if {@code supplier}
-         *         is {@code null} or returns {@code null}, or if any entry string cannot be properly parsed into a
+         *         is {@code null}, or if any entry string cannot be properly parsed into a
          *         key-value pair.
          * @throws RuntimeException if resolving a requested conversion type or converting a key or value fails
-         * @throws NullPointerException if a converted key or value is {@code null} and the destination rejects it
+         * @throws NullPointerException if {@code supplier} returns {@code null}, or a converted key or value is {@code null}
+         *         and the destination rejects it
          * @throws ClassCastException if a converted key or value has a type that the destination cannot accept or compare
          * @throws UnsupportedOperationException if the destination map rejects insertion and an entry is produced
          */
@@ -2180,7 +2257,7 @@ public final class Splitter {
             N.checkArgNotNull(valueType, cs.valueType);
             N.checkArgNotNull(supplier, cs.supplier);
 
-            final M result = N.checkArgNotNull(supplier.get(), "The Supplier must not return null");
+            final M result = N.requireNonNull(supplier.get(), "The Supplier must not return null");
 
             splitInto(source, keyType, valueType, result);
 
@@ -2211,10 +2288,11 @@ public final class Splitter {
          * @param supplier a Supplier that creates a new Map instance to hold the results
          * @return the Map created by the supplier, populated with the converted key-value pairs
          * @throws IllegalArgumentException if {@code keyType} or {@code valueType} is {@code null}, if {@code supplier}
-         *         is {@code null} or returns {@code null}, or if any entry string cannot be properly parsed into a
+         *         is {@code null}, or if any entry string cannot be properly parsed into a
          *         key-value pair.
          * @throws RuntimeException if converting a key or value fails
-         * @throws NullPointerException if a converted key or value is {@code null} and the destination rejects it
+         * @throws NullPointerException if {@code supplier} returns {@code null}, or a converted key or value is {@code null}
+         *         and the destination rejects it
          * @throws ClassCastException if a converted key or value has a type that the destination cannot accept or compare
          * @throws UnsupportedOperationException if the destination map rejects insertion and an entry is produced
          */
@@ -2225,7 +2303,7 @@ public final class Splitter {
             N.checkArgNotNull(valueType, cs.valueType);
             N.checkArgNotNull(supplier, cs.supplier);
 
-            final M result = N.checkArgNotNull(supplier.get(), "The Supplier must not return null");
+            final M result = N.requireNonNull(supplier.get(), "The Supplier must not return null");
 
             splitInto(source, keyType, valueType, result);
 
@@ -2564,7 +2642,7 @@ public final class Splitter {
          * @param source the CharSequence to split into a map; may be {@code null}
          * @param converter a function that transforms the parsed map into a result.
          * @return the result of applying the converter function to the parsed map
-         * @throws IllegalArgumentException if the callback is {@code null}, or an entry does not yield both a key and a value
+         * @throws IllegalArgumentException if {@code converter} is {@code null}, or an entry does not yield both a key and a value
          * @see #split(CharSequence)
          * @see #splitThenAccept(CharSequence, Consumer)
          */
@@ -2589,7 +2667,7 @@ public final class Splitter {
          *
          * @param source the CharSequence to split into a map; may be {@code null}
          * @param consumer a consumer that processes the parsed map.
-         * @throws IllegalArgumentException if the callback is {@code null}, or an entry does not yield both a key and a value
+         * @throws IllegalArgumentException if {@code consumer} is {@code null}, or an entry does not yield both a key and a value
          * @see #split(CharSequence)
          * @see #splitThenApply(CharSequence, Function)
          */

@@ -28,8 +28,8 @@ package com.landawn.abacus.type;
  * Type<Byte> type = TypeFactory.getType(byte.class);
  *
  * // Convert string to byte
- * Byte value = type.valueOf("42");    // Returns (byte) 42
- * Byte value2 = type.valueOf("-128"); // Returns (byte) -128
+ * Byte value = type.valueOf("42");     // Returns (byte) 42
+ * Byte value2 = type.valueOf("-128");  // Returns (byte) -128
  *
  * // Get default value
  * Byte defaultVal = type.defaultValue();   // Returns 0

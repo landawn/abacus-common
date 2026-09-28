@@ -1861,4 +1861,171 @@ public class ParallelIteratorStreamTest extends TestBase {
         org.junit.jupiter.api.Assertions.assertFalse(mapCreated.get());
         org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, source::count);
     }
+
+    @Test
+    public void testGroupToNullKeyWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch siblingStarted = new CountDownLatch(1);
+        final AtomicBoolean siblingFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedSibling = new AtomicBoolean();
+        final Stream<Integer> testStream = Stream.of(Arrays.asList(1, 2).iterator())
+                .parallel(2)
+                .onClose(() -> closeObservedFinishedSibling.set(siblingFinished.get()));
+
+        final NullPointerException thrown = assertThrows(NullPointerException.class, () -> testStream.groupTo(value -> {
+            if (value == 2) {
+                siblingStarted.countDown();
+                Thread.sleep(200);
+                siblingFinished.set(true);
+                return value;
+            }
+
+            if (!siblingStarted.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+
+            return null;
+        }, value -> value, Collectors.counting(), java.util.HashMap::new));
+
+        assertEquals("element cannot be mapped to a null key", thrown.getMessage());
+        assertTrue(siblingFinished.get());
+        assertTrue(closeObservedFinishedSibling.get());
+    }
+
+    @Test
+    public void testFlatGroupToNullKeyWaitsForSiblingWorkersBeforeClosing() {
+        final CountDownLatch siblingStarted = new CountDownLatch(1);
+        final AtomicBoolean siblingFinished = new AtomicBoolean();
+        final AtomicBoolean closeObservedFinishedSibling = new AtomicBoolean();
+        final Stream<Integer> testStream = Stream.of(Arrays.asList(1, 2).iterator())
+                .parallel(2)
+                .onClose(() -> closeObservedFinishedSibling.set(siblingFinished.get()));
+
+        final NullPointerException thrown = assertThrows(NullPointerException.class, () -> testStream.flatGroupTo(value -> {
+            if (value == 2) {
+                siblingStarted.countDown();
+                Thread.sleep(200);
+                siblingFinished.set(true);
+                return Arrays.asList(value);
+            }
+
+            if (!siblingStarted.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for sibling worker");
+            }
+
+            return Arrays.asList((Integer) null);
+        }, (key, value) -> value, Collectors.counting(), java.util.HashMap::new));
+
+        assertEquals("element cannot be mapped to a null key", thrown.getMessage());
+        assertTrue(siblingFinished.get());
+        assertTrue(closeObservedFinishedSibling.get());
+    }
+
+    @Test
+    public void testCollectWorkerContainersReceiveInterleavedElements() {
+        final CountDownLatch secondTaken = new CountDownLatch(1);
+        final CountDownLatch thirdTaken = new CountDownLatch(1);
+
+        final List<Integer> result = Stream.of(Arrays.asList(0, 1, 2, 3).iterator()).parallel(2).collect(ArrayList<Integer>::new, (container, e) -> {
+            container.add(e);
+
+            try {
+                if (e == 0) {
+                    assertTrue(secondTaken.await(5, TimeUnit.SECONDS));
+                } else if (e == 1) {
+                    secondTaken.countDown();
+                    assertTrue(thirdTaken.await(5, TimeUnit.SECONDS));
+                } else if (e == 2) {
+                    thirdTaken.countDown();
+                }
+            } catch (final InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new AssertionError(ex);
+            }
+        }, List::addAll);
+
+        // The worker that took 0 also took 2 and 3 while its sibling was still holding 1.
+        assertTrue(result.equals(Arrays.asList(0, 2, 3, 1)) || result.equals(Arrays.asList(1, 0, 2, 3)), result.toString());
+    }
+
+    // ---- perf review 2026-09-26 G104 begin ----
+    // G104-01: findFirst/findLast track the position as a primitive; findLast publishes one candidate per worker.
+    private static List<Integer> g104Range(final int size) {
+        final List<Integer> list = new ArrayList<>(size);
+
+        for (int i = 0; i < size; i++) {
+            list.add(i);
+        }
+
+        return list;
+    }
+
+    // G104-01
+    @Test
+    public void testFindLast_manyMatchesAcrossWorkers() {
+        final List<Integer> data = g104Range(10_000);
+
+        for (int round = 0; round < 20; round++) {
+            final AtomicInteger calls = new AtomicInteger();
+            assertEquals(Integer.valueOf(9_999), Stream.of(data.iterator()).parallel(4).findLast(x -> {
+                calls.incrementAndGet();
+                return true;
+            }).get());
+            // findLast never short-circuits: every element is tested exactly once.
+            assertEquals(10_000, calls.get());
+
+            assertEquals(Integer.valueOf(9_996), Stream.of(data.iterator()).parallel(4).findLast(x -> x % 7 == 0).get());
+            assertEquals(Integer.valueOf(4_999), Stream.of(data.iterator()).parallel(3).findLast(x -> x < 5_000).get());
+            assertEquals(Integer.valueOf(0), Stream.of(data.iterator()).parallel(4).findLast(x -> x == 0).get());
+        }
+    }
+
+    // G104-01
+    @Test
+    public void testFindLast_noMatchEmptyNullAndFailure() {
+        final List<Integer> data = g104Range(1_000);
+        final AtomicInteger calls = new AtomicInteger();
+
+        assertFalse(Stream.of(data.iterator()).parallel(4).findLast(x -> {
+            calls.incrementAndGet();
+            return false;
+        }).isPresent());
+        assertEquals(1_000, calls.get());
+        assertFalse(Stream.of(new ArrayList<Integer>().iterator()).parallel(4).findLast(x -> true).isPresent());
+
+        final List<Integer> withNull = new ArrayList<>(data);
+        withNull.add(null);
+        assertThrows(NullPointerException.class, () -> Stream.of(withNull.iterator()).parallel(4).findLast(x -> true));
+
+        final AtomicBoolean closed = new AtomicBoolean();
+        final IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> Stream.of(data.iterator()).parallel(4).onClose(() -> closed.set(true)).findLast(x -> {
+                    if (x == 500) {
+                        throw new IllegalStateException("findLast failure");
+                    }
+
+                    return true;
+                }));
+        assertEquals("findLast failure", thrown.getMessage());
+        assertTrue(closed.get());
+    }
+
+    // G104-01
+    @Test
+    public void testFindFirst_positionsBeyondBoxCache() {
+        final List<Integer> data = g104Range(10_000);
+
+        for (int round = 0; round < 20; round++) {
+            assertEquals(Integer.valueOf(1_234), Stream.of(data.iterator()).parallel(4).findFirst(x -> x >= 1_234).get());
+            assertEquals(Integer.valueOf(999), Stream.of(data.iterator()).parallel(4).findFirst(x -> x % 1_000 == 999).get());
+            assertEquals(Integer.valueOf(0), Stream.of(data.iterator()).parallel(3).findFirst(x -> true).get());
+            assertFalse(Stream.of(data.iterator()).parallel(4).findFirst(x -> x < 0).isPresent());
+        }
+
+        assertFalse(Stream.of(new ArrayList<Integer>().iterator()).parallel(4).findFirst(x -> true).isPresent());
+
+        final List<Integer> withNull = new ArrayList<>(Arrays.asList(1, 2, 3));
+        withNull.add(0, null);
+        assertThrows(NullPointerException.class, () -> Stream.of(withNull.iterator()).parallel(4).findFirst(x -> x == null));
+    }
+    // ---- perf review 2026-09-26 G104 end ----
 }

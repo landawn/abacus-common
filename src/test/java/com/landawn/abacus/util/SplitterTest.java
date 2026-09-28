@@ -251,7 +251,7 @@ public class SplitterTest extends AbstractTest {
 
         assertThrows(IllegalArgumentException.class, () -> splitter.splitInto("a,b,c", (Collection<String>) null));
         assertThrows(IllegalArgumentException.class, () -> splitter.splitToCollection(null, (java.util.function.Supplier<List<String>>) null));
-        assertThrows(IllegalArgumentException.class, () -> splitter.splitToCollection(null, (java.util.function.Supplier<List<String>>) () -> null));
+        assertThrows(NullPointerException.class, () -> splitter.splitToCollection(null, (java.util.function.Supplier<List<String>>) () -> null));
 
         final boolean[] supplierCalled = { false };
         assertThrows(IllegalArgumentException.class,
@@ -535,7 +535,7 @@ public class SplitterTest extends AbstractTest {
         assertThrows(IllegalArgumentException.class,
                 () -> mapSplitter.splitInto("a=1", Type.of(String.class), Type.of(String.class), (Map<String, String>) null));
         assertThrows(IllegalArgumentException.class, () -> mapSplitter.splitToMap(null, (java.util.function.Supplier<Map<String, String>>) null));
-        assertThrows(IllegalArgumentException.class, () -> mapSplitter.splitToMap(null, (java.util.function.Supplier<Map<String, String>>) () -> null));
+        assertThrows(NullPointerException.class, () -> mapSplitter.splitToMap(null, (java.util.function.Supplier<Map<String, String>>) () -> null));
 
         final boolean[] supplierCalled = { false };
         assertThrows(IllegalArgumentException.class,
@@ -545,4 +545,107 @@ public class SplitterTest extends AbstractTest {
                 }));
         assertFalse(supplierCalled[0]);
     }
+
+    @Test
+    public void testMapSplitterWithCharSequenceNullOrEmptyDelimiterNamesParameter() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.with(null, "="));
+        assertTrue(e.getMessage().contains("entryDelimiter"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.with("", "="));
+        assertTrue(e.getMessage().contains("entryDelimiter"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.with(",", null));
+        assertTrue(e.getMessage().contains("keyValueDelimiter"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.with(",", ""));
+        assertTrue(e.getMessage().contains("keyValueDelimiter"), e.getMessage());
+    }
+
+    @Test
+    public void testMapSplitterWithPatternNullDelimiterNamesParameter() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.with((Pattern) null, Pattern.compile("=")));
+        assertTrue(e.getMessage().contains("entryDelimiter"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.with(Pattern.compile(","), (Pattern) null));
+        assertTrue(e.getMessage().contains("keyValueDelimiter"), e.getMessage());
+
+        // the entry pattern is still validated completely before the key-value pattern is looked at
+        e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.with(Pattern.compile("x*"), (Pattern) null));
+        assertTrue(e.getMessage().contains("empty input string"), e.getMessage());
+    }
+
+    @Test
+    public void testMapSplitterPatternNullOrEmptyRegexNamesParameter() {
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.pattern(null, "="));
+        assertTrue(e.getMessage().contains("entryDelimiterRegex"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.pattern("", "="));
+        assertTrue(e.getMessage().contains("entryDelimiterRegex"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.pattern(",", null));
+        assertTrue(e.getMessage().contains("keyValueDelimiterRegex"), e.getMessage());
+
+        e = assertThrows(IllegalArgumentException.class, () -> MapSplitter.pattern(",", ""));
+        assertTrue(e.getMessage().contains("keyValueDelimiterRegex"), e.getMessage());
+
+        // an invalid entry regex is still reported before a null key-value regex
+        assertThrows(java.util.regex.PatternSyntaxException.class, () -> MapSplitter.pattern("[", null));
+    }
+
+    // ---- perf review 2026-09-26 G071 begin ----
+
+    // G071-05: a String source is scanned with String.indexOf (char and short-string delimiters); any other CharSequence keeps
+    // the charAt scan. Both must produce identical tokens for every configuration, incl. surrogate delimiters and limits.
+    @Test
+    public void testSplit_stringSourceMatchesCharSequenceSource() {
+        final java.util.Random random = new java.util.Random(71);
+        final char[] alphabet = { 'a', 'b', ',', ':', ' ', '\t', '\uD800', '\uDC00', '\u00e9' };
+        final String[] delimiters = { ",", ":", " ", "\uD800", "\uDC00", "\u00e9", ", ", "::", "a:", ",,", "\uD800\uDC00", ":a:b:,:a:b:,:a:b:,", "a" };
+
+        for (int round = 0; round < 400; round++) {
+            final int length = random.nextInt(round < 50 ? 6 : 60);
+            final StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < length; i++) {
+                sb.append(alphabet[random.nextInt(alphabet.length)]);
+            }
+
+            final String source = sb.toString();
+
+            for (final String delimiter : delimiters) {
+                for (int config = 0; config < 16; config++) {
+                    final Splitter splitter = delimiter.length() == 1 && (config & 1) == 0 ? Splitter.with(delimiter.charAt(0)) : Splitter.with(delimiter);
+
+                    if ((config & 2) != 0) {
+                        splitter.omitEmptyStrings();
+                    }
+
+                    if ((config & 4) != 0) {
+                        splitter.trimResults();
+                    } else if ((config & 8) != 0) {
+                        splitter.stripResults();
+                    }
+
+                    final int limit = random.nextInt(5);
+
+                    if (limit > 0) {
+                        splitter.limit(limit);
+                    }
+
+                    final String msg = "source=" + source + ", delimiter=" + delimiter + ", config=" + config + ", limit=" + limit;
+                    assertEquals(splitter.split(new StringBuilder(source)), splitter.split(source), msg);
+                    assertEquals(splitter.splitToStream(new StringBuilder(source)).toList(), splitter.splitToStream(source).toList(), msg);
+                }
+            }
+        }
+
+        assertEquals(Arrays.asList("", "a", "", "b", ""), Splitter.with(',').split(",a,,b,"));
+        assertEquals(Arrays.asList("", "a", "b", ""), Splitter.with("::").split("::a::b::"));
+        assertEquals(Arrays.asList("a", "b::c"), Splitter.with("::").limit(2).split("a::b::c"));
+        assertEquals(Arrays.asList("x", "y\uDC00"), Splitter.with('\uD800').split("x\uD800y\uDC00"));
+        assertEquals(Arrays.asList("abc"), Splitter.with(',').split("abc"));
+        assertEquals(Arrays.asList(""), Splitter.with(", ").split(""));
+    }
+
+    // ---- perf review 2026-09-26 G071 end ----
 }

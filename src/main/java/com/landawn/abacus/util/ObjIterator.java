@@ -121,8 +121,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> iter = ObjIterator.empty();
-     * boolean has = iter.hasNext();   // returns false
-     * iter.next();                    // throws NoSuchElementException
+     * boolean has = iter.hasNext();  // returns false
+     * iter.next();                   // throws NoSuchElementException
      * }</pre>
      *
      * @param <T> the type of elements (not) returned by the iterator
@@ -140,15 +140,15 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ObjIterator<String> single = ObjIterator.just("Hello");
-     * single.next();      // returns "Hello"
-     * single.hasNext();   // returns false
+     * single.next();     // returns "Hello"
+     * single.hasNext();  // returns false
      * }</pre>
      *
      * @param <T> the type of the element
-     * @param val the single element to be returned by the iterator
+     * @param value the single element to be returned by the iterator
      * @return an {@code ObjIterator} containing exactly one element
      */
-    public static <T> ObjIterator<T> just(final T val) {
+    public static <T> ObjIterator<T> just(final T value) {
         return new ObjIterator<>() {
             private boolean done = false;
 
@@ -169,7 +169,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
 
                 done = true;
 
-                return val;
+                return value;
             }
         };
     }
@@ -301,8 +301,8 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * <pre>{@code
      * Iterator<String> src = Arrays.asList("a", "b", "c").iterator();
      * ObjIterator<String> iter = ObjIterator.of(src);
-     * String first = iter.next();     // returns "a"
-     * boolean has = iter.hasNext();   // returns true
+     * String first = iter.next();    // returns "a"
+     * boolean has = iter.hasNext();  // returns true
      *
      * ObjIterator<String> empty = ObjIterator.of((Iterator<String>) null);
      * boolean none = empty.hasNext();   // returns false (null -> empty iterator)
@@ -316,25 +316,25 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
      * match on the message or cause of an exhausted wrapper; test {@code hasNext()} instead.</p>
      *
      * @param <T> the type of elements in the iterator
-     * @param iter the {@code Iterator} to wrap
+     * @param iterator the {@code Iterator} to wrap
      * @return an {@code ObjIterator} wrapping the given iterator
      */
-    public static <T> ObjIterator<T> of(final Iterator<? extends T> iter) {
-        if (iter == null) {
+    public static <T> ObjIterator<T> of(final Iterator<? extends T> iterator) {
+        if (iterator == null) {
             return empty();
         }
 
         return new ObjIterator<>() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public T next() {
                 // No hasNext() guard: exhaustion is reported by the wrapped iterator, not normalised to
                 // ERROR_MSG_FOR_NO_SUCH_EX. Pinned by ObjIteratorTest; see of(Iterator) before re-adding one.
-                return iter.next();
+                return iterator.next();
             }
         };
     }
@@ -418,6 +418,9 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
     public static <T> ObjIterator<T> defer(final Supplier<? extends Iterator<? extends T>> iteratorSupplier) throws IllegalArgumentException {
         N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
+        // Capture only this clearable holder, not the factory itself in a synthetic final field.
+        final Holder<Supplier<? extends Iterator<? extends T>>> supplierHolder = Holder.of(iteratorSupplier);
+
         return new ObjIterator<>() {
             private Iterator<? extends T> iter = null;
             private volatile boolean isInitialized = false;
@@ -453,7 +456,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                             isInitializing = true;
 
                             try {
-                                iter = iteratorSupplier.get();
+                                iter = supplierHolder.value().get();
 
                                 if (iter == this) {
                                     throw new IllegalStateException("Iterator supplier returned the deferred iterator itself");
@@ -467,6 +470,7 @@ public abstract class ObjIterator<T> extends ImmutableIterator<T> {
                                     initializationFailure = e;
                                 }
                             } finally {
+                                supplierHolder.setValue(null);
                                 isInitializing = false;
                                 isInitialized = true;
                             }

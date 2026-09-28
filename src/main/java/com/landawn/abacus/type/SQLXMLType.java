@@ -207,15 +207,15 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * type.set(stmt, 1, xmlData);   // Set XML at parameter index 1
      * }</pre>
      *
-     * @param stmt the PreparedStatement to set the parameter on
+     * @param statement the PreparedStatement to set the parameter on
      * @param columnIndex the 1-based index of the parameter to set
      * @param x the SQLXML value to set as the parameter
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter index is invalid
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final SQLXML x) throws NullPointerException, SQLException {
-        stmt.setSQLXML(columnIndex, x);
+    public void set(final PreparedStatement statement, final int columnIndex, final SQLXML x) throws NullPointerException, SQLException {
+        statement.setSQLXML(columnIndex, x);
     }
 
     /**
@@ -229,14 +229,14 @@ public class SQLXMLType extends AbstractType<SQLXML> {
      * type.set(stmt, "xml_param", xmlData);   // Set XML by parameter name
      * }</pre>
      *
-     * @param stmt the CallableStatement to set the parameter on
+     * @param statement the CallableStatement to set the parameter on
      * @param parameterName the name of the parameter to set
      * @param x the SQLXML value to set as the parameter
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs or the parameter name is not found
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final SQLXML x) throws NullPointerException, SQLException {
-        stmt.setSQLXML(parameterName, x);
+    public void set(final CallableStatement statement, final String parameterName, final SQLXML x) throws NullPointerException, SQLException {
+        statement.setSQLXML(parameterName, x);
     }
 }

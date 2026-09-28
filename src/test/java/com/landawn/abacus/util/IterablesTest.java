@@ -2233,4 +2233,33 @@ public class IterablesTest extends IterablesTestSupport {
         // Every other random-access input still honours the unqualified promise.
         assertTrue(Iterables.asReversed(Arrays.asList(1, 2, 3)) instanceof RandomAccess);
     }
+
+    // ---- deep review 2026-09-25 G048 begin ----
+    // G048-01: a forward-overlapping self-copy took the snapshot path, which wrote through ListIterator.set; a
+    // CopyOnWriteArrayList supports set(int, E) but not ListIterator.set, so only that overlap direction threw.
+    @Test
+    public void testCopyInto_forwardOverlapOnCopyOnWriteArrayList() {
+        final List<Integer> list = new java.util.concurrent.CopyOnWriteArrayList<>(Arrays.asList(1, 2, 3, 4));
+        Iterables.copyInto(list, 0, list, 1, 3);
+        assertEquals(Arrays.asList(1, 1, 2, 3), list);
+
+        // the backward-overlap direction already worked; it must keep working
+        final List<Integer> list2 = new java.util.concurrent.CopyOnWriteArrayList<>(Arrays.asList(1, 2, 3, 4));
+        Iterables.copyInto(list2, 1, list2, 0, 3);
+        assertEquals(Arrays.asList(2, 3, 4, 4), list2);
+    }
+
+    // G048-01: whether the copy into a RandomAccess destination succeeded depended on the SOURCE's type - a
+    // non-RandomAccess source sent the writes through the destination's ListIterator.set.
+    @Test
+    public void testCopyInto_sequentialSourceIntoCopyOnWriteArrayList() {
+        final List<Integer> dest = new java.util.concurrent.CopyOnWriteArrayList<>(Arrays.asList(0, 0, 0, 0));
+        Iterables.copyInto(new LinkedList<>(Arrays.asList(1, 2, 3)), 1, dest, 2, 2);
+        assertEquals(Arrays.asList(0, 0, 2, 3), dest);
+
+        final List<Integer> dest2 = new java.util.concurrent.CopyOnWriteArrayList<>(Arrays.asList(0, 0, 0, 0));
+        Iterables.copyInto(new ArrayList<>(Arrays.asList(1, 2, 3)), 1, dest2, 2, 2);
+        assertEquals(dest2, dest);
+    }
+    // ---- deep review 2026-09-25 G048 end ----
 }

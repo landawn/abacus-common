@@ -1159,11 +1159,11 @@ public class HttpRequestTest extends HttpRequestTestSupport {
     @Test
     public void testZeroFactoryTimeoutMeansNoTimeoutAndNegativeIsRejected() throws Exception {
         // 0 is the factories' documented "no timeout" sentinel (the JDK default, unbounded).
+        // With no connect timeout the request runs on the shared default client (see HttpRequestSharedClientTest).
         final HttpRequest request = HttpRequest.url(testUrl, 0L, 0L);
-        final HttpClient.Builder clientBuilder = (HttpClient.Builder) field(request, "clientBuilder");
-        assertNotNull(clientBuilder);
-        assertEquals(true, clientBuilder.build().connectTimeout().isEmpty());
-        assertEquals(true, booleanField(request, "closeHttpClientAfterExecution"));
+        assertEquals(null, field(request, "clientBuilder"));
+        assertEquals(true, ((HttpClient) field(request, "httpClient")).connectTimeout().isEmpty());
+        assertEquals(false, booleanField(request, "closeHttpClientAfterExecution"));
         assertEquals("GET response", request.get(String.class));
 
         // A NEGATIVE value used to be accepted here as "no timeout" too - the same silent discard that
@@ -1175,7 +1175,7 @@ public class HttpRequestTest extends HttpRequestTestSupport {
         }
 
         final HttpRequest bounded = HttpRequest.url(testUrl, 1_000L, 5_000L);
-        assertEquals(Duration.ofSeconds(1), ((HttpClient.Builder) field(bounded, "clientBuilder")).build().connectTimeout().get());
+        assertEquals(Duration.ofSeconds(1), connectTimeoutOf(bounded).get());
     }
 
     // G04-103: decompress() ran every response body through wrapInputStream + readAllBytes, even for the formats
@@ -1297,4 +1297,42 @@ public class HttpRequestTest extends HttpRequestTestSupport {
         }
     }
 
+    @Test
+    public void testNegativeMillisTimeoutsNameInMillisParameters() {
+        final String target = "http://localhost:1/unused";
+
+        assertEquals("'connectTimeoutInMillis' cannot be negative: -1",
+                assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(target).connectTimeout(-1L)).getMessage());
+        assertEquals("'readTimeoutInMillis' cannot be negative: -1",
+                assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(target).readTimeout(-1L)).getMessage());
+        assertEquals("'connectTimeoutInMillis' cannot be negative: -1",
+                assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(target, -1L, 0L)).getMessage());
+        assertEquals("'readTimeoutInMillis' cannot be negative: -1",
+                assertThrows(IllegalArgumentException.class, () -> HttpRequest.url(URI.create(target), 0L, -1L)).getMessage());
+    }
+
+    @Test
+    public void testFormBodyEncodingFailureLeavesContentTypeAndBodyUnchanged() throws Exception {
+        final String url = "http://127.0.0.1:1/post";
+        final String json = "{\"k\":\"v\"}";
+        final HttpRequest request = HttpRequest.url(url).jsonBody(json);
+        final Map<Object, Object> badForm = new HashMap<>();
+        badForm.put(null, "value");
+
+        assertThrows(IllegalArgumentException.class, () -> request.formBody(badForm));
+        assertThrows(RuntimeException.class, () -> request.xmlBody((String) null));
+
+        final java.lang.reflect.Field builderField = HttpRequest.class.getDeclaredField("requestBuilder");
+        builderField.setAccessible(true);
+        final java.net.http.HttpRequest.Builder builder = (java.net.http.HttpRequest.Builder) builderField.get(request);
+        final java.net.http.HttpRequest built = builder.copy().uri(URI.create(url)).GET().build();
+
+        // The failed setters must not have switched the Content-Type of the still-installed JSON body.
+        assertEquals(java.util.List.of("application/json"), built.headers().allValues("Content-Type"));
+
+        final java.lang.reflect.Field bodyField = HttpRequest.class.getDeclaredField("bodyPublisher");
+        bodyField.setAccessible(true);
+        final java.net.http.HttpRequest.BodyPublisher body = (java.net.http.HttpRequest.BodyPublisher) bodyField.get(request);
+        assertEquals(json.getBytes(StandardCharsets.UTF_8).length, body.contentLength());
+    }
 }

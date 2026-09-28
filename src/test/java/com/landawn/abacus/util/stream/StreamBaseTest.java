@@ -2771,7 +2771,6 @@ public class StreamBaseTest extends TestBase {
     @Test
     public void testStaticFields() {
         Assertions.assertNotNull(StreamBase.NONE);
-        Assertions.assertNotNull(StreamBase.RAND);
         Assertions.assertNotNull(StreamBase.NULL_CHAR_ARRAY);
         Assertions.assertArrayEquals("null".toCharArray(), StreamBase.NULL_CHAR_ARRAY);
         Assertions.assertNotNull(StreamBase.ELEMENT_SEPARATOR_CHAR_ARRAY);
@@ -3303,4 +3302,119 @@ public class StreamBaseTest extends TestBase {
         }
     }
 
+    @Test
+    public void testZeroMaxThreadNumUsesDefaultThreadCountForParallelAndSps() {
+        Assertions.assertEquals(Arrays.asList(2, 4, 6), Stream.of(1, 2, 3).parallel(0).map(x -> x * 2).sorted().toList());
+
+        Assertions.assertEquals(Arrays.asList(2, 4, 6), Stream.of(1, 2, 3).sps(0, s -> s.map(x -> x * 2)).sorted().toList());
+
+        final ExecutorService executor = Executors.newFixedThreadPool(4);
+
+        try {
+            final Stream<Integer> parallel = Stream.of(1, 2, 3).parallel(0, executor);
+            Assertions.assertTrue(parallel.isParallel());
+            Assertions.assertEquals(Arrays.asList(2, 4, 6), parallel.map(x -> x * 2).sorted().toList());
+
+            Assertions.assertEquals(Arrays.asList(2, 4, 6), Stream.of(1, 2, 3).sps(0, executor, s -> s.map(x -> x * 2)).sorted().toList());
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    @Test
+    public void testSpsZeroMaxThreadNumResolvesToDefaultThreadCountWithAndWithoutExecutor() {
+        final List<Integer> observed = new ArrayList<>();
+
+        final List<Integer> result = Stream.of(1, 2, 3).sps(0, s -> {
+            observed.add(((StreamBase<?, ?, ?, ?, ?, ?, ?, ?>) s).maxThreadNum());
+            return s.map(i -> i * 2);
+        }).sorted().toList();
+
+        Assertions.assertEquals(java.util.Arrays.asList(2, 4, 6), result);
+
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        try {
+            final List<Integer> result2 = Stream.of(1, 2, 3).sps(0, executor, s -> {
+                observed.add(((StreamBase<?, ?, ?, ?, ?, ?, ?, ?>) s).maxThreadNum());
+                return s.map(i -> i + 1);
+            }).sorted().toList();
+
+            Assertions.assertEquals(java.util.Arrays.asList(2, 3, 4), result2);
+        } finally {
+            executor.shutdownNow();
+        }
+
+        Assertions.assertEquals(java.util.Arrays.asList(StreamBase.DEFAULT_MAX_THREAD_NUM, StreamBase.DEFAULT_MAX_THREAD_NUM), observed);
+    }
+
+    @Test
+    public void testTransformReturningNullClosesUpstreamAndReturnsNull() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> upstream = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
+
+        final Stream<Integer> result = upstream.transform(s -> null);
+
+        Assertions.assertNull(result);
+        Assertions.assertEquals(1, closeCount.get());
+        Assertions.assertThrows(IllegalStateException.class, upstream::count);
+    }
+
+    @Test
+    public void testRateLimitedInvalidRateClosesStreamLikeOtherArgumentChecks() {
+        for (final double invalid : new double[] { 0.0, -1.0, Double.NaN }) {
+            final AtomicInteger closeCount = new AtomicInteger();
+            final Stream<Integer> stream = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
+
+            final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> stream.rateLimited(invalid));
+            Assertions.assertEquals("rate must be positive: " + invalid, e.getMessage());
+            Assertions.assertEquals(1, closeCount.get(), "rate " + invalid);
+            Assertions.assertThrows(IllegalStateException.class, stream::count);
+
+            final AtomicInteger intCloseCount = new AtomicInteger();
+            final IntStream intStream = IntStream.of(1, 2, 3).onClose(intCloseCount::incrementAndGet);
+
+            Assertions.assertThrows(IllegalArgumentException.class, () -> intStream.rateLimited(invalid));
+            Assertions.assertEquals(1, intCloseCount.get(), "int stream rate " + invalid);
+
+            final AtomicInteger entryCloseCount = new AtomicInteger();
+            final EntryStream<String, Integer> entryStream = EntryStream.of("a", 1).onClose(entryCloseCount::incrementAndGet);
+
+            Assertions.assertThrows(IllegalArgumentException.class, () -> entryStream.rateLimited(invalid));
+            Assertions.assertEquals(1, entryCloseCount.get(), "entry stream rate " + invalid);
+        }
+
+        Assertions.assertEquals(3, Stream.of(1, 2, 3).rateLimited(Double.POSITIVE_INFINITY).count());
+    }
+
+    @Test
+    public void testCheckFromIndexSizeNegativeSizeThrowsIllegalArgumentAndClosesStream() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> stream = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ((StreamBase<?, ?, ?, ?, ?, ?, ?, ?>) stream).checkFromIndexSize(0, -1, 3));
+        Assertions.assertEquals(1, closeCount.get());
+
+        final Stream<Integer> stream2 = Stream.of(1, 2, 3);
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ((StreamBase<?, ?, ?, ?, ?, ?, ?, ?>) stream2).checkFromIndexSize(-1, 1, 3));
+        Assertions.assertThrows(IndexOutOfBoundsException.class, () -> ((StreamBase<?, ?, ?, ?, ?, ?, ?, ?>) Stream.of(1)).checkFromIndexSize(1, 3, 3));
+        ((StreamBase<?, ?, ?, ?, ?, ?, ?, ?>) Stream.of(1)).checkFromIndexSize(0, 3, 3);
+    }
+
+    // ---- deep review 2026-09-25 G105 begin ----
+
+    // G105-01: a negative ParallelSettings.maxThreadNum must be reported under the real parameter name and close the stream.
+    @Test
+    public void testParallelWithParallelSettings_negativeMaxThreadNumMessageNamesParameter() {
+        final AtomicInteger closeCount = new AtomicInteger();
+        final Stream<Integer> stream = Stream.of(1, 2, 3).onClose(closeCount::incrementAndGet);
+        final ParallelSettings settings = new ParallelSettings(-1, null, null);
+
+        final IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> stream.parallel(settings));
+
+        Assertions.assertTrue(e.getMessage().contains("parallelSettings.maxThreadNum()"), e.getMessage());
+        Assertions.assertEquals(1, closeCount.get());
+    }
+
+    // ---- deep review 2026-09-25 G105 end ----
 }

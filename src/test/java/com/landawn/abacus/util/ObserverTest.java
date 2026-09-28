@@ -2082,4 +2082,10 @@ public class ObserverTest extends TestBase {
         Assertions.assertEquals(1, completions.get());
         Assertions.assertEquals(expected, actual);
     }
+
+    @Test
+    public void testOfNullIteratorMessageNamesIterParameter() {
+        final IllegalArgumentException ex = Assertions.assertThrows(IllegalArgumentException.class, () -> Observer.of((Iterator<String>) null));
+        Assertions.assertTrue(ex.getMessage().contains("'iterator'"), ex.getMessage());
+    }
 }

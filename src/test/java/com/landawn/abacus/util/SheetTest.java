@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,7 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -1529,6 +1534,73 @@ public class SheetTest extends SheetTestSupport {
             assertNotNull(clonedFrozen);
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains("Kryo is required"));
+        }
+    }
+
+    // Kryo is on the test classpath, but KryoParser's built-in registrations need reflective access to java.io; a JVM
+    // started without --add-opens java.base/java.io therefore has the jar yet no usable parser. That state cannot be
+    // produced inside this JVM (the parser is a static final initialized once), so the scenario runs in a child JVM.
+    @Test
+    public void testCloneWhenKryoIsPresentButFailsToInitializeReportsUnavailableNotMissingJar() throws Exception {
+        final Path out = Files.createTempFile("sheet-clone-kryo-unavailable", ".txt");
+
+        try {
+            final ProcessBuilder pb = new ProcessBuilder(Paths.get(System.getProperty("java.home"), "bin", "java").toString(), "-cp",
+                    System.getProperty("java.class.path"), KryoUnavailableCloneProbe.class.getName());
+            pb.environment().remove("JDK_JAVA_OPTIONS");
+            pb.environment().remove("JAVA_TOOL_OPTIONS");
+            pb.redirectErrorStream(true);
+            pb.redirectOutput(out.toFile());
+
+            final Process process = pb.start();
+
+            if (!process.waitFor(60, TimeUnit.SECONDS)) {
+                process.destroyForcibly();
+                fail("child JVM did not finish: " + Files.readString(out));
+            }
+
+            final String output = Files.readString(out);
+            assertEquals(0, process.exitValue(), output);
+            Assumptions.assumeTrue(output.contains("kryoAvailable=false"), "Kryo initialized in the child JVM, so the scenario is unreachable: " + output);
+
+            for (final String op : new String[] { "clone()", "clone(false)", "clone(true)" }) {
+                final String line = output.lines().filter(l -> l.startsWith(op + "=")).findFirst().orElseThrow(() -> new AssertionError(output));
+                assertTrue(line.startsWith(op + "=java.lang.UnsupportedOperationException: Kryo is required for deep cloning but is unavailable"), line);
+                assertTrue(line.contains("failed to initialize"), line);
+                assertFalse(line.contains("add Kryo to your classpath"), line);
+                assertTrue(line.contains("copy()"), line);
+            }
+
+            // The documented alternative still works in the same JVM.
+            assertTrue(output.contains("copy=[[1]]"), output);
+        } finally {
+            Files.deleteIfExists(out);
+        }
+    }
+
+    /**
+     * Entry point of the child JVM used by {@link #testCloneWhenKryoIsPresentButFailsToInitializeReportsUnavailableNotMissingJar()}.
+     */
+    public static final class KryoUnavailableCloneProbe {
+        public static void main(final String[] args) {
+            System.out.println("kryoAvailable=" + com.landawn.abacus.parser.ParserFactory.isKryoParserAvailable());
+
+            final Sheet<String, String, Integer> sheet = Sheet.rows(N.asList("r1"), N.asList("c1"), new Integer[][] { { 1 } });
+
+            print("clone()", () -> sheet.clone());
+            print("clone(false)", () -> sheet.clone(false));
+            print("clone(true)", () -> sheet.clone(true));
+
+            System.out.println("copy=" + N.deepToString(sheet.copy().toArray()));
+        }
+
+        private static void print(final String op, final java.util.function.Supplier<Sheet<String, String, Integer>> call) {
+            try {
+                call.get();
+                System.out.println(op + "=ok");
+            } catch (final RuntimeException e) {
+                System.out.println(op + "=" + e);
+            }
         }
     }
 

@@ -81,8 +81,8 @@ public final class ImmutableEntry<K, V> extends AbstractMap.SimpleImmutableEntry
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ImmutableEntry<String, Integer> entry = ImmutableEntry.of("age", 25);
-     * System.out.println(entry.getKey());     // prints age
-     * System.out.println(entry.getValue());   // prints 25
+     * System.out.println(entry.getKey());    // prints age
+     * System.out.println(entry.getValue());  // prints 25
      *
      * // Null values are allowed
      * ImmutableEntry<String, String> nullEntry = ImmutableEntry.of("missing", null);

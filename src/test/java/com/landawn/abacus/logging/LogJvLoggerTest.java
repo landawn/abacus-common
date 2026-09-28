@@ -16,6 +16,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 
 import com.landawn.abacus.TestBase;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.config.Property;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
 
 public class LogJvLoggerTest extends TestBase {
 
@@ -226,5 +236,53 @@ public class LogJvLoggerTest extends TestBase {
             parentLogger.info("Parent logger");
             childLogger.info("Child logger");
         });
+    }
+
+
+    @Test
+    public void testTemplateAndSupplierOverloadsUseMessageOnlyFilterShape() {
+        final String name = "test.log4j2.filterShape." + System.nanoTime();
+        final LoggerContext context = (LoggerContext) org.apache.logging.log4j.LogManager.getContext(false);
+        final List<String> appended = new ArrayList<>();
+        // A context-wide filter that implements only the message-only (String, Object...) shape.
+        final AbstractFilter filter = new AbstractFilter() {
+            @Override
+            public Result filter(final org.apache.logging.log4j.core.Logger logger, final Level level, final Marker marker, final String msg,
+                    final Object... params) {
+                return msg != null && msg.contains("secret") ? Result.DENY : Result.NEUTRAL;
+            }
+        };
+        final AbstractAppender appender = new AbstractAppender(name, null, null, false, Property.EMPTY_ARRAY) {
+            @Override
+            public void append(final LogEvent event) {
+                appended.add(event.getMessage().getFormattedMessage());
+            }
+        };
+        final LoggerConfig config = new LoggerConfig(name, Level.ALL, false);
+        appender.start();
+        filter.start();
+        config.addAppender(appender, Level.ALL, null);
+        context.getConfiguration().addLogger(name, config);
+        context.getConfiguration().addFilter(filter);
+        context.updateLoggers();
+
+        try {
+            final Log4Jv2Logger logger = new Log4Jv2Logger(name);
+
+            logger.info("secret plain");
+            logger.info("secret {}", 1);
+            logger.warn("secret {} {}", 1, 2);
+            logger.error(() -> "secret supplier");
+            logger.debug("public {}", 1);
+
+            // Every message-only form reaches the filter through the same shape as info(String).
+            assertEquals(List.of("public 1"), appended);
+        } finally {
+            context.getConfiguration().removeFilter(filter);
+            context.getConfiguration().removeLogger(name);
+            context.updateLoggers();
+            filter.stop();
+            appender.stop();
+        }
     }
 }

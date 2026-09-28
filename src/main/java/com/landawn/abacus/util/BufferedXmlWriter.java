@@ -200,13 +200,12 @@ public final class BufferedXmlWriter extends CharacterWriter {
     }
 
     /**
-     * Returns the character used as the quotation delimiter in XML string serialization.
-     * This implementation always returns {@link SK#CHAR_ZERO} (the {@code null} character, {@code '\0'}),
-     * which signals to the serialization infrastructure that no explicit quotation character
-     * wrapping is required for XML element text content.
+     * Returns {@link SK#CHAR_ZERO} (the {@code null} character, {@code '\0'}), meaning "no quotation
+     * character" for XML element text content.
      *
-     * <p>This method is used internally by the writer infrastructure and
-     * typically should not be called directly by client code.</p>
+     * <p>Nothing in this library currently calls this method; it has no effect on the output of this
+     * writer or of XML serialization (it is unrelated to
+     * {@link com.landawn.abacus.parser.XmlSerConfig#getCharQuotation()}).</p>
      *
      * @return {@link SK#CHAR_ZERO} (the {@code null} character {@code '\0'})
      */

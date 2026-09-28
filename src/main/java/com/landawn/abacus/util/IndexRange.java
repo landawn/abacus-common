@@ -37,20 +37,20 @@ import com.landawn.abacus.util.u.Optional;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexRange range = new IndexRange(2, 5);
- * range.start();                 // returns 2
- * range.end();                   // returns 5
- * "a[bcd]e".substring(range.start(), range.end());   // returns "bcd"
+ * range.start();                                    // returns 2
+ * range.end();                                      // returns 5
+ * "a[bcd]e".substring(range.start(), range.end());  // returns "bcd"
  *
- * new IndexRange(0, 0);          // valid: empty range
- * new IndexRange(-1, 3);         // throws IllegalArgumentException (negative start)
- * new IndexRange(4, 2);          // throws IllegalArgumentException (end < start)
+ * new IndexRange(0, 0);   // valid: empty range
+ * new IndexRange(-1, 3);  // throws IllegalArgumentException (negative start)
+ * new IndexRange(4, 2);   // throws IllegalArgumentException (end < start)
  *
  * // Range operations
- * new IndexRange(2, 5).containsRange(new IndexRange(3, 4));   // returns true
- * new IndexRange(2, 5).overlaps(new IndexRange(4, 8));        // returns true
- * new IndexRange(2, 5).intersection(new IndexRange(4, 8));    // returns u.Optional.of(new IndexRange(4, 5))
- * new IndexRange(2, 5).span(new IndexRange(4, 8));            // returns new IndexRange(2, 8)
- * new IndexRange(2, 5).isEmpty();                             // returns false
+ * new IndexRange(2, 5).containsRange(new IndexRange(3, 4));  // returns true
+ * new IndexRange(2, 5).overlaps(new IndexRange(4, 8));       // returns true
+ * new IndexRange(2, 5).intersection(new IndexRange(4, 8));   // returns u.Optional.of(new IndexRange(4, 5))
+ * new IndexRange(2, 5).span(new IndexRange(4, 8));           // returns new IndexRange(2, 8)
+ * new IndexRange(2, 5).isEmpty();                            // returns false
  * }</pre>
  *
  * @param start the inclusive start index of the range, must be {@code >= 0}
@@ -102,9 +102,9 @@ public record IndexRange(int start, int end) {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * Range<Integer> range = new IndexRange(1, 5).toRange();
-     * range.contains(1);   // returns true
-     * range.contains(4);   // returns true
-     * range.contains(5);   // returns false (upper bound is exclusive)
+     * range.contains(1);  // returns true
+     * range.contains(4);  // returns true
+     * range.contains(5);  // returns false (upper bound is exclusive)
      * }</pre>
      *
      * @return a half-open {@code Range<Integer>} {@code [start, end)} covering the same indices as this range
@@ -120,10 +120,10 @@ public record IndexRange(int start, int end) {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexRange range = new IndexRange(2, 5);
-     * range.contains(2);   // returns true (start is inclusive)
-     * range.contains(3);   // returns true
-     * range.contains(5);   // returns false (end is exclusive)
-     * range.contains(1);   // returns false
+     * range.contains(2);  // returns true (start is inclusive)
+     * range.contains(3);  // returns true
+     * range.contains(5);  // returns false (end is exclusive)
+     * range.contains(1);  // returns false
      * }</pre>
      *
      * @param index the index to check for containment
@@ -148,10 +148,10 @@ public record IndexRange(int start, int end) {
      * IndexRange range2 = new IndexRange(3, 7);
      * IndexRange range3 = new IndexRange(5, 15);
      *
-     * range1.containsRange(range2);               // returns true
-     * range1.containsRange(range3);               // returns false (extends beyond upper bound)
-     * range1.containsRange(new IndexRange(5, 5)); // returns true (the other range is empty)
-     * range1.containsRange(null);                 // returns false
+     * range1.containsRange(range2);                // returns true
+     * range1.containsRange(range3);                // returns false (extends beyond upper bound)
+     * range1.containsRange(new IndexRange(5, 5));  // returns true (the other range is empty)
+     * range1.containsRange(null);                  // returns false
      * }</pre>
      *
      * @param other the range to check for containment, {@code null} returns {@code false}
@@ -178,9 +178,9 @@ public record IndexRange(int start, int end) {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexRange range = new IndexRange(2, 5);
-     * range.isAfter(1);   // returns true
-     * range.isAfter(2);   // returns false (2 is included in the range)
-     * range.isAfter(3);   // returns false (3 is within the range)
+     * range.isAfter(1);  // returns true
+     * range.isAfter(2);  // returns false (2 is included in the range)
+     * range.isAfter(3);  // returns false (3 is within the range)
      * }</pre>
      *
      * @param index the index to check
@@ -206,8 +206,8 @@ public record IndexRange(int start, int end) {
      * IndexRange range2 = new IndexRange(1, 5);
      * IndexRange range3 = new IndexRange(1, 11);
      *
-     * range1.isAfterRange(range2);   // returns true  (10 >= 5)
-     * range1.isAfterRange(range3);   // returns false (ranges share index 10)
+     * range1.isAfterRange(range2);  // returns true  (10 >= 5)
+     * range1.isAfterRange(range3);  // returns false (ranges share index 10)
      * }</pre>
      *
      * @param other the range to compare against, {@code null} returns {@code false}
@@ -231,9 +231,9 @@ public record IndexRange(int start, int end) {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexRange range = new IndexRange(2, 5);
-     * range.isBefore(6);   // returns true
-     * range.isBefore(5);   // returns true (5 is excluded by the half-open range)
-     * range.isBefore(4);   // returns false (4 is within the range)
+     * range.isBefore(6);  // returns true
+     * range.isBefore(5);  // returns true (5 is excluded by the half-open range)
+     * range.isBefore(4);  // returns false (4 is within the range)
      * }</pre>
      *
      * @param index the index to check
@@ -259,8 +259,8 @@ public record IndexRange(int start, int end) {
      * IndexRange range2 = new IndexRange(10, 15);
      * IndexRange range3 = new IndexRange(4, 10);
      *
-     * range1.isBeforeRange(range2);   // returns true  (5 <= 10)
-     * range1.isBeforeRange(range3);   // returns false (ranges share index 4)
+     * range1.isBeforeRange(range2);  // returns true  (5 <= 10)
+     * range1.isBeforeRange(range3);  // returns false (ranges share index 4)
      * }</pre>
      *
      * @param other the range to compare against, {@code null} returns {@code false}
@@ -289,9 +289,9 @@ public record IndexRange(int start, int end) {
      * IndexRange range3 = new IndexRange(6, 10);
      * IndexRange range4 = new IndexRange(5, 10);
      *
-     * range1.overlaps(range2);   // returns true (overlap from 3 to 5)
-     * range1.overlaps(range3);   // returns false (no overlap)
-     * range1.overlaps(range4);   // returns false (ranges touch at 5 but share no index)
+     * range1.overlaps(range2);  // returns true (overlap from 3 to 5)
+     * range1.overlaps(range3);  // returns false (no overlap)
+     * range1.overlaps(range4);  // returns false (ranges touch at 5 but share no index)
      * }</pre>
      *
      * @param other the range to test for overlap, {@code null} returns {@code false}
@@ -413,9 +413,9 @@ public record IndexRange(int start, int end) {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * new IndexRange(2, 5).shift(3);    // returns new IndexRange(5, 8)
-     * new IndexRange(2, 5).shift(-1);   // returns new IndexRange(1, 4)
-     * new IndexRange(2, 5).shift(-2);   // returns new IndexRange(0, 3)
+     * new IndexRange(2, 5).shift(3);   // returns new IndexRange(5, 8)
+     * new IndexRange(2, 5).shift(-1);  // returns new IndexRange(1, 4)
+     * new IndexRange(2, 5).shift(-2);  // returns new IndexRange(0, 3)
      * }</pre>
      *
      * @param delta the number of positions to shift this range by
@@ -439,8 +439,8 @@ public record IndexRange(int start, int end) {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * new IndexRange(5, 5).isEmpty();   // returns true
-     * new IndexRange(5, 6).isEmpty();   // returns false
+     * new IndexRange(5, 5).isEmpty();  // returns true
+     * new IndexRange(5, 6).isEmpty();  // returns false
      * }</pre>
      *
      * @return {@code true} if this range contains no indices, {@code false} otherwise
@@ -454,8 +454,8 @@ public record IndexRange(int start, int end) {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * new IndexRange(2, 5).length();   // returns 3
-     * "abcde".substring(2, 5).length() == new IndexRange(2, 5).length();   // returns true
+     * new IndexRange(2, 5).length();                                      // returns 3
+     * "abcde".substring(2, 5).length() == new IndexRange(2, 5).length();  // returns true
      * }</pre>
      *
      * @return the number of indices in this range
@@ -512,8 +512,8 @@ public record IndexRange(int start, int end) {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * new IndexRange(2, 5).toString();   // returns "[2, 5)"
-     * new IndexRange(5, 5).toString();   // returns "[5, 5)"
+     * new IndexRange(2, 5).toString();  // returns "[2, 5)"
+     * new IndexRange(5, 5).toString();  // returns "[5, 5)"
      * }</pre>
      *
      * @return a string representation of this range

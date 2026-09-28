@@ -353,4 +353,19 @@ public class CsvUtilLoadTest extends CsvUtilTestSupport {
         assertEquals("2", padded.get(0, 1));
         assertNull(padded.get(0, 2));
     }
+
+    @Test
+    public void testLoad_RowFilterSeesWholeRawRowInHeaderOrderAfterOffset() {
+        final List<Integer> seenLengths = new ArrayList<>();
+        final Dataset ds = CsvUtil.load(new StringReader("id,name,age\n1,A,30\n2,B,5\n3,C,40\n4,D,50\n"), List.of("name", "age"), 1, 1, row -> {
+            seenLengths.add(row.length);
+            return Integer.parseInt(row[2]) > 18;
+        });
+
+        // offset skipped raw row A before the filter; B was rejected; count stopped after the first accepted row C.
+        assertEquals(List.of(3, 3), seenLengths);
+        assertEquals(List.of("name", "age"), new ArrayList<>(ds.columnNames()));
+        assertEquals(1, ds.size());
+        assertEquals(List.of("C"), new ArrayList<>(ds.<String> getColumn("name")));
+    }
 }

@@ -91,8 +91,8 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * List<Type<?>> paramTypes = type.parameterTypes();
-     * System.out.println(paramTypes.size());          // Output: 1
-     * System.out.println(paramTypes.get(0).name());   // Output: short
+     * System.out.println(paramTypes.size());         // Output: 1
+     * System.out.println(paramTypes.get(0).name());  // Output: short
      * }</pre>
      *
      * @return an immutable list containing the primitive {@code short} Type that describes the elements of this list type
@@ -130,9 +130,10 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @see #valueOf(String)
      * @see #valueOf(Object)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public String stringOf(final ShortList x) {
-        return x == null ? null : arrayType.stringOf(x.toArray());
+        return x == null ? null : arrayType instanceof PrimitiveShortArrayType ? stringOf(x.internalArray(), x.size()) : arrayType.stringOf(x.toArray());
     }
 
     /**
@@ -143,8 +144,8 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * <pre>{@code
      * Type<ShortList> type = TypeFactory.getType(ShortList.class);
      * ShortList list = type.valueOf("[1, 2, 3]");
-     * System.out.println(list.size());   // Output: 3
-     * System.out.println(list.get(0));   // Output: 1
+     * System.out.println(list.size());  // Output: 3
+     * System.out.println(list.get(0));  // Output: 1
      *
      * ShortList emptyList = type.valueOf("[]");
      * System.out.println(emptyList.isEmpty());   // Output: true
@@ -214,19 +215,24 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * {@code appendable.append(x == null ? NULL_STRING : stringOf(x))}. (For value types whose human-readable and
      * serialized forms coincide, the appended text is naturally identical to {@code stringOf(x)}.)
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void appendTo(final Appendable appendable, final ShortList x) throws NullPointerException, IOException {
         if (x == null) {
             appendable.append(NULL_STRING);
         } else {
-            arrayType.appendTo(appendable, x.toArray());
+            if (arrayType instanceof PrimitiveShortArrayType && canWriteDirectly(appendable)) {
+                appendTo(appendable, x.internalArray(), x.size());
+            } else {
+                arrayType.appendTo(appendable, x.toArray());
+            }
         }
     }
 
     /**
      * Writes the character representation of a ShortList to a CharacterWriter.
      * This method is optimized for performance when writing to character-based outputs.
-     * The list is converted to an array and then written as comma-separated values
+     * The logical elements are written as comma-separated values
      * enclosed in square brackets.
      *
      * <p><b>Usage Examples:</b></p>
@@ -264,12 +270,17 @@ public final class PrimitiveShortListType extends AbstractPrimitiveListType<Shor
      * @throws NullPointerException if {@code writer} is {@code null}.
      * @throws IOException if writing the representation to the destination fails.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public void serializeTo(final CharacterWriter writer, final ShortList x, final JsonXmlSerConfig<?> config) throws NullPointerException, IOException {
         if (x == null) {
             writer.write(NULL_CHAR_ARRAY);
         } else {
-            arrayType.serializeTo(writer, x.toArray(), config);
+            if (arrayType instanceof PrimitiveShortArrayType && canWriteDirectly(writer, config)) {
+                serializeTo(writer, x.internalArray(), x.size());
+            } else {
+                arrayType.serializeTo(writer, x.toArray(), config);
+            }
         }
     }
 }

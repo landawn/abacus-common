@@ -25,8 +25,8 @@ package com.landawn.abacus.util;
  * <p><b>Usage Examples:</b></p>
  * <pre>{@code
  * IndexedByte indexedByte = IndexedByte.of((byte) 42, 5);
- * byte value = indexedByte.value();   // returns 42
- * int index = indexedByte.index();    // returns 5
+ * byte value = indexedByte.value();  // returns 42
+ * int index = indexedByte.index();   // returns 5
  * }</pre>
  *
  * @see Indexed
@@ -105,8 +105,8 @@ public final class IndexedByte extends AbstractIndexed {
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * IndexedByte indexed = IndexedByte.of((byte) 10, 3);
-     * byte v = indexed.value();   // returns (byte) 10
-     * int i = indexed.index();    // returns 3
+     * byte v = indexed.value();  // returns (byte) 10
+     * int i = indexed.index();   // returns 3
      * }</pre>
      *
      * @return the byte value associated with this index
@@ -138,8 +138,8 @@ public final class IndexedByte extends AbstractIndexed {
      * IndexedByte indexed2 = IndexedByte.of((byte) 42, 5);
      * IndexedByte indexed3 = IndexedByte.of((byte) 43, 5);
      *
-     * indexed1.equals(indexed2);   // returns true
-     * indexed1.equals(indexed3);   // returns false
+     * indexed1.equals(indexed2);  // returns true
+     * indexed1.equals(indexed3);  // returns false
      * }</pre>
      *
      * @param obj the object to compare with this IndexedByte instance for equality

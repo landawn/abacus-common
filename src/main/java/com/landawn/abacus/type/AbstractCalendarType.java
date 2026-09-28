@@ -109,16 +109,17 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * <p>Converts the {@code Calendar} to a {@code Timestamp} before setting it in the statement.</p>
      * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Calendar} value to set, or {@code null} for SQL {@code NULL}
      * @throws IllegalArgumentException if {@code x} is a non-lenient calendar containing invalid field values.
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Calendar x) throws IllegalArgumentException, NullPointerException, SQLException {
-        stmt.setTimestamp(columnIndex, (x == null) ? null : Dates.createTimestamp(x));
+    public void set(final PreparedStatement statement, final int columnIndex, final Calendar x)
+            throws IllegalArgumentException, NullPointerException, SQLException {
+        statement.setTimestamp(columnIndex, (x == null) ? null : Dates.createTimestamp(x));
     }
 
     /**
@@ -126,17 +127,17 @@ public abstract class AbstractCalendarType<T extends Calendar> extends AbstractT
      * <p>Converts the {@code Calendar} to a {@code Timestamp} before setting it in the statement.</p>
      * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Calendar} value to set, or {@code null} for SQL {@code NULL}
      * @throws IllegalArgumentException if {@code x} is a non-lenient calendar containing invalid field values.
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Calendar x)
+    public void set(final CallableStatement statement, final String parameterName, final Calendar x)
             throws IllegalArgumentException, NullPointerException, SQLException {
-        stmt.setTimestamp(parameterName, (x == null) ? null : Dates.createTimestamp(x));
+        statement.setTimestamp(parameterName, (x == null) ? null : Dates.createTimestamp(x));
     }
 
     /**

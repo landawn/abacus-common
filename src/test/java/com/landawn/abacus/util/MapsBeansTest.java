@@ -421,7 +421,7 @@ public class MapsBeansTest extends TestBase {
         public void getOrPutIfAbsent_isTheStrictSibling() {
             // Contrast documented on putIfAbsent(Map, K, Supplier): the get-or-create family guarantees a non-null
             // result and therefore rejects a null-producing supplier.
-            assertThrows(IllegalArgumentException.class, () -> Maps.getOrPutIfAbsent(new HashMap<String, String>(), "k", () -> null));
+            assertThrows(NullPointerException.class, () -> Maps.getOrPutIfAbsent(new HashMap<String, String>(), "k", () -> null));
         }
     }
 
@@ -590,7 +590,8 @@ public class MapsBeansTest extends TestBase {
             big.put("d", 4);
             big.put("e", 5);
 
-            assertEquals(HashMap.class, Maps.filter(big, (k, v) -> true).getClass(), "a rejected size falls back to HashMap");
+            // LinkedHashMap since the 2026-09-24 review (C-377): the HashMap fallback dropped the template's order
+            assertEquals(LinkedHashMap.class, Maps.filter(big, (k, v) -> true).getClass(), "a rejected size falls back to LinkedHashMap");
 
             final SizePickyMap<String, Integer> small = new SizePickyMap<>(0);
             small.put("a", 1);

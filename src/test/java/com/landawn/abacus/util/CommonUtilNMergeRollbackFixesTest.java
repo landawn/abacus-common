@@ -460,22 +460,27 @@ public class CommonUtilNMergeRollbackFixesTest extends TestBase {
 
     @Test
     public void removeAtKeepsTheListIntactWhenRepopulationFails() {
+        // C-249 (2026-09-24): removeAt(List, int...) no longer re-populates the list at all - it removes through one
+        // positional removeIf pass - so a failing addAll can no longer lose (or even touch) the content.
         final FailingAddAllList<String> list = new FailingAddAllList<>(Arrays.asList("a", "b", "c", "d", "e"));
         list.armFailures(1);
 
-        assertThrows(IllegalStateException.class, () -> N.removeAt(list, 0, 2));
-        assertEquals(Arrays.asList("a", "b", "c", "d", "e"), new ArrayList<>(list));
+        assertTrue(N.removeAt(list, 0, 2));
+        assertEquals(Arrays.asList("b", "d", "e"), new ArrayList<>(list));
+        assertEquals(1, list.failuresLeft, "addAll must not be called");
     }
 
     @Test
     public void removeRangeKeepsTheListIntactWhenRepopulationFails() {
-        // span > 3 and not a LinkedList, so this takes the clear+rebuild branch. Pre-fix the failing addAll
-        // left the caller holding an EMPTY list; the removal must now either happen or not happen at all.
+        // span > 3 and not a LinkedList. This branch used to clear and rebuild the list (a failing addAll once left
+        // the caller holding an EMPTY list). Since C-277 (2026-09-24) it removes the range with a positional
+        // removeIf and never calls addAll, so the removal simply happens.
         final FailingAddAllList<String> list = new FailingAddAllList<>(Arrays.asList("a", "b", "c", "d", "e", "f", "g"));
         list.armFailures(1);
 
-        assertThrows(IllegalStateException.class, () -> N.removeRange(list, 1, 6));
-        assertEquals(Arrays.asList("a", "b", "c", "d", "e", "f", "g"), new ArrayList<>(list));
+        assertTrue(N.removeRange(list, 1, 6));
+        assertEquals(Arrays.asList("a", "g"), new ArrayList<>(list));
+        assertEquals(1, list.failuresLeft, "addAll must not be called");
     }
 
     @Test
@@ -597,11 +602,14 @@ public class CommonUtilNMergeRollbackFixesTest extends TestBase {
 
     @Test
     public void removeDuplicatesKeepsTheCollectionIntactWhenRepopulationFails() {
+        // C-215 (2026-09-24): a List is de-duplicated with one removeIf pass and is never re-populated, so a failing
+        // addAll is not reached; the rollback path is still exercised by the non-List (Deque) test below.
         final FailingAddAllList<String> list = new FailingAddAllList<>(Arrays.asList("a", "b", "a", "c", "b"));
         list.armFailures(1);
 
-        assertThrows(IllegalStateException.class, () -> N.removeDuplicates(list));
-        assertEquals(Arrays.asList("a", "b", "a", "c", "b"), new ArrayList<>(list));
+        assertTrue(N.removeDuplicates(list));
+        assertEquals(Arrays.asList("a", "b", "c"), new ArrayList<>(list));
+        assertEquals(1, list.failuresLeft, "addAll must not be called");
     }
 
     @Test

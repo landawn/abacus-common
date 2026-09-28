@@ -423,4 +423,35 @@ public class DataSourceUtilTest extends TestBase {
         verify(mockStmt).executeBatch();
         verify(mockStmt).clearBatch();
     }
+
+    @Test
+    public void testCloseQuietlyClosesRemainingResourcesAfterCloseError() throws SQLException {
+        ResultSet mockRs = mock(ResultSet.class);
+        Statement mockStmt = mock(Statement.class);
+        Connection mockConn = mock(Connection.class);
+        AssertionError rsFailure = new AssertionError("ResultSet close error");
+        AssertionError connFailure = new AssertionError("Connection close error");
+        doThrow(rsFailure).when(mockRs).close();
+        doThrow(new SQLException("Statement close failure")).when(mockStmt).close();
+        doThrow(connFailure).when(mockConn).close();
+
+        assertSame(rsFailure, assertThrows(AssertionError.class, () -> DataSourceUtil.closeQuietly(mockRs, mockStmt, mockConn)));
+        verify(mockStmt).close();
+        verify(mockConn).close();
+        assertArrayEquals(new Throwable[] { connFailure }, rsFailure.getSuppressed());
+
+        ResultSet rs2 = mock(ResultSet.class);
+        Statement stmt2 = mock(Statement.class);
+        AssertionError rs2Failure = new AssertionError("ResultSet close error");
+        doThrow(rs2Failure).when(rs2).close();
+        assertSame(rs2Failure, assertThrows(AssertionError.class, () -> DataSourceUtil.closeQuietly(rs2, stmt2)));
+        verify(stmt2).close();
+
+        Statement stmt3 = mock(Statement.class);
+        Connection conn3 = mock(Connection.class);
+        AssertionError stmt3Failure = new AssertionError("Statement close error");
+        doThrow(stmt3Failure).when(stmt3).close();
+        assertSame(stmt3Failure, assertThrows(AssertionError.class, () -> DataSourceUtil.closeQuietly(stmt3, conn3)));
+        verify(conn3).close();
+    }
 }

@@ -964,4 +964,28 @@ public class DatesParseTest extends TestBase {
                 () -> Dates.parseToJUDate("2025-13-15T10:30:45.123+05:00", Dates.ISO_ZONED_DATE_TIME_FORMAT, ny)).getMessage();
         assertTrue(named.contains("with format "), () -> "an explicit format must still be named: " + named);
     }
+
+
+    @Test
+    public void testAutoDetectedSecondsPrecisionOffsetIsAcceptedByEveryTarget() {
+        // Auto-detection accepts a seconds-precision +HH:mm:ss offset alongside +HH:mm and +HHmm,
+        // with or without a fraction and inside the bracketed-zone form.
+        final long expected = Instant.parse("2025-01-15T05:00:30Z").toEpochMilli();
+
+        assertEquals(expected, Dates.parseToJUDate("2025-01-15T10:30:45+05:30:15").getTime());
+        assertEquals(expected + 123, Dates.parseToJUDate("2025-01-15T10:30:45.123+05:30:15").getTime());
+        assertEquals(expected, Dates.parseToCalendar("2025-01-15T10:30:45+05:30:15").getTimeInMillis());
+        assertEquals(expected + 500, Dates.parseToTimestamp("2025-01-15T10:30:45.5+05:30:15").getTime());
+        assertEquals(Instant.ofEpochMilli(expected), Dates.parseToInstant("2025-01-15T10:30:45+05:30:15"));
+        assertEquals(OffsetDateTime.parse("2025-01-15T10:30:45+05:30:15"), Dates.parseToOffsetDateTime("2025-01-15T10:30:45+05:30:15"));
+        assertEquals(LocalDateTime.of(2025, 1, 15, 10, 30, 45), Dates.parseToLocalDateTime("2025-01-15T10:30:45+05:30:15"));
+
+        // Africa/Monrovia kept -00:44:30 until 1972, so the bracketed form carries a seconds offset too.
+        final ZonedDateTime monrovia = Dates.parseToZonedDateTime("1969-12-31T23:15:30-00:44:30[Africa/Monrovia]");
+        assertEquals(Instant.EPOCH, monrovia.toInstant());
+        assertEquals("Africa/Monrovia", monrovia.getZone().getId());
+
+        // The explicit whole-minute constant still rejects it.
+        assertThrows(IllegalArgumentException.class, () -> Dates.parseToJUDate("2025-01-15T10:30:45+05:30:15", Dates.ISO_OFFSET_DATE_TIME_FORMAT));
+    }
 }

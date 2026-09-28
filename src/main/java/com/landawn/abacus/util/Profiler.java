@@ -444,11 +444,11 @@ public final class Profiler {
      *
      * // Combined: Staggered start + throttled execution
      * MultiLoopsStatistics stats = Profiler.run(
-     *     8,      // 8 threads
-     *     50,     // 50ms between thread starts
-     *     500,    // 500 iterations per thread
-     *     20,     // 20ms between iterations
-     *     5,      // 5 rounds
+     *     8,    // 8 threads
+     *     50,   // 50ms between thread starts
+     *     500,  // 500 iterations per thread
+     *     20,   // 20ms between iterations
+     *     5,    // 5 rounds
      *     "DatabaseQuery_Throttled",
      *     () -> {
      *         database.query("SELECT * FROM users WHERE id = ?", randomId());
@@ -581,17 +581,17 @@ public final class Profiler {
      *
      * @param instance the instance on which the method is invoked
      * @param method the method to be tested
-     * @param args the arguments to be passed to the method. The size of {@code args} can be 0, 1, or same size with {@code threadNum}. It's the input argument for every loop in each thread.
+     * @param arguments the arguments to be passed to the method. The size of {@code arguments} can be 0, 1, or same size with {@code threadNum}. It's the input argument for every loop in each thread.
      * @param threadNum the number of threads to use
      * @param loopNum the number of loops to run in each thread
      * @param roundNum the number of rounds to repeat the test
      * @return the statistics of the performance test
-     * @throws IllegalArgumentException if {@code method} is {@code null}, or if {@code threadNum} or {@code loopNum} is not positive, or {@code args} has a size other than zero, one, or the thread count
+     * @throws IllegalArgumentException if {@code method} is {@code null}, or if {@code threadNum} or {@code loopNum} is not positive, or {@code arguments} has a size other than zero, one, or the thread count
      * @throws UncheckedInterruptedException if the calling thread is interrupted during the preparation delay, an inter-thread delay, or while awaiting workers
      */
-    static MultiLoopsStatistics run(final Object instance, final Method method, final List<?> args, final int threadNum, final int loopNum, final int roundNum)
-            throws IllegalArgumentException, UncheckedInterruptedException {
-        return run(instance, method, args, null, null, null, null, threadNum, 0, loopNum, 0, roundNum);
+    static MultiLoopsStatistics run(final Object instance, final Method method, final List<?> arguments, final int threadNum, final int loopNum,
+            final int roundNum) throws IllegalArgumentException, UncheckedInterruptedException {
+        return run(instance, method, arguments, null, null, null, null, threadNum, 0, loopNum, 0, roundNum);
     }
 
     /**
@@ -600,7 +600,7 @@ public final class Profiler {
      *
      * @param instance the instance on which to invoke the method, may be {@code null} for static methods
      * @param method the method to be profiled
-     * @param args the size of {@code args} can be 0, 1, or same size with {@code threadNum}. It's the input argument for every loop in each thread.
+     * @param arguments the size of {@code arguments} can be 0, 1, or same size with {@code threadNum}. It's the input argument for every loop in each thread.
      * @param setUpForMethod the setup method to be executed before the profiled method, may be {@code null}
      * @param tearDownForMethod the teardown method to be executed after the profiled method, may be {@code null}
      * @param setUpForLoop the setup method to be executed before each loop iteration, may be {@code null}
@@ -611,16 +611,16 @@ public final class Profiler {
      * @param loopDelay the delay in milliseconds between each loop iteration
      * @param roundNum the number of rounds to repeat the entire performance test
      * @return the performance statistics from multiple loop executions
-     * @throws IllegalArgumentException if {@code method} is {@code null}, or if {@code threadNum} or {@code loopNum} is not positive, or either delay is negative, or {@code args} has a size other than zero, one, or the thread count
+     * @throws IllegalArgumentException if {@code method} is {@code null}, or if {@code threadNum} or {@code loopNum} is not positive, or either delay is negative, or {@code arguments} has a size other than zero, one, or the thread count
      * @throws UncheckedInterruptedException if the calling thread is interrupted during the preparation delay, an inter-thread delay, or while awaiting workers
      */
-    static MultiLoopsStatistics run(final Object instance, final Method method, final List<?> args, final Method setUpForMethod, final Method tearDownForMethod,
-            final Method setUpForLoop, final Method tearDownForLoop, final int threadNum, final long threadDelay, final int loopNum, final long loopDelay,
-            final int roundNum) throws IllegalArgumentException, UncheckedInterruptedException {
+    static MultiLoopsStatistics run(final Object instance, final Method method, final List<?> arguments, final Method setUpForMethod,
+            final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum, final long threadDelay,
+            final int loopNum, final long loopDelay, final int roundNum) throws IllegalArgumentException, UncheckedInterruptedException {
         N.checkArgNotNull(method, cs.method);
 
-        return run(instance, method.getName(), method, args, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum, threadDelay, loopNum,
-                loopDelay, roundNum);
+        return run(instance, method.getName(), method, arguments, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum, threadDelay,
+                loopNum, loopDelay, roundNum);
     }
 
     /**
@@ -630,7 +630,7 @@ public final class Profiler {
      * @param instance it can be {@code null} if the specified {@code method} is a static method
      * @param methodName the name of the method being profiled
      * @param method the method to be profiled
-     * @param args the size of {@code args} can be 0, 1, or same size with {@code threadNum}. It's the input argument for every loop in each thread.
+     * @param arguments the size of {@code arguments} can be 0, 1, or same size with {@code threadNum}. It's the input argument for every loop in each thread.
      * @param setUpForMethod the setup method to be executed before the profiled method, may be {@code null}
      * @param tearDownForMethod the teardown method to be executed after the profiled method, may be {@code null}
      * @param setUpForLoop the setup method to be executed before each loop iteration, may be {@code null}
@@ -641,14 +641,14 @@ public final class Profiler {
      * @param loopDelay the delay in milliseconds between each loop iteration
      * @param roundNum the number of rounds to repeat the entire performance test
      * @return the performance statistics from multiple loop executions
-     * @throws IllegalArgumentException if {@code threadNum} or {@code loopNum} is not positive, or either delay is negative, or {@code args} has a size other than zero, one, or the thread count, or if {@code method} is {@code null}
+     * @throws IllegalArgumentException if {@code threadNum} or {@code loopNum} is not positive, or either delay is negative, or {@code arguments} has a size other than zero, one, or the thread count, or if {@code method} is {@code null}
      * @throws UncheckedInterruptedException if the calling thread is interrupted during the preparation delay, an inter-thread delay, or while awaiting workers
      */
-    static MultiLoopsStatistics run(final Object instance, final String methodName, final Method method, final List<?> args, final Method setUpForMethod,
+    static MultiLoopsStatistics run(final Object instance, final String methodName, final Method method, final List<?> arguments, final Method setUpForMethod,
             final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop, final int threadNum, final long threadDelay,
             final int loopNum, final long loopDelay, final int roundNum) throws IllegalArgumentException, UncheckedInterruptedException {
-        return run(instance, methodName, method, null, args, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum, threadDelay, loopNum,
-                loopDelay, roundNum);
+        return run(instance, methodName, method, null, arguments, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum, threadDelay,
+                loopNum, loopDelay, roundNum);
     }
 
     /**
@@ -661,7 +661,7 @@ public final class Profiler {
      * @param methodName the name the results are reported under
      * @param method the reflective target, or {@code null} when {@code invocationFactory} is supplied directly
      * @param invocationFactory the invocation strategy; {@code null} means "invoke {@code method} reflectively"
-     * @param args the per-loop arguments; its size can be 0, 1, or {@code threadNum}
+     * @param arguments the per-loop arguments; its size can be 0, 1, or {@code threadNum}
      * @param setUpForMethod run before the profiled method, may be {@code null}
      * @param tearDownForMethod run after the profiled method, may be {@code null}
      * @param setUpForLoop run before each loop iteration, may be {@code null}
@@ -672,11 +672,11 @@ public final class Profiler {
      * @param loopDelay the delay in milliseconds between loop iterations
      * @param roundNum the number of rounds; a value {@code <= 0} is treated as 1
      * @return the last round's statistics
-     * @throws IllegalArgumentException if {@code threadNum} or {@code loopNum} is not positive, or either delay is negative, or {@code args} has a size other than zero, one, or the thread count, or if {@code method} and {@code invocationFactory} are both {@code null}
+     * @throws IllegalArgumentException if {@code threadNum} or {@code loopNum} is not positive, or either delay is negative, or {@code arguments} has a size other than zero, one, or the thread count, or if {@code method} and {@code invocationFactory} are both {@code null}
      * @throws UncheckedInterruptedException if the calling thread is interrupted during the preparation delay, an inter-thread delay, or while awaiting workers
      */
     private static MultiLoopsStatistics run(final Object instance, final String methodName, final Method method, final InvocationFactory invocationFactory,
-            final List<?> args, final Method setUpForMethod, final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop,
+            final List<?> arguments, final Method setUpForMethod, final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop,
             final int threadNum, final long threadDelay, final int loopNum, final long loopDelay, final int roundNum)
             throws IllegalArgumentException, UncheckedInterruptedException {
         final int actualRoundNum = roundNum <= 0 ? 1 : roundNum;
@@ -684,7 +684,7 @@ public final class Profiler {
         if ((threadNum <= 0) || (loopNum <= 0) || (threadDelay < 0) || (loopDelay < 0)) {
             throw new IllegalArgumentException("threadNum=" + threadNum + ", loopNum=" + loopNum + ", threadDelay=" + threadDelay + ", loopDelay=" + loopDelay); //NOSONAR
         }
-        if (N.notEmpty(args) && (args.size() > 1) && (args.size() != threadNum)) {
+        if (N.notEmpty(arguments) && (arguments.size() > 1) && (arguments.size() != threadNum)) {
             throw new IllegalArgumentException(
                     "The input args must be null or size = 1 or size = threadNum. It's the input parameter for the every loop in each thread ");
         }
@@ -703,7 +703,7 @@ public final class Profiler {
         }
 
         if (actualRoundNum == 1) {
-            return run(instance, methodName, method, invocationFactory, args, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum,
+            return run(instance, methodName, method, invocationFactory, arguments, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum,
                     threadDelay, loopNum, loopDelay);
         } else {
             MultiLoopsStatistics result = null;
@@ -715,8 +715,8 @@ public final class Profiler {
                     result = null; //NOSONAR
                 }
 
-                result = run(instance, methodName, method, invocationFactory, args, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop, threadNum,
-                        threadDelay, loopNum, loopDelay);
+                result = run(instance, methodName, method, invocationFactory, arguments, setUpForMethod, tearDownForMethod, setUpForLoop, tearDownForLoop,
+                        threadNum, threadDelay, loopNum, loopDelay);
             }
 
             return result;
@@ -730,7 +730,7 @@ public final class Profiler {
      */
     @SuppressWarnings("deprecation")
     private static MultiLoopsStatistics run(final Object instance, final String methodName, final Method method, final InvocationFactory invocationFactory,
-            final List<?> args, final Method setUpForMethod, final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop,
+            final List<?> arguments, final Method setUpForMethod, final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop,
             final int threadNum, final long threadDelay, final int loopNum, final long loopDelay)
             throws IllegalArgumentException, UncheckedInterruptedException {
         final InvocationFactory invocationFactoryToUse;
@@ -777,7 +777,7 @@ public final class Profiler {
             final long startTimeInNano = System.nanoTime();
 
             for (int threadIndex = 0; threadIndex < actualThreadNum; threadIndex++) {
-                final Object arg = (N.isEmpty(args)) ? null : ((args.size() == 1) ? args.get(0) : args.get(threadIndex));
+                final Object arg = (N.isEmpty(arguments)) ? null : ((arguments.size() == 1) ? arguments.get(0) : arguments.get(threadIndex));
                 asyncExecutor.execute(() -> runLoops(instance, methodName, invocationFactoryToUse, invocationFactory == null, arg, setUpForMethod,
                         tearDownForMethod, setUpForLoop, tearDownForLoop, actualLoopNum, loopDelay, cancelled, loopStatisticsList, ps));
 
@@ -812,7 +812,8 @@ public final class Profiler {
 
     private static void runLoops(final Object instance, final String methodName, final InvocationFactory invocationFactory, final boolean reflective,
             final Object arg, final Method setUpForMethod, final Method tearDownForMethod, final Method setUpForLoop, final Method tearDownForLoop,
-            final int loopNum, final long loopDelay, final AtomicBoolean cancelled, final List<LoopStatistics> loopStatisticsList, final PrintStream ps) {
+            final int loopNum, final long loopDelay, final AtomicBoolean cancelled, final List<LoopStatistics> loopStatisticsList,
+            final PrintStream printStream) {
         final Invocation invocation = invocationFactory.forArg(arg);
 
         for (int loopIndex = 0; loopIndex < loopNum; loopIndex++) {
@@ -831,14 +832,14 @@ public final class Profiler {
                     setUpForLoop.invoke(instance);
                 } catch (final Exception e) {
                     // ignore;
-                    e.printStackTrace(ps);
+                    e.printStackTrace(printStream);
                     logger.warn(e, "Profiler loop setup failed for method {} at loop {}", methodName, loopIndex);
                 }
             }
 
             final long startTimeInMillis = System.currentTimeMillis();
             final long startTimeInNano = System.nanoTime();
-            final MethodStatistics methodStatistics = runLoop(instance, methodName, invocation, reflective, setUpForMethod, tearDownForMethod, ps);
+            final MethodStatistics methodStatistics = runLoop(instance, methodName, invocation, reflective, setUpForMethod, tearDownForMethod, printStream);
             final long endTimeInNano = System.nanoTime();
             final long endTimeInMillis = System.currentTimeMillis();
 
@@ -847,7 +848,7 @@ public final class Profiler {
                     tearDownForLoop.invoke(instance);
                 } catch (final Exception e) {
                     // ignore;
-                    e.printStackTrace(ps);
+                    e.printStackTrace(printStream);
                     logger.warn(e, "Profiler loop teardown failed for method {} at loop {}", methodName, loopIndex);
                 }
             }
@@ -874,7 +875,7 @@ public final class Profiler {
                         Thread.currentThread().interrupt();
                     }
 
-                    e.printStackTrace(ps);
+                    e.printStackTrace(printStream);
                     logger.warn(e, "Profiler loop delay failed for method {} after loop {}. Skipping this thread's remaining loops", methodName, loopIndex);
 
                     return;
@@ -893,17 +894,17 @@ public final class Profiler {
      * @param reflective whether invocation uses Method.invoke and adds its own exception wrapper
      * @param setUpForMethod the setup method to be executed before the profiled method, may be {@code null}
      * @param tearDownForMethod the teardown method to be executed after the profiled method, may be {@code null}
-     * @param ps the PrintStream for output
+     * @param printStream the PrintStream for output
      * @return the statistics for this single profiled invocation
      */
     private static MethodStatistics runLoop(final Object instance, final String methodName, final Invocation invocation, final boolean reflective,
-            final Method setUpForMethod, final Method tearDownForMethod, final PrintStream ps) {
+            final Method setUpForMethod, final Method tearDownForMethod, final PrintStream printStream) {
         if (setUpForMethod != null) {
             try {
                 setUpForMethod.invoke(instance);
             } catch (final Exception e) {
                 // ignore;
-                e.printStackTrace(ps);
+                e.printStackTrace(printStream);
                 logger.warn(e, "Profiler method setup failed for method: {}", methodName);
             }
         }
@@ -926,7 +927,7 @@ public final class Profiler {
         Object result = null;
 
         if (failure != null) {
-            failure.printStackTrace(ps);
+            failure.printStackTrace(printStream);
 
             // Both invocation strategies must record the exception the profiled code actually threw: the
             // reflective path delivers it wrapped in InvocationTargetException, the direct path raw.
@@ -944,7 +945,7 @@ public final class Profiler {
                 tearDownForMethod.invoke(instance);
             } catch (final Exception e) {
                 // ignore;
-                e.printStackTrace(ps);
+                e.printStackTrace(printStream);
                 logger.warn(e, "Profiler method teardown failed for method: {}", methodName);
             }
         }
@@ -2629,6 +2630,8 @@ public final class Profiler {
          * @see #printResult() for console output
          */
         public void writeResult(final OutputStream output) throws IllegalArgumentException, NullPointerException {
+            N.checkArgNotNull(output, cs.output);
+
             writeResult(new PrintWriter(IOUtil.newOutputStreamWriter(output)));
         }
 
@@ -2814,6 +2817,8 @@ public final class Profiler {
          * @see #writeResult(OutputStream) for plain text output
          */
         public void writeHtmlResult(final OutputStream output) throws IllegalArgumentException, NullPointerException {
+            N.checkArgNotNull(output, cs.output);
+
             writeHtmlResult(new PrintWriter(IOUtil.newOutputStreamWriter(output)));
         }
 
@@ -3030,6 +3035,8 @@ public final class Profiler {
          * @see #writeResult(OutputStream) for plain text output
          */
         public void writeXmlResult(final OutputStream output) throws IllegalArgumentException, NullPointerException {
+            N.checkArgNotNull(output, cs.output);
+
             writeXmlResult(new PrintWriter(IOUtil.newOutputStreamWriter(output)));
         }
 

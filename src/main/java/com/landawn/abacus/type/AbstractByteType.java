@@ -135,23 +135,26 @@ public abstract class AbstractByteType extends NumberType<Number> {
      *
      * @param cbuf the character array to convert, may be {@code null}
      * @param offset the starting position in the array (0-based)
-     * @param len the number of characters to read
-     * @return the {@code Byte} value, or the default value if {@code cbuf} is {@code null} or {@code len} is {@code 0}
+     * @param length the number of characters to read
+     * @return the {@code Byte} value, or the default value if {@code cbuf} is {@code null} or {@code length} is {@code 0}
+     * @throws IndexOutOfBoundsException if the requested nonempty region is read outside {@code cbuf}; a {@code null} buffer or zero length returns the default value without reading.
+     * @throws IllegalArgumentException if {@code cbuf} is non-null, {@code length} is nonzero, and the decimal parsing path receives a negative offset or length.
      * @throws NumberFormatException if the region is not a valid integer
      * @throws ArithmeticException if the region is a well-formed integer outside the {@code byte} range
      */
     @Override
-    public Byte valueOf(final char[] cbuf, final int offset, final int len) throws NumberFormatException, ArithmeticException {
-        if ((cbuf == null) || (len == 0)) {
+    public Byte valueOf(final char[] cbuf, final int offset, final int length)
+            throws IndexOutOfBoundsException, IllegalArgumentException, NumberFormatException, ArithmeticException {
+        if ((cbuf == null) || (length == 0)) {
             return (Byte) defaultValue();
         }
 
         // See AbstractIntegerType.valueOf(char[]): the shared fast path cannot parse a hex token.
-        if (AbstractIntegerType.hasRadixPrefix(cbuf, offset, len)) {
-            return Numbers.toByte(new String(cbuf, offset, len));
+        if (AbstractIntegerType.hasRadixPrefix(cbuf, offset, length)) {
+            return Numbers.toByte(new String(cbuf, offset, length));
         }
 
-        final int i = parseInt(cbuf, offset, len);
+        final int i = parseInt(cbuf, offset, length);
 
         if ((i < Byte.MIN_VALUE) || (i > Byte.MAX_VALUE)) {
             // Unified overflow policy: a well-formed but out-of-range value is an ArithmeticException, as
@@ -209,18 +212,18 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      * Otherwise, converts the {@code Number} to a byte value.
      *
-     * @param stmt the {@code PreparedStatement} to set the parameter on
+     * @param statement the {@code PreparedStatement} to set the parameter on
      * @param columnIndex the parameter index (1-based)
      * @param x the {@code Number} value to set as byte, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final PreparedStatement stmt, final int columnIndex, final Number x) throws NullPointerException, SQLException {
+    public void set(final PreparedStatement statement, final int columnIndex, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(columnIndex, Types.TINYINT);
+            statement.setNull(columnIndex, Types.TINYINT);
         } else {
-            stmt.setByte(columnIndex, x.byteValue());
+            statement.setByte(columnIndex, x.byteValue());
         }
     }
 
@@ -229,18 +232,18 @@ public abstract class AbstractByteType extends NumberType<Number> {
      * If the value is {@code null}, sets the parameter to SQL {@code NULL}.
      * Otherwise, converts the {@code Number} to a byte value.
      *
-     * @param stmt the {@code CallableStatement} to set the parameter on
+     * @param statement the {@code CallableStatement} to set the parameter on
      * @param parameterName the parameter name
      * @param x the {@code Number} value to set as byte, or {@code null} for SQL {@code NULL}
-     * @throws NullPointerException if {@code stmt} is null when the JDBC operation is invoked
+     * @throws NullPointerException if {@code statement} is null when the JDBC operation is invoked
      * @throws SQLException if a database access error occurs
      */
     @Override
-    public void set(final CallableStatement stmt, final String parameterName, final Number x) throws NullPointerException, SQLException {
+    public void set(final CallableStatement statement, final String parameterName, final Number x) throws NullPointerException, SQLException {
         if (x == null) {
-            stmt.setNull(parameterName, Types.TINYINT);
+            statement.setNull(parameterName, Types.TINYINT);
         } else {
-            stmt.setByte(parameterName, x.byteValue());
+            statement.setByte(parameterName, x.byteValue());
         }
     }
 

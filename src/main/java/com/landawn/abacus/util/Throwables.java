@@ -59,7 +59,7 @@ import com.landawn.abacus.util.u.Nullable;
  *   <li>Avoid functional programming patterns when checked exceptions are involved</li>
  * </ul>
  * Throwables solves this by providing exception-throwing variants that maintain type safety
- * and enable clean functional composition.
+ * and let exception-throwing code be written as lambdas and method references.
  *
  * <p><b>Common Use Cases:</b>
  * <ul>
@@ -183,8 +183,16 @@ import com.landawn.abacus.util.u.Nullable;
  * <ul>
  *   <li><b>Preserve Type Information:</b> Generic exception types maintain compile-time safety</li>
  *   <li><b>Fail Fast:</b> Exceptions are propagated immediately rather than being silently ignored</li>
- *   <li><b>Composability:</b> Exception-throwing operations can be composed like standard functional interfaces</li>
- *   <li><b>Interoperability:</b> Seamless conversion between standard and throwable variants</li>
+ *   <li><b>Limited composition:</b> The interfaces here are mostly bare functional contracts. The only composition
+ *       helpers are {@link Predicate#negate()} and the {@code andThen} methods of {@link NFunction} and its primitive
+ *       {@code *NFunction} variants; there is no {@code Function.andThen/compose}, {@code Predicate.and/or} or
+ *       {@code Consumer.andThen}; {@link Fnn} adds only the {@code not(..)} negations for the predicate
+ *       interfaces. Compose other operations with an explicit lambda.</li>
+ *   <li><b>Interoperability:</b> Most {@code com.landawn.abacus.util.function} interfaces extend their throwable
+ *       counterpart (with {@code RuntimeException}) and offer {@code toThrowable()}; in the other direction,
+ *       {@code unchecked()} adapters exist only on {@link Runnable}, {@link Callable}, {@link Supplier},
+ *       {@link Predicate}, {@link BiPredicate}, {@link Function}, {@link BiFunction}, {@link UnaryOperator},
+ *       {@link BinaryOperator}, {@link Consumer} and {@link BiConsumer}.</li>
  * </ul>
  *
  * <p><b>{@code Error} gets no special treatment.</b> All eight static {@code run}/{@code call} helpers here are
@@ -238,7 +246,9 @@ import com.landawn.abacus.util.u.Nullable;
  * <p><b>Memory Management:</b>
  * <ul>
  *   <li>Functional interfaces are lightweight with minimal memory footprint</li>
- *   <li>A lazy initializer retains its computed value - consider weak references for large objects</li>
+ *   <li>A lazy initializer holds a strong reference to its computed value for its own lifetime; it does not support
+ *       weak or soft values, so use an external cache with weak/soft values when a large value must remain
+ *       collectable</li>
  *   <li>Primitive specializations reduce memory pressure compared to boxed variants</li>
  *   <li>The shared empty iterator holds no user data; its only field is the inherited close flag, whose flip is
  *       a no-op because it has no resource to release</li>
@@ -246,9 +256,9 @@ import com.landawn.abacus.util.u.Nullable;
  *
  * <p><b>Nested Utility Classes:</b>
  * <ul>
+ *   <li><b>{@link Iterator}:</b> An iterator whose {@code hasNext()}/{@code next()} may throw a checked exception</li>
  *   <li><b>{@link EE}:</b> Utility class for handling multiple exception types simultaneously</li>
  *   <li><b>{@link EEE}:</b> Utility class for handling three different exception types in operations</li>
- *   <li><b>{@link N#lazyInitChecked(Throwables.Supplier)}:</b> Public entry point for checked lazy initialization</li>
  * </ul>
  *
  * <p><b>Comparison with Standard Functional Interfaces:</b>
@@ -256,7 +266,9 @@ import com.landawn.abacus.util.u.Nullable;
  *   <li><b>Exception Handling:</b> Can throw checked exceptions unlike standard interfaces</li>
  *   <li><b>Type Safety:</b> Compile-time exception type checking and documentation</li>
  *   <li><b>Completeness:</b> Full coverage including primitive types and multi-arity operations</li>
- *   <li><b>Interoperability:</b> Can be converted to/from standard interfaces as needed</li>
+ *   <li><b>Interoperability:</b> Standard-side {@code com.landawn.abacus.util.function} interfaces convert to throwable
+ *       ones with {@code toThrowable()}; the reverse {@code unchecked()} adapter exists only on the core object
+ *       interfaces listed under "Exception Handling Philosophy"</li>
  * </ul>
  *
  * <p><b>Integration with Fnn:</b>
@@ -298,8 +310,14 @@ public final class Throwables {
      * checked exceptions are not allowed, such as within lambda expressions passed to
      * standard functional interfaces.</p>
      *
-     * <p><b>Interruption:</b> If the command throws {@link InterruptedException}, the current thread's
-     * interrupted status is restored before the converted exception is thrown.</p>
+     * <p><b>Interruption:</b> If the command throws an {@link InterruptedException} - bare, or wrapped in an
+     * {@code InvocationTargetException}/{@code UndeclaredThrowableException} (not an {@code ExecutionException},
+     * which reports another thread) - the current thread's interrupted status is restored before the converted
+     * exception is thrown.
+     * Only those two wrapper types are looked through: an {@code InterruptedException} that is the cause of any
+     * other exception (for example {@code new RuntimeException(ie)}) or is suppressed on one leaves the status
+     * unchanged, whereas the {@link Try} {@code run}/{@code call} methods search the whole cause and suppressed chain,
+     * except beneath an {@code ExecutionException} or {@code CompletionException} (both report another thread).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -313,8 +331,8 @@ public final class Throwables {
      * filePaths.forEach(path -> Throwables.run(() -> Files.delete(path)));
      * }</pre>
      *
-     * @param cmd the runnable command to execute that may throw a checked exception
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @param command the runnable command to execute that may throw a checked exception
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is.
      *         An {@link java.util.concurrent.ExecutionException}, {@link java.lang.reflect.InvocationTargetException}
      *         or {@link java.lang.reflect.UndeclaredThrowableException} is peeled down to its cause first and that
@@ -323,11 +341,11 @@ public final class Throwables {
      * @see Try#run(Throwables.Runnable)
      */
     @Beta
-    public static void run(final Throwables.Runnable<? extends Throwable> cmd) throws IllegalArgumentException, RuntimeException {
-        N.checkArgNotNull(cmd, cs.cmd);
+    public static void run(final Throwables.Runnable<? extends Throwable> command) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(command, cs.command);
 
         try {
-            cmd.run();
+            command.run();
         } catch (final Throwable e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -341,8 +359,13 @@ public final class Throwables {
      * <p>This method allows custom exception handling logic instead of propagating exceptions.
      * It's useful for logging, recovery, or graceful degradation scenarios.</p>
      *
-     * <p><b>Interruption:</b> If the command throws {@link InterruptedException}, the current thread is
-     * re-interrupted before the error handler is invoked.</p>
+     * <p><b>Interruption:</b> If the command throws an {@link InterruptedException} - bare, or wrapped in an
+     * {@code InvocationTargetException}/{@code UndeclaredThrowableException} (not an {@code ExecutionException},
+     * which reports another thread) - the current thread is re-interrupted before the error handler is invoked.
+     * Only those two wrapper types are looked through: an {@code InterruptedException} that is the cause of any
+     * other exception (for example {@code new RuntimeException(ie)}) or is suppressed on one leaves the status
+     * unchanged, whereas the {@link Try} {@code run}/{@code call} methods search the whole cause and suppressed chain,
+     * except beneath an {@code ExecutionException} or {@code CompletionException} (both report another thread).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -360,19 +383,19 @@ public final class Throwables {
      * ));
      * }</pre>
      *
-     * @param cmd the runnable command to execute that may throw a checked exception
+     * @param command the runnable command to execute that may throw a checked exception
      * @param actionOnError the consumer that will handle any exception thrown by the command
-     * @throws IllegalArgumentException if any of {@code cmd}, {@code actionOnError} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code command}, {@code actionOnError} is {@code null}.
      * @see Try#run(Throwables.Runnable, java.util.function.Consumer)
      */
     @Beta
-    public static void run(final Throwables.Runnable<? extends Throwable> cmd, final java.util.function.Consumer<? super Throwable> actionOnError)
+    public static void run(final Throwables.Runnable<? extends Throwable> command, final java.util.function.Consumer<? super Throwable> actionOnError)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
-            cmd.run();
+            command.run();
         } catch (final Throwable e) {
             restoreInterruptedStatusIfNeeded(e);
             actionOnError.accept(e);
@@ -387,8 +410,14 @@ public final class Throwables {
      * <p>This method allows using exception-throwing code in functional contexts that require
      * a return value, such as map operations in streams or Optional transformations.</p>
      *
-     * <p><b>Interruption:</b> If the command throws {@link InterruptedException}, the current thread's
-     * interrupted status is restored before the converted exception is thrown.</p>
+     * <p><b>Interruption:</b> If the command throws an {@link InterruptedException} - bare, or wrapped in an
+     * {@code InvocationTargetException}/{@code UndeclaredThrowableException} (not an {@code ExecutionException},
+     * which reports another thread) - the current thread's interrupted status is restored before the converted
+     * exception is thrown.
+     * Only those two wrapper types are looked through: an {@code InterruptedException} that is the cause of any
+     * other exception (for example {@code new RuntimeException(ie)}) or is suppressed on one leaves the status
+     * unchanged, whereas the {@link Try} {@code run}/{@code call} methods search the whole cause and suppressed chain,
+     * except beneath an {@code ExecutionException} or {@code CompletionException} (both report another thread).</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -405,9 +434,9 @@ public final class Throwables {
      * }</pre>
      *
      * @param <R> the type of the result returned by the callable
-     * @param cmd the callable command to execute that may throw a checked exception
+     * @param command the callable command to execute that may throw a checked exception
      * @return the result returned by the callable command
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @throws RuntimeException if the command throws an exception; a checked exception (or an {@link Error}) is wrapped in a RuntimeException, while a runtime exception is rethrown as-is.
      *         An {@link java.util.concurrent.ExecutionException}, {@link java.lang.reflect.InvocationTargetException}
      *         or {@link java.lang.reflect.UndeclaredThrowableException} is peeled down to its cause first and that
@@ -416,11 +445,11 @@ public final class Throwables {
      * @see Try#call(java.util.concurrent.Callable)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd) throws IllegalArgumentException, RuntimeException {
-        N.checkArgNotNull(cmd, cs.cmd);
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> command) throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(command, cs.command);
 
         try {
-            return cmd.call();
+            return command.call();
         } catch (final Throwable e) {
             throw ExceptionUtil.toRuntimeException(e, true);
         }
@@ -434,8 +463,26 @@ public final class Throwables {
      * <p>This method enables transforming exceptions into valid return values, useful for
      * error recovery and functional error handling patterns.</p>
      *
-     * <p><b>Interruption:</b> If the command throws {@link InterruptedException}, the current thread is
-     * re-interrupted before the error handler is invoked.</p>
+     * <p><b>Interruption:</b> If the command throws an {@link InterruptedException} - bare, or wrapped in an
+     * {@code InvocationTargetException}/{@code UndeclaredThrowableException} (not an {@code ExecutionException},
+     * which reports another thread) - the current thread is re-interrupted before the error handler is invoked.
+     * Only those two wrapper types are looked through: an {@code InterruptedException} that is the cause of any
+     * other exception (for example {@code new RuntimeException(ie)}) or is suppressed on one leaves the status
+     * unchanged, whereas the {@link Try} {@code run}/{@code call} methods search the whole cause and suppressed chain,
+     * except beneath an {@code ExecutionException} or {@code CompletionException} (both report another thread).</p>
+     *
+     * <p><b>Overload selection:</b> the {@code call} overload that a second argument binds to is chosen by ordinary
+     * Java overload resolution on the argument's static type. A handler lambda or method reference selects this
+     * overload. A handler <i>variable</i> selects it when its type is a {@code java.util.function.Function} (including
+     * {@code com.landawn.abacus.util.function.Function}) whose input type accepts a {@code Throwable}, such as
+     * {@code Function<Throwable, X>}, {@code Function<Object, X>} or {@code Function<? super Throwable, X>}.
+     * {@code R} is then inferred from both {@code X} and the command's result type, so a
+     * {@code Function<Throwable, Object>} handler compiles only with an {@code Object}-typed target. Any other
+     * variable cannot bind here, for example a {@code Function<Exception, String>} (it cannot accept a
+     * {@code Throwable}) or a {@code Throwables.Function} (not a {@code java.util.function.Function}). When the call's
+     * target admits it, such as an {@code Object} target, that variable binds to
+     * {@link #call(Throwables.Callable, Object)} and is returned as the default value itself, without being invoked.
+     * Otherwise the call does not compile. See {@link #call(Throwables.Callable, Object)} for examples.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -453,20 +500,20 @@ public final class Throwables {
      * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the error handler
-     * @param cmd the callable command to execute that may throw a checked exception
+     * @param command the callable command to execute that may throw a checked exception
      * @param actionOnError the function that will handle any exception thrown by the command and provide an alternative result
      * @return the result returned by the callable command if successful, or the result of the error handler if an exception occurs
-     * @throws IllegalArgumentException if any of {@code cmd}, {@code actionOnError} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code command}, {@code actionOnError} is {@code null}.
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Function)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd,
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> command,
             final java.util.function.Function<? super Throwable, ? extends R> actionOnError) throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(actionOnError, cs.actionOnError);
 
         try {
-            return cmd.call();
+            return command.call();
         } catch (final Throwable e) {
             restoreInterruptedStatusIfNeeded(e);
             return actionOnError.apply(e);
@@ -478,34 +525,60 @@ public final class Throwables {
      * If the command throws an exception, the result from the specified supplier will be returned instead.
      * An {@link Error} is handled the same way.
      * This method provides a safe way to handle exceptions by providing a fallback value supplier.
-     * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
-     * the fallback supplier is invoked.
-     * Because this method is overloaded with a direct {@link Comparable} fallback, explicitly cast an
-     * untyped supplier lambda as shown below so overload resolution selects this method.
+     * If the command throws an {@link InterruptedException} - bare, or wrapped in an
+     * {@code InvocationTargetException}/{@code UndeclaredThrowableException} (not an {@code ExecutionException},
+     * which reports another thread) - the current thread is re-interrupted before the fallback supplier is invoked.
+     * Only those two wrapper types are looked through: an {@code InterruptedException} that is the cause of any
+     * other exception (for example {@code new RuntimeException(ie)}) or is suppressed on one leaves the status
+     * unchanged, whereas the {@link Try} {@code run}/{@code call} methods search the whole cause and suppressed chain,
+     * except beneath an {@code ExecutionException} or {@code CompletionException} (both report another thread).
+     *
+     * <p><b>Overload selection:</b> the {@code call} overload that a second argument binds to is chosen by ordinary
+     * Java overload resolution on the argument's static type, so a {@code Supplier} <i>variable</i> is not always
+     * invoked. A supplier lambda or method reference, such as {@code () -> "x"} or {@code v::get}, selects this
+     * overload. A supplier variable selects it when its type is a {@code java.util.function.Supplier<X>} whose
+     * element type {@code X} can take the command's result. That includes a
+     * {@code com.landawn.abacus.util.function.Supplier<X>}, and a {@code Supplier<? super String>} for a command that
+     * returns a {@code String}. {@code R} is then {@code X}. If the call's target cannot accept {@code X}, the call
+     * does not compile; it does not fall back to the value overload. For example, passing a {@code Supplier<Object>}
+     * while assigning the result to a {@code String} does not compile. Any other variable binds to
+     * {@link #call(Throwables.Callable, Object)} when the call's target admits it, such as an {@code Object} target.
+     * It is then returned as the default <i>value</i> itself and is never invoked. Such variables include:</p>
+     * <ul>
+     *   <li>a {@code Throwables.Supplier}, which is not a {@code java.util.function.Supplier};</li>
+     *   <li>a {@code Supplier<Integer>} when the command returns a {@code String};</li>
+     *   <li>a {@code Supplier<? extends String>} when the command returns a {@code String}, because a {@code String}
+     *       need not fit the unknown subtype. The same variable <i>is</i> invoked when the command lambda returns no
+     *       value of its own and only throws, such as {@code () -> { throw new IOException(); }};</li>
+     *   <li>a {@code Supplier<String>} when the command itself returns a {@code Supplier<String>}; here the supplier
+     *       is the intended default value.</li>
+     * </ul>
+     * <p>See {@link #call(Throwables.Callable, Object)} for examples. To make sure a supplier variable {@code v} is
+     * invoked, pass {@code v::get}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * String result = Throwables.call(
      *     () -> riskyOperation(),
-     *     (java.util.function.Supplier<String>) () -> "default value"
+     *     () -> "default value"
      * );
      * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the supplier
-     * @param cmd the callable command to execute that may throw a checked exception
+     * @param command the callable command to execute that may throw a checked exception
      * @param supplier the supplier that provides an alternative result if the command throws an exception
      * @return the result returned by the callable command if successful, or the result from the supplier if an exception occurs
-     * @throws IllegalArgumentException if any of {@code cmd}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code command}, {@code supplier} is {@code null}.
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Supplier)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final java.util.function.Supplier<R> supplier)
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> command, final java.util.function.Supplier<R> supplier)
             throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(supplier, cs.supplier);
 
         try {
-            return cmd.call();
+            return command.call();
         } catch (final Throwable e) {
             restoreInterruptedStatusIfNeeded(e);
             return supplier.get();
@@ -518,12 +591,45 @@ public final class Throwables {
      * An {@link Error} is handled the same way.
      *
      * <p>This is the simplest form of error handling with a known fallback value.</p>
-     * If the command throws {@link InterruptedException}, the current thread's interrupted status is restored.
+     * If the command throws an {@link InterruptedException} - bare, or wrapped in an
+     * {@code InvocationTargetException}/{@code UndeclaredThrowableException} (not an {@code ExecutionException},
+     * which reports another thread) - the current thread's interrupted status is restored.
+     * Only those two wrapper types are looked through: an {@code InterruptedException} that is the cause of any
+     * other exception (for example {@code new RuntimeException(ie)}) or is suppressed on one leaves the status
+     * unchanged, whereas the {@link Try} {@code run}/{@code call} methods search the whole cause and suppressed chain,
+     * except beneath an {@code ExecutionException} or {@code CompletionException} (both report another thread).
      *
-     * <p><b>Note:</b> The result type {@code <R>} is limited to {@code Comparable<? super R>}.
-     * If the fallback value's type is not {@link Comparable}, use the {@code Supplier} overload.
-     * An untyped supplier lambda can be ambiguous with this overload, so cast it explicitly (for example,
-     * {@code Throwables.call(cmd, (java.util.function.Supplier<MyType>) () -> myDefault)}).</p>
+     * <p><b>Note:</b> The default value may be any object, including a non-{@link Comparable} one such as a
+     * {@code List}. A lambda or method reference as the second argument selects the {@code Supplier} or
+     * {@code Function} overload instead. For a <i>variable</i>, ordinary Java overload resolution on its static type
+     * decides. A {@code java.util.function.Supplier} or {@code java.util.function.Function} variable, including the
+     * {@code com.landawn.abacus.util.function} subtypes, is invoked when it fits the {@code Supplier} or
+     * {@code Function} overload. {@link #call(Throwables.Callable, java.util.function.Supplier)} and
+     * {@link #call(Throwables.Callable, java.util.function.Function)} give the exact conditions. Any other variable
+     * binds here when the call's target admits it, and is returned as the default value itself without being
+     * invoked. Whether a {@code Supplier<? extends String>} is invoked can therefore depend on the command, as the
+     * examples below show.
+     * A bare {@code null} default is ambiguous between the overloads and does not compile; write a typed null such as
+     * {@code (String) null}.</p>
+     *
+     * <p><b>BREAKING (1.1.2):</b> {@code R} was bounded by {@code Comparable<? super R>} in earlier releases. Dropping
+     * the bound changed this method's erasure from {@code Comparable} to {@code Object}: source-compatible, but code
+     * compiled against an earlier release must be recompiled or it fails with {@code NoSuchMethodError}.</p>
+     *
+     * <p><b>Overload selection examples</b> (each command fails, as when {@code path} does not exist):</p>
+     * <pre>{@code
+     * java.util.function.Supplier<? extends String> s = () -> "fallback";
+     * Object a = Throwables.call(() -> { throw new IOException(); }, s);  // "fallback": s is invoked
+     * Object b = Throwables.call(() -> Files.readString(path), s);        // s itself: the default value
+     *
+     * com.landawn.abacus.util.function.Supplier<String> t = () -> "fallback";
+     * String c = Throwables.call(() -> Files.readString(path), t);       // "fallback": t is invoked
+     *
+     * Throwables.Supplier<String, RuntimeException> u = () -> "fallback";
+     * java.util.function.Function<Exception, String> f = e -> "handled";
+     * Object d = Throwables.call(() -> Files.readString(path), u);  // u itself: not a java.util.function.Supplier
+     * Object g = Throwables.call(() -> Files.readString(path), f);  // f itself: cannot accept a Throwable
+     * }</pre>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -535,24 +641,24 @@ public final class Throwables {
      *     () -> loadFromFile("config.properties"),
      *     "default-config"
      * );
+     *
+     * // Any fallback type works
+     * List<String> lines = Throwables.call(() -> Files.readAllLines(path), Collections.emptyList());
      * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the default value
-     * @param cmd the callable command to execute that may throw a checked exception
+     * @param command the callable command to execute that may throw a checked exception
      * @param defaultValue the default value to return if the command throws an exception
      * @return the result returned by the callable command if successful, or the default value if an exception occurs
-     * @throws IllegalArgumentException if {@code cmd} is {@code null}.
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
      * @see #call(Throwables.Callable, java.util.function.Supplier)
      */
     @Beta
-    public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final R defaultValue)
-            throws IllegalArgumentException {
-        N.checkArgNotNull(cmd, cs.cmd);
-
-        // Restrict direct fallback values to comparable result types.
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> command, final R defaultValue) throws IllegalArgumentException {
+        N.checkArgNotNull(command, cs.command);
 
         try {
-            return cmd.call();
+            return command.call();
         } catch (final Throwable e) {
             restoreInterruptedStatusIfNeeded(e);
             return defaultValue;
@@ -567,10 +673,22 @@ public final class Throwables {
      * An {@link Error} is passed to the predicate like any other throwable.
      *
      * <p>This method enables selective exception handling based on exception type or properties.</p>
-     * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
-     * the predicate is evaluated.
-     * Because this method is overloaded with a direct {@link Comparable} fallback, explicitly cast
-     * untyped supplier lambdas so overload resolution selects this method.
+     * If the command throws an {@link InterruptedException} - bare, or wrapped in an
+     * {@code InvocationTargetException}/{@code UndeclaredThrowableException} (not an {@code ExecutionException},
+     * which reports another thread) - the current thread is re-interrupted before the predicate is evaluated.
+     * Only those two wrapper types are looked through: an {@code InterruptedException} that is the cause of any
+     * other exception (for example {@code new RuntimeException(ie)}) or is suppressed on one leaves the status
+     * unchanged, whereas the {@link Try} {@code run}/{@code call} methods search the whole cause and suppressed chain,
+     * except beneath an {@code ExecutionException} or {@code CompletionException} (both report another thread).
+     * The third argument binds by the same overload-resolution rule that
+     * {@link #call(Throwables.Callable, java.util.function.Supplier)} describes. A supplier lambda or method reference
+     * selects this overload. So does a {@code java.util.function.Supplier<X>} variable, including a
+     * {@code com.landawn.abacus.util.function.Supplier<X>}, whose element type {@code X} can take the command's result.
+     * Any other variable binds, when the call's target admits it, to
+     * {@link #call(Throwables.Callable, java.util.function.Predicate, Object)} and is returned as the default value
+     * itself. Examples are a {@code Throwables.Supplier}, or a {@code Supplier<? extends String>} with a command that
+     * returns a {@code String}. A bare {@code null} third argument also binds <i>here</i> and fails with
+     * {@link IllegalArgumentException}; write a typed null such as {@code (String) null} for a {@code null} default.
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -578,37 +696,38 @@ public final class Throwables {
      * String content = Throwables.call(
      *     () -> Files.readString(path),
      *     ex -> ex instanceof IOException,
-     *     (java.util.function.Supplier<String>) () -> "default content"
+     *     () -> "default content"
      * );
      *
      * // Fall back to the cache on specific errors
      * Data result = Throwables.call(
      *     () -> fetchFromRemote(),
      *     ex -> ex.getMessage() != null && ex.getMessage().contains("timeout"),
-     *     (java.util.function.Supplier<Data>) () -> fetchFromCache()
+     *     () -> fetchFromCache()
      * );
      * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the supplier
-     * @param cmd the callable command to execute that may throw a checked exception
+     * @param command the callable command to execute that may throw a checked exception
      * @param predicate the predicate that tests whether to handle the exception or rethrow it; it receives the
      *        exception exactly as thrown, including any {@code ExecutionException}/{@code InvocationTargetException}/
      *        {@code UndeclaredThrowableException} wrapper - only the rethrow path peels those off
      * @param supplier the supplier that provides an alternative result if the predicate returns true
      * @return the result returned by the callable command if successful, or the result from the supplier if an exception occurs and the predicate returns true
-     * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate}, {@code supplier} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code command}, {@code predicate}, {@code supplier} is {@code null}.
      * @throws RuntimeException if the command throws an exception and the predicate returns false
      * @see Try#call(java.util.concurrent.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
-    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd, final java.util.function.Predicate<? super Throwable> predicate,
-            final java.util.function.Supplier<R> supplier) throws IllegalArgumentException, RuntimeException {
-        N.checkArgNotNull(cmd, cs.cmd);
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> command,
+            final java.util.function.Predicate<? super Throwable> predicate, final java.util.function.Supplier<R> supplier)
+            throws IllegalArgumentException, RuntimeException {
+        N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(predicate, cs.predicate);
         N.checkArgNotNull(supplier, cs.supplier);
 
         try {
-            return cmd.call();
+            return command.call();
         } catch (final Throwable e) {
             restoreInterruptedStatusIfNeeded(e);
 
@@ -628,12 +747,28 @@ public final class Throwables {
      * An {@link Error} is passed to the predicate like any other throwable.
      *
      * <p>Combines predicate-based exception filtering with a simple default value.</p>
-     * If the command throws {@link InterruptedException}, the current thread is re-interrupted before
-     * the predicate is evaluated.
+     * If the command throws an {@link InterruptedException} - bare, or wrapped in an
+     * {@code InvocationTargetException}/{@code UndeclaredThrowableException} (not an {@code ExecutionException},
+     * which reports another thread) - the current thread is re-interrupted before the predicate is evaluated.
+     * Only those two wrapper types are looked through: an {@code InterruptedException} that is the cause of any
+     * other exception (for example {@code new RuntimeException(ie)}) or is suppressed on one leaves the status
+     * unchanged, whereas the {@link Try} {@code run}/{@code call} methods search the whole cause and suppressed chain,
+     * except beneath an {@code ExecutionException} or {@code CompletionException} (both report another thread).
      *
-     * <p><b>Note:</b> The result type {@code <R>} is limited to {@code Comparable<? super R>}.
-     * If the fallback value's type is not {@link Comparable}, use the {@code Supplier} overload instead.
-     * Cast an untyped supplier lambda explicitly because it can otherwise be ambiguous with this overload.</p>
+     * <p><b>Note:</b> The default value may be any object, including a non-{@link Comparable} one such as a
+     * {@code List}. A lambda or method reference as the third argument selects the {@code Supplier} overload instead.
+     * For a {@code Supplier} <i>variable</i>, ordinary Java overload resolution on its static type decides, as described
+     * on {@link #call(Throwables.Callable, java.util.function.Supplier)}. A {@code java.util.function.Supplier<X>}
+     * (including a {@code com.landawn.abacus.util.function.Supplier<X>}) whose {@code X} can take the command's
+     * result is invoked. Any other variable, for example a {@code Throwables.Supplier} or a
+     * {@code Supplier<? extends String>} with a {@code String}-returning command, is accepted here as the default
+     * value itself when the call's target admits it, and is never invoked. A bare {@code null}
+     * default binds to the {@code Supplier} overload, which rejects it with {@link IllegalArgumentException}; write a
+     * typed null such as {@code (String) null}, as in the example below.</p>
+     *
+     * <p><b>BREAKING (1.1.2):</b> {@code R} was bounded by {@code Comparable<? super R>} in earlier releases. Dropping
+     * the bound changed this method's erasure from {@code Comparable} to {@code Object}: source-compatible, but code
+     * compiled against an earlier release must be recompiled or it fails with {@code NoSuchMethodError}.</p>
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
@@ -653,26 +788,24 @@ public final class Throwables {
      * }</pre>
      *
      * @param <R> the type of the result returned by the callable or the default value
-     * @param cmd the callable command to execute that may throw a checked exception
+     * @param command the callable command to execute that may throw a checked exception
      * @param predicate the predicate that tests whether to handle the exception or rethrow it; it receives the
      *        exception exactly as thrown, including any {@code ExecutionException}/{@code InvocationTargetException}/
      *        {@code UndeclaredThrowableException} wrapper - only the rethrow path peels those off
      * @param defaultValue the default value to return if the predicate returns true
      * @return the result returned by the callable command if successful, or the default value if an exception occurs and the predicate returns true
-     * @throws IllegalArgumentException if any of {@code cmd}, {@code predicate} is {@code null}.
+     * @throws IllegalArgumentException if any of {@code command}, {@code predicate} is {@code null}.
      * @throws RuntimeException if the command throws an exception and the predicate returns false
      * @see #call(Throwables.Callable, java.util.function.Predicate, java.util.function.Supplier)
      */
     @Beta
-    public static <R extends Comparable<? super R>> R call(final Throwables.Callable<? extends R, ? extends Throwable> cmd,
+    public static <R> R call(final Throwables.Callable<? extends R, ? extends Throwable> command,
             final java.util.function.Predicate<? super Throwable> predicate, final R defaultValue) throws IllegalArgumentException, RuntimeException {
-        N.checkArgNotNull(cmd, cs.cmd);
+        N.checkArgNotNull(command, cs.command);
         N.checkArgNotNull(predicate, cs.predicate);
 
-        // Restrict direct fallback values to comparable result types.
-
         try {
-            return cmd.call();
+            return command.call();
         } catch (final Throwable e) {
             restoreInterruptedStatusIfNeeded(e);
 
@@ -685,15 +818,42 @@ public final class Throwables {
     }
 
     /**
-     * Restores the current thread's interrupted status when {@code e} is an interruption signal.
+     * Restores the current thread's interrupted status when {@code e} is an interruption signal: an
+     * {@link InterruptedException} itself, or one wrapped in an
+     * {@link java.lang.reflect.InvocationTargetException} or {@link java.lang.reflect.UndeclaredThrowableException}
+     * (looked through up to {@code MAX_INTERRUPT_UNWRAP_DEPTH} = 100 nested wrappers, the same bound as
+     * {@code ExceptionUtil.toRuntimeException}; a deeper chain leaves the status unchanged).
+     * An {@code InterruptedException} found under an {@link java.util.concurrent.ExecutionException} was raised on
+     * another thread and does not interrupt this one.
      *
      * @param e the failure caught from a user-supplied operation
      */
-    private static void restoreInterruptedStatusIfNeeded(final Throwable e) {
-        if (e instanceof InterruptedException) {
-            Thread.currentThread().interrupt();
+    private static void restoreInterruptedStatusIfNeeded(Throwable e) {
+        // Mirror ExceptionUtil.toRuntimeException(e, true), which the rethrow paths use, so that a handled or
+        // fallback-absorbed failure keeps the interrupt exactly when a rethrown one would: InvocationTargetException
+        // and UndeclaredThrowableException are raised on the calling thread and keep the interrupt's meaning, while an
+        // ExecutionException reports another thread's failure. The depth bound guards against cyclic cause chains
+        // (ExceptionUtil also gives up without interrupting when its equivalent bound is exhausted).
+        for (int depth = 0; depth <= MAX_INTERRUPT_UNWRAP_DEPTH; depth++) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            if (e instanceof java.util.concurrent.ExecutionException || e == null) {
+                return;
+            }
+
+            if (!(e instanceof java.lang.reflect.InvocationTargetException || e instanceof java.lang.reflect.UndeclaredThrowableException)) {
+                return;
+            }
+
+            e = e.getCause();
         }
     }
+
+    /** Same depth budget as {@code ExceptionUtil}'s wrapper-unwrapping loop. */
+    private static final int MAX_INTERRUPT_UNWRAP_DEPTH = 100;
 
     /**
      * Shared instance used by all empty iterators; it holds no user data and its inherited close flag releases nothing.
@@ -725,6 +885,11 @@ public final class Throwables {
      * Exhaustion and terminal operations do not close the iterator automatically. Callers must close
      * resource-backed iterators. Closing an iterator returned by
      * {@link #filter(Throwables.Predicate)} or {@link #map(Throwables.Function)} closes its source.
+     * What a closed iterator does next depends on the factory: iterators returned by {@link #defer(java.util.function.Supplier)},
+     * {@link #concat(Collection)}, {@link #filter(Throwables.Predicate)}, {@link #map(Throwables.Function)} and
+     * {@link #ofLines(Reader)} report themselves exhausted once closed, while the resource-free iterators returned by
+     * {@link #empty()}, {@link #just(Object)}, {@link #of(Object...)}, {@link #of(Object[], int, int)},
+     * {@link #of(Iterable)} and {@link #of(java.util.Iterator)} ignore {@link #closeResource()} and keep iterating.
      *
      * <p><b>Note on the factory methods' exception bound:</b> this class is declared with
      * {@code <E extends Throwable>}, but {@link #of(Object...)}, {@link #of(Object[], int, int)},
@@ -781,21 +946,24 @@ public final class Throwables {
         /**
          * Returns an iterator containing only the specified single element.
          *
+         * <p>The returned iterator holds no resource, so {@link #closeResource()} is a no-op on it: it does
+         * <i>not</i> end the iteration, and the remaining elements can still be read after it is called.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Throwables.Iterator<String, IOException> single = Throwables.Iterator.just("hello");
-         * String value = single.next();   // returns "hello"
-         * assert !single.hasNext();       // returns false (iterator exhausted)
+         * String value = single.next();  // returns "hello"
+         * assert !single.hasNext();      // returns false (iterator exhausted)
          *
          * Throwables.Iterator<Integer, RuntimeException> one = Throwables.Iterator.just(42);
          * }</pre>
          *
          * @param <T> the type of the element
          * @param <E> the type of exception that may be thrown
-         * @param val the single element to be contained in the iterator
+         * @param value the single element to be contained in the iterator
          * @return an iterator containing only the specified element
          */
-        public static <T, E extends Throwable> Throwables.Iterator<T, E> just(final T val) {
+        public static <T, E extends Throwable> Throwables.Iterator<T, E> just(final T value) {
             return new Throwables.Iterator<>() {
                 private boolean done = false;
 
@@ -816,13 +984,16 @@ public final class Throwables {
 
                     done = true;
 
-                    return val;
+                    return value;
                 }
             };
         }
 
         /**
          * Returns an iterator over the specified array of elements.
+         *
+         * <p>The returned iterator holds no resource, so {@link #closeResource()} is a no-op on it: it does
+         * <i>not</i> end the iteration, and the remaining elements can still be read after it is called.</p>
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -846,13 +1017,16 @@ public final class Throwables {
         /**
          * Returns an iterator over a range of elements in the specified array.
          *
+         * <p>The returned iterator holds no resource, so {@link #closeResource()} is a no-op on it: it does
+         * <i>not</i> end the iteration, and the remaining elements can still be read after it is called.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * String[] data = {"a", "b", "c", "d", "e"};
          * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of(data, 1, 4);
-         * iter.next();   // returns "b"
-         * iter.next();   // returns "c"
-         * iter.next();   // returns "d"
+         * iter.next();  // returns "b"
+         * iter.next();  // returns "c"
+         * iter.next();  // returns "d"
          * }</pre>
          *
          * @param <T> the type of elements in the array
@@ -926,6 +1100,9 @@ public final class Throwables {
         /**
          * Returns an iterator over the elements in the specified Iterable.
          *
+         * <p>The returned iterator holds no resource, so {@link #closeResource()} is a no-op on it: it does
+         * <i>not</i> end the iteration, and the remaining elements can still be read after it is called.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * List<String> list = Arrays.asList("a", "b", "c");
@@ -961,6 +1138,9 @@ public final class Throwables {
         /**
          * Returns a Throwables.Iterator that wraps the specified java.util.Iterator.
          *
+         * <p>{@link #closeResource()} is a no-op on the returned iterator: it neither ends the iteration nor
+         * releases the wrapped iterator, whose remaining elements can still be read after it is called.</p>
+         *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * java.util.Iterator<String> utilIter = Arrays.asList("x", "y").iterator();
@@ -970,23 +1150,23 @@ public final class Throwables {
          *
          * @param <T> the type of elements returned by the iterator
          * @param <E> the type of exception that may be thrown
-         * @param iter the java.util.Iterator to wrap
-         * @return a Throwables.Iterator wrapping the specified iterator, or an empty iterator if iter is null
+         * @param iterator the java.util.Iterator to wrap
+         * @return a Throwables.Iterator wrapping the specified iterator, or an empty iterator if {@code iterator} is null
          */
-        public static <T, E extends Exception> Throwables.Iterator<T, E> of(final java.util.Iterator<? extends T> iter) {
-            if (iter == null) {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> of(final java.util.Iterator<? extends T> iterator) {
+            if (iterator == null) {
                 return EMPTY;
             }
 
             return new Throwables.Iterator<>() {
                 @Override
                 public boolean hasNext() throws E {
-                    return iter.hasNext();
+                    return iterator.hasNext();
                 }
 
                 @Override
                 public T next() throws E {
-                    return iter.next();
+                    return iterator.next();
                 }
             };
         }
@@ -1010,7 +1190,17 @@ public final class Throwables {
          * acquire a resource. After {@code closeResource()} the wrapper reports itself exhausted, exactly as
          * {@link #concat(Collection)}, {@link #filter(Throwables.Predicate)} and {@link #map(Throwables.Function)}
          * do: {@code hasNext()} returns {@code false}, {@code next()} throws {@link NoSuchElementException},
-         * {@code advance(long)} is a no-op and {@code count()} returns {@code 0}.
+         * {@code advance(long)} is a no-op and {@code count()} returns {@code 0}. This includes a close made by the
+         * underlying iterator's own {@code hasNext()}: that call then returns {@code false} whatever the underlying
+         * iterator reported.
+         *
+         * <p>Unlike {@code concat}, {@code filter} and {@code map}, which count and skip element by element, this
+         * wrapper hands {@code count()} and a positive {@code advance(long)} to the underlying iterator's own
+         * {@code count()} and {@code advance(long)}, so a bulk implementation of the underlying iterator is kept. Those
+         * two methods therefore see only a close made before they are called. If the underlying iterator closes this
+         * wrapper while such a delegated call is running, the call still runs to completion and its result stands:
+         * {@code count()} can then include elements after the point of the close, where {@code map} and {@code filter}
+         * would stop counting at the close.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1029,126 +1219,148 @@ public final class Throwables {
          *
          * @param <T> the type of the elements in the Iterator.
          * @param <E> the type of the exception that may be thrown.
-         * @param iteratorSupplier a Supplier that provides the Throwables.Iterator when needed.
+         * @param iteratorSupplier a Supplier that provides the Throwables.Iterator when needed; it may supply an
+         *        iterator of any subtype of {@code T} that throws any subtype of {@code E}, so for example
+         *        {@code defer(() -> ofLines(reader))} can be typed as {@code Throwables.Iterator<String, Exception>}.
          * @return a Throwables.Iterator that is initialized on the first call to {@code hasNext()}, {@code next()},
          *         a positive {@code advance(long)}, or {@code count()}
          * @throws IllegalArgumentException if {@code iteratorSupplier} is {@code null}.
          */
-        public static <T, E extends Exception> Throwables.Iterator<T, E> defer(final java.util.function.Supplier<Throwables.Iterator<T, E>> iteratorSupplier)
-                throws IllegalArgumentException {
+        public static <T, E extends Exception> Throwables.Iterator<T, E> defer(
+                final java.util.function.Supplier<? extends Throwables.Iterator<? extends T, ? extends E>> iteratorSupplier) throws IllegalArgumentException {
             N.checkArgNotNull(iteratorSupplier, cs.iteratorSupplier);
 
-            return new Throwables.Iterator<>() {
-                private Throwables.Iterator<T, E> iter = null;
-                private java.util.function.Supplier<Throwables.Iterator<T, E>> supplier = iteratorSupplier;
-                private boolean isInitialized = false;
-                private boolean isClosed = false;
-                private boolean isInitializing = false;
-                private IllegalStateException recursiveFailure;
+            return new DeferredIterator<>(iteratorSupplier);
+        }
 
-                @Override
-                boolean supportsFailureAtomicAdvance() throws E {
-                    return init() && iter.supportsFailureAtomicAdvance();
+        // Keep lifecycle wrappers static: anonymous classes can retain synthetic source/callback captures
+        // even after their explicitly clearable fields have been nulled during close.
+        private static final class DeferredIterator<T, E extends Exception> extends Throwables.Iterator<T, E> {
+            private Throwables.Iterator<? extends T, ? extends E> iter = null;
+            private java.util.function.Supplier<? extends Throwables.Iterator<? extends T, ? extends E>> supplier;
+            private boolean isInitialized = false;
+            private boolean isClosed = false;
+            private boolean isInitializing = false;
+            private IllegalStateException recursiveFailure;
+
+            private DeferredIterator(final java.util.function.Supplier<? extends Throwables.Iterator<? extends T, ? extends E>> supplier) {
+                this.supplier = supplier;
+            }
+
+            @Override
+            boolean supportsFailureAtomicAdvance() throws E {
+                return init() && iter.supportsFailureAtomicAdvance();
+            }
+
+            @Override
+            public boolean hasNext() throws E {
+                if (!init()) {
+                    return false;
                 }
 
-                @Override
-                public boolean hasNext() throws E {
-                    return init() && iter.hasNext();
+                // The source's hasNext() may close this wrapper re-entrantly, which nulls `iter`. Call it through a
+                // local and re-check the flag afterwards, so a wrapper closed mid-call reports exhaustion instead of
+                // returning true and then throwing NoSuchElementException from next().
+                final Throwables.Iterator<? extends T, ? extends E> src = iter;
+                final boolean hasNext = src.hasNext();
+
+                return hasNext && !isClosed;
+            }
+
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator is closed or has no remaining element
+             * @throws E if creating or advancing the source iterator throws an exception
+             */
+            @Override
+            public T next() throws NoSuchElementException, E {
+                if (!init()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                /**
-                 * {@inheritDoc}
-                 * @throws NoSuchElementException if this iterator is closed or has no remaining element
-                 * @throws E if creating or advancing the source iterator throws an exception
-                 */
-                @Override
-                public T next() throws NoSuchElementException, E {
-                    if (!init()) {
-                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                return iter.next();
+            }
+
+            @Override
+            public void advance(final long n) throws E {
+                if (n <= 0 || !init()) {
+                    return;
+                }
+
+                iter.advance(n);
+            }
+
+            @Override
+            public long count() throws E {
+                // Delegated (not counted through hasNext()/next()) to keep the source's bulk count. The price, as
+                // documented: a close made by the source during this call does not stop the delegated count.
+                return init() ? iter.count() : 0;
+            }
+
+            @Override
+            protected void closeResourceInternal() {
+                isClosed = true;
+                supplier = null;
+
+                if (iter != null) {
+                    try {
+                        iter.closeResource();
+                    } finally {
+                        iter = null;
                     }
+                }
+            }
 
-                    return iter.next();
+            private boolean init() {
+                if (isClosed) {
+                    return false;
                 }
 
-                @Override
-                public void advance(final long n) throws E {
-                    if (n <= 0 || !init()) {
-                        return;
-                    }
-
-                    iter.advance(n);
-                }
-
-                @Override
-                public long count() throws E {
-                    return init() ? iter.count() : 0;
-                }
-
-                @Override
-                protected void closeResourceInternal() {
-                    isClosed = true;
-                    supplier = null;
-
-                    if (iter != null) {
-                        try {
-                            iter.closeResource();
-                        } finally {
-                            iter = null;
+                if (!isInitialized) {
+                    if (isInitializing) {
+                        if (recursiveFailure == null) {
+                            recursiveFailure = new IllegalStateException("Recursive initialization of deferred iterator");
                         }
-                    }
-                }
-
-                private boolean init() {
-                    if (isClosed) {
-                        return false;
+                        throw recursiveFailure;
                     }
 
-                    if (!isInitialized) {
-                        if (isInitializing) {
-                            if (recursiveFailure == null) {
-                                recursiveFailure = new IllegalStateException("Recursive initialization of deferred iterator");
+                    isInitializing = true;
+                    try {
+                        final Throwables.Iterator<? extends T, ? extends E> supplied = supplier.get();
+                        if (supplied == null) {
+                            throw new IllegalStateException("Iterator supplier returned null");
+                        }
+                        // A self-return does not reenter initialization, but would recurse forever during delegation.
+                        if (supplied == this) {
+                            throw recursiveFailure == null ? new IllegalStateException("Iterator supplier returned the deferred iterator itself")
+                                    : recursiveFailure;
+                        }
+                        if (recursiveFailure != null) {
+                            // Even if the supplier swallowed the recursive failure, its abandoned resource must be closed.
+                            try {
+                                supplied.closeResource();
+                            } catch (final Throwable failure) {
+                                if (failure != recursiveFailure) {
+                                    recursiveFailure.addSuppressed(failure);
+                                }
                             }
                             throw recursiveFailure;
                         }
-
-                        isInitializing = true;
-                        try {
-                            final Throwables.Iterator<T, E> supplied = supplier.get();
-                            if (supplied == null) {
-                                throw new IllegalStateException("Iterator supplier returned null");
-                            }
-                            // A self-return does not reenter initialization, but would recurse forever during delegation.
-                            if (supplied == this) {
-                                throw recursiveFailure == null ? new IllegalStateException("Iterator supplier returned the deferred iterator itself")
-                                        : recursiveFailure;
-                            }
-                            if (recursiveFailure != null) {
-                                // Even if the supplier swallowed the recursive failure, its abandoned resource must be closed.
-                                try {
-                                    supplied.closeResource();
-                                } catch (final Throwable failure) {
-                                    if (failure != recursiveFailure) {
-                                        recursiveFailure.addSuppressed(failure);
-                                    }
-                                }
-                                throw recursiveFailure;
-                            }
-                            if (isClosed) {
-                                // The supplier can close the wrapper before returning a newly acquired resource.
-                                supplied.closeResource();
-                                return false;
-                            }
-                            iter = supplied;
-                            supplier = null;
-                            isInitialized = true;
-                        } finally {
-                            isInitializing = false;
-                            recursiveFailure = null;
+                        if (isClosed) {
+                            // The supplier can close the wrapper before returning a newly acquired resource.
+                            supplied.closeResource();
+                            return false;
                         }
+                        iter = supplied;
+                        supplier = null;
+                        isInitialized = true;
+                    } finally {
+                        isInitializing = false;
+                        recursiveFailure = null;
                     }
-                    return true;
                 }
-            };
+                return true;
+            }
         }
 
         /**
@@ -1160,10 +1372,10 @@ public final class Throwables {
          * Throwables.Iterator<String, RuntimeException> iter1 = Throwables.Iterator.of("a", "b");
          * Throwables.Iterator<String, RuntimeException> iter2 = Throwables.Iterator.of("c", "d");
          * Throwables.Iterator<String, RuntimeException> combined = Throwables.Iterator.concat(iter1, iter2);
-         * combined.next();   // returns "a"
-         * combined.next();   // returns "b"
-         * combined.next();   // returns "c"
-         * combined.next();   // returns "d"
+         * combined.next();  // returns "a"
+         * combined.next();  // returns "b"
+         * combined.next();  // returns "c"
+         * combined.next();  // returns "d"
          * }</pre>
          *
          * @param <T> the type of elements returned by the iterators
@@ -1183,7 +1395,9 @@ public final class Throwables {
          * Closing the returned iterator closes every supplied iterator, including iterators that have
          * not yet been reached. If multiple close operations fail, the first failure is rethrown after
          * all iterators have been closed and distinct later failures are attached as suppressed exceptions.
-         * Source references are released after close, and the returned iterator is then exhausted.
+         * Source references are released after close, and the returned iterator is then exhausted. This also holds
+         * when a source closes the returned iterator from inside its own {@code hasNext()}: the returned iterator
+         * reports {@code false} instead of moving on to the next source.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
@@ -1209,40 +1423,72 @@ public final class Throwables {
             final List<Throwables.Iterator<? extends T, ? extends E>> sources = new ArrayList<>(c);
 
             return new Throwables.Iterator<>() {
-                private final java.util.Iterator<? extends Throwables.Iterator<? extends T, ? extends E>> iter = sources.iterator();
+                // An index rather than sources.iterator(): closing this wrapper clears the list, and a source callback
+                // may do that re-entrantly while hasNext() is walking it (an ArrayList iterator would then throw CME).
+                private int cursor;
                 private Throwables.Iterator<? extends T, ? extends E> cur;
+                // Remembers a positive hasNext() so that next() does not ask the source again: a source whose
+                // hasNext() closes this wrapper could otherwise turn hasNext() == true into a NoSuchElementException.
+                private boolean ready;
                 private boolean closed;
 
                 @Override
                 public boolean hasNext() throws E {
-                    if (closed) {
-                        return false;
+                    if (ready) {
+                        return true;
                     }
 
-                    while ((cur == null || !cur.hasNext()) && iter.hasNext()) {
-                        cur = iter.next();
+                    // A source's hasNext() may close this wrapper (the only early-exit hook this iterator has). As in
+                    // defer, filter and map, a wrapper closed mid-traversal then just reports exhaustion, so `closed` is
+                    // re-checked after every source callback instead of reading the fields that closeResourceInternal()
+                    // has reset.
+                    while (!closed) {
+                        final Throwables.Iterator<? extends T, ? extends E> c = cur;
+
+                        if (c != null) {
+                            final boolean hasMore = c.hasNext();
+
+                            if (closed) {
+                                return false;
+                            }
+
+                            if (hasMore) {
+                                ready = true;
+                                return true;
+                            }
+                        }
+
+                        if (cursor >= sources.size()) {
+                            return false;
+                        }
+
+                        cur = sources.get(cursor++);
                     }
 
-                    return cur != null && cur.hasNext();
+                    return false;
                 }
 
                 /**
                  * {@inheritDoc}
                  * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
-                 * @throws NoSuchElementException if this iterator has no remaining element
+                 * @throws NoSuchElementException if this iterator is closed or has no remaining element
                  */
                 @Override
                 public T next() throws E, NoSuchElementException {
-                    if ((cur == null || !cur.hasNext()) && !hasNext()) {
+                    // hasNext() returns true only while open and with cur positioned on a source that has an element;
+                    // closeResourceInternal() clears `ready`, so a close in between is reported as exhaustion.
+                    if (!hasNext()) {
                         throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                     }
 
+                    ready = false;
                     return cur.next();
                 }
 
                 @Override
                 protected void closeResourceInternal() {
                     closed = true;
+                    ready = false;
                     Throwable failure = null;
 
                     for (final Throwables.Iterator<? extends T, ? extends E> source : sources) {
@@ -1394,9 +1640,9 @@ public final class Throwables {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b");
-         * iter.next();   // returns "a"
-         * iter.next();   // returns "b"
-         * iter.next();   // throws NoSuchElementException (no more elements)
+         * iter.next();  // returns "a"
+         * iter.next();  // returns "b"
+         * iter.next();  // throws NoSuchElementException (no more elements)
          * }</pre>
          *
          * @return the next element in the iteration
@@ -1413,15 +1659,15 @@ public final class Throwables {
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Throwables.Iterator<Integer, RuntimeException> iter = Throwables.Iterator.of(1, 2, 3, 4, 5);
-         * iter.advance(2);                   // skips 1 and 2
-         * iter.next();                       // returns 3
+         * iter.advance(2);  // skips 1 and 2
+         * iter.next();      // returns 3
          *
-         * iter.advance(10);                  // skips past the end (only 4, 5 remained)
-         * iter.hasNext();                    // returns false
+         * iter.advance(10);  // skips past the end (only 4, 5 remained)
+         * iter.hasNext();    // returns false
          *
          * Throwables.Iterator<Integer, RuntimeException> unmoved = Throwables.Iterator.of(1, 2, 3);
-         * unmoved.advance(0);   // no-op
-         * unmoved.next();       // still returns 1
+         * unmoved.advance(0);  // no-op
+         * unmoved.next();      // still returns 1
          * }</pre>
          *
          * @param n the number of elements to skip; no-op if zero or negative
@@ -1447,8 +1693,8 @@ public final class Throwables {
          * iter.count(); // returns 3 (and consumes all elements)
          *
          * Throwables.Iterator<Integer, RuntimeException> iter2 = Throwables.Iterator.of(10, 20, 30);
-         * iter2.next();    // consumes 10
-         * iter2.count();   // returns 2 (counts only the remaining elements)
+         * iter2.next();   // consumes 10
+         * iter2.count();  // returns 2 (counts only the remaining elements)
          * }</pre>
          *
          * @return the number of remaining elements
@@ -1499,143 +1745,182 @@ public final class Throwables {
          * Returns a new iterator that contains only elements matching the specified predicate.
          * Elements that do not satisfy the predicate will be skipped.
          * Closing the returned iterator closes this source iterator, releases its buffered element and
-         * callback references, and leaves the returned iterator exhausted.
+         * callback references, and leaves the returned iterator exhausted. This also holds when the predicate or
+         * the source closes the returned iterator while it is searching for the next match: the search stops, the
+         * element being tested is dropped (even if the predicate accepts it) and {@code hasNext()} returns
+         * {@code false}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Throwables.Iterator<Integer, RuntimeException> iter = Throwables.Iterator.of(1, 2, 3, 4, 5);
          * Throwables.Iterator<Integer, RuntimeException> even = iter.filter(x -> x % 2 == 0);
-         * even.next();   // returns 2
-         * even.next();   // returns 4
+         * even.next();  // returns 2
+         * even.next();  // returns 4
          * }</pre>
          *
-         * @param predicate the predicate to test each element
+         * @param predicate the predicate to test each element; it may throw any subtype of {@code E}
          * @return a new iterator containing only elements that satisfy the predicate; exceptions thrown
          *         by the predicate propagate from the returned iterator's {@code hasNext()}/{@code next()} calls
          * @throws IllegalArgumentException if {@code predicate} is {@code null}.
          */
-        public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, E> predicate) throws IllegalArgumentException {
+        public Throwables.Iterator<T, E> filter(final Throwables.Predicate<? super T, ? extends E> predicate) throws IllegalArgumentException {
             N.checkArgNotNull(predicate, cs.predicate);
 
-            return new Throwables.Iterator<>() {
-                private Throwables.Iterator<T, E> iter = Iterator.this;
-                private Throwables.Predicate<? super T, E> predicateRef = predicate;
-                private T next;
-                private boolean nextReady;
-                private boolean closed;
+            return new FilteringIterator<>(this, predicate);
+        }
 
-                @Override
-                public boolean hasNext() throws E {
-                    if (closed) {
-                        return false;
-                    }
+        private static final class FilteringIterator<T, E extends Throwable> extends Throwables.Iterator<T, E> {
+            private Throwables.Iterator<T, E> iter;
+            private Throwables.Predicate<? super T, ? extends E> predicateRef;
+            private T next;
+            private boolean nextReady;
+            private boolean closed;
 
-                    if (!nextReady) {
-                        while (iter.hasNext()) {
-                            final T candidate = iter.next();
+            private FilteringIterator(final Throwables.Iterator<T, E> iter, final Throwables.Predicate<? super T, ? extends E> predicate) {
+                this.iter = iter;
+                predicateRef = predicate;
+            }
 
-                            if (predicateRef.test(candidate)) {
-                                next = candidate;
-                                nextReady = true;
-                                break;
-                            }
+            @Override
+            public boolean hasNext() throws E {
+                if (!nextReady && !closed) {
+                    // The predicate or the source may close this wrapper re-entrantly (the only early-exit hook
+                    // this iterator has); closeResourceInternal() then nulls the fields and resets nextReady. Work
+                    // on locals and re-check `closed` after every callback, so a wrapper closed mid-traversal just
+                    // reports exhaustion (defer, concat and map re-check their flag the same way) - never an NPE,
+                    // and never hasNext() == true followed by a NoSuchElementException from next().
+                    final Throwables.Iterator<T, E> src = iter;
+                    final Throwables.Predicate<? super T, ? extends E> p = predicateRef;
+
+                    while (src.hasNext() && !closed) {
+                        final T candidate = src.next();
+
+                        if (!closed && p.test(candidate) && !closed) {
+                            next = candidate;
+                            nextReady = true;
+                            break;
+                        }
+
+                        if (closed) {
+                            break;
                         }
                     }
-
-                    return nextReady;
                 }
 
-                /**
-                 * {@inheritDoc}
-                 * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
-                 * @throws NoSuchElementException if this iterator has no remaining element
-                 */
-                @Override
-                public T next() throws E, NoSuchElementException {
-                    if (!hasNext()) {
-                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                    }
+                return nextReady;
+            }
 
-                    final T result = next;
+            /**
+             * {@inheritDoc}
+             * @throws E if advancing the source iterator or evaluating an intermediate operation throws an exception
+             * @throws NoSuchElementException if this iterator has no remaining element
+             */
+            @Override
+            public T next() throws E, NoSuchElementException {
+                if (!hasNext()) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
+                }
+
+                final T result = next;
+                next = null;
+                nextReady = false;
+                return result;
+            }
+
+            @Override
+            protected void closeResourceInternal() {
+                closed = true;
+
+                try {
+                    iter.closeResource();
+                } finally {
+                    iter = null;
+                    predicateRef = null;
                     next = null;
                     nextReady = false;
-                    return result;
                 }
-
-                @Override
-                protected void closeResourceInternal() {
-                    closed = true;
-
-                    try {
-                        iter.closeResource();
-                    } finally {
-                        iter = null;
-                        predicateRef = null;
-                        next = null;
-                        nextReady = false;
-                    }
-                }
-            };
+            }
         }
 
         /**
          * Returns a new iterator that applies the specified mapping function to each element.
          * Closing the returned iterator closes this source iterator, releases its callback and source
-         * references, and leaves the returned iterator exhausted.
+         * references, and leaves the returned iterator exhausted. If the mapper closes the returned iterator, the
+         * value it returns is still returned by that {@code next()} call; the iterator is exhausted afterwards. If this
+         * source's {@code hasNext()} closes the returned iterator, that {@code hasNext()} call returns {@code false}
+         * whatever the source reported, so {@code hasNext() == true} is never followed by a
+         * {@link NoSuchElementException} from {@code next()}.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("1", "2", "3");
          * Throwables.Iterator<Integer, RuntimeException> ints = iter.map(Integer::parseInt);
-         * ints.next();   // returns 1
-         * ints.next();   // returns 2
+         * ints.next();  // returns 1
+         * ints.next();  // returns 2
          * }</pre>
          *
          * @param <U> the type of elements returned by the new iterator
-         * @param mapper the function to apply to each element
+         * @param mapper the function to apply to each element; it may return any subtype of {@code U} and throw any
+         *        subtype of {@code E}
          * @return a new iterator with the mapping function applied to each element; exceptions thrown
          *         by the mapper propagate from the returned iterator's {@code next()} calls
          * @throws IllegalArgumentException if {@code mapper} is {@code null}.
          */
-        public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, U, E> mapper) throws IllegalArgumentException {
+        public <U> Throwables.Iterator<U, E> map(final Throwables.Function<? super T, ? extends U, ? extends E> mapper) throws IllegalArgumentException {
             N.checkArgNotNull(mapper, cs.mapper);
 
-            return new Throwables.Iterator<>() {
-                private Throwables.Iterator<T, E> iter = Iterator.this;
-                private Throwables.Function<? super T, U, E> mapperRef = mapper;
-                private boolean closed;
+            return new MappingIterator<>(this, mapper);
+        }
 
-                @Override
-                public boolean hasNext() throws E {
-                    return !closed && iter.hasNext();
+        private static final class MappingIterator<T, U, E extends Throwable> extends Throwables.Iterator<U, E> {
+            private Throwables.Iterator<T, E> iter;
+            private Throwables.Function<? super T, ? extends U, ? extends E> mapperRef;
+            private boolean closed;
+
+            private MappingIterator(final Throwables.Iterator<T, E> iter, final Throwables.Function<? super T, ? extends U, ? extends E> mapper) {
+                this.iter = iter;
+                mapperRef = mapper;
+            }
+
+            @Override
+            public boolean hasNext() throws E {
+                if (closed) {
+                    return false;
                 }
 
-                /**
-                 * {@inheritDoc}
-                 * @throws NoSuchElementException if this iterator is closed or has no remaining element
-                 * @throws E if advancing the source iterator or applying the mapper throws an exception
-                 */
-                @Override
-                public U next() throws NoSuchElementException, E {
-                    if (closed) {
-                        throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
-                    }
+                // The source's hasNext() may close this wrapper re-entrantly (exactly as in filter/concat); re-check
+                // the flag afterwards so hasNext() == true is never followed by a NoSuchElementException from next().
+                final Throwables.Iterator<T, E> src = iter;
+                final boolean hasNext = src.hasNext();
 
-                    return mapperRef.apply(iter.next());
+                return hasNext && !closed;
+            }
+
+            /**
+             * {@inheritDoc}
+             * @throws NoSuchElementException if this iterator is closed or has no remaining element
+             * @throws E if advancing the source iterator or applying the mapper throws an exception
+             */
+            @Override
+            public U next() throws NoSuchElementException, E {
+                if (closed) {
+                    throw new NoSuchElementException(InternalUtil.ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                @Override
-                protected void closeResourceInternal() {
-                    closed = true;
+                return mapperRef.apply(iter.next());
+            }
 
-                    try {
-                        iter.closeResource();
-                    } finally {
-                        iter = null;
-                        mapperRef = null;
-                    }
+            @Override
+            protected void closeResourceInternal() {
+                closed = true;
+
+                try {
+                    iter.closeResource();
+                } finally {
+                    iter = null;
+                    mapperRef = null;
                 }
-            };
+            }
         }
 
         /**
@@ -1733,14 +2018,19 @@ public final class Throwables {
 
         /**
          * Returns an array containing all remaining elements in this iterator.
-         * If the specified array is large enough, the elements are stored in it.
-         * Otherwise, a new array of the same type is created.
+         * If the specified array is large enough, the elements are stored in it; following the
+         * {@link Collection#toArray(Object[])} contract, if it has room to spare, the element immediately after the
+         * last stored element is set to {@code null} and the later elements are left untouched.
+         * Otherwise, a new array of the same runtime component type is created.
          * This method will consume all remaining elements.
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
          * Throwables.Iterator<String, RuntimeException> iter = Throwables.Iterator.of("a", "b");
          * String[] arr = iter.toArray(new String[0]); // returns ["a", "b"]
+         *
+         * String[] big = {"x", "x", "x", "x"};
+         * Throwables.Iterator.of("a", "b").toArray(big);   // returns big, now ["a", "b", null, "x"]
          * }</pre>
          *
          * @param <A> the component type of the array
@@ -1749,8 +2039,9 @@ public final class Throwables {
          * @throws IllegalArgumentException if {@code a} is {@code null}; validation occurs before this iterator is
          *         consumed.
          * @throws E if checking for or retrieving a remaining element throws
+         * @throws ArrayStoreException if a remaining element cannot be stored in the runtime component type of {@code a}
          */
-        public <A> A[] toArray(final A[] a) throws IllegalArgumentException, E {
+        public <A> A[] toArray(final A[] a) throws IllegalArgumentException, E, ArrayStoreException {
             N.checkArgNotNull(a, cs.a);
 
             return toList().toArray(a);
@@ -1824,8 +2115,8 @@ public final class Throwables {
          *
          * List<String> rest = new ArrayList<>();
          * Throwables.Iterator<String, RuntimeException> iter2 = Throwables.Iterator.of("x", "y", "z");
-         * iter2.next();                        // consumes "x"
-         * iter2.foreachRemaining(rest::add);   // rest becomes [y, z]
+         * iter2.next();                       // consumes "x"
+         * iter2.foreachRemaining(rest::add);  // rest becomes [y, z]
          * }</pre>
          *
          * @param <E2> the type of exception that the action may throw
@@ -3634,6 +3925,36 @@ public final class Throwables {
      */
     @FunctionalInterface
     public interface UnaryOperator<T, E extends Throwable> extends Function<T, T, E> {
+
+        /**
+         * Returns a {@code com.landawn.abacus.util.function.UnaryOperator} (a {@code java.util.function.UnaryOperator})
+         * that wraps this Throwables.UnaryOperator, so the adapter can be passed where an operator is required, such as
+         * {@link java.util.List#replaceAll(java.util.function.UnaryOperator)} or
+         * {@link java.util.stream.Stream#iterate(Object, java.util.function.UnaryOperator)}.
+         * Any checked exception - and any {@link Error} - thrown by this operator is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Throwables.UnaryOperator<String, IOException> canonical = s -> new File(s).getCanonicalPath();
+         * paths.replaceAll(canonical.unchecked());
+         * }</pre>
+         *
+         * @return a {@code com.landawn.abacus.util.function.UnaryOperator} that executes this operator and converts any thrown exception or error to a RuntimeException
+         */
+        @Beta
+        @Override
+        default com.landawn.abacus.util.function.UnaryOperator<T> unchecked() {
+            // Covariant override of Function.unchecked(): the inherited Function-typed adapter is not an operator, so
+            // List.replaceAll / Stream.iterate rejected it.
+            return t -> {
+                try {
+                    return apply(t);
+                } catch (final Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e, true);
+                }
+            };
+        }
     }
 
     /**
@@ -3645,6 +3966,35 @@ public final class Throwables {
      */
     @FunctionalInterface
     public interface BinaryOperator<T, E extends Throwable> extends BiFunction<T, T, T, E> {
+
+        /**
+         * Returns a {@code com.landawn.abacus.util.function.BinaryOperator} (a {@code java.util.function.BinaryOperator})
+         * that wraps this Throwables.BinaryOperator, so the adapter can be passed where an operator is required, such as
+         * {@link java.util.stream.Stream#reduce(java.util.function.BinaryOperator)}.
+         * Any checked exception - and any {@link Error} - thrown by this operator is converted to a RuntimeException;
+         * a RuntimeException is normally rethrown as the same instance. See the class-level &quot;Unchecked adapter behavior&quot; note.
+         *
+         * <p><b>Usage Examples:</b></p>
+         * <pre>{@code
+         * Throwables.BinaryOperator<BigDecimal, IOException> add = (a, b) -> audit(a.add(b));
+         * Optional<BigDecimal> total = amounts.stream().reduce(add.unchecked());
+         * }</pre>
+         *
+         * @return a {@code com.landawn.abacus.util.function.BinaryOperator} that executes this operator and converts any thrown exception or error to a RuntimeException
+         */
+        @Beta
+        @Override
+        default com.landawn.abacus.util.function.BinaryOperator<T> unchecked() {
+            // Covariant override of BiFunction.unchecked(): the inherited BiFunction-typed adapter is not an operator,
+            // so Stream.reduce rejected it.
+            return (t, u) -> {
+                try {
+                    return apply(t, u);
+                } catch (final Throwable e) {
+                    throw ExceptionUtil.toRuntimeException(e, true);
+                }
+            };
+        }
     }
 
     /**
@@ -5534,14 +5884,14 @@ public final class Throwables {
          * @param <T> the type of the object argument to the function
          * @param <R> the type of the result of the function
          * @param <E> the type of exception that may be thrown
-         * @param func the function to return
+         * @param function the function to return
          * @return the same function instance
-         * @throws IllegalArgumentException if {@code func} is {@code null}.
+         * @throws IllegalArgumentException if {@code function} is {@code null}.
          */
-        static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(final IntObjFunction<T, R, E> func) throws IllegalArgumentException {
-            N.checkArgNotNull(func, cs.func);
+        static <T, R, E extends Throwable> IntObjFunction<T, R, E> of(final IntObjFunction<T, R, E> function) throws IllegalArgumentException {
+            N.checkArgNotNull(function, cs.function);
 
-            return func;
+            return function;
         }
 
         /**
@@ -5729,11 +6079,11 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param i the long input argument
+         * @param value the long input argument
          * @param t the object input argument
-         * @throws E if the consumer implementation throws while processing {@code i}, {@code t}
+         * @throws E if the consumer implementation throws while processing {@code value}, {@code t}
          */
-        void accept(long i, T t) throws E;
+        void accept(long value, T t) throws E;
     }
 
     /**
@@ -5748,12 +6098,12 @@ public final class Throwables {
         /**
          * Applies this function to the given arguments.
          *
-         * @param i the long function argument
+         * @param value the long function argument
          * @param t the object function argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code i}, {@code t}
+         * @throws E if the function implementation throws while computing the result for {@code value}, {@code t}
          */
-        R apply(long i, T t) throws E;
+        R apply(long value, T t) throws E;
     }
 
     /**
@@ -5767,12 +6117,12 @@ public final class Throwables {
         /**
          * Evaluates this predicate on the given arguments.
          *
-         * @param i the long input argument
+         * @param value the long input argument
          * @param t the object input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if the predicate implementation throws while testing {@code i}, {@code t}
+         * @throws E if the predicate implementation throws while testing {@code value}, {@code t}
          */
-        boolean test(long i, T t) throws E;
+        boolean test(long value, T t) throws E;
     }
 
     /**
@@ -5786,11 +6136,11 @@ public final class Throwables {
         /**
          * Performs this operation on the given arguments.
          *
-         * @param i the double input argument
+         * @param value the double input argument
          * @param t the object input argument
-         * @throws E if the consumer implementation throws while processing {@code i}, {@code t}
+         * @throws E if the consumer implementation throws while processing {@code value}, {@code t}
          */
-        void accept(double i, T t) throws E;
+        void accept(double value, T t) throws E;
     }
 
     /**
@@ -5805,12 +6155,12 @@ public final class Throwables {
         /**
          * Applies this function to the given arguments.
          *
-         * @param i the double function argument
+         * @param value the double function argument
          * @param t the object function argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code i}, {@code t}
+         * @throws E if the function implementation throws while computing the result for {@code value}, {@code t}
          */
-        R apply(double i, T t) throws E;
+        R apply(double value, T t) throws E;
     }
 
     /**
@@ -5824,12 +6174,12 @@ public final class Throwables {
         /**
          * Evaluates this predicate on the given arguments.
          *
-         * @param i the double input argument
+         * @param value the double input argument
          * @param t the object input argument
          * @return {@code true} if the input arguments match the predicate, otherwise {@code false}
-         * @throws E if the predicate implementation throws while testing {@code i}, {@code t}
+         * @throws E if the predicate implementation throws while testing {@code value}, {@code t}
          */
-        boolean test(double i, T t) throws E;
+        boolean test(double value, T t) throws E;
     }
 
     /**
@@ -5844,11 +6194,11 @@ public final class Throwables {
         /**
          * Applies this function to the given boolean array.
          *
-         * @param args the boolean array argument
+         * @param arguments the boolean array argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
-        R apply(boolean... args) throws E;
+        R apply(boolean... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -5878,11 +6228,11 @@ public final class Throwables {
         /**
          * Applies this function to the given char array.
          *
-         * @param args the char array argument
+         * @param arguments the char array argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
-        R apply(char... args) throws E;
+        R apply(char... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -5912,11 +6262,11 @@ public final class Throwables {
         /**
          * Applies this function to the given byte array.
          *
-         * @param args the byte array argument
+         * @param arguments the byte array argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
-        R apply(byte... args) throws E;
+        R apply(byte... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -5945,11 +6295,11 @@ public final class Throwables {
         /**
          * Applies this function to the given short array.
          *
-         * @param args the short array argument
+         * @param arguments the short array argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
-        R apply(short... args) throws E;
+        R apply(short... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -5979,11 +6329,11 @@ public final class Throwables {
         /**
          * Applies this function to the given int array.
          *
-         * @param args the int array argument
+         * @param arguments the int array argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
-        R apply(int... args) throws E;
+        R apply(int... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -6013,11 +6363,11 @@ public final class Throwables {
         /**
          * Applies this function to the given long array.
          *
-         * @param args the long array argument
+         * @param arguments the long array argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
-        R apply(long... args) throws E;
+        R apply(long... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -6047,11 +6397,11 @@ public final class Throwables {
         /**
          * Applies this function to the given float array.
          *
-         * @param args the float array argument
+         * @param arguments the float array argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
-        R apply(float... args) throws E;
+        R apply(float... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -6081,11 +6431,11 @@ public final class Throwables {
         /**
          * Applies this function to the given double array.
          *
-         * @param args the double array argument
+         * @param arguments the double array argument
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
-        R apply(double... args) throws E;
+        R apply(double... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -6116,12 +6466,12 @@ public final class Throwables {
         /**
          * Applies this function to the given arguments.
          *
-         * @param args the variable arguments of type T
+         * @param arguments the variable arguments of type T
          * @return the function result
-         * @throws E if the function implementation throws while computing the result for {@code args}
+         * @throws E if the function implementation throws while computing the result for {@code arguments}
          */
         @SuppressWarnings("unchecked")
-        R apply(T... args) throws E;
+        R apply(T... arguments) throws E;
 
         /**
          * Returns a composed function that first applies this function to its input,
@@ -7090,12 +7440,13 @@ public final class Throwables {
          *
          * <p><b>Usage Examples:</b></p>
          * <pre>{@code
-         * LazyInitializer<Database, SQLException> dbInit = LazyInitializer.of(() ->
+         * // LazyInitializer is internal; callers obtain one through N.lazyInitChecked
+         * Throwables.Supplier<Database, SQLException> dbInit = N.lazyInitChecked(() ->
          *     createExpensiveDatabase()
          * );
          * // Database is not created until first call to dbInit.get()
-         * Database db = dbInit.get();       // initializes once and returns the instance
-         * Database sameDb = dbInit.get();   // returns the cached instance
+         * Database db = dbInit.get();      // initializes once and returns the instance
+         * Database sameDb = dbInit.get();  // returns the cached instance
          * }</pre>
          *
          * @param <T> the type of the value to be lazily initialized
@@ -7141,14 +7492,17 @@ public final class Throwables {
                         initializing = true;
 
                         try {
-                            value = supplier.get();
+                            final T computed = supplier.get();
 
                             // A supplier may catch the recursive-access exception. Do not publish a
-                            // value from an initialization attempt that already violated the invariant.
+                            // value from an initialization attempt that already violated the invariant, and do not
+                            // even store it: the rejected object would otherwise stay reachable from this
+                            // initializer until some later attempt succeeded (forever, if none does).
                             if (recursiveFailure != null) {
                                 throw recursiveFailure;
                             }
 
+                            value = computed;
                             supplier = null;
                             initialized = true;
                         } finally {

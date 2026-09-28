@@ -476,4 +476,65 @@ public class CommonUtilNewTest extends CommonUtilTestSupport {
         assertEquals(0, CommonUtil.newLinkedHashMap(0).size());
     }
 
+    // ---- perf review 2026-09-26 G027 begin ----
+    public static class G027AltRowBean {
+        static int nameReads;
+        private String name;
+        private int score;
+
+        public G027AltRowBean() {
+        }
+
+        G027AltRowBean(String name, int score) {
+            this.name = name;
+            this.score = score;
+        }
+
+        public String getName() {
+            nameReads++;
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getScore() {
+            return score;
+        }
+
+        public void setScore(int score) {
+            this.score = score;
+        }
+    }
+
+    // G027-02: bean metadata is resolved once per run of same-class rows; mixed classes, maps, nulls and missing columns keep their values
+    @Test
+    public void testNewDataset_mixedBeanClassRowsKeepPerRowValues() {
+        Map<String, Object> mapRow = new LinkedHashMap<>();
+        mapRow.put("name", "Map");
+        mapRow.put("score", 5);
+        List<Object> rows = Arrays.asList(new DatasetRowBean("Tom", 10), new DatasetRowBean("Ann", 11), new G027AltRowBean("Bob", 7), mapRow, null,
+                new DatasetRowBean("Zed", 12), new G027AltRowBean("Eve", 8), new G027AltRowBean("Kim", 9), new DatasetRowBean("Lou", 13));
+        G027AltRowBean.nameReads = 0;
+        Dataset ds = CommonUtil.newDataset(Arrays.asList("name", "age", "score", "missing"), rows);
+        assertEquals(3, G027AltRowBean.nameReads);
+        assertEquals(Arrays.asList("name", "age", "score", "missing"), ds.columnNames());
+        assertEquals(9, ds.size());
+        assertEquals(Arrays.asList("Tom", "Ann", "Bob", "Map", null, "Zed", "Eve", "Kim", "Lou"), ds.getColumn("name"));
+        assertEquals(Arrays.asList(10, 11, null, null, null, 12, null, null, 13), ds.getColumn("age"));
+        assertEquals(Arrays.asList(null, null, 7, 5, null, null, 8, 9, null), ds.getColumn("score"));
+        assertEquals(Arrays.asList(null, null, null, null, null, null, null, null, null), ds.getColumn("missing"));
+    }
+
+    // G027-02: the same-class fast path still reports an unsupported row that follows bean rows
+    @Test
+    public void testNewDataset_beanRowsThenUnsupportedRowStillThrows() {
+        List<Object> rows = Arrays.asList(new DatasetRowBean("Tom", 10), new DatasetRowBean("Ann", 11), "scalar");
+        assertThrows(IllegalArgumentException.class, () -> CommonUtil.newDataset(Arrays.asList("name", "age"), rows));
+        Dataset single = CommonUtil.newDataset(Arrays.asList("name"), Arrays.asList(new DatasetRowBean("Tom", 10), new DatasetRowBean("Ann", 11)));
+        assertEquals(Arrays.asList("Tom", "Ann"), single.getColumn("name"));
+    }
+    // ---- perf review 2026-09-26 G027 end ----
+
 }

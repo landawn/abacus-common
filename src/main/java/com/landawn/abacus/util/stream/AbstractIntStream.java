@@ -23,7 +23,6 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.IntBinaryOperator;
@@ -294,10 +293,10 @@ abstract class AbstractIntStream extends IntStream {
 
         if (isParallel()) {
             //noinspection resource
-            return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_INT).mapToInt(Fn.GET_AS_INT));
+            return mapToObj(mapper).psp(s -> s.filter(o -> AbstractStream.requireNonNullOptional(o, "OptionalInt").isPresent()).mapToInt(Fn.GET_AS_INT));
         } else {
             //noinspection resource
-            return mapToObj(mapper).filter(Fn.IS_PRESENT_INT).mapToInt(Fn.GET_AS_INT);
+            return mapToObj(mapper).filter(o -> AbstractStream.requireNonNullOptional(o, "OptionalInt").isPresent()).mapToInt(Fn.GET_AS_INT);
         }
     }
 
@@ -309,10 +308,11 @@ abstract class AbstractIntStream extends IntStream {
 
         if (isParallel()) {
             //noinspection resource
-            return mapToObj(mapper).psp(s -> s.filter(Fn.IS_PRESENT_INT_JDK).mapToInt(Fn.GET_AS_INT_JDK));
+            return mapToObj(mapper)
+                    .psp(s -> s.filter(o -> AbstractStream.requireNonNullOptional(o, "java.util.OptionalInt").isPresent()).mapToInt(Fn.GET_AS_INT_JDK));
         } else {
             //noinspection resource
-            return mapToObj(mapper).filter(Fn.IS_PRESENT_INT_JDK).mapToInt(Fn.GET_AS_INT_JDK);
+            return mapToObj(mapper).filter(o -> AbstractStream.requireNonNullOptional(o, "java.util.OptionalInt").isPresent()).mapToInt(Fn.GET_AS_INT_JDK);
         }
     }
 
@@ -544,18 +544,20 @@ abstract class AbstractIntStream extends IntStream {
             return this;
         }
 
-        final IntPredicate filter = isParallel() ? new IntPredicate() {
-            final AtomicLong cnt = new AtomicLong(n);
+        if (isParallel()) {
+            // A skip is a prefix operation: run it on the sequential view (as rateLimited/delay do), so the remaining
+            // elements keep encounter order and onSkip is called one element at a time, then restore this stream's
+            // parallel settings for the downstream stages. The former parallel dropWhile stage emitted the kept
+            // elements in completion order and serialised every element under its lock (about 6x slower) - C-133.
+            //noinspection resource
+            return sequential().skip(n, action).parallel(maxThreadNum(), splitStrategy(), asyncExecutor(), cancelUncompletedThreads());
+        }
 
-            @Override
-            public boolean test(final int value) {
-                return cnt.getAndDecrement() > 0;
-            }
-        } : new IntPredicate() {
+        final IntPredicate filter = new IntPredicate() {
             final MutableLong cnt = MutableLong.of(n);
 
             @Override
-            public boolean test(final int value) throws IllegalStateException {
+            public boolean test(final int value) {
                 return cnt.getAndDecrement() > 0;
             }
         };
@@ -610,16 +612,42 @@ abstract class AbstractIntStream extends IntStream {
         final IntIteratorEx iter = iteratorEx();
 
         final IntIterator intIterator = new IntIteratorEx() {
+            // The gap is skipped on the way *in* to the next element, not on the way out of the previous one (as in
+            // Seq.step). Skipping eagerly inside nextInt() made step(n).first()/limit(k) pull the whole trailing gap
+            // from the source - unbounded work or blocking on an infinite/timed source - and fail on elements never needed.
+            private long remainingGap = 0;
+
             @Override
             public boolean hasNext() {
+                skipGapIfNeeded();
+
                 return iter.hasNext();
             }
 
             @Override
             public int nextInt() throws NoSuchElementException {
+                skipGapIfNeeded();
+
                 final int next = iter.nextInt();
-                iter.advance(skip);
+                remainingGap = skip;
                 return next;
+            }
+
+            private void skipGapIfNeeded() {
+                if (remainingGap > 0) {
+                    final long gap = remainingGap;
+
+                    if (!iter.supportsFailureAtomicAdvance()) {
+                        // A failing non-atomic advance leaves an unknown position: never re-skip the gap on a retry.
+                        remainingGap = 0;
+                    }
+
+                    // Bulk advance, never element by element: upstream range/skip/array-backed iterators advance without
+                    // reading the skipped elements; iterators without a bulk advance() (such as map) fall back to reading
+                    // them one by one, exactly as the former eager advance(skip) did.
+                    iter.advance(gap);
+                    remainingGap = 0;
+                }
             }
         };
 
@@ -878,7 +906,10 @@ abstract class AbstractIntStream extends IntStream {
                     throw new NoSuchElementException(ERROR_MSG_FOR_NO_SUCH_EX);
                 }
 
-                return elements[(int) (((long) start + cnt++) % len) + fromIndex];
+                // 0 <= start + cnt < 2 * len here, so a conditional subtraction replaces the per-element modulo.
+                final long position = (long) start + cnt++;
+
+                return elements[(int) (position < len ? position : position - len) + fromIndex];
             }
 
             @Override
@@ -913,8 +944,16 @@ abstract class AbstractIntStream extends IntStream {
 
                 final int[] a = new int[len - cnt];
 
-                for (int i = cnt; i < len; i++) {
-                    a[i - cnt] = elements[(int) (((long) start + i) % len) + fromIndex];
+                if (cnt < len) {
+                    // The remaining rotated elements are at most two contiguous runs of the backing range:
+                    // [head, len) followed by [0, remaining - headLength). Copy each run in bulk.
+                    final long first = (long) start + cnt;
+                    final int head = (int) (first < len ? first : first - len);
+                    final int remaining = len - cnt;
+                    final int headLength = Math.min(len - head, remaining);
+
+                    System.arraycopy(elements, fromIndex + head, a, 0, headLength);
+                    System.arraycopy(elements, fromIndex, a, headLength, remaining - headLength);
                 }
 
                 cnt = len;
@@ -949,12 +988,12 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream shuffled(final Random rnd) throws IllegalStateException, IllegalArgumentException {
+    public IntStream shuffled(final Random random) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
-        checkArgNotNull(rnd, cs.rnd);
+        checkArgNotNull(random, cs.random);
 
         return lazyLoad(a -> {
-            N.shuffle(a, rnd);
+            N.shuffle(a, random);
             return a;
         }, false);
     }
@@ -1070,17 +1109,17 @@ abstract class AbstractIntStream extends IntStream {
 
     /**
      * Creates a lazily-loaded IntStream by applying the given array transformation operation.
-     * The stream materializes all elements into an array and applies {@code op} when the returned
+     * The stream materializes all elements into an array and applies {@code operator} when the returned
      * stream is first consumed.
      *
-     * @param op the transformation to apply to the collected element array
+     * @param operator the transformation to apply to the collected element array
      * @param sorted whether the resulting stream should be marked as sorted
      * @return a new IntStream backed by the transformed array
      */
-    private IntStream lazyLoad(final UnaryOperator<int[]> op, final boolean sorted) {
+    private IntStream lazyLoad(final UnaryOperator<int[]> operator, final boolean sorted) {
         // Preserve sorted state on the outer stream (see AbstractStream.lazyLoad).
         return newStream(IntIterator.defer(() -> { //NOSONAR
-            final int[] a = op.apply(toArrayForIntermediateOp());
+            final int[] a = operator.apply(toArrayForIntermediateOp());
             return a == null || a.length == 0 ? IntIterator.empty() : IntIterator.of(a);
         }), sorted);
     }
@@ -1111,6 +1150,7 @@ abstract class AbstractIntStream extends IntStream {
                     return true;
                 } else {
                     a = list.toArray();
+                    list = null; // The immutable cycle snapshot now owns the cached values.
                     len = a.length;
                     cursor = 0;
 
@@ -1190,6 +1230,7 @@ abstract class AbstractIntStream extends IntStream {
                     return true;
                 } else {
                     a = list.toArray();
+                    list = null; // The immutable cycle snapshot now owns the cached values.
                     len = a.length;
                     cursor = 0;
                     roundsCompleted++;
@@ -1266,13 +1307,13 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream prepend(final OptionalInt op) throws IllegalStateException, IllegalArgumentException {
+    public IntStream prepend(final OptionalInt optional) throws IllegalStateException, IllegalArgumentException {
         assertNotClosed();
 
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(optional, cs.optional);
 
         // return prepend(op.stream());
-        return op.isEmpty() ? this : prepend(op.orElseThrow());
+        return optional.isEmpty() ? this : prepend(optional.orElseThrow());
     }
 
     @SafeVarargs
@@ -1295,13 +1336,13 @@ abstract class AbstractIntStream extends IntStream {
     }
 
     @Override
-    public IntStream append(final OptionalInt op) throws IllegalStateException, IllegalArgumentException { //NOSONAR
+    public IntStream append(final OptionalInt optional) throws IllegalStateException, IllegalArgumentException { //NOSONAR
         assertNotClosed();
 
-        checkArgNotNull(op, cs.op);
+        checkArgNotNull(optional, cs.optional);
 
         // return append(op.stream());
-        return op.isEmpty() ? this : append(op.orElseThrow());
+        return optional.isEmpty() ? this : append(optional.orElseThrow());
     }
 
     @SafeVarargs
@@ -1384,7 +1425,7 @@ abstract class AbstractIntStream extends IntStream {
     @Override
     public <K, V, M extends Map<K, V>, E extends Exception, E2 extends Exception> M toMap(final Throwables.IntFunction<? extends K, E> keyMapper,
             final Throwables.IntFunction<? extends V, E2> valueMapper, final Supplier<? extends M> mapFactory)
-            throws IllegalStateException, IllegalArgumentException, E, E2 {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException, E, E2 {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1409,7 +1450,7 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <K, D, E extends Exception> Map<K, D> groupTo(final Throwables.IntFunction<? extends K, E> keyMapper,
-            final Collector<? super Integer, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, E {
+            final Collector<? super Integer, ?, D> downstream) throws IllegalStateException, IllegalArgumentException, NullPointerException, E {
         assertNotClosed();
 
         checkArgNotNull(keyMapper, cs.keyMapper);
@@ -1444,6 +1485,9 @@ abstract class AbstractIntStream extends IntStream {
             final IntIterator iter = iteratorEx();
 
             return iter.hasNext() ? OptionalInt.of(iter.nextInt()) : OptionalInt.empty();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1468,6 +1512,9 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             return OptionalInt.of(next);
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1489,6 +1536,9 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             return result;
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1516,6 +1566,9 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             return Optional.of(N.percentilesOfSorted(a));
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1532,8 +1585,8 @@ abstract class AbstractIntStream extends IntStream {
             if (N.isEmpty(a)) {
                 return Pair.of(new IntSummaryStatistics(), Optional.empty());
             } else {
-                // Compute the sum as a long locally; StreamBase.sum(int[]) wraps the result in
-                // toIntExact and throws ArithmeticException on overflow, but IntSummaryStatistics's
+                // Compute the sum as a long locally; N.sum(int...) returns an int and throws
+                // ArithmeticException on overflow, but IntSummaryStatistics's
                 // 4th argument is a long and the analogous summaryStatistics() path accumulates
                 // into a long without overflow. Diverging behavior here would cause one API to
                 // throw on the same data the other handles cleanly.
@@ -1543,6 +1596,9 @@ abstract class AbstractIntStream extends IntStream {
                 }
                 return Pair.of(new IntSummaryStatistics(a.length, a[0], a[a.length - 1], s), Optional.of(N.percentilesOfSorted(a)));
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1562,6 +1618,9 @@ abstract class AbstractIntStream extends IntStream {
             }
 
             return joiner.toString();
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1579,6 +1638,9 @@ abstract class AbstractIntStream extends IntStream {
             while (iter.hasNext()) {
                 joiner.append(iter.nextInt());
             }
+        } catch (final Throwable e) {
+            closeAfterFailure(e);
+            throw e;
         } finally {
             close();
         }
@@ -1588,7 +1650,7 @@ abstract class AbstractIntStream extends IntStream {
 
     @Override
     public <R> R collect(final Supplier<R> supplier, final ObjIntConsumer<? super R> accumulator)
-            throws IllegalStateException, IllegalArgumentException, RuntimeException {
+            throws IllegalStateException, IllegalArgumentException, NullPointerException {
         assertNotClosed();
 
         checkArgNotNull(supplier, cs.supplier);

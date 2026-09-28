@@ -64,8 +64,8 @@ public final class PrimitiveLongType extends AbstractLongType {
      * <pre>{@code
      * Type<Long> type = TypeFactory.getType(long.class);
      * Class clazz = type.javaType();
-     * System.out.println(clazz.getName());       // Output: long
-     * System.out.println(clazz.isPrimitive());   // Output: true
+     * System.out.println(clazz.getName());      // Output: long
+     * System.out.println(clazz.isPrimitive());  // Output: true
      * }</pre>
      *
      * @return the Class object for long.class

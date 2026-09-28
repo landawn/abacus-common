@@ -5374,4 +5374,345 @@ public class AbstractStreamTest extends TestBase {
         assertTrue(delivered.size() <= 4, "delivery must stop promptly, was " + delivered.size());
     }
 
+    @Test
+    public void testOnEachSaveNullStatementMessageNamesStmt() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(1).onEachSave((PreparedStatement) null, 1, 0, (i, ps) -> {
+                }));
+        assertEquals("'statement' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testOnEachSaveNullConnectionMessageNamesConn() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(1).onEachSave((Connection) null, "INSERT INTO test VALUES (?)", 1, 0, (i, ps) -> {
+                }));
+        assertEquals("'connection' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testOnEachSaveNullDataSourceMessageNamesDs() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(1).onEachSave((javax.sql.DataSource) null, "INSERT INTO test VALUES (?)", 1, 0, (i, ps) -> {
+                }));
+        assertEquals("'dataSource' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testPersistNullStatementMessageNamesStmt() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(1).persist((PreparedStatement) null, 1, 0, (i, ps) -> {
+                }));
+        assertEquals("'statement' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testPersistNullConnectionMessageNamesConn() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(1).persist((Connection) null, "INSERT INTO test VALUES (?)", 1, 0, (i, ps) -> {
+                }));
+        assertEquals("'connection' cannot be null", e.getMessage());
+    }
+
+    @Test
+    public void testPersistNullDataSourceMessageNamesDs() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(1).persist((javax.sql.DataSource) null, "INSERT INTO test VALUES (?)", 1, 0, (i, ps) -> {
+                }));
+        assertEquals("'dataSource' cannot be null", e.getMessage());
+    }
+
+    // ---- deep review 2026-09-25 G110 begin ----
+    // G110-06: a null merge function passed to collapse(BiPredicate, init, mergeFunction) is reported under its public name
+    @Test
+    public void testCollapse_biPredicateInitNullMergeFunction_messageNamesMergeFunction() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(1, 2).collapse((a, b) -> true, "", (java.util.function.BiFunction<String, Integer, String>) null));
+        assertEquals("'mergeFunction' cannot be null", e.getMessage());
+    }
+
+    // G110-06: same for collapse(TriPredicate, init, mergeFunction)
+    @Test
+    public void testCollapse_triPredicateInitNullMergeFunction_messageNamesMergeFunction() {
+        final IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> Stream.of(1, 2).collapse((first, last, next) -> true, "", (java.util.function.BiFunction<String, Integer, String>) null));
+        assertEquals("'mergeFunction' cannot be null", e.getMessage());
+    }
+    // ---- deep review 2026-09-25 G110 end ----
+    // ---- perf review 2026-09-26 G086 begin ----
+    // G086-01: mapMulti (sequential buffer) - variable fan-out (0, 1, many), order kept, buffer drained and reused across bursts
+    @Test
+    public void testMapMulti_variableFanOutAndLargeBurst() {
+        final int[] fanOuts = { 0, 1, 3, 0, 2, 1000, 0, 1, 5 };
+        final List<Integer> result = Stream.of(0, 1, 3, 0, 2, 1000, 0, 1, 5).<Integer> mapMulti((n, consumer) -> {
+            for (int i = 0; i < n; i++) {
+                consumer.accept(n * 10000 + i);
+            }
+        }).toList();
+
+        final List<Integer> expected = new ArrayList<>();
+
+        for (final int n : fanOuts) {
+            for (int i = 0; i < n; i++) {
+                expected.add(n * 10000 + i);
+            }
+        }
+
+        assertEquals(expected, result);
+    }
+
+    // G086-01: mapMulti stays lazy - the source is read only until the buffer holds an element
+    @Test
+    public void testMapMulti_lazySourceConsumption() {
+        final List<Integer> pulled = new ArrayList<>();
+        final List<Integer> result = Stream.of(0, 0, 2, 0, 3, 4, 5).peek(pulled::add).<Integer> mapMulti((n, consumer) -> {
+            for (int i = 0; i < n; i++) {
+                consumer.accept(n);
+            }
+        }).limit(3).toList();
+
+        assertEquals(Arrays.asList(2, 2, 3), result);
+        assertEquals(Arrays.asList(0, 0, 2, 0, 3), pulled);
+    }
+
+    // G086-01: mapMulti iterator protocol - repeated hasNext(), next() without hasNext(), null elements, NoSuchElementException at the end
+    @Test
+    public void testMapMulti_iteratorProtocol() {
+        final ObjIterator<String> iter = Stream.of("a", "", "bc").<String> mapMulti((s, consumer) -> {
+            for (int i = 0; i < s.length(); i++) {
+                consumer.accept(i == 0 ? null : String.valueOf(s.charAt(i)));
+            }
+        }).iterator();
+
+        assertTrue(iter.hasNext());
+        assertTrue(iter.hasNext());
+        org.junit.jupiter.api.Assertions.assertNull(iter.next());
+        org.junit.jupiter.api.Assertions.assertNull(iter.next());
+        assertEquals("c", iter.next());
+        assertFalse(iter.hasNext());
+        assertFalse(iter.hasNext());
+        assertThrows(java.util.NoSuchElementException.class, iter::next);
+    }
+
+    // G086-01: elements a mapper emitted before it failed are still delivered after the failure, in order
+    @Test
+    public void testMapMulti_elementsEmittedBeforeMapperFailureAreKept() {
+        final ObjIterator<Integer> iter = Stream.of(1, 2, 3).<Integer> mapMulti((n, consumer) -> {
+            consumer.accept(n);
+
+            if (n == 2) {
+                throw new IllegalStateException("boom");
+            }
+
+            consumer.accept(-n);
+        }).iterator();
+
+        assertEquals(1, iter.next());
+        assertEquals(-1, iter.next());
+        assertThrows(IllegalStateException.class, iter::hasNext);
+        assertTrue(iter.hasNext());
+        assertEquals(2, iter.next());
+        assertEquals(3, iter.next());
+        assertEquals(-3, iter.next());
+        assertFalse(iter.hasNext());
+    }
+    // G086-02: rotated() toArray(A[]) copies the two contiguous runs in bulk when no array-store check can fail; checked against a modulo oracle
+    @Test
+    public void testRotated_toArrayMatchesModuloOracle() {
+        final int[] distances = { 0, 1, 2, 3, 5, 7, 8, 13, -1, -2, -3, -7, -8, -13, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE + 1 };
+
+        for (int len = 0; len <= 8; len++) {
+            final int from = 2;
+            final Integer[] backing = new Integer[len + 5];
+
+            for (int i = 0; i < backing.length; i++) {
+                backing[i] = i * 10 - 7;
+            }
+
+            for (final int distance : distances) {
+                final Integer[] expected = new Integer[len];
+
+                for (int i = 0; i < len; i++) {
+                    expected[i] = backing[from + (int) Math.floorMod((long) i - distance, (long) len)];
+                }
+
+                // source 0: array-backed (the rotated range is the caller's Integer[]); source 1: iterator-backed (an Object[] snapshot)
+                for (int source = 0; source < 2; source++) {
+                    final String msg = "len=" + len + ", distance=" + distance + ", source=" + source;
+
+                    assertArrayEquals(expected, rotatedForG086(backing, from, len, source, distance).toArray(), msg);
+                    assertEquals(Arrays.asList(expected), rotatedForG086(backing, from, len, source, distance).toList(), msg);
+
+                    for (int k = 0; k <= len + 1; k++) {
+                        final Object[] rest = Arrays.copyOfRange(expected, Math.min(k, len), len);
+
+                        assertArrayEquals(rest, rotatedForG086(backing, from, len, source, distance).skip(k).toArray(), msg + ", skip=" + k);
+
+                        // Integer[] target: bulk copy for the array source, element-wise for the Object[] snapshot
+                        final ObjIterator<Integer> byNext = rotatedForG086(backing, from, len, source, distance).iterator();
+
+                        for (int j = 0; j < Math.min(k, len); j++) {
+                            assertEquals(expected[j], byNext.next(), msg + ", k=" + k + ", j=" + j);
+                        }
+
+                        assertArrayEquals(rest, byNext.toArray(new Integer[0]), msg + ", k=" + k);
+                        assertFalse(byNext.hasNext(), msg);
+
+                        // a larger target keeps its tail and gets a null terminator
+                        final Object[] target = new Object[rest.length + 2];
+                        target[rest.length + 1] = "tail";
+                        final ObjIteratorEx<Integer> byAdvance = rotatedForG086(backing, from, len, source, distance).iteratorEx();
+                        byAdvance.advance(k);
+                        org.junit.jupiter.api.Assertions.assertSame(target, byAdvance.toArray(target), msg);
+                        assertArrayEquals(rest, Arrays.copyOf(target, rest.length), msg + ", advance=" + k);
+                        org.junit.jupiter.api.Assertions.assertNull(target[rest.length], msg);
+                        assertEquals("tail", target[rest.length + 1], msg);
+                    }
+                }
+            }
+        }
+    }
+
+    private static Stream<Integer> rotatedForG086(final Integer[] backing, final int from, final int len, final int source, final int distance) {
+        return (source == 0 ? Stream.of(backing, from, from + len) : Stream.of(Arrays.asList(backing).subList(from, from + len).iterator())).rotated(distance);
+    }
+
+    // G086-02: a target array whose type cannot hold the elements still fails element by element with the usual ArrayStoreException
+    @Test
+    public void testRotated_toArrayIntoIncompatibleArrayThrowsArrayStoreException() {
+        final ObjIterator<Integer> iter = Stream.of(1, 2, 3).rotated(1).iterator();
+        final ArrayStoreException e = assertThrows(ArrayStoreException.class, () -> iter.toArray(new String[3]));
+
+        assertFalse(String.valueOf(e.getMessage()).contains("arraycopy"), e.getMessage());
+    }
+
+    // G086-02: toArray into the stream's own backing array keeps the element-by-element (in-place) result
+    @Test
+    public void testRotated_toArrayIntoBackingArrayKeepsElementWiseResult() {
+        final Integer[] backing = { 1, 2, 3, 4, 5 };
+        final Integer[] simulated = backing.clone();
+
+        for (int i = 0; i < 5; i++) {
+            simulated[i] = simulated[(3 + i) % 5]; // rotated(2): start = 5 - 2
+        }
+
+        final ObjIterator<Integer> iter = Stream.of(backing).rotated(2).iterator();
+
+        org.junit.jupiter.api.Assertions.assertSame(backing, iter.toArray(backing));
+        assertArrayEquals(simulated, backing);
+    }
+    // ---- perf review 2026-09-26 G086 end ----
+
+    // ---- bug review 2026-09-27 G114 begin ----
+
+    // G114-06: onEachSave(Connection/DataSource, ...) marked itself initialized before preparing the statement, so
+    // after a failed prepareStatement/getConnection the next next() passed a null statement on (NPE) instead of
+    // retrying and reporting the SQL failure again, as the File overloads do.
+    @Test
+    public void testOnEachSave_failedPrepareIsRetriedNotNullStatement() throws Exception {
+        final Connection connection = mock(Connection.class);
+        when(connection.prepareStatement(anyString())).thenThrow(new SQLException("prepare failed"));
+
+        final Iterator<Integer> iter = Stream.of(1, 2).onEachSave(connection, "INSERT INTO t VALUES(?)", (e, stmt) -> stmt.setInt(1, e)).iterator();
+
+        final RuntimeException first = assertThrows(RuntimeException.class, iter::next);
+        final RuntimeException second = assertThrows(RuntimeException.class, iter::next);
+        assertEquals(first.getClass(), second.getClass());
+        assertTrue(second.getMessage().contains("prepare failed"), String.valueOf(second));
+        verify(connection, times(2)).prepareStatement(anyString());
+
+        final javax.sql.DataSource dataSource = mock(javax.sql.DataSource.class);
+        when(dataSource.getConnection()).thenThrow(new SQLException("no connection"));
+
+        final Iterator<Integer> iter2 = Stream.of(1, 2).onEachSave(dataSource, "INSERT INTO t VALUES(?)", (e, stmt) -> stmt.setInt(1, e)).iterator();
+
+        assertThrows(RuntimeException.class, iter2::next);
+        final RuntimeException dsSecond = assertThrows(RuntimeException.class, iter2::next);
+        assertTrue(dsSecond.getMessage().contains("no connection"), String.valueOf(dsSecond));
+        verify(dataSource, times(2)).getConnection();
+    }
+
+    // ---- bug review 2026-09-27 G114 end ----
+
+    // ---- bug review 2026-09-27 verify G122 begin ----
+
+    // onEachSave(DataSource): each failed prepareStatement (SQLException) releases the connection it obtained, a later
+    // next() retries with a fresh connection, and closing the stream afterwards releases nothing twice.
+    @Test
+    public void testOnEachSave_dataSourceFailedPrepareReleasesEachConnection() throws Exception {
+        final javax.sql.DataSource dataSource = mock(javax.sql.DataSource.class);
+        final Connection conn1 = mock(Connection.class);
+        final Connection conn2 = mock(Connection.class);
+        when(dataSource.getConnection()).thenReturn(conn1, conn2);
+        when(conn1.prepareStatement(anyString())).thenThrow(new SQLException("prepare failed 1"));
+        when(conn2.prepareStatement(anyString())).thenThrow(new SQLException("prepare failed 2"));
+
+        final Stream<Integer> saved = Stream.of(1, 2).onEachSave(dataSource, "INSERT INTO t VALUES(?)", (e, stmt) -> stmt.setInt(1, e));
+        final Iterator<Integer> iter = saved.iterator();
+
+        assertTrue(assertThrows(RuntimeException.class, iter::next).getMessage().contains("prepare failed 1"));
+        assertTrue(assertThrows(RuntimeException.class, iter::next).getMessage().contains("prepare failed 2"));
+        verify(dataSource, times(2)).getConnection();
+        verify(conn1, times(1)).close();
+        verify(conn2, times(1)).close();
+
+        saved.close();
+        verify(conn1, times(1)).close();
+        verify(conn2, times(1)).close();
+    }
+
+    // onEachSave(DataSource): after an unchecked failure of prepareStatement the retry reuses the connection already
+    // obtained (it is not replaced and leaked), and close() then executes nothing more and releases it exactly once.
+    @Test
+    public void testOnEachSave_dataSourceUncheckedPrepareFailureReusesConnection() throws Exception {
+        final javax.sql.DataSource dataSource = mock(javax.sql.DataSource.class);
+        final Connection conn1 = mock(Connection.class);
+        final Connection conn2 = mock(Connection.class);
+        final PreparedStatement stmt = mock(PreparedStatement.class);
+        when(dataSource.getConnection()).thenReturn(conn1, conn2);
+        when(conn1.prepareStatement(anyString())).thenThrow(new IllegalStateException("driver state")).thenReturn(stmt);
+
+        final Stream<Integer> saved = Stream.of(1, 2, 3).onEachSave(dataSource, "INSERT INTO t VALUES(?)", (e, ps) -> ps.setInt(1, e));
+        final Iterator<Integer> iter = saved.iterator();
+
+        assertThrows(IllegalStateException.class, iter::next);
+        assertEquals(2, iter.next());
+        assertEquals(3, iter.next());
+        assertFalse(iter.hasNext());
+        saved.close();
+
+        verify(dataSource, times(1)).getConnection();
+        verify(stmt, times(2)).execute();
+        verify(stmt, times(1)).close();
+        verify(conn1, times(1)).close();
+        verify(conn2, times(0)).close();
+    }
+
+    // onEachSave(Connection, batch): a failed first prepareStatement loses only the element pulled by that next(); the
+    // batch count starts from the retry, so the remaining elements are flushed in full batches plus one tail batch on close.
+    @Test
+    public void testOnEachSave_connectionBatchCountAfterFailedPrepare() throws Exception {
+        final Connection connection = mock(Connection.class);
+        final PreparedStatement stmt = mock(PreparedStatement.class);
+        when(connection.prepareStatement(anyString())).thenThrow(new SQLException("prepare failed")).thenReturn(stmt);
+        when(stmt.executeBatch()).thenReturn(new int[0]);
+
+        final Stream<Integer> saved = Stream.of(1, 2, 3, 4).onEachSave(connection, "INSERT INTO t VALUES(?)", 2, 0, (e, ps) -> ps.setInt(1, e));
+        final Iterator<Integer> iter = saved.iterator();
+
+        assertThrows(RuntimeException.class, iter::next);
+        assertEquals(2, iter.next());
+        assertEquals(3, iter.next());
+        verify(stmt, times(2)).addBatch();
+        verify(stmt, times(1)).executeBatch();
+        assertEquals(4, iter.next());
+        saved.close();
+
+        verify(stmt, times(3)).addBatch();
+        verify(stmt, times(2)).executeBatch();
+        verify(stmt, times(1)).close();
+        verify(connection, times(0)).close();
+    }
+
+    // ---- bug review 2026-09-27 verify G122 end ----
 }

@@ -81,6 +81,11 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * The expected format is a bracket-enclosed, comma-separated list as produced by {@link #stringOf}.
      * The literal {@code null} (4 characters) is converted to a {@code null} array element.
      *
+     * <p>A non-{@code null} element may also be enclosed in a matching pair of double or single quotes (for example
+     * {@code ["1", null]}), which is the form {@link #serializeTo(CharacterWriter, Long[], JsonXmlSerConfig)} writes
+     * when {@link JsonXmlSerConfig#isWriteLongAsString()} is set; the quotes are removed before the element is parsed.
+     * A quoted {@code "null"} is not a {@code null} element.</p>
+     *
      * <p>Special cases:
      * <ul>
      *   <li>{@code null}, blank, or empty string returns {@code null}</li>
@@ -94,7 +99,8 @@ public final class LongArrayType extends ObjectArrayType<Long> {
      * @param str the string to parse; may be {@code null}
      * @return the parsed {@code Long[]}, or {@code null} if {@code str} is {@code null} or blank
      * @throws IllegalArgumentException if an unquoted element is empty or whitespace-only.
-     * @throws NumberFormatException if a non-{@code null} element is not a valid integer literal
+     * @throws NumberFormatException if a non-{@code null} element (after removing its enclosing quotes, if any) is not a
+     *         valid integer literal
      * @throws ArithmeticException if an element is outside the {@code long} range
      * @see #valueOf(Object)
      * @see #stringOf(Long[])
@@ -117,7 +123,17 @@ public final class LongArrayType extends ObjectArrayType<Long> {
                 if (elements[i].length() == 4 && elements[i].equals(NULL_STRING)) {
                     array[i] = null;
                 } else {
-                    array[i] = elementType.valueOf(elements[i]);
+                    String element = elements[i];
+                    final int elementLength = element.length();
+
+                    // serializeTo quotes every value under writeLongAsString; read that form back. An empty quoted
+                    // element is left as is so it fails as a malformed number instead of becoming null.
+                    if (elementLength > 2 && (element.charAt(0) == '"' || element.charAt(0) == '\'')
+                            && element.charAt(elementLength - 1) == element.charAt(0)) {
+                        element = element.substring(1, elementLength - 1);
+                    }
+
+                    array[i] = elementType.valueOf(element);
                 }
             }
         }

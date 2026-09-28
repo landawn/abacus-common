@@ -60,7 +60,11 @@ class Log4Jv2Logger extends AbstractLogger {
      */
     @Override
     void log(final LogLevel level, final String message) throws NullPointerException {
-        log(level, message, null);
+        // The message-only form, exactly like trace(String) etc. below: logIfEnabled(fqcn, level, marker, message, null)
+        // is not equivalent, because Log4j consults Filter.filter(.., Object, Throwable) for it instead of
+        // Filter.filter(.., String, Object...), so a filter implementing only the latter was bypassed by the inherited
+        // template and supplier overloads while still applying to the direct message-only calls.
+        loggerImpl.logIfEnabled(AbstractLogger.class.getName(), toBackendLevel(level), null, message);
     }
 
     /**
@@ -68,14 +72,17 @@ class Log4Jv2Logger extends AbstractLogger {
      */
     @Override
     void log(final LogLevel level, final String message, final Throwable throwable) throws NullPointerException {
-        final Level backendLevel = switch (level) {
+        loggerImpl.logIfEnabled(AbstractLogger.class.getName(), toBackendLevel(level), null, message, throwable);
+    }
+
+    private static Level toBackendLevel(final LogLevel level) {
+        return switch (level) {
             case TRACE -> Level.TRACE;
             case DEBUG -> Level.DEBUG;
             case INFO -> Level.INFO;
             case WARN -> Level.WARN;
             case ERROR -> Level.ERROR;
         };
-        loggerImpl.logIfEnabled(AbstractLogger.class.getName(), backendLevel, null, message, throwable);
     }
 
     /**

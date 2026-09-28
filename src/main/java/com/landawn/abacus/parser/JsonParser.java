@@ -499,10 +499,10 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code elementType} is null or unsupported for streaming.
-     * @throws UnsupportedOperationException if the root of the source is a JSON object or a quoted string
      * @throws ParsingException if the initial token is an unquoted scalar or malformed JSON; malformed later elements fail while consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the source is a JSON object or a quoted string
      */
-    <T> Stream<T> stream(String source, Type<? extends T> elementType) throws IllegalArgumentException, UnsupportedOperationException, ParsingException;
+    <T> Stream<T> stream(String source, Type<? extends T> elementType) throws IllegalArgumentException, ParsingException, UnsupportedOperationException;
 
     /**
      * Creates a stream for parsing JSON array elements lazily with custom configuration from a JSON string.
@@ -525,11 +525,11 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @param elementType the type of array elements. Only Bean/Map/MapEntity/Collection/Array/Dataset/Sheet/EntityId element types are supported.
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code elementType} is null or unsupported for streaming.
-     * @throws UnsupportedOperationException if the root of the source is a JSON object or a quoted string
      * @throws ParsingException if the initial token is an unquoted scalar or malformed JSON; malformed later elements fail while consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the source is a JSON object or a quoted string
      */
     <T> Stream<T> stream(String source, JsonDeserConfig config, Type<? extends T> elementType)
-            throws IllegalArgumentException, UnsupportedOperationException, ParsingException;
+            throws IllegalArgumentException, ParsingException, UnsupportedOperationException;
 
     /**
      * Creates a stream for parsing JSON array elements from a file.
@@ -553,11 +553,11 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code source} is null or a directory that cannot be opened, or {@code elementType} is null or unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures are raised while consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the file content is a JSON object or a quoted string
      * @throws ParsingException if the initial token is an unquoted scalar or malformed JSON; malformed later elements fail while consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the file content is a JSON object or a quoted string
      */
     <T> Stream<T> stream(File source, Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException;
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException;
 
     /**
      * Creates a stream for parsing JSON array elements from a file with custom configuration.
@@ -580,11 +580,11 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @return a {@code Stream} of parsed elements that must be closed after use; never {@code null}
      * @throws IllegalArgumentException if {@code source} is null or a directory that cannot be opened, or {@code elementType} is null or unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures are raised while consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the file content is a JSON object or a quoted string
      * @throws ParsingException if the initial token is an unquoted scalar or malformed JSON; malformed later elements fail while consuming the returned stream.
+     * @throws UnsupportedOperationException if the root of the file content is a JSON object or a quoted string
      */
     <T> Stream<T> stream(File source, JsonDeserConfig config, Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException;
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException;
 
     /**
      * Creates a stream for parsing JSON array elements from an InputStream.
@@ -609,12 +609,12 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @throws IllegalArgumentException if {@code source} is null, or {@code elementType} is null or unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures are raised
      *         while consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      * @throws ParsingException if the initial token is an unquoted scalar or malformed JSON; malformed later elements fail while consuming the
      *         returned stream.
+     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      */
     <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException;
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException;
 
     /**
      * Creates a stream for parsing JSON array elements from an InputStream with custom configuration.
@@ -640,12 +640,12 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @throws IllegalArgumentException if {@code source} is null, or {@code elementType} is null or unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures are raised
      *         while consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      * @throws ParsingException if the initial token is an unquoted scalar or malformed JSON; malformed later elements fail while consuming the
      *         returned stream.
+     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      */
     <T> Stream<T> stream(InputStream source, boolean closeInputStreamWhenStreamIsClosed, JsonDeserConfig config, Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException;
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException;
 
     /**
      * Creates a stream for parsing JSON array elements from a Reader.
@@ -670,12 +670,12 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @throws IllegalArgumentException if {@code source} is null, or {@code elementType} is null or unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures are raised
      *         while consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      * @throws ParsingException if the initial token is an unquoted scalar or malformed JSON; malformed later elements fail while consuming the
      *         returned stream.
+     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      */
     <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException;
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException;
 
     /**
      * Creates a stream for parsing JSON array elements from a Reader with custom configuration.
@@ -701,10 +701,10 @@ public interface JsonParser extends Parser<JsonSerConfig, JsonDeserConfig> {
      * @throws IllegalArgumentException if {@code source} is null, or {@code elementType} is null or unsupported for streaming.
      * @throws UncheckedIOException if opening or initially reading the source fails; later read failures are raised
      *         while consuming the returned stream.
-     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      * @throws ParsingException if the initial token is an unquoted scalar or malformed JSON; malformed later elements fail while consuming the
      *         returned stream.
+     * @throws UnsupportedOperationException if the root of the source content is a JSON object or a quoted string
      */
     <T> Stream<T> stream(Reader source, boolean closeReaderWhenStreamIsClosed, JsonDeserConfig config, Type<? extends T> elementType)
-            throws IllegalArgumentException, UncheckedIOException, UnsupportedOperationException, ParsingException;
+            throws IllegalArgumentException, UncheckedIOException, ParsingException, UnsupportedOperationException;
 }

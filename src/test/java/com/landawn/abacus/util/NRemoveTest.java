@@ -293,4 +293,55 @@ public class NRemoveTest extends NTestSupport {
         assertTrue(N.removeAll(modifiable, java.util.Set.of("a")));
         assertEquals(Arrays.asList("b"), modifiable);
     }
+
+    @Test
+    public void testRemove_floatDoubleSignedZeroAndNaN() {
+        assertArrayEquals(new float[] { 0.0f, 1.0f }, N.remove(new float[] { 0.0f, -0.0f, 1.0f }, -0.0f), 0f);
+        assertArrayEquals(new float[] { 1.0f }, N.remove(new float[] { Float.NaN, 1.0f }, Float.NaN), 0f);
+        assertArrayEquals(new float[] { 0.0f, 1.0f }, N.remove(new float[] { 0.0f, 1.0f }, -0.0f), 0f);
+        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(N.remove(new float[] { 0.0f, 1.0f }, -0.0f)[0]));
+        assertArrayEquals(new double[] { 0.0, 1.0 }, N.remove(new double[] { 0.0, -0.0, 1.0 }, -0.0), 0d);
+        assertArrayEquals(new double[] { 1.0 }, N.remove(new double[] { Double.NaN, 1.0 }, Double.NaN), 0d);
+        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(N.remove(new double[] { 0.0, 1.0 }, -0.0)[0]));
+    }
+
+    @Test
+    public void testRemoveAll_floatDoubleSignedZeroAndNaN() {
+        final float[] fr = N.removeAll(new float[] { 0.0f, -0.0f, Float.NaN, 1.0f }, -0.0f, Float.NaN);
+        assertEquals(2, fr.length);
+        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(fr[0]));
+        assertEquals(1.0f, fr[1], 0f);
+        final float[] fr1 = N.removeAll(new float[] { 0.0f, -0.0f, 1.0f }, -0.0f);
+        assertEquals(2, fr1.length);
+        assertEquals(Float.floatToIntBits(0.0f), Float.floatToIntBits(fr1[0]));
+
+        final double[] dr = N.removeAll(new double[] { 0.0, -0.0, Double.NaN, 1.0 }, -0.0, Double.NaN);
+        assertEquals(2, dr.length);
+        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(dr[0]));
+        assertEquals(1.0, dr[1], 0d);
+        final double[] dr1 = N.removeAll(new double[] { 0.0, -0.0, 1.0 }, -0.0);
+        assertEquals(2, dr1.length);
+        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(dr1[0]));
+    }
+
+
+    @Test
+    public void testRemoveAll_emptyIteratorOnUnmodifiableCollectionReturnsFalse() {
+        final List<Integer> list = java.util.Collections.unmodifiableList(new ArrayList<>(Arrays.asList(1, 2)));
+
+        assertFalse(N.removeAll(list, java.util.Collections.<Integer> emptyIterator()));
+        assertEquals(Arrays.asList(1, 2), list);
+        assertThrows(UnsupportedOperationException.class, () -> N.removeAll(list, Arrays.asList(1).iterator()));
+    }
+
+    @Test
+    public void testRemoveAllOccurrences_floatAndDoubleUseCompareSemantics() {
+        assertArrayEquals(new float[] { -0.0f, Float.NaN }, N.removeAllOccurrences(new float[] { 0.0f, -0.0f, Float.NaN }, 0.0f), 0.0f);
+        assertArrayEquals(new float[] { 0.0f, -0.0f }, N.removeAllOccurrences(new float[] { 0.0f, -0.0f, Float.NaN }, Float.NaN), 0.0f);
+        assertEquals(Float.floatToIntBits(-0.0f), Float.floatToIntBits(N.removeAllOccurrences(new float[] { 0.0f, -0.0f }, 0.0f)[0]));
+
+        assertArrayEquals(new double[] { -0.0, Double.NaN }, N.removeAllOccurrences(new double[] { 0.0, -0.0, Double.NaN }, 0.0), 0.0);
+        assertArrayEquals(new double[] { 0.0, -0.0 }, N.removeAllOccurrences(new double[] { 0.0, -0.0, Double.NaN }, Double.NaN), 0.0);
+        assertEquals(Double.doubleToLongBits(0.0), Double.doubleToLongBits(N.removeAllOccurrences(new double[] { 0.0, -0.0 }, -0.0)[0]));
+    }
 }

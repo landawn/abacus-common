@@ -109,8 +109,8 @@ public enum Month {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Month.MARCH.intValue();      // returns 3
-     * Month.DECEMBER.intValue();   // returns 12
+     * Month.MARCH.intValue();     // returns 3
+     * Month.DECEMBER.intValue();  // returns 12
      * }</pre>
      *
      * @return the numeric value of this month (1-12)
@@ -131,8 +131,8 @@ public enum Month {
      *
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
-     * Month jan = Month.of(1);    // returns JANUARY
-     * Month dec = Month.of(12);   // returns DECEMBER
+     * Month jan = Month.of(1);   // returns JANUARY
+     * Month dec = Month.of(12);  // returns DECEMBER
      * }</pre>
      *
      * @param intValue the numeric value of the month (must be between 1 and 12 inclusive)

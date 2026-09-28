@@ -422,4 +422,32 @@ public class HttpResponseTest extends TestBase {
         assertTrue(str.contains("url=https://api.example.com/test"));
         assertTrue(str.contains("elapsedTime"));
     }
+
+    // ---- deep review 2026-09-25 G003 begin ----
+
+    // G003-01: a JSON array body without a JSON Content-Type (NONE format) was wrapped by N.convert as ONE element.
+    @Test
+    public void testBody_noneFormatJsonArrayToCollectionAndArray() {
+        final HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", new HashMap<>(),
+                "[\"a\",\"b\"]".getBytes(StandardCharsets.UTF_8), ContentFormat.NONE, StandardCharsets.UTF_8);
+
+        assertEquals(Arrays.asList("a", "b"), response.body(List.class));
+        assertArrayEquals(new String[] { "a", "b" }, response.body(String[].class));
+        assertEquals(Arrays.asList("a", "b"), response.body(Type.<List<String>> of("List<String>")));
+    }
+
+    // G003-01: an empty JSON array must not become a one-element list holding the text "[]".
+    @Test
+    public void testBody_noneFormatEmptyJsonArrayToList() {
+        final HttpResponse response = new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", null, "[]".getBytes(StandardCharsets.UTF_8), null,
+                StandardCharsets.UTF_8);
+
+        assertTrue(response.body(List.class).isEmpty());
+        assertEquals(0, response.body(String[].class).length);
+        // Scalar targets still take the N.convert shortcut.
+        assertEquals(Integer.valueOf(42), new HttpResponse("http://example.com", 1000L, 2000L, 200, "OK", null, "42".getBytes(StandardCharsets.UTF_8),
+                ContentFormat.NONE, StandardCharsets.UTF_8).body(Integer.class));
+    }
+
+    // ---- deep review 2026-09-25 G003 end ----
 }

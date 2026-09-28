@@ -218,30 +218,30 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
      * ByteIteratorEx iterEx = ByteIteratorEx.of(iter);
      * }</pre>
      *
-     * @param iter the ByteIterator to wrap (can be null)
-     * @return the same instance if {@code iter} is already a ByteIteratorEx, a ByteIteratorEx wrapping the given iterator, or an empty iterator if {@code iter} is null
+     * @param iterator the ByteIterator to wrap (can be null)
+     * @return the same instance if {@code iterator} is already a ByteIteratorEx, a ByteIteratorEx wrapping the given iterator, or an empty iterator if {@code iterator} is null
      */
-    public static ByteIteratorEx of(final ByteIterator iter) {
-        if (iter == null) {
+    public static ByteIteratorEx of(final ByteIterator iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ByteIteratorEx) {
-            return ((ByteIteratorEx) iter);
+        } else if (iterator instanceof ByteIteratorEx) {
+            return ((ByteIteratorEx) iterator);
         }
 
         return new ByteIteratorEx() {
             @Override
             public boolean hasNext() {
-                return iter.hasNext();
+                return iterator.hasNext();
             }
 
             @Override
             public byte nextByte() throws NoSuchElementException {
-                return iter.nextByte();
+                return iterator.nextByte();
             }
 
             @Override
             public void closeResource() {
-                ObjIteratorEx.closeResource(iter);
+                ObjIteratorEx.closeResource(iterator);
             }
         };
     }
@@ -259,13 +259,13 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
      * <p>The returned iterator throws {@link NullPointerException} when a {@code null} element
      * is unboxed by its next method.</p>
      *
-     * @param iter the Iterator of Byte objects (can be null)
+     * @param iterator the Iterator of Byte objects (can be null)
      * @return a ByteIteratorEx unwrapping the given iterator, or empty iterator if iter is null
      */
-    public static ByteIteratorEx from(final Iterator<Byte> iter) {
-        if (iter == null) {
+    public static ByteIteratorEx from(final Iterator<Byte> iterator) {
+        if (iterator == null) {
             return empty();
-        } else if (iter instanceof ObjIteratorEx<Byte> iteratorEx) {
+        } else if (iterator instanceof ObjIteratorEx<Byte> iteratorEx) {
 
             return new ByteIteratorEx() {
                 @Override
@@ -312,7 +312,7 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
             return new ByteIteratorEx() {
                 @Override
                 public boolean hasNext() {
-                    return iter.hasNext();
+                    return iterator.hasNext();
                 }
 
                 /**
@@ -323,12 +323,12 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
                  */
                 @Override
                 public byte nextByte() throws NoSuchElementException, NullPointerException {
-                    return iter.next();
+                    return iterator.next();
                 }
 
                 @Override
                 public void closeResource() {
-                    ObjIteratorEx.closeResource(iter);
+                    ObjIteratorEx.closeResource(iterator);
                 }
             };
         }
@@ -409,8 +409,8 @@ public abstract class ByteIteratorEx extends ByteIterator implements IteratorEx<
      * <p><b>Usage Examples:</b></p>
      * <pre>{@code
      * ByteIteratorEx iter = ByteIteratorEx.of((byte) 1, (byte) 2);
-     * iter.closeResource();         // releases resources (a no-op for this implementation)
-     * assertTrue(iter.hasNext());   // closeResource() does not consume elements
+     * iter.closeResource();        // releases resources (a no-op for this implementation)
+     * assertTrue(iter.hasNext());  // closeResource() does not consume elements
      *
      * // Safe to call closeResource() multiple times
      * ByteIteratorEx iter2 = ByteIteratorEx.of((byte) 3, (byte) 4);

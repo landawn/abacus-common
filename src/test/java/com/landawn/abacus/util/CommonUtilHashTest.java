@@ -193,4 +193,46 @@ public class CommonUtilHashTest extends CommonUtilTestSupport {
         assertThrows(IndexOutOfBoundsException.class, () -> CommonUtil.hashCode((Object[]) null, 0, 1));
     }
 
+    // ---- perf review 2026-09-26 G026 begin ----
+    // G026-02: hashCode(char[]/byte[]/short[]/int[]) delegate to Arrays.hashCode; pin them against the range overload
+    // and the 31 * h + e reference for null, empty, negative values and lengths around vector widths.
+    @Test
+    public void testHashCodeFullArray_matchesRangeOverloadAndReference() {
+        assertEquals(0, CommonUtil.hashCode((char[]) null));
+        assertEquals(0, CommonUtil.hashCode((byte[]) null));
+        assertEquals(0, CommonUtil.hashCode((short[]) null));
+        assertEquals(0, CommonUtil.hashCode((int[]) null));
+
+        final java.util.Random random = new java.util.Random(20260926L);
+
+        for (int len = 0; len <= 70; len++) {
+            final char[] ca = new char[len];
+            final byte[] ba = new byte[len];
+            final short[] sa = new short[len];
+            final int[] ia = new int[len];
+            int expectedC = 1, expectedB = 1, expectedS = 1, expectedI = 1;
+
+            for (int i = 0; i < len; i++) {
+                ca[i] = (char) random.nextInt();
+                ba[i] = (byte) random.nextInt();
+                sa[i] = (short) random.nextInt();
+                ia[i] = random.nextInt();
+                expectedC = 31 * expectedC + ca[i];
+                expectedB = 31 * expectedB + ba[i];
+                expectedS = 31 * expectedS + sa[i];
+                expectedI = 31 * expectedI + ia[i];
+            }
+
+            assertEquals(expectedC, CommonUtil.hashCode(ca));
+            assertEquals(expectedB, CommonUtil.hashCode(ba));
+            assertEquals(expectedS, CommonUtil.hashCode(sa));
+            assertEquals(expectedI, CommonUtil.hashCode(ia));
+            assertEquals(CommonUtil.hashCode(ca, 0, len), CommonUtil.hashCode(ca));
+            assertEquals(CommonUtil.hashCode(ba, 0, len), CommonUtil.hashCode(ba));
+            assertEquals(CommonUtil.hashCode(sa, 0, len), CommonUtil.hashCode(sa));
+            assertEquals(CommonUtil.hashCode(ia, 0, len), CommonUtil.hashCode(ia));
+            assertEquals(CommonUtil.hashCode(ia), CommonUtil.deepHashCode((Object) ia));
+        }
+    }
+    // ---- perf review 2026-09-26 G026 end ----
 }

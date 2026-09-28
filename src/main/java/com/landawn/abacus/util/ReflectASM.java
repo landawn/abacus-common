@@ -125,11 +125,11 @@ final class ReflectASM<T> {
     /**
      * Creates a wrapper for a target class and, optionally, an existing instance.
      *
-     * @param cls the target class
+     * @param targetClass the target class
      * @param instance the wrapped instance, or {@code null} when operating on the class
      */
-    ReflectASM(final Class<T> cls, final T instance) {
-        this.cls = cls;
+    ReflectASM(final Class<T> targetClass, final T instance) {
+        this.cls = targetClass;
         this.instance = instance;
     }
 
@@ -152,15 +152,15 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @param <T> the type of the class
-     * @param clsName the fully qualified name of the class; must not be {@code null}
+     * @param className the fully qualified name of the class; must not be {@code null}
      * @return a ReflectASM instance for the specified class
-     * @throws IllegalArgumentException if {@code clsName} is {@code null}, or if the class with the given name cannot be located.
+     * @throws IllegalArgumentException if {@code className} is {@code null}, or if the class with the given name cannot be located.
      * @see ClassUtil#forName(String)
      */
-    public static <T> ReflectASM<T> on(final String clsName) throws IllegalArgumentException {
-        N.checkArgNotNull(clsName, cs.clsName);
+    public static <T> ReflectASM<T> on(final String className) throws IllegalArgumentException {
+        N.checkArgNotNull(className, cs.className);
 
-        return on(ClassUtil.forName(clsName));
+        return on(ClassUtil.forName(className));
     }
 
     /**
@@ -184,14 +184,14 @@ final class ReflectASM<T> {
      * }</pre>
      *
      * @param <T> the type of the class
-     * @param cls the {@code Class} object representing the type; must not be {@code null}
+     * @param targetClass the {@code Class} object representing the type; must not be {@code null}
      * @return a ReflectASM instance for the specified class
-     * @throws IllegalArgumentException if {@code cls} is {@code null}.
+     * @throws IllegalArgumentException if {@code targetClass} is {@code null}.
      */
-    public static <T> ReflectASM<T> on(final Class<T> cls) throws IllegalArgumentException {
-        N.checkArgNotNull(cls, cs.cls);
+    public static <T> ReflectASM<T> on(final Class<T> targetClass) throws IllegalArgumentException {
+        N.checkArgNotNull(targetClass, cs.targetClass);
 
-        return new ReflectASM<>(cls, null);
+        return new ReflectASM<>(targetClass, null);
     }
 
     /**
@@ -494,7 +494,7 @@ final class ReflectASM<T> {
      *
      * @param <V> the expected return type of the method
      * @param methodName the name of the method to invoke; must not be {@code null}
-     * @param args the arguments to pass to the method; may be omitted for no-argument methods
+     * @param arguments the arguments to pass to the method; may be omitted for no-argument methods
      * @return the return value of the method cast to {@code V}, or {@code null} for {@code void} methods
      * @throws IllegalArgumentException if {@code methodName} is {@code null}
      * @throws RuntimeException if the method does not exist, is private, or throws an exception
@@ -503,14 +503,14 @@ final class ReflectASM<T> {
      * @throws ClassCastException if an argument is not compatible with the parameter type selected by method name and arity
      * @throws NullPointerException if an instance method is invoked without an instance, or a primitive parameter receives {@code null}
      */
-    public final <V> V invoke(final String methodName, final Object... args)
+    public final <V> V invoke(final String methodName, final Object... arguments)
             throws IllegalArgumentException, RuntimeException, ClassCastException, NullPointerException {
         N.checkArgNotNull(methodName, cs.methodName);
 
         final MethodAccess methodAccess = getMethodAccess(cls);
 
         try {
-            return (V) methodAccess.invoke(instance, methodName, args);
+            return (V) methodAccess.invoke(instance, methodName, arguments);
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
@@ -565,7 +565,7 @@ final class ReflectASM<T> {
      * the wrapped instance is {@code null} and a {@code NullPointerException} will be thrown.</p>
      *
      * @param methodName the name of the method to invoke; must not be {@code null}
-     * @param args the arguments to pass to the method; may be omitted for no-argument methods
+     * @param arguments the arguments to pass to the method; may be omitted for no-argument methods
      * @return this {@code ReflectASM} instance for method chaining
      * @throws IllegalArgumentException if {@code methodName} is {@code null}
      * @throws RuntimeException if the method does not exist, is private, or throws an exception
@@ -573,9 +573,9 @@ final class ReflectASM<T> {
      * @throws ClassCastException if an argument is incompatible with the parameter type selected by method name and arity
      * @throws NullPointerException if an instance method is invoked without an instance, or a primitive parameter receives {@code null}
      */
-    public final ReflectASM<T> call(final String methodName, final Object... args)
+    public final ReflectASM<T> call(final String methodName, final Object... arguments)
             throws IllegalArgumentException, RuntimeException, ClassCastException, NullPointerException {
-        invoke(methodName, args);
+        invoke(methodName, arguments);
 
         return this;
     }
@@ -593,16 +593,16 @@ final class ReflectASM<T> {
      * {@code IllegalArgumentException} after side effects have already happened.</p>
      *
      * @param methodName the name of the method to look up
-     * @param args the arguments the method would be invoked with; both the count and the runtime
+     * @param arguments the arguments the method would be invoked with; both the count and the runtime
      *        types are used to make sure ReflectASM would dispatch to the same overload that
      *        standard, type-aware reflection would
      * @return {@code true} if exactly one visible method matches the name and argument count and its
      *         parameter types are compatible with the given arguments, {@code false} otherwise
      */
-    boolean canInvoke(final String methodName, final Object... args) {
+    boolean canInvoke(final String methodName, final Object... arguments) {
         try {
             final MethodAccess methodAccess = getMethodAccess(cls);
-            final int argCount = args == null ? 0 : args.length;
+            final int argCount = arguments == null ? 0 : arguments.length;
             final String[] methodNames = methodAccess.getMethodNames();
             final Class<?>[][] parameterTypes = methodAccess.getParameterTypes();
 
@@ -616,7 +616,7 @@ final class ReflectASM<T> {
                 }
             }
 
-            return matchCount == 1 && parametersAssignable(parameterTypes[matchIndex], args);
+            return matchCount == 1 && parametersAssignable(parameterTypes[matchIndex], arguments);
         } catch (final RuntimeException | LinkageError e) {
             // MethodAccess generation failed for this class; let the caller use standard reflection.
             // LinkageError is included because an incomplete ReflectASM deployment (for example one whose
@@ -627,9 +627,9 @@ final class ReflectASM<T> {
         }
     }
 
-    private static boolean parametersAssignable(final Class<?>[] paramTypes, final Object[] args) {
+    private static boolean parametersAssignable(final Class<?>[] paramTypes, final Object[] arguments) {
         for (int i = 0, len = paramTypes.length; i < len; i++) {
-            final Object arg = args[i];
+            final Object arg = arguments[i];
 
             if (arg == null) {
                 // A null argument fits any reference parameter; a primitive parameter cannot accept
@@ -645,8 +645,8 @@ final class ReflectASM<T> {
         return true;
     }
 
-    private static Class<?> wrap(final Class<?> cls) {
-        return ClassUtil.isPrimitiveType(cls) ? ClassUtil.wrap(cls) : cls;
+    private static Class<?> wrap(final Class<?> targetClass) {
+        return ClassUtil.isPrimitiveType(targetClass) ? ClassUtil.wrap(targetClass) : targetClass;
     }
 
     private FieldAccess getFieldAccess() {
@@ -656,15 +656,15 @@ final class ReflectASM<T> {
     /**
      * Returns the constructor access for the specified class.
      *
-     * @param cls the class for which to get the constructor access
+     * @param targetClass the class for which to get the constructor access
      * @return the cached or newly created ConstructorAccess instance for the specified class
      * @throws SecurityException if a security manager denies access
      */
-    private ConstructorAccess<T> getConstructorAccess(final Class<T> cls) throws SecurityException {
-        return (ConstructorAccess<T>) CONSTRUCTOR_ACCESS_CACHE.get(cls);
+    private ConstructorAccess<T> getConstructorAccess(final Class<T> targetClass) throws SecurityException {
+        return (ConstructorAccess<T>) CONSTRUCTOR_ACCESS_CACHE.get(targetClass);
     }
 
-    private MethodAccess getMethodAccess(final Class<?> cls) {
-        return METHOD_ACCESS_CACHE.get(cls);
+    private MethodAccess getMethodAccess(final Class<?> targetClass) {
+        return METHOD_ACCESS_CACHE.get(targetClass);
     }
 }

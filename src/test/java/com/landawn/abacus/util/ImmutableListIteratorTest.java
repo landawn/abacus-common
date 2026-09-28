@@ -350,4 +350,29 @@ public class ImmutableListIteratorTest extends TestBase {
         stillHasElements.remove(2);
         Assertions.assertThrows(ConcurrentModificationException.class, stale::next);
     }
+
+    @Test
+    public void testArrayListBackedImmutableListReportsCauselessExhaustionFromBothTraversals() {
+        // Only an Arrays.asList-backed list (of(...)) carries an IndexOutOfBoundsException cause on its
+        // listIterator(); an ArrayList-backed copyOf(Collection) list and a builder-built list do not.
+        final ImmutableList<String> copied = ImmutableList.copyOf(new ArrayList<>(Arrays.asList("x")));
+
+        final ImmutableListIterator<String> viaListIterator = copied.listIterator();
+        Assertions.assertEquals("x", viaListIterator.next());
+        final NoSuchElementException pastEnd = Assertions.assertThrows(NoSuchElementException.class, viaListIterator::next);
+        Assertions.assertNull(pastEnd.getCause());
+        Assertions.assertNull(pastEnd.getMessage());
+
+        final ObjIterator<String> viaIterator = copied.iterator();
+        Assertions.assertEquals("x", viaIterator.next());
+        Assertions.assertNull(Assertions.assertThrows(NoSuchElementException.class, viaIterator::next).getCause());
+
+        final ImmutableListIterator<String> built = ImmutableList.<String> builder().add("x").build().listIterator();
+        Assertions.assertEquals("x", built.next());
+        Assertions.assertNull(Assertions.assertThrows(NoSuchElementException.class, built::next).getCause());
+
+        final ImmutableListIterator<String> sub = ImmutableList.of("x", "y").subList(0, 1).listIterator();
+        Assertions.assertEquals("x", sub.next());
+        Assertions.assertNull(Assertions.assertThrows(NoSuchElementException.class, sub::next).getCause());
+    }
 }
